@@ -27,6 +27,10 @@ static async Task Review(ArmClient client, RulesEngine.RulesEngine engine)
 
         var appServices = resourceGroupResource.GetAppServicePlans().Select(x => x.Data).ToArray();
         results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "AppServicePlan", appServices));
+
+        var redis = resourceGroupResource.GetAllRedis().Select(x => x.Data).ToArray();
+        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "Redis", redis));
+        
     }
     WriteTable(results);
 }
