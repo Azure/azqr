@@ -10,22 +10,23 @@ static async Task Review(ArmClient client, RulesEngine.RulesEngine engine)
 {
     var results = new List<Results>();
     var subscription = await client.GetDefaultSubscriptionAsync();
+    var subscriptionId = new ResourceIdentifier(subscription.Id);
     var resourceGroupCollection = subscription.GetResourceGroups();
     foreach (var resourceGroupResource in resourceGroupCollection)
     {
         var rgId = new ResourceIdentifier(resourceGroupResource.Id);
 
         var storageAccounts = resourceGroupResource.GetStorageAccounts().Select(x => x.Data).ToArray();
-        results.AddRange(await ExecuteRules(engine, subscription.Id, rgId.Name, "Storage", storageAccounts));
+        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "Storage", storageAccounts));
 
         var cosmosAccounts = resourceGroupResource.GetCosmosDBAccounts().Select(x => x.Data).ToArray();
-        results.AddRange(await ExecuteRules(engine, subscription.Id, rgId.Name, "CosmosDB", cosmosAccounts));
+        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "CosmosDB", cosmosAccounts));
 
         var keyVaults = resourceGroupResource.GetKeyVaults().Select(x => x.Data).ToArray();
-        results.AddRange(await ExecuteRules(engine, subscription.Id, rgId.Name, "KeyVault", keyVaults));
+        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "KeyVault", keyVaults));
 
         var appServices = resourceGroupResource.GetAppServicePlans().Select(x => x.Data).ToArray();
-        results.AddRange(await ExecuteRules(engine, subscription.Id, rgId.Name, "AppServicePlan", appServices));
+        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "AppServicePlan", appServices));
     }
     WriteTable(results);
 }
@@ -89,5 +90,5 @@ static void WriteTable(List<Results> results)
         }
     }
 
-    table.Write();
+    table.Write(Format.MarkDown);
 }
