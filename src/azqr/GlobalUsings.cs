@@ -31,7 +31,12 @@ global using Azure.ResourceManager.Storage;
 global using Azure.ResourceManager.TrafficManager;
 global using Azure.ResourceManager.WebPubSub;
 
+global using System.Globalization;
+global using System.Reflection;
+
 global using Newtonsoft.Json;
 global using RulesEngine.Models;
 
 global using ConsoleTables;
+
+global using Microsoft.Extensions.FileProviders;

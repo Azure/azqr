@@ -38,6 +38,7 @@
     <PackageReference Include="Azure.ResourceManager.TrafficManager" Version="1.0.0" />
     <PackageReference Include="Azure.ResourceManager.WebPubSub" Version="1.0.0" />
     <PackageReference Include="ConsoleTables" Version="2.4.2" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.10" />
     <PackageReference Include="RulesEngine" Version="4.0.0" />
   </ItemGroup>
 
@@ -45,6 +46,10 @@
     <None Update="Rules\rules.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/*.md" />
   </ItemGroup>
 
 </Project>
