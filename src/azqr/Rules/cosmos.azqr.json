@@ -1,0 +1,73 @@
+[
+    {
+        "WorkflowName": "CosmosDB",
+        "Rules": [
+            {
+                "RuleName": "Avaliability Zones",
+                "SuccessEvent": "20",
+                "ErrorMessage": "Cosmos DB is not protected against zone failures",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Locations.Count(c => c.IsZoneRedundant == true)",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Yes\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"No\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Private Endpoints",
+                "SuccessEvent": "40",
+                "ErrorMessage": "Cosmos DB does not have Private Endpoints configured",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.PrivateEndpointConnections.Count() > 0",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.PrivateEndpointConnections.Count()"
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"None\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "CAF Naming",
+                "SuccessEvent": "50",
+                "ErrorMessage": "Key Vault name should start with 'cosmos' as prefix",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Name.StartsWith(\"cosmos\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Sucess\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Fail\""
+                        }
+                    }
+                }
+            }
+        ]
+    }
+]

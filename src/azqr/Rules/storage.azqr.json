@@ -1,0 +1,117 @@
+[
+    {
+        "WorkflowName": "Storage",
+        "Rules": [
+            {
+                "RuleName": "Kind",
+                "SuccessEvent": "10",
+                "ErrorMessage": "Storage Account kind is not StorageV2",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Kind.Value.ToString() == \"StorageV2\"",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Kind.Value.ToString()"
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Kind.Value.ToString()"
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Avaliability Zones",
+                "SuccessEvent": "20",
+                "ErrorMessage": "Storage Account is LRS",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "!input1.Sku.Name.ToString().Contains(\"LRS\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Yes\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"No\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "SLA",
+                "SuccessEvent": "30",
+                "ErrorMessage": "SLA",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.AccessTier.ToString() == \"Hot\" && input1.Sku.Name.ToString().Contains(\"RAGRS\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"99.99%\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"99.9%\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Private Endpoints",
+                "SuccessEvent": "40",
+                "ErrorMessage": "Storage Account does not have Private Endpoints configured",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.PrivateEndpointConnections.Count() > 0",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.PrivateEndpointConnections.Count()"
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"None\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "CAF Naming",
+                "SuccessEvent": "50",
+                "ErrorMessage": "Storage Account name should start with 'st' as prefix",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Name.StartsWith(\"st\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Sucess\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Fail\""
+                        }
+                    }
+                }
+            }
+        ]
+    }
+]

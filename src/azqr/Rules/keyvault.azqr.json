@@ -1,0 +1,67 @@
+[
+    {
+        "WorkflowName": "KeyVault",
+        "Rules": [
+            {
+                "RuleName": "Avaliability Zones",
+                "SuccessEvent": "20",
+                "ErrorMessage": "Key Vault is replicated",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "true",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Yes\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Private Endpoints",
+                "SuccessEvent": "40",
+                "ErrorMessage": "Key Vault does not have Private Endpoints configured",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Properties.PrivateEndpointConnections.Count() > 0",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Properties.PrivateEndpointConnections.Count()"
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"None\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "CAF Naming",
+                "SuccessEvent": "50",
+                "ErrorMessage": "Key Vault name should start with 'kv' as prefix",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Name.StartsWith(\"kv\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Sucess\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Fail\""
+                        }
+                    }
+                }
+            }
+        ]
+    }
+]

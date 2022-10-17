@@ -1,0 +1,51 @@
+[
+    {
+        "WorkflowName": "AppServicePlan",
+        "Rules": [
+            {
+                "RuleName": "Avaliability Zones",
+                "SuccessEvent": "20",
+                "ErrorMessage": "App Service Plan is not protected against zone failures",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.IsZoneRedundant",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Yes\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"No\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "CAF Naming",
+                "SuccessEvent": "50",
+                "ErrorMessage": "Key Vault name should start with 'plan' as prefix",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Name.StartsWith(\"plan\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Sucess\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Fail\""
+                        }
+                    }
+                }
+            }
+        ]
+    }
+]
