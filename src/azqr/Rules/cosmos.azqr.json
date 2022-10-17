@@ -57,7 +57,7 @@
                     "OnSuccess": {
                         "Name": "OutputExpression",
                         "Context": {
-                            "Expression": "\"Sucess\""
+                            "Expression": "\"Success\""
                         }
                     },
                     "OnFailure": {
