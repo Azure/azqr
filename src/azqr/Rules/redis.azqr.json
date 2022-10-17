@@ -25,28 +25,6 @@
                 }
             },
             {
-                "RuleName": "Non-SSL Port",
-                "SuccessEvent": "20",
-                "ErrorMessage": "Redis Cache should use a SSL port",
-                "ErrorType": "Error",
-                "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.EnableNonSslPort == false",
-                "Actions": {
-                    "OnSuccess": {
-                        "Name": "OutputExpression",
-                        "Context": {
-                            "Expression": "\"Success\""
-                        }
-                    },
-                    "OnFailure": {
-                        "Name": "OutputExpression",
-                        "Context": {
-                            "Expression": "\"Fail\""
-                        }
-                    }
-                }
-            },
-            {
                 "RuleName": "Private Endpoints",
                 "SuccessEvent": "40",
                 "ErrorMessage": "Redis Cache does not have Private Endpoints configured",
@@ -75,6 +53,28 @@
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
                 "Expression": "input1.Name.StartsWith(\"redis\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Success\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Fail\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Non-SSL Port",
+                "SuccessEvent": "60",
+                "ErrorMessage": "Redis Cache should use a SSL port",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.EnableNonSslPort == false",
                 "Actions": {
                     "OnSuccess": {
                         "Name": "OutputExpression",
