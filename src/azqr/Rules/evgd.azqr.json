@@ -1,36 +1,14 @@
 [
     {
-        "WorkflowName": "SignalR",
+        "WorkflowName": "EventGrid",
         "Rules": [
-            {
-                "RuleName": "Private Endpoints",
-                "SuccessEvent": "40",
-                "ErrorMessage": "No Private Endpoints configured",
-                "ErrorType": "Error",
-                "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.PrivateEndpointConnections.Count() > 0",
-                "Actions": {
-                    "OnSuccess": {
-                        "Name": "OutputExpression",
-                        "Context": {
-                            "Expression": "input1.PrivateEndpointConnections.Count()"
-                        }
-                    },
-                    "OnFailure": {
-                        "Name": "OutputExpression",
-                        "Context": {
-                            "Expression": "\"None\""
-                        }
-                    }
-                }
-            },
             {
                 "RuleName": "CAF Naming",
                 "SuccessEvent": "50",
-                "ErrorMessage": "Name should start with 'sigr' as prefix",
+                "ErrorMessage": "Name should start with 'evgd' as prefix",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.Name.StartsWith(\"sigr\")",
+                "Expression": "input1.Name.StartsWith(\"evgd\")",
                 "Actions": {
                     "OnSuccess": {
                         "Name": "OutputExpression",
@@ -57,7 +35,7 @@
                     "OnSuccess": {
                         "Name": "OutputExpression",
                         "Context": {
-                            "Expression": "\"input2\""
+                            "Expression": "input2"
                         }
                     },
                     "OnFailure": {

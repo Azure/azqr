@@ -45,6 +45,9 @@ static async Task Review(ArmClient client, RulesEngine.RulesEngine engine)
 
         var serviceBusNamespaces = resourceGroupResource.GetServiceBusNamespaces().Select(x => x.Data).ToArray();
         results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ServiceBus", serviceBusNamespaces));
+
+        var eventGrids = resourceGroupResource.GetDomains().Select(x => x.Data).ToArray();
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "EventGrid", eventGrids));
     }
 
     var reportTemplate = GetTemplate("Resources.Report.md");
