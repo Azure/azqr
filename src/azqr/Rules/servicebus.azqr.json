@@ -1,6 +1,6 @@
 [
     {
-        "WorkflowName": "ApiManagement",
+        "WorkflowName": "ServiceBus",
         "Rules": [
             {
                 "RuleName": "Avaliability Zones",
@@ -8,7 +8,7 @@
                 "ErrorMessage": "Not protected against zone failures",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.Zones.Count() > 1",
+                "Expression": "input1.IsZoneRedundant",
                 "Actions": {
                     "OnSuccess": {
                         "Name": "OutputExpression",
@@ -49,10 +49,10 @@
             {
                 "RuleName": "CAF Naming",
                 "SuccessEvent": "50",
-                "ErrorMessage": "Name should start with 'apim' as prefix",
+                "ErrorMessage": "Name should start with 'sb' as prefix",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.Name.StartsWith(\"apim\")",
+                "Expression": "input1.Name.StartsWith(\"sb\")",
                 "Actions": {
                     "OnSuccess": {
                         "Name": "OutputExpression",

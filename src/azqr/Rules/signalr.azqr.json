@@ -1,29 +1,7 @@
 [
     {
-        "WorkflowName": "ApiManagement",
+        "WorkflowName": "SignalR",
         "Rules": [
-            {
-                "RuleName": "Avaliability Zones",
-                "SuccessEvent": "20",
-                "ErrorMessage": "Not protected against zone failures",
-                "ErrorType": "Error",
-                "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.Zones.Count() > 1",
-                "Actions": {
-                    "OnSuccess": {
-                        "Name": "OutputExpression",
-                        "Context": {
-                            "Expression": "\"Yes\""
-                        }
-                    },
-                    "OnFailure": {
-                        "Name": "OutputExpression",
-                        "Context": {
-                            "Expression": "\"No\""
-                        }
-                    }
-                }
-            },
             {
                 "RuleName": "Private Endpoints",
                 "SuccessEvent": "40",
@@ -49,10 +27,10 @@
             {
                 "RuleName": "CAF Naming",
                 "SuccessEvent": "50",
-                "ErrorMessage": "Name should start with 'apim' as prefix",
+                "ErrorMessage": "Name should start with 'sigr' as prefix",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.Name.StartsWith(\"apim\")",
+                "Expression": "input1.Name.StartsWith(\"sigr\")",
                 "Actions": {
                     "OnSuccess": {
                         "Name": "OutputExpression",

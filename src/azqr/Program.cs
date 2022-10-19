@@ -33,6 +33,18 @@ static async Task Review(ArmClient client, RulesEngine.RulesEngine engine)
 
         var apims = resourceGroupResource.GetApiManagementServices().Select(x => x.Data).ToArray();
         results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ApiManagement", apims));
+
+        var acrs = resourceGroupResource.GetContainerRegistries().Select(x => x.Data).ToArray();
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ContainerRegistry", acrs));
+
+        var aks = resourceGroupResource.GetContainerServiceManagedClusters().Select(x => x.Data).ToArray();
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "AKS", aks));
+
+        var signalR = resourceGroupResource.GetSignalRs().Select(x => x.Data).ToArray();
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "SignalR", signalR));
+
+        var serviceBusNamespaces = resourceGroupResource.GetServiceBusNamespaces().Select(x => x.Data).ToArray();
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ServiceBus", serviceBusNamespaces));
     }
 
     var reportTemplate = GetTemplate("Resources.Report.md");

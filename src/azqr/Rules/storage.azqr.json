@@ -5,7 +5,7 @@
             {
                 "RuleName": "Kind",
                 "SuccessEvent": "10",
-                "ErrorMessage": "Storage Account kind is not StorageV2",
+                "ErrorMessage": "Kind is not StorageV2",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
                 "Expression": "input1.Kind.Value.ToString() == \"StorageV2\"",
@@ -27,7 +27,7 @@
             {
                 "RuleName": "Avaliability Zones",
                 "SuccessEvent": "20",
-                "ErrorMessage": "Storage Account is LRS therefore not protected against zone failures",
+                "ErrorMessage": "Sku is LRS therefore not protected against zone failures",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
                 "Expression": "!input1.Sku.Name.ToString().Contains(\"LRS\")",
@@ -71,7 +71,7 @@
             {
                 "RuleName": "Private Endpoints",
                 "SuccessEvent": "40",
-                "ErrorMessage": "Storage Account does not have Private Endpoints configured",
+                "ErrorMessage": "No Private Endpoints configured",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
                 "Expression": "input1.PrivateEndpointConnections.Count() > 0",
@@ -93,7 +93,7 @@
             {
                 "RuleName": "CAF Naming",
                 "SuccessEvent": "50",
-                "ErrorMessage": "Storage Account name should start with 'st' as prefix",
+                "ErrorMessage": "Nme should start with 'st' as prefix",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
                 "Expression": "input1.Name.StartsWith(\"st\")",
