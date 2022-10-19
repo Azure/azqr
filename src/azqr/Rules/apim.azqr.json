@@ -1,14 +1,14 @@
 [
     {
-        "WorkflowName": "AppServicePlan",
+        "WorkflowName": "ApiManagement",
         "Rules": [
             {
                 "RuleName": "Avaliability Zones",
                 "SuccessEvent": "20",
-                "ErrorMessage": "App Service Plan is not protected against zone failures",
+                "ErrorMessage": "APIM is not protected against zone failures",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.IsZoneRedundant",
+                "Expression": "input1.Zones.Count() > 1",
                 "Actions": {
                     "OnSuccess": {
                         "Name": "OutputExpression",
@@ -25,12 +25,34 @@
                 }
             },
             {
-                "RuleName": "CAF Naming",
-                "SuccessEvent": "50",
-                "ErrorMessage": "Key Vault name should start with 'plan' as prefix",
+                "RuleName": "Private Endpoints",
+                "SuccessEvent": "40",
+                "ErrorMessage": "Storage Account does not have Private Endpoints configured",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.Name.StartsWith(\"plan\")",
+                "Expression": "input1.PrivateEndpointConnections.Count() > 0",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.PrivateEndpointConnections.Count()"
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"None\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "CAF Naming",
+                "SuccessEvent": "50",
+                "ErrorMessage": "APIM name should start with 'apim' as prefix",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Name.StartsWith(\"apim\")",
                 "Actions": {
                     "OnSuccess": {
                         "Name": "OutputExpression",

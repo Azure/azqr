@@ -17,20 +17,22 @@ static async Task Review(ArmClient client, RulesEngine.RulesEngine engine)
         var rgId = new ResourceIdentifier(resourceGroupResource.Id!);
 
         var storageAccounts = resourceGroupResource.GetStorageAccounts().Select(x => x.Data).ToArray();
-        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "Storage", storageAccounts));
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "Storage", storageAccounts));
 
         var cosmosAccounts = resourceGroupResource.GetCosmosDBAccounts().Select(x => x.Data).ToArray();
-        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "CosmosDB", cosmosAccounts));
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "CosmosDB", cosmosAccounts));
 
         var keyVaults = resourceGroupResource.GetKeyVaults().Select(x => x.Data).ToArray();
-        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "KeyVault", keyVaults));
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "KeyVault", keyVaults));
 
-        var appServices = resourceGroupResource.GetAppServicePlans().Select(x => x.Data).ToArray();
-        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "AppServicePlan", appServices));
+        var plans = resourceGroupResource.GetAppServicePlans().Select(x => x.Data).ToArray();
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "AppServicePlan", plans));
 
         var redis = resourceGroupResource.GetAllRedis().Select(x => x.Data).ToArray();
-        results.AddRange(await ExecuteRules(engine, subscriptionId.Name, rgId.Name, "Redis", redis));
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "Redis", redis));
 
+        var apims = resourceGroupResource.GetApiManagementServices().Select(x => x.Data).ToArray();
+        results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ApiManagement", apims));
     }
 
     var reportTemplate = GetTemplate("Resources.Report.md");
@@ -67,6 +69,7 @@ static RulesEngine.RulesEngine LoadRulesEngine()
 }
 
 static async ValueTask<List<Results>> ExecuteRules(
+    ArmClient client, 
     RulesEngine.RulesEngine engine,
     string subscriptionId,
     string resourceGroup,
@@ -78,13 +81,16 @@ static async ValueTask<List<Results>> ExecuteRules(
     {
         foreach (var svc in services)
         {
+            var diagnostics = client.GetDiagnosticSettings(new ResourceIdentifier(svc.Id!));
+            var diagnosticsCount = diagnostics.Count();
+            
             results.Add(new Results
             {
                 SubscriptionId = subscriptionId,
                 ResourceGroup = resourceGroup,
                 Type = svc.ResourceType,
                 ServiceName = svc.Name,
-                RulesResults = await engine.ExecuteAllRulesAsync(workflowName, svc)
+                RulesResults = await engine.ExecuteAllRulesAsync(workflowName, svc, diagnosticsCount)
             });
         }
     }

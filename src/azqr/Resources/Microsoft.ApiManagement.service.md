@@ -1,7 +1,5 @@
 ### Azure API Management
 
-Not AZ Aware
-
 Use of Availability Zones is recommended. The API Management service supports Zone redundancy, which provides resiliency and high availability to a service instance in a specific Azure region. With zone redundancy, the gateway and the control plane of your API Management instance (Management API, developer portal, Git configuration) are replicated across datacenters in physically separated zones, making it resilient to a zone failure.
 
 The number of units selected must be distributed evenly across the availability zones.

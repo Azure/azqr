@@ -23,6 +23,7 @@ global using Azure.ResourceManager.Logic;
 global using Azure.ResourceManager.Monitor;
 global using Azure.ResourceManager.MySql;
 global using Azure.ResourceManager.Network;
+global using Azure.ResourceManager.OperationalInsights;
 global using Azure.ResourceManager.Redis;
 global using Azure.ResourceManager.ServiceBus;
 global using Azure.ResourceManager.SignalR;

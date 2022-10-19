@@ -51,13 +51,35 @@
                     "OnSuccess": {
                         "Name": "OutputExpression",
                         "Context": {
-                            "Expression": "\"Success\""
+                            "Expression": "\"Yes\""
                         }
                     },
                     "OnFailure": {
                         "Name": "OutputExpression",
                         "Context": {
-                            "Expression": "\"Fail\""
+                            "Expression": "\"No\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Diagnostic Settings",
+                "SuccessEvent": "60",
+                "ErrorMessage": "No Diagnostics Setting Found",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input2 > 0",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"input2\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"None\""
                         }
                     }
                 }
