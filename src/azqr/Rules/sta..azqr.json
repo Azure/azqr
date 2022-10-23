@@ -3,23 +3,17 @@
         "WorkflowName": "Storage",
         "Rules": [
             {
-                "RuleName": "Kind",
+                "RuleName": "SKU",
                 "SuccessEvent": "10",
-                "ErrorMessage": "Kind is not StorageV2",
+                "ErrorMessage": "SKU",
                 "ErrorType": "Error",
                 "RuleExpressionType": "LambdaExpression",
-                "Expression": "input1.Kind.Value.ToString() == \"StorageV2\"",
+                "Expression": "true",
                 "Actions": {
                     "OnSuccess": {
                         "Name": "OutputExpression",
                         "Context": {
-                            "Expression": "input1.Kind.Value.ToString()"
-                        }
-                    },
-                    "OnFailure": {
-                        "Name": "OutputExpression",
-                        "Context": {
-                            "Expression": "input1.Kind.Value.ToString()"
+                            "Expression": "input1.Sku.Name.ToString()"
                         }
                     }
                 }
@@ -130,6 +124,28 @@
                         "Name": "OutputExpression",
                         "Context": {
                             "Expression": "\"None\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Kind",
+                "SuccessEvent": "70",
+                "ErrorMessage": "Kind is not StorageV2",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Kind.Value.ToString() == \"StorageV2\"",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Kind.Value.ToString()"
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Kind.Value.ToString()"
                         }
                     }
                 }

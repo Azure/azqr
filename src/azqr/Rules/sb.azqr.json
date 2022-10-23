@@ -3,6 +3,22 @@
         "WorkflowName": "ServiceBus",
         "Rules": [
             {
+                "RuleName": "SKU",
+                "SuccessEvent": "10",
+                "ErrorMessage": "SKU",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "true",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Sku.Name.ToString()"
+                        }
+                    }
+                }
+            },
+            {
                 "RuleName": "Avaliability Zones",
                 "SuccessEvent": "20",
                 "ErrorMessage": "Not protected against zone failures",
@@ -20,6 +36,28 @@
                         "Name": "OutputExpression",
                         "Context": {
                             "Expression": "\"No\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "SLA",
+                "SuccessEvent": "30",
+                "ErrorMessage": "No SLA",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Sku.Name.ToString().Contains(\"Premium\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"99.95%\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"99.9%\""
                         }
                     }
                 }

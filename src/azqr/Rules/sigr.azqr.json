@@ -3,6 +3,44 @@
         "WorkflowName": "SignalR",
         "Rules": [
             {
+                "RuleName": "SKU",
+                "SuccessEvent": "10",
+                "ErrorMessage": "SKU",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "true",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Sku.Name.ToString()"
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Avaliability Zones",
+                "SuccessEvent": "20",
+                "ErrorMessage": "Not protected against zone failures",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Sku.Name.Contains(\"Premium\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Yes\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"No\""
+                        }
+                    }
+                }
+            },
+            {
                 "RuleName": "Private Endpoints",
                 "SuccessEvent": "40",
                 "ErrorMessage": "No Private Endpoints configured",

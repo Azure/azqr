@@ -3,6 +3,22 @@
         "WorkflowName": "AKS",
         "Rules": [
             {
+                "RuleName": "SKU",
+                "SuccessEvent": "10",
+                "ErrorMessage": "SKU",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "true",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Sku.Name.ToString()"
+                        }
+                    }
+                }
+            },
+            {
                 "RuleName": "CAF Naming",
                 "SuccessEvent": "50",
                 "ErrorMessage": "Name should start with 'aks' as prefix",

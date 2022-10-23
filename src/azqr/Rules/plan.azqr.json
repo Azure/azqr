@@ -3,6 +3,22 @@
         "WorkflowName": "AppServicePlan",
         "Rules": [
             {
+                "RuleName": "SKU",
+                "SuccessEvent": "10",
+                "ErrorMessage": "SKU",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "true",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Sku.Name.ToString()"
+                        }
+                    }
+                }
+            },
+            {
                 "RuleName": "Avaliability Zones",
                 "SuccessEvent": "20",
                 "ErrorMessage": "Not protected against zone failures",
