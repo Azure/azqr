@@ -73,13 +73,13 @@
                     "OnSuccess": {
                         "Name": "OutputExpression",
                         "Context": {
-                            "Expression": "\"Success\""
+                            "Expression": "\"Yes\""
                         }
                     },
                     "OnFailure": {
                         "Name": "OutputExpression",
                         "Context": {
-                            "Expression": "\"Fail\""
+                            "Expression": "\"No\""
                         }
                     }
                 }
