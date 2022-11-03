@@ -22,4 +22,11 @@ jobs:
           dotnet-version: 6.0.x
 
       - name: Build
-        run: dotnet build
+        run: dotnet publish -c Release
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: azqr-${{ matrix.os }}
+          path: ./src/azqr/bin/Release/net6.0/publish/
+        
