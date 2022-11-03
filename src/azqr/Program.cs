@@ -84,7 +84,7 @@ static RulesEngine.RulesEngine LoadRulesEngine()
 }
 
 static async ValueTask<List<Results>> ExecuteRules(
-    ArmClient client, 
+    ArmClient client,
     RulesEngine.RulesEngine engine,
     string subscriptionId,
     string resourceGroup,
@@ -98,7 +98,7 @@ static async ValueTask<List<Results>> ExecuteRules(
         {
             var diagnostics = client.GetDiagnosticSettings(new ResourceIdentifier(svc.Id!));
             var diagnosticsCount = diagnostics.Count();
-            
+
             results.Add(new Results
             {
                 SubscriptionId = subscriptionId,
@@ -114,19 +114,20 @@ static async ValueTask<List<Results>> ExecuteRules(
 
 static string WriteTable(List<Results> results)
 {
-    var table = new ConsoleTable("SubscriptionId", "Resource Group", "Type", "Service Name", "Rule Name", "Result");
+    var table = new ConsoleTable("SubscriptionId", "Resource Group", "Type", "Service Name", "SKU", "Avaliability Zones", "SLA", "Private Endpoints", "Diagnostic Settings", "CAF Naming");
     foreach (var result in results)
     {
-        foreach (var ruleResult in result.RulesResults)
-        {
-            table.AddRow(
-                result.SubscriptionId,
-                result.ResourceGroup,
-                result.Type,
-                result.ServiceName,
-                ruleResult.Rule.RuleName,
-                ruleResult.ActionResult.Output);
-        }
+        table.AddRow(
+            result.SubscriptionId,
+            result.ResourceGroup,
+            result.Type,
+            result.ServiceName,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "SKU")?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "Avaliability Zones")?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "SLA")?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "Private Endpoints")?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "Diagnostic Settings")?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "CAF Naming")?.ActionResult.Output);
     }
 
     return table.ToMarkDownString();
