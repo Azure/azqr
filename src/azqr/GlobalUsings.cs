@@ -42,3 +42,5 @@ global using RulesEngine.Models;
 global using ConsoleTables;
 
 global using Microsoft.Extensions.FileProviders;
+
+global using azqr;

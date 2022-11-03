@@ -1,3 +1,5 @@
+namespace azqr;
+
 public class Results
 {
     public string SubscriptionId { get; set; } = string.Empty;

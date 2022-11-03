@@ -1,3 +1,5 @@
+namespace azqr;
+
 public static class ColumnNames
 {
     public const string SubscriptionId=  "SubscriptionId";
