@@ -31,6 +31,7 @@ global using Azure.ResourceManager.Sql;
 global using Azure.ResourceManager.Storage;
 global using Azure.ResourceManager.TrafficManager;
 global using Azure.ResourceManager.WebPubSub;
+global using Azure.ResourceManager.Network.Models;
 
 global using System.Globalization;
 global using System.Reflection;

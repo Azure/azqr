@@ -48,6 +48,9 @@ static async Task Review(ArmClient client, RulesEngine.RulesEngine engine)
 
         var eventGrids = resourceGroupResource.GetDomains().Select(x => x.Data).ToArray();
         results.AddRange(await ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "EventGrid", eventGrids));
+
+        var applicationGateways = resourceGroupResource.GetApplicationGateways().Select(x => x.Data).ToArray();
+        results.AddRange(await ExecuteNetworkRules(client, engine, subscriptionId.Name, rgId.Name, "ApplicationGateway", applicationGateways));
     }
 
     var reportTemplate = GetTemplate("Resources.Report.md");
@@ -90,6 +93,35 @@ static async ValueTask<List<Results>> ExecuteRules(
     string resourceGroup,
     string workflowName,
     ResourceData[] services)
+{
+    var results = new List<Results>();
+    if (engine.ContainsWorkflow(workflowName))
+    {
+        foreach (var svc in services)
+        {
+            var diagnostics = client.GetDiagnosticSettings(new ResourceIdentifier(svc.Id!));
+            var diagnosticsCount = diagnostics.Count();
+
+            results.Add(new Results
+            {
+                SubscriptionId = subscriptionId,
+                ResourceGroup = resourceGroup,
+                Type = svc.ResourceType,
+                ServiceName = svc.Name,
+                RulesResults = await engine.ExecuteAllRulesAsync(workflowName, svc, diagnosticsCount)
+            });
+        }
+    }
+    return results;
+}
+
+static async ValueTask<List<Results>> ExecuteNetworkRules(
+    ArmClient client,
+    RulesEngine.RulesEngine engine,
+    string subscriptionId,
+    string resourceGroup,
+    string workflowName,
+    NetworkTrackedResourceData[] services)
 {
     var results = new List<Results>();
     if (engine.ContainsWorkflow(workflowName))
