@@ -146,7 +146,18 @@ static async ValueTask<List<Results>> ExecuteNetworkRules(
 
 static string WriteTable(List<Results> results)
 {
-    var table = new ConsoleTable("SubscriptionId", "Resource Group", "Type", "Service Name", "SKU", "Avaliability Zones", "SLA", "Private Endpoints", "Diagnostic Settings", "CAF Naming");
+    var table = new ConsoleTable(
+        ColumnNames.SubscriptionId, 
+        ColumnNames.ResourceGroup, 
+        ColumnNames.Type, 
+        ColumnNames.ServiceName, 
+        ColumnNames.SKU, 
+        ColumnNames.AvaliabilityZones, 
+        ColumnNames.SLA, 
+        ColumnNames.PrivateEndpoints, 
+        ColumnNames.DiagnosticSettings, 
+        ColumnNames.CAFNaming);
+
     foreach (var result in results)
     {
         table.AddRow(
@@ -154,12 +165,12 @@ static string WriteTable(List<Results> results)
             result.ResourceGroup,
             result.Type,
             result.ServiceName,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "SKU")?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "Avaliability Zones")?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "SLA")?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "Private Endpoints")?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "Diagnostic Settings")?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == "CAF Naming")?.ActionResult.Output);
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName ==  ColumnNames.SKU)?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName ==  ColumnNames.AvaliabilityZones)?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName ==  ColumnNames.SLA)?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName ==  ColumnNames.PrivateEndpoints)?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName ==  ColumnNames.DiagnosticSettings)?.ActionResult.Output,
+            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName ==  ColumnNames.CAFNaming)?.ActionResult.Output);
     }
 
     return table.ToMarkDownString();
