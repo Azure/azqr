@@ -135,7 +135,7 @@ static async ValueTask<List<Results>> ExecuteNetworkRules(
             {
                 SubscriptionId = subscriptionId,
                 ResourceGroup = resourceGroup,
-                Type = svc.ResourceType,
+                Type = svc.ResourceType!,
                 ServiceName = svc.Name,
                 RulesResults = await engine.ExecuteAllRulesAsync(workflowName, svc, diagnosticsCount)
             });
