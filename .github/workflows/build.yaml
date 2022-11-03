@@ -1,7 +1,10 @@
 name: build
+
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
 jobs:
   build:
     name: Build
@@ -21,6 +24,18 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
+      - name: Setup MinVer
+        run: |
+          dotnet tool install --global minver-cli --version 4.2.0
+
+      - name: Calculate Version
+        run: |
+          echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 1.0 -d preview)" >> $GITHUB_ENV
+      
+      - name: Calculated Version
+        run: |
+          echo "${{ env.MINVERVERSIONOVERRIDE }}"
+
       - name: Build
         run: dotnet publish -c Release
 
@@ -29,4 +44,3 @@ jobs:
         with:
           name: azqr-${{ matrix.os }}
           path: ./src/azqr/bin/Release/net6.0/publish/
-        
