@@ -11,7 +11,7 @@ After performing a high level analysis of {{customer}}'s solution we present a s
 
 ## Services Review
 
-The following review shows the Azure services selected for the solution, with their SLA and associated risk score.
+The following review shows the Azure services selected for the solution, with their current configuration.
 
 {{results}}
 
