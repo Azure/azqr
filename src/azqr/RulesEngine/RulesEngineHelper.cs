@@ -5,7 +5,8 @@ public static class RulesEngineHelper
     public static RulesEngine.RulesEngine LoadRulesEngine()
     {
         var allWorkflows = new List<Workflow>();
-        var files = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.azqr.json", SearchOption.AllDirectories);
+        var currentFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        var files = Directory.GetFiles(currentFolder!, "*.azqr.json", SearchOption.AllDirectories);
         if (files == null || files.Length == 0)
             throw new Exception("Rules not found.");
 
