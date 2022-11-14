@@ -31,6 +31,12 @@ jobs:
       - name: Calculate Version
         run: |
           echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 1.0 -d preview)" >> $GITHUB_ENV
+        if: matrix.os != 'windows-latest'
+      
+      - name: Calculate Version Windows
+        run: |
+          echo "MINVERVERSIONOVERRIDE=$(minver -t v. -m 1.0 -d preview)" >> $env:GITHUB_ENV
+        if: matrix.os == 'windows-latest'
       
       - name: Calculated Version
         run: |
