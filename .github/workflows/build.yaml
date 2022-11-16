@@ -32,12 +32,12 @@ jobs:
         run: |
           echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 1.0 -d preview)" >> $GITHUB_ENV
         if: matrix.os != 'windows-latest'
-      
+
       - name: Calculate Version Windows
         run: |
           echo "MINVERVERSIONOVERRIDE=$(minver -t v. -m 1.0 -d preview)" >> $env:GITHUB_ENV
         if: matrix.os == 'windows-latest'
-      
+
       - name: Calculated Version
         run: |
           echo "${{ env.MINVERVERSIONOVERRIDE }}"
@@ -50,3 +50,57 @@ jobs:
         with:
           name: azqr-${{ matrix.os }}
           path: ./src/azqr/bin/Release/net6.0/publish/
+
+  release:
+    name: Create Release
+    needs: build
+    if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ env.MINVERVERSIONOVERRIDE }}
+          tag_name: ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  publish:
+    name: Publish binaries
+    needs: release
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v') 
+    env:
+      ARTIFACT_DIR: ${{ github.workspace }}/release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: download artifacts - ${{ matrix.os }}
+        uses: actions/download-artifact@master
+        with:
+          name: azqr-${{ matrix.os }}
+          path: ${{ env.ARTIFACT_DIR }}/azqr-${{ matrix.os }}/
+
+      - name: Zip files
+        working-directory: ${{ env.ARTIFACT_DIR }}/azqr-${{ matrix.os }}/
+        run: |
+          zip -r ${{ github.workspace }}/azqr-${{ matrix.os }}.zip *
+
+      - name: upload linux artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/azqr-${{ matrix.os }}.zip
+          asset_name: azqr-${{ matrix.os }}.zip
+          asset_content_type: application/gzip
