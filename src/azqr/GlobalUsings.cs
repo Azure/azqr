@@ -33,6 +33,8 @@ global using Azure.ResourceManager.TrafficManager;
 global using Azure.ResourceManager.WebPubSub;
 global using Azure.ResourceManager.Network.Models;
 
+global using System.CommandLine;
+global using System.CommandLine.Invocation;
 global using System.Globalization;
 global using System.Reflection;
 
