@@ -9,21 +9,28 @@ var resourceGroupOption = new System.CommandLine.Option<string>(
     "Name of the resource group to review.");
 rootCommand.AddOption(resourceGroupOption);
 
-rootCommand.SetHandler<string, string>(async (subscriptionId, resourceGroup) =>
+var customerOption = new System.CommandLine.Option<string>(
+    new string[] { "--customer", "-c" },
+    () => "<Replace with Customer Name>",
+    "Name of the customer.");
+rootCommand.AddOption(customerOption);
+
+rootCommand.SetHandler<string, string, string>(async (subscriptionId, resourceGroup, customerName) =>
     {
         var credential = new DefaultAzureCredential();
         var client = new ArmClient(credential, subscriptionId);
 
         var engine = RulesEngineHelper.LoadRulesEngine();
 
-        await Review(client, engine, resourceGroup);
+        await Review(client, engine, customerName, resourceGroup);
     },
     subscriptionOption,
-    resourceGroupOption);
+    resourceGroupOption,
+    customerOption);
 
 return await rootCommand.InvokeAsync(args);
 
-static async Task Review(ArmClient client, RulesEngine.RulesEngine engine, string resourceGroup)
+static async Task Review(ArmClient client, RulesEngine.RulesEngine engine, string customerName, string resourceGroup)
 {
     // https://learn.microsoft.com/en-us/dotnet/azure/sdk/resource-management?tabs=dotnetcli
     var results = new List<Results>();
@@ -49,14 +56,15 @@ static async Task Review(ArmClient client, RulesEngine.RulesEngine engine, strin
     var reportTemplate = EmbeddedFilesHelper.GetTemplate("Resources.Report.md");
     var resultsTable = WriteTable(results);
 
-    var customer = "Contoso";
-
-    var report = reportTemplate.Replace("{{date}}", $"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month)} {DateTime.Now.Year.ToString()}");
-    report = report.Replace("{{customer}}", customer);
-    report = report.Replace("{{results}}", resultsTable);
-    report = report.Replace("{{recommendations}}", EmbeddedFilesHelper.GetRecommendations(results));
+    var report = reportTemplate
+        .Replace("{{date}}", $"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Now.Month)} {DateTime.Now.Year.ToString()}")
+        .Replace("{{customer}}", customerName)
+        .Replace("{{results}}", resultsTable)
+        .Replace("{{recommendations}}", EmbeddedFilesHelper.GetRecommendations(results));
 
     await File.WriteAllTextAsync("Report.md", report);
+
+    Console.WriteLine("Review completed!");
 }
 
 static async Task<List<Results>> ReviewResourceGroup(ArmClient client, RulesEngine.RulesEngine engine, ResourceIdentifier subscriptionId, ResourceGroupResource resourceGroupResource)
@@ -64,6 +72,8 @@ static async Task<List<Results>> ReviewResourceGroup(ArmClient client, RulesEngi
     var results = new List<Results>();
 
     var rgId = new ResourceIdentifier(resourceGroupResource.Id!);
+
+    Console.WriteLine($"Reviewing Subscription Id: {subscriptionId} and Resource Group: {rgId.Name}...");
 
     var storageAccounts = resourceGroupResource.GetStorageAccounts().Select(x => x.Data).ToArray();
     results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "Storage", storageAccounts));
