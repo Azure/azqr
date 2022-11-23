@@ -99,6 +99,9 @@ static async Task<List<Results>> ReviewResourceGroup(ArmClient client, RulesEngi
     var aks = resourceGroupResource.GetContainerServiceManagedClusters().Select(x => x.Data).ToArray();
     results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "AKS", aks));
 
+    var ci = resourceGroupResource.GetContainerGroups().Select(x => x.Data).ToArray();
+    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ContainerInstance", ci));
+
     var signalR = resourceGroupResource.GetSignalRs().Select(x => x.Data).ToArray();
     results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "SignalR", signalR));
 

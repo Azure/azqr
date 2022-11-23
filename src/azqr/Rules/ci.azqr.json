@@ -1,0 +1,127 @@
+[
+    {
+        "WorkflowName": "ContainerInstance",
+        "Rules": [
+            {
+                "RuleName": "SKU",
+                "SuccessEvent": "10",
+                "ErrorMessage": "SKU",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "true",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input1.Sku.Value.ToString()"
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Avaliability Zones",
+                "SuccessEvent": "20",
+                "ErrorMessage": "Not protected against zone failures",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Zones.Count() > 1",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Yes\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"No\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "SLA",
+                "SuccessEvent": "30",
+                "ErrorMessage": "SLA",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "true",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"99.9%\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Private Endpoints",
+                "SuccessEvent": "40",
+                "ErrorMessage": "No Private Endpoints configured",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.SubnetIds.Count() > 0",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Private\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Public\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "CAF Naming",
+                "SuccessEvent": "50",
+                "ErrorMessage": "Name should start with 'ci' as prefix",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input1.Name.StartsWith(\"ci\")",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"Yes\""
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"No\""
+                        }
+                    }
+                }
+            },
+            {
+                "RuleName": "Diagnostic Settings",
+                "SuccessEvent": "60",
+                "ErrorMessage": "No Diagnostics Setting Found",
+                "ErrorType": "Error",
+                "RuleExpressionType": "LambdaExpression",
+                "Expression": "input2 > 0",
+                "Actions": {
+                    "OnSuccess": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "input2"
+                        }
+                    },
+                    "OnFailure": {
+                        "Name": "OutputExpression",
+                        "Context": {
+                            "Expression": "\"None\""
+                        }
+                    }
+                }
+            }
+        ]
+    }
+]
