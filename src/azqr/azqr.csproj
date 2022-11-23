@@ -55,9 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Rules\*.azqr.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Include="Rules\*.azqr.json" />
   </ItemGroup>
 
   <ItemGroup>

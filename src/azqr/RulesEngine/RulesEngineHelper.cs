@@ -5,19 +5,12 @@ public static class RulesEngineHelper
     public static RulesEngine.RulesEngine LoadRulesEngine()
     {
         var allWorkflows = new List<Workflow>();
-        var currentFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        var files = Directory.GetFiles(currentFolder!, "*.azqr.json", SearchOption.AllDirectories);
-        if (files == null || files.Length == 0)
-            throw new Exception("Rules not found.");
+        var files = EmbeddedFilesHelper.GetTemplates("Rules");
 
-        foreach (var file in files)
+        foreach (var kv in files)
         {
-            var fileData = File.ReadAllText(file);
-            if (fileData != null)
-            {
-                var workflows = JsonConvert.DeserializeObject<List<Workflow>>(fileData)!.ToArray();
-                allWorkflows.AddRange(workflows);
-            }
+            var workflows = JsonConvert.DeserializeObject<List<Workflow>>(kv.Value)!.ToArray();
+            allWorkflows.AddRange(workflows);
         }
 
         return new RulesEngine.RulesEngine(allWorkflows.ToArray(), null);
