@@ -1,4 +1,3 @@
-global using Azure;
 global using Azure.Core;
 global using Azure.Identity;
 global using Azure.ResourceManager;
@@ -34,7 +33,6 @@ global using Azure.ResourceManager.WebPubSub;
 global using Azure.ResourceManager.Network.Models;
 
 global using System.CommandLine;
-global using System.CommandLine.Invocation;
 global using System.Globalization;
 global using System.Reflection;
 
