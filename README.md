@@ -8,7 +8,7 @@ Azure Quick Review (azqr) goal is to produce a high level assemesment of an Azur
 * Availability Zones: checks if the service is proytected against Zone failures. 
 * Private Endpoints: checks if the service uses Private Endpoints.
 * Diagnostic Settings: checks if there are Diagnostic Settings configured for the service. 
-* CAF Naming convention: checks if the service follows CAF Naming convention.
+* CAF Naming convention: checks if the service follows [CAF Naming convention](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations).
 
 ## Usage
 
@@ -16,7 +16,7 @@ Download the latest release from [here](https://github.com/cmendible/azqr/releas
 
 ### Authentication
 
-azqr supports the following authentication methods:
+**azqr** supports the following authentication methods:
 
 * Azure CLI
 * Service Principal. You'll need to set the following environment variables:
