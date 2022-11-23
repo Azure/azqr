@@ -24,6 +24,8 @@ public static class RulesEngineHelper
         string workflowName,
         ResourceData[] services)
     {
+        Console.WriteLine($"Executing rules for {workflowName}...");
+
         var results = new List<Results>();
         if (engine.ContainsWorkflow(workflowName))
         {
@@ -53,6 +55,8 @@ public static class RulesEngineHelper
         string workflowName,
         NetworkTrackedResourceData[] services)
     {
+        Console.WriteLine($"Executing rules for {workflowName}...");
+
         var results = new List<Results>();
         if (engine.ContainsWorkflow(workflowName))
         {
