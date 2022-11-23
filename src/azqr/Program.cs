@@ -95,6 +95,9 @@ static async Task<List<Results>> ReviewResourceGroup(ArmClient client, RulesEngi
     var serviceBusNamespaces = resourceGroupResource.GetServiceBusNamespaces().Select(x => x.Data).ToArray();
     results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ServiceBus", serviceBusNamespaces));
 
+    var evenHubs = resourceGroupResource.GetEventHubsNamespaces().Select(x => x.Data).ToArray();
+    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "EventHubs", evenHubs));
+
     var eventGrids = resourceGroupResource.GetDomains().Select(x => x.Data).ToArray();
     results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "EventGrid", eventGrids));
 
