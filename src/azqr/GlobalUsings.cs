@@ -12,6 +12,7 @@ global using Azure.ResourceManager.Cdn;
 global using Azure.ResourceManager.Compute;
 global using Azure.ResourceManager.ContainerInstance;
 global using Azure.ResourceManager.ContainerRegistry;
+global using Azure.ResourceManager.ContainerRegistry.Models;
 global using Azure.ResourceManager.ContainerService;
 global using Azure.ResourceManager.CosmosDB;
 global using Azure.ResourceManager.EventGrid;
@@ -35,9 +36,6 @@ global using Azure.ResourceManager.Network.Models;
 global using System.CommandLine;
 global using System.Globalization;
 global using System.Reflection;
-
-global using Newtonsoft.Json;
-global using RulesEngine.Models;
 
 global using ConsoleTables;
 

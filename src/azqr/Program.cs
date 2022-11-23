@@ -20,9 +20,7 @@ rootCommand.SetHandler<string, string, string>(async (subscriptionId, resourceGr
         var credential = new DefaultAzureCredential();
         var client = new ArmClient(credential, subscriptionId);
 
-        var engine = RulesEngineHelper.LoadRulesEngine();
-
-        await Review(client, engine, customerName, resourceGroup);
+        await Review(client, customerName, resourceGroup);
     },
     subscriptionOption,
     resourceGroupOption,
@@ -30,10 +28,10 @@ rootCommand.SetHandler<string, string, string>(async (subscriptionId, resourceGr
 
 return await rootCommand.InvokeAsync(args);
 
-static async Task Review(ArmClient client, RulesEngine.RulesEngine engine, string customerName, string resourceGroup)
+static async Task Review(ArmClient client, string customerName, string resourceGroup)
 {
     // https://learn.microsoft.com/en-us/dotnet/azure/sdk/resource-management?tabs=dotnetcli
-    var results = new List<Results>();
+    var results = new List<AzureServiceResult>();
     var subscription = await client.GetDefaultSubscriptionAsync();
     var subscriptionId = new ResourceIdentifier(subscription.Id!);
     var resourceGroupCollection = subscription.GetResourceGroups();
@@ -42,14 +40,14 @@ static async Task Review(ArmClient client, RulesEngine.RulesEngine engine, strin
     {
         await foreach (var rg in resourceGroupCollection.GetAllAsync())
         {
-            var resourceGroupResult = await ReviewResourceGroup(client, engine, subscriptionId, rg);
+            var resourceGroupResult = ReviewResourceGroup(client, subscriptionId, rg);
             results.AddRange(resourceGroupResult);
         }
     }
     else
     {
         var rg = await resourceGroupCollection.GetAsync(resourceGroup);
-        var resourceGroupResult = await ReviewResourceGroup(client, engine, subscriptionId, rg);
+        var resourceGroupResult = ReviewResourceGroup(client, subscriptionId, rg);
         results.AddRange(resourceGroupResult);
     }
 
@@ -67,63 +65,114 @@ static async Task Review(ArmClient client, RulesEngine.RulesEngine engine, strin
     Console.WriteLine("Review completed!");
 }
 
-static async Task<List<Results>> ReviewResourceGroup(ArmClient client, RulesEngine.RulesEngine engine, ResourceIdentifier subscriptionId, ResourceGroupResource resourceGroupResource)
+static List<AzureServiceResult> ReviewResourceGroup(ArmClient client, ResourceIdentifier subscriptionId, ResourceGroupResource resourceGroupResource)
 {
-    var results = new List<Results>();
+    var analyzers = new List<IAzureServiceAnalyzer>();
+    var results = new List<AzureServiceResult>();
 
     var rgId = new ResourceIdentifier(resourceGroupResource.Id!);
 
-    Console.WriteLine($"Reviewing Subscription Id: {subscriptionId} and Resource Group: {rgId.Name}...");
+    Console.WriteLine($"Reviewing Resource Group: {rgId}...");
 
-    var storageAccounts = resourceGroupResource.GetStorageAccounts().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "Storage", storageAccounts));
+    analyzers.Add(new StorageAccountAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetStorageAccounts().Select(x => x.Data).ToArray()));
 
-    var cosmosAccounts = resourceGroupResource.GetCosmosDBAccounts().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "CosmosDB", cosmosAccounts));
+    analyzers.Add(new CosmosDbAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetCosmosDBAccounts().Select(x => x.Data).ToArray()));
 
-    var keyVaults = resourceGroupResource.GetKeyVaults().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "KeyVault", keyVaults));
+    analyzers.Add(new KeyVaultAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetKeyVaults().Select(x => x.Data).ToArray()));
 
-    var plans = resourceGroupResource.GetAppServicePlans().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "AppServicePlan", plans));
+    analyzers.Add(new RedisAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetAllRedis().Select(x => x.Data).ToArray()));
 
-    var redis = resourceGroupResource.GetAllRedis().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "Redis", redis));
+    analyzers.Add(new ApimAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetApiManagementServices().Select(x => x.Data).ToArray()));
 
-    var apims = resourceGroupResource.GetApiManagementServices().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ApiManagement", apims));
+    analyzers.Add(new ContainerRegistryAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetContainerRegistries().Select(x => x.Data).ToArray()));
 
-    var acrs = resourceGroupResource.GetContainerRegistries().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ContainerRegistry", acrs));
+    analyzers.Add(new AksAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetContainerServiceManagedClusters().Select(x => x.Data).ToArray()));
 
-    var aks = resourceGroupResource.GetContainerServiceManagedClusters().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "AKS", aks));
+    analyzers.Add(new ContainerAppEnvironmentAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetManagedEnvironments().Select(x => x.Data).ToArray()));
 
-    var ci = resourceGroupResource.GetContainerGroups().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ContainerInstance", ci));
+    analyzers.Add(new ContainerInstanceAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetContainerGroups().Select(x => x.Data).ToArray()));
 
-    var cae = resourceGroupResource.GetManagedEnvironments().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ContainerAppEnvironment", cae));
+    analyzers.Add(new SignalRAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetSignalRs().Select(x => x.Data).ToArray()));
 
-    var signalR = resourceGroupResource.GetSignalRs().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "SignalR", signalR));
+    analyzers.Add(new ServiceBusAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetServiceBusNamespaces().Select(x => x.Data).ToArray()));
 
-    var serviceBusNamespaces = resourceGroupResource.GetServiceBusNamespaces().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "ServiceBus", serviceBusNamespaces));
+    analyzers.Add(new EventHubAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetEventHubsNamespaces().Select(x => x.Data).ToArray()));
 
-    var evenHubs = resourceGroupResource.GetEventHubsNamespaces().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "EventHubs", evenHubs));
+    analyzers.Add(new EventGridAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetDomains().Select(x => x.Data).ToArray()));
 
-    var eventGrids = resourceGroupResource.GetDomains().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteRules(client, engine, subscriptionId.Name, rgId.Name, "EventGrid", eventGrids));
+    analyzers.Add(new ApplicationGatewayAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetApplicationGateways().Select(x => x.Data).ToArray()));
 
-    var applicationGateways = resourceGroupResource.GetApplicationGateways().Select(x => x.Data).ToArray();
-    results.AddRange(await RulesEngineHelper.ExecuteNetworkRules(client, engine, subscriptionId.Name, rgId.Name, "ApplicationGateway", applicationGateways));
+    analyzers.Add(new AppServicePlanAnalyzer(
+        client,
+        subscriptionId.Name,
+        rgId.Name,
+        resourceGroupResource.GetAppServicePlans().Select(x => x.Data).ToArray()));
+
+    foreach (var analyzer in analyzers)
+    {
+        results.AddRange(analyzer.Review());
+    }
 
     return results;
 }
 
-static string WriteTable(List<Results> results)
+static string WriteTable(List<AzureServiceResult> results)
 {
     var table = new ConsoleTable(
         ColumnNames.SubscriptionId,
@@ -144,12 +193,12 @@ static string WriteTable(List<Results> results)
             result.ResourceGroup,
             result.Type,
             result.ServiceName,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == ColumnNames.SKU)?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == ColumnNames.AvaliabilityZones)?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == ColumnNames.SLA)?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == ColumnNames.PrivateEndpoints)?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == ColumnNames.DiagnosticSettings)?.ActionResult.Output,
-            result.RulesResults.FirstOrDefault(x => x.Rule.RuleName == ColumnNames.CAFNaming)?.ActionResult.Output);
+            result.Sku,
+            result.AvaliabilityZones,
+            result.Sla,
+            result.PrivateEndpoints,
+            result.DiagnosticSettings,
+            result.CAFNaming);
     }
 
     return table.ToMarkDownString();

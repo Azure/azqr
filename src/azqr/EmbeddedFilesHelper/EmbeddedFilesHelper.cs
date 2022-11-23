@@ -38,13 +38,13 @@ public static class EmbeddedFilesHelper
         }
     }
 
-    public static string GetRecommendations(List<Results> results)
+    public static string GetRecommendations(List<AzureServiceResult> results)
     {
         var recommendations = string.Empty;
         var types = results.Select(x => x.Type).Distinct();
         foreach (var type in types)
         {
-            var recommendationsTemplate = GetTemplate($"Resources.{type.Replace("/", ".")}.md");
+            var recommendationsTemplate = GetTemplate($"Resources.{type.ToString().Replace("/", ".")}.md");
             recommendations += recommendationsTemplate + Environment.NewLine;
         }
         return recommendations;
