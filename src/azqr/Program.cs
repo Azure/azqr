@@ -162,7 +162,8 @@ static List<AzureServiceResult> ReviewResourceGroup(ArmClient client, ResourceId
         client,
         subscriptionId.Name,
         rgId.Name,
-        resourceGroupResource.GetAppServicePlans().Select(x => x.Data).ToArray()));
+        resourceGroupResource.GetAppServicePlans().Select(x => x.Data).ToArray(),
+        resourceGroupResource.GetWebSites()));
 
     foreach (var analyzer in analyzers)
     {
