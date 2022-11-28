@@ -1,23 +1,50 @@
-name: build
+name: "azqr-build"
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
-
+  push:
+    branches:
+      - main
+      - release-*
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - main
+      - release-*
 jobs:
   build:
-    name: Build
+    name: Build ${{ matrix.target_os }}_${{ matrix.target_arch }} binaries
+    runs-on: ${{ matrix.os }}
+    env:
+      GOVER: 1.19
+      GOOS: ${{ matrix.target_os }}
+      GOARCH: ${{ matrix.target_arch }}
+      GOPROXY: https://proxy.golang.org
+      ARCHIVE_OUTDIR: dist/archives
+      PROJECT_NAME: azqr
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: src
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        target_arch: [amd64]
+        include:
+          - os: ubuntu-latest
+            target_os: linux
+            filename: azqr
+          - os: windows-latest
+            target_os: windows
+            filename: azqr.exe
+          - os: macOS-latest
+            target_os: darwin
+            filename: azqr
     steps:
-      - name: Check out code
-        uses: actions/checkout@v1
+      - name: Set up Go ${{ env.GOVER }}
+        uses: actions/setup-go@v2.1.3
+        with:
+          go-version: ${{ env.GOVER }}
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
@@ -38,18 +65,25 @@ jobs:
           echo "MINVERVERSIONOVERRIDE=$(minver -t v. -m 0.1 -d preview)" >> $env:GITHUB_ENV
         if: matrix.os == 'windows-latest'
 
-      - name: Calculated Version
+      - name: Create output folder
         run: |
-          echo "${{ env.MINVERVERSIONOVERRIDE }}"
+          mkdir -p ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
 
-      - name: Build
-        run: dotnet publish -c Release
+      - name: Run build and archive non windows binaries
+        if: matrix.target_os != 'windows'
+        run: |
+          GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -ldflags "-s -w" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/azqr/
+
+      - name: Run build and archive windows binaries
+        if: matrix.target_os == 'windows'
+        run: |
+          go build -ldflags "-s -w" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/azqr/
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: azqr-${{ matrix.os }}
-          path: ./src/azqr/bin/Release/net6.0/publish/
+          name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
+          path: ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }}
 
   release:
     name: Create Release
@@ -76,31 +110,40 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-    if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v') 
+        target_arch: [amd64]
+    if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
     env:
       ARTIFACT_DIR: ${{ github.workspace }}/release
+      PROJECT_NAME: azqr
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: download artifacts - ${{ matrix.os }}
+      - name: download artifacts - ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
         uses: actions/download-artifact@master
         with:
-          name: azqr-${{ matrix.os }}
-          path: ${{ env.ARTIFACT_DIR }}/azqr-${{ matrix.os }}/
-
-      - name: Zip files
-        working-directory: ${{ env.ARTIFACT_DIR }}/azqr-${{ matrix.os }}/
-        run: |
-          zip -r ${{ github.workspace }}/azqr-${{ matrix.os }}.zip *
+          name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
+          path: ${{ env.ARTIFACT_DIR }}/${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}/
 
       - name: upload linux artifact
+        if: matrix.os != 'windows-latest'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/azqr-${{ matrix.os }}.zip
-          asset_name: azqr-${{ matrix.os }}.zip
-          asset_content_type: application/gzip
+          asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}/azqr
+          asset_name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
+          asset_content_type: application/octet-stream
+
+      - name: upload windows artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}/azqr.exe
+          asset_name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}.exe
+          asset_content_type: application/octet-stream

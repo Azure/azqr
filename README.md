@@ -5,7 +5,7 @@
 Azure Quick Review (azqr) goal is to produce a high level assemesment of an Azure Subscription or Resource Group providing the following information for each Azure Service:
 
 * SLA: current expected SLA
-* Availability Zones: checks if the service is proytected against Zone failures. 
+* Availability Zones: checks if the service is protected against Zone failures. 
 * Private Endpoints: checks if the service uses Private Endpoints.
 * Diagnostic Settings: checks if there are Diagnostic Settings configured for the service. 
 * CAF Naming convention: checks if the service follows [CAF Naming convention](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations).
@@ -25,12 +25,6 @@ Download the latest release from [here](https://github.com/cmendible/azqr/releas
   * AZURE_TENANT_ID
 
 ### Running the Review
-
-To review all resource groups in the default subscription run:
-
-```bash
-./azqr 
-```
 
 To review all resource groups in a specific subscription run:
 
