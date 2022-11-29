@@ -48,7 +48,7 @@ func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, e
 			AvailabilityZones:  len(redis.Zones) > 0,
 			PrivateEndpoints:   len(redis.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*redis.Name, "kv"),
+			CAFNaming:          strings.HasPrefix(*redis.Name, "redis"),
 		})
 	}
 	return results, nil
