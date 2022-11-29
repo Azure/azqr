@@ -50,12 +50,12 @@ func (c SignalRAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *signalr.Name,
 			Sku:                sku,
-			Sla:                "TODO",
+			Sla:                "99.9%",
 			Type:               *signalr.Type,
 			AvailabilityZones:  zones,
 			PrivateEndpoints:   len(signalr.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*signalr.Name, "sb"),
+			CAFNaming:          strings.HasPrefix(*signalr.Name, "sigr"),
 		})
 	}
 	return results, nil
