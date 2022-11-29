@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -11,17 +12,19 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/cmendibl3/azqr/cmd/azqr/analyzers"
-	"github.com/olekukonko/tablewriter"
+	"github.com/fbiville/markdown-table-formatter/pkg/markdown"
 )
 
 func main() {
 	subscriptionPtr := flag.String("s", "", "Azure Subscription Id (Required)")
 	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
+	outputPtr := flag.String("o", "report.md", "Output file")
 
 	flag.Parse()
 
 	subscriptionId := *subscriptionPtr
 	resourceGroupName := *resourceGroupPtr
+	outputFile := *outputPtr
 
 	if subscriptionId == "" {
 		flag.Usage()
@@ -75,6 +78,7 @@ func main() {
 
 	all := make([]analyzers.AzureServiceResult, 0)
 	for _, r := range resourceGroups {
+		log.Printf("Analyzing Resource Group %s", r)
 		for _, a := range svcanalyzers {
 			results, err := a.Review(r)
 			if err != nil {
@@ -84,7 +88,11 @@ func main() {
 		}
 	}
 
-	renderTable(all)
+	var report = renderTable(all)
+	err = os.WriteFile(outputFile, []byte(report), 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func checkExistenceResourceGroup(subscriptionId string, resourceGroupName string, ctx context.Context, cred azcore.TokenCredential) (bool, error) {
@@ -119,19 +127,23 @@ func listResourceGroup(subscriptionId string, ctx context.Context, cred azcore.T
 	return resourceGroups, nil
 }
 
-func renderTable(results []analyzers.AzureServiceResult) {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"SubscriptionId", "ResourceGroup", "ServiceName", "Sku", "Sla", "Type", "AvailabilityZones", "PrivateEndpoints", "DiagnosticSettings", "CAFNaming"})
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderLine(false)
-	table.SetBorder(false)
-	table.SetTablePadding("\t")
-	table.SetNoWhiteSpace(true)
-
+func renderTable(results []analyzers.AzureServiceResult) string {
+	rows := [][]string{}
 	for _, r := range results {
-		table.Append([]string{r.SubscriptionId, r.ResourceGroup, r.ServiceName, r.Sku, r.Sla, r.Type, strconv.FormatBool(r.AvailabilityZones), strconv.FormatBool(r.PrivateEndpoints), strconv.FormatBool(r.DiagnosticSettings), strconv.FormatBool(r.CAFNaming)})
+		rows = append([][]string{
+			{r.SubscriptionId, r.ResourceGroup, r.Type, r.ServiceName, r.Sku, r.Sla, strconv.FormatBool(r.AvailabilityZones), strconv.FormatBool(r.PrivateEndpoints), strconv.FormatBool(r.DiagnosticSettings), strconv.FormatBool(r.CAFNaming)},
+		}, rows...)
 	}
-	table.Render()
+
+	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
+		WithPrettyPrint().
+		Build("SubscriptionId", "ResourceGroup", "Type", "Name", "SKU", "SLA", "Zones", "P Endpoints", "Diag", "CAF").
+		Format(rows)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("")
+	fmt.Println(prettyPrintedTable)
+	return prettyPrintedTable
 }
