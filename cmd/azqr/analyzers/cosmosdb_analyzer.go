@@ -38,12 +38,22 @@ func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 			return nil, err
 		}
 
+		sla := "99.99%"
 		availabilityZones := false
+		availabilityZonesNotEnabledInALocation := false
+		numberOfLocations := 0
 		for _, location := range database.Properties.Locations {
+			numberOfLocations++
 			if *location.IsZoneRedundant {
 				availabilityZones = true
-				break
+				sla = "99.995%"
+			} else {
+				availabilityZonesNotEnabledInALocation = true
 			}
+		}
+
+		if availabilityZones && numberOfLocations >= 2 && !availabilityZonesNotEnabledInALocation {
+			sla = "99.999%"
 		}
 
 		results = append(results, AzureServiceResult{
@@ -51,7 +61,7 @@ func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *database.Name,
 			Sku:                string(*database.Properties.DatabaseAccountOfferType),
-			Sla:                "TODO",
+			Sla:                sla,
 			Type:               *database.Type,
 			AvailabilityZones:  availabilityZones,
 			PrivateEndpoints:   len(database.Properties.PrivateEndpointConnections) > 0,
