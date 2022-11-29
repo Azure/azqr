@@ -44,7 +44,7 @@ func (a EventGridAnalyzer) Review(resourceGroupName string) ([]AzureServiceResul
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *d.Name,
 			Sku:                "None",
-			Sla:                "TODO",
+			Sla:                "99.99%",
 			Type:               *d.Type,
 			AvailabilityZones:  true,
 			PrivateEndpoints:   len(d.Properties.PrivateEndpointConnections) > 0,
