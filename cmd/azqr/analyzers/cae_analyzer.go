@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -27,6 +28,8 @@ func NewContainerAppsAnalyzer(subscriptionId string, ctx context.Context, cred a
 }
 
 func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing Container Apps in Resource Group %s", resourceGroupName)
+
 	apps, err := a.listApps(resourceGroupName)
 	if err != nil {
 		return nil, err

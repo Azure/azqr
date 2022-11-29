@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -28,7 +29,8 @@ func NewApplicationGatewayAnalyzer(subscriptionId string, ctx context.Context, c
 }
 
 func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
-
+	log.Printf("Analyzing Application Gateways in Resource Group %s", resourceGroupName)
+	
 	gateways, err := a.listGateways(resourceGroupName)
 	if err != nil {
 		return nil, err

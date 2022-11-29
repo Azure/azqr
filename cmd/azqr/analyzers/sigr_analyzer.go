@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -28,6 +29,8 @@ func NewSignalRAnalyzer(subscriptionId string, ctx context.Context, cred azcore.
 }
 
 func (c SignalRAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing SignalR in Resource Group %s", resourceGroupName)
+	
 	signalr, err := c.listSignalR(resourceGroupName)
 	if err != nil {
 		return nil, err

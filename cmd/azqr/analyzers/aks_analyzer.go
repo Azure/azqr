@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -27,6 +28,8 @@ func NewAKSAnalyzer(subscriptionId string, ctx context.Context, cred azcore.Toke
 }
 
 func (a AKSAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing AKS Clusters in Resource Group %s", resourceGroupName)
+	
 	clusters, err := a.listClusters(resourceGroupName)
 	if err != nil {
 		return nil, err

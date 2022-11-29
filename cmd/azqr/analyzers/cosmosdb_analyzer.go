@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -27,6 +28,8 @@ func NewCosmosDBAnalyzer(subscriptionId string, ctx context.Context, cred azcore
 }
 
 func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing CosmosDB Databases in Resource Group %s", resourceGroupName)
+
 	databases, err := c.listDatabases(resourceGroupName)
 	if err != nil {
 		return nil, err

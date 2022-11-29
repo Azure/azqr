@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -27,6 +28,7 @@ func NewEventGridAnalyzer(subscriptionId string, ctx context.Context, cred azcor
 }
 
 func (a EventGridAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing EventGrid Domains in Resource Group %s", resourceGroupName)
 
 	domains, err := a.listDomain(resourceGroupName)
 	if err != nil {

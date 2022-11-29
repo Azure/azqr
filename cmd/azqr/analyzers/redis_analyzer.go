@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -27,6 +28,8 @@ func NewRedisAnalyzer(subscriptionId string, ctx context.Context, cred azcore.To
 }
 
 func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing Redis in Resource Group %s", resourceGroupName)
+	
 	redis, err := c.listRedis(resourceGroupName)
 	if err != nil {
 		return nil, err

@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -27,6 +28,8 @@ func NewApiManagementAnalyzer(subscriptionId string, ctx context.Context, cred a
 }
 
 func (a ApiManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing API Management Services in Resource Group %s", resourceGroupName)
+
 	services, err := a.listServices(resourceGroupName)
 	if err != nil {
 		return nil, err

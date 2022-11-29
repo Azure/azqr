@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -27,6 +28,8 @@ func NewKeyVaultAnalyzer(subscriptionId string, ctx context.Context, cred azcore
 }
 
 func (c KeyVaultAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing Key Vaults in Resource Group %s", resourceGroupName)
+
 	vaults, err := c.listVaults(resourceGroupName)
 	if err != nil {
 		return nil, err

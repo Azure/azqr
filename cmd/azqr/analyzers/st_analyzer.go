@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -28,6 +29,8 @@ func NewStorageAnalyzer(subscriptionId string, ctx context.Context, cred azcore.
 }
 
 func (c StorageAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing Storage in Resource Group %s", resourceGroupName)
+	
 	storage, err := c.listStorage(resourceGroupName)
 	if err != nil {
 		return nil, err

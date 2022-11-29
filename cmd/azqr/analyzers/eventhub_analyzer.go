@@ -2,6 +2,7 @@ package analyzers
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -27,6 +28,8 @@ func NewEventHubAnalyzer(subscriptionId string, ctx context.Context, cred azcore
 }
 
 func (c EventHubAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+	log.Printf("Analyzing Event Hubs in Resource Group %s", resourceGroupName)
+
 	eventHubs, err := c.listEventHubs(resourceGroupName)
 	if err != nil {
 		return nil, err
