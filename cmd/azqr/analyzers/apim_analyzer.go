@@ -38,12 +38,18 @@ func (a ApiManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 			return nil, err
 		}
 
+		sku := string(*s.SKU.Name)
+		sla := "99.95%"
+		if strings.Contains(sku, "Premium") && (len(s.Zones) > 0 || len(s.Properties.AdditionalLocations) > 0) {
+			sla = "99.99%"
+		}
+
 		results = append(results, AzureServiceResult{
 			SubscriptionId:     a.subscriptionId,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *s.Name,
-			Sku:                string(*s.SKU.Name),
-			Sla:                "TODO",
+			Sku:                sku,
+			Sla:                sla,
 			Type:               *s.Type,
 			AvailabilityZones:  len(s.Zones) > 0,
 			PrivateEndpoints:   len(s.Properties.PrivateEndpointConnections) > 0,
