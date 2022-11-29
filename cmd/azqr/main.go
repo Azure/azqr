@@ -66,6 +66,7 @@ func main() {
 		analyzers.NewEventHubAnalyzer(subscriptionId, ctx, cred),
 		analyzers.NewEventGridAnalyzer(subscriptionId, ctx, cred),
 		analyzers.NewKeyVaultAnalyzer(subscriptionId, ctx, cred),
+		analyzers.NewAppServiceAnalyzer(subscriptionId, ctx, cred),
 		analyzers.NewRedisAnalyzer(subscriptionId, ctx, cred),
 		analyzers.NewServiceBusAnalyzer(subscriptionId, ctx, cred),
 		analyzers.NewSignalRAnalyzer(subscriptionId, ctx, cred),
@@ -74,7 +75,6 @@ func main() {
 
 	all := make([]analyzers.AzureServiceResult, 0)
 	for _, r := range resourceGroups {
-		log.Printf("Analyzing Resource Group %s", r)
 		for _, a := range svcanalyzers {
 			results, err := a.Review(r)
 			if err != nil {

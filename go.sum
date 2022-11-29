@@ -8,6 +8,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanage
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement v1.0.0/go.mod h1:gr6fiHmIii3Zw3riWMSr+P0tWTz4hfqTVcFttdi2JBo=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers v1.0.0 h1:zIQzosd251uW2j2+MIbMDeyqkISOFV88XYE7pvkWIZM=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers v1.0.0/go.mod h1:/OjYJjDeOIdCSJmuQH0BDpegn00BI747f5WJseOm26o=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice v1.0.0 h1:kRX8I0dWAcpW6Vq0m90CgV+qw4O1vXodgwrhoPr1RWs=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice v1.0.0/go.mod h1:avvc5/7qR4taCvAhOM7KFXuEHhAU0Wek9YX7sh9H3EM=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance v1.0.0 h1:yKmuPI8w+5rXTMa4G5xrzwz9aGEkS6t4Gx/cRBnuh+M=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance v1.0.0/go.mod h1:V0F1UD2J+8nx/DQEfxZCXnLCKVLFlYUG8lrjrxFKU8w=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry v0.6.0 h1:Z5/bDxQL2Zc9t6ZDwdRU60bpLHZvoKOeuaM7XVbf2z0=
