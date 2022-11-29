@@ -45,7 +45,7 @@ func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]AzureSer
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *g.Name,
 			Sku:                string(*g.Properties.SKU.Name),
-			Sla:                "TODO",
+			Sla:                "99.95%",
 			Type:               *g.Type,
 			AvailabilityZones:  len(g.Zones) > 0,
 			PrivateEndpoints:   len(g.Properties.PrivateEndpointConnections) > 0,
