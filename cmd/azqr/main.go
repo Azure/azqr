@@ -7,11 +7,14 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/cmendibl3/azqr/cmd/azqr/analyzers"
+	"github.com/cmendibl3/azqr/cmd/azqr/report_templates"
 	"github.com/fbiville/markdown-table-formatter/pkg/markdown"
 )
 
@@ -19,12 +22,14 @@ func main() {
 	subscriptionPtr := flag.String("s", "", "Azure Subscription Id (Required)")
 	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
 	outputPtr := flag.String("o", "report.md", "Output file")
+	customerPtr := flag.String("c", "<Replace with Customer Name>", "Customer Name")
 
 	flag.Parse()
 
 	subscriptionId := *subscriptionPtr
 	resourceGroupName := *resourceGroupPtr
 	outputFile := *outputPtr
+	customer := *customerPtr
 
 	if subscriptionId == "" {
 		flag.Usage()
@@ -88,8 +93,26 @@ func main() {
 		}
 	}
 
-	var report = renderTable(all)
-	err = os.WriteFile(outputFile, []byte(report), 0644)
+	resultsTable := renderTable(all)
+	reportTemplate := report_templates.GetTemplates("Report.md")
+	reportTemplate = strings.Replace(reportTemplate, "{{results}}", resultsTable, 1)
+	reportTemplate = strings.Replace(reportTemplate, "{{date}}", time.Now().Format("2006-01-02"), 1)
+	reportTemplate = strings.Replace(reportTemplate, "{{customer}}", customer, -1)
+
+	recommendations := ""
+	dict := map[string]bool{}
+	for _, r := range all {
+		parsedType := strings.Replace(r.Type, "/", ".", -1)
+		if _, ok := dict[r.Type]; !ok {
+			dict[r.Type] = true
+			recommendations += "\n"
+			recommendations += report_templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
+		}
+	}
+
+	reportTemplate = strings.Replace(reportTemplate, "{{recommendations}}", recommendations, 1)
+
+	err = os.WriteFile(outputFile, []byte(reportTemplate), 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
