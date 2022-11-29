@@ -43,7 +43,7 @@ func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, e
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *redis.Name,
 			Sku:                string(*redis.Properties.SKU.Name),
-			Sla:                "TODO",
+			Sla:                "99.9%",
 			Type:               *redis.Type,
 			AvailabilityZones:  len(redis.Zones) > 0,
 			PrivateEndpoints:   len(redis.Properties.PrivateEndpointConnections) > 0,
