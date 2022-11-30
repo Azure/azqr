@@ -16,9 +16,9 @@ type EventGridAnalyzer struct {
 	cred                azcore.TokenCredential
 }
 
-func NewEventGridAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *EventHubAnalyzer {
+func NewEventGridAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *EventGridAnalyzer {
 	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	analyzer := EventHubAnalyzer{
+	analyzer := EventGridAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
 		ctx:                 ctx,
