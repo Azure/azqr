@@ -14,15 +14,21 @@ type AppServiceAnalyzer struct {
 	subscriptionId      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
+	plansClient         *armappservice.PlansClient
 }
 
 func NewAppServiceAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *AppServiceAnalyzer {
 	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
+	plansClient, err := armappservice.NewPlansClient(subscriptionId, cred, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 	analyzer := AppServiceAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
 		ctx:                 ctx,
 		cred:                cred,
+		plansClient:         plansClient,
 	}
 
 	return &analyzer
@@ -30,7 +36,7 @@ func NewAppServiceAnalyzer(subscriptionId string, ctx context.Context, cred azco
 
 func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing App Service Plans in Resource Group %s", resourceGroupName)
-	
+
 	sites, err := a.listPlans(resourceGroupName)
 	if err != nil {
 		return nil, err
@@ -67,7 +73,7 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 			}
 
 			caf := false
-			if strings.HasPrefix(*s.Name, "app")  || strings.HasPrefix(*s.Name, "func") {
+			if strings.HasPrefix(*s.Name, "app") || strings.HasPrefix(*s.Name, "func") {
 				caf = true
 			}
 
@@ -90,11 +96,7 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 }
 
 func (a AppServiceAnalyzer) listPlans(resourceGroupName string) ([]*armappservice.Plan, error) {
-	plansClient, err := armappservice.NewPlansClient(a.subscriptionId, a.cred, nil)
-	if err != nil {
-		return nil, err
-	}
-	pager := plansClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := a.plansClient.NewListByResourceGroupPager(resourceGroupName, nil)
 	results := []*armappservice.Plan{}
 	for pager.More() {
 		resp, err := pager.NextPage(a.ctx)
@@ -108,11 +110,7 @@ func (a AppServiceAnalyzer) listPlans(resourceGroupName string) ([]*armappservic
 }
 
 func (a AppServiceAnalyzer) listSites(resourceGroupName string, plan string) ([]*armappservice.Site, error) {
-	plansClient, err := armappservice.NewPlansClient(a.subscriptionId, a.cred, nil)
-	if err != nil {
-		return nil, err
-	}
-	pager := plansClient.NewListWebAppsPager(resourceGroupName, plan, nil)
+	pager := a.plansClient.NewListWebAppsPager(resourceGroupName, plan, nil)
 	results := []*armappservice.Site{}
 	for pager.More() {
 		resp, err := pager.NextPage(a.ctx)

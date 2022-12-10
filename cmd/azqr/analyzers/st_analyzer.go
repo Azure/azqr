@@ -12,25 +12,31 @@ import (
 
 type StorageAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId string
-	ctx context.Context
-	cred azcore.TokenCredential
+	subscriptionId      string
+	ctx                 context.Context
+	cred                azcore.TokenCredential
+	storageClient       *armstorage.AccountsClient
 }
 
 func NewStorageAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *StorageAnalyzer {
 	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
+	storageClient, err := armstorage.NewAccountsClient(subscriptionId, cred, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 	analyzer := StorageAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
 		ctx:                 ctx,
 		cred:                cred,
+		storageClient:       storageClient,
 	}
 	return &analyzer
 }
 
 func (c StorageAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Storage in Resource Group %s", resourceGroupName)
-	
+
 	storage, err := c.listStorage(resourceGroupName)
 	if err != nil {
 		return nil, err
@@ -70,12 +76,7 @@ func (c StorageAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 }
 
 func (c StorageAnalyzer) listStorage(resourceGroupName string) ([]*armstorage.Account, error) {
-	storageClient, err := armstorage.NewAccountsClient(c.subscriptionId, c.cred, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	pager := storageClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.storageClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
 	staccounts := make([]*armstorage.Account, 0)
 	for pager.More() {

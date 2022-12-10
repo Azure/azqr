@@ -14,15 +14,21 @@ type EventGridAnalyzer struct {
 	subscriptionId      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
+	domainsClient       *armeventgrid.DomainsClient
 }
 
 func NewEventGridAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *EventGridAnalyzer {
 	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
+	domainsClient, err := armeventgrid.NewDomainsClient(subscriptionId, cred, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 	analyzer := EventGridAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
 		ctx:                 ctx,
 		cred:                cred,
+		domainsClient:       domainsClient,
 	}
 	return &analyzer
 }
@@ -58,12 +64,7 @@ func (a EventGridAnalyzer) Review(resourceGroupName string) ([]AzureServiceResul
 }
 
 func (a EventGridAnalyzer) listDomain(resourceGroupName string) ([]*armeventgrid.Domain, error) {
-	domainsClient, err := armeventgrid.NewDomainsClient(a.subscriptionId, a.cred, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	pager := domainsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := a.domainsClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
 	domains := make([]*armeventgrid.Domain, 0)
 	for pager.More() {

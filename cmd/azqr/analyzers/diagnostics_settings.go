@@ -26,7 +26,6 @@ func NewDiagnosticsSettings(cred azcore.TokenCredential, ctx context.Context) (*
 }
 
 func (s DiagnosticsSettings) HasDiagnostics(resourceId string) (bool, error) {
-
 	pager := s.diagnosticsSettingsClient.NewListPager(resourceId, nil)
 
 	for pager.More() {

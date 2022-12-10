@@ -14,15 +14,21 @@ type ContainerInstanceAnalyzer struct {
 	subscriptionId      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
+	instancesClient     *armcontainerinstance.ContainerGroupsClient
 }
 
 func NewContainerIntanceAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ContainerInstanceAnalyzer {
 	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
+	instancesClient, err := armcontainerinstance.NewContainerGroupsClient(subscriptionId, cred, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 	analyzer := ContainerInstanceAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
 		ctx:                 ctx,
 		cred:                cred,
+		instancesClient:     instancesClient,
 	}
 	return &analyzer
 }
@@ -58,12 +64,7 @@ func (c ContainerInstanceAnalyzer) Review(resourceGroupName string) ([]AzureServ
 }
 
 func (c ContainerInstanceAnalyzer) listInstances(resourceGroupName string) ([]*armcontainerinstance.ContainerGroup, error) {
-	instancesClient, err := armcontainerinstance.NewContainerGroupsClient(c.subscriptionId, c.cred, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	pager := instancesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.instancesClient.NewListByResourceGroupPager(resourceGroupName, nil)
 	apps := make([]*armcontainerinstance.ContainerGroup, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(c.ctx)

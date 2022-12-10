@@ -14,15 +14,22 @@ type ContainerAppsAnalyzer struct {
 	subscriptionId      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
+	appsClient          *armappcontainers.ManagedEnvironmentsClient
 }
 
 func NewContainerAppsAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ContainerAppsAnalyzer {
 	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
+	appsClient, err := armappcontainers.NewManagedEnvironmentsClient(subscriptionId, cred, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	analyzer := ContainerAppsAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
 		ctx:                 ctx,
 		cred:                cred,
+		appsClient:          appsClient,
 	}
 	return &analyzer
 }
@@ -58,12 +65,7 @@ func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 }
 
 func (a ContainerAppsAnalyzer) listApps(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error) {
-	appsClient, err := armappcontainers.NewManagedEnvironmentsClient(a.subscriptionId, a.cred, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	pager := appsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := a.appsClient.NewListByResourceGroupPager(resourceGroupName, nil)
 	apps := make([]*armappcontainers.ManagedEnvironment, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(a.ctx)

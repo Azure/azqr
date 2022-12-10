@@ -12,25 +12,31 @@ import (
 
 type SignalRAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId string
-	ctx context.Context
-	cred azcore.TokenCredential
+	subscriptionId      string
+	ctx                 context.Context
+	cred                azcore.TokenCredential
+	signalrClient       *armsignalr.Client
 }
 
 func NewSignalRAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *SignalRAnalyzer {
 	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
+	signalrClient, err := armsignalr.NewClient(subscriptionId, cred, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 	analyzer := SignalRAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
 		ctx:                 ctx,
 		cred:                cred,
+		signalrClient:       signalrClient,
 	}
 	return &analyzer
 }
 
 func (c SignalRAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing SignalR in Resource Group %s", resourceGroupName)
-	
+
 	signalr, err := c.listSignalR(resourceGroupName)
 	if err != nil {
 		return nil, err
@@ -64,14 +70,8 @@ func (c SignalRAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 	return results, nil
 }
 
-func (c SignalRAnalyzer) listSignalR(resourceGroupName string,) ([]*armsignalr.ResourceInfo, error) {
-
-	signalrClient, err := armsignalr.NewClient(c.subscriptionId, c.cred, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	pager := signalrClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c SignalRAnalyzer) listSignalR(resourceGroupName string) ([]*armsignalr.ResourceInfo, error) {
+	pager := c.signalrClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
 	signalrs := make([]*armsignalr.ResourceInfo, 0)
 	for pager.More() {

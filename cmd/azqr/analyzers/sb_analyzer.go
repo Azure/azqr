@@ -15,22 +15,28 @@ type ServiceBusAnalyzer struct {
 	subscriptionId      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
+	servicebusClient    *armservicebus.NamespacesClient
 }
 
 func NewServiceBusAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ServiceBusAnalyzer {
 	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
+	servicebusClient, err := armservicebus.NewNamespacesClient(subscriptionId, cred, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 	analyzer := ServiceBusAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
 		ctx:                 ctx,
 		cred:                cred,
+		servicebusClient:    servicebusClient,
 	}
 	return &analyzer
 }
 
 func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Service Bus in Resource Group %s", resourceGroupName)
-	
+
 	servicebus, err := c.listServiceBus(resourceGroupName)
 	if err != nil {
 		return nil, err
@@ -65,12 +71,7 @@ func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 }
 
 func (c ServiceBusAnalyzer) listServiceBus(resourceGroupName string) ([]*armservicebus.SBNamespace, error) {
-	servicebusClient, err := armservicebus.NewNamespacesClient(c.subscriptionId, c.cred, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	pager := servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
 	namespaces := make([]*armservicebus.SBNamespace, 0)
 	for pager.More() {

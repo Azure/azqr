@@ -14,22 +14,28 @@ type RedisAnalyzer struct {
 	subscriptionId      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
+	redisClient         *armredis.Client
 }
 
 func NewRedisAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *RedisAnalyzer {
 	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
+	redisClient, err := armredis.NewClient(subscriptionId, cred, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 	analyzer := RedisAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
 		ctx:                 ctx,
 		cred:                cred,
+		redisClient:         redisClient,
 	}
 	return &analyzer
 }
 
 func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Redis in Resource Group %s", resourceGroupName)
-	
+
 	redis, err := c.listRedis(resourceGroupName)
 	if err != nil {
 		return nil, err
@@ -58,12 +64,7 @@ func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, e
 }
 
 func (c RedisAnalyzer) listRedis(resourceGroupName string) ([]*armredis.ResourceInfo, error) {
-	redisClient, err := armredis.NewClient(c.subscriptionId, c.cred, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	pager := redisClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.redisClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
 	redis := make([]*armredis.ResourceInfo, 0)
 	for pager.More() {
