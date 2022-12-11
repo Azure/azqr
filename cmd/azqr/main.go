@@ -79,6 +79,7 @@ func main() {
 		analyzers.NewServiceBusAnalyzer(subscriptionId, ctx, cred),
 		analyzers.NewSignalRAnalyzer(subscriptionId, ctx, cred),
 		analyzers.NewStorageAnalyzer(subscriptionId, ctx, cred),
+		analyzers.NewPostgreAnalyzer(subscriptionId, ctx, cred),
 	}
 
 	all := make([]analyzers.AzureServiceResult, 0)
@@ -105,7 +106,7 @@ func main() {
 		parsedType := strings.Replace(r.Type, "/", ".", -1)
 		if _, ok := dict[r.Type]; !ok {
 			dict[r.Type] = true
-			recommendations += "\n"
+			recommendations += "\n\n"
 			recommendations += report_templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
 		}
 	}
