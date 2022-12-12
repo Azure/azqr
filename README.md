@@ -43,3 +43,12 @@ For help run:
 ```bash
 ./azqr -h
 ```
+
+## Contribution
+
+Thanks to everyone who has contributed!
+
+<a href="https://github.com/cmendible/azqr/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=cmendible/azqr" />
+</a>
+
