@@ -47,15 +47,31 @@ func (a AKSAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, err
 			return nil, err
 		}
 
+		zones := true
+		for _, profile := range c.Properties.AgentPoolProfiles {
+			if profile.AvailabilityZones == nil || (profile.AvailabilityZones != nil && len(profile.AvailabilityZones) <= 1) {
+				zones = false
+			}
+		}
+
+		sku := string(*c.SKU.Tier)
+		sla := "None"
+		if sku == "Paid" {
+			sla = "99.9%"
+			if zones {
+				sla = "99.95%"
+			}
+		}
+
 		results = append(results, AzureServiceResult{
 			SubscriptionId:     a.subscriptionId,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *c.Name,
-			Sku:                string(*c.SKU.Name),
-			Sla:                "TODO",
+			Sku:                sku,
+			Sla:                sla,
 			Type:               *c.Type,
-			AvailabilityZones:  false,
-			PrivateEndpoints:   false,
+			AvailabilityZones:  zones,
+			PrivateEndpoints:   *c.Properties.APIServerAccessProfile.EnablePrivateCluster,
 			DiagnosticSettings: hasDiagnostics,
 			CAFNaming:          strings.HasPrefix(*c.Name, "aks"),
 		})
