@@ -63,6 +63,11 @@ func (a AKSAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, err
 			}
 		}
 
+		privateEndpoints := false
+		if c.Properties.APIServerAccessProfile != nil && *c.Properties.APIServerAccessProfile.EnablePrivateCluster {
+			privateEndpoints = true
+		}
+
 		results = append(results, AzureServiceResult{
 			SubscriptionId:     a.subscriptionId,
 			ResourceGroup:      resourceGroupName,
@@ -71,7 +76,7 @@ func (a AKSAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, err
 			Sla:                sla,
 			Type:               *c.Type,
 			AvailabilityZones:  zones,
-			PrivateEndpoints:   *c.Properties.APIServerAccessProfile.EnablePrivateCluster,
+			PrivateEndpoints:   privateEndpoints,
 			DiagnosticSettings: hasDiagnostics,
 			CAFNaming:          strings.HasPrefix(*c.Name, "aks"),
 		})
