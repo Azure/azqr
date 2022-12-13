@@ -7,5 +7,7 @@ Availability Zones are supported when using the Standard, Premium, and Dedicated
 
 This option allows the creation of a secondary namespace in a different region. Only the active namespace receives messages at any time. Messages and events aren't replicated to the secondary region. The RTO for the regional failover is up to 30 minutes. Confirm this RTO aligns with the requirements of the customer and fits in the broader availability strategy. If a higher RTO is required, consider implementing a client-side failover pattern.
 
+**Partitions:**
+
 We recommend sending events to an event hub without setting partition information to allow the Event Hubs service to balance the load across partitions.
 
