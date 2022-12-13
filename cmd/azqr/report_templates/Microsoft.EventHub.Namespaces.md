@@ -9,4 +9,3 @@ This option allows the creation of a secondary namespace in a different region. 
 
 We recommend sending events to an event hub without setting partition information to allow the Event Hubs service to balance the load across partitions.
 
-Availability Zones are supported when using the Standard, Premium, and Dedicated SKU: [Compare Azure Event Hubs tiers | Microsoft Learn] https://learn.microsoft.com/en-us/azure/event-hubs/compare-tiers
