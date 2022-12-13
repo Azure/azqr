@@ -1,6 +1,10 @@
 ### Container Apps
 
-Use of Availability Zones is recommended. The Azure Container Apps service supports Zone redundancy, which provides resiliency and high availability to a service instance in a specific Azure region. With zone redundancy, the control plane of your Container Apps' zone redundancy feature, replicas are automatically randomly distributed across the zones in the region, making it resilient to a zone failure.
+Use of Availability Zones is recommended. 
+
+The Azure Container Apps service supports Zone redundancy, which provides resiliency and high availability to a service instance in a specific Azure region. 
+
+By enabling Container Apps' zone redundancy feature, replicas are automatically randomly distributed across the zones in the region.
 
 The number of units selected must be distributed evenly across the availability zones.
 
