@@ -52,3 +52,5 @@ Thanks to everyone who has contributed!
   <img src="https://contributors-img.web.app/image?repo=cmendible/azqr" />
 </a>
 
+## Code of Conduct
+This project has adopted the [Contributor Covenant Code of Conduct](CODE-OF-CONDUCT.md)
