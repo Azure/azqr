@@ -69,16 +69,18 @@ func (a AKSAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, err
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     a.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *c.Name,
-			Sku:                sku,
-			Sla:                sla,
-			Type:               *c.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: a.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *c.Name,
+				Sku:            sku,
+				Sla:            sla,
+				Type:           *c.Type,
+				Location:       parseLocation(c.Location),
+				CAFNaming:      strings.HasPrefix(*c.Name, "aks")},
 			AvailabilityZones:  zones,
 			PrivateEndpoints:   privateEndpoints,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*c.Name, "aks"),
 		})
 	}
 	return results, nil

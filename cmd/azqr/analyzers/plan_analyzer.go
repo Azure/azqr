@@ -49,16 +49,18 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     a.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *p.Name,
-			Sku:                string(*p.SKU.Name),
-			Sla:                "TODO",
-			Type:               *p.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: a.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *p.Name,
+				Sku:            string(*p.SKU.Name),
+				Sla:            "TODO",
+				Type:           *p.Type,
+				Location:       parseLocation(p.Location),
+				CAFNaming:      strings.HasPrefix(*p.Name, "plan")},
 			AvailabilityZones:  *p.Properties.ZoneRedundant,
 			PrivateEndpoints:   false,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*p.Name, "plan"),
 		})
 
 		sites, err := a.listSites(resourceGroupName, *p.Name)
@@ -78,16 +80,18 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 			}
 
 			results = append(results, AzureServiceResult{
-				SubscriptionId:     a.subscriptionId,
-				ResourceGroup:      resourceGroupName,
-				ServiceName:        *s.Name,
-				Sku:                string(*p.SKU.Name),
-				Sla:                "TODO",
-				Type:               *s.Type,
+				AzureBaseServiceResult: AzureBaseServiceResult{
+					SubscriptionId: a.subscriptionId,
+					ResourceGroup:  resourceGroupName,
+					ServiceName:    *s.Name,
+					Sku:            string(*p.SKU.Name),
+					Sla:            "TODO",
+					Type:           *s.Type,
+					Location:       parseLocation(p.Location),
+					CAFNaming:      caf},
 				AvailabilityZones:  *p.Properties.ZoneRedundant,
 				PrivateEndpoints:   false,
 				DiagnosticSettings: hasDiagnostics,
-				CAFNaming:          caf,
 			})
 		}
 

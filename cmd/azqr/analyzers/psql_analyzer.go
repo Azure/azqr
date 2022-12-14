@@ -57,16 +57,18 @@ func (c PostgreAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *postgre.Name,
-			Sku:                *postgre.SKU.Name,
-			Sla:                "99.99%",
-			Type:               *postgre.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *postgre.Name,
+				Sku:            *postgre.SKU.Name,
+				Sla:            "99.99%",
+				Type:           *postgre.Type,
+				Location:       parseLocation(postgre.Location),
+				CAFNaming:      strings.HasPrefix(*postgre.Name, "psql")},
 			AvailabilityZones:  false,
 			PrivateEndpoints:   len(postgre.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*postgre.Name, "psql"),
 		})
 	}
 
@@ -90,16 +92,18 @@ func (c PostgreAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *postgre.Name,
-			Sku:                *postgre.SKU.Name,
-			Sla:                sla,
-			Type:               *postgre.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *postgre.Name,
+				Sku:            *postgre.SKU.Name,
+				Sla:            sla,
+				Type:           *postgre.Type,
+				Location:       parseLocation(postgre.Location),
+				CAFNaming:      strings.HasPrefix(*postgre.Name, "psql")},
 			AvailabilityZones:  *postgre.Properties.HighAvailability.Mode == armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant,
 			PrivateEndpoints:   *postgre.Properties.Network.PublicNetworkAccess == armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*postgre.Name, "psql"),
 		})
 	}
 

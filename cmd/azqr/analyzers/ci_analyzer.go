@@ -48,16 +48,18 @@ func (c ContainerInstanceAnalyzer) Review(resourceGroupName string) ([]AzureServ
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *instance.Name,
-			Sku:                string(*instance.Properties.SKU),
-			Sla:                "99.9%",
-			Type:               *instance.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *instance.Name,
+				Sku:            string(*instance.Properties.SKU),
+				Sla:            "99.9%",
+				Type:           *instance.Type,
+				Location:       parseLocation(instance.Location),
+				CAFNaming:      strings.HasPrefix(*instance.Name, "ci")},
 			AvailabilityZones:  len(instance.Zones) > 0,
 			PrivateEndpoints:   *instance.Properties.IPAddress.Type == armcontainerinstance.ContainerGroupIPAddressTypePrivate,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*instance.Name, "ci"),
 		})
 	}
 	return results, nil

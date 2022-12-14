@@ -66,16 +66,18 @@ func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *database.Name,
-			Sku:                string(*database.Properties.DatabaseAccountOfferType),
-			Sla:                sla,
-			Type:               *database.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *database.Name,
+				Sku:            string(*database.Properties.DatabaseAccountOfferType),
+				Sla:            sla,
+				Type:           *database.Type,
+				Location:       parseLocation(database.Location),
+				CAFNaming:      strings.HasPrefix(*database.Name, "cosmos")},
 			AvailabilityZones:  availabilityZones,
 			PrivateEndpoints:   len(database.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*database.Name, "cosmos"),
 		})
 	}
 	return results, nil

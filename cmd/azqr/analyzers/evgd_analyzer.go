@@ -48,16 +48,18 @@ func (a EventGridAnalyzer) Review(resourceGroupName string) ([]AzureServiceResul
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     a.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *d.Name,
-			Sku:                "None",
-			Sla:                "99.99%",
-			Type:               *d.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: a.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *d.Name,
+				Sku:            "None",
+				Sla:            "99.99%",
+				Type:           *d.Type,
+				Location:       parseLocation(d.Location),
+				CAFNaming:      strings.HasPrefix(*d.Name, "evgd")},
 			AvailabilityZones:  true,
 			PrivateEndpoints:   len(d.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*d.Name, "evgd"),
 		})
 	}
 	return results, nil

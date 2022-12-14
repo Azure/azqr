@@ -49,16 +49,18 @@ func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     a.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *app.Name,
-			Sku:                "None",
-			Sla:                "99.95%",
-			Type:               *app.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: a.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *app.Name,
+				Sku:            "None",
+				Sla:            "99.95%",
+				Type:           *app.Type,
+				Location:       parseLocation(app.Location),
+				CAFNaming:      strings.HasPrefix(*app.Name, "cae")},
 			AvailabilityZones:  *app.Properties.ZoneRedundant,
 			PrivateEndpoints:   *app.Properties.VnetConfiguration.Internal,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*app.Name, "cae"),
 		})
 	}
 	return results, nil

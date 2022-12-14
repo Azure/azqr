@@ -54,16 +54,18 @@ func (c EventHubAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *eventHub.Name,
-			Sku:                sku,
-			Sla:                sla,
-			Type:               *eventHub.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *eventHub.Name,
+				Sku:            sku,
+				Sla:            sla,
+				Type:           *eventHub.Type,
+				Location:       parseLocation(eventHub.Location),
+				CAFNaming:      strings.HasPrefix(*eventHub.Name, "evh")},
 			AvailabilityZones:  *eventHub.Properties.ZoneRedundant,
 			PrivateEndpoints:   len(eventHub.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*eventHub.Name, "evh"),
 		})
 	}
 	return results, nil

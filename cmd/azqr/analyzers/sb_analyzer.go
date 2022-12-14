@@ -55,16 +55,18 @@ func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *servicebus.Name,
-			Sku:                sku,
-			Sla:                sla,
-			Type:               *servicebus.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *servicebus.Name,
+				Sku:            sku,
+				Sla:            sla,
+				Type:           *servicebus.Type,
+				Location:       parseLocation(servicebus.Location),
+				CAFNaming:      strings.HasPrefix(*servicebus.Name, "sb")},
 			AvailabilityZones:  true,
 			PrivateEndpoints:   len(servicebus.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*servicebus.Name, "sb"),
 		})
 	}
 	return results, nil

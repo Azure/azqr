@@ -60,16 +60,18 @@ func (c StorageAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *storage.Name,
-			Sku:                sku,
-			Sla:                sla,
-			Type:               *storage.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *storage.Name,
+				Sku:            sku,
+				Sla:            sla,
+				Type:           *storage.Type,
+				Location:       *storage.Location,
+				CAFNaming:      strings.HasPrefix(*storage.Name, "st")},
 			AvailabilityZones:  zones,
 			PrivateEndpoints:   len(storage.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*storage.Name, "st"),
 		})
 	}
 	return results, nil

@@ -155,13 +155,13 @@ func renderTable(results []analyzers.AzureServiceResult) string {
 	rows := [][]string{}
 	for _, r := range results {
 		rows = append([][]string{
-			{r.SubscriptionId, r.ResourceGroup, r.Type, r.ServiceName, r.Sku, r.Sla, strconv.FormatBool(r.AvailabilityZones), strconv.FormatBool(r.PrivateEndpoints), strconv.FormatBool(r.DiagnosticSettings), strconv.FormatBool(r.CAFNaming)},
+			{r.SubscriptionId, r.ResourceGroup, r.Location, r.Type, r.ServiceName, r.Sku, r.Sla, strconv.FormatBool(r.AvailabilityZones), strconv.FormatBool(r.PrivateEndpoints), strconv.FormatBool(r.DiagnosticSettings), strconv.FormatBool(r.CAFNaming)},
 		}, rows...)
 	}
 
 	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
 		WithPrettyPrint().
-		Build("SubscriptionId", "ResourceGroup", "Type", "Name", "SKU", "SLA", "Zones", "P Endpoints", "Diag", "CAF").
+		Build("SubscriptionId", "ResourceGroup", "Location", "Type", "Name", "SKU", "SLA", "Zones", "P Endpoints", "Diag", "CAF").
 		Format(rows)
 
 	if err != nil {

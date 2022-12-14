@@ -48,16 +48,18 @@ func (c KeyVaultAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *vault.Name,
-			Sku:                string(*vault.Properties.SKU.Name),
-			Sla:                "99.99%",
-			Type:               *vault.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *vault.Name,
+				Sku:            string(*vault.Properties.SKU.Name),
+				Sla:            "99.99%",
+				Type:           *vault.Type,
+				Location:       parseLocation(vault.Location),
+				CAFNaming:      strings.HasPrefix(*vault.Name, "kv")},
 			AvailabilityZones:  true,
 			PrivateEndpoints:   len(vault.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*vault.Name, "kv"),
 		})
 	}
 	return results, nil

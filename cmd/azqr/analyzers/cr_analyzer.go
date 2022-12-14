@@ -48,16 +48,18 @@ func (c ContainerRegistryAnalyzer) Review(resourceGroupName string) ([]AzureServ
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *registry.Name,
-			Sku:                string(*registry.SKU.Name),
-			Sla:                "99.95%",
-			Type:               *registry.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *registry.Name,
+				Sku:            string(*registry.SKU.Name),
+				Sla:            "99.95%",
+				Type:           *registry.Type,
+				Location:       parseLocation(registry.Location),
+				CAFNaming:      strings.HasPrefix(*registry.Name, "cr")},
 			AvailabilityZones:  *registry.Properties.ZoneRedundancy == armcontainerregistry.ZoneRedundancyEnabled,
 			PrivateEndpoints:   len(registry.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*registry.Name, "cr"),
 		})
 	}
 	return results, nil

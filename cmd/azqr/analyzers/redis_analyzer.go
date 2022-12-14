@@ -48,16 +48,18 @@ func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, e
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *redis.Name,
-			Sku:                string(*redis.Properties.SKU.Name),
-			Sla:                "99.9%",
-			Type:               *redis.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *redis.Name,
+				Sku:            string(*redis.Properties.SKU.Name),
+				Sla:            "99.9%",
+				Type:           *redis.Type,
+				Location:       parseLocation(redis.Location),
+				CAFNaming:      strings.HasPrefix(*redis.Name, "redis")},
 			AvailabilityZones:  len(redis.Zones) > 0,
 			PrivateEndpoints:   len(redis.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*redis.Name, "redis"),
 		})
 	}
 	return results, nil

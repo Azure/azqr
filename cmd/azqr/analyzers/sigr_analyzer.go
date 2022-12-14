@@ -55,16 +55,18 @@ func (c SignalRAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     c.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *signalr.Name,
-			Sku:                sku,
-			Sla:                "99.9%",
-			Type:               *signalr.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: c.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *signalr.Name,
+				Sku:            sku,
+				Sla:            "99.9%",
+				Type:           *signalr.Type,
+				Location:       parseLocation(signalr.Location),
+				CAFNaming:      strings.HasPrefix(*signalr.Name, "sigr")},
 			AvailabilityZones:  zones,
 			PrivateEndpoints:   len(signalr.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*signalr.Name, "sigr"),
 		})
 	}
 	return results, nil

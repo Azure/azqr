@@ -55,16 +55,18 @@ func (a ApiManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     a.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *s.Name,
-			Sku:                sku,
-			Sla:                sla,
-			Type:               *s.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: a.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *s.Name,
+				Sku:            sku,
+				Sla:            sla,
+				Type:           *s.Type,
+				Location:       parseLocation(s.Location),
+				CAFNaming:      strings.HasPrefix(*s.Name, "apim")},
 			AvailabilityZones:  len(s.Zones) > 0,
 			PrivateEndpoints:   len(s.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*s.Name, "apim"),
 		})
 	}
 	return results, nil

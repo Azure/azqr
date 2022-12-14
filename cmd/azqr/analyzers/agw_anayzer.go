@@ -49,16 +49,18 @@ func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]AzureSer
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionId:     a.subscriptionId,
-			ResourceGroup:      resourceGroupName,
-			ServiceName:        *g.Name,
-			Sku:                string(*g.Properties.SKU.Name),
-			Sla:                "99.95%",
-			Type:               *g.Type,
+			AzureBaseServiceResult: AzureBaseServiceResult{
+				SubscriptionId: a.subscriptionId,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *g.Name,
+				Sku:            string(*g.Properties.SKU.Name),
+				Sla:            "99.95%",
+				Type:           *g.Type,
+				Location:       parseLocation(g.Location),
+				CAFNaming:      strings.HasPrefix(*g.Name, "agw")},
 			AvailabilityZones:  len(g.Zones) > 0,
 			PrivateEndpoints:   len(g.Properties.PrivateEndpointConnections) > 0,
 			DiagnosticSettings: hasDiagnostics,
-			CAFNaming:          strings.HasPrefix(*g.Name, "agw"),
 		})
 	}
 	return results, nil
