@@ -3,6 +3,7 @@
 
 > **Warning**
 > This feature is currently in preview
+> This feature is currently not available for Azure portal
 
 Use of Availability Zones is recommended. The Azure Container Instances (ACI) supports zonal container group deployments, meaning the instance is pinned to a specific, self-selected availability zone. The availability zone is specified at the container group level. Containers within a container group can't have unique availability zones.
 
