@@ -5,7 +5,7 @@ Use of Availability Zones is recommended. The Azure Database for PostgreSQL - Fl
 [High availability concepts in Azure Database for PostgreSQL - Flexible Server | Microsoft Learn](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-high-availability)
 
 > **Note**
-> For mission-critica applications
+SLA for mission-critical applications
 
 We guarantee at least 99.99% of the time customers will have connectivity to their Microsoft Azure Database for PostgreSQL – Flexible server configured with Zone Redundant High Availability.
 
