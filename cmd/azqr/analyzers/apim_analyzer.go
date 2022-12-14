@@ -52,6 +52,8 @@ func (a ApiManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 		sla := "99.95%"
 		if strings.Contains(sku, "Premium") && (len(s.Zones) > 0 || len(s.Properties.AdditionalLocations) > 0) {
 			sla = "99.99%"
+		} else if strings.Contains(sku, "Developer") {
+			sla = "None"
 		}
 
 		results = append(results, AzureServiceResult{
