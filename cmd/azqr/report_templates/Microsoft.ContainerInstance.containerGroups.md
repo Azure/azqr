@@ -1,6 +1,5 @@
 ### Container Instances
 
-> This feature is currently not available for Azure portal
 
 > **Warning**
 > This feature is currently in preview
