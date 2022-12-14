@@ -10,6 +10,27 @@ Azure Quick Review (azqr) goal is to produce a high level assemesment of an Azur
 * Diagnostic Settings: checks if there are Diagnostic Settings configured for the service. 
 * CAF Naming convention: checks if the service follows [CAF Naming convention](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations).
 
+## Supported Azure Services
+
+* Azure Application Gateway
+* Azure App Services
+* Azure Functions
+* Azure Container Apps
+* Azure Kubernetes Service
+* Azure Container Instances
+* Azure Container Registry
+* Azure API Management
+* Azure Event Hub
+* Azure Service Bus
+* Azure Event Grid
+* Azure SignalR Service
+* Azure Cache for Redis
+* Azure Cosmos DB
+* Azure Database for PostgreSQL Single Server
+* Azure Database for PostgreSQL Flexible Server
+* Azure Key Vault
+* Azure Storage Account
+
 ## Usage
 
 Download the latest release from [here](https://github.com/cmendible/azqr/releases).
