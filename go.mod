@@ -1,4 +1,4 @@
-module github.com/cmendibl3/azqr
+module github.com/cmendible/azqr
 
 go 1.19
 

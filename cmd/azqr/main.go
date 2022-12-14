@@ -13,8 +13,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
-	"github.com/cmendibl3/azqr/cmd/azqr/analyzers"
-	"github.com/cmendibl3/azqr/cmd/azqr/report_templates"
+	"github.com/cmendible/azqr/cmd/azqr/analyzers"
+	"github.com/cmendible/azqr/cmd/azqr/report_templates"
 	"github.com/fbiville/markdown-table-formatter/pkg/markdown"
 )
 
