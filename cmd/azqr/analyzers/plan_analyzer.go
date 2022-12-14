@@ -48,13 +48,19 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 			return nil, err
 		}
 
+		sku := string(*p.SKU.Tier)
+		sla := "None"
+		if sku != "Free" && sku != "Shared" {
+			sla = "99.95%"
+		}
+
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
 				SubscriptionId: a.subscriptionId,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *p.Name,
 				Sku:            string(*p.SKU.Name),
-				Sla:            "TODO",
+				Sla:            sla,
 				Type:           *p.Type,
 				Location:       parseLocation(p.Location),
 				CAFNaming:      strings.HasPrefix(*p.Name, "plan")},
@@ -85,7 +91,7 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 					ResourceGroup:  resourceGroupName,
 					ServiceName:    *s.Name,
 					Sku:            string(*p.SKU.Name),
-					Sla:            "TODO",
+					Sla:            sla,
 					Type:           *s.Type,
 					Location:       parseLocation(p.Location),
 					CAFNaming:      caf},
