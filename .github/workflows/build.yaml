@@ -70,6 +70,11 @@ jobs:
           git diff --exit-code ./go.mod
           git diff --exit-code ./go.sum
 
+      - name: Run Tests
+        if: matrix.target_os == 'linux'
+        run: |
+          go test ./cmd/azqr/analyzers/
+
       - name: Calculate Version
         run: |
           echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 0.1 -d preview)" >> $GITHUB_ENV

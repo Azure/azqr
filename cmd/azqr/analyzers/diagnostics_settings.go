@@ -10,6 +10,7 @@ import (
 type DiagnosticsSettings struct {
 	diagnosticsSettingsClient *armmonitor.DiagnosticSettingsClient
 	ctx                       context.Context
+	hasDiagnosticsFunc        func(resourceId string) (bool, error)
 }
 
 func NewDiagnosticsSettings(cred azcore.TokenCredential, ctx context.Context) (*DiagnosticsSettings, error) {
@@ -26,17 +27,21 @@ func NewDiagnosticsSettings(cred azcore.TokenCredential, ctx context.Context) (*
 }
 
 func (s DiagnosticsSettings) HasDiagnostics(resourceId string) (bool, error) {
-	pager := s.diagnosticsSettingsClient.NewListPager(resourceId, nil)
+	if s.hasDiagnosticsFunc == nil {
+		pager := s.diagnosticsSettingsClient.NewListPager(resourceId, nil)
 
-	for pager.More() {
-		resp, err := pager.NextPage(s.ctx)
-		if err != nil {
-			return false, err
+		for pager.More() {
+			resp, err := pager.NextPage(s.ctx)
+			if err != nil {
+				return false, err
+			}
+			if len(resp.Value) > 0 {
+				return true, nil
+			}
 		}
-		if len(resp.Value) > 0 {
-			return true, nil
-		}
+
+		return false, nil
+	} else {
+		return s.hasDiagnosticsFunc(resourceId)
 	}
-
-	return false, nil
 }

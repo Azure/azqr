@@ -15,6 +15,7 @@ type ApplicationGatewayAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	gatewaysClient      *armnetwork.ApplicationGatewaysClient
+	listGatewaysFunc    func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error)
 }
 
 func NewApplicationGatewayAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ApplicationGatewayAnalyzer {
@@ -23,6 +24,7 @@ func NewApplicationGatewayAnalyzer(subscriptionId string, ctx context.Context, c
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	analyzer := ApplicationGatewayAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
 		subscriptionId:      subscriptionId,
@@ -67,14 +69,18 @@ func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]AzureSer
 }
 
 func (a ApplicationGatewayAnalyzer) listGateways(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error) {
-	pager := a.gatewaysClient.NewListPager(resourceGroupName, nil)
-	results := []*armnetwork.ApplicationGateway{}
-	for pager.More() {
-		resp, err := pager.NextPage(a.ctx)
-		if err != nil {
-			return nil, err
+	if a.listGatewaysFunc == nil {
+		pager := a.gatewaysClient.NewListPager(resourceGroupName, nil)
+		results := []*armnetwork.ApplicationGateway{}
+		for pager.More() {
+			resp, err := pager.NextPage(a.ctx)
+			if err != nil {
+				return nil, err
+			}
+			results = append(results, resp.Value...)
 		}
-		results = append(results, resp.Value...)
+		return results, nil
+	} else {
+		return a.listGatewaysFunc(resourceGroupName)
 	}
-	return results, nil
 }
