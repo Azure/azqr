@@ -74,4 +74,5 @@ Thanks to everyone who has contributed!
 </a>
 
 ## Code of Conduct
+
 This project has adopted the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md)
