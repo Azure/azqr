@@ -14,3 +14,5 @@ SLA for mission-critical applications
 * We guarantee at least 99.9% of the time customers will have connectivity to their Microsoft Azure Database for PostgreSQL – Flexible server configured without High Availability.
 
 [SLA para Azure Database for PostgreSQL | Microsoft Docs](https://azure.microsoft.com/es-es/support/legal/sla/postgresql/v1_4/)
+
+---

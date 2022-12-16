@@ -11,3 +11,4 @@ This option allows the creation of a secondary namespace in a different region. 
 
 We recommend sending events to an event hub without setting partition information to allow the Event Hubs service to balance the load across partitions.
 
+---

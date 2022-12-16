@@ -5,3 +5,5 @@ Majority of Storage accounts are using LRS replication. We recommend at least ZR
 Use of RA-GRS replication would increase availability to 99.99%
  
 [Data redundancy - Azure Storage | Microsoft Docs](https://docs.microsoft.com/en-us/azure/storage/common/storage-redundancy).
+
+---

@@ -13,3 +13,5 @@ Instead, our service SDK provides a functionality to support multiple SignalR se
 Diagram shows two regions each with an app server and a SignalR service, where each server is associated with the SignalR service in its region as primary and with the service in the other region as secondary. 
 
 In order to have cross region resiliency for SignalR service, you need to set up multiple service instances in different regions, check the following document to learn more: [Resiliency and disaster recovery in Azure SignalR Service | Microsoft Docs.](https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-concept-disaster-recovery)
+
+---

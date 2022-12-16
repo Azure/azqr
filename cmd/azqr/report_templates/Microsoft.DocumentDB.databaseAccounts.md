@@ -4,3 +4,5 @@ Azure Cosmos DB provides high availability in two primary ways. First, Azure Cos
 Azure Cosmos DB provides geo-replication and support for availability zones. We recommend at least the use of AZ.
  
 Please check: [High availability in Azure Cosmos DB | Microsoft Docs for more information.](https://docs.microsoft.com/en-us/azure/cosmos-db/high-availability)
+
+---

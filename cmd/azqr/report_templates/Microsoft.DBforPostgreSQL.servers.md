@@ -8,3 +8,5 @@ SLA for mission-critical applications
 * We guarantee at least 99.99% of the time customers will have connectivity between their Microsoft Azure Database for PostgreSQL Server- Single Server and our Internet gateway.
 
 [High availability in Azure Database for PostgreSQL – Single Server | Microsoft Learn](https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-high-availability)
+
+---
