@@ -15,6 +15,7 @@ type ContainerRegistryAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	registriesClient    *armcontainerregistry.RegistriesClient
+	listRegistriesFunc  func(resourceGroupName string) ([]*armcontainerregistry.Registry, error)
 }
 
 func NewContainerRegistryAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ContainerRegistryAnalyzer {
@@ -66,15 +67,19 @@ func (c ContainerRegistryAnalyzer) Review(resourceGroupName string) ([]AzureServ
 }
 
 func (c ContainerRegistryAnalyzer) listRegistries(resourceGroupName string) ([]*armcontainerregistry.Registry, error) {
-	pager := c.registriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listRegistriesFunc == nil {
+		pager := c.registriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	registries := make([]*armcontainerregistry.Registry, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		registries := make([]*armcontainerregistry.Registry, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			registries = append(registries, resp.Value...)
 		}
-		registries = append(registries, resp.Value...)
+		return registries, nil
+	} else {
+		return c.listRegistriesFunc(resourceGroupName)
 	}
-	return registries, nil
 }

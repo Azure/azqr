@@ -15,6 +15,7 @@ type EventHubAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	client              *armeventhub.NamespacesClient
+	listEventHubsFunc   func(resourceGroupName string) ([]*armeventhub.EHNamespace, error)
 }
 
 func NewEventHubAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *EventHubAnalyzer {
@@ -72,15 +73,19 @@ func (c EventHubAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 }
 
 func (c EventHubAnalyzer) listEventHubs(resourceGroupName string) ([]*armeventhub.EHNamespace, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listEventHubsFunc == nil {
+		pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	namespaces := make([]*armeventhub.EHNamespace, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		namespaces := make([]*armeventhub.EHNamespace, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			namespaces = append(namespaces, resp.Value...)
 		}
-		namespaces = append(namespaces, resp.Value...)
+		return namespaces, nil
+	} else {
+		return c.listEventHubsFunc(resourceGroupName)
 	}
-	return namespaces, nil
 }

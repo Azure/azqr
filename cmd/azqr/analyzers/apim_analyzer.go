@@ -15,6 +15,7 @@ type ApiManagementAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	serviceClient       *armapimanagement.ServiceClient
+	listServicesFunc    func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error)
 }
 
 func NewApiManagementAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ApiManagementAnalyzer {
@@ -75,15 +76,19 @@ func (a ApiManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 }
 
 func (a ApiManagementAnalyzer) listServices(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
-	pager := a.serviceClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if a.listServicesFunc == nil {
+		pager := a.serviceClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	services := make([]*armapimanagement.ServiceResource, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.ctx)
-		if err != nil {
-			return nil, err
+		services := make([]*armapimanagement.ServiceResource, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(a.ctx)
+			if err != nil {
+				return nil, err
+			}
+			services = append(services, resp.Value...)
 		}
-		services = append(services, resp.Value...)
+		return services, nil
+	} else {
+		return a.listServicesFunc(resourceGroupName)
 	}
-	return services, nil
 }

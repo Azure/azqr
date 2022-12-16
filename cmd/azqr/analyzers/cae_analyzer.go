@@ -15,6 +15,7 @@ type ContainerAppsAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	appsClient          *armappcontainers.ManagedEnvironmentsClient
+	listAppsFunc        func(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error)
 }
 
 func NewContainerAppsAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ContainerAppsAnalyzer {
@@ -67,14 +68,18 @@ func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 }
 
 func (a ContainerAppsAnalyzer) listApps(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error) {
-	pager := a.appsClient.NewListByResourceGroupPager(resourceGroupName, nil)
-	apps := make([]*armappcontainers.ManagedEnvironment, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.ctx)
-		if err != nil {
-			return nil, err
+	if a.listAppsFunc == nil {
+		pager := a.appsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+		apps := make([]*armappcontainers.ManagedEnvironment, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(a.ctx)
+			if err != nil {
+				return nil, err
+			}
+			apps = append(apps, resp.Value...)
 		}
-		apps = append(apps, resp.Value...)
+		return apps, nil
+	} else {
+		return a.listAppsFunc(resourceGroupName)
 	}
-	return apps, nil
 }

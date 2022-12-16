@@ -15,6 +15,7 @@ type CosmosDBAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	databasesClient     *armcosmos.DatabaseAccountsClient
+	listDatabasesFunc   func(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error)
 }
 
 func NewCosmosDBAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *CosmosDBAnalyzer {
@@ -84,15 +85,19 @@ func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 }
 
 func (c CosmosDBAnalyzer) listDatabases(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error) {
-	pager := c.databasesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listDatabasesFunc == nil {
+		pager := c.databasesClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	domains := make([]*armcosmos.DatabaseAccountGetResults, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		domains := make([]*armcosmos.DatabaseAccountGetResults, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			domains = append(domains, resp.Value...)
 		}
-		domains = append(domains, resp.Value...)
+		return domains, nil
+	} else {
+		return c.listDatabasesFunc(resourceGroupName)
 	}
-	return domains, nil
 }

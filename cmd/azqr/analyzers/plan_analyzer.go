@@ -15,6 +15,8 @@ type AppServiceAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	plansClient         *armappservice.PlansClient
+	listPlansFunc       func(resourceGroupName string) ([]*armappservice.Plan, error)
+	listSitesFunc       func(resourceGroupName string, planName string) ([]*armappservice.Site, error)
 }
 
 func NewAppServiceAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *AppServiceAnalyzer {
@@ -106,28 +108,36 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 }
 
 func (a AppServiceAnalyzer) listPlans(resourceGroupName string) ([]*armappservice.Plan, error) {
-	pager := a.plansClient.NewListByResourceGroupPager(resourceGroupName, nil)
-	results := []*armappservice.Plan{}
-	for pager.More() {
-		resp, err := pager.NextPage(a.ctx)
-		if err != nil {
-			return nil, err
+	if a.listPlansFunc == nil {
+		pager := a.plansClient.NewListByResourceGroupPager(resourceGroupName, nil)
+		results := []*armappservice.Plan{}
+		for pager.More() {
+			resp, err := pager.NextPage(a.ctx)
+			if err != nil {
+				return nil, err
+			}
+			results = append(results, resp.Value...)
 		}
-		results = append(results, resp.Value...)
-	}
 
-	return results, nil
+		return results, nil
+	} else {
+		return a.listPlansFunc(resourceGroupName)
+	}
 }
 
 func (a AppServiceAnalyzer) listSites(resourceGroupName string, plan string) ([]*armappservice.Site, error) {
-	pager := a.plansClient.NewListWebAppsPager(resourceGroupName, plan, nil)
-	results := []*armappservice.Site{}
-	for pager.More() {
-		resp, err := pager.NextPage(a.ctx)
-		if err != nil {
-			return nil, err
+	if a.listSitesFunc == nil {
+		pager := a.plansClient.NewListWebAppsPager(resourceGroupName, plan, nil)
+		results := []*armappservice.Site{}
+		for pager.More() {
+			resp, err := pager.NextPage(a.ctx)
+			if err != nil {
+				return nil, err
+			}
+			results = append(results, resp.Value...)
 		}
-		results = append(results, resp.Value...)
+		return results, nil
+	} else {
+		return a.listSitesFunc(resourceGroupName, plan)
 	}
-	return results, nil
 }

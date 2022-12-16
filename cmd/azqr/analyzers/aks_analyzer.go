@@ -15,6 +15,7 @@ type AKSAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	clustersClient      *armcontainerservice.ManagedClustersClient
+	listClustersFunc    func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error)
 }
 
 func NewAKSAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *AKSAnalyzer {
@@ -87,15 +88,19 @@ func (a AKSAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, err
 }
 
 func (a AKSAnalyzer) listClusters(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error) {
-	pager := a.clustersClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if a.listClustersFunc == nil {
+		pager := a.clustersClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	clusters := make([]*armcontainerservice.ManagedCluster, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.ctx)
-		if err != nil {
-			return nil, err
+		clusters := make([]*armcontainerservice.ManagedCluster, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(a.ctx)
+			if err != nil {
+				return nil, err
+			}
+			clusters = append(clusters, resp.Value...)
 		}
-		clusters = append(clusters, resp.Value...)
+		return clusters, nil
+	} else {
+		return a.listClustersFunc(resourceGroupName)
 	}
-	return clusters, nil
 }

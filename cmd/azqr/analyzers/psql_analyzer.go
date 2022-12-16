@@ -17,6 +17,8 @@ type PostgreAnalyzer struct {
 	cred                azcore.TokenCredential
 	postgreClient       *armpostgresql.ServersClient
 	flexibleClient      *armpostgresqlflexibleservers.ServersClient
+	listPostgreFunc     func(resourceGroupName string) ([]*armpostgresql.Server, error)
+	listFlexibleFunc    func(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error)
 }
 
 func NewPostgreAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *PostgreAnalyzer {
@@ -111,29 +113,37 @@ func (c PostgreAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 }
 
 func (c PostgreAnalyzer) listPostgre(resourceGroupName string) ([]*armpostgresql.Server, error) {
-	pager := c.postgreClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listPostgreFunc == nil {
+		pager := c.postgreClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	servers := make([]*armpostgresql.Server, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		servers := make([]*armpostgresql.Server, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			servers = append(servers, resp.Value...)
 		}
-		servers = append(servers, resp.Value...)
+		return servers, nil
+	} else {
+		return c.listPostgreFunc(resourceGroupName)
 	}
-	return servers, nil
 }
 
 func (c PostgreAnalyzer) listFlexiblePostgre(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error) {
-	pager := c.flexibleClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listFlexibleFunc == nil {
+		pager := c.flexibleClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	servers := make([]*armpostgresqlflexibleservers.Server, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		servers := make([]*armpostgresqlflexibleservers.Server, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			servers = append(servers, resp.Value...)
 		}
-		servers = append(servers, resp.Value...)
+		return servers, nil
+	} else {
+		return c.listFlexibleFunc(resourceGroupName)
 	}
-	return servers, nil
 }

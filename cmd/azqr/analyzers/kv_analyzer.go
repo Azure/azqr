@@ -15,6 +15,7 @@ type KeyVaultAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	vaultsClient        *armkeyvault.VaultsClient
+	listVaultsFunc      func(resourceGroupName string) ([]*armkeyvault.Vault, error)
 }
 
 func NewKeyVaultAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *KeyVaultAnalyzer {
@@ -66,15 +67,19 @@ func (c KeyVaultAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 }
 
 func (c KeyVaultAnalyzer) listVaults(resourceGroupName string) ([]*armkeyvault.Vault, error) {
-	pager := c.vaultsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listVaultsFunc == nil {
+		pager := c.vaultsClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	vaults := make([]*armkeyvault.Vault, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		vaults := make([]*armkeyvault.Vault, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			vaults = append(vaults, resp.Value...)
 		}
-		vaults = append(vaults, resp.Value...)
+		return vaults, nil
+	} else {
+		return c.listVaultsFunc(resourceGroupName)
 	}
-	return vaults, nil
 }

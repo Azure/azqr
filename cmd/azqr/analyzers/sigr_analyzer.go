@@ -16,6 +16,7 @@ type SignalRAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	signalrClient       *armsignalr.Client
+	listSignalRFunc     func(resourceGroupName string) ([]*armsignalr.ResourceInfo, error)
 }
 
 func NewSignalRAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *SignalRAnalyzer {
@@ -73,15 +74,19 @@ func (c SignalRAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 }
 
 func (c SignalRAnalyzer) listSignalR(resourceGroupName string) ([]*armsignalr.ResourceInfo, error) {
-	pager := c.signalrClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listSignalRFunc == nil {
+		pager := c.signalrClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	signalrs := make([]*armsignalr.ResourceInfo, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		signalrs := make([]*armsignalr.ResourceInfo, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			signalrs = append(signalrs, resp.Value...)
 		}
-		signalrs = append(signalrs, resp.Value...)
+		return signalrs, nil
+	} else {
+		return c.listSignalRFunc(resourceGroupName)
 	}
-	return signalrs, nil
 }

@@ -16,6 +16,7 @@ type StorageAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	storageClient       *armstorage.AccountsClient
+	listStorageFunc     func(resourceGroupName string) ([]*armstorage.Account, error)
 }
 
 func NewStorageAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *StorageAnalyzer {
@@ -78,15 +79,19 @@ func (c StorageAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 }
 
 func (c StorageAnalyzer) listStorage(resourceGroupName string) ([]*armstorage.Account, error) {
-	pager := c.storageClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listStorageFunc == nil {
+		pager := c.storageClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	staccounts := make([]*armstorage.Account, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		staccounts := make([]*armstorage.Account, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			staccounts = append(staccounts, resp.Value...)
 		}
-		staccounts = append(staccounts, resp.Value...)
+		return staccounts, nil
+	} else {
+		return c.listStorageFunc(resourceGroupName)
 	}
-	return staccounts, nil
 }

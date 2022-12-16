@@ -15,6 +15,7 @@ type RedisAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	redisClient         *armredis.Client
+	listRedisFunc       func(resourceGroupName string) ([]*armredis.ResourceInfo, error)
 }
 
 func NewRedisAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *RedisAnalyzer {
@@ -66,15 +67,19 @@ func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, e
 }
 
 func (c RedisAnalyzer) listRedis(resourceGroupName string) ([]*armredis.ResourceInfo, error) {
-	pager := c.redisClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listRedisFunc == nil {
+		pager := c.redisClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	redis := make([]*armredis.ResourceInfo, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		redis := make([]*armredis.ResourceInfo, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			redis = append(redis, resp.Value...)
 		}
-		redis = append(redis, resp.Value...)
+		return redis, nil
+	} else {
+		return c.listRedisFunc(resourceGroupName)
 	}
-	return redis, nil
 }

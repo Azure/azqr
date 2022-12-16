@@ -16,6 +16,7 @@ type ServiceBusAnalyzer struct {
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	servicebusClient    *armservicebus.NamespacesClient
+	listRedisFunc       func(resourceGroupName string) ([]*armservicebus.SBNamespace, error)
 }
 
 func NewServiceBusAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ServiceBusAnalyzer {
@@ -73,15 +74,19 @@ func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 }
 
 func (c ServiceBusAnalyzer) listServiceBus(resourceGroupName string) ([]*armservicebus.SBNamespace, error) {
-	pager := c.servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	if c.listRedisFunc == nil {
+		pager := c.servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	namespaces := make([]*armservicebus.SBNamespace, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.ctx)
-		if err != nil {
-			return nil, err
+		namespaces := make([]*armservicebus.SBNamespace, 0)
+		for pager.More() {
+			resp, err := pager.NextPage(c.ctx)
+			if err != nil {
+				return nil, err
+			}
+			namespaces = append(namespaces, resp.Value...)
 		}
-		namespaces = append(namespaces, resp.Value...)
+		return namespaces, nil
+	} else {
+		return c.listRedisFunc(resourceGroupName)
 	}
-	return namespaces, nil
 }
