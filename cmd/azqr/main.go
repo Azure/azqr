@@ -16,6 +16,11 @@ import (
 	"github.com/cmendible/azqr/cmd/azqr/analyzers"
 	"github.com/cmendible/azqr/cmd/azqr/report_templates"
 	"github.com/fbiville/markdown-table-formatter/pkg/markdown"
+	"golang.org/x/sync/semaphore"
+)
+
+const (
+	DefaultConcurrency = 4
 )
 
 func main() {
@@ -23,6 +28,7 @@ func main() {
 	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
 	outputPtr := flag.String("o", "report.md", "Output file")
 	customerPtr := flag.String("c", "<Replace with Customer Name>", "Customer Name")
+	concurrency := flag.Int("p", DefaultConcurrency, fmt.Sprintf(`Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency. `, DefaultConcurrency))
 
 	flag.Parse()
 
@@ -82,18 +88,25 @@ func main() {
 		analyzers.NewPostgreAnalyzer(subscriptionId, ctx, cred),
 	}
 
-	all := make([]analyzers.AzureServiceResult, 0)
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	var all []analyzers.AzureServiceResult
+	rc := ReviewContext{
+		Ctx:   ctx,
+		ResCh: make(chan []analyzers.AzureServiceResult),
+		ErrCh: make(chan error),
+	}
 	for _, r := range resourceGroups {
 		log.Printf("Analyzing Resource Group %s", r)
-		for _, a := range svcanalyzers {
-			results, err := a.Review(r)
-			if err != nil {
-				log.Fatal(err)
-			}
-			all = append(all, results...)
+		go reviewRunner(&rc, r, &svcanalyzers, *concurrency)
+		res, err := waitForReviews(&rc, len(svcanalyzers))
+		// As soon as any error happen, we cancel every still running analysis
+		if err != nil {
+			cancel()
+			log.Fatal(err)
 		}
+		all = append(all, *res...)
 	}
-
 	resultsTable := renderTable(all)
 	reportTemplate := report_templates.GetTemplates("Report.md")
 	reportTemplate = strings.Replace(reportTemplate, "{{results}}", resultsTable, 1)
@@ -116,6 +129,68 @@ func main() {
 	err = os.WriteFile(outputFile, []byte(reportTemplate), 0644)
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+// ReviewContext A running resource group analysis support context
+type ReviewContext struct {
+	// Review context, will be passed to every created goroutines
+	Ctx context.Context
+	// Communication interface for each review results
+	ResCh chan []analyzers.AzureServiceResult
+	// Communication interface for errors
+	ErrCh chan error
+}
+
+// Run a review on a peculiar resource group "r" with the appropriates analysers using "concurrency" goroutines
+func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]analyzers.AzureServiceAnalyzer, concurrency int) {
+	if concurrency <= 0 {
+		concurrency = len(*svcAnalysers)
+	}
+	sem := semaphore.NewWeighted(int64(concurrency))
+	for i := range *svcAnalysers {
+		if err := sem.Acquire(rc.Ctx, 1); err != nil {
+			rc.ErrCh <- err
+			return
+		}
+		// When starting a goroutine from a loop, we cannot directly use
+		// the iteration variable, as only the last element of the loop will
+		// be processed
+		analyserPtr := &(*svcAnalysers)[i]
+		go func(a *analyzers.AzureServiceAnalyzer, r string) {
+			defer sem.Release(1)
+			// In case the analysis was cancelled, we don't need to execute the review
+			if context.Canceled == rc.Ctx.Err() {
+				return
+			}
+			res, err := (*a).Review(r)
+			if err != nil {
+				rc.ErrCh <- err
+			}
+			rc.ResCh <- res
+		}(analyserPtr, r)
+	}
+}
+
+// Wait for at least "nb" goroutines to hands their result and return them
+func waitForReviews(rc *ReviewContext, nb int) (*[]analyzers.AzureServiceResult, error) {
+	received := 0
+	reviews := make([]analyzers.AzureServiceResult, nb)
+	for {
+		select {
+		// In case a timeout is set
+		case <-rc.Ctx.Done():
+			return nil, rc.Ctx.Err()
+		case err := <-rc.ErrCh:
+			return nil, err
+		case res := <-rc.ResCh:
+			received++
+			reviews = append(reviews, res...)
+			if received >= nb {
+				return &reviews, nil
+			}
+			break
+		}
 	}
 }
 
