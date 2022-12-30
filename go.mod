@@ -26,6 +26,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.1.0
 	github.com/Azure/go-autorest/autorest/to v0.4.0
 	github.com/fbiville/markdown-table-formatter v0.3.0
+	golang.org/x/sync v0.1.0
 )
 
 require (
