@@ -175,7 +175,7 @@ func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]analyzers.AzureSe
 // Wait for at least "nb" goroutines to hands their result and return them
 func waitForReviews(rc *ReviewContext, nb int) (*[]analyzers.AzureServiceResult, error) {
 	received := 0
-	reviews := make([]analyzers.AzureServiceResult, nb)
+	reviews := make([]analyzers.AzureServiceResult, 0)
 	for {
 		select {
 		// In case a timeout is set
