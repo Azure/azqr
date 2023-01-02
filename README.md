@@ -2,7 +2,7 @@
 
 # Azure Quick Review
 
-Azure Quick Review (azqr) goal is to produce a high level assemesment of an Azure Subscription or Resource Group providing the following information for each Azure Service:
+Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group providing the following information for each Azure Service:
 
 * SLA: current expected SLA
 * Availability Zones: checks if the service is protected against Zone failures. 
