@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 	"github.com/Azure/go-autorest/autorest/to"
 )
@@ -74,48 +73,39 @@ func newAPIMPrivateEndpointResult(t *testing.T) AzureServiceResult {
 }
 
 func TestAPIMAnalyzer_Review(t *testing.T) {
-	type fields struct {
-		diagnosticsSettings DiagnosticsSettings
-		subscriptionId      string
-		ctx                 context.Context
-		cred                azcore.TokenCredential
-		serviceClient       *armapimanagement.ServiceClient
-		listServicesFunc    func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error)
-	}
 	type args struct {
 		resourceGroupName string
 	}
-	f := fields{
-		diagnosticsSettings: DiagnosticsSettings{
-			diagnosticsSettingsClient: nil,
-			ctx:                       context.TODO(),
-			hasDiagnosticsFunc: func(resourceId string) (bool, error) {
-				return true, nil
-			},
-		},
-		subscriptionId: "subscriptionId",
-		ctx:            context.TODO(),
-		cred:           nil,
-		serviceClient:  nil,
-		listServicesFunc: func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
-			return []*armapimanagement.ServiceResource{
-					newAPIM(t),
-					newAPIMWithAvailabilityZones(t),
-					newAPIMWithPrivateEndpoints(t),
-				},
-				nil
-		},
-	}
 	tests := []struct {
 		name    string
-		fields  fields
+		a       ApiManagementAnalyzer
 		args    args
 		want    []AzureServiceResult
 		wantErr bool
 	}{
 		{
-			name:   "Test Review",
-			fields: f,
+			name: "Test Review",
+			a: ApiManagementAnalyzer{
+				diagnosticsSettings: DiagnosticsSettings{
+					diagnosticsSettingsClient: nil,
+					ctx:                       context.TODO(),
+					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
+						return true, nil
+					},
+				},
+				subscriptionId: "subscriptionId",
+				ctx:            context.TODO(),
+				cred:           nil,
+				serviceClient:  nil,
+				listServicesFunc: func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
+					return []*armapimanagement.ServiceResource{
+							newAPIM(t),
+							newAPIMWithAvailabilityZones(t),
+							newAPIMWithPrivateEndpoints(t),
+						},
+						nil
+				},
+			},
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
@@ -129,15 +119,7 @@ func TestAPIMAnalyzer_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := ApiManagementAnalyzer{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-				subscriptionId:      tt.fields.subscriptionId,
-				ctx:                 tt.fields.ctx,
-				cred:                tt.fields.cred,
-				serviceClient:       tt.fields.serviceClient,
-				listServicesFunc:    tt.fields.listServicesFunc,
-			}
-			got, err := a.Review(tt.args.resourceGroupName)
+			got, err := tt.a.Review(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ApiManagementAnalyzer.Review() error = %v, wantErr %v", err, tt.wantErr)
 				return

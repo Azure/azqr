@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
 	"github.com/Azure/go-autorest/autorest/to"
 )
@@ -82,48 +81,39 @@ func newAKSPrivateEndpointResult(t *testing.T) AzureServiceResult {
 }
 
 func TestAKSAnalyzer_Review(t *testing.T) {
-	type fields struct {
-		diagnosticsSettings DiagnosticsSettings
-		subscriptionId      string
-		ctx                 context.Context
-		cred                azcore.TokenCredential
-		clustersClient      *armcontainerservice.ManagedClustersClient
-		listClustersFunc    func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error)
-	}
 	type args struct {
 		resourceGroupName string
 	}
-	f := fields{
-		diagnosticsSettings: DiagnosticsSettings{
-			diagnosticsSettingsClient: nil,
-			ctx:                       context.TODO(),
-			hasDiagnosticsFunc: func(resourceId string) (bool, error) {
-				return true, nil
-			},
-		},
-		subscriptionId: "subscriptionId",
-		ctx:            context.TODO(),
-		cred:           nil,
-		clustersClient: nil,
-		listClustersFunc: func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error) {
-			return []*armcontainerservice.ManagedCluster{
-					newAKS(t),
-					newAKSWithAvailabilityZones(t),
-					newAKSWithPrivateEndpoints(t),
-				},
-				nil
-		},
-	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    []AzureServiceResult
-		wantErr bool
+		name        string
+		a 			AKSAnalyzer
+		args        args
+		want        []AzureServiceResult
+		wantErr     bool
 	}{
 		{
 			name:   "Test Review",
-			fields: f,
+			a: AKSAnalyzer{
+				diagnosticsSettings: DiagnosticsSettings{
+					diagnosticsSettingsClient: nil,
+					ctx:                       context.TODO(),
+					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
+						return true, nil
+					},
+				},
+				subscriptionId: "subscriptionId",
+				ctx:            context.TODO(),
+				cred:           nil,
+				clustersClient: nil,
+				listClustersFunc: func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error) {
+					return []*armcontainerservice.ManagedCluster{
+							newAKS(t),
+							newAKSWithAvailabilityZones(t),
+							newAKSWithPrivateEndpoints(t),
+						},
+						nil
+				},
+			},
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
@@ -137,15 +127,7 @@ func TestAKSAnalyzer_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := AKSAnalyzer{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-				subscriptionId:      tt.fields.subscriptionId,
-				ctx:                 tt.fields.ctx,
-				cred:                tt.fields.cred,
-				clustersClient:      tt.fields.clustersClient,
-				listClustersFunc:    tt.fields.listClustersFunc,
-			}
-			got, err := a.Review(tt.args.resourceGroupName)
+			got, err := tt.a.Review(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("AKSAnalyzer.Review() error = %v, wantErr %v", err, tt.wantErr)
 				return

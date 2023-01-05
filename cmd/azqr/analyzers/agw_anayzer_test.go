@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 	"github.com/Azure/go-autorest/autorest/to"
 )
@@ -72,48 +71,39 @@ func newApplicationGatewayPrivateEndpointResult(t *testing.T) AzureServiceResult
 }
 
 func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
-	type fields struct {
-		diagnosticsSettings DiagnosticsSettings
-		subscriptionId      string
-		ctx                 context.Context
-		cred                azcore.TokenCredential
-		gatewaysClient      *armnetwork.ApplicationGatewaysClient
-		listGatewaysFunc    func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error)
-	}
 	type args struct {
 		resourceGroupName string
 	}
-	f := fields{
-		diagnosticsSettings: DiagnosticsSettings{
-			diagnosticsSettingsClient: nil,
-			ctx:                       context.TODO(),
-			hasDiagnosticsFunc: func(resourceId string) (bool, error) {
-				return true, nil
-			},
-		},
-		subscriptionId: "subscriptionId",
-		ctx:            context.TODO(),
-		cred:           nil,
-		gatewaysClient: nil,
-		listGatewaysFunc: func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error) {
-			return []*armnetwork.ApplicationGateway{
-					newApplicationGateway(t),
-					newApplicationGatewayWithAvailabilityZones(t),
-					newApplicationGatewayWithPrivateEndpoints(t),
-				},
-				nil
-		},
-	}
 	tests := []struct {
 		name    string
-		fields  fields
+		a       ApplicationGatewayAnalyzer
 		args    args
 		want    []AzureServiceResult
 		wantErr bool
 	}{
 		{
-			name:   "Test Review",
-			fields: f,
+			name: "Test Review",
+			a: ApplicationGatewayAnalyzer{
+				diagnosticsSettings: DiagnosticsSettings{
+					diagnosticsSettingsClient: nil,
+					ctx:                       context.TODO(),
+					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
+						return true, nil
+					},
+				},
+				subscriptionId: "subscriptionId",
+				ctx:            context.TODO(),
+				cred:           nil,
+				gatewaysClient: nil,
+				listGatewaysFunc: func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error) {
+					return []*armnetwork.ApplicationGateway{
+							newApplicationGateway(t),
+							newApplicationGatewayWithAvailabilityZones(t),
+							newApplicationGatewayWithPrivateEndpoints(t),
+						},
+						nil
+				},
+			},
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
@@ -127,15 +117,7 @@ func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := ApplicationGatewayAnalyzer{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-				subscriptionId:      tt.fields.subscriptionId,
-				ctx:                 tt.fields.ctx,
-				cred:                tt.fields.cred,
-				gatewaysClient:      tt.fields.gatewaysClient,
-				listGatewaysFunc:    tt.fields.listGatewaysFunc,
-			}
-			got, err := a.Review(tt.args.resourceGroupName)
+			got, err := tt.a.Review(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ApplicationGatewayAnalyzer.Review() error = %v, wantErr %v", err, tt.wantErr)
 				return
