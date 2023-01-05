@@ -23,12 +23,15 @@ const (
 	DefaultConcurrency = 4
 )
 
+var Version = "dev"
+
 func main() {
 	subscriptionPtr := flag.String("s", "", "Azure Subscription Id (Required)")
 	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
 	outputPtr := flag.String("o", "report.md", "Output file")
 	customerPtr := flag.String("c", "<Replace with Customer Name>", "Customer Name")
 	concurrency := flag.Int("p", DefaultConcurrency, fmt.Sprintf(`Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency. `, DefaultConcurrency))
+	version := flag.Bool("v", false, "Print version and exit")
 
 	flag.Parse()
 
@@ -36,6 +39,11 @@ func main() {
 	resourceGroupName := *resourceGroupPtr
 	outputFile := *outputPtr
 	customer := *customerPtr
+
+	if *version {
+		fmt.Printf("azqr version: %s", Version)
+		os.Exit(0)
+	}
 
 	if subscriptionId == "" {
 		flag.Usage()
