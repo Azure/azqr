@@ -197,7 +197,6 @@ func waitForReviews(rc *ReviewContext, nb int) (*[]analyzers.AzureServiceResult,
 			if received >= nb {
 				return &reviews, nil
 			}
-			break
 		}
 	}
 }
