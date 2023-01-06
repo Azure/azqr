@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
@@ -53,7 +52,7 @@ func (c StorageAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 		}
 
 		sku := string(*storage.SKU.Name)
-		tier := string(*storage.SKU.Tier)
+		tier := string(*storage.Properties.AccessTier)
 		zones := false
 		if strings.Contains(sku, "ZRS") {
 			zones = true
