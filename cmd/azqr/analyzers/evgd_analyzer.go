@@ -9,24 +9,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
 )
 
+// EventGridAnalyzer - Analyzer for EventGrid Domains
 type EventGridAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	domainsClient       *armeventgrid.DomainsClient
 	listDomainFunc      func(resourceGroupName string) ([]*armeventgrid.Domain, error)
 }
 
-func NewEventGridAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *EventGridAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	domainsClient, err := armeventgrid.NewDomainsClient(subscriptionId, cred, nil)
+// NewEventGridAnalyzer - Creates a new EventGridAnalyzer
+func NewEventGridAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *EventGridAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	domainsClient, err := armeventgrid.NewDomainsClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := EventGridAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		domainsClient:       domainsClient,
@@ -34,6 +36,7 @@ func NewEventGridAnalyzer(subscriptionId string, ctx context.Context, cred azcor
 	return &analyzer
 }
 
+// Review - Analyzes all EventGrid Domains in a Resource Group
 func (a EventGridAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing EventGrid Domains in Resource Group %s", resourceGroupName)
 
@@ -50,11 +53,11 @@ func (a EventGridAnalyzer) Review(resourceGroupName string) ([]AzureServiceResul
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: a.subscriptionId,
+				SubscriptionID: a.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *d.Name,
-				Sku:            "None",
-				Sla:            "99.99%",
+				SKU:            "None",
+				SLA:            "99.99%",
 				Type:           *d.Type,
 				Location:       parseLocation(d.Location),
 				CAFNaming:      strings.HasPrefix(*d.Name, "evgd")},
@@ -79,7 +82,7 @@ func (a EventGridAnalyzer) listDomain(resourceGroupName string) ([]*armeventgrid
 			domains = append(domains, resp.Value...)
 		}
 		return domains, nil
-	} else {
-		return a.listDomainFunc(resourceGroupName)
 	}
+
+	return a.listDomainFunc(resourceGroupName)
 }

@@ -9,25 +9,27 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers"
 )
 
+// ContainerAppsAnalyzer - Analyzer for Container Apps
 type ContainerAppsAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	appsClient          *armappcontainers.ManagedEnvironmentsClient
 	listAppsFunc        func(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error)
 }
 
-func NewContainerAppsAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ContainerAppsAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	appsClient, err := armappcontainers.NewManagedEnvironmentsClient(subscriptionId, cred, nil)
+// NewContainerAppsAnalyzer - Creates a new ContainerAppsAnalyzer
+func NewContainerAppsAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *ContainerAppsAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	appsClient, err := armappcontainers.NewManagedEnvironmentsClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	analyzer := ContainerAppsAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		appsClient:          appsClient,
@@ -35,6 +37,7 @@ func NewContainerAppsAnalyzer(subscriptionId string, ctx context.Context, cred a
 	return &analyzer
 }
 
+// Review - Analyzes all Container Apps in a Resource Group
 func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Container Apps in Resource Group %s", resourceGroupName)
 
@@ -51,11 +54,11 @@ func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: a.subscriptionId,
+				SubscriptionID: a.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *app.Name,
-				Sku:            "None",
-				Sla:            "99.95%",
+				SKU:            "None",
+				SLA:            "99.95%",
 				Type:           *app.Type,
 				Location:       parseLocation(app.Location),
 				CAFNaming:      strings.HasPrefix(*app.Name, "cae")},
@@ -79,7 +82,7 @@ func (a ContainerAppsAnalyzer) listApps(resourceGroupName string) ([]*armappcont
 			apps = append(apps, resp.Value...)
 		}
 		return apps, nil
-	} else {
-		return a.listAppsFunc(resourceGroupName)
 	}
+
+	return a.listAppsFunc(resourceGroupName)
 }

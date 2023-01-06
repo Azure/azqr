@@ -10,24 +10,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
+// SignalRAnalyzer - Analyzer for SignalR
 type SignalRAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	signalrClient       *armsignalr.Client
 	listSignalRFunc     func(resourceGroupName string) ([]*armsignalr.ResourceInfo, error)
 }
 
-func NewSignalRAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *SignalRAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	signalrClient, err := armsignalr.NewClient(subscriptionId, cred, nil)
+// NewSignalRAnalyzer - Creates a new SignalRAnalyzer
+func NewSignalRAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *SignalRAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	signalrClient, err := armsignalr.NewClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := SignalRAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		signalrClient:       signalrClient,
@@ -35,6 +37,7 @@ func NewSignalRAnalyzer(subscriptionId string, ctx context.Context, cred azcore.
 	return &analyzer
 }
 
+// Review - Analyzes all SignalR in a Resource Group
 func (c SignalRAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing SignalR in Resource Group %s", resourceGroupName)
 
@@ -57,11 +60,11 @@ func (c SignalRAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *signalr.Name,
-				Sku:            sku,
-				Sla:            "99.9%",
+				SKU:            sku,
+				SLA:            "99.9%",
 				Type:           *signalr.Type,
 				Location:       parseLocation(signalr.Location),
 				CAFNaming:      strings.HasPrefix(*signalr.Name, "sigr")},
@@ -86,7 +89,7 @@ func (c SignalRAnalyzer) listSignalR(resourceGroupName string) ([]*armsignalr.Re
 			signalrs = append(signalrs, resp.Value...)
 		}
 		return signalrs, nil
-	} else {
-		return c.listSignalRFunc(resourceGroupName)
 	}
+
+	return c.listSignalRFunc(resourceGroupName)
 }

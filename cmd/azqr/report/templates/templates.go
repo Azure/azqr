@@ -1,4 +1,4 @@
-package report_templates
+package templates
 
 import (
 	"embed"
@@ -7,6 +7,7 @@ import (
 //go:embed *.md
 var embededFiles embed.FS
 
+// GetTemplates - Returns the template for the given name
 func GetTemplates(templateName string) string {
 	data, err := embededFiles.ReadFile(templateName)
 	if err != nil {

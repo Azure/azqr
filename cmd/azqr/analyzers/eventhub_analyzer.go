@@ -9,24 +9,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
 
+// EventHubAnalyzer - Analyzer for Event Hubs
 type EventHubAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	client              *armeventhub.NamespacesClient
 	listEventHubsFunc   func(resourceGroupName string) ([]*armeventhub.EHNamespace, error)
 }
 
-func NewEventHubAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *EventHubAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	client, err := armeventhub.NewNamespacesClient(subscriptionId, cred, nil)
+// NewEventHubAnalyzer - Creates a new EventHubAnalyzer
+func NewEventHubAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *EventHubAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	client, err := armeventhub.NewNamespacesClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := EventHubAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		client:              client,
@@ -34,6 +36,7 @@ func NewEventHubAnalyzer(subscriptionId string, ctx context.Context, cred azcore
 	return &analyzer
 }
 
+// Review - Analyzes all Event Hubs in a Resource Group
 func (c EventHubAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Event Hubs in Resource Group %s", resourceGroupName)
 
@@ -56,11 +59,11 @@ func (c EventHubAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *eventHub.Name,
-				Sku:            sku,
-				Sla:            sla,
+				SKU:            sku,
+				SLA:            sla,
 				Type:           *eventHub.Type,
 				Location:       parseLocation(eventHub.Location),
 				CAFNaming:      strings.HasPrefix(*eventHub.Name, "evh")},
@@ -85,7 +88,7 @@ func (c EventHubAnalyzer) listEventHubs(resourceGroupName string) ([]*armeventhu
 			namespaces = append(namespaces, resp.Value...)
 		}
 		return namespaces, nil
-	} else {
-		return c.listEventHubsFunc(resourceGroupName)
 	}
+
+	return c.listEventHubsFunc(resourceGroupName)
 }

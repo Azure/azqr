@@ -9,9 +9,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice"
 )
 
+// AppServiceAnalyzer - Analyzer for App Service Plans
 type AppServiceAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	plansClient         *armappservice.PlansClient
@@ -19,15 +20,16 @@ type AppServiceAnalyzer struct {
 	listSitesFunc       func(resourceGroupName string, planName string) ([]*armappservice.Site, error)
 }
 
-func NewAppServiceAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *AppServiceAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	plansClient, err := armappservice.NewPlansClient(subscriptionId, cred, nil)
+// NewAppServiceAnalyzer - Creates a new AppServiceAnalyzer
+func NewAppServiceAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *AppServiceAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	plansClient, err := armappservice.NewPlansClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := AppServiceAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		plansClient:         plansClient,
@@ -36,6 +38,7 @@ func NewAppServiceAnalyzer(subscriptionId string, ctx context.Context, cred azco
 	return &analyzer
 }
 
+// Review - Analyzes all App Service Plans in a Resource Group
 func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing App Service Plans in Resource Group %s", resourceGroupName)
 
@@ -58,11 +61,11 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: a.subscriptionId,
+				SubscriptionID: a.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *p.Name,
-				Sku:            string(*p.SKU.Name),
-				Sla:            sla,
+				SKU:            string(*p.SKU.Name),
+				SLA:            sla,
 				Type:           *p.Type,
 				Location:       parseLocation(p.Location),
 				CAFNaming:      strings.HasPrefix(*p.Name, "plan")},
@@ -89,11 +92,11 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 
 			results = append(results, AzureServiceResult{
 				AzureBaseServiceResult: AzureBaseServiceResult{
-					SubscriptionId: a.subscriptionId,
+					SubscriptionID: a.subscriptionID,
 					ResourceGroup:  resourceGroupName,
 					ServiceName:    *s.Name,
-					Sku:            string(*p.SKU.Name),
-					Sla:            sla,
+					SKU:            string(*p.SKU.Name),
+					SLA:            sla,
 					Type:           *s.Type,
 					Location:       parseLocation(p.Location),
 					CAFNaming:      caf},
@@ -120,9 +123,9 @@ func (a AppServiceAnalyzer) listPlans(resourceGroupName string) ([]*armappservic
 		}
 
 		return results, nil
-	} else {
-		return a.listPlansFunc(resourceGroupName)
 	}
+
+	return a.listPlansFunc(resourceGroupName)
 }
 
 func (a AppServiceAnalyzer) listSites(resourceGroupName string, plan string) ([]*armappservice.Site, error) {
@@ -137,7 +140,7 @@ func (a AppServiceAnalyzer) listSites(resourceGroupName string, plan string) ([]
 			results = append(results, resp.Value...)
 		}
 		return results, nil
-	} else {
-		return a.listSitesFunc(resourceGroupName, plan)
 	}
+
+	return a.listSitesFunc(resourceGroupName, plan)
 }

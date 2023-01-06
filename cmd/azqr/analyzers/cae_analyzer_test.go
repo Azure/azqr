@@ -39,11 +39,11 @@ func newContainerAppsWithPrivateEndpoints(t *testing.T) *armappcontainers.Manage
 func newContainerAppsResult(t *testing.T) AzureServiceResult {
 	return AzureServiceResult{
 		AzureBaseServiceResult: AzureBaseServiceResult{
-			SubscriptionId: "subscriptionId",
+			SubscriptionID: "subscriptionId",
 			ResourceGroup:  "resourceGroupName",
 			ServiceName:    "cae-name",
-			Sku:            "None",
-			Sla:            "99.95%",
+			SKU:            "None",
+			SLA:            "99.95%",
 			Type:           "Microsoft.App/managedEnvironments",
 			Location:       "westeurope",
 			CAFNaming:      true,
@@ -79,7 +79,7 @@ func TestContainerAppsAnalyzer_Review(t *testing.T) {
 	}{
 		{
 			name: "Test Review",
-			c:    ContainerAppsAnalyzer{
+			c: ContainerAppsAnalyzer{
 				diagnosticsSettings: DiagnosticsSettings{
 					diagnosticsSettingsClient: nil,
 					ctx:                       context.TODO(),
@@ -87,7 +87,7 @@ func TestContainerAppsAnalyzer_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				subscriptionId: "subscriptionId",
+				subscriptionID: "subscriptionId",
 				ctx:            context.TODO(),
 				cred:           nil,
 				appsClient:     nil,

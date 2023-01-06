@@ -9,25 +9,27 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
 
-type ApiManagementAnalyzer struct {
+// APIManagementAnalyzer - Analyzer for API Management Services
+type APIManagementAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	serviceClient       *armapimanagement.ServiceClient
 	listServicesFunc    func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error)
 }
 
-func NewApiManagementAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ApiManagementAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	serviceClient, err := armapimanagement.NewServiceClient(subscriptionId, cred, nil)
+// NewAPIManagementAnalyzer - Creates a new APIManagementAnalyzer
+func NewAPIManagementAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *APIManagementAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	serviceClient, err := armapimanagement.NewServiceClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	analyzer := ApiManagementAnalyzer{
+	analyzer := APIManagementAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		serviceClient:       serviceClient,
@@ -35,7 +37,8 @@ func NewApiManagementAnalyzer(subscriptionId string, ctx context.Context, cred a
 	return &analyzer
 }
 
-func (a ApiManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+// Review -Analyzes all API Management Services in a Resource Group
+func (a APIManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing API Management Services in Resource Group %s", resourceGroupName)
 
 	services, err := a.listServices(resourceGroupName)
@@ -59,11 +62,11 @@ func (a ApiManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: a.subscriptionId,
+				SubscriptionID: a.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *s.Name,
-				Sku:            sku,
-				Sla:            sla,
+				SKU:            sku,
+				SLA:            sla,
 				Type:           *s.Type,
 				Location:       parseLocation(s.Location),
 				CAFNaming:      strings.HasPrefix(*s.Name, "apim")},
@@ -75,7 +78,7 @@ func (a ApiManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceR
 	return results, nil
 }
 
-func (a ApiManagementAnalyzer) listServices(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
+func (a APIManagementAnalyzer) listServices(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
 	if a.listServicesFunc == nil {
 		pager := a.serviceClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
@@ -88,7 +91,7 @@ func (a ApiManagementAnalyzer) listServices(resourceGroupName string) ([]*armapi
 			services = append(services, resp.Value...)
 		}
 		return services, nil
-	} else {
-		return a.listServicesFunc(resourceGroupName)
 	}
+
+	return a.listServicesFunc(resourceGroupName)
 }

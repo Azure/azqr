@@ -9,24 +9,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
 )
 
+// AKSAnalyzer - Analyzer for AKS Clusters
 type AKSAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	clustersClient      *armcontainerservice.ManagedClustersClient
 	listClustersFunc    func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error)
 }
 
-func NewAKSAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *AKSAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	clustersClient, err := armcontainerservice.NewManagedClustersClient(subscriptionId, cred, nil)
+// NewAKSAnalyzer -Creates a new AKSAnalyzer
+func NewAKSAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *AKSAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	clustersClient, err := armcontainerservice.NewManagedClustersClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := AKSAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		clustersClient:      clustersClient,
@@ -34,6 +36,7 @@ func NewAKSAnalyzer(subscriptionId string, ctx context.Context, cred azcore.Toke
 	return &analyzer
 }
 
+// Review - Analyzes all AKS Clusters in a Resource Group
 func (a AKSAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing AKS Clusters in Resource Group %s", resourceGroupName)
 
@@ -71,11 +74,11 @@ func (a AKSAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, err
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: a.subscriptionId,
+				SubscriptionID: a.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *c.Name,
-				Sku:            sku,
-				Sla:            sla,
+				SKU:            sku,
+				SLA:            sla,
 				Type:           *c.Type,
 				Location:       parseLocation(c.Location),
 				CAFNaming:      strings.HasPrefix(*c.Name, "aks")},
@@ -100,7 +103,7 @@ func (a AKSAnalyzer) listClusters(resourceGroupName string) ([]*armcontainerserv
 			clusters = append(clusters, resp.Value...)
 		}
 		return clusters, nil
-	} else {
-		return a.listClustersFunc(resourceGroupName)
 	}
+
+	return a.listClustersFunc(resourceGroupName)
 }

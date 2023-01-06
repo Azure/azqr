@@ -21,7 +21,7 @@ func newContainerRegistry(t *testing.T) *armcontainerregistry.Registry {
 			Name: &sku,
 		},
 		Properties: &armcontainerregistry.RegistryProperties{
-			ZoneRedundancy: &zoneRedundancy,
+			ZoneRedundancy:             &zoneRedundancy,
 			PrivateEndpointConnections: []*armcontainerregistry.PrivateEndpointConnection{},
 		},
 	}
@@ -47,11 +47,11 @@ func newContainerRegistryWithPrivateEndpoints(t *testing.T) *armcontainerregistr
 func newContainerRegistryResult(t *testing.T) AzureServiceResult {
 	return AzureServiceResult{
 		AzureBaseServiceResult: AzureBaseServiceResult{
-			SubscriptionId: "subscriptionId",
+			SubscriptionID: "subscriptionId",
 			ResourceGroup:  "resourceGroupName",
 			ServiceName:    "cr-name",
-			Sku:            "Basic",
-			Sla:            "99.95%",
+			SKU:            "Basic",
+			SLA:            "99.95%",
 			Type:           "Microsoft.ContainerRegistry/registries",
 			Location:       "westeurope",
 			CAFNaming:      true,
@@ -95,7 +95,7 @@ func TestContainerRegistryAnalyzer_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				subscriptionId:   "subscriptionId",
+				subscriptionID:   "subscriptionId",
 				ctx:              context.TODO(),
 				cred:             nil,
 				registriesClient: nil,

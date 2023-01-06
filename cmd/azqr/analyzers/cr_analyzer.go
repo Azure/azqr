@@ -9,24 +9,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
+// ContainerRegistryAnalyzer - Analyzer for Container Registries
 type ContainerRegistryAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	registriesClient    *armcontainerregistry.RegistriesClient
 	listRegistriesFunc  func(resourceGroupName string) ([]*armcontainerregistry.Registry, error)
 }
 
-func NewContainerRegistryAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ContainerRegistryAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	registriesClient, err := armcontainerregistry.NewRegistriesClient(subscriptionId, cred, nil)
+// NewContainerRegistryAnalyzer - Creates a new ContainerRegistryAnalyzer
+func NewContainerRegistryAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *ContainerRegistryAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	registriesClient, err := armcontainerregistry.NewRegistriesClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := ContainerRegistryAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		registriesClient:    registriesClient,
@@ -34,6 +36,7 @@ func NewContainerRegistryAnalyzer(subscriptionId string, ctx context.Context, cr
 	return &analyzer
 }
 
+// Review - Analyzes all Container Registries in a Resource Group
 func (c ContainerRegistryAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Container Registries in Resource Group %s", resourceGroupName)
 
@@ -50,11 +53,11 @@ func (c ContainerRegistryAnalyzer) Review(resourceGroupName string) ([]AzureServ
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *registry.Name,
-				Sku:            string(*registry.SKU.Name),
-				Sla:            "99.95%",
+				SKU:            string(*registry.SKU.Name),
+				SLA:            "99.95%",
 				Type:           *registry.Type,
 				Location:       parseLocation(registry.Location),
 				CAFNaming:      strings.HasPrefix(*registry.Name, "cr")},
@@ -79,7 +82,7 @@ func (c ContainerRegistryAnalyzer) listRegistries(resourceGroupName string) ([]*
 			registries = append(registries, resp.Value...)
 		}
 		return registries, nil
-	} else {
-		return c.listRegistriesFunc(resourceGroupName)
 	}
+
+	return c.listRegistriesFunc(resourceGroupName)
 }

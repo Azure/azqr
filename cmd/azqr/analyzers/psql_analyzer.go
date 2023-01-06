@@ -10,9 +10,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
 )
 
+// PostgreAnalyzer - Analyzer for PostgreSQL
 type PostgreAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	postgreClient       *armpostgresql.ServersClient
@@ -21,21 +22,22 @@ type PostgreAnalyzer struct {
 	listFlexibleFunc    func(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error)
 }
 
-func NewPostgreAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *PostgreAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	postgreClient, err := armpostgresql.NewServersClient(subscriptionId, cred, nil)
+// NewPostgreAnalyzer - Creates a new PostgreAnalyzer
+func NewPostgreAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *PostgreAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	postgreClient, err := armpostgresql.NewServersClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	flexibleClient, err := armpostgresqlflexibleservers.NewServersClient(subscriptionId, cred, nil)
+	flexibleClient, err := armpostgresqlflexibleservers.NewServersClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	analyzer := PostgreAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		postgreClient:       postgreClient,
@@ -44,6 +46,7 @@ func NewPostgreAnalyzer(subscriptionId string, ctx context.Context, cred azcore.
 	return &analyzer
 }
 
+// Review - Analyzes all PostgreSQL in a Resource Group
 func (c PostgreAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Postgre in Resource Group %s", resourceGroupName)
 
@@ -60,11 +63,11 @@ func (c PostgreAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *postgre.Name,
-				Sku:            *postgre.SKU.Name,
-				Sla:            "99.99%",
+				SKU:            *postgre.SKU.Name,
+				SLA:            "99.99%",
 				Type:           *postgre.Type,
 				Location:       parseLocation(postgre.Location),
 				CAFNaming:      strings.HasPrefix(*postgre.Name, "psql")},
@@ -95,11 +98,11 @@ func (c PostgreAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *postgre.Name,
-				Sku:            *postgre.SKU.Name,
-				Sla:            sla,
+				SKU:            *postgre.SKU.Name,
+				SLA:            sla,
 				Type:           *postgre.Type,
 				Location:       parseLocation(postgre.Location),
 				CAFNaming:      strings.HasPrefix(*postgre.Name, "psql")},
@@ -125,9 +128,9 @@ func (c PostgreAnalyzer) listPostgre(resourceGroupName string) ([]*armpostgresql
 			servers = append(servers, resp.Value...)
 		}
 		return servers, nil
-	} else {
-		return c.listPostgreFunc(resourceGroupName)
 	}
+
+	return c.listPostgreFunc(resourceGroupName)
 }
 
 func (c PostgreAnalyzer) listFlexiblePostgre(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error) {
@@ -143,7 +146,7 @@ func (c PostgreAnalyzer) listFlexiblePostgre(resourceGroupName string) ([]*armpo
 			servers = append(servers, resp.Value...)
 		}
 		return servers, nil
-	} else {
-		return c.listFlexibleFunc(resourceGroupName)
 	}
+
+	return c.listFlexibleFunc(resourceGroupName)
 }

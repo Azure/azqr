@@ -102,12 +102,12 @@ jobs:
       - name: Run build and archive non windows binaries
         if: matrix.target_os != 'windows'
         run: |
-          GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -ldflags "-s -w -X 'main.Version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/azqr/
+          GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -ldflags "-s -w -X 'main.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/azqr/
 
       - name: Run build and archive windows binaries
         if: matrix.target_os == 'windows'
         run: |
-          go build -ldflags "-s -w -X 'main.Version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/azqr/
+          go build -ldflags "-s -w -X 'main.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/azqr/
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3

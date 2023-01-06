@@ -53,11 +53,11 @@ func newAKSWithPrivateEndpoints(t *testing.T) *armcontainerservice.ManagedCluste
 func newAKSResult(t *testing.T) AzureServiceResult {
 	return AzureServiceResult{
 		AzureBaseServiceResult: AzureBaseServiceResult{
-			SubscriptionId: "subscriptionId",
+			SubscriptionID: "subscriptionId",
 			ResourceGroup:  "resourceGroupName",
 			ServiceName:    "aks-name",
-			Sku:            "Free",
-			Sla:            "None",
+			SKU:            "Free",
+			SLA:            "None",
 			Type:           "Microsoft.ContainerService/managedClusters",
 			Location:       "westeurope",
 			CAFNaming:      true,
@@ -85,14 +85,14 @@ func TestAKSAnalyzer_Review(t *testing.T) {
 		resourceGroupName string
 	}
 	tests := []struct {
-		name        string
-		a 			AKSAnalyzer
-		args        args
-		want        []AzureServiceResult
-		wantErr     bool
+		name    string
+		a       AKSAnalyzer
+		args    args
+		want    []AzureServiceResult
+		wantErr bool
 	}{
 		{
-			name:   "Test Review",
+			name: "Test Review",
 			a: AKSAnalyzer{
 				diagnosticsSettings: DiagnosticsSettings{
 					diagnosticsSettingsClient: nil,
@@ -101,7 +101,7 @@ func TestAKSAnalyzer_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				subscriptionId: "subscriptionId",
+				subscriptionID: "subscriptionId",
 				ctx:            context.TODO(),
 				cred:           nil,
 				clustersClient: nil,

@@ -9,24 +9,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
+// RedisAnalyzer - Analyzer for Redis
 type RedisAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	redisClient         *armredis.Client
 	listRedisFunc       func(resourceGroupName string) ([]*armredis.ResourceInfo, error)
 }
 
-func NewRedisAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *RedisAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	redisClient, err := armredis.NewClient(subscriptionId, cred, nil)
+// NewRedisAnalyzer - Creates a new RedisAnalyzer
+func NewRedisAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *RedisAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	redisClient, err := armredis.NewClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := RedisAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		redisClient:         redisClient,
@@ -34,6 +36,7 @@ func NewRedisAnalyzer(subscriptionId string, ctx context.Context, cred azcore.To
 	return &analyzer
 }
 
+// Review - Analyzes all Redis in a Resource Group
 func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Redis in Resource Group %s", resourceGroupName)
 
@@ -50,11 +53,11 @@ func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, e
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *redis.Name,
-				Sku:            string(*redis.Properties.SKU.Name),
-				Sla:            "99.9%",
+				SKU:            string(*redis.Properties.SKU.Name),
+				SLA:            "99.9%",
 				Type:           *redis.Type,
 				Location:       parseLocation(redis.Location),
 				CAFNaming:      strings.HasPrefix(*redis.Name, "redis")},
@@ -79,7 +82,7 @@ func (c RedisAnalyzer) listRedis(resourceGroupName string) ([]*armredis.Resource
 			redis = append(redis, resp.Value...)
 		}
 		return redis, nil
-	} else {
-		return c.listRedisFunc(resourceGroupName)
 	}
+
+	return c.listRedisFunc(resourceGroupName)
 }

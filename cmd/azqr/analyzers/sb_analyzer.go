@@ -10,24 +10,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
 
+// ServiceBusAnalyzer - Analyzer for Service Bus
 type ServiceBusAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	servicebusClient    *armservicebus.NamespacesClient
-	listRedisFunc       func(resourceGroupName string) ([]*armservicebus.SBNamespace, error)
+	listServiceBusFunc  func(resourceGroupName string) ([]*armservicebus.SBNamespace, error)
 }
 
-func NewServiceBusAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ServiceBusAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	servicebusClient, err := armservicebus.NewNamespacesClient(subscriptionId, cred, nil)
+// NewServiceBusAnalyzer - Creates a new ServiceBusAnalyzer
+func NewServiceBusAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *ServiceBusAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	servicebusClient, err := armservicebus.NewNamespacesClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := ServiceBusAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		servicebusClient:    servicebusClient,
@@ -35,6 +37,7 @@ func NewServiceBusAnalyzer(subscriptionId string, ctx context.Context, cred azco
 	return &analyzer
 }
 
+// Review - Analyzes all Service Bus in a Resource Group
 func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Service Bus in Resource Group %s", resourceGroupName)
 
@@ -57,11 +60,11 @@ func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *servicebus.Name,
-				Sku:            sku,
-				Sla:            sla,
+				SKU:            sku,
+				SLA:            sla,
 				Type:           *servicebus.Type,
 				Location:       parseLocation(servicebus.Location),
 				CAFNaming:      strings.HasPrefix(*servicebus.Name, "sb")},
@@ -74,7 +77,7 @@ func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]AzureServiceResu
 }
 
 func (c ServiceBusAnalyzer) listServiceBus(resourceGroupName string) ([]*armservicebus.SBNamespace, error) {
-	if c.listRedisFunc == nil {
+	if c.listServiceBusFunc == nil {
 		pager := c.servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
 		namespaces := make([]*armservicebus.SBNamespace, 0)
@@ -86,7 +89,7 @@ func (c ServiceBusAnalyzer) listServiceBus(resourceGroupName string) ([]*armserv
 			namespaces = append(namespaces, resp.Value...)
 		}
 		return namespaces, nil
-	} else {
-		return c.listRedisFunc(resourceGroupName)
 	}
+
+	return c.listServiceBusFunc(resourceGroupName)
 }

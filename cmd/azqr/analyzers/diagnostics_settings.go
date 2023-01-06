@@ -7,13 +7,15 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 )
 
+// DiagnosticsSettings - analyzer
 type DiagnosticsSettings struct {
 	diagnosticsSettingsClient *armmonitor.DiagnosticSettingsClient
 	ctx                       context.Context
 	hasDiagnosticsFunc        func(resourceId string) (bool, error)
 }
 
-func NewDiagnosticsSettings(cred azcore.TokenCredential, ctx context.Context) (*DiagnosticsSettings, error) {
+// NewDiagnosticsSettings - Creates a new DiagnosticsSettings
+func NewDiagnosticsSettings(ctx context.Context, cred azcore.TokenCredential) (*DiagnosticsSettings, error) {
 	diagnosticsSettingsClient, err := armmonitor.NewDiagnosticSettingsClient(cred, nil)
 	if err != nil {
 		return nil, err
@@ -26,9 +28,10 @@ func NewDiagnosticsSettings(cred azcore.TokenCredential, ctx context.Context) (*
 	return &settings, nil
 }
 
-func (s DiagnosticsSettings) HasDiagnostics(resourceId string) (bool, error) {
+// HasDiagnostics - Checks if a resource has diagnostics settings
+func (s DiagnosticsSettings) HasDiagnostics(resourceID string) (bool, error) {
 	if s.hasDiagnosticsFunc == nil {
-		pager := s.diagnosticsSettingsClient.NewListPager(resourceId, nil)
+		pager := s.diagnosticsSettingsClient.NewListPager(resourceID, nil)
 
 		for pager.More() {
 			resp, err := pager.NextPage(s.ctx)
@@ -41,7 +44,7 @@ func (s DiagnosticsSettings) HasDiagnostics(resourceId string) (bool, error) {
 		}
 
 		return false, nil
-	} else {
-		return s.hasDiagnosticsFunc(resourceId)
 	}
+
+	return s.hasDiagnosticsFunc(resourceID)
 }

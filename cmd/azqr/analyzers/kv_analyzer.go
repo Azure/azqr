@@ -9,24 +9,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
 
+// KeyVaultAnalyzer - Analyzer for Key Vaults
 type KeyVaultAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	vaultsClient        *armkeyvault.VaultsClient
 	listVaultsFunc      func(resourceGroupName string) ([]*armkeyvault.Vault, error)
 }
 
-func NewKeyVaultAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *KeyVaultAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	vaultsClient, err := armkeyvault.NewVaultsClient(subscriptionId, cred, nil)
+// NewKeyVaultAnalyzer - Creates a new KeyVaultAnalyzer
+func NewKeyVaultAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *KeyVaultAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	vaultsClient, err := armkeyvault.NewVaultsClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := KeyVaultAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		vaultsClient:        vaultsClient,
@@ -34,6 +36,7 @@ func NewKeyVaultAnalyzer(subscriptionId string, ctx context.Context, cred azcore
 	return &analyzer
 }
 
+// Review - Analyzes all Key Vaults in a Resource Group
 func (c KeyVaultAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Key Vaults in Resource Group %s", resourceGroupName)
 
@@ -50,11 +53,11 @@ func (c KeyVaultAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *vault.Name,
-				Sku:            string(*vault.Properties.SKU.Name),
-				Sla:            "99.99%",
+				SKU:            string(*vault.Properties.SKU.Name),
+				SLA:            "99.99%",
 				Type:           *vault.Type,
 				Location:       parseLocation(vault.Location),
 				CAFNaming:      strings.HasPrefix(*vault.Name, "kv")},
@@ -79,7 +82,7 @@ func (c KeyVaultAnalyzer) listVaults(resourceGroupName string) ([]*armkeyvault.V
 			vaults = append(vaults, resp.Value...)
 		}
 		return vaults, nil
-	} else {
-		return c.listVaultsFunc(resourceGroupName)
 	}
+
+	return c.listVaultsFunc(resourceGroupName)
 }

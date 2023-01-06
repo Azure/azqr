@@ -45,11 +45,11 @@ func newAPIMWithPrivateEndpoints(t *testing.T) *armapimanagement.ServiceResource
 func newAPIMResult(t *testing.T) AzureServiceResult {
 	return AzureServiceResult{
 		AzureBaseServiceResult: AzureBaseServiceResult{
-			SubscriptionId: "subscriptionId",
+			SubscriptionID: "subscriptionId",
 			ResourceGroup:  "resourceGroupName",
 			ServiceName:    "apim-name",
-			Sku:            "Developer",
-			Sla:            "None",
+			SKU:            "Developer",
+			SLA:            "None",
 			Type:           "Microsoft.ApiManagement/service",
 			Location:       "westeurope",
 			CAFNaming:      true,
@@ -78,14 +78,14 @@ func TestAPIMAnalyzer_Review(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		a       ApiManagementAnalyzer
+		a       APIManagementAnalyzer
 		args    args
 		want    []AzureServiceResult
 		wantErr bool
 	}{
 		{
 			name: "Test Review",
-			a: ApiManagementAnalyzer{
+			a: APIManagementAnalyzer{
 				diagnosticsSettings: DiagnosticsSettings{
 					diagnosticsSettingsClient: nil,
 					ctx:                       context.TODO(),
@@ -93,7 +93,7 @@ func TestAPIMAnalyzer_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				subscriptionId: "subscriptionId",
+				subscriptionID: "subscriptionId",
 				ctx:            context.TODO(),
 				cred:           nil,
 				serviceClient:  nil,

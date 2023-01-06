@@ -52,11 +52,11 @@ func newCosmosDBWithPrivateEndpoints(t *testing.T) *armcosmos.DatabaseAccountGet
 func newCosmosDBResult(t *testing.T) AzureServiceResult {
 	return AzureServiceResult{
 		AzureBaseServiceResult: AzureBaseServiceResult{
-			SubscriptionId: "subscriptionId",
+			SubscriptionID: "subscriptionId",
 			ResourceGroup:  "resourceGroupName",
 			ServiceName:    "cosmosdb-name",
-			Sku:            "Standard",
-			Sla:            "99.99%",
+			SKU:            "Standard",
+			SLA:            "99.99%",
 			Type:           "Microsoft.DocumentDB/databaseAccounts",
 			Location:       "westeurope",
 			CAFNaming:      true,
@@ -70,7 +70,7 @@ func newCosmosDBResult(t *testing.T) AzureServiceResult {
 func newCosmosDBAvailabilityZonesResult(t *testing.T) AzureServiceResult {
 	svc := newCosmosDBResult(t)
 	svc.AvailabilityZones = true
-	svc.Sla = "99.995%"
+	svc.SLA = "99.995%"
 	return svc
 }
 
@@ -101,7 +101,7 @@ func TestCosmosDBAnalyzer_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				subscriptionId:  "subscriptionId",
+				subscriptionID:  "subscriptionId",
 				ctx:             context.TODO(),
 				cred:            nil,
 				databasesClient: nil,

@@ -9,24 +9,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
 
+// CosmosDBAnalyzer - Analyzer for CosmosDB Databases
 type CosmosDBAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	databasesClient     *armcosmos.DatabaseAccountsClient
 	listDatabasesFunc   func(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error)
 }
 
-func NewCosmosDBAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *CosmosDBAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	databasesClient, err := armcosmos.NewDatabaseAccountsClient(subscriptionId, cred, nil)
+// NewCosmosDBAnalyzer - Creates a new CosmosDBAnalyzer
+func NewCosmosDBAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *CosmosDBAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	databasesClient, err := armcosmos.NewDatabaseAccountsClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := CosmosDBAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		databasesClient:     databasesClient,
@@ -34,6 +36,7 @@ func NewCosmosDBAnalyzer(subscriptionId string, ctx context.Context, cred azcore
 	return &analyzer
 }
 
+// Review - Analyzes all CosmosDB Databases in a Resource Group
 func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing CosmosDB Databases in Resource Group %s", resourceGroupName)
 
@@ -68,11 +71,11 @@ func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *database.Name,
-				Sku:            string(*database.Properties.DatabaseAccountOfferType),
-				Sla:            sla,
+				SKU:            string(*database.Properties.DatabaseAccountOfferType),
+				SLA:            sla,
 				Type:           *database.Type,
 				Location:       parseLocation(database.Location),
 				CAFNaming:      strings.HasPrefix(*database.Name, "cosmos")},
@@ -97,7 +100,7 @@ func (c CosmosDBAnalyzer) listDatabases(resourceGroupName string) ([]*armcosmos.
 			domains = append(domains, resp.Value...)
 		}
 		return domains, nil
-	} else {
-		return c.listDatabasesFunc(resourceGroupName)
 	}
+
+	return c.listDatabasesFunc(resourceGroupName)
 }

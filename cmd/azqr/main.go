@@ -14,38 +14,40 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/cmendible/azqr/cmd/azqr/analyzers"
-	"github.com/cmendible/azqr/cmd/azqr/report_templates"
+	"github.com/cmendible/azqr/cmd/azqr/report/templates"
 	"github.com/fbiville/markdown-table-formatter/pkg/markdown"
 	"golang.org/x/sync/semaphore"
 )
 
 const (
-	DefaultConcurrency = 4
+	defaultConcurrency = 4
 )
 
-var Version = "dev"
+var (
+	version = "dev"
+)
 
 func main() {
 	subscriptionPtr := flag.String("s", "", "Azure Subscription Id (Required)")
 	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
 	outputPtr := flag.String("o", "report.md", "Output file")
 	customerPtr := flag.String("c", "<Replace with Customer Name>", "Customer Name")
-	concurrency := flag.Int("p", DefaultConcurrency, fmt.Sprintf(`Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency. `, DefaultConcurrency))
-	version := flag.Bool("v", false, "Print version and exit")
+	concurrency := flag.Int("p", defaultConcurrency, fmt.Sprintf("Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency.", defaultConcurrency))
+	ver := flag.Bool("v", false, "Print version and exit")
 
 	flag.Parse()
 
-	subscriptionId := *subscriptionPtr
+	subscriptionID := *subscriptionPtr
 	resourceGroupName := *resourceGroupPtr
 	outputFile := *outputPtr
 	customer := *customerPtr
 
-	if *version {
-		fmt.Printf("azqr version: %s", Version)
+	if *ver {
+		fmt.Printf("azqr version: %s", version)
 		os.Exit(0)
 	}
 
-	if subscriptionId == "" {
+	if subscriptionID == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -58,7 +60,7 @@ func main() {
 
 	resourceGroups := []string{}
 	if resourceGroupName != "" {
-		exists, err := checkExistenceResourceGroup(subscriptionId, resourceGroupName, ctx, cred)
+		exists, err := checkExistenceResourceGroup(ctx, subscriptionID, resourceGroupName, cred)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -68,7 +70,7 @@ func main() {
 		}
 		resourceGroups = append(resourceGroups, resourceGroupName)
 	} else {
-		rgs, err := listResourceGroup(subscriptionId, ctx, cred)
+		rgs, err := listResourceGroup(ctx, subscriptionID, cred)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,22 +80,22 @@ func main() {
 	}
 
 	svcanalyzers := []analyzers.AzureServiceAnalyzer{
-		analyzers.NewAKSAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewApiManagementAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewApplicationGatewayAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewContainerAppsAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewContainerIntanceAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewCosmosDBAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewContainerRegistryAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewEventHubAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewEventGridAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewKeyVaultAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewAppServiceAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewRedisAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewServiceBusAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewSignalRAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewStorageAnalyzer(subscriptionId, ctx, cred),
-		analyzers.NewPostgreAnalyzer(subscriptionId, ctx, cred),
+		analyzers.NewAKSAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewAPIManagementAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewApplicationGatewayAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewContainerAppsAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewContainerIntanceAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewCosmosDBAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewContainerRegistryAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewEventHubAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewEventGridAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewKeyVaultAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewAppServiceAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewRedisAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewServiceBusAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewSignalRAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewStorageAnalyzer(ctx, subscriptionID, cred),
+		analyzers.NewPostgreAnalyzer(ctx, subscriptionID, cred),
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -116,7 +118,7 @@ func main() {
 		all = append(all, *res...)
 	}
 	resultsTable := renderTable(all)
-	reportTemplate := report_templates.GetTemplates("Report.md")
+	reportTemplate := templates.GetTemplates("Report.md")
 	reportTemplate = strings.Replace(reportTemplate, "{{results}}", resultsTable, 1)
 	reportTemplate = strings.Replace(reportTemplate, "{{date}}", time.Now().Format("2006-01-02"), 1)
 	reportTemplate = strings.Replace(reportTemplate, "{{customer}}", customer, -1)
@@ -128,7 +130,7 @@ func main() {
 		if _, ok := dict[r.Type]; !ok {
 			dict[r.Type] = true
 			recommendations += "\n\n"
-			recommendations += report_templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
+			recommendations += templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
 		}
 	}
 
@@ -201,8 +203,8 @@ func waitForReviews(rc *ReviewContext, nb int) (*[]analyzers.AzureServiceResult,
 	}
 }
 
-func checkExistenceResourceGroup(subscriptionId string, resourceGroupName string, ctx context.Context, cred azcore.TokenCredential) (bool, error) {
-	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionId, cred, nil)
+func checkExistenceResourceGroup(ctx context.Context, subscriptionID string, resourceGroupName string, cred azcore.TokenCredential) (bool, error) {
+	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, nil)
 	if err != nil {
 		return false, err
 	}
@@ -214,8 +216,8 @@ func checkExistenceResourceGroup(subscriptionId string, resourceGroupName string
 	return boolResp.Success, nil
 }
 
-func listResourceGroup(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) ([]*armresources.ResourceGroup, error) {
-	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionId, cred, nil)
+func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) ([]*armresources.ResourceGroup, error) {
+	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -237,7 +239,7 @@ func renderTable(results []analyzers.AzureServiceResult) string {
 	rows := [][]string{}
 	for _, r := range results {
 		rows = append([][]string{
-			{r.SubscriptionId, r.ResourceGroup, r.Location, r.Type, r.ServiceName, r.Sku, r.Sla, strconv.FormatBool(r.AvailabilityZones), strconv.FormatBool(r.PrivateEndpoints), strconv.FormatBool(r.DiagnosticSettings), strconv.FormatBool(r.CAFNaming)},
+			{r.SubscriptionID, r.ResourceGroup, r.Location, r.Type, r.ServiceName, r.SKU, r.SLA, strconv.FormatBool(r.AvailabilityZones), strconv.FormatBool(r.PrivateEndpoints), strconv.FormatBool(r.DiagnosticSettings), strconv.FormatBool(r.CAFNaming)},
 		}, rows...)
 	}
 

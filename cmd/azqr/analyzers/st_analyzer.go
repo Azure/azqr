@@ -10,24 +10,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
+// StorageAnalyzer - Analyzer for Storage
 type StorageAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	storageClient       *armstorage.AccountsClient
 	listStorageFunc     func(resourceGroupName string) ([]*armstorage.Account, error)
 }
 
-func NewStorageAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *StorageAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	storageClient, err := armstorage.NewAccountsClient(subscriptionId, cred, nil)
+// NewStorageAnalyzer - Creates a new StorageAnalyzer
+func NewStorageAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *StorageAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	storageClient, err := armstorage.NewAccountsClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	analyzer := StorageAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		storageClient:       storageClient,
@@ -35,6 +37,7 @@ func NewStorageAnalyzer(subscriptionId string, ctx context.Context, cred azcore.
 	return &analyzer
 }
 
+// Review - Analyzes all Storage in a Resource Group
 func (c StorageAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Storage in Resource Group %s", resourceGroupName)
 
@@ -62,11 +65,11 @@ func (c StorageAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult,
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: c.subscriptionId,
+				SubscriptionID: c.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *storage.Name,
-				Sku:            sku,
-				Sla:            sla,
+				SKU:            sku,
+				SLA:            sla,
 				Type:           *storage.Type,
 				Location:       *storage.Location,
 				CAFNaming:      strings.HasPrefix(*storage.Name, "st")},
@@ -91,7 +94,7 @@ func (c StorageAnalyzer) listStorage(resourceGroupName string) ([]*armstorage.Ac
 			staccounts = append(staccounts, resp.Value...)
 		}
 		return staccounts, nil
-	} else {
-		return c.listStorageFunc(resourceGroupName)
 	}
+
+	return c.listStorageFunc(resourceGroupName)
 }

@@ -43,11 +43,11 @@ func newContainerInstanceWithPrivateEndpoints(t *testing.T) *armcontainerinstanc
 func newContainerInstanceResult(t *testing.T) AzureServiceResult {
 	return AzureServiceResult{
 		AzureBaseServiceResult: AzureBaseServiceResult{
-			SubscriptionId: "subscriptionId",
+			SubscriptionID: "subscriptionId",
 			ResourceGroup:  "resourceGroupName",
 			ServiceName:    "ci-name",
-			Sku:            "Standard",
-			Sla:            "99.9%",
+			SKU:            "Standard",
+			SLA:            "99.9%",
 			Type:           "Microsoft.ContainerInstance/containerGroups",
 			Location:       "westeurope",
 			CAFNaming:      true,
@@ -91,7 +91,7 @@ func TestContainerInstanceAnalyzer_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				subscriptionId:  "subscriptionId",
+				subscriptionID:  "subscriptionId",
 				ctx:             context.TODO(),
 				cred:            nil,
 				instancesClient: nil,

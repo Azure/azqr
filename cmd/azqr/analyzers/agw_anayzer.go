@@ -9,25 +9,27 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
 
+// ApplicationGatewayAnalyzer - Analyzer for Application Gateways
 type ApplicationGatewayAnalyzer struct {
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionId      string
+	subscriptionID      string
 	ctx                 context.Context
 	cred                azcore.TokenCredential
 	gatewaysClient      *armnetwork.ApplicationGatewaysClient
 	listGatewaysFunc    func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error)
 }
 
-func NewApplicationGatewayAnalyzer(subscriptionId string, ctx context.Context, cred azcore.TokenCredential) *ApplicationGatewayAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(cred, ctx)
-	gatewaysClient, err := armnetwork.NewApplicationGatewaysClient(subscriptionId, cred, nil)
+// NewApplicationGatewayAnalyzer - Creates a new ApplicationGatewayAnalyzer
+func NewApplicationGatewayAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *ApplicationGatewayAnalyzer {
+	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
+	gatewaysClient, err := armnetwork.NewApplicationGatewaysClient(subscriptionID, cred, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	analyzer := ApplicationGatewayAnalyzer{
 		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionId:      subscriptionId,
+		subscriptionID:      subscriptionID,
 		ctx:                 ctx,
 		cred:                cred,
 		gatewaysClient:      gatewaysClient,
@@ -36,6 +38,7 @@ func NewApplicationGatewayAnalyzer(subscriptionId string, ctx context.Context, c
 	return &analyzer
 }
 
+// Review - Analyzes all Application Gateways in a Resource Group
 func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
 	log.Printf("Analyzing Application Gateways in Resource Group %s", resourceGroupName)
 
@@ -52,11 +55,11 @@ func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]AzureSer
 
 		results = append(results, AzureServiceResult{
 			AzureBaseServiceResult: AzureBaseServiceResult{
-				SubscriptionId: a.subscriptionId,
+				SubscriptionID: a.subscriptionID,
 				ResourceGroup:  resourceGroupName,
 				ServiceName:    *g.Name,
-				Sku:            string(*g.Properties.SKU.Name),
-				Sla:            "99.95%",
+				SKU:            string(*g.Properties.SKU.Name),
+				SLA:            "99.95%",
 				Type:           *g.Type,
 				Location:       parseLocation(g.Location),
 				CAFNaming:      strings.HasPrefix(*g.Name, "agw")},
@@ -80,7 +83,7 @@ func (a ApplicationGatewayAnalyzer) listGateways(resourceGroupName string) ([]*a
 			results = append(results, resp.Value...)
 		}
 		return results, nil
-	} else {
-		return a.listGatewaysFunc(resourceGroupName)
 	}
+
+	return a.listGatewaysFunc(resourceGroupName)
 }

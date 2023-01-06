@@ -43,11 +43,11 @@ func newApplicationGatewayWithPrivateEndpoints(t *testing.T) *armnetwork.Applica
 func newApplicationGatewayResult(t *testing.T) AzureServiceResult {
 	return AzureServiceResult{
 		AzureBaseServiceResult: AzureBaseServiceResult{
-			SubscriptionId: "subscriptionId",
+			SubscriptionID: "subscriptionId",
 			ResourceGroup:  "resourceGroupName",
 			ServiceName:    "agw-name",
-			Sku:            "Standard_v2",
-			Sla:            "99.95%",
+			SKU:            "Standard_v2",
+			SLA:            "99.95%",
 			Type:           "Microsoft.Network/applicationGateways",
 			Location:       "westeurope",
 			CAFNaming:      true,
@@ -91,7 +91,7 @@ func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				subscriptionId: "subscriptionId",
+				subscriptionID: "subscriptionId",
 				ctx:            context.TODO(),
 				cred:           nil,
 				gatewaysClient: nil,
