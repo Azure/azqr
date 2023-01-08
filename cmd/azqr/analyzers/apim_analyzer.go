@@ -38,14 +38,14 @@ func NewAPIManagementAnalyzer(ctx context.Context, subscriptionID string, cred a
 }
 
 // Review -Analyzes all API Management Services in a Resource Group
-func (a APIManagementAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (a APIManagementAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing API Management Services in Resource Group %s", resourceGroupName)
 
 	services, err := a.listServices(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, s := range services {
 		hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*s.ID)
 		if err != nil {

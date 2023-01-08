@@ -8,4 +8,8 @@ Downtime will be dependent on how you decide to carry out the migration and how 
 
 Availability Zones are only supported when using the Premium SKU: [Migrate App Service to availability zone support | Microsoft Learn](https://learn.microsoft.com/en-us/azure/reliability/migrate-app-service)
 
+Relevant Azure Function settings: 
+
+{{functions}}
+
 ---

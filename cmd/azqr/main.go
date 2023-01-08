@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -100,10 +99,10 @@ func main() {
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	var all []analyzers.AzureServiceResult
+	var all []analyzers.IAzureServiceResult
 	rc := ReviewContext{
 		Ctx:   ctx,
-		ResCh: make(chan []analyzers.AzureServiceResult),
+		ResCh: make(chan []analyzers.IAzureServiceResult),
 		ErrCh: make(chan error),
 	}
 	for _, r := range resourceGroups {
@@ -118,6 +117,15 @@ func main() {
 		all = append(all, *res...)
 	}
 	resultsTable := renderTable(all)
+
+	var allFunctions []analyzers.IAzureFunctionAppResult
+	for _, r := range all {
+		v, ok := r.(analyzers.IAzureFunctionAppResult)
+		if ok {
+			allFunctions = append(allFunctions, v)
+		}
+	}
+
 	reportTemplate := templates.GetTemplates("Report.md")
 	reportTemplate = strings.Replace(reportTemplate, "{{results}}", resultsTable, 1)
 	reportTemplate = strings.Replace(reportTemplate, "{{date}}", time.Now().Format("2006-01-02"), 1)
@@ -126,11 +134,15 @@ func main() {
 	recommendations := ""
 	dict := map[string]bool{}
 	for _, r := range all {
-		parsedType := strings.Replace(r.Type, "/", ".", -1)
-		if _, ok := dict[r.Type]; !ok {
-			dict[r.Type] = true
+		parsedType := strings.Replace(r.GetResourceType(), "/", ".", -1)
+		if _, ok := dict[r.GetResourceType()]; !ok {
+			dict[r.GetResourceType()] = true
 			recommendations += "\n\n"
 			recommendations += templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
+
+			if r.GetResourceType() == "Microsoft.Web/serverfarms/sites" && len(allFunctions) > 0 {
+				recommendations = strings.Replace(recommendations, "{{functions}}", renderFunctionsTable(allFunctions), 1)
+			}
 		}
 	}
 
@@ -147,7 +159,7 @@ type ReviewContext struct {
 	// Review context, will be passed to every created goroutines
 	Ctx context.Context
 	// Communication interface for each review results
-	ResCh chan []analyzers.AzureServiceResult
+	ResCh chan []analyzers.IAzureServiceResult
 	// Communication interface for errors
 	ErrCh chan error
 }
@@ -183,9 +195,9 @@ func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]analyzers.AzureSe
 }
 
 // Wait for at least "nb" goroutines to hands their result and return them
-func waitForReviews(rc *ReviewContext, nb int) (*[]analyzers.AzureServiceResult, error) {
+func waitForReviews(rc *ReviewContext, nb int) (*[]analyzers.IAzureServiceResult, error) {
 	received := 0
-	reviews := make([]analyzers.AzureServiceResult, 0)
+	reviews := make([]analyzers.IAzureServiceResult, 0)
 	for {
 		select {
 		// In case a timeout is set
@@ -235,12 +247,10 @@ func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.T
 	return resourceGroups, nil
 }
 
-func renderTable(results []analyzers.AzureServiceResult) string {
+func renderTable(results []analyzers.IAzureServiceResult) string {
 	rows := [][]string{}
 	for _, r := range results {
-		rows = append([][]string{
-			{r.SubscriptionID, r.ResourceGroup, r.Location, r.Type, r.ServiceName, r.SKU, r.SLA, strconv.FormatBool(r.AvailabilityZones), strconv.FormatBool(r.PrivateEndpoints), strconv.FormatBool(r.DiagnosticSettings), strconv.FormatBool(r.CAFNaming)},
-		}, rows...)
+		rows = append(r.ToCommonResult(), rows...)
 	}
 
 	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
@@ -253,5 +263,23 @@ func renderTable(results []analyzers.AzureServiceResult) string {
 	}
 	fmt.Println("")
 	fmt.Println(prettyPrintedTable)
+	return prettyPrintedTable
+}
+
+func renderFunctionsTable(results []analyzers.IAzureFunctionAppResult) string {
+	rows := [][]string{}
+	for _, r := range results {
+		rows = append(r.ToFunctionResult(), rows...)
+	}
+
+	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
+		WithPrettyPrint().
+		Build("SubscriptionId", "ResourceGroup", "Location", "Type", "Name", "WEBSITE_RUN_FROM_PACKAGE", "WEBSITE_CONTENTOVERVNET", "WEBSITE_VNET_ROUTE_ALL", "AzureWebJobsDashboard", "AppInsights", "SCALE_CONTROLLER_LOGGING_ENABLED").
+		Format(rows)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return prettyPrintedTable
 }

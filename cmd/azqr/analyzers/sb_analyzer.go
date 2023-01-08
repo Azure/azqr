@@ -37,14 +37,14 @@ func NewServiceBusAnalyzer(ctx context.Context, subscriptionID string, cred azco
 }
 
 // Review - Analyzes all Service Bus in a Resource Group
-func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Service Bus in Resource Group %s", resourceGroupName)
 
 	servicebus, err := c.listServiceBus(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, servicebus := range servicebus {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*servicebus.ID)
 		if err != nil {

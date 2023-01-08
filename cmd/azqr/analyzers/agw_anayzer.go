@@ -39,14 +39,14 @@ func NewApplicationGatewayAnalyzer(ctx context.Context, subscriptionID string, c
 }
 
 // Review - Analyzes all Application Gateways in a Resource Group
-func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Application Gateways in Resource Group %s", resourceGroupName)
 
 	gateways, err := a.listGateways(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, g := range gateways {
 		hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*g.ID)
 		if err != nil {

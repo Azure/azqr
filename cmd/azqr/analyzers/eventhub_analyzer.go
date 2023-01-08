@@ -37,14 +37,14 @@ func NewEventHubAnalyzer(ctx context.Context, subscriptionID string, cred azcore
 }
 
 // Review - Analyzes all Event Hubs in a Resource Group
-func (c EventHubAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c EventHubAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Event Hubs in Resource Group %s", resourceGroupName)
 
 	eventHubs, err := c.listEventHubs(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, eventHub := range eventHubs {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*eventHub.ID)
 		if err != nil {

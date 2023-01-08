@@ -37,14 +37,14 @@ func NewContainerRegistryAnalyzer(ctx context.Context, subscriptionID string, cr
 }
 
 // Review - Analyzes all Container Registries in a Resource Group
-func (c ContainerRegistryAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c ContainerRegistryAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Registries in Resource Group %s", resourceGroupName)
 
 	regsitries, err := c.listRegistries(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, registry := range regsitries {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*registry.ID)
 		if err != nil {

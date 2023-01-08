@@ -37,14 +37,14 @@ func NewSignalRAnalyzer(ctx context.Context, subscriptionID string, cred azcore.
 }
 
 // Review - Analyzes all SignalR in a Resource Group
-func (c SignalRAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c SignalRAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing SignalR in Resource Group %s", resourceGroupName)
 
 	signalr, err := c.listSignalR(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, signalr := range signalr {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*signalr.ID)
 		if err != nil {

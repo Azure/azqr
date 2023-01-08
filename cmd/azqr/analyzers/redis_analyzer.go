@@ -37,14 +37,14 @@ func NewRedisAnalyzer(ctx context.Context, subscriptionID string, cred azcore.To
 }
 
 // Review - Analyzes all Redis in a Resource Group
-func (c RedisAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c RedisAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Redis in Resource Group %s", resourceGroupName)
 
 	redis, err := c.listRedis(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, redis := range redis {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*redis.ID)
 		if err != nil {

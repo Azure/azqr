@@ -37,14 +37,14 @@ func NewAKSAnalyzer(ctx context.Context, subscriptionID string, cred azcore.Toke
 }
 
 // Review - Analyzes all AKS Clusters in a Resource Group
-func (a AKSAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (a AKSAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing AKS Clusters in Resource Group %s", resourceGroupName)
 
 	clusters, err := a.listClusters(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, c := range clusters {
 		hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*c.ID)
 		if err != nil {

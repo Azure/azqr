@@ -38,14 +38,14 @@ func NewContainerAppsAnalyzer(ctx context.Context, subscriptionID string, cred a
 }
 
 // Review - Analyzes all Container Apps in a Resource Group
-func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Apps in Resource Group %s", resourceGroupName)
 
 	apps, err := a.listApps(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, app := range apps {
 		hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*app.ID)
 		if err != nil {

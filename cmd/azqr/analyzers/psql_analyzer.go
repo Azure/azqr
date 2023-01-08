@@ -47,14 +47,14 @@ func NewPostgreAnalyzer(ctx context.Context, subscriptionID string, cred azcore.
 }
 
 // Review - Analyzes all PostgreSQL in a Resource Group
-func (c PostgreAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c PostgreAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Postgre in Resource Group %s", resourceGroupName)
 
 	postgre, err := c.listPostgre(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, postgre := range postgre {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*postgre.ID)
 		if err != nil {

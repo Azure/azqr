@@ -37,14 +37,14 @@ func NewKeyVaultAnalyzer(ctx context.Context, subscriptionID string, cred azcore
 }
 
 // Review - Analyzes all Key Vaults in a Resource Group
-func (c KeyVaultAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c KeyVaultAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Key Vaults in Resource Group %s", resourceGroupName)
 
 	vaults, err := c.listVaults(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, vault := range vaults {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*vault.ID)
 		if err != nil {

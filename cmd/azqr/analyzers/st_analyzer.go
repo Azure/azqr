@@ -37,14 +37,14 @@ func NewStorageAnalyzer(ctx context.Context, subscriptionID string, cred azcore.
 }
 
 // Review - Analyzes all Storage in a Resource Group
-func (c StorageAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c StorageAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Storage in Resource Group %s", resourceGroupName)
 
 	storage, err := c.listStorage(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, storage := range storage {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*storage.ID)
 		if err != nil {

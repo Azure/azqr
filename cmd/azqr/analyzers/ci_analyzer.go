@@ -37,14 +37,14 @@ func NewContainerIntanceAnalyzer(ctx context.Context, subscriptionID string, cre
 }
 
 // Review - Analyzes all Container Instances in a Resource Group
-func (c ContainerInstanceAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c ContainerInstanceAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Instances in Resource Group %s", resourceGroupName)
 
 	instances, err := c.listInstances(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, instance := range instances {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*instance.ID)
 		if err != nil {

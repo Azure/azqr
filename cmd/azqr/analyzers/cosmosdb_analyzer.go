@@ -37,14 +37,14 @@ func NewCosmosDBAnalyzer(ctx context.Context, subscriptionID string, cred azcore
 }
 
 // Review - Analyzes all CosmosDB Databases in a Resource Group
-func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing CosmosDB Databases in Resource Group %s", resourceGroupName)
 
 	databases, err := c.listDatabases(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, database := range databases {
 		hasDiagnostics, err := c.diagnosticsSettings.HasDiagnostics(*database.ID)
 		if err != nil {

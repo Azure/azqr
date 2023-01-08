@@ -37,14 +37,14 @@ func NewEventGridAnalyzer(ctx context.Context, subscriptionID string, cred azcor
 }
 
 // Review - Analyzes all EventGrid Domains in a Resource Group
-func (a EventGridAnalyzer) Review(resourceGroupName string) ([]AzureServiceResult, error) {
+func (a EventGridAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing EventGrid Domains in Resource Group %s", resourceGroupName)
 
 	domains, err := a.listDomain(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	results := []AzureServiceResult{}
+	results := []IAzureServiceResult{}
 	for _, d := range domains {
 		hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*d.ID)
 		if err != nil {
