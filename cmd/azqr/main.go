@@ -12,8 +12,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
-	"github.com/cmendible/azqr/cmd/azqr/analyzers"
-	"github.com/cmendible/azqr/cmd/azqr/report/templates"
+	"github.com/cmendible/azqr/internal/analyzers"
+	"github.com/cmendible/azqr/internal/report/templates"
 	"github.com/fbiville/markdown-table-formatter/pkg/markdown"
 	"golang.org/x/sync/semaphore"
 )
@@ -118,9 +118,9 @@ func main() {
 	}
 	resultsTable := renderTable(all)
 
-	var allFunctions []analyzers.IAzureFunctionAppResult
+	var allFunctions []analyzers.IAzureServiceResult
 	for _, r := range all {
-		v, ok := r.(analyzers.IAzureFunctionAppResult)
+		v, ok := r.(analyzers.AzureFunctionAppResult)
 		if ok {
 			allFunctions = append(allFunctions, v)
 		}
@@ -141,7 +141,7 @@ func main() {
 			recommendations += templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
 
 			if r.GetResourceType() == "Microsoft.Web/serverfarms/sites" && len(allFunctions) > 0 {
-				recommendations = strings.Replace(recommendations, "{{functions}}", renderFunctionsTable(allFunctions), 1)
+				recommendations = strings.Replace(recommendations, "{{functions}}", renderDetailsTable(allFunctions), 1)
 			}
 		}
 	}
@@ -248,14 +248,16 @@ func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.T
 }
 
 func renderTable(results []analyzers.IAzureServiceResult) string {
+	heathers := results[0].GetProperties()
+
 	rows := [][]string{}
 	for _, r := range results {
-		rows = append(r.ToCommonResult(), rows...)
+		rows = append(mapToRow(heathers, r.ToMap()), rows...)
 	}
 
 	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
 		WithPrettyPrint().
-		Build("SubscriptionId", "ResourceGroup", "Location", "Type", "Name", "SKU", "SLA", "Zones", "P Endpoints", "Diag", "CAF").
+		Build(heathers...).
 		Format(rows)
 
 	if err != nil {
@@ -266,15 +268,17 @@ func renderTable(results []analyzers.IAzureServiceResult) string {
 	return prettyPrintedTable
 }
 
-func renderFunctionsTable(results []analyzers.IAzureFunctionAppResult) string {
+func renderDetailsTable(results []analyzers.IAzureServiceResult) string {
+	heathers := results[0].GetDetailProperties()
+
 	rows := [][]string{}
 	for _, r := range results {
-		rows = append(r.ToFunctionResult(), rows...)
+		rows = append(mapToRow(heathers, r.ToDetail()), rows...)
 	}
 
 	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
 		WithPrettyPrint().
-		Build("SubscriptionId", "ResourceGroup", "Location", "Type", "Name", "WEBSITE_RUN_FROM_PACKAGE", "WEBSITE_CONTENTOVERVNET", "WEBSITE_VNET_ROUTE_ALL", "AzureWebJobsDashboard", "AppInsights", "SCALE_CONTROLLER_LOGGING_ENABLED").
+		Build(heathers...).
 		Format(rows)
 
 	if err != nil {
@@ -282,4 +286,14 @@ func renderFunctionsTable(results []analyzers.IAzureFunctionAppResult) string {
 	}
 
 	return prettyPrintedTable
+}
+
+func mapToRow(heathers []string, m map[string]string) [][]string {
+	v := make([]string, 0, len(m))
+
+	for _, k := range heathers {
+		v = append(v, m[k])
+	}
+
+	return [][]string{v}
 }
