@@ -63,7 +63,7 @@ func TestEventGridAnalyzer_Review(t *testing.T) {
 		name    string
 		a       EventGridAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -91,7 +91,7 @@ func TestEventGridAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newEventGridResult(t),
 				newEventGridPrivateEndpointResult(t),
 			},

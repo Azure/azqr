@@ -88,7 +88,7 @@ func TestCosmosDBAnalyzer_Review(t *testing.T) {
 		name    string
 		c       CosmosDBAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -117,7 +117,7 @@ func TestCosmosDBAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newCosmosDBResult(t),
 				newCosmosDBAvailabilityZonesResult(t),
 				newCosmosDBPrivateEndpointResult(t),

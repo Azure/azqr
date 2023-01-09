@@ -80,7 +80,7 @@ func TestAPIMAnalyzer_Review(t *testing.T) {
 		name    string
 		a       APIManagementAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -109,7 +109,7 @@ func TestAPIMAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newAPIMResult(t),
 				newAPIMAvailabilityZonesResult(t),
 				newAPIMPrivateEndpointResult(t),

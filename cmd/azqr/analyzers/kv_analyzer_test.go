@@ -67,7 +67,7 @@ func TestKeyVaultAnalyzer_Review(t *testing.T) {
 		name    string
 		c       KeyVaultAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -95,7 +95,7 @@ func TestKeyVaultAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newKeyVaultResult(t),
 				newKeyVaultPrivateEndpointResult(t),
 			},

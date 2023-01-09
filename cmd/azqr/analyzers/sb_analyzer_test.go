@@ -67,7 +67,7 @@ func TestServiceBusAnalyzer_Review(t *testing.T) {
 		name    string
 		c       ServiceBusAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -95,7 +95,7 @@ func TestServiceBusAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newServiceBusResult(t),
 				newServiceBusPrivateEndpointResult(t),
 			},

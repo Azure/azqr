@@ -78,7 +78,7 @@ func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
 		name    string
 		a       ApplicationGatewayAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -107,7 +107,7 @@ func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newApplicationGatewayResult(t),
 				newApplicationGatewayAvailabilityZonesResult(t),
 				newApplicationGatewayPrivateEndpointResult(t),

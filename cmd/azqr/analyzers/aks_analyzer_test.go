@@ -88,7 +88,7 @@ func TestAKSAnalyzer_Review(t *testing.T) {
 		name    string
 		a       AKSAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -117,7 +117,7 @@ func TestAKSAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newAKSResult(t),
 				newAKSAvailabilityZonesResult(t),
 				newAKSPrivateEndpointResult(t),

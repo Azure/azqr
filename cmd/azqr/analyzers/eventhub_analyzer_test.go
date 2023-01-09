@@ -80,7 +80,7 @@ func TestEventHubAnalyzer_Review(t *testing.T) {
 		name    string
 		c       EventHubAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -109,7 +109,7 @@ func TestEventHubAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newEventHubResult(t),
 				newEventHubAvailabilityZonesResult(t),
 				newEventHubPrivateEndpointResult(t),

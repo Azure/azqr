@@ -74,7 +74,7 @@ func TestContainerAppsAnalyzer_Review(t *testing.T) {
 		name    string
 		c       ContainerAppsAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -103,7 +103,7 @@ func TestContainerAppsAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newContainerAppsResult(t),
 				newContainerAppsAvailabilityZonesResult(t),
 				newContainerAppsPrivateEndpointResult(t),

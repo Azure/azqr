@@ -80,7 +80,7 @@ func TestRedisAnalyzer_Review(t *testing.T) {
 		name    string
 		c       RedisAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -109,7 +109,7 @@ func TestRedisAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newRedisResult(t),
 				newRedisAvailabilityZonesResult(t),
 				newRedisPrivateEndpointResult(t),

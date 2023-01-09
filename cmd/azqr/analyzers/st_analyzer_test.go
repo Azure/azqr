@@ -83,7 +83,7 @@ func TestStorageAnalyzer_Review(t *testing.T) {
 		name    string
 		c       StorageAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -112,7 +112,7 @@ func TestStorageAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newStorageResult(t),
 				newStorageAvailabilityZonesResult(t),
 				newStoragePrivateEndpointResult(t),

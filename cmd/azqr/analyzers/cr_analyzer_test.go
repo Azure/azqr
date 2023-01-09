@@ -82,7 +82,7 @@ func TestContainerRegistryAnalyzer_Review(t *testing.T) {
 		name    string
 		c       ContainerRegistryAnalyzer
 		args    args
-		want    []AzureServiceResult
+		want    []IAzureServiceResult
 		wantErr bool
 	}{
 		{
@@ -111,7 +111,7 @@ func TestContainerRegistryAnalyzer_Review(t *testing.T) {
 			args: args{
 				resourceGroupName: "resourceGroupName",
 			},
-			want: []AzureServiceResult{
+			want: []IAzureServiceResult{
 				newContainerRegistryResult(t),
 				newContainerRegistryAvailabilityZonesResult(t),
 				newContainerRegistryPrivateEndpointResult(t),
