@@ -19,26 +19,26 @@ type APIManagementAnalyzer struct {
 	listServicesFunc    func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error)
 }
 
-// NewAPIManagementAnalyzer - Creates a new APIManagementAnalyzer
-func NewAPIManagementAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *APIManagementAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	serviceClient, err := armapimanagement.NewServiceClient(subscriptionID, cred, nil)
+// Init - Initializes the APIManagementAnalyzer
+func (a *APIManagementAnalyzer) Init(config ServiceAnalizerConfig) error {
+	a.subscriptionID = config.SubscriptionID
+	a.ctx = config.Ctx
+	a.cred = config.Cred
+	var err error 
+	a.serviceClient, err = armapimanagement.NewServiceClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	analyzer := APIManagementAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		serviceClient:       serviceClient,
+	a.diagnosticsSettings = DiagnosticsSettings{}
+	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review -Analyzes all API Management Services in a Resource Group
-func (a APIManagementAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *APIManagementAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing API Management Services in Resource Group %s", resourceGroupName)
 
 	services, err := a.listServices(resourceGroupName)
@@ -77,7 +77,7 @@ func (a APIManagementAnalyzer) Review(resourceGroupName string) ([]IAzureService
 	return results, nil
 }
 
-func (a APIManagementAnalyzer) listServices(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
+func (a *APIManagementAnalyzer) listServices(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
 	if a.listServicesFunc == nil {
 		pager := a.serviceClient.NewListByResourceGroupPager(resourceGroupName, nil)
 

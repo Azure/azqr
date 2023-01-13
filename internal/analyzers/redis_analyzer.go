@@ -19,25 +19,26 @@ type RedisAnalyzer struct {
 	listRedisFunc       func(resourceGroupName string) ([]*armredis.ResourceInfo, error)
 }
 
-// NewRedisAnalyzer - Creates a new RedisAnalyzer
-func NewRedisAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *RedisAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	redisClient, err := armredis.NewClient(subscriptionID, cred, nil)
+// Init - Initializes the RedisAnalyzer
+func (c *RedisAnalyzer) Init(config ServiceAnalizerConfig) error {
+	c.subscriptionID = config.SubscriptionID
+	c.ctx = config.Ctx
+	c.cred = config.Cred
+	var err error
+	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	analyzer := RedisAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		redisClient:         redisClient,
+	c.diagnosticsSettings = DiagnosticsSettings{}
+	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all Redis in a Resource Group
-func (c RedisAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *RedisAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Redis in Resource Group %s", resourceGroupName)
 
 	redis, err := c.listRedis(resourceGroupName)
@@ -68,7 +69,7 @@ func (c RedisAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, 
 	return results, nil
 }
 
-func (c RedisAnalyzer) listRedis(resourceGroupName string) ([]*armredis.ResourceInfo, error) {
+func (c *RedisAnalyzer) listRedis(resourceGroupName string) ([]*armredis.ResourceInfo, error) {
 	if c.listRedisFunc == nil {
 		pager := c.redisClient.NewListByResourceGroupPager(resourceGroupName, nil)
 

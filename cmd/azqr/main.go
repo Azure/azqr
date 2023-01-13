@@ -31,6 +31,7 @@ func main() {
 	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
 	outputPtr := flag.String("o", "report.md", "Output file")
 	customerPtr := flag.String("c", "<Replace with Customer Name>", "Customer Name")
+	detail := flag.Bool("d", false, "Enable more details in the report")
 	concurrency := flag.Int("p", defaultConcurrency, fmt.Sprintf("Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency.", defaultConcurrency))
 	ver := flag.Bool("v", false, "Print version and exit")
 
@@ -78,27 +79,42 @@ func main() {
 		}
 	}
 
-	svcanalyzers := []analyzers.AzureServiceAnalyzer{
-		analyzers.NewAKSAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewAPIManagementAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewApplicationGatewayAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewContainerAppsAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewContainerIntanceAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewCosmosDBAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewContainerRegistryAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewEventHubAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewEventGridAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewKeyVaultAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewAppServiceAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewRedisAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewServiceBusAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewSignalRAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewStorageAnalyzer(ctx, subscriptionID, cred),
-		analyzers.NewPostgreAnalyzer(ctx, subscriptionID, cred),
+	svcanalyzers := []analyzers.IAzureServiceAnalyzer{
+		&analyzers.AKSAnalyzer{},
+		&analyzers.APIManagementAnalyzer{},
+		&analyzers.ApplicationGatewayAnalyzer{},
+		&analyzers.ContainerAppsAnalyzer{},
+		&analyzers.ContainerInstanceAnalyzer{},
+		&analyzers.CosmosDBAnalyzer{},
+		&analyzers.ContainerRegistryAnalyzer{},
+		&analyzers.EventHubAnalyzer{},
+		&analyzers.EventGridAnalyzer{},
+		&analyzers.KeyVaultAnalyzer{},
+		&analyzers.AppServiceAnalyzer{},
+		&analyzers.RedisAnalyzer{},
+		&analyzers.ServiceBusAnalyzer{},
+		&analyzers.SignalRAnalyzer{},
+		&analyzers.StorageAnalyzer{},
+		&analyzers.PostgreAnalyzer{},
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	config := analyzers.ServiceAnalizerConfig{
+		Ctx:                ctx,
+		SubscriptionID:     subscriptionID,
+		Cred:               cred,
+		EnableDetailedScan: *detail,
+	}
+
+	for _, a := range svcanalyzers {
+		err := a.Init(config)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	var all []analyzers.IAzureServiceResult
 	rc := ReviewContext{
 		Ctx:   ctx,
@@ -140,8 +156,10 @@ func main() {
 			recommendations += "\n\n"
 			recommendations += templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
 
-			if r.GetResourceType() == "Microsoft.Web/serverfarms/sites" && len(allFunctions) > 0 {
+			if r.GetResourceType() == "Microsoft.Web/serverfarms/sites" && len(allFunctions) > 0 && config.EnableDetailedScan {
 				recommendations = strings.Replace(recommendations, "{{functions}}", renderDetailsTable(allFunctions), 1)
+			} else {
+				recommendations = strings.Replace(recommendations, "{{functions}}", "", 1)
 			}
 		}
 	}
@@ -165,7 +183,7 @@ type ReviewContext struct {
 }
 
 // Run a review on a peculiar resource group "r" with the appropriates analysers using "concurrency" goroutines
-func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]analyzers.AzureServiceAnalyzer, concurrency int) {
+func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]analyzers.IAzureServiceAnalyzer, concurrency int) {
 	if concurrency <= 0 {
 		concurrency = len(*svcAnalysers)
 	}
@@ -179,7 +197,7 @@ func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]analyzers.AzureSe
 		// the iteration variable, as only the last element of the loop will
 		// be processed
 		analyserPtr := &(*svcAnalysers)[i]
-		go func(a *analyzers.AzureServiceAnalyzer, r string) {
+		go func(a *analyzers.IAzureServiceAnalyzer, r string) {
 			defer sem.Release(1)
 			// In case the analysis was cancelled, we don't need to execute the review
 			if context.Canceled == rc.Ctx.Err() {
@@ -248,6 +266,10 @@ func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.T
 }
 
 func renderTable(results []analyzers.IAzureServiceResult) string {
+	if len(results) == 0 {
+		return "No results found."
+	}
+
 	heathers := results[0].GetProperties()
 
 	rows := [][]string{}

@@ -19,25 +19,26 @@ type StorageAnalyzer struct {
 	listStorageFunc     func(resourceGroupName string) ([]*armstorage.Account, error)
 }
 
-// NewStorageAnalyzer - Creates a new StorageAnalyzer
-func NewStorageAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *StorageAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	storageClient, err := armstorage.NewAccountsClient(subscriptionID, cred, nil)
+// Init - Initializes the StorageAnalyzer
+func (c *StorageAnalyzer) Init(config ServiceAnalizerConfig) error {
+	c.subscriptionID = config.SubscriptionID
+	c.ctx = config.Ctx
+	c.cred = config.Cred
+	var err error
+	c.storageClient, err = armstorage.NewAccountsClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	analyzer := StorageAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		storageClient:       storageClient,
+	c.diagnosticsSettings = DiagnosticsSettings{}
+	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all Storage in a Resource Group
-func (c StorageAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *StorageAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Storage in Resource Group %s", resourceGroupName)
 
 	storage, err := c.listStorage(resourceGroupName)
@@ -79,7 +80,7 @@ func (c StorageAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult
 	return results, nil
 }
 
-func (c StorageAnalyzer) listStorage(resourceGroupName string) ([]*armstorage.Account, error) {
+func (c *StorageAnalyzer) listStorage(resourceGroupName string) ([]*armstorage.Account, error) {
 	if c.listStorageFunc == nil {
 		pager := c.storageClient.NewListByResourceGroupPager(resourceGroupName, nil)
 

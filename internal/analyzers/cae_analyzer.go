@@ -19,26 +19,26 @@ type ContainerAppsAnalyzer struct {
 	listAppsFunc        func(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error)
 }
 
-// NewContainerAppsAnalyzer - Creates a new ContainerAppsAnalyzer
-func NewContainerAppsAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *ContainerAppsAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	appsClient, err := armappcontainers.NewManagedEnvironmentsClient(subscriptionID, cred, nil)
+// Init - Initializes the ContainerAppsAnalyzer
+func (a *ContainerAppsAnalyzer) Init(config ServiceAnalizerConfig) error {
+	a.subscriptionID = config.SubscriptionID
+	a.ctx = config.Ctx
+	a.cred = config.Cred
+	var err error 
+	a.appsClient, err = armappcontainers.NewManagedEnvironmentsClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	analyzer := ContainerAppsAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		appsClient:          appsClient,
+	a.diagnosticsSettings = DiagnosticsSettings{}
+	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all Container Apps in a Resource Group
-func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *ContainerAppsAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Apps in Resource Group %s", resourceGroupName)
 
 	apps, err := a.listApps(resourceGroupName)
@@ -69,7 +69,7 @@ func (a ContainerAppsAnalyzer) Review(resourceGroupName string) ([]IAzureService
 	return results, nil
 }
 
-func (a ContainerAppsAnalyzer) listApps(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error) {
+func (a *ContainerAppsAnalyzer) listApps(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error) {
 	if a.listAppsFunc == nil {
 		pager := a.appsClient.NewListByResourceGroupPager(resourceGroupName, nil)
 		apps := make([]*armappcontainers.ManagedEnvironment, 0)

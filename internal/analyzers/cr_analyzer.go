@@ -19,25 +19,26 @@ type ContainerRegistryAnalyzer struct {
 	listRegistriesFunc  func(resourceGroupName string) ([]*armcontainerregistry.Registry, error)
 }
 
-// NewContainerRegistryAnalyzer - Creates a new ContainerRegistryAnalyzer
-func NewContainerRegistryAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *ContainerRegistryAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	registriesClient, err := armcontainerregistry.NewRegistriesClient(subscriptionID, cred, nil)
+// Init - Initializes the ContainerRegistryAnalyzer
+func (c *ContainerRegistryAnalyzer) Init(config ServiceAnalizerConfig) error {
+	c.subscriptionID = config.SubscriptionID
+	c.ctx = config.Ctx
+	c.cred = config.Cred
+	var err error
+	c.registriesClient, err = armcontainerregistry.NewRegistriesClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	analyzer := ContainerRegistryAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		registriesClient:    registriesClient,
+	c.diagnosticsSettings = DiagnosticsSettings{}
+	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all Container Registries in a Resource Group
-func (c ContainerRegistryAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *ContainerRegistryAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Registries in Resource Group %s", resourceGroupName)
 
 	regsitries, err := c.listRegistries(resourceGroupName)
@@ -68,7 +69,7 @@ func (c ContainerRegistryAnalyzer) Review(resourceGroupName string) ([]IAzureSer
 	return results, nil
 }
 
-func (c ContainerRegistryAnalyzer) listRegistries(resourceGroupName string) ([]*armcontainerregistry.Registry, error) {
+func (c *ContainerRegistryAnalyzer) listRegistries(resourceGroupName string) ([]*armcontainerregistry.Registry, error) {
 	if c.listRegistriesFunc == nil {
 		pager := c.registriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
 

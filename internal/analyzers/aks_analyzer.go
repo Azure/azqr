@@ -19,25 +19,26 @@ type AKSAnalyzer struct {
 	listClustersFunc    func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error)
 }
 
-// NewAKSAnalyzer -Creates a new AKSAnalyzer
-func NewAKSAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *AKSAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	clustersClient, err := armcontainerservice.NewManagedClustersClient(subscriptionID, cred, nil)
+// Init - Initializes the AKSAnalyzer
+func (a *AKSAnalyzer) Init(config ServiceAnalizerConfig) error {
+	a.subscriptionID = config.SubscriptionID
+	a.ctx = config.Ctx
+	a.cred = config.Cred
+	var err error 
+	a.clustersClient, err = armcontainerservice.NewManagedClustersClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	analyzer := AKSAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		clustersClient:      clustersClient,
+	a.diagnosticsSettings = DiagnosticsSettings{}
+	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all AKS Clusters in a Resource Group
-func (a AKSAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *AKSAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing AKS Clusters in Resource Group %s", resourceGroupName)
 
 	clusters, err := a.listClusters(resourceGroupName)
@@ -89,7 +90,7 @@ func (a AKSAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, er
 	return results, nil
 }
 
-func (a AKSAnalyzer) listClusters(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error) {
+func (a *AKSAnalyzer) listClusters(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error) {
 	if a.listClustersFunc == nil {
 		pager := a.clustersClient.NewListByResourceGroupPager(resourceGroupName, nil)
 

@@ -17,35 +17,35 @@ type AppServiceAnalyzer struct {
 	cred                azcore.TokenCredential
 	plansClient         *armappservice.PlansClient
 	sitesClient         *armappservice.WebAppsClient
+	enableDetailedScan  bool
 	listPlansFunc       func(resourceGroupName string) ([]*armappservice.Plan, error)
 	listSitesFunc       func(resourceGroupName string, planName string) ([]*armappservice.Site, error)
 }
 
-// NewAppServiceAnalyzer - Creates a new AppServiceAnalyzer
-func NewAppServiceAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *AppServiceAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	plansClient, err := armappservice.NewPlansClient(subscriptionID, cred, nil)
+// Init - Initializes the AppServiceAnalyzer
+func (a *AppServiceAnalyzer) Init(config ServiceAnalizerConfig) error {
+	a.subscriptionID = config.SubscriptionID
+	a.ctx = config.Ctx
+	a.cred = config.Cred
+	var err error
+	a.plansClient, err = armappservice.NewPlansClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	sitesClient, err := armappservice.NewWebAppsClient(subscriptionID, cred, nil)
+	a.sitesClient, err = armappservice.NewWebAppsClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	analyzer := AppServiceAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		plansClient:         plansClient,
-		sitesClient:         sitesClient,
+	a.diagnosticsSettings = DiagnosticsSettings{}
+	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all App Service Plans in a Resource Group
-func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *AppServiceAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing App Service Plans in Resource Group %s", resourceGroupName)
 
 	sites, err := a.listPlans(resourceGroupName)
@@ -116,37 +116,39 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]IAzureServiceRes
 					},
 				}
 
-				// can't trust s.Properties.SiteConfig since values are nil or empty
-				c, err := a.sitesClient.ListApplicationSettings(a.ctx, resourceGroupName, *s.Name, nil)
-				if err != nil {
-					return nil, err
-				}
-
-				for appSetting, value := range c.Properties {
-					switch strings.ToLower(appSetting) {
-					case "azurewebjobsdashboard":
-						funcresult.AzureWebJobsDashboard = len(*value) > 0
-					case "website_run_from_package":
-						funcresult.RunFromPackage = *value == "1"
-					case "scale_controller_logging_enabled":
-						funcresult.ScaleControllerLoggingEnabled = *value == "1"
-					case "website_contentovervnet":
-						funcresult.ContentOverVNET = *value == "1"
-					case "website_vnet_route_all":
-						funcresult.VNETRouteAll = *value == "1"
-					case "appinsights_instrumentationkey", "applicationinsights_connection_string":
-						funcresult.AppInsightsEnabled = len(*value) > 0
+				if a.enableDetailedScan {
+					// can't trust s.Properties.SiteConfig since values are nil or empty
+					c, err := a.sitesClient.ListApplicationSettings(a.ctx, resourceGroupName, *s.Name, nil)
+					if err != nil {
+						return nil, err
 					}
-				}
 
-				// can't trust s.Properties.SiteConfig since values are nil or empty
-				sc, err := a.sitesClient.GetConfiguration(a.ctx, resourceGroupName, *s.Name, nil)
-				if err != nil {
-					return nil, err
-				}
+					for appSetting, value := range c.Properties {
+						switch strings.ToLower(appSetting) {
+						case "azurewebjobsdashboard":
+							funcresult.AzureWebJobsDashboard = len(*value) > 0
+						case "website_run_from_package":
+							funcresult.RunFromPackage = *value == "1"
+						case "scale_controller_logging_enabled":
+							funcresult.ScaleControllerLoggingEnabled = *value == "1"
+						case "website_contentovervnet":
+							funcresult.ContentOverVNET = *value == "1"
+						case "website_vnet_route_all":
+							funcresult.VNETRouteAll = *value == "1"
+						case "appinsights_instrumentationkey", "applicationinsights_connection_string":
+							funcresult.AppInsightsEnabled = len(*value) > 0
+						}
+					}
 
-				// overrides the WEBSITE_VNET_ROUTE_ALL appsettings
-				funcresult.VNETRouteAll = sc.Properties.VnetRouteAllEnabled != nil && *sc.Properties.VnetRouteAllEnabled
+					// can't trust s.Properties.SiteConfig since values are nil or empty
+					sc, err := a.sitesClient.GetConfiguration(a.ctx, resourceGroupName, *s.Name, nil)
+					if err != nil {
+						return nil, err
+					}
+
+					// overrides the WEBSITE_VNET_ROUTE_ALL appsettings
+					funcresult.VNETRouteAll = sc.Properties.VnetRouteAllEnabled != nil && *sc.Properties.VnetRouteAllEnabled
+				}
 
 				result = funcresult
 			} else {
@@ -172,7 +174,7 @@ func (a AppServiceAnalyzer) Review(resourceGroupName string) ([]IAzureServiceRes
 	return results, nil
 }
 
-func (a AppServiceAnalyzer) listPlans(resourceGroupName string) ([]*armappservice.Plan, error) {
+func (a *AppServiceAnalyzer) listPlans(resourceGroupName string) ([]*armappservice.Plan, error) {
 	if a.listPlansFunc == nil {
 		pager := a.plansClient.NewListByResourceGroupPager(resourceGroupName, nil)
 		results := []*armappservice.Plan{}
@@ -190,7 +192,7 @@ func (a AppServiceAnalyzer) listPlans(resourceGroupName string) ([]*armappservic
 	return a.listPlansFunc(resourceGroupName)
 }
 
-func (a AppServiceAnalyzer) listSites(resourceGroupName string, plan string) ([]*armappservice.Site, error) {
+func (a *AppServiceAnalyzer) listSites(resourceGroupName string, plan string) ([]*armappservice.Site, error) {
 	if a.listSitesFunc == nil {
 		pager := a.plansClient.NewListWebAppsPager(resourceGroupName, plan, nil)
 		results := []*armappservice.Site{}

@@ -19,25 +19,26 @@ type KeyVaultAnalyzer struct {
 	listVaultsFunc      func(resourceGroupName string) ([]*armkeyvault.Vault, error)
 }
 
-// NewKeyVaultAnalyzer - Creates a new KeyVaultAnalyzer
-func NewKeyVaultAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *KeyVaultAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	vaultsClient, err := armkeyvault.NewVaultsClient(subscriptionID, cred, nil)
+// Init - Initializes the KeyVaultAnalyzer
+func (c *KeyVaultAnalyzer) Init(config ServiceAnalizerConfig) error {
+	c.subscriptionID = config.SubscriptionID
+	c.ctx = config.Ctx
+	c.cred = config.Cred
+	var err error
+	c.vaultsClient, err = armkeyvault.NewVaultsClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	analyzer := KeyVaultAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		vaultsClient:        vaultsClient,
+	c.diagnosticsSettings = DiagnosticsSettings{}
+	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all Key Vaults in a Resource Group
-func (c KeyVaultAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *KeyVaultAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Key Vaults in Resource Group %s", resourceGroupName)
 
 	vaults, err := c.listVaults(resourceGroupName)
@@ -68,7 +69,7 @@ func (c KeyVaultAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResul
 	return results, nil
 }
 
-func (c KeyVaultAnalyzer) listVaults(resourceGroupName string) ([]*armkeyvault.Vault, error) {
+func (c *KeyVaultAnalyzer) listVaults(resourceGroupName string) ([]*armkeyvault.Vault, error) {
 	if c.listVaultsFunc == nil {
 		pager := c.vaultsClient.NewListByResourceGroupPager(resourceGroupName, nil)
 

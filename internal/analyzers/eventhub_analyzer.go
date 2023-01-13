@@ -19,25 +19,26 @@ type EventHubAnalyzer struct {
 	listEventHubsFunc   func(resourceGroupName string) ([]*armeventhub.EHNamespace, error)
 }
 
-// NewEventHubAnalyzer - Creates a new EventHubAnalyzer
-func NewEventHubAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *EventHubAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	client, err := armeventhub.NewNamespacesClient(subscriptionID, cred, nil)
+// Init - Initializes the EventHubAnalyzer
+func (a *EventHubAnalyzer) Init(config ServiceAnalizerConfig) error {
+	a.subscriptionID = config.SubscriptionID
+	a.ctx = config.Ctx
+	a.cred = config.Cred
+	var err error 
+	a.client, err = armeventhub.NewNamespacesClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	analyzer := EventHubAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		client:              client,
+	a.diagnosticsSettings = DiagnosticsSettings{}
+	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all Event Hubs in a Resource Group
-func (c EventHubAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *EventHubAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Event Hubs in Resource Group %s", resourceGroupName)
 
 	eventHubs, err := c.listEventHubs(resourceGroupName)
@@ -74,7 +75,7 @@ func (c EventHubAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResul
 	return results, nil
 }
 
-func (c EventHubAnalyzer) listEventHubs(resourceGroupName string) ([]*armeventhub.EHNamespace, error) {
+func (c *EventHubAnalyzer) listEventHubs(resourceGroupName string) ([]*armeventhub.EHNamespace, error) {
 	if c.listEventHubsFunc == nil {
 		pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
 

@@ -19,27 +19,26 @@ type ApplicationGatewayAnalyzer struct {
 	listGatewaysFunc    func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error)
 }
 
-// NewApplicationGatewayAnalyzer - Creates a new ApplicationGatewayAnalyzer
-func NewApplicationGatewayAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *ApplicationGatewayAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	gatewaysClient, err := armnetwork.NewApplicationGatewaysClient(subscriptionID, cred, nil)
+// Init - Initializes the ApplicationGatewayAnalyzer
+func (a *ApplicationGatewayAnalyzer) Init(config ServiceAnalizerConfig) error {
+	a.subscriptionID = config.SubscriptionID
+	a.ctx = config.Ctx
+	a.cred = config.Cred
+	var err error 
+	a.gatewaysClient, err = armnetwork.NewApplicationGatewaysClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	analyzer := ApplicationGatewayAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		gatewaysClient:      gatewaysClient,
+	a.diagnosticsSettings = DiagnosticsSettings{}
+	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all Application Gateways in a Resource Group
-func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Application Gateways in Resource Group %s", resourceGroupName)
 
 	gateways, err := a.listGateways(resourceGroupName)
@@ -70,7 +69,7 @@ func (a ApplicationGatewayAnalyzer) Review(resourceGroupName string) ([]IAzureSe
 	return results, nil
 }
 
-func (a ApplicationGatewayAnalyzer) listGateways(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error) {
+func (a *ApplicationGatewayAnalyzer) listGateways(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error) {
 	if a.listGatewaysFunc == nil {
 		pager := a.gatewaysClient.NewListPager(resourceGroupName, nil)
 		results := []*armnetwork.ApplicationGateway{}

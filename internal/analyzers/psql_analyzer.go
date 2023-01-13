@@ -22,32 +22,30 @@ type PostgreAnalyzer struct {
 	listFlexibleFunc    func(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error)
 }
 
-// NewPostgreAnalyzer - Creates a new PostgreAnalyzer
-func NewPostgreAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *PostgreAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	postgreClient, err := armpostgresql.NewServersClient(subscriptionID, cred, nil)
+// Init - Initializes the PostgreAnalyzer
+func (c *PostgreAnalyzer) Init(config ServiceAnalizerConfig) error {
+	c.subscriptionID = config.SubscriptionID
+	c.ctx = config.Ctx
+	c.cred = config.Cred
+	var err error
+	c.postgreClient, err = armpostgresql.NewServersClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	flexibleClient, err := armpostgresqlflexibleservers.NewServersClient(subscriptionID, cred, nil)
+	c.flexibleClient, err = armpostgresqlflexibleservers.NewServersClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	analyzer := PostgreAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		postgreClient:       postgreClient,
-		flexibleClient:      flexibleClient,
+	c.diagnosticsSettings = DiagnosticsSettings{}
+	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all PostgreSQL in a Resource Group
-func (c PostgreAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *PostgreAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Postgre in Resource Group %s", resourceGroupName)
 
 	postgre, err := c.listPostgre(resourceGroupName)
@@ -113,7 +111,7 @@ func (c PostgreAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult
 	return results, nil
 }
 
-func (c PostgreAnalyzer) listPostgre(resourceGroupName string) ([]*armpostgresql.Server, error) {
+func (c *PostgreAnalyzer) listPostgre(resourceGroupName string) ([]*armpostgresql.Server, error) {
 	if c.listPostgreFunc == nil {
 		pager := c.postgreClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
@@ -131,7 +129,7 @@ func (c PostgreAnalyzer) listPostgre(resourceGroupName string) ([]*armpostgresql
 	return c.listPostgreFunc(resourceGroupName)
 }
 
-func (c PostgreAnalyzer) listFlexiblePostgre(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error) {
+func (c *PostgreAnalyzer) listFlexiblePostgre(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error) {
 	if c.listFlexibleFunc == nil {
 		pager := c.flexibleClient.NewListByResourceGroupPager(resourceGroupName, nil)
 

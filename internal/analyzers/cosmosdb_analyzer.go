@@ -19,25 +19,26 @@ type CosmosDBAnalyzer struct {
 	listDatabasesFunc   func(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error)
 }
 
-// NewCosmosDBAnalyzer - Creates a new CosmosDBAnalyzer
-func NewCosmosDBAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *CosmosDBAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	databasesClient, err := armcosmos.NewDatabaseAccountsClient(subscriptionID, cred, nil)
+// Init - Initializes the CosmosDBAnalyzer
+func (a *CosmosDBAnalyzer) Init(config ServiceAnalizerConfig) error {
+	a.subscriptionID = config.SubscriptionID
+	a.ctx = config.Ctx
+	a.cred = config.Cred
+	var err error 
+	a.databasesClient, err = armcosmos.NewDatabaseAccountsClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	analyzer := CosmosDBAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		databasesClient:     databasesClient,
+	a.diagnosticsSettings = DiagnosticsSettings{}
+	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all CosmosDB Databases in a Resource Group
-func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *CosmosDBAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing CosmosDB Databases in Resource Group %s", resourceGroupName)
 
 	databases, err := c.listDatabases(resourceGroupName)
@@ -86,7 +87,7 @@ func (c CosmosDBAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResul
 	return results, nil
 }
 
-func (c CosmosDBAnalyzer) listDatabases(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error) {
+func (c *CosmosDBAnalyzer) listDatabases(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error) {
 	if c.listDatabasesFunc == nil {
 		pager := c.databasesClient.NewListByResourceGroupPager(resourceGroupName, nil)
 

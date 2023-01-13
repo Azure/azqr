@@ -14,22 +14,19 @@ type DiagnosticsSettings struct {
 	hasDiagnosticsFunc        func(resourceId string) (bool, error)
 }
 
-// NewDiagnosticsSettings - Creates a new DiagnosticsSettings
-func NewDiagnosticsSettings(ctx context.Context, cred azcore.TokenCredential) (*DiagnosticsSettings, error) {
-	diagnosticsSettingsClient, err := armmonitor.NewDiagnosticSettingsClient(cred, nil)
+// Init - Initializes the DiagnosticsSettings
+func (s *DiagnosticsSettings) Init(ctx context.Context, cred azcore.TokenCredential) error {
+	s.ctx = ctx
+	var err error
+	s.diagnosticsSettingsClient, err = armmonitor.NewDiagnosticSettingsClient(cred, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	settings := DiagnosticsSettings{
-		diagnosticsSettingsClient: diagnosticsSettingsClient,
-		ctx:                       ctx,
-	}
-
-	return &settings, nil
+	return nil
 }
 
 // HasDiagnostics - Checks if a resource has diagnostics settings
-func (s DiagnosticsSettings) HasDiagnostics(resourceID string) (bool, error) {
+func (s *DiagnosticsSettings) HasDiagnostics(resourceID string) (bool, error) {
 	if s.hasDiagnosticsFunc == nil {
 		pager := s.diagnosticsSettingsClient.NewListPager(resourceID, nil)
 

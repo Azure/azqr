@@ -19,25 +19,26 @@ type ServiceBusAnalyzer struct {
 	listServiceBusFunc  func(resourceGroupName string) ([]*armservicebus.SBNamespace, error)
 }
 
-// NewServiceBusAnalyzer - Creates a new ServiceBusAnalyzer
-func NewServiceBusAnalyzer(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) *ServiceBusAnalyzer {
-	diagnosticsSettings, _ := NewDiagnosticsSettings(ctx, cred)
-	servicebusClient, err := armservicebus.NewNamespacesClient(subscriptionID, cred, nil)
+// Init - Initializes the ServiceBusAnalyzer
+func (a *ServiceBusAnalyzer) Init(config ServiceAnalizerConfig) error {
+	a.subscriptionID = config.SubscriptionID
+	a.ctx = config.Ctx
+	a.cred = config.Cred
+	var err error
+	a.servicebusClient, err = armservicebus.NewNamespacesClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	analyzer := ServiceBusAnalyzer{
-		diagnosticsSettings: *diagnosticsSettings,
-		subscriptionID:      subscriptionID,
-		ctx:                 ctx,
-		cred:                cred,
-		servicebusClient:    servicebusClient,
+	a.diagnosticsSettings = DiagnosticsSettings{}
+	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	if err != nil {
+		return err
 	}
-	return &analyzer
+	return nil
 }
 
 // Review - Analyzes all Service Bus in a Resource Group
-func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *ServiceBusAnalyzer) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Service Bus in Resource Group %s", resourceGroupName)
 
 	servicebus, err := c.listServiceBus(resourceGroupName)
@@ -74,7 +75,7 @@ func (c ServiceBusAnalyzer) Review(resourceGroupName string) ([]IAzureServiceRes
 	return results, nil
 }
 
-func (c ServiceBusAnalyzer) listServiceBus(resourceGroupName string) ([]*armservicebus.SBNamespace, error) {
+func (c *ServiceBusAnalyzer) listServiceBus(resourceGroupName string) ([]*armservicebus.SBNamespace, error) {
 	if c.listServiceBusFunc == nil {
 		pager := c.servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
 

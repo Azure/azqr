@@ -1,8 +1,11 @@
 package analyzers
 
 import (
+	"context"
 	"strconv"
 	"strings"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 )
 
 type (
@@ -16,8 +19,18 @@ type (
 		Value() AzureServiceResult
 	}
 
+	// ServiceAnalizerConfig - Struct for all Service Analyzers Config
+	ServiceAnalizerConfig struct {
+		Ctx                context.Context
+		Cred               azcore.TokenCredential
+		SubscriptionID     string
+		Location           string
+		EnableDetailedScan bool
+	}
+
 	// AzureServiceAnalyzer - Interface for all Azure Service Analyzers
-	AzureServiceAnalyzer interface {
+	IAzureServiceAnalyzer interface {
+		Init(config ServiceAnalizerConfig) error
 		Review(resourceGroupName string) ([]IAzureServiceResult, error)
 	}
 
