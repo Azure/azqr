@@ -96,6 +96,7 @@ func main() {
 		&analyzers.SignalRAnalyzer{},
 		&analyzers.StorageAnalyzer{},
 		&analyzers.PostgreAnalyzer{},
+		&analyzers.SQLAnalyzer{},
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
