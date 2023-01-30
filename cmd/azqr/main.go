@@ -6,15 +6,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
-	"github.com/cmendible/azqr/internal/analyzers"
-	"github.com/cmendible/azqr/internal/report/templates"
-	"github.com/fbiville/markdown-table-formatter/pkg/markdown"
+	"github.com/cmendible/azqr/internal/scanners"
+	"github.com/cmendible/azqr/internal/renderers"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -29,8 +27,8 @@ var (
 func main() {
 	subscriptionPtr := flag.String("s", "", "Azure Subscription Id (Required)")
 	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
-	outputPtr := flag.String("o", "report.md", "Output file")
-	customerPtr := flag.String("c", "<Replace with Customer Name>", "Customer Name")
+	outputPtr := flag.String("o", "azqr_report", "Output file prefix")
+	customerPtr := flag.String("c", "Replace_With_Customer_Name", "Customer Name")
 	detail := flag.Bool("d", false, "Enable more details in the report")
 	concurrency := flag.Int("p", defaultConcurrency, fmt.Sprintf("Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency.", defaultConcurrency))
 	ver := flag.Bool("v", false, "Print version and exit")
@@ -39,8 +37,15 @@ func main() {
 
 	subscriptionID := *subscriptionPtr
 	resourceGroupName := *resourceGroupPtr
-	outputFile := *outputPtr
+	outputFilePrefix := *outputPtr
 	customer := *customerPtr
+
+	current_time := time.Now()
+	outputFileStamp := fmt.Sprintf("%d_%02d_%02d_T%02d%02d%02d",
+		current_time.Year(), current_time.Month(), current_time.Day(),
+		current_time.Hour(), current_time.Minute(), current_time.Second())
+
+	outputFile := fmt.Sprintf("%s_%s", outputFilePrefix, outputFileStamp)
 
 	if *ver {
 		fmt.Printf("azqr version: %s", version)
@@ -79,53 +84,53 @@ func main() {
 		}
 	}
 
-	svcanalyzers := []analyzers.IAzureServiceAnalyzer{
-		&analyzers.AKSAnalyzer{},
-		&analyzers.APIManagementAnalyzer{},
-		&analyzers.ApplicationGatewayAnalyzer{},
-		&analyzers.ContainerAppsAnalyzer{},
-		&analyzers.ContainerInstanceAnalyzer{},
-		&analyzers.CosmosDBAnalyzer{},
-		&analyzers.ContainerRegistryAnalyzer{},
-		&analyzers.EventHubAnalyzer{},
-		&analyzers.EventGridAnalyzer{},
-		&analyzers.KeyVaultAnalyzer{},
-		&analyzers.AppServiceAnalyzer{},
-		&analyzers.RedisAnalyzer{},
-		&analyzers.ServiceBusAnalyzer{},
-		&analyzers.SignalRAnalyzer{},
-		&analyzers.StorageAnalyzer{},
-		&analyzers.PostgreAnalyzer{},
-		&analyzers.SQLAnalyzer{},
+	svcScanners := []scanners.IAzureScanner{
+		&scanners.AKSScanner{},
+		&scanners.APIManagementScanner{},
+		&scanners.ApplicationGatewayScanner{},
+		&scanners.ContainerAppsScanner{},
+		&scanners.ContainerInstanceScanner{},
+		&scanners.CosmosDBScanner{},
+		&scanners.ContainerRegistryScanner{},
+		&scanners.EventHubScanner{},
+		&scanners.EventGridScanner{},
+		&scanners.KeyVaultScanner{},
+		&scanners.AppServiceScanner{},
+		&scanners.RedisScanner{},
+		&scanners.ServiceBusScanner{},
+		&scanners.SignalRScanner{},
+		&scanners.StorageScanner{},
+		&scanners.PostgreScanner{},
+		&scanners.SQLScanner{},
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	config := analyzers.ServiceAnalizerConfig{
+	config := scanners.ScannerConfig{
 		Ctx:                ctx,
 		SubscriptionID:     subscriptionID,
 		Cred:               cred,
 		EnableDetailedScan: *detail,
 	}
 
-	for _, a := range svcanalyzers {
+	for _, a := range svcScanners {
 		err := a.Init(config)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	var all []analyzers.IAzureServiceResult
+	var all []scanners.IAzureServiceResult
 	rc := ReviewContext{
 		Ctx:   ctx,
-		ResCh: make(chan []analyzers.IAzureServiceResult),
+		ResCh: make(chan []scanners.IAzureServiceResult),
 		ErrCh: make(chan error),
 	}
 	for _, r := range resourceGroups {
 		log.Printf("Analyzing Resource Group %s", r)
-		go reviewRunner(&rc, r, &svcanalyzers, *concurrency)
-		res, err := waitForReviews(&rc, len(svcanalyzers))
+		go reviewRunner(&rc, r, &svcScanners, *concurrency)
+		res, err := waitForReviews(&rc, len(svcScanners))
 		// As soon as any error happen, we cancel every still running analysis
 		if err != nil {
 			cancel()
@@ -133,44 +138,9 @@ func main() {
 		}
 		all = append(all, *res...)
 	}
-	resultsTable := renderTable(all)
 
-	var allFunctions []analyzers.IAzureServiceResult
-	for _, r := range all {
-		v, ok := r.(analyzers.AzureFunctionAppResult)
-		if ok {
-			allFunctions = append(allFunctions, v)
-		}
-	}
-
-	reportTemplate := templates.GetTemplates("Report.md")
-	reportTemplate = strings.Replace(reportTemplate, "{{results}}", resultsTable, 1)
-	reportTemplate = strings.Replace(reportTemplate, "{{date}}", time.Now().Format("2006-01-02"), 1)
-	reportTemplate = strings.Replace(reportTemplate, "{{customer}}", customer, -1)
-
-	recommendations := ""
-	dict := map[string]bool{}
-	for _, r := range all {
-		parsedType := strings.Replace(r.GetResourceType(), "/", ".", -1)
-		if _, ok := dict[r.GetResourceType()]; !ok {
-			dict[r.GetResourceType()] = true
-			recommendations += "\n\n"
-			recommendations += templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
-
-			if r.GetResourceType() == "Microsoft.Web/serverfarms/sites" && len(allFunctions) > 0 && config.EnableDetailedScan {
-				recommendations = strings.Replace(recommendations, "{{functions}}", renderDetailsTable(allFunctions), 1)
-			} else {
-				recommendations = strings.Replace(recommendations, "{{functions}}", "", 1)
-			}
-		}
-	}
-
-	reportTemplate = strings.Replace(reportTemplate, "{{recommendations}}", recommendations, 1)
-
-	err = os.WriteFile(outputFile, []byte(reportTemplate), 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
+	renderers.CreateMarkdownReport(all, customer, outputFile, config.EnableDetailedScan)
+	renderers.CreateExcelReport(all, outputFile)
 }
 
 // ReviewContext A running resource group analysis support context
@@ -178,13 +148,13 @@ type ReviewContext struct {
 	// Review context, will be passed to every created goroutines
 	Ctx context.Context
 	// Communication interface for each review results
-	ResCh chan []analyzers.IAzureServiceResult
+	ResCh chan []scanners.IAzureServiceResult
 	// Communication interface for errors
 	ErrCh chan error
 }
 
 // Run a review on a peculiar resource group "r" with the appropriates analysers using "concurrency" goroutines
-func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]analyzers.IAzureServiceAnalyzer, concurrency int) {
+func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]scanners.IAzureScanner, concurrency int) {
 	if concurrency <= 0 {
 		concurrency = len(*svcAnalysers)
 	}
@@ -198,7 +168,7 @@ func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]analyzers.IAzureS
 		// the iteration variable, as only the last element of the loop will
 		// be processed
 		analyserPtr := &(*svcAnalysers)[i]
-		go func(a *analyzers.IAzureServiceAnalyzer, r string) {
+		go func(a *scanners.IAzureScanner, r string) {
 			defer sem.Release(1)
 			// In case the analysis was cancelled, we don't need to execute the review
 			if context.Canceled == rc.Ctx.Err() {
@@ -214,9 +184,9 @@ func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]analyzers.IAzureS
 }
 
 // Wait for at least "nb" goroutines to hands their result and return them
-func waitForReviews(rc *ReviewContext, nb int) (*[]analyzers.IAzureServiceResult, error) {
+func waitForReviews(rc *ReviewContext, nb int) (*[]scanners.IAzureServiceResult, error) {
 	received := 0
-	reviews := make([]analyzers.IAzureServiceResult, 0)
+	reviews := make([]scanners.IAzureServiceResult, 0)
 	for {
 		select {
 		// In case a timeout is set
@@ -264,59 +234,4 @@ func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.T
 		resourceGroups = append(resourceGroups, pageResp.ResourceGroupListResult.Value...)
 	}
 	return resourceGroups, nil
-}
-
-func renderTable(results []analyzers.IAzureServiceResult) string {
-	if len(results) == 0 {
-		return "No results found."
-	}
-
-	heathers := results[0].GetProperties()
-
-	rows := [][]string{}
-	for _, r := range results {
-		rows = append(mapToRow(heathers, r.ToMap()), rows...)
-	}
-
-	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
-		WithPrettyPrint().
-		Build(heathers...).
-		Format(rows)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("")
-	fmt.Println(prettyPrintedTable)
-	return prettyPrintedTable
-}
-
-func renderDetailsTable(results []analyzers.IAzureServiceResult) string {
-	heathers := results[0].GetDetailProperties()
-
-	rows := [][]string{}
-	for _, r := range results {
-		rows = append(mapToRow(heathers, r.ToDetail()), rows...)
-	}
-
-	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
-		WithPrettyPrint().
-		Build(heathers...).
-		Format(rows)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return prettyPrintedTable
-}
-
-func mapToRow(heathers []string, m map[string]string) [][]string {
-	v := make([]string, 0, len(m))
-
-	for _, k := range heathers {
-		v = append(v, m[k])
-	}
-
-	return [][]string{v}
 }
