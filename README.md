@@ -29,6 +29,7 @@ Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure
 * Azure Cosmos DB
 * Azure Database for PostgreSQL Single Server
 * Azure Database for PostgreSQL Flexible Server
+* Azure SQL Database
 * Azure Key Vault
 * Azure Storage Account
 
