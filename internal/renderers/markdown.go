@@ -72,7 +72,7 @@ func renderTable(results []scanners.IAzureServiceResult) string {
 		return "No results found."
 	}
 
-	heathers := results[0].GetProperties()
+	heathers := results[0].GetHeathers()
 
 	rows := [][]string{}
 	for _, r := range results {
@@ -93,11 +93,11 @@ func renderTable(results []scanners.IAzureServiceResult) string {
 }
 
 func renderDetailsTable(results []scanners.IAzureServiceResult) string {
-	heathers := results[0].GetDetailProperties()
+	heathers := results[0].GetDetailHeathers()
 
 	rows := [][]string{}
 	for _, r := range results {
-		rows = append(mapToRow(heathers, r.ToDetail()), rows...)
+		rows = append(mapToRow(heathers, r.ToDetailMap()), rows...)
 	}
 
 	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().

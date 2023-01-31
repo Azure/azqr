@@ -12,10 +12,10 @@ type (
 	// IAzureServiceResult - Interface for all Azure Service Results
 	IAzureServiceResult interface {
 		GetResourceType() string
-		GetProperties() []string
-		GetDetailProperties() []string
+		GetHeathers() []string
+		GetDetailHeathers() []string
 		ToMap() map[string]string
-		ToDetail() map[string]string
+		ToDetailMap() map[string]string
 		Value() AzureServiceResult
 	}
 
@@ -24,7 +24,6 @@ type (
 		Ctx                context.Context
 		Cred               azcore.TokenCredential
 		SubscriptionID     string
-		Location           string
 		EnableDetailedScan bool
 	}
 
@@ -68,7 +67,7 @@ func (r AzureServiceResult) ToMap() map[string]string {
 }
 
 // ToDetail - Returns a map representation of the Azure Service Result
-func (r AzureServiceResult) ToDetail() map[string]string {
+func (r AzureServiceResult) ToDetailMap() map[string]string {
 	return map[string]string{}
 }
 
@@ -77,8 +76,8 @@ func (r AzureServiceResult) GetResourceType() string {
 	return r.Type
 }
 
-// GetProperties - Returns the headers of the Azure Service Result
-func (r AzureServiceResult) GetProperties() []string {
+// GetHeathers - Returns the headers of the Azure Service Result
+func (r AzureServiceResult) GetHeathers() []string {
 	return []string{
 		"SubscriptionID",
 		"ResourceGroup",
@@ -94,8 +93,8 @@ func (r AzureServiceResult) GetProperties() []string {
 	}
 }
 
-// GetDetailProperties - Returns the detail headers of the Azure Service Result
-func (r AzureServiceResult) GetDetailProperties() []string {
+// GetDeatilsHeathers - Returns the detail headers of the Azure Service Result
+func (r AzureServiceResult) GetDetailHeathers() []string {
 	return []string{}
 }
 
@@ -116,7 +115,7 @@ type AzureFunctionAppResult struct {
 }
 
 // ToDetail - Returns a map representation of the Azure Function App Result
-func (r AzureFunctionAppResult) ToDetail() map[string]string {
+func (r AzureFunctionAppResult) ToDetailMap() map[string]string {
 	return map[string]string{
 		"SubscriptionID":                r.SubscriptionID,
 		"ResourceGroup":                 r.ResourceGroup,

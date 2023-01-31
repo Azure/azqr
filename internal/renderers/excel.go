@@ -22,7 +22,7 @@ func CreateExcelReport(data ReportData) {
 			return
 		}
 
-		heathers := data.MainData[0].GetProperties()
+		heathers := data.MainData[0].GetHeathers()
 
 		rows := [][]string{}
 		for _, r := range data.MainData {
