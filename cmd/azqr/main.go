@@ -11,8 +11,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
-	"github.com/cmendible/azqr/internal/scanners"
 	"github.com/cmendible/azqr/internal/renderers"
+	"github.com/cmendible/azqr/internal/scanners"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -139,8 +139,27 @@ func main() {
 		all = append(all, *res...)
 	}
 
-	renderers.CreateMarkdownReport(all, customer, outputFile, config.EnableDetailedScan)
-	renderers.CreateExcelReport(all, outputFile)
+	defenderScanner := scanners.DefenderScanner{}
+	err = defenderScanner.Init(&config)
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	defenderResults, err := defenderScanner.ListConfiguration()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	reportData := renderers.ReportData{
+		Customer:           customer,
+		OutputFileName:     outputFile,
+		EnableDetailedScan: config.EnableDetailedScan,
+		MainData:           all,
+		DefenderData:       defenderResults,
+	}
+
+	renderers.CreateMarkdownReport(reportData)
+	renderers.CreateExcelReport(reportData)
 }
 
 // ReviewContext A running resource group analysis support context
