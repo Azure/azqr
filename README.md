@@ -31,7 +31,12 @@ Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure
 * Azure Database for PostgreSQL Flexible Server
 * Azure SQL Database
 * Azure Key Vault
+* Azure App Configuration
 * Azure Storage Account
+
+## Microsoft Defender Status
+
+Azure Quick Review (azqr) also reports on the status of Microsoft Defender for Cloud plans.
 
 ## Usage
 
@@ -47,15 +52,15 @@ Download the latest release from [here](https://github.com/cmendible/azqr/releas
   * AZURE_CLIENT_SECRET
   * AZURE_TENANT_ID
 
-### Running the Review
+### Running the Scan
 
-To review all resource groups in a specific subscription run:
+To scan all resource groups in a specific subscription run:
 
 ```bash
 ./azqr -s <subscription_id>
 ```
 
-To review a specific resource group in a specific subscription run:
+To scan a specific resource group in a specific subscription run:
 
 ```bash
 ./azqr -s <subscription_id> -r <resource_group_name>
@@ -66,6 +71,14 @@ For help run:
 ```bash
 ./azqr -h
 ```
+
+### Scan Results
+
+Azure Quick Review (azqr) creates 3 files as part of thhe output:
+
+* Markdown report
+* HTML report
+* Excel report
 
 ## Contribution
 
