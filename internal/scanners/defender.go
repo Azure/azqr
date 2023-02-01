@@ -14,8 +14,8 @@ type DefenderResult struct {
 
 // DefenderScanner - Defender scanner
 type DefenderScanner struct {
-	client       *armsecurity.PricingsClient
 	config       *ScannerConfig
+	client       *armsecurity.PricingsClient
 	defenderFunc func() ([]DefenderResult, error)
 }
 

@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
 // StorageScanner - Analyzer for Storage
 type StorageScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	storageClient       *armstorage.AccountsClient
 	listStorageFunc     func(resourceGroupName string) ([]*armstorage.Account, error)
 }
 
 // Init - Initializes the StorageScanner
-func (c *StorageScanner) Init(config ScannerConfig) error {
-	c.subscriptionID = config.SubscriptionID
-	c.ctx = config.Ctx
-	c.cred = config.Cred
+func (c *StorageScanner) Init(config *ScannerConfig) error {
+	c.config = config
 	var err error
 	c.storageClient, err = armstorage.NewAccountsClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	c.diagnosticsSettings = DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -64,7 +58,7 @@ func (c *StorageScanner) Review(resourceGroupName string) ([]IAzureServiceResult
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *storage.Name,
 			SKU:                sku,
@@ -86,7 +80,7 @@ func (c *StorageScanner) listStorage(resourceGroupName string) ([]*armstorage.Ac
 
 		staccounts := make([]*armstorage.Account, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
 
 // KeyVaultScanner - Analyzer for Key Vaults
 type KeyVaultScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	vaultsClient        *armkeyvault.VaultsClient
 	listVaultsFunc      func(resourceGroupName string) ([]*armkeyvault.Vault, error)
 }
 
 // Init - Initializes the KeyVaultScanner
-func (c *KeyVaultScanner) Init(config ScannerConfig) error {
-	c.subscriptionID = config.SubscriptionID
-	c.ctx = config.Ctx
-	c.cred = config.Cred
+func (c *KeyVaultScanner) Init(config *ScannerConfig) error {
+	c.config = config
 	var err error
 	c.vaultsClient, err = armkeyvault.NewVaultsClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	c.diagnosticsSettings = DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -53,7 +47,7 @@ func (c *KeyVaultScanner) Review(resourceGroupName string) ([]IAzureServiceResul
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *vault.Name,
 			SKU:                string(*vault.Properties.SKU.Name),
@@ -75,7 +69,7 @@ func (c *KeyVaultScanner) listVaults(resourceGroupName string) ([]*armkeyvault.V
 
 		vaults := make([]*armkeyvault.Vault, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

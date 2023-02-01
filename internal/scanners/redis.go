@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
 // RedisScanner - Analyzer for Redis
 type RedisScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	redisClient         *armredis.Client
 	listRedisFunc       func(resourceGroupName string) ([]*armredis.ResourceInfo, error)
 }
 
 // Init - Initializes the RedisScanner
-func (c *RedisScanner) Init(config ScannerConfig) error {
-	c.subscriptionID = config.SubscriptionID
-	c.ctx = config.Ctx
-	c.cred = config.Cred
+func (c *RedisScanner) Init(config *ScannerConfig) error {
+	c.config = config
 	var err error
 	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	c.diagnosticsSettings = DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -53,7 +47,7 @@ func (c *RedisScanner) Review(resourceGroupName string) ([]IAzureServiceResult, 
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *redis.Name,
 			SKU:                string(*redis.Properties.SKU.Name),
@@ -75,7 +69,7 @@ func (c *RedisScanner) listRedis(resourceGroupName string) ([]*armredis.Resource
 
 		redis := make([]*armredis.ResourceInfo, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

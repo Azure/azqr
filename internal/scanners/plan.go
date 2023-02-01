@@ -1,20 +1,16 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 )
 
 // AppServiceScanner - Analyzer for App Service Plans
 type AppServiceScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	plansClient         *armappservice.PlansClient
 	sitesClient         *armappservice.WebAppsClient
 	enableDetailedScan  bool
@@ -23,10 +19,8 @@ type AppServiceScanner struct {
 }
 
 // Init - Initializes the AppServiceScanner
-func (a *AppServiceScanner) Init(config ScannerConfig) error {
-	a.subscriptionID = config.SubscriptionID
-	a.ctx = config.Ctx
-	a.cred = config.Cred
+func (a *AppServiceScanner) Init(config *ScannerConfig) error {
+	a.config = config
 	var err error
 	a.plansClient, err = armappservice.NewPlansClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
@@ -37,7 +31,7 @@ func (a *AppServiceScanner) Init(config ScannerConfig) error {
 		return err
 	}
 	a.diagnosticsSettings = DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -66,7 +60,7 @@ func (a *AppServiceScanner) Review(resourceGroupName string) ([]IAzureServiceRes
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     a.subscriptionID,
+			SubscriptionID:     a.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *p.Name,
 			SKU:                string(*p.SKU.Name),
@@ -102,7 +96,7 @@ func (a *AppServiceScanner) Review(resourceGroupName string) ([]IAzureServiceRes
 			if strings.Contains(kind, "functionapp") {
 				funcresult := AzureFunctionAppResult{
 					AzureServiceResult: AzureServiceResult{
-						SubscriptionID:     a.subscriptionID,
+						SubscriptionID:     a.config.SubscriptionID,
 						ResourceGroup:      resourceGroupName,
 						ServiceName:        *s.Name,
 						SKU:                string(*p.SKU.Name),
@@ -118,7 +112,7 @@ func (a *AppServiceScanner) Review(resourceGroupName string) ([]IAzureServiceRes
 
 				if a.enableDetailedScan {
 					// can't trust s.Properties.SiteConfig since values are nil or empty
-					c, err := a.sitesClient.ListApplicationSettings(a.ctx, resourceGroupName, *s.Name, nil)
+					c, err := a.sitesClient.ListApplicationSettings(a.config.Ctx, resourceGroupName, *s.Name, nil)
 					if err != nil {
 						return nil, err
 					}
@@ -141,7 +135,7 @@ func (a *AppServiceScanner) Review(resourceGroupName string) ([]IAzureServiceRes
 					}
 
 					// can't trust s.Properties.SiteConfig since values are nil or empty
-					sc, err := a.sitesClient.GetConfiguration(a.ctx, resourceGroupName, *s.Name, nil)
+					sc, err := a.sitesClient.GetConfiguration(a.config.Ctx, resourceGroupName, *s.Name, nil)
 					if err != nil {
 						return nil, err
 					}
@@ -153,7 +147,7 @@ func (a *AppServiceScanner) Review(resourceGroupName string) ([]IAzureServiceRes
 				result = funcresult
 			} else {
 				result = AzureServiceResult{
-					SubscriptionID:     a.subscriptionID,
+					SubscriptionID:     a.config.SubscriptionID,
 					ResourceGroup:      resourceGroupName,
 					ServiceName:        *s.Name,
 					SKU:                string(*p.SKU.Name),
@@ -179,7 +173,7 @@ func (a *AppServiceScanner) listPlans(resourceGroupName string) ([]*armappservic
 		pager := a.plansClient.NewListByResourceGroupPager(resourceGroupName, nil)
 		results := []*armappservice.Plan{}
 		for pager.More() {
-			resp, err := pager.NextPage(a.ctx)
+			resp, err := pager.NextPage(a.config.Ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -197,7 +191,7 @@ func (a *AppServiceScanner) listSites(resourceGroupName string, plan string) ([]
 		pager := a.plansClient.NewListWebAppsPager(resourceGroupName, plan, nil)
 		results := []*armappservice.Site{}
 		for pager.More() {
-			resp, err := pager.NextPage(a.ctx)
+			resp, err := pager.NextPage(a.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

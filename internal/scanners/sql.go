@@ -1,20 +1,16 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 )
 
 // SQLScanner - Analyzer for SQL
 type SQLScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	sqlClient           *armsql.ServersClient
 	sqlDatabasedClient  *armsql.DatabasesClient
 	listServersFunc     func(resourceGroupName string) ([]*armsql.Server, error)
@@ -22,10 +18,8 @@ type SQLScanner struct {
 }
 
 // Init - Initializes the SQLScanner
-func (c *SQLScanner) Init(config ScannerConfig) error {
-	c.subscriptionID = config.SubscriptionID
-	c.ctx = config.Ctx
-	c.cred = config.Cred
+func (c *SQLScanner) Init(config *ScannerConfig) error {
+	c.config = config
 	var err error
 	c.sqlClient, err = armsql.NewServersClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
@@ -36,7 +30,7 @@ func (c *SQLScanner) Init(config ScannerConfig) error {
 		return err
 	}
 	c.diagnosticsSettings = DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -59,7 +53,7 @@ func (c *SQLScanner) Review(resourceGroupName string) ([]IAzureServiceResult, er
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *sql.Name,
 			SKU:                "N/A",
@@ -90,7 +84,7 @@ func (c *SQLScanner) Review(resourceGroupName string) ([]IAzureServiceResult, er
 			}
 
 			results = append(results, AzureServiceResult{
-				SubscriptionID:     c.subscriptionID,
+				SubscriptionID:     c.config.SubscriptionID,
 				ResourceGroup:      resourceGroupName,
 				ServiceName:        *database.Name,
 				SKU:                *database.SKU.Name,
@@ -114,7 +108,7 @@ func (c *SQLScanner) listSQL(resourceGroupName string) ([]*armsql.Server, error)
 
 		servers := make([]*armsql.Server, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -132,7 +126,7 @@ func (c *SQLScanner) listDatabases(resourceGroupName, serverName string) ([]*arm
 
 		servers := make([]*armsql.Database, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

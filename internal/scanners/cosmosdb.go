@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
 
 // CosmosDBScanner - Analyzer for CosmosDB Databases
 type CosmosDBScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	databasesClient     *armcosmos.DatabaseAccountsClient
 	listDatabasesFunc   func(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error)
 }
 
 // Init - Initializes the CosmosDBScanner
-func (a *CosmosDBScanner) Init(config ScannerConfig) error {
-	a.subscriptionID = config.SubscriptionID
-	a.ctx = config.Ctx
-	a.cred = config.Cred
+func (a *CosmosDBScanner) Init(config *ScannerConfig) error {
+	a.config = config
 	var err error
 	a.databasesClient, err = armcosmos.NewDatabaseAccountsClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	a.diagnosticsSettings = DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -71,7 +65,7 @@ func (c *CosmosDBScanner) Review(resourceGroupName string) ([]IAzureServiceResul
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *database.Name,
 			SKU:                string(*database.Properties.DatabaseAccountOfferType),
@@ -93,7 +87,7 @@ func (c *CosmosDBScanner) listDatabases(resourceGroupName string) ([]*armcosmos.
 
 		domains := make([]*armcosmos.DatabaseAccountGetResults, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

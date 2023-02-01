@@ -77,6 +77,11 @@ func TestStorageScanner_Review(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
+	config := &ScannerConfig{
+		SubscriptionID: "subscriptionId",
+		Cred:           nil,
+		Ctx:            context.TODO(),
+	}
 	tests := []struct {
 		name    string
 		c       StorageScanner
@@ -87,17 +92,15 @@ func TestStorageScanner_Review(t *testing.T) {
 		{
 			name: "Test Review",
 			c: StorageScanner{
+				config: config,
 				diagnosticsSettings: DiagnosticsSettings{
+					config:                    config,
 					diagnosticsSettingsClient: nil,
-					ctx:                       context.TODO(),
 					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
 						return true, nil
 					},
 				},
-				subscriptionID: "subscriptionId",
-				ctx:            context.TODO(),
-				cred:           nil,
-				storageClient:  nil,
+				storageClient: nil,
 				listStorageFunc: func(resourceGroupName string) ([]*armstorage.Account, error) {
 					return []*armstorage.Account{
 							newStorage(t),

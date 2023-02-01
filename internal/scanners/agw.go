@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
 
 // ApplicationGatewayScanner - Analyzer for Application Gateways
 type ApplicationGatewayScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	gatewaysClient      *armnetwork.ApplicationGatewaysClient
 	listGatewaysFunc    func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error)
 }
 
 // Init - Initializes the ApplicationGatewayAnalyzer
-func (a *ApplicationGatewayScanner) Init(config ScannerConfig) error {
-	a.subscriptionID = config.SubscriptionID
-	a.ctx = config.Ctx
-	a.cred = config.Cred
+func (a *ApplicationGatewayScanner) Init(config *ScannerConfig) error {
+	a.config = config
 	var err error
-	a.gatewaysClient, err = armnetwork.NewApplicationGatewaysClient(config.SubscriptionID, config.Cred, nil)
+	a.gatewaysClient, err = armnetwork.NewApplicationGatewaysClient(config.SubscriptionID, a.config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	a.diagnosticsSettings = DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -53,7 +47,7 @@ func (a *ApplicationGatewayScanner) Review(resourceGroupName string) ([]IAzureSe
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     a.subscriptionID,
+			SubscriptionID:     a.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *g.Name,
 			SKU:                string(*g.Properties.SKU.Name),
@@ -74,7 +68,7 @@ func (a *ApplicationGatewayScanner) listGateways(resourceGroupName string) ([]*a
 		pager := a.gatewaysClient.NewListPager(resourceGroupName, nil)
 		results := []*armnetwork.ApplicationGateway{}
 		for pager.More() {
-			resp, err := pager.NextPage(a.ctx)
+			resp, err := pager.NextPage(a.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

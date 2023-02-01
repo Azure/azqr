@@ -1,24 +1,21 @@
 package scanners
 
 import (
-	"context"
-
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 )
 
 // DiagnosticsSettings - analyzer
 type DiagnosticsSettings struct {
+	config                    *ScannerConfig
 	diagnosticsSettingsClient *armmonitor.DiagnosticSettingsClient
-	ctx                       context.Context
 	hasDiagnosticsFunc        func(resourceId string) (bool, error)
 }
 
 // Init - Initializes the DiagnosticsSettings
-func (s *DiagnosticsSettings) Init(ctx context.Context, cred azcore.TokenCredential) error {
-	s.ctx = ctx
+func (s *DiagnosticsSettings) Init(config *ScannerConfig) error {
+	s.config = config
 	var err error
-	s.diagnosticsSettingsClient, err = armmonitor.NewDiagnosticSettingsClient(cred, nil)
+	s.diagnosticsSettingsClient, err = armmonitor.NewDiagnosticSettingsClient(s.config.Cred, nil)
 	if err != nil {
 		return err
 	}
@@ -31,7 +28,7 @@ func (s *DiagnosticsSettings) HasDiagnostics(resourceID string) (bool, error) {
 		pager := s.diagnosticsSettingsClient.NewListPager(resourceID, nil)
 
 		for pager.More() {
-			resp, err := pager.NextPage(s.ctx)
+			resp, err := pager.NextPage(s.config.Ctx)
 			if err != nil {
 				return false, err
 			}

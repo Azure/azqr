@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
 
 // EventHubScanner - Analyzer for Event Hubs
 type EventHubScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	client              *armeventhub.NamespacesClient
 	listEventHubsFunc   func(resourceGroupName string) ([]*armeventhub.EHNamespace, error)
 }
 
 // Init - Initializes the EventHubScanner
-func (a *EventHubScanner) Init(config ScannerConfig) error {
-	a.subscriptionID = config.SubscriptionID
-	a.ctx = config.Ctx
-	a.cred = config.Cred
+func (a *EventHubScanner) Init(config *ScannerConfig) error {
+	a.config = config
 	var err error
 	a.client, err = armeventhub.NewNamespacesClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	a.diagnosticsSettings = DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -59,7 +53,7 @@ func (c *EventHubScanner) Review(resourceGroupName string) ([]IAzureServiceResul
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *eventHub.Name,
 			SKU:                sku,
@@ -81,7 +75,7 @@ func (c *EventHubScanner) listEventHubs(resourceGroupName string) ([]*armeventhu
 
 		namespaces := make([]*armeventhub.EHNamespace, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

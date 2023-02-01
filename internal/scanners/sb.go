@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
 
 // ServiceBusScanner - Analyzer for Service Bus
 type ServiceBusScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	servicebusClient    *armservicebus.NamespacesClient
 	listServiceBusFunc  func(resourceGroupName string) ([]*armservicebus.SBNamespace, error)
 }
 
 // Init - Initializes the ServiceBusScanner
-func (a *ServiceBusScanner) Init(config ScannerConfig) error {
-	a.subscriptionID = config.SubscriptionID
-	a.ctx = config.Ctx
-	a.cred = config.Cred
+func (a *ServiceBusScanner) Init(config *ScannerConfig) error {
+	a.config = config
 	var err error
 	a.servicebusClient, err = armservicebus.NewNamespacesClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	a.diagnosticsSettings = DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -59,7 +53,7 @@ func (c *ServiceBusScanner) Review(resourceGroupName string) ([]IAzureServiceRes
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *servicebus.Name,
 			SKU:                sku,
@@ -81,7 +75,7 @@ func (c *ServiceBusScanner) listServiceBus(resourceGroupName string) ([]*armserv
 
 		namespaces := make([]*armservicebus.SBNamespace, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

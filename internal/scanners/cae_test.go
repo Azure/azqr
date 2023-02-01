@@ -68,6 +68,11 @@ func TestContainerAppsScanner_Review(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
+	config := &ScannerConfig{
+		SubscriptionID: "subscriptionId",
+		Cred:           nil,
+		Ctx:            context.TODO(),
+	}
 	tests := []struct {
 		name    string
 		c       ContainerAppsScanner
@@ -78,16 +83,14 @@ func TestContainerAppsScanner_Review(t *testing.T) {
 		{
 			name: "Test Review",
 			c: ContainerAppsScanner{
+				config: config,
 				diagnosticsSettings: DiagnosticsSettings{
+					config:                    config,
 					diagnosticsSettingsClient: nil,
-					ctx:                       context.TODO(),
 					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
 						return true, nil
 					},
 				},
-				subscriptionID: "subscriptionId",
-				ctx:            context.TODO(),
-				cred:           nil,
 				appsClient:     nil,
 				listAppsFunc: func(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error) {
 					return []*armappcontainers.ManagedEnvironment{

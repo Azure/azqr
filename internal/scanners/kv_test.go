@@ -61,6 +61,11 @@ func TestKeyVaultScanner_Review(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
+	config := &ScannerConfig{
+		SubscriptionID: "subscriptionId",
+		Cred:           nil,
+		Ctx:            context.TODO(),
+	}
 	tests := []struct {
 		name    string
 		c       KeyVaultScanner
@@ -71,17 +76,15 @@ func TestKeyVaultScanner_Review(t *testing.T) {
 		{
 			name: "Test Review",
 			c: KeyVaultScanner{
+				config: config,
 				diagnosticsSettings: DiagnosticsSettings{
+					config:                    config,
 					diagnosticsSettingsClient: nil,
-					ctx:                       context.TODO(),
 					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
 						return true, nil
 					},
 				},
-				subscriptionID: "subscriptionId",
-				ctx:            context.TODO(),
-				cred:           nil,
-				vaultsClient:   nil,
+				vaultsClient: nil,
 				listVaultsFunc: func(resourceGroupName string) ([]*armkeyvault.Vault, error) {
 					return []*armkeyvault.Vault{
 							newKeyVault(t),

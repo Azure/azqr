@@ -57,6 +57,11 @@ func TestEventGridScanner_Review(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
+	config := &ScannerConfig{
+		SubscriptionID: "subscriptionId",
+		Cred:           nil,
+		Ctx:            context.TODO(),
+	}
 	tests := []struct {
 		name    string
 		a       EventGridScanner
@@ -67,17 +72,15 @@ func TestEventGridScanner_Review(t *testing.T) {
 		{
 			name: "Test Review",
 			a: EventGridScanner{
+				config: config,
 				diagnosticsSettings: DiagnosticsSettings{
+					config:                    config,
 					diagnosticsSettingsClient: nil,
-					ctx:                       context.TODO(),
 					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
 						return true, nil
 					},
 				},
-				subscriptionID: "subscriptionId",
-				ctx:            context.TODO(),
-				cred:           nil,
-				domainsClient:  nil,
+				domainsClient: nil,
 				listDomainFunc: func(resourceGroupName string) ([]*armeventgrid.Domain, error) {
 					return []*armeventgrid.Domain{
 							newEventGrid(t),

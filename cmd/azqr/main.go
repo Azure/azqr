@@ -107,7 +107,7 @@ func main() {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	config := scanners.ScannerConfig{
+	config := &scanners.ScannerConfig{
 		Ctx:                ctx,
 		SubscriptionID:     subscriptionID,
 		Cred:               cred,
@@ -140,7 +140,7 @@ func main() {
 	}
 
 	defenderScanner := scanners.DefenderScanner{}
-	err = defenderScanner.Init(&config)
+	err = defenderScanner.Init(config)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
 // SignalRScanner - Analyzer for SignalR
 type SignalRScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	signalrClient       *armsignalr.Client
 	listSignalRFunc     func(resourceGroupName string) ([]*armsignalr.ResourceInfo, error)
 }
 
 // Init - Initializes the SignalRScanner
-func (c *SignalRScanner) Init(config ScannerConfig) error {
-	c.subscriptionID = config.SubscriptionID
-	c.ctx = config.Ctx
-	c.cred = config.Cred
+func (c *SignalRScanner) Init(config *ScannerConfig) error {
+	c.config = config
 	var err error
 	c.signalrClient, err = armsignalr.NewClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	c.diagnosticsSettings = DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -59,7 +53,7 @@ func (c *SignalRScanner) Review(resourceGroupName string) ([]IAzureServiceResult
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *signalr.Name,
 			SKU:                sku,
@@ -81,7 +75,7 @@ func (c *SignalRScanner) listSignalR(resourceGroupName string) ([]*armsignalr.Re
 
 		signalrs := make([]*armsignalr.ResourceInfo, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

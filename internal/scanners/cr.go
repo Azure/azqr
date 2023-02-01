@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
 // ContainerRegistryScanner - Analyzer for Container Registries
 type ContainerRegistryScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	registriesClient    *armcontainerregistry.RegistriesClient
 	listRegistriesFunc  func(resourceGroupName string) ([]*armcontainerregistry.Registry, error)
 }
 
 // Init - Initializes the ContainerRegistryScanner
-func (c *ContainerRegistryScanner) Init(config ScannerConfig) error {
-	c.subscriptionID = config.SubscriptionID
-	c.ctx = config.Ctx
-	c.cred = config.Cred
+func (c *ContainerRegistryScanner) Init(config *ScannerConfig) error {
+	c.config = config
 	var err error
 	c.registriesClient, err = armcontainerregistry.NewRegistriesClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	c.diagnosticsSettings = DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -53,7 +47,7 @@ func (c *ContainerRegistryScanner) Review(resourceGroupName string) ([]IAzureSer
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *registry.Name,
 			SKU:                string(*registry.SKU.Name),
@@ -75,7 +69,7 @@ func (c *ContainerRegistryScanner) listRegistries(resourceGroupName string) ([]*
 
 		registries := make([]*armcontainerregistry.Registry, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

@@ -76,6 +76,11 @@ func TestContainerRegistryScanner_Review(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
+	config := &ScannerConfig{
+		SubscriptionID: "subscriptionId",
+		Cred:           nil,
+		Ctx:            context.TODO(),
+	}
 	tests := []struct {
 		name    string
 		c       ContainerRegistryScanner
@@ -86,16 +91,14 @@ func TestContainerRegistryScanner_Review(t *testing.T) {
 		{
 			name: "Test Review",
 			c: ContainerRegistryScanner{
+				config: config,
 				diagnosticsSettings: DiagnosticsSettings{
+					config:                    config,
 					diagnosticsSettingsClient: nil,
-					ctx:                       context.TODO(),
 					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
 						return true, nil
 					},
 				},
-				subscriptionID:   "subscriptionId",
-				ctx:              context.TODO(),
-				cred:             nil,
 				registriesClient: nil,
 				listRegistriesFunc: func(resourceGroupName string) ([]*armcontainerregistry.Registry, error) {
 					return []*armcontainerregistry.Registry{

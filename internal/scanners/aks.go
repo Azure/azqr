@@ -1,36 +1,30 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
 )
 
 // AKSScanner - Analyzer for AKS Clusters
 type AKSScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	clustersClient      *armcontainerservice.ManagedClustersClient
 	listClustersFunc    func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error)
 }
 
 // Init - Initializes the AKSScanner
-func (a *AKSScanner) Init(config ScannerConfig) error {
-	a.subscriptionID = config.SubscriptionID
-	a.ctx = config.Ctx
-	a.cred = config.Cred
+func (a *AKSScanner) Init(config *ScannerConfig) error {
+	a.config = config
 	var err error
 	a.clustersClient, err = armcontainerservice.NewManagedClustersClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
 		return err
 	}
 	a.diagnosticsSettings = DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -74,7 +68,7 @@ func (a *AKSScanner) Review(resourceGroupName string) ([]IAzureServiceResult, er
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     a.subscriptionID,
+			SubscriptionID:     a.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *c.Name,
 			SKU:                sku,
@@ -96,7 +90,7 @@ func (a *AKSScanner) listClusters(resourceGroupName string) ([]*armcontainerserv
 
 		clusters := make([]*armcontainerservice.ManagedCluster, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(a.ctx)
+			resp, err := pager.NextPage(a.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

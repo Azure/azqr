@@ -1,21 +1,17 @@
 package scanners
 
 import (
-	"context"
 	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
 )
 
 // PostgreScanner - Analyzer for PostgreSQL
 type PostgreScanner struct {
+	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
-	subscriptionID      string
-	ctx                 context.Context
-	cred                azcore.TokenCredential
 	postgreClient       *armpostgresql.ServersClient
 	flexibleClient      *armpostgresqlflexibleservers.ServersClient
 	listPostgreFunc     func(resourceGroupName string) ([]*armpostgresql.Server, error)
@@ -23,10 +19,8 @@ type PostgreScanner struct {
 }
 
 // Init - Initializes the PostgreScanner
-func (c *PostgreScanner) Init(config ScannerConfig) error {
-	c.subscriptionID = config.SubscriptionID
-	c.ctx = config.Ctx
-	c.cred = config.Cred
+func (c *PostgreScanner) Init(config *ScannerConfig) error {
+	c.config = config
 	var err error
 	c.postgreClient, err = armpostgresql.NewServersClient(config.SubscriptionID, config.Cred, nil)
 	if err != nil {
@@ -37,7 +31,7 @@ func (c *PostgreScanner) Init(config ScannerConfig) error {
 		return err
 	}
 	c.diagnosticsSettings = DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config.Ctx, config.Cred)
+	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
@@ -60,7 +54,7 @@ func (c *PostgreScanner) Review(resourceGroupName string) ([]IAzureServiceResult
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *postgre.Name,
 			SKU:                *postgre.SKU.Name,
@@ -94,7 +88,7 @@ func (c *PostgreScanner) Review(resourceGroupName string) ([]IAzureServiceResult
 		}
 
 		results = append(results, AzureServiceResult{
-			SubscriptionID:     c.subscriptionID,
+			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
 			ServiceName:        *postgre.Name,
 			SKU:                *postgre.SKU.Name,
@@ -117,7 +111,7 @@ func (c *PostgreScanner) listPostgre(resourceGroupName string) ([]*armpostgresql
 
 		servers := make([]*armpostgresql.Server, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -135,7 +129,7 @@ func (c *PostgreScanner) listFlexiblePostgre(resourceGroupName string) ([]*armpo
 
 		servers := make([]*armpostgresqlflexibleservers.Server, 0)
 		for pager.More() {
-			resp, err := pager.NextPage(c.ctx)
+			resp, err := pager.NextPage(c.config.Ctx)
 			if err != nil {
 				return nil, err
 			}

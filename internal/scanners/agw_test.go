@@ -72,6 +72,11 @@ func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
+	config := &ScannerConfig{
+		SubscriptionID: "subscriptionId",
+		Cred:           nil,
+		Ctx:            context.TODO(),
+	}
 	tests := []struct {
 		name    string
 		a       ApplicationGatewayScanner
@@ -81,18 +86,16 @@ func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
 	}{
 		{
 			name: "Test Review",
+
 			a: ApplicationGatewayScanner{
+				config: config,
 				diagnosticsSettings: DiagnosticsSettings{
+					config:                    config,
 					diagnosticsSettingsClient: nil,
-					ctx:                       context.TODO(),
 					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
 						return true, nil
 					},
 				},
-				subscriptionID: "subscriptionId",
-				ctx:            context.TODO(),
-				cred:           nil,
-				gatewaysClient: nil,
 				listGatewaysFunc: func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error) {
 					return []*armnetwork.ApplicationGateway{
 							newApplicationGateway(t),
