@@ -31,8 +31,8 @@ func (a *EventHubScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all Event Hubs in a Resource Group
-func (c *EventHubScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all Event Hubs in a Resource Group
+func (c *EventHubScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Event Hubs in Resource Group %s", resourceGroupName)
 
 	eventHubs, err := c.listEventHubs(resourceGroupName)

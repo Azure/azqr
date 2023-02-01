@@ -31,8 +31,8 @@ func (c *RedisScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all Redis in a Resource Group
-func (c *RedisScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all Redis in a Resource Group
+func (c *RedisScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Redis in Resource Group %s", resourceGroupName)
 
 	redis, err := c.listRedis(resourceGroupName)

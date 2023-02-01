@@ -91,7 +91,7 @@ func TestContainerAppsScanner_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				appsClient:     nil,
+				appsClient: nil,
 				listAppsFunc: func(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error) {
 					return []*armappcontainers.ManagedEnvironment{
 							newContainerApps(t),
@@ -114,13 +114,13 @@ func TestContainerAppsScanner_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.c.Review(tt.args.resourceGroupName)
+			got, err := tt.c.Scan(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ContainerAppsScanner.Review() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ContainerAppsScanner.Scan() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ContainerAppsScanner.Review() = %v, want %v", got, tt.want)
+				t.Errorf("ContainerAppsScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

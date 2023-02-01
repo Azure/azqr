@@ -31,8 +31,8 @@ func (c *StorageScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all Storage in a Resource Group
-func (c *StorageScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all Storage in a Resource Group
+func (c *StorageScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Storage in Resource Group %s", resourceGroupName)
 
 	storage, err := c.listStorage(resourceGroupName)

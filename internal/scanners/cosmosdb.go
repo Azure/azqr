@@ -31,8 +31,8 @@ func (a *CosmosDBScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all CosmosDB Databases in a Resource Group
-func (c *CosmosDBScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all CosmosDB Databases in a Resource Group
+func (c *CosmosDBScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing CosmosDB Databases in Resource Group %s", resourceGroupName)
 
 	databases, err := c.listDatabases(resourceGroupName)

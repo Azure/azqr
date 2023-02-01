@@ -12,7 +12,7 @@ type AppConfigurationScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
 	client              *armappconfiguration.ConfigurationStoresClient
-	listFunc        func(resourceGroupName string) ([]*armappconfiguration.ConfigurationStore, error)
+	listFunc            func(resourceGroupName string) ([]*armappconfiguration.ConfigurationStore, error)
 }
 
 // Init - Initializes the AppConfigurationScanner
@@ -31,8 +31,8 @@ func (a *AppConfigurationScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all App Configurations in a Resource Group
-func (a *AppConfigurationScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all App Configurations in a Resource Group
+func (a *AppConfigurationScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Apps in Resource Group %s", resourceGroupName)
 
 	apps, err := a.list(resourceGroupName)

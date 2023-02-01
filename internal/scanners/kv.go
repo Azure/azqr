@@ -31,8 +31,8 @@ func (c *KeyVaultScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all Key Vaults in a Resource Group
-func (c *KeyVaultScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all Key Vaults in a Resource Group
+func (c *KeyVaultScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Key Vaults in Resource Group %s", resourceGroupName)
 
 	vaults, err := c.listVaults(resourceGroupName)

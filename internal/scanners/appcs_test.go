@@ -121,13 +121,13 @@ func TestAppConfigurationScanner_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.a.Review(tt.args.resourceGroupName)
+			got, err := tt.a.Scan(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("AppConfigurationScanner.Review() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("AppConfigurationScanner.Scan() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AppConfigurationScanner.Review() = %v, want %v", got, tt.want)
+				t.Errorf("AppConfigurationScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

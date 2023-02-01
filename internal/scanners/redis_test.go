@@ -97,7 +97,7 @@ func TestRedisScanner_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				redisClient:    nil,
+				redisClient: nil,
 				listRedisFunc: func(resourceGroupName string) ([]*armredis.ResourceInfo, error) {
 					return []*armredis.ResourceInfo{
 							newRedis(t),
@@ -120,13 +120,13 @@ func TestRedisScanner_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.c.Review(tt.args.resourceGroupName)
+			got, err := tt.c.Scan(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("RedisScanner.Review() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("RedisScanner.Scan() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("RedisScanner.Review() = %v, want %v", got, tt.want)
+				t.Errorf("RedisScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

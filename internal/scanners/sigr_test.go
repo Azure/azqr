@@ -98,7 +98,7 @@ func TestSignalRScanner_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				signalrClient:  nil,
+				signalrClient: nil,
 				listSignalRFunc: func(resourceGroupName string) ([]*armsignalr.ResourceInfo, error) {
 					return []*armsignalr.ResourceInfo{
 							newSignalR(t),
@@ -121,13 +121,13 @@ func TestSignalRScanner_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.c.Review(tt.args.resourceGroupName)
+			got, err := tt.c.Scan(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("SignalRScanner.Review() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("SignalRScanner.Scan() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SignalRScanner.Review() = %v, want %v", got, tt.want)
+				t.Errorf("SignalRScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

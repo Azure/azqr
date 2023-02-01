@@ -31,8 +31,8 @@ func (c *ContainerRegistryScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all Container Registries in a Resource Group
-func (c *ContainerRegistryScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all Container Registries in a Resource Group
+func (c *ContainerRegistryScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Registries in Resource Group %s", resourceGroupName)
 
 	regsitries, err := c.listRegistries(resourceGroupName)

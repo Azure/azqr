@@ -31,8 +31,8 @@ func (a *EventGridScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all EventGrid Domains in a Resource Group
-func (a *EventGridScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all EventGrid Domains in a Resource Group
+func (a *EventGridScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing EventGrid Domains in Resource Group %s", resourceGroupName)
 
 	domains, err := a.listDomain(resourceGroupName)

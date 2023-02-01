@@ -105,13 +105,13 @@ func TestServiceBusScanner_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.c.Review(tt.args.resourceGroupName)
+			got, err := tt.c.Scan(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ServiceBusScanner.Review() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ServiceBusScanner.Scan() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ServiceBusScanner.Review() = %v, want %v", got, tt.want)
+				t.Errorf("ServiceBusScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

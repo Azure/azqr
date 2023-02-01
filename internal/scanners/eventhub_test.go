@@ -120,13 +120,13 @@ func TestEventHubScanner_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.c.Review(tt.args.resourceGroupName)
+			got, err := tt.c.Scan(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("EventHubScanner.Review() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("EventHubScanner.Scan() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("EventHubScanner.Review() = %v, want %v", got, tt.want)
+				t.Errorf("EventHubScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -99,7 +99,7 @@ func TestAKSScanner_Review(t *testing.T) {
 			a: AKSScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{
-					config: config,
+					config:                    config,
 					diagnosticsSettingsClient: nil,
 					hasDiagnosticsFunc: func(resourceId string) (bool, error) {
 						return true, nil
@@ -128,13 +128,13 @@ func TestAKSScanner_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.a.Review(tt.args.resourceGroupName)
+			got, err := tt.a.Scan(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("AKSScanner.Review() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("AKSScanner.Scan() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AKSScanner.Review() = %v, want %v", got, tt.want)
+				t.Errorf("AKSScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

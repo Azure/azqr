@@ -31,8 +31,8 @@ func (c *ContainerInstanceScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all Container Instances in a Resource Group
-func (c *ContainerInstanceScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all Container Instances in a Resource Group
+func (c *ContainerInstanceScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Instances in Resource Group %s", resourceGroupName)
 
 	instances, err := c.listInstances(resourceGroupName)

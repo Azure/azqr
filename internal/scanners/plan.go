@@ -38,8 +38,8 @@ func (a *AppServiceScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all App Service Plans in a Resource Group
-func (a *AppServiceScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all App Service Plans in a Resource Group
+func (a *AppServiceScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing App Service Plans in Resource Group %s", resourceGroupName)
 
 	sites, err := a.listPlans(resourceGroupName)

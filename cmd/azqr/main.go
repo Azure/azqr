@@ -144,7 +144,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	defenderResults, err := defenderScanner.ListConfiguration()
 	if err != nil {
 		log.Fatal(err)
@@ -193,7 +193,7 @@ func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]scanners.IAzureSc
 			if context.Canceled == rc.Ctx.Err() {
 				return
 			}
-			res, err := (*a).Review(r)
+			res, err := (*a).Scan(r)
 			if err != nil {
 				rc.ErrCh <- err
 			}

@@ -118,13 +118,13 @@ func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.a.Review(tt.args.resourceGroupName)
+			got, err := tt.a.Scan(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ApplicationGatewayScanner.Review() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ApplicationGatewayScanner.Scan() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ApplicationGatewaScanner.Review() = %v, want %v", got, tt.want)
+				t.Errorf("ApplicationGatewaScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

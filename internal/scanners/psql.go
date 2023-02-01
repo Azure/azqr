@@ -38,8 +38,8 @@ func (c *PostgreScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all PostgreSQL in a Resource Group
-func (c *PostgreScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all PostgreSQL in a Resource Group
+func (c *PostgreScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Postgre in Resource Group %s", resourceGroupName)
 
 	postgre, err := c.listPostgre(resourceGroupName)

@@ -31,8 +31,8 @@ func (a *ApplicationGatewayScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all Application Gateways in a Resource Group
-func (a *ApplicationGatewayScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all Application Gateways in a Resource Group
+func (a *ApplicationGatewayScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Application Gateways in Resource Group %s", resourceGroupName)
 
 	gateways, err := a.listGateways(resourceGroupName)

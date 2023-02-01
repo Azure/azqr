@@ -97,7 +97,7 @@ func TestAPIMAnalyzer_Review(t *testing.T) {
 						return true, nil
 					},
 				},
-				serviceClient:  nil,
+				serviceClient: nil,
 				listServicesFunc: func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
 					return []*armapimanagement.ServiceResource{
 							newAPIM(t),
@@ -120,13 +120,13 @@ func TestAPIMAnalyzer_Review(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.a.Review(tt.args.resourceGroupName)
+			got, err := tt.a.Scan(tt.args.resourceGroupName)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("APIManagementScanner.Review() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("APIManagementScanner.Scan() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("APIManagementScanner.Review() = %v, want %v", got, tt.want)
+				t.Errorf("APIManagementScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

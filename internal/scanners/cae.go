@@ -31,8 +31,8 @@ func (a *ContainerAppsScanner) Init(config *ScannerConfig) error {
 	return nil
 }
 
-// Review - Analyzes all Container Apps in a Resource Group
-func (a *ContainerAppsScanner) Review(resourceGroupName string) ([]IAzureServiceResult, error) {
+// Scan - Scans all Container Apps in a Resource Group
+func (a *ContainerAppsScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Apps in Resource Group %s", resourceGroupName)
 
 	apps, err := a.listApps(resourceGroupName)

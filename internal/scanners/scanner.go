@@ -30,7 +30,7 @@ type (
 	// AzureServiceAnalyzer - Interface for all Azure Service Analyzers
 	IAzureScanner interface {
 		Init(config *ScannerConfig) error
-		Review(resourceGroupName string) ([]IAzureServiceResult, error)
+		Scan(resourceGroupName string) ([]IAzureServiceResult, error)
 	}
 
 	// AzureServiceResult - Struct for all Azure Service Results
