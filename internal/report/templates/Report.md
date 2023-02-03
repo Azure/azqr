@@ -1,4 +1,4 @@
-# Microsoft CSU / Architecture Review for {{customer}}
+# Microsoft CSU / Azure Quick Review
 **{{date}}**
 
 ## Introduction
@@ -7,7 +7,7 @@ Our customers are increasingly dependent on Azure for core, mission-critical com
 
 Care cannot start and end when critical issues emerge. It must be constant, and systematically linked to your business and cloud needs, to ensure you are given the assistance needed to get and stay truly healthy.
 
-After performing a high level analysis of {{customer}}'s solution we present a series of recommendations.
+After performing a high level analysis of current deployed Azure services, we present a series of recommendations.
 
 ## Services Review
 

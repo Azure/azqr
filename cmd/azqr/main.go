@@ -28,7 +28,6 @@ func main() {
 	subscriptionPtr := flag.String("s", "", "Azure Subscription Id (Required)")
 	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
 	outputPtr := flag.String("o", "azqr_report", "Output file prefix")
-	customerPtr := flag.String("c", "Replace_With_Customer_Name", "Customer Name")
 	detail := flag.Bool("d", false, "Enable more details in the report")
 	concurrency := flag.Int("p", defaultConcurrency, fmt.Sprintf("Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency.", defaultConcurrency))
 	ver := flag.Bool("v", false, "Print version and exit")
@@ -38,7 +37,6 @@ func main() {
 	subscriptionID := *subscriptionPtr
 	resourceGroupName := *resourceGroupPtr
 	outputFilePrefix := *outputPtr
-	customer := *customerPtr
 
 	current_time := time.Now()
 	outputFileStamp := fmt.Sprintf("%d_%02d_%02d_T%02d%02d%02d",
@@ -151,7 +149,6 @@ func main() {
 	}
 
 	reportData := renderers.ReportData{
-		Customer:           customer,
 		OutputFileName:     outputFile,
 		EnableDetailedScan: config.EnableDetailedScan,
 		MainData:           all,

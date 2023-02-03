@@ -5,7 +5,6 @@ import (
 )
 
 type ReportData struct {
-	Customer           string
 	OutputFileName     string
 	EnableDetailedScan bool
 	MainData           []scanners.IAzureServiceResult

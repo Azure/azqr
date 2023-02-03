@@ -27,7 +27,6 @@ func CreateMarkdownReport(data ReportData) {
 	reportTemplate := templates.GetTemplates("Report.md")
 	reportTemplate = strings.Replace(reportTemplate, "{{results}}", resultsTable, 1)
 	reportTemplate = strings.Replace(reportTemplate, "{{date}}", time.Now().Format("2006-01-02"), 1)
-	reportTemplate = strings.Replace(reportTemplate, "{{customer}}", data.Customer, -1)
 
 	recommendations := ""
 	dict := map[string]bool{}
