@@ -26,7 +26,7 @@ func CreateExcelReport(data ReportData) {
 
 		rows := [][]string{}
 		for _, r := range data.MainData {
-			rows = append(mapToRow(heathers, r.ToMap()), rows...)
+			rows = append(mapToRow(heathers, r.ToMap(data.Mask)), rows...)
 		}
 
 		for idx, row := range rows {
@@ -72,7 +72,7 @@ func CreateExcelReport(data ReportData) {
 
 			rows := [][]string{}
 			for _, r := range data.DefenderData {
-				rows = append(mapToRow(heathers, r.ToMap()), rows...)
+				rows = append(mapToRow(heathers, r.ToMap(data.Mask)), rows...)
 			}
 
 			for idx, row := range rows {

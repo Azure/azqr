@@ -14,7 +14,7 @@ import (
 )
 
 func CreateMarkdownReport(data ReportData) {
-	resultsTable := renderTable(data.MainData)
+	resultsTable := renderTable(data.MainData, data.Mask)
 
 	var allFunctions []scanners.IAzureServiceResult
 	for _, r := range data.MainData {
@@ -38,7 +38,7 @@ func CreateMarkdownReport(data ReportData) {
 			recommendations += templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
 
 			if r.GetResourceType() == "Microsoft.Web/serverfarms/sites" && len(allFunctions) > 0 && data.EnableDetailedScan {
-				recommendations = strings.Replace(recommendations, "{{functions}}", renderDetailsTable(allFunctions), 1)
+				recommendations = strings.Replace(recommendations, "{{functions}}", renderDetailsTable(allFunctions, data.Mask), 1)
 			} else {
 				recommendations = strings.Replace(recommendations, "{{functions}}", "", 1)
 			}
@@ -48,7 +48,7 @@ func CreateMarkdownReport(data ReportData) {
 	if len(data.DefenderData) > 0 {
 		recommendations += "\n\n"
 		recommendations += templates.GetTemplates("Microsoft.Security.pricings.md")
-		recommendations = strings.Replace(recommendations, "{{defender}}", renderDefenderTable(data.DefenderData), 1)
+		recommendations = strings.Replace(recommendations, "{{defender}}", renderDefenderTable(data.DefenderData, data.Mask), 1)
 	}
 
 	reportTemplate = strings.Replace(reportTemplate, "{{recommendations}}", recommendations, 1)
@@ -66,7 +66,7 @@ func CreateMarkdownReport(data ReportData) {
 	}
 }
 
-func renderTable(results []scanners.IAzureServiceResult) string {
+func renderTable(results []scanners.IAzureServiceResult, mask bool) string {
 	if len(results) == 0 {
 		return "No results found."
 	}
@@ -75,7 +75,7 @@ func renderTable(results []scanners.IAzureServiceResult) string {
 
 	rows := [][]string{}
 	for _, r := range results {
-		rows = append(mapToRow(heathers, r.ToMap()), rows...)
+		rows = append(mapToRow(heathers, r.ToMap(mask)), rows...)
 	}
 
 	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
@@ -91,12 +91,12 @@ func renderTable(results []scanners.IAzureServiceResult) string {
 	return prettyPrintedTable
 }
 
-func renderDetailsTable(results []scanners.IAzureServiceResult) string {
+func renderDetailsTable(results []scanners.IAzureServiceResult, mask bool) string {
 	heathers := results[0].GetDetailHeathers()
 
 	rows := [][]string{}
 	for _, r := range results {
-		rows = append(mapToRow(heathers, r.ToDetailMap()), rows...)
+		rows = append(mapToRow(heathers, r.ToDetailMap(mask)), rows...)
 	}
 
 	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().
@@ -111,7 +111,7 @@ func renderDetailsTable(results []scanners.IAzureServiceResult) string {
 	return prettyPrintedTable
 }
 
-func renderDefenderTable(results []scanners.DefenderResult) string {
+func renderDefenderTable(results []scanners.DefenderResult, mask bool) string {
 	if len(results) == 0 {
 		return "No results found."
 	}
@@ -120,7 +120,7 @@ func renderDefenderTable(results []scanners.DefenderResult) string {
 
 	rows := [][]string{}
 	for _, r := range results {
-		rows = append(mapToRow(heathers, r.ToMap()), rows...)
+		rows = append(mapToRow(heathers, r.ToMap(mask)), rows...)
 	}
 
 	prettyPrintedTable, err := markdown.NewTableFormatterBuilder().

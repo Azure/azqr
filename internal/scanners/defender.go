@@ -9,7 +9,7 @@ import (
 // DefenderResult - Defender result
 type DefenderResult struct {
 	SubscriptionID, Name, Tier string
-	Deprecated                       bool
+	Deprecated                 bool
 }
 
 // DefenderScanner - Defender scanner
@@ -29,9 +29,9 @@ func (d *DefenderResult) GetProperties() []string {
 }
 
 // ToMap - Returns the properties of the DefenderResult as a map
-func (r DefenderResult) ToMap() map[string]string {
+func (r DefenderResult) ToMap(mask bool) map[string]string {
 	return map[string]string{
-		"SubscriptionID": r.SubscriptionID,
+		"SubscriptionID": maskSubscriptionID(r.SubscriptionID, mask),
 		"Name":           r.Name,
 		"Tier":           r.Tier,
 		"Deprecated":     strconv.FormatBool(r.Deprecated),

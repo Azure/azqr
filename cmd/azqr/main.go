@@ -29,6 +29,7 @@ func main() {
 	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
 	outputPtr := flag.String("o", "azqr_report", "Output file prefix")
 	detail := flag.Bool("d", false, "Enable more details in the report")
+	maskPtr := flag.Bool("m", false, "Mask the subscription id in the report")
 	concurrency := flag.Int("p", defaultConcurrency, fmt.Sprintf("Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency.", defaultConcurrency))
 	ver := flag.Bool("v", false, "Print version and exit")
 
@@ -151,6 +152,7 @@ func main() {
 	reportData := renderers.ReportData{
 		OutputFileName:     outputFile,
 		EnableDetailedScan: config.EnableDetailedScan,
+		Mask:               *maskPtr,
 		MainData:           all,
 		DefenderData:       defenderResults,
 	}

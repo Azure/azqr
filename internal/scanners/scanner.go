@@ -2,6 +2,7 @@ package scanners
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -14,8 +15,8 @@ type (
 		GetResourceType() string
 		GetHeathers() []string
 		GetDetailHeathers() []string
-		ToMap() map[string]string
-		ToDetailMap() map[string]string
+		ToMap(mask bool) map[string]string
+		ToDetailMap(mask bool) map[string]string
 		Value() AzureServiceResult
 	}
 
@@ -50,9 +51,9 @@ type (
 )
 
 // ToMap - Returns a map representation of the Azure Service Result
-func (r AzureServiceResult) ToMap() map[string]string {
+func (r AzureServiceResult) ToMap(mask bool) map[string]string {
 	return map[string]string{
-		"SubscriptionID": r.SubscriptionID,
+		"SubscriptionID": maskSubscriptionID(r.SubscriptionID, mask),
 		"ResourceGroup":  r.ResourceGroup,
 		"Location":       parseLocation(r.Location),
 		"Type":           r.Type,
@@ -67,7 +68,7 @@ func (r AzureServiceResult) ToMap() map[string]string {
 }
 
 // ToDetail - Returns a map representation of the Azure Service Result
-func (r AzureServiceResult) ToDetailMap() map[string]string {
+func (r AzureServiceResult) ToDetailMap(mask bool) map[string]string {
 	return map[string]string{}
 }
 
@@ -115,9 +116,9 @@ type AzureFunctionAppResult struct {
 }
 
 // ToDetail - Returns a map representation of the Azure Function App Result
-func (r AzureFunctionAppResult) ToDetailMap() map[string]string {
+func (r AzureFunctionAppResult) ToDetailMap(mask bool) map[string]string {
 	return map[string]string{
-		"SubscriptionID":                r.SubscriptionID,
+		"SubscriptionID":                maskSubscriptionID(r.SubscriptionID, mask),
 		"ResourceGroup":                 r.ResourceGroup,
 		"Location":                      parseLocation(r.Location),
 		"Type":                          r.Type,
@@ -150,4 +151,13 @@ func (r AzureFunctionAppResult) GetDetailProperties() []string {
 
 func parseLocation(location string) string {
 	return strings.ToLower(strings.ReplaceAll(location, " ", ""))
+}
+
+func maskSubscriptionID(subscriptionID string, mask bool) string {
+	if !mask {
+		return subscriptionID
+	}
+
+	// Show only last 7 chars of the subscription ID
+	return fmt.Sprintf("xxxxxxxx-xxxx-xxxx-xxxx-xxxxx%s", subscriptionID[29:])
 }
