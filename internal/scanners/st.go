@@ -47,7 +47,12 @@ func (c *StorageScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, 
 		}
 
 		sku := string(*storage.SKU.Name)
-		tier := string(*storage.Properties.AccessTier)
+		tier := ""
+		if storage.Properties != nil {
+			if storage.Properties.AccessTier != nil {
+				tier = string(*storage.Properties.AccessTier)
+			}
+		}
 		zones := false
 		if strings.Contains(sku, "ZRS") {
 			zones = true
