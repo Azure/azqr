@@ -72,14 +72,19 @@ jobs:
           git diff --exit-code ./go.mod
           git diff --exit-code ./go.sum
 
+      - name: Run Go vet
+        if: matrix.target_os == 'linux'
+        run: |
+          go vet ./...
+
       - name: Run Tests
         if: matrix.target_os == 'linux'
         env:
           COVERAGE_OPTS: "-coverprofile=coverage.txt -covermode=atomic"
         run: |
           go install gotest.tools/gotestsum@latest
-          CGO_ENABLED=0 gotestsum --jsonfile ./test_report_unit.json --format standard-quiet -- ./internal/... $COVERAGE_OPTS --tags=unit
-          go test ./internal/scanners/
+          CGO_ENABLED=0 gotestsum --jsonfile ./test_report_unit.json --format standard-quiet -- ./... $COVERAGE_OPTS --tags=unit
+          go test ./...
 
       - name: Codecov
         if: matrix.target_os == 'linux'
