@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
 
-// EventHubScanner - Analyzer for Event Hubs
+// EventHubScanner - Scanner for Event Hubs
 type EventHubScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

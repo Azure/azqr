@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
 )
 
-// ContainerInstanceScanner - Analyzer for Container Instances
+// ContainerInstanceScanner - Scanner for Container Instances
 type ContainerInstanceScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

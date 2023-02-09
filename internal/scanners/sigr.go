@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
-// SignalRScanner - Analyzer for SignalR
+// SignalRScanner - Scanner for SignalR
 type SignalRScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

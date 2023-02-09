@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
 )
 
-// EventGridScanner - Analyzer for EventGrid Domains
+// EventGridScanner - Scanner for EventGrid Domains
 type EventGridScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
 
-// KeyVaultScanner - Analyzer for Key Vaults
+// KeyVaultScanner - Scanner for Key Vaults
 type KeyVaultScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

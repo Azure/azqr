@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 )
 
-// AppServiceScanner - Analyzer for App Service Plans
+// AppServiceScanner - Scanner for App Service Plans
 type AppServiceScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

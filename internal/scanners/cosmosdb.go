@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
 
-// CosmosDBScanner - Analyzer for CosmosDB Databases
+// CosmosDBScanner - Scanner for CosmosDB Databases
 type CosmosDBScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

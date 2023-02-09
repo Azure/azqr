@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 )
 
-// SQLScanner - Analyzer for SQL
+// SQLScanner - Scanner for SQL
 type SQLScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

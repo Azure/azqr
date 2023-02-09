@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
 
-// ServiceBusScanner - Analyzer for Service Bus
+// ServiceBusScanner - Scanner for Service Bus
 type ServiceBusScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

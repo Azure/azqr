@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
 
-// ApplicationGatewayScanner - Analyzer for Application Gateways
+// ApplicationGatewayScanner - Scanner for Application Gateways
 type ApplicationGatewayScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

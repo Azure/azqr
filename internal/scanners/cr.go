@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
-// ContainerRegistryScanner - Analyzer for Container Registries
+// ContainerRegistryScanner - Scanner for Container Registries
 type ContainerRegistryScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

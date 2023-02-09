@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
-// StorageScanner - Analyzer for Storage
+// StorageScanner - Scanner for Storage
 type StorageScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
-// RedisScanner - Analyzer for Redis
+// RedisScanner - Scanner for Redis
 type RedisScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

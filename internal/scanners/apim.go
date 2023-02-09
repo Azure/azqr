@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
 
-// APIManagementScanner - Analyzer for API Management Services
+// APIManagementScanner - Scanner for API Management Services
 type APIManagementScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

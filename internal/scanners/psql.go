@@ -8,7 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
 )
 
-// PostgreScanner - Analyzer for PostgreSQL
+// PostgreScanner - Scanner for PostgreSQL
 type PostgreScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

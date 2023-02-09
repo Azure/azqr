@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
 )
 
-// AKSScanner - Analyzer for AKS Clusters
+// AKSScanner - Scanner for AKS Clusters
 type AKSScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings

@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers"
 )
 
-// ContainerAppsScanner - Analyzer for Container Apps
+// ContainerAppsScanner - Scanner for Container Apps
 type ContainerAppsScanner struct {
 	config              *ScannerConfig
 	diagnosticsSettings DiagnosticsSettings
