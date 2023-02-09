@@ -54,7 +54,7 @@ func (a *FrontDoorScanner) Scan(resourceGroupName string) ([]IAzureServiceResult
 			SLA:                "99.99%",
 			Type:               *g.Type,
 			Location:           *g.Location,
-			CAFNaming:          strings.HasPrefix(*g.Name, "fd"),
+			CAFNaming:          strings.HasPrefix(*g.Name, "afd"),
 			AvailabilityZones:  true,
 			PrivateEndpoints:   false,
 			DiagnosticSettings: hasDiagnostics,
