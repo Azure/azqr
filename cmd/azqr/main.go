@@ -101,6 +101,7 @@ func main() {
 		&scanners.StorageScanner{},
 		&scanners.PostgreScanner{},
 		&scanners.SQLScanner{},
+		&scanners.FrontDoorScanner{},
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
