@@ -64,7 +64,7 @@ func newContainerAppsPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestContainerAppsScanner_Review(t *testing.T) {
+func TestContainerAppsScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -81,7 +81,7 @@ func TestContainerAppsScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			c: ContainerAppsScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

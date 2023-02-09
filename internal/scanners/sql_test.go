@@ -53,7 +53,7 @@ func newSQLServerPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestSQLScanner_Review(t *testing.T) {
+func TestSQLScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -70,7 +70,7 @@ func TestSQLScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			c: SQLScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

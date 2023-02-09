@@ -68,7 +68,7 @@ func newApplicationGatewayPrivateEndpointResult(t *testing.T) AzureServiceResult
 	return svc
 }
 
-func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
+func TestApplicationGatewayScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -85,7 +85,7 @@ func TestApplicationGatewayAnalyzer_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 
 			a: ApplicationGatewayScanner{
 				config: config,

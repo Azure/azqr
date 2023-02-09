@@ -70,7 +70,7 @@ func newEventHubPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestEventHubScanner_Review(t *testing.T) {
+func TestEventHubScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -87,7 +87,7 @@ func TestEventHubScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			c: EventHubScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

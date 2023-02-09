@@ -70,7 +70,7 @@ func newRedisPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestRedisScanner_Review(t *testing.T) {
+func TestRedisScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -87,7 +87,7 @@ func TestRedisScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			c: RedisScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

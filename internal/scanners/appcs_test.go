@@ -71,7 +71,7 @@ func newAppConfigurationPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestAppConfigurationScanner_Review(t *testing.T) {
+func TestAppConfigurationScanner_Scan(t *testing.T) {
 	config := &ScannerConfig{
 		SubscriptionID: "subscriptionId",
 		Cred:           nil,
@@ -88,7 +88,7 @@ func TestAppConfigurationScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			a: AppConfigurationScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

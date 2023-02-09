@@ -73,7 +73,7 @@ func newStoragePrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestStorageScanner_Review(t *testing.T) {
+func TestStorageScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -90,7 +90,7 @@ func TestStorageScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			c: StorageScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

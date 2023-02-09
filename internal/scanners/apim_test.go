@@ -70,7 +70,7 @@ func newAPIMPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestAPIMAnalyzer_Review(t *testing.T) {
+func TestAPIMScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -87,7 +87,7 @@ func TestAPIMAnalyzer_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			a: APIManagementScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

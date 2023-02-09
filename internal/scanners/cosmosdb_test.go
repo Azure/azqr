@@ -78,7 +78,7 @@ func newCosmosDBPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestCosmosDBScanner_Review(t *testing.T) {
+func TestCosmosDBScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -95,7 +95,7 @@ func TestCosmosDBScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			c: CosmosDBScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

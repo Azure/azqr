@@ -57,7 +57,7 @@ func newKeyVaultPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestKeyVaultScanner_Review(t *testing.T) {
+func TestKeyVaultScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -74,7 +74,7 @@ func TestKeyVaultScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			c: KeyVaultScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

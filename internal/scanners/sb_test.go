@@ -57,7 +57,7 @@ func newServiceBusPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestServiceBusScanner_Review(t *testing.T) {
+func TestServiceBusScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -74,7 +74,7 @@ func TestServiceBusScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			c: ServiceBusScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{

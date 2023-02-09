@@ -78,7 +78,7 @@ func newAKSPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	return svc
 }
 
-func TestAKSScanner_Review(t *testing.T) {
+func TestAKSScanner_Scan(t *testing.T) {
 	type args struct {
 		resourceGroupName string
 	}
@@ -95,7 +95,7 @@ func TestAKSScanner_Review(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Test Review",
+			name: "Test Scan",
 			a: AKSScanner{
 				config: config,
 				diagnosticsSettings: DiagnosticsSettings{
