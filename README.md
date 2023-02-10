@@ -13,7 +13,6 @@ Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure
 
 ## Supported Azure Services
 
-* Azure Application Gateway
 * Azure App Services
 * Azure Functions
 * Azure Container Apps
@@ -32,6 +31,8 @@ Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure
 * Azure SQL Database
 * Azure Key Vault
 * Azure App Configuration
+* Azure Application Gateway
+* Azure Front Door
 * Azure Storage Account
 
 ## Microsoft Defender Status
