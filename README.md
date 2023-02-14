@@ -64,7 +64,7 @@ To scan all resource groups in a specific subscription run:
 To scan a specific resource group in a specific subscription run:
 
 ```bash
-./azqr -s <subscription_id> -r <resource_group_name>
+./azqr -s <subscription_id> -g <resource_group_name>
 ```
 
 For help run:
