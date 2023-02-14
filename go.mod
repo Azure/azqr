@@ -28,6 +28,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr v1.0.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql v1.0.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.1.0
+	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub v1.0.0
 	github.com/Azure/go-autorest/autorest/to v0.4.0
 	github.com/fbiville/markdown-table-formatter v0.3.0
 	github.com/gomarkdown/markdown v0.0.0-20221013030248-663e2500819c
