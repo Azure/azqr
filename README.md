@@ -86,7 +86,7 @@ For help run:
 
 ### Scan Results
 
-Azure Quick Review (azqr) creates 3 files as part of thhe output:
+Azure Quick Review (azqr) creates 3 files as part of the output:
 
 * Markdown report
 * HTML report
