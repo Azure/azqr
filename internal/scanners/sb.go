@@ -32,7 +32,7 @@ func (a *ServiceBusScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all Service Bus in a Resource Group
-func (c *ServiceBusScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Service Bus in Resource Group %s", resourceGroupName)
 
 	servicebus, err := c.listServiceBus(resourceGroupName)

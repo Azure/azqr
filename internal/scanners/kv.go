@@ -32,7 +32,7 @@ func (c *KeyVaultScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all Key Vaults in a Resource Group
-func (c *KeyVaultScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Key Vaults in Resource Group %s", resourceGroupName)
 
 	vaults, err := c.listVaults(resourceGroupName)

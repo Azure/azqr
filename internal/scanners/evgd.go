@@ -32,7 +32,7 @@ func (a *EventGridScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all EventGrid Domains in a Resource Group
-func (a *EventGridScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing EventGrid Domains in Resource Group %s", resourceGroupName)
 
 	domains, err := a.listDomain(resourceGroupName)

@@ -39,7 +39,7 @@ func (a *AppServiceScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all App Service Plans in a Resource Group
-func (a *AppServiceScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing App Service Plans in Resource Group %s", resourceGroupName)
 
 	sites, err := a.listPlans(resourceGroupName)
@@ -89,6 +89,8 @@ func (a *AppServiceScanner) Scan(resourceGroupName string) ([]IAzureServiceResul
 				caf = true
 			}
 
+			_, peEnabled := scanContext.PrivateEndpoints[*s.ID]
+
 			var result IAzureServiceResult
 
 			// https://learn.microsoft.com/en-us/azure/azure-functions/functions-app-settings
@@ -105,7 +107,7 @@ func (a *AppServiceScanner) Scan(resourceGroupName string) ([]IAzureServiceResul
 						Location:           *p.Location,
 						CAFNaming:          caf,
 						AvailabilityZones:  *p.Properties.ZoneRedundant,
-						PrivateEndpoints:   false,
+						PrivateEndpoints:   peEnabled,
 						DiagnosticSettings: hasDiagnostics,
 					},
 				}
@@ -156,7 +158,7 @@ func (a *AppServiceScanner) Scan(resourceGroupName string) ([]IAzureServiceResul
 					Location:           *p.Location,
 					CAFNaming:          caf,
 					AvailabilityZones:  *p.Properties.ZoneRedundant,
-					PrivateEndpoints:   false,
+					PrivateEndpoints:   peEnabled,
 					DiagnosticSettings: hasDiagnostics,
 				}
 			}

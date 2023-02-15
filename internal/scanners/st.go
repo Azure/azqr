@@ -32,7 +32,7 @@ func (c *StorageScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all Storage in a Resource Group
-func (c *StorageScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *StorageScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Storage in Resource Group %s", resourceGroupName)
 
 	storage, err := c.listStorage(resourceGroupName)

@@ -32,7 +32,7 @@ func (a *ApplicationGatewayScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all Application Gateways in a Resource Group
-func (a *ApplicationGatewayScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *ApplicationGatewayScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Application Gateways in Resource Group %s", resourceGroupName)
 
 	gateways, err := a.listGateways(resourceGroupName)

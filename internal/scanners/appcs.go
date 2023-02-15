@@ -32,7 +32,7 @@ func (a *AppConfigurationScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all App Configurations in a Resource Group
-func (a *AppConfigurationScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *AppConfigurationScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Container Apps in Resource Group %s", resourceGroupName)
 
 	apps, err := a.list(resourceGroupName)

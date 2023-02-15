@@ -32,7 +32,7 @@ func (a *AKSScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all AKS Clusters in a Resource Group
-func (a *AKSScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *AKSScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing AKS Clusters in Resource Group %s", resourceGroupName)
 
 	clusters, err := a.listClusters(resourceGroupName)
