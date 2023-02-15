@@ -24,6 +24,7 @@ Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure
 * Azure Service Bus
 * Azure Event Grid
 * Azure SignalR Service
+* Azure Web PubSub
 * Azure Cache for Redis
 * Azure Cosmos DB
 * Azure Database for PostgreSQL Single Server
