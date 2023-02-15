@@ -41,6 +41,16 @@ Azure Quick Review (azqr) also reports on the status of Microsoft Defender for C
 
 ## Usage
 
+### Install on Linux or Azure CLoud Shell
+
+```bash
+latest_azqr=$(curl -sL https://api.github.com/repos/cmendible/azqr/releases/latest | jq -r ".tag_name" | cut -c1-)
+wget https://github.com/cmendible/azqr/releases/download/$latest_azqr/azqr-ubuntu-latest-amd64 -O azqr
+chmod +x azqr
+```
+
+### Install on Windows or Mac
+
 Download the latest release from [here](https://github.com/cmendible/azqr/releases).
 
 ### Authentication
