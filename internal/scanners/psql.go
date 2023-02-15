@@ -39,7 +39,7 @@ func (c *PostgreScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all PostgreSQL in a Resource Group
-func (c *PostgreScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *PostgreScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Postgre in Resource Group %s", resourceGroupName)
 
 	postgre, err := c.listPostgre(resourceGroupName)

@@ -20,7 +20,7 @@ type (
 		Value() AzureServiceResult
 	}
 
-	// ScannerConfig - Struct for all Service Analyzers Config
+	// ScannerConfig - Struct for Scanner Config
 	ScannerConfig struct {
 		Ctx                context.Context
 		Cred               azcore.TokenCredential
@@ -28,10 +28,15 @@ type (
 		EnableDetailedScan bool
 	}
 
-	// AzureServiceAnalyzer - Interface for all Azure Service Analyzers
+	// ScanContext - Struct for Scanner Context
+	ScanContext struct {
+		PrivateEndpoints map[string]bool
+	}
+
+	// IAzureScanner - Interface for all Azure Scanners
 	IAzureScanner interface {
 		Init(config *ScannerConfig) error
-		Scan(resourceGroupName string) ([]IAzureServiceResult, error)
+		Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error)
 	}
 
 	// AzureServiceResult - Struct for all Azure Service Results

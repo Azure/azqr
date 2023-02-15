@@ -32,7 +32,7 @@ func (a *APIManagementScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan -Scans all API Management Services in a Resource Group
-func (a *APIManagementScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *APIManagementScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing API Management Services in Resource Group %s", resourceGroupName)
 
 	services, err := a.listServices(resourceGroupName)

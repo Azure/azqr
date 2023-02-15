@@ -38,7 +38,7 @@ func (c *SQLScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all SQL in a Resource Group
-func (c *SQLScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *SQLScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing SQL in Resource Group %s", resourceGroupName)
 
 	sql, err := c.listSQL(resourceGroupName)

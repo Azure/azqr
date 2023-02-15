@@ -114,6 +114,20 @@ func main() {
 		EnableDetailedScan: *detail,
 	}
 
+	peScanner := scanners.PrivateEndpointScanner{}
+	err = peScanner.Init(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+	peResults, err := peScanner.ListResourcesWithPrivateEndpoints()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	scanContext := scanners.ScanContext{
+		PrivateEndpoints: peResults,
+	}
+
 	for _, a := range svcScanners {
 		err := a.Init(config)
 		if err != nil {
@@ -129,7 +143,7 @@ func main() {
 	}
 	for _, r := range resourceGroups {
 		log.Printf("Analyzing Resource Group %s", r)
-		go reviewRunner(&rc, r, &svcScanners, *concurrency)
+		go scanRunner(&rc, r, &scanContext, &svcScanners, *concurrency)
 		res, err := waitForReviews(&rc, len(svcScanners))
 		// As soon as any error happen, we cancel every still running analysis
 		if err != nil {
@@ -172,8 +186,8 @@ type ReviewContext struct {
 	ErrCh chan error
 }
 
-// Run a review on a peculiar resource group "r" with the appropriates analysers using "concurrency" goroutines
-func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]scanners.IAzureScanner, concurrency int) {
+// Run a scan on a particular resource group "r" with the appropriates scanners using "concurrency" goroutines
+func scanRunner(rc *ReviewContext, r string, scanContext *scanners.ScanContext, svcAnalysers *[]scanners.IAzureScanner, concurrency int) {
 	if concurrency <= 0 {
 		concurrency = len(*svcAnalysers)
 	}
@@ -193,7 +207,7 @@ func reviewRunner(rc *ReviewContext, r string, svcAnalysers *[]scanners.IAzureSc
 			if context.Canceled == rc.Ctx.Err() {
 				return
 			}
-			res, err := (*a).Scan(r)
+			res, err := (*a).Scan(r, scanContext)
 			if err != nil {
 				rc.ErrCh <- err
 			}

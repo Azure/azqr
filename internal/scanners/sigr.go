@@ -32,7 +32,7 @@ func (c *SignalRScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all SignalR in a Resource Group
-func (c *SignalRScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *SignalRScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing SignalR in Resource Group %s", resourceGroupName)
 
 	signalr, err := c.listSignalR(resourceGroupName)

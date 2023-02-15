@@ -32,7 +32,7 @@ func (a *FrontDoorScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all Front Doors in a Resource Group
-func (a *FrontDoorScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (a *FrontDoorScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing Front Doors in Resource Group %s", resourceGroupName)
 
 	gateways, err := a.list(resourceGroupName)

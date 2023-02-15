@@ -32,7 +32,7 @@ func (c *WebPubSubScanner) Init(config *ScannerConfig) error {
 }
 
 // Scan - Scans all WebPubSub in a Resource Group
-func (c *WebPubSubScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, error) {
+func (c *WebPubSubScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error) {
 	log.Printf("Analyzing WebPubSub in Resource Group %s", resourceGroupName)
 
 	WebPubSub, err := c.listWebPubSub(resourceGroupName)
