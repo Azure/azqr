@@ -58,8 +58,12 @@ func (c *StorageScanner) Scan(resourceGroupName string) ([]IAzureServiceResult, 
 			zones = true
 		}
 		sla := "99.9%"
-		if strings.Contains(sku, "RAGRS") || strings.Contains(tier, "Hot") {
+		if strings.Contains(sku, "RAGRS") && strings.Contains(tier, "Hot") {
 			sla = "99.99%"
+		} else if strings.Contains(sku, "RAGRS") && !strings.Contains(tier, "Hot") {
+			sla = "99.9%"
+		} else if !strings.Contains(tier, "Hot") {
+			sla = "99%"
 		}
 
 		results = append(results, AzureServiceResult{

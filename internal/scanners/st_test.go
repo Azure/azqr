@@ -27,6 +27,40 @@ func newStorage(t *testing.T) *armstorage.Account {
 	}
 }
 
+func newStorageStandard_RAGRS_Hot(t *testing.T) *armstorage.Account {
+	sku := armstorage.SKUNameStandardRAGRS
+	svc := newStorage(t)
+	svc.SKU.Name = &sku
+	return svc
+}
+
+func newStorageStandard_RAGRS_Cool(t *testing.T) *armstorage.Account {
+	sku := armstorage.SKUNameStandardRAGRS
+	svc := newStorage(t)
+	svc.SKU.Name = &sku
+	tier := armstorage.AccessTierCool
+	svc.Properties.AccessTier = &tier
+
+	return svc
+}
+
+func newStorageStandard_LRS_Hot(t *testing.T) *armstorage.Account {
+	sku := armstorage.SKUNameStandardLRS
+	svc := newStorage(t)
+	svc.SKU.Name = &sku
+	return svc
+}
+
+func newStorageStandard_LRS_Cool(t *testing.T) *armstorage.Account {
+	sku := armstorage.SKUNameStandardLRS
+	svc := newStorage(t)
+	svc.SKU.Name = &sku
+	tier := armstorage.AccessTierCool
+	svc.Properties.AccessTier = &tier
+
+	return svc
+}
+
 func newStorageWithAvailabilityZones(t *testing.T) *armstorage.Account {
 	sku := armstorage.SKUNamePremiumZRS
 	svc := newStorage(t)
@@ -50,7 +84,7 @@ func newStorageResult(t *testing.T) AzureServiceResult {
 		ResourceGroup:      "resourceGroupName",
 		ServiceName:        "stname",
 		SKU:                "Premium_LRS",
-		SLA:                "99.99%",
+		SLA:                "99.9%",
 		Type:               "Microsoft.Storage/storageAccounts",
 		Location:           "westeurope",
 		CAFNaming:          true,
@@ -70,6 +104,34 @@ func newStorageAvailabilityZonesResult(t *testing.T) AzureServiceResult {
 func newStoragePrivateEndpointResult(t *testing.T) AzureServiceResult {
 	svc := newStorageResult(t)
 	svc.PrivateEndpoints = true
+	return svc
+}
+
+func newStorageStandard_RAGRS_Hot_Result(t *testing.T) AzureServiceResult {
+	svc := newStorageResult(t)
+	svc.SKU = "Standard_RAGRS"
+	svc.SLA = "99.99%"
+	return svc
+}
+
+func newStorageStandard_RAGRS_Cool_Result(t *testing.T) AzureServiceResult {
+	svc := newStorageResult(t)
+	svc.SKU = "Standard_RAGRS"
+	svc.SLA = "99.9%"
+	return svc
+}
+
+func newStorageStandard_LRS_Hot_Result(t *testing.T) AzureServiceResult {
+	svc := newStorageResult(t)
+	svc.SKU = "Standard_LRS"
+	svc.SLA = "99.9%"
+	return svc
+}
+
+func newStorageStandard_LRS_Cool_Result(t *testing.T) AzureServiceResult {
+	svc := newStorageResult(t)
+	svc.SKU = "Standard_LRS"
+	svc.SLA = "99%"
 	return svc
 }
 
@@ -106,6 +168,10 @@ func TestStorageScanner_Scan(t *testing.T) {
 							newStorage(t),
 							newStorageWithAvailabilityZones(t),
 							newStorageWithPrivateEndpoints(t),
+							newStorageStandard_RAGRS_Hot(t),
+							newStorageStandard_RAGRS_Cool(t),
+							newStorageStandard_LRS_Hot(t),
+							newStorageStandard_LRS_Cool(t),
 						},
 						nil
 				},
@@ -117,6 +183,10 @@ func TestStorageScanner_Scan(t *testing.T) {
 				newStorageResult(t),
 				newStorageAvailabilityZonesResult(t),
 				newStoragePrivateEndpointResult(t),
+				newStorageStandard_RAGRS_Hot_Result(t),
+				newStorageStandard_RAGRS_Cool_Result(t),
+				newStorageStandard_LRS_Hot_Result(t),
+				newStorageStandard_LRS_Cool_Result(t),
 			},
 			wantErr: false,
 		},
