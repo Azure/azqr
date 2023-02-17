@@ -92,7 +92,32 @@ Azure Quick Review (azqr) creates 3 files as part of the output:
 * HTML report
 * Excel report
 
-## Contribution
+## Troubleshooting
+
+### Error: "RESPONSE 429: 429 Too Many Requests"
+
+If the output of `azqr` shows an error similar to the following:
+
+```bash
+--------------------------------------------------------------------------------
+RESPONSE 429: 429 Too Many Requests
+ERROR CODE: ResourceRequestsThrottled
+--------------------------------------------------------------------------------
+{
+  "error": {
+    "code": "ResourceRequestsThrottled",
+    "message": "Number of requests for action 'Microsoft.Cdn/profiles/read' exceeded the limit of '50' for time interval '00:05:00'. Please try again after '372' seconds."
+  }
+}
+```
+
+Reduce the number of parallel requests that `azqr` is making. You can do this by setting the value of the `-p` parameter to a lower value (default is 4) as follows:
+
+```bash
+./azqr -s <subscription_id> -p 2
+```
+
+## Contributors
 
 Thanks to everyone who has contributed!
 
