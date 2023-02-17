@@ -17,5 +17,5 @@ The table below provides a summary of the scan results.
 
 ## Azure Best Practices  
 
-Based on the scan results, check the following best practices,
+Based on the scan results, check the following best practices:
 {{best_practices}}
