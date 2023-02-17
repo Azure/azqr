@@ -28,30 +28,30 @@ func CreateMarkdownReport(data ReportData) {
 	reportTemplate = strings.Replace(reportTemplate, "{{results}}", resultsTable, 1)
 	reportTemplate = strings.Replace(reportTemplate, "{{date}}", time.Now().Format("2006-01-02"), 1)
 
-	recommendations := ""
+	bestPractices := ""
 	dict := map[string]bool{}
 	for _, r := range data.MainData {
 		parsedType := strings.Replace(r.GetResourceType(), "/", ".", -1)
 		if _, ok := dict[r.GetResourceType()]; !ok {
 			dict[r.GetResourceType()] = true
-			recommendations += "\n\n"
-			recommendations += templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
+			bestPractices += "\n\n"
+			bestPractices += templates.GetTemplates(fmt.Sprintf("%s.md", parsedType))
 
 			if r.GetResourceType() == "Microsoft.Web/serverfarms/sites" && len(allFunctions) > 0 && data.EnableDetailedScan {
-				recommendations = strings.Replace(recommendations, "{{functions}}", renderDetailsTable(allFunctions, data.Mask), 1)
+				bestPractices = strings.Replace(bestPractices, "{{functions}}", renderDetailsTable(allFunctions, data.Mask), 1)
 			} else {
-				recommendations = strings.Replace(recommendations, "{{functions}}", "", 1)
+				bestPractices = strings.Replace(bestPractices, "{{functions}}", "", 1)
 			}
 		}
 	}
 
 	if len(data.DefenderData) > 0 {
-		recommendations += "\n\n"
-		recommendations += templates.GetTemplates("Microsoft.Security.pricings.md")
-		recommendations = strings.Replace(recommendations, "{{defender}}", renderDefenderTable(data.DefenderData, data.Mask), 1)
+		bestPractices += "\n\n"
+		bestPractices += templates.GetTemplates("Microsoft.Security.pricings.md")
+		bestPractices = strings.Replace(bestPractices, "{{defender}}", renderDefenderTable(data.DefenderData, data.Mask), 1)
 	}
 
-	reportTemplate = strings.Replace(reportTemplate, "{{recommendations}}", recommendations, 1)
+	reportTemplate = strings.Replace(reportTemplate, "{{best_practices}}", bestPractices, 1)
 
 	err := os.WriteFile(fmt.Sprintf("%s.md", data.OutputFileName), []byte(reportTemplate), 0644)
 	if err != nil {
