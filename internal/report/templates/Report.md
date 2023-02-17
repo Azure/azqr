@@ -1,4 +1,4 @@
-# Microsoft CSU / Azure Quick Review
+# Azure Quick Review
 **{{date}}**
 
 ## Introduction
@@ -7,15 +7,15 @@ Our customers are increasingly dependent on Azure for core, mission-critical com
 
 Care cannot start and end when critical issues emerge. It must be constant, and systematically linked to your business and cloud needs, to ensure you are given the assistance needed to get and stay truly healthy.
 
-After performing a high level analysis of current deployed Azure services, we present a series of recommendations.
+The report below is a summary of the Azure Quick Review performed on your subscription. It provides a high-level overview of the current configuration of your Azure environment, and will help you identify potential issues that may impact your business.
 
-## Services Review
+## Scan Results
 
-The following review shows the Azure services selected for the solution, with their current configuration.
+The table below provides a summary of the scan results.
 
 {{results}}
 
-## Resiliency Recommendations 
+## Azure Best Practices  
 
-The following recommendations are based on the analysis of the solution and the services selected. 
-{{recommendations}}
+Based on the scan results, check the following best practices,
+{{best_practices}}
