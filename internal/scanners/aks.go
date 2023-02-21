@@ -53,9 +53,12 @@ func (a *AKSScanner) Scan(resourceGroupName string, scanContext *ScanContext) ([
 			}
 		}
 
-		sku := string(*c.SKU.Tier)
+		sku := "Free"
+		if c.SKU != nil && c.SKU.Tier != nil {
+			sku = string(*c.SKU.Tier)
+		}
 		sla := "None"
-		if sku == "Paid" {
+		if !strings.Contains(sku, "Free") {
 			sla = "99.9%"
 			if zones {
 				sla = "99.95%"
