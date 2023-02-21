@@ -46,6 +46,11 @@ func (c *ContainerInstanceScanner) Scan(resourceGroupName string, scanContext *S
 			return nil, err
 		}
 
+		pe := false
+		if instance.Properties.IPAddress != nil && instance.Properties.IPAddress.Type != nil {
+			pe = *instance.Properties.IPAddress.Type == armcontainerinstance.ContainerGroupIPAddressTypePrivate
+		}
+
 		results = append(results, AzureServiceResult{
 			SubscriptionID:     c.config.SubscriptionID,
 			ResourceGroup:      resourceGroupName,
@@ -56,7 +61,7 @@ func (c *ContainerInstanceScanner) Scan(resourceGroupName string, scanContext *S
 			Location:           *instance.Location,
 			CAFNaming:          strings.HasPrefix(*instance.Name, "ci"),
 			AvailabilityZones:  len(instance.Zones) > 0,
-			PrivateEndpoints:   *instance.Properties.IPAddress.Type == armcontainerinstance.ContainerGroupIPAddressTypePrivate,
+			PrivateEndpoints:   pe,
 			DiagnosticSettings: hasDiagnostics,
 		})
 	}
