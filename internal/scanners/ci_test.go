@@ -40,6 +40,12 @@ func newContainerInstanceWithPrivateEndpoints(t *testing.T) *armcontainerinstanc
 	return svc
 }
 
+func newContainerInstanceWithoutIPAdress(t *testing.T) *armcontainerinstance.ContainerGroup {
+	svc := newContainerInstance(t)
+	svc.Properties.IPAddress = nil
+	return svc
+}
+
 func newContainerInstanceResult(t *testing.T) AzureServiceResult {
 	return AzureServiceResult{
 		SubscriptionID:     "subscriptionId",
@@ -67,6 +73,13 @@ func newContainerInstancePrivateEndpointResult(t *testing.T) AzureServiceResult 
 	svc.PrivateEndpoints = true
 	return svc
 }
+
+func newContainerInstanceWithoutIPAddressResult(t *testing.T) AzureServiceResult {
+	svc := newContainerInstanceResult(t)
+	svc.PrivateEndpoints = false
+	return svc
+}
+
 
 func TestContainerInstanceScanner_Scan(t *testing.T) {
 	type args struct {
@@ -101,6 +114,7 @@ func TestContainerInstanceScanner_Scan(t *testing.T) {
 							newContainerInstance(t),
 							newContainerInstanceWithAvailabilityZones(t),
 							newContainerInstanceWithPrivateEndpoints(t),
+							newContainerInstanceWithoutIPAdress(t),
 						},
 						nil
 				},
@@ -112,6 +126,7 @@ func TestContainerInstanceScanner_Scan(t *testing.T) {
 				newContainerInstanceResult(t),
 				newContainerInstanceAvailabilityZonesResult(t),
 				newContainerInstancePrivateEndpointResult(t),
+				newContainerInstanceWithoutIPAddressResult(t),
 			},
 			wantErr: false,
 		},
