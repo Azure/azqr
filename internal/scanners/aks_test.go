@@ -50,6 +50,12 @@ func newAKSWithPrivateEndpoints(t *testing.T) *armcontainerservice.ManagedCluste
 	return svc
 }
 
+func newAKSWithoutSKU(t *testing.T) *armcontainerservice.ManagedCluster {
+	svc := newAKS(t)
+	svc.SKU = nil
+	return svc
+}
+
 func newAKSResult(t *testing.T) AzureServiceResult {
 	return AzureServiceResult{
 		SubscriptionID:     "subscriptionId",
@@ -75,6 +81,11 @@ func newAKSAvailabilityZonesResult(t *testing.T) AzureServiceResult {
 func newAKSPrivateEndpointResult(t *testing.T) AzureServiceResult {
 	svc := newAKSResult(t)
 	svc.PrivateEndpoints = true
+	return svc
+}
+
+func newAKSWithoutSKUResult(t *testing.T) AzureServiceResult {
+	svc := newAKSResult(t)
 	return svc
 }
 
@@ -111,6 +122,7 @@ func TestAKSScanner_Scan(t *testing.T) {
 							newAKS(t),
 							newAKSWithAvailabilityZones(t),
 							newAKSWithPrivateEndpoints(t),
+							newAKSWithoutSKU(t),
 						},
 						nil
 				},
@@ -122,6 +134,7 @@ func TestAKSScanner_Scan(t *testing.T) {
 				newAKSResult(t),
 				newAKSAvailabilityZonesResult(t),
 				newAKSPrivateEndpointResult(t),
+				newAKSWithoutSKUResult(t),
 			},
 			wantErr: false,
 		},
