@@ -1,5 +1,0 @@
-### Microsoft Defender Status
-
-{{defender}}
-
----

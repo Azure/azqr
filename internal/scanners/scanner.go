@@ -3,23 +3,12 @@ package scanners
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 )
 
 type (
-	// IAzureServiceResult - Interface for all Azure Service Results
-	IAzureServiceResult interface {
-		GetResourceType() string
-		GetHeathers() []string
-		GetDetailHeathers() []string
-		ToMap(mask bool) map[string]string
-		ToDetailMap(mask bool) map[string]string
-		Value() AzureServiceResult
-	}
-
 	// ScannerConfig - Struct for Scanner Config
 	ScannerConfig struct {
 		Ctx                context.Context
@@ -36,24 +25,71 @@ type (
 	// IAzureScanner - Interface for all Azure Scanners
 	IAzureScanner interface {
 		Init(config *ScannerConfig) error
-		Scan(resourceGroupName string, scanContext *ScanContext) ([]IAzureServiceResult, error)
+		GetRules() map[string]AzureRule
+		Scan(resourceGroupName string, scanContext *ScanContext) ([]AzureServiceResult, error)
 	}
 
 	// AzureServiceResult - Struct for all Azure Service Results
 	AzureServiceResult struct {
-		SubscriptionID     string
-		ResourceGroup      string
-		ServiceName        string
-		SKU                string
-		SLA                string
-		Type               string
-		Location           string
-		CAFNaming          bool
-		AvailabilityZones  bool
-		PrivateEndpoints   bool
-		DiagnosticSettings bool
+		SubscriptionID string
+		ResourceGroup  string
+		Location       string
+		Type           string
+		ServiceName    string
+		Rules          map[string]AzureRuleResult
 	}
+
+	AzureRule struct {
+		Id          string
+		Category    string
+		Subcategory string
+		Description string
+		Severity    string
+		Url         string
+		IsSpecific  bool
+		Eval        func(target interface{}, scanContext *ScanContext) (bool, string)
+	}
+
+	AzureRuleResult struct {
+		Id          string
+		Category    string
+		Subcategory string
+		Description string
+		Severity    string
+		Url         string
+		IsSpecific  bool
+		Result      string
+		IsBroken    bool
+	}
+
+	RuleEngine struct{}
 )
+
+func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContext *ScanContext) AzureRuleResult {
+	broken, result := rule.Eval(target, scanContext)
+
+	return AzureRuleResult{
+		Id:          rule.Id,
+		Category:    rule.Category,
+		Subcategory: rule.Subcategory,
+		Description: rule.Description,
+		Severity:    rule.Severity,
+		Url:         rule.Url,
+		IsSpecific:  rule.IsSpecific,
+		Result:      result,
+		IsBroken:    broken,
+	}
+}
+
+func (e *RuleEngine) EvaluateRules(rules map[string]AzureRule, target interface{}, scanContext *ScanContext) map[string]AzureRuleResult {
+	results := map[string]AzureRuleResult{}
+
+	for k, rule := range rules {
+		results[k] = e.EvaluateRule(rule, target, scanContext)
+	}
+
+	return results
+}
 
 // ToMap - Returns a map representation of the Azure Service Result
 func (r AzureServiceResult) ToMap(mask bool) map[string]string {
@@ -63,18 +99,13 @@ func (r AzureServiceResult) ToMap(mask bool) map[string]string {
 		"Location":       parseLocation(r.Location),
 		"Type":           r.Type,
 		"Name":           r.ServiceName,
-		"SKU":            r.SKU,
-		"SLA":            r.SLA,
-		"AZ":             strconv.FormatBool(r.AvailabilityZones),
-		"PE":             strconv.FormatBool(r.PrivateEndpoints),
-		"DS":             strconv.FormatBool(r.DiagnosticSettings),
-		"CAF":            strconv.FormatBool(r.CAFNaming),
+		"SKU":            r.Rules["SKU"].Result,
+		"SLA":            r.Rules["SLA"].Result,
+		"AZ":             r.Rules["AvailabilityZones"].Result,
+		"PVT":            r.Rules["Private"].Result,
+		"DS":             r.Rules["DiagnosticSettings"].Result,
+		"CAF":            r.Rules["CAF"].Result,
 	}
-}
-
-// ToDetail - Returns a map representation of the Azure Service Result
-func (r AzureServiceResult) ToDetailMap(mask bool) map[string]string {
-	return map[string]string{}
 }
 
 // GetResourceType - Returns the resource type of the Azure Service Result
@@ -93,64 +124,9 @@ func (r AzureServiceResult) GetHeathers() []string {
 		"SKU",
 		"SLA",
 		"AZ",
-		"PE",
+		"PVT",
 		"DS",
 		"CAF",
-	}
-}
-
-// GetDeatilsHeathers - Returns the detail headers of the Azure Service Result
-func (r AzureServiceResult) GetDetailHeathers() []string {
-	return []string{}
-}
-
-// Get - Returns the Azure Service Result
-func (r AzureServiceResult) Value() AzureServiceResult {
-	return r
-}
-
-// AzureFunctionAppResult - Struct for Azure Fucntion App Results
-type AzureFunctionAppResult struct {
-	AzureServiceResult
-	AzureWebJobsDashboard         bool
-	ScaleControllerLoggingEnabled bool // SCALE_CONTROLLER_LOGGING_ENABLED
-	ContentOverVNET               bool // WEBSITE_CONTENTOVERVNET
-	RunFromPackage                bool // WEBSITE_RUN_FROM_PACKAGE
-	VNETRouteAll                  bool // WEBSITE_VNET_ROUTE_ALL
-	AppInsightsEnabled            bool // APPINSIGHTS_INSTRUMENTATIONKEY or APPLICATIONINSIGHTS_CONNECTION_STRING
-}
-
-// ToDetail - Returns a map representation of the Azure Function App Result
-func (r AzureFunctionAppResult) ToDetailMap(mask bool) map[string]string {
-	return map[string]string{
-		"SubscriptionID":                maskSubscriptionID(r.SubscriptionID, mask),
-		"ResourceGroup":                 r.ResourceGroup,
-		"Location":                      parseLocation(r.Location),
-		"Type":                          r.Type,
-		"Name":                          r.ServiceName,
-		"RunFromPackage":                strconv.FormatBool(r.RunFromPackage),
-		"ContentOverVNET":               strconv.FormatBool(r.ContentOverVNET),
-		"VNETRouteAll":                  strconv.FormatBool(r.VNETRouteAll),
-		"AzureWebJobsDashboard":         strconv.FormatBool(r.AzureWebJobsDashboard),
-		"AppInsightsEnabled":            strconv.FormatBool(r.AppInsightsEnabled),
-		"ScaleControllerLoggingEnabled": strconv.FormatBool(r.ScaleControllerLoggingEnabled),
-	}
-}
-
-// GetDetailProperties - Returns the detail properties of the Azure Function App Result
-func (r AzureFunctionAppResult) GetDetailProperties() []string {
-	return []string{
-		"SubscriptionID",
-		"ResourceGroup",
-		"Location",
-		"Type",
-		"Name",
-		"RunFromPackage",
-		"ContentOverVNET",
-		"VNETRouteAll",
-		"AzureWebJobsDashboard",
-		"AppInsightsEnabled",
-		"ScaleControllerLoggingEnabled",
 	}
 }
 

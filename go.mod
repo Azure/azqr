@@ -29,16 +29,12 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql v1.0.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.1.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub v1.0.0
-	github.com/Azure/go-autorest/autorest/to v0.4.0
-	github.com/fbiville/markdown-table-formatter v0.3.0
-	github.com/gomarkdown/markdown v0.0.0-20221013030248-663e2500819c
 	github.com/xuri/excelize/v2 v2.7.0
 	golang.org/x/sync v0.1.0
 )
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.1.2 // indirect
-	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v0.7.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/google/uuid v1.1.1 // indirect
