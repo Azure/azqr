@@ -42,7 +42,7 @@ Azure Quick Review (azqr) also reports on the status of Microsoft Defender for C
 
 ## Usage
 
-### Install on Linux or Azure CLoud Shell
+### Install on Linux or Azure Cloud Shell
 
 ```bash
 latest_azqr=$(curl -sL https://api.github.com/repos/cmendible/azqr/releases/latest | jq -r ".tag_name" | cut -c1-)
@@ -86,11 +86,7 @@ For help run:
 
 ### Scan Results
 
-Azure Quick Review (azqr) creates 3 files as part of the output:
-
-* Markdown report
-* HTML report
-* Excel report
+Azure Quick Review (azqr) creates an excel spreadsheet with the results of the scan.
 
 ## Troubleshooting
 

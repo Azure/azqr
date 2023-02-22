@@ -1,5 +1,0 @@
-### Azure SQL Databases
-
-TODO
-
----

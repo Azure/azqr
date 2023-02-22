@@ -13,6 +13,26 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/cmendible/azqr/internal/renderers"
 	"github.com/cmendible/azqr/internal/scanners"
+	"github.com/cmendible/azqr/internal/scanners/afd"
+	"github.com/cmendible/azqr/internal/scanners/agw"
+	"github.com/cmendible/azqr/internal/scanners/aks"
+	"github.com/cmendible/azqr/internal/scanners/apim"
+	"github.com/cmendible/azqr/internal/scanners/appcs"
+	"github.com/cmendible/azqr/internal/scanners/cae"
+	"github.com/cmendible/azqr/internal/scanners/ci"
+	"github.com/cmendible/azqr/internal/scanners/cosmos"
+	"github.com/cmendible/azqr/internal/scanners/cr"
+	"github.com/cmendible/azqr/internal/scanners/evgd"
+	"github.com/cmendible/azqr/internal/scanners/evh"
+	"github.com/cmendible/azqr/internal/scanners/kv"
+	"github.com/cmendible/azqr/internal/scanners/plan"
+	"github.com/cmendible/azqr/internal/scanners/psql"
+	"github.com/cmendible/azqr/internal/scanners/redis"
+	"github.com/cmendible/azqr/internal/scanners/sb"
+	"github.com/cmendible/azqr/internal/scanners/sigr"
+	"github.com/cmendible/azqr/internal/scanners/sql"
+	"github.com/cmendible/azqr/internal/scanners/st"
+	"github.com/cmendible/azqr/internal/scanners/wps"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -84,24 +104,27 @@ func main() {
 	}
 
 	svcScanners := []scanners.IAzureScanner{
-		&scanners.AKSScanner{},
-		&scanners.APIManagementScanner{},
-		&scanners.ApplicationGatewayScanner{},
-		&scanners.ContainerAppsScanner{},
-		&scanners.ContainerInstanceScanner{},
-		&scanners.CosmosDBScanner{},
-		&scanners.ContainerRegistryScanner{},
-		&scanners.EventHubScanner{},
-		&scanners.EventGridScanner{},
-		&scanners.KeyVaultScanner{},
-		&scanners.AppServiceScanner{},
-		&scanners.RedisScanner{},
-		&scanners.ServiceBusScanner{},
-		&scanners.SignalRScanner{},
-		&scanners.StorageScanner{},
-		&scanners.PostgreScanner{},
-		&scanners.SQLScanner{},
-		&scanners.FrontDoorScanner{},
+		&aks.AKSScanner{},
+		&apim.APIManagementScanner{},
+		&agw.ApplicationGatewayScanner{},
+		&cae.ContainerAppsScanner{},
+		&ci.ContainerInstanceScanner{},
+		&cosmos.CosmosDBScanner{},
+		&cr.ContainerRegistryScanner{},
+		&evh.EventHubScanner{},
+		&evgd.EventGridScanner{},
+		&kv.KeyVaultScanner{},
+		&appcs.AppConfigurationScanner{},
+		&plan.AppServiceScanner{},
+		&redis.RedisScanner{},
+		&sb.ServiceBusScanner{},
+		&sigr.SignalRScanner{},
+		&wps.WebPubSubScanner{},
+		&st.StorageScanner{},
+		&psql.PostgreScanner{},
+		&psql.PostgreFlexibleScanner{},
+		&sql.SQLScanner{},
+		&afd.FrontDoorScanner{},
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -135,14 +158,14 @@ func main() {
 		}
 	}
 
-	var all []scanners.IAzureServiceResult
+	var all []scanners.AzureServiceResult
 	rc := ReviewContext{
 		Ctx:   ctx,
-		ResCh: make(chan []scanners.IAzureServiceResult),
+		ResCh: make(chan []scanners.AzureServiceResult),
 		ErrCh: make(chan error),
 	}
 	for _, r := range resourceGroups {
-		log.Printf("Analyzing Resource Group %s", r)
+		log.Printf("Scanning Resource Group %s", r)
 		go scanRunner(&rc, r, &scanContext, &svcScanners, *concurrency)
 		res, err := waitForReviews(&rc, len(svcScanners))
 		// As soon as any error happen, we cancel every still running analysis
@@ -172,8 +195,9 @@ func main() {
 		DefenderData:       defenderResults,
 	}
 
-	renderers.CreateMarkdownReport(reportData)
 	renderers.CreateExcelReport(reportData)
+
+	log.Println("Scan completed.")
 }
 
 // ReviewContext A running resource group analysis support context
@@ -181,7 +205,7 @@ type ReviewContext struct {
 	// Review context, will be passed to every created goroutines
 	Ctx context.Context
 	// Communication interface for each review results
-	ResCh chan []scanners.IAzureServiceResult
+	ResCh chan []scanners.AzureServiceResult
 	// Communication interface for errors
 	ErrCh chan error
 }
@@ -217,9 +241,9 @@ func scanRunner(rc *ReviewContext, r string, scanContext *scanners.ScanContext, 
 }
 
 // Wait for at least "nb" goroutines to hands their result and return them
-func waitForReviews(rc *ReviewContext, nb int) (*[]scanners.IAzureServiceResult, error) {
+func waitForReviews(rc *ReviewContext, nb int) (*[]scanners.AzureServiceResult, error) {
 	received := 0
-	reviews := make([]scanners.IAzureServiceResult, 0)
+	reviews := make([]scanners.AzureServiceResult, 0)
 	for {
 		select {
 		// In case a timeout is set

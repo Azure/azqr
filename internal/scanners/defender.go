@@ -1,6 +1,7 @@
 package scanners
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity"
@@ -51,6 +52,7 @@ func (s *DefenderScanner) Init(config *ScannerConfig) error {
 
 // ListConfiguration - Lists Microsoft Defender for Cloud pricing configurations in the subscription.
 func (s *DefenderScanner) ListConfiguration() ([]DefenderResult, error) {
+	log.Println("Scanning Defender Status...")
 	if s.defenderFunc == nil {
 		resp, err := s.client.List(s.config.Ctx, nil)
 		if err != nil {

@@ -8,6 +8,6 @@ type ReportData struct {
 	OutputFileName     string
 	EnableDetailedScan bool
 	Mask               bool
-	MainData           []scanners.IAzureServiceResult
+	MainData           []scanners.AzureServiceResult
 	DefenderData       []scanners.DefenderResult
 }
