@@ -15,7 +15,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "apim-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "APIM should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -64,7 +64,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "apim-004",
-			Category:    "Security",
+			Category:    "Networking",
 			Subcategory: "Private Endpoint",
 			Description: "APIM should have private endpoints enabled",
 			Severity:    "High",
@@ -91,7 +91,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "apim-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "APIM should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

@@ -15,7 +15,7 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "cosmos-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "CosmosDB should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -87,7 +87,7 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "cosmos-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "CosmosDB should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -112,7 +112,7 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "cosmos-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "CosmosDB Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

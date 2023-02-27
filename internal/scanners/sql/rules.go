@@ -15,7 +15,7 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "sql-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "SQL should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -51,7 +51,7 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "sql-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "SQL should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -73,7 +73,7 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "sql-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "SQL Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -92,7 +92,7 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "sqldb-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "SQL Database should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -137,7 +137,7 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "sqldb-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "SQL Database should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -157,7 +157,7 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "sqldb-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "SQL Database Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

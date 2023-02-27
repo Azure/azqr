@@ -38,8 +38,8 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "ci-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
-			Description: "ContainerInstance should have private endpoints enabled",
+			Subcategory: "Networking",
+			Description: "ContainerInstance should use private IP addresses",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
@@ -65,7 +65,7 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "ci-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "ContainerInstance Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

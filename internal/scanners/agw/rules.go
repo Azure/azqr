@@ -15,7 +15,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "agw-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "Application Gateway should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -68,7 +68,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "agw-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "Application Gateway Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

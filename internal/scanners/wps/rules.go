@@ -15,7 +15,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "wps-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "Web Pub Sub should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -67,7 +67,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "wps-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "Web Pub Sub should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -93,7 +93,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "wps-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "Web Pub Sub Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

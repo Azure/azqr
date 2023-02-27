@@ -15,7 +15,7 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "sb-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "Service Bus should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -60,7 +60,7 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "sb-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "Service Bus should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -85,7 +85,7 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "sb-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "Service Bus Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

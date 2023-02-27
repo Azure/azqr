@@ -15,7 +15,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "appcs-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "AppConfiguration should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -50,7 +50,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "appcs-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "AppConfiguration should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -76,7 +76,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "appcs-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "AppConfiguration Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

@@ -15,7 +15,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "aks-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "AKS Cluster should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -81,7 +81,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "aks-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "AKS Cluster should be private",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -110,7 +110,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "aks-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "AKS Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -119,6 +119,130 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, strconv.FormatBool(caf)
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		},
+		"aks-007": {
+			Id:          "aks-007",
+			Category:    "Security",
+			Subcategory: "Identity and Access Control",
+			Description: "AKS should integrate authentication with AAD",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				aad := c.Properties.AADProfile != nil
+				return !aad, strconv.FormatBool(aad)
+			},
+			Url: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
+		},
+		"aks-008": {
+			Id:          "aks-008",
+			Category:    "Security",
+			Subcategory: "Identity and Access Control",
+			Description: "AKS should be RBAC enabled.",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				rbac := *c.Properties.EnableRBAC
+				return !rbac, strconv.FormatBool(rbac)
+			},
+			Url: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
+		},
+		"aks-009": {
+			Id:          "aks-009",
+			Category:    "Security",
+			Subcategory: "Identity and Access Control",
+			Description: "AKS should have local accounts disabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				acc := *c.Properties.DisableLocalAccounts
+				return !acc, strconv.FormatBool(acc)
+			},
+			Url: "https://learn.microsoft.com/azure/aks/managed-aad#disable-local-accounts",
+		},
+		"aks-010": {
+			Id:          "aks-010",
+			Category:    "Security",
+			Subcategory: "Best Practices",
+			Description: "AKS should have httpApplicationRouting disabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				p, exists := c.Properties.AddonProfiles["httpApplicationRouting"]
+				broken := exists && *p.Enabled
+				return broken, strconv.FormatBool(!broken)
+			},
+			Url: "https://learn.microsoft.com/azure/aks/http-application-routing",
+		},
+		"aks-011": {
+			Id:          "aks-011",
+			Category:    "Monitoring and Logging",
+			Subcategory: "Monitoring",
+			Description: "AKS should have Container Insights enabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				p, exists := c.Properties.AddonProfiles["omsagent"]
+				broken := !exists || !*p.Enabled
+				return broken, strconv.FormatBool(!broken)
+			},
+			Url: "https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview",
+		},
+		"aks-012": {
+			Id:          "aks-012",
+			Category:    "Monitoring and Logging",
+			Subcategory: "Monitoring",
+			Description: "AKS should have Container Insights enabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				p, exists := c.Properties.AddonProfiles["omsagent"]
+				broken := !exists || !*p.Enabled
+				return broken, strconv.FormatBool(!broken)
+			},
+			Url: "https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview",
+		},
+		"aks-013": {
+			Id:          "aks-013",
+			Category:    "Security",
+			Subcategory: "Networking",
+			Description: "AKS should have outbound type set to user defined routing",
+			Severity:    "High",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				out := *c.Properties.NetworkProfile.OutboundType == armcontainerservice.OutboundTypeUserDefinedRouting
+				return !out, strconv.FormatBool(out)
+			},
+			Url: "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
+		},
+		"aks-014": {
+			Id:          "aks-014",
+			Category:    "Networking",
+			Subcategory: "Best Practices",
+			Description: "AKS should avoid using kubenet network plugin",
+			Severity:    "High",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				out := *c.Properties.NetworkProfile.NetworkPlugin == armcontainerservice.NetworkPluginKubenet
+				return out, strconv.FormatBool(!out)
+			},
+			Url: "https://learn.microsoft.com/azure/aks/operator-best-practices-network",
+		},
+		"aks-015": {
+			Id:          "aks-015",
+			Category:    "Operations",
+			Subcategory: "Scalability",
+			Description: "AKS should have autoscaler enabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				for _, p := range c.Properties.AgentPoolProfiles {
+					if !*p.EnableAutoScaling {
+						return true, strconv.FormatBool(false)
+					}
+				}
+				return false, strconv.FormatBool(true)
+			},
+			Url: "https://learn.microsoft.com/azure/aks/concepts-scale",
 		},
 	}
 }

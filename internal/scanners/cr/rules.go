@@ -15,7 +15,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "cr-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "ContainerRegistry should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -56,7 +56,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "cr-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "ContainerRegistry should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -81,7 +81,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "cr-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "ContainerRegistry Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -90,6 +90,32 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, strconv.FormatBool(caf)
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		},
+		"cr-007": {
+			Id:          "cr-007",
+			Category:    "Security",
+			Subcategory: "Identity and Access Control",
+			Description: "ContainerRegistry should have anonymous pull access disabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerregistry.Registry)
+				apull := *c.Properties.AnonymousPullEnabled
+				return apull, strconv.FormatBool(apull)
+			},
+			Url: "https://learn.microsoft.com/azure/container-registry/anonymous-pull-access#configure-anonymous-pull-access",
+		},
+		"cr-008": {
+			Id:          "cr-008",
+			Category:    "Security",
+			Subcategory: "Identity and Access Control",
+			Description: "ContainerRegistry should have the Administrator account disabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerregistry.Registry)
+				admin := *c.Properties.AdminUserEnabled
+				return admin, strconv.FormatBool(admin)
+			},
+			Url: "https://learn.microsoft.com/azure/container-registry/container-registry-authentication-managed-identity",
 		},
 	}
 }

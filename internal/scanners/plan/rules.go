@@ -15,7 +15,7 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "plan-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "Plan should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -73,7 +73,7 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "plan-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "Plan Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -92,7 +92,7 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "app-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "App Service should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -109,7 +109,7 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "app-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "App Service should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -122,7 +122,7 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "app-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "App Service Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -131,6 +131,19 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 				return !caf, strconv.FormatBool(caf)
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		},
+		"app-007": {
+			Id:          "app-007",
+			Category:    "Security",
+			Subcategory: "Network Security",
+			Description: "App Service should use HTTPS only",
+			Severity:    "High",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				h := *c.Properties.HTTPSOnly
+				return !h, strconv.FormatBool(h)
+			},
+			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
 		},
 	}
 }
@@ -141,7 +154,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 		"DiagnosticSettings": {
 			Id:          "func-001",
 			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Settings",
+			Subcategory: "Diagnostic Logs",
 			Description: "Function should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -158,7 +171,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 		"Private": {
 			Id:          "func-004",
 			Category:    "Security",
-			Subcategory: "Private Endpoint",
+			Subcategory: "Networking",
 			Description: "Function should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -171,7 +184,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 		"CAF": {
 			Id:          "func-006",
 			Category:    "Governance",
-			Subcategory: "CAF Naming",
+			Subcategory: "Naming Convention (CAF)",
 			Description: "Function Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -180,6 +193,19 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 				return !caf, strconv.FormatBool(caf)
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		},
+		"func-007": {
+			Id:          "func-007",
+			Category:    "Security",
+			Subcategory: "Network Security",
+			Description: "Fucntion should use HTTPS only",
+			Severity:    "High",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				h := *c.Properties.HTTPSOnly
+				return !h, strconv.FormatBool(h)
+			},
+			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
 		},
 	}
 }
