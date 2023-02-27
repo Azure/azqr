@@ -56,7 +56,7 @@ type (
 		Subcategory string
 		Description string
 		Severity    string
-		Url         string
+		Learn       string
 		IsSpecific  bool
 		Result      string
 		IsBroken    bool
@@ -74,7 +74,7 @@ func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContex
 		Subcategory: rule.Subcategory,
 		Description: rule.Description,
 		Severity:    rule.Severity,
-		Url:         rule.Url,
+		Learn:       rule.Url,
 		IsSpecific:  rule.IsSpecific,
 		Result:      result,
 		IsBroken:    broken,
@@ -94,7 +94,7 @@ func (e *RuleEngine) EvaluateRules(rules map[string]AzureRule, target interface{
 // ToMap - Returns a map representation of the Azure Service Result
 func (r AzureServiceResult) ToMap(mask bool) map[string]string {
 	return map[string]string{
-		"SubscriptionID": maskSubscriptionID(r.SubscriptionID, mask),
+		"SubscriptionID": MaskSubscriptionID(r.SubscriptionID, mask),
 		"ResourceGroup":  r.ResourceGroup,
 		"Location":       parseLocation(r.Location),
 		"Type":           r.Type,
@@ -134,7 +134,7 @@ func parseLocation(location string) string {
 	return strings.ToLower(strings.ReplaceAll(location, " ", ""))
 }
 
-func maskSubscriptionID(subscriptionID string, mask bool) string {
+func MaskSubscriptionID(subscriptionID string, mask bool) string {
 	if !mask {
 		return subscriptionID
 	}

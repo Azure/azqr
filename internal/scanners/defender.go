@@ -32,7 +32,7 @@ func (d *DefenderResult) GetProperties() []string {
 // ToMap - Returns the properties of the DefenderResult as a map
 func (r DefenderResult) ToMap(mask bool) map[string]string {
 	return map[string]string{
-		"SubscriptionID": maskSubscriptionID(r.SubscriptionID, mask),
+		"SubscriptionID": MaskSubscriptionID(r.SubscriptionID, mask),
 		"Name":           r.Name,
 		"Tier":           r.Tier,
 		"Deprecated":     strconv.FormatBool(r.Deprecated),

@@ -1,0 +1,58 @@
+package renderers
+
+import (
+	"fmt"
+	_ "image/png"
+	"log"
+
+	"github.com/cmendible/azqr/internal/scanners"
+	"github.com/xuri/excelize/v2"
+)
+
+func renderServices(f *excelize.File, data ReportData) {
+	_, err := f.NewSheet("Services")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	heathers := []string{"Subscription", "Resource Group", "Location", "Type", "Service Name", "Category", "Subcategory", "Severity", "Description", "Result", "Broken", "Learn"}
+
+	rows := [][]string{}
+	for _, d := range data.MainData {
+		for _, r := range d.Rules {
+			row := []string{
+				scanners.MaskSubscriptionID(d.SubscriptionID, data.Mask),
+				d.ResourceGroup,
+				d.Location,
+				d.Type,
+				d.ServiceName,
+				r.Category,
+				r.Subcategory,
+				r.Severity,
+				r.Description,
+				r.Result,
+				fmt.Sprintf("%t", r.IsBroken),
+				r.Learn,
+			}
+			rows = append([][]string{row}, rows...)
+		}
+	}
+
+	createFirstRow(f, "Services", heathers)
+
+	currentRow := 4
+	for _, row := range rows {
+		currentRow += 1
+		cell, err := excelize.CoordinatesToCellName(1, currentRow)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = f.SetSheetRow("Services", cell, &row)
+		if err != nil {
+			log.Fatal(err)
+		}
+		setHyperLink(f, "Services", 12, currentRow)
+	}
+
+	configureSheet(f, "Services", heathers, currentRow)
+}
