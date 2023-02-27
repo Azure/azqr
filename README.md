@@ -88,6 +88,8 @@ For help run:
 
 Azure Quick Review (azqr) creates an excel spreadsheet with the results of the scan.
 
+Check the [Azure Quick Review Scan Results](docs/scan_results/README.md) documentation for more information.
+
 ## Troubleshooting
 
 ### Error: "RESPONSE 429: 429 Too Many Requests"
