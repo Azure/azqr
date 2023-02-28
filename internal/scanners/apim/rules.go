@@ -2,7 +2,6 @@ package apim
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
@@ -25,7 +24,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
 		},
@@ -38,7 +37,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				zones := len(a.Zones) > 0
-				return !zones, strconv.FormatBool(zones)
+				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/reliability/migrate-api-mgt",
 		},
@@ -71,7 +70,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
 		},
@@ -97,7 +96,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				caf := strings.HasPrefix(*c.Name, "apim")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

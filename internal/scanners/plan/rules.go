@@ -2,7 +2,6 @@ package plan
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
@@ -25,7 +24,7 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 		},
 		"AvailabilityZones": {
@@ -37,7 +36,7 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armappservice.Plan)
 				zones := *i.Properties.ZoneRedundant
-				return !zones, strconv.FormatBool(zones)
+				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/reliability/migrate-app-service",
 		},
@@ -79,7 +78,7 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Plan)
 				caf := strings.HasPrefix(*c.Name, "app")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
@@ -102,7 +101,7 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
 		},
@@ -115,7 +114,7 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armappservice.Site)
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/app-service/networking/private-endpoint",
 		},
@@ -128,7 +127,7 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				caf := strings.HasPrefix(*c.Name, "app")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
@@ -141,7 +140,7 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				h := *c.Properties.HTTPSOnly
-				return !h, strconv.FormatBool(h)
+				return !h, ""
 			},
 			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
 		},
@@ -164,7 +163,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-monitor-log-analytics?tabs=csharp",
 		},
@@ -177,7 +176,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armappservice.Site)
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-vnet",
 		},
@@ -190,7 +189,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				caf := strings.HasPrefix(*c.Name, "app")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
@@ -203,7 +202,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				h := *c.Properties.HTTPSOnly
-				return !h, strconv.FormatBool(h)
+				return !h, ""
 			},
 			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
 		},

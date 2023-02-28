@@ -2,7 +2,6 @@ package afd
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
@@ -25,7 +24,7 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
 		},
@@ -60,7 +59,7 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcdn.Profile)
 				caf := strings.HasPrefix(*c.Name, "afd")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

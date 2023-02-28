@@ -3,6 +3,7 @@ package scanners
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -93,6 +94,30 @@ func (e *RuleEngine) EvaluateRules(rules map[string]AzureRule, target interface{
 
 // ToMap - Returns a map representation of the Azure Service Result
 func (r AzureServiceResult) ToMap(mask bool) map[string]string {
+	az := ""
+	_, exists := r.Rules["AvailabilityZones"]
+	if exists {
+		az = strconv.FormatBool(!r.Rules["AvailabilityZones"].IsBroken)
+	}
+
+	pvt := ""
+	_, exists = r.Rules["Private"]
+	if exists {
+		pvt = strconv.FormatBool(!r.Rules["Private"].IsBroken)
+	}
+
+	ds := ""
+	_, exists = r.Rules["DiagnosticSettings"]
+	if exists {
+		ds = strconv.FormatBool(!r.Rules["DiagnosticSettings"].IsBroken)
+	}
+
+	caf := ""
+	_, exists = r.Rules["CAF"]
+	if exists {
+		caf = strconv.FormatBool(!r.Rules["CAF"].IsBroken)
+	}
+
 	return map[string]string{
 		"SubscriptionID": MaskSubscriptionID(r.SubscriptionID, mask),
 		"ResourceGroup":  r.ResourceGroup,
@@ -101,10 +126,10 @@ func (r AzureServiceResult) ToMap(mask bool) map[string]string {
 		"Name":           r.ServiceName,
 		"SKU":            r.Rules["SKU"].Result,
 		"SLA":            r.Rules["SLA"].Result,
-		"AZ":             r.Rules["AvailabilityZones"].Result,
-		"PVT":            r.Rules["Private"].Result,
-		"DS":             r.Rules["DiagnosticSettings"].Result,
-		"CAF":            r.Rules["CAF"].Result,
+		"AZ":             az,
+		"PVT":            pvt,
+		"DS":             ds,
+		"CAF":            caf,
 	}
 }
 

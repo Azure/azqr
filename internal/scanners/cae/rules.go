@@ -2,7 +2,6 @@ package cae
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers"
@@ -25,7 +24,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-apps/log-options#diagnostic-settings",
 		},
@@ -38,7 +37,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				app := target.(*armappcontainers.ManagedEnvironment)
 				zones := *app.Properties.ZoneRedundant
-				return !zones, strconv.FormatBool(zones)
+				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-apps/disaster-recovery?tabs=bash#set-up-zone-redundancy-in-your-container-apps-environment",
 		},
@@ -62,7 +61,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				app := target.(*armappcontainers.ManagedEnvironment)
 				pe := *app.Properties.VnetConfiguration.Internal
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-apps/vnet-custom-internal?tabs=bash&pivots=azure-portal",
 		},
@@ -75,7 +74,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ManagedEnvironment)
 				caf := strings.HasPrefix(*c.Name, "cae")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

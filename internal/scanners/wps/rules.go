@@ -2,7 +2,6 @@ package wps
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
@@ -25,7 +24,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
 		},
@@ -42,7 +41,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				if strings.Contains(sku, "Premium") {
 					zones = true
 				}
-				return !zones, strconv.FormatBool(zones)
+				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
 		},
@@ -73,7 +72,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
 		},
@@ -99,7 +98,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armwebpubsub.ResourceInfo)
 				caf := strings.HasPrefix(*c.Name, "wps")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

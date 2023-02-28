@@ -1,7 +1,6 @@
 package ci
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
@@ -20,7 +19,7 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				zones := len(i.Zones) > 0
-				return !zones, strconv.FormatBool(zones)
+				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-instances/availability-zones",
 		},
@@ -47,7 +46,7 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 				if i.Properties.IPAddress != nil && i.Properties.IPAddress.Type != nil {
 					pe = *i.Properties.IPAddress.Type == armcontainerinstance.ContainerGroupIPAddressTypePrivate
 				}
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 		},
 		"SKU": {
@@ -71,7 +70,7 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerinstance.ContainerGroup)
 				caf := strings.HasPrefix(*c.Name, "ci")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

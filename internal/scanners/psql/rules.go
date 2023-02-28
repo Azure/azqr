@@ -2,7 +2,6 @@ package psql
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
@@ -26,20 +25,9 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-server-logs#resource-logs",
-		},
-		"AvailabilityZones": {
-			Id:          "psql-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
-			Description: "PostgreSQL should have availability zones enabled",
-			Severity:    "High",
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, strconv.FormatBool(false)
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/overview-single-server",
 		},
 		"SLA": {
 			Id:          "psql-003",
@@ -62,7 +50,7 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresql.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-data-access-and-security-private-link",
 		},
@@ -87,7 +75,7 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				caf := strings.HasPrefix(*c.Name, "psql")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
@@ -110,7 +98,7 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
 		},
@@ -123,7 +111,7 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresqlflexibleservers.Server)
 				zones := *i.Properties.HighAvailability.Mode == armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant
-				return !zones, strconv.FormatBool(zones)
+				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview#architecture-and-high-availability",
 		},
@@ -156,7 +144,7 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresqlflexibleservers.Server)
 				pe := *i.Properties.Network.PublicNetworkAccess == armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking#private-access-vnet-integration",
 		},
@@ -181,7 +169,7 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresqlflexibleservers.Server)
 				caf := strings.HasPrefix(*c.Name, "psql")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

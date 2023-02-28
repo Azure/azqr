@@ -2,7 +2,6 @@ package kv
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
@@ -25,20 +24,9 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
-		},
-		"AvailabilityZones": {
-			Id:          "kv-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
-			Description: "Key Vault should have availability zones enabled",
-			Severity:    "High",
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, strconv.FormatBool(true)
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/disaster-recovery-guidance",
 		},
 		"SLA": {
 			Id:          "kv-003",
@@ -60,7 +48,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armkeyvault.Vault)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/private-link-service",
 		},
@@ -85,7 +73,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
 				caf := strings.HasPrefix(*c.Name, "kv")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

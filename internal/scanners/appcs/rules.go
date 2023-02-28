@@ -2,7 +2,6 @@ package appcs
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
@@ -25,7 +24,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
 		},
@@ -56,7 +55,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armappconfiguration.ConfigurationStore)
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
-				return !pe, strconv.FormatBool(pe)
+				return !pe,""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
 		},
@@ -82,7 +81,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappconfiguration.ConfigurationStore)
 				caf := strings.HasPrefix(*c.Name, "appcs")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

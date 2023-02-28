@@ -2,7 +2,6 @@ package sql
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
@@ -25,7 +24,7 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 		},
 		"AvailabilityZones": {
@@ -35,7 +34,7 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 			Description: "SQL should have availability zones enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, strconv.FormatBool(false)
+				return false, ""
 			},
 		},
 		"SLA": {
@@ -57,7 +56,7 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 		},
 		"SKU": {
@@ -79,7 +78,7 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Server)
 				caf := strings.HasPrefix(*c.Name, "sql")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
@@ -102,7 +101,7 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 		},
 		"AvailabilityZones": {
@@ -114,7 +113,7 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Database)
 				zones := *i.Properties.ZoneRedundant
-				return !zones, strconv.FormatBool(zones)
+				return !zones, ""
 			},
 		},
 		"SLA": {
@@ -163,7 +162,7 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Database)
 				caf := strings.HasPrefix(*c.Name, "sqldb")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

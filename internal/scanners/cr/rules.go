@@ -2,7 +2,6 @@ package cr
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
@@ -25,7 +24,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
 		},
@@ -38,7 +37,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerregistry.Registry)
 				zones := *i.Properties.ZoneRedundancy == armcontainerregistry.ZoneRedundancyEnabled
-				return !zones, strconv.FormatBool(zones)
+				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-registry/zone-redundancy",
 		},
@@ -62,7 +61,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerregistry.Registry)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link",
 		},
@@ -87,7 +86,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerregistry.Registry)
 				caf := strings.HasPrefix(*c.Name, "cr")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
@@ -100,7 +99,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerregistry.Registry)
 				apull := *c.Properties.AnonymousPullEnabled
-				return apull, strconv.FormatBool(apull)
+				return apull, ""
 			},
 			Url: "https://learn.microsoft.com/azure/container-registry/anonymous-pull-access#configure-anonymous-pull-access",
 		},
@@ -113,7 +112,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerregistry.Registry)
 				admin := *c.Properties.AdminUserEnabled
-				return admin, strconv.FormatBool(admin)
+				return admin, ""
 			},
 			Url: "https://learn.microsoft.com/azure/container-registry/container-registry-authentication-managed-identity",
 		},

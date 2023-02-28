@@ -2,7 +2,6 @@ package evgd
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
@@ -25,20 +24,9 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
-		},
-		"AvailabilityZones": {
-			Id:          "evgd-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
-			Description: "Event Grid Domain should have availability zones enabled",
-			Severity:    "High",
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, strconv.FormatBool(true)
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-grid/availability-zones-disaster-recovery",
 		},
 		"SLA": {
 			Id:          "evgd-003",
@@ -60,7 +48,7 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armeventgrid.Domain)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/event-grid/configure-private-endpoints",
 		},
@@ -84,7 +72,7 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventgrid.Domain)
 				caf := strings.HasPrefix(*c.Name, "evgd")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},

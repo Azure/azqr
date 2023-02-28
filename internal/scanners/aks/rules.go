@@ -2,7 +2,6 @@ package aks
 
 import (
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
@@ -25,7 +24,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
 				}
 
-				return !hasDiagnostics, strconv.FormatBool(hasDiagnostics)
+				return !hasDiagnostics, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
 		},
@@ -43,7 +42,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 						zones = false
 					}
 				}
-				return !zones, strconv.FormatBool(zones)
+				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/aks/availability-zones",
 		},
@@ -87,7 +86,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				pe := c.Properties.APIServerAccessProfile != nil && *c.Properties.APIServerAccessProfile.EnablePrivateCluster
-				return !pe, strconv.FormatBool(pe)
+				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
 		},
@@ -116,7 +115,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				caf := strings.HasPrefix(*c.Name, "aks")
-				return !caf, strconv.FormatBool(caf)
+				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
@@ -129,7 +128,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				aad := c.Properties.AADProfile != nil
-				return !aad, strconv.FormatBool(aad)
+				return !aad, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
 		},
@@ -142,7 +141,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				rbac := *c.Properties.EnableRBAC
-				return !rbac, strconv.FormatBool(rbac)
+				return !rbac, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
 		},
@@ -155,7 +154,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				acc := *c.Properties.DisableLocalAccounts
-				return !acc, strconv.FormatBool(acc)
+				return !acc, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/managed-aad#disable-local-accounts",
 		},
@@ -169,7 +168,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armcontainerservice.ManagedCluster)
 				p, exists := c.Properties.AddonProfiles["httpApplicationRouting"]
 				broken := exists && *p.Enabled
-				return broken, strconv.FormatBool(!broken)
+				return broken, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/http-application-routing",
 		},
@@ -183,7 +182,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armcontainerservice.ManagedCluster)
 				p, exists := c.Properties.AddonProfiles["omsagent"]
 				broken := !exists || !*p.Enabled
-				return broken, strconv.FormatBool(!broken)
+				return broken, ""
 			},
 			Url: "https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview",
 		},
@@ -197,7 +196,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armcontainerservice.ManagedCluster)
 				p, exists := c.Properties.AddonProfiles["omsagent"]
 				broken := !exists || !*p.Enabled
-				return broken, strconv.FormatBool(!broken)
+				return broken, ""
 			},
 			Url: "https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview",
 		},
@@ -210,7 +209,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				out := *c.Properties.NetworkProfile.OutboundType == armcontainerservice.OutboundTypeUserDefinedRouting
-				return !out, strconv.FormatBool(out)
+				return !out, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
 		},
@@ -223,7 +222,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				out := *c.Properties.NetworkProfile.NetworkPlugin == armcontainerservice.NetworkPluginKubenet
-				return out, strconv.FormatBool(!out)
+				return out, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/operator-best-practices-network",
 		},
@@ -237,10 +236,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armcontainerservice.ManagedCluster)
 				for _, p := range c.Properties.AgentPoolProfiles {
 					if !*p.EnableAutoScaling {
-						return true, strconv.FormatBool(false)
+						return true, ""
 					}
 				}
-				return false, strconv.FormatBool(true)
+				return false, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/concepts-scale",
 		},
