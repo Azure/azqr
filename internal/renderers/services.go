@@ -15,9 +15,10 @@ func renderServices(f *excelize.File, data ReportData) {
 		log.Fatal(err)
 	}
 
-	heathers := []string{"Subscription", "Resource Group", "Location", "Type", "Service Name", "Category", "Subcategory", "Severity", "Description", "Result", "Broken", "Learn"}
+	heathers := []string{"Subscription", "Resource Group", "Location", "Type", "Service Name", "Broken", "Category", "Subcategory", "Severity", "Description", "Result", "Learn"}
 
-	rows := [][]string{}
+	rbroken := [][]string{}
+	rok := [][]string{}
 	for _, d := range data.MainData {
 		for _, r := range d.Rules {
 			row := []string{
@@ -26,19 +27,25 @@ func renderServices(f *excelize.File, data ReportData) {
 				d.Location,
 				d.Type,
 				d.ServiceName,
+				fmt.Sprintf("%t", r.IsBroken),
 				r.Category,
 				r.Subcategory,
 				r.Severity,
 				r.Description,
 				r.Result,
-				fmt.Sprintf("%t", r.IsBroken),
 				r.Learn,
 			}
-			rows = append([][]string{row}, rows...)
+			if r.IsBroken {
+				rbroken = append([][]string{row}, rbroken...)
+			} else {
+				rok = append([][]string{row}, rok...)
+			}
 		}
 	}
 
 	createFirstRow(f, "Services", heathers)
+
+	rows := append(rbroken, rok...)
 
 	currentRow := 4
 	for _, row := range rows {
