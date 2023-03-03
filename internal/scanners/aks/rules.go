@@ -153,8 +153,11 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
-				acc := *c.Properties.DisableLocalAccounts
-				return !acc, ""
+
+				if c.Properties.DisableLocalAccounts != nil && *c.Properties.DisableLocalAccounts {
+					return false, ""
+				}
+				return true, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/managed-aad#disable-local-accounts",
 		},
@@ -234,9 +237,15 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
-				for _, p := range c.Properties.AgentPoolProfiles {
-					if !*p.EnableAutoScaling {
-						return true, ""
+				if c.Properties.AgentPoolProfiles != nil {
+					for _, p := range c.Properties.AgentPoolProfiles {
+						if p.EnableAutoScaling != nil {
+							if !*p.EnableAutoScaling {
+								return true, ""
+							}
+						} else {
+							return true, ""
+						}
 					}
 				}
 				return false, ""

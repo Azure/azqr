@@ -98,7 +98,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerregistry.Registry)
-				apull := *c.Properties.AnonymousPullEnabled
+				apull := c.Properties.AnonymousPullEnabled != nil && *c.Properties.AnonymousPullEnabled
 				return apull, ""
 			},
 			Url: "https://learn.microsoft.com/azure/container-registry/anonymous-pull-access#configure-anonymous-pull-access",
@@ -111,7 +111,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerregistry.Registry)
-				admin := *c.Properties.AdminUserEnabled
+				admin := c.Properties.AdminUserEnabled != nil && *c.Properties.AdminUserEnabled
 				return admin, ""
 			},
 			Url: "https://learn.microsoft.com/azure/container-registry/container-registry-authentication-managed-identity",
