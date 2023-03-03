@@ -201,7 +201,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
-				h := *c.Properties.HTTPSOnly
+				h := c.Properties.HTTPSOnly != nil && *c.Properties.HTTPSOnly
 				return !h, ""
 			},
 			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",

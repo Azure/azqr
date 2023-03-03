@@ -60,7 +60,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				app := target.(*armappcontainers.ManagedEnvironment)
-				pe := *app.Properties.VnetConfiguration.Internal
+				pe := app.Properties.VnetConfiguration != nil && *app.Properties.VnetConfiguration.Internal
 				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-apps/vnet-custom-internal?tabs=bash&pivots=azure-portal",

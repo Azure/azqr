@@ -190,20 +190,6 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview",
 		},
 		"aks-012": {
-			Id:          "aks-012",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Monitoring",
-			Description: "AKS should have Container Insights enabled",
-			Severity:    "Medium",
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				p, exists := c.Properties.AddonProfiles["omsagent"]
-				broken := !exists || !*p.Enabled
-				return broken, ""
-			},
-			Url: "https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview",
-		},
-		"aks-013": {
 			Id:          "aks-013",
 			Category:    "Security",
 			Subcategory: "Networking",
@@ -216,7 +202,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
 		},
-		"aks-014": {
+		"aks-013": {
 			Id:          "aks-014",
 			Category:    "Networking",
 			Subcategory: "Best Practices",
@@ -229,7 +215,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/azure/aks/operator-best-practices-network",
 		},
-		"aks-015": {
+		"aks-014": {
 			Id:          "aks-015",
 			Category:    "Operations",
 			Subcategory: "Scalability",
