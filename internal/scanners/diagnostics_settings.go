@@ -8,7 +8,7 @@ import (
 type DiagnosticsSettings struct {
 	config                    *ScannerConfig
 	diagnosticsSettingsClient *armmonitor.DiagnosticSettingsClient
-	hasDiagnosticsFunc        func(resourceId string) (bool, error)
+	HasDiagnosticsFunc        func(resourceId string) (bool, error)
 }
 
 // Init - Initializes the DiagnosticsSettings
@@ -24,7 +24,7 @@ func (s *DiagnosticsSettings) Init(config *ScannerConfig) error {
 
 // HasDiagnostics - Checks if a resource has diagnostics settings
 func (s *DiagnosticsSettings) HasDiagnostics(resourceID string) (bool, error) {
-	if s.hasDiagnosticsFunc == nil {
+	if s.HasDiagnosticsFunc == nil {
 		pager := s.diagnosticsSettingsClient.NewListPager(resourceID, nil)
 
 		for pager.More() {
@@ -40,5 +40,5 @@ func (s *DiagnosticsSettings) HasDiagnostics(resourceID string) (bool, error) {
 		return false, nil
 	}
 
-	return s.hasDiagnosticsFunc(resourceID)
+	return s.HasDiagnosticsFunc(resourceID)
 }
