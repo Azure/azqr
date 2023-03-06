@@ -190,7 +190,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview",
 		},
 		"aks-012": {
-			Id:          "aks-013",
+			Id:          "aks-012",
 			Category:    "Security",
 			Subcategory: "Networking",
 			Description: "AKS should have outbound type set to user defined routing",
@@ -203,7 +203,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
 		},
 		"aks-013": {
-			Id:          "aks-014",
+			Id:          "aks-013",
 			Category:    "Networking",
 			Subcategory: "Best Practices",
 			Description: "AKS should avoid using kubenet network plugin",
@@ -216,7 +216,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/azure/aks/operator-best-practices-network",
 		},
 		"aks-014": {
-			Id:          "aks-015",
+			Id:          "aks-014",
 			Category:    "Operations",
 			Subcategory: "Scalability",
 			Description: "AKS should have autoscaler enabled",
@@ -226,15 +226,13 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				if c.Properties.AgentPoolProfiles != nil {
 					for _, p := range c.Properties.AgentPoolProfiles {
 						if p.EnableAutoScaling != nil {
-							if !*p.EnableAutoScaling {
-								return true, ""
-							}
+							return !*p.EnableAutoScaling, ""
 						} else {
 							return true, ""
 						}
 					}
 				}
-				return false, ""
+				return true, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/concepts-scale",
 		},
