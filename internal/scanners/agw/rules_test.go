@@ -48,9 +48,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			name: "ApplicationGatewayScanner SLA",
 			fields: fields{
 				rule: "SLA",
-				target: &armnetwork.ApplicationGateway{
-					ID: to.StringPtr("test"),
-				},
+				target: &armnetwork.ApplicationGateway{},
 				scanContext:         &scanners.ScanContext{},
 				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
@@ -64,7 +62,6 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "SKU",
 				target: &armnetwork.ApplicationGateway{
-					ID: to.StringPtr("test"),
 					Properties: &armnetwork.ApplicationGatewayPropertiesFormat{
 						SKU: &armnetwork.ApplicationGatewaySKU{
 							Name: getSKUName(),
@@ -84,7 +81,6 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armnetwork.ApplicationGateway{
-					ID:   to.StringPtr("test"),
 					Name: to.StringPtr("agw-test"),
 				},
 				scanContext:         &scanners.ScanContext{},
