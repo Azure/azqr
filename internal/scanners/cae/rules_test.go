@@ -75,7 +75,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerAppsScanner VnetConfiguration not presente",
+			name: "ContainerAppsScanner VnetConfiguration not present",
 			fields: fields{
 				rule: "Private",
 				target: &armappcontainers.ManagedEnvironment{
