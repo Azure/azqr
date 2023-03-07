@@ -197,7 +197,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 			Id:          "func-007",
 			Category:    "Security",
 			Subcategory: "Network Security",
-			Description: "Fucntion should use HTTPS only",
+			Description: "Function should use HTTPS only",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
