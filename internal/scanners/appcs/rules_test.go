@@ -62,7 +62,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AppConfigurationScanner SLA Free Premimum SKU and Availability Zones",
+			name: "AppConfigurationScanner SLA Standard",
 			fields: fields{
 				rule: "SLA",
 				target: &armappconfiguration.ConfigurationStore{
