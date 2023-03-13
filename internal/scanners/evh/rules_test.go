@@ -45,7 +45,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerRegistryScanner Availability Zones",
+			name: "EventHubScanner Availability Zones",
 			fields: fields{
 				rule: "AvailabilityZones",
 				target: &armeventhub.EHNamespace{
@@ -117,7 +117,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "APIManagementScanner SKU",
+			name: "EventHubScanner SKU",
 			fields: fields{
 				rule:                "SKU",
 				target: &armeventhub.EHNamespace{

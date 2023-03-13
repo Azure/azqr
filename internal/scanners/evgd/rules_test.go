@@ -79,7 +79,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "APIManagementScanner SKU",
+			name: "EventGridScanner SKU",
 			fields: fields{
 				rule:                "SKU",
 				target:              &armeventgrid.Domain{},

@@ -96,7 +96,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "APIManagementScanner SKU",
+			name: "ContainerRegistryScanner SKU",
 			fields: fields{
 				rule: "SKU",
 				target: &armcontainerregistry.Registry{

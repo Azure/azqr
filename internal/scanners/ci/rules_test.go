@@ -109,7 +109,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "APIManagementScanner SKU",
+			name: "ContainerInstanceScanner SKU",
 			fields: fields{
 				rule: "SKU",
 				target: &armcontainerinstance.ContainerGroup{

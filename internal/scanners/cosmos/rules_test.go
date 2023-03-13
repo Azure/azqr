@@ -150,7 +150,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "APIManagementScanner SKU",
+			name: "CosmosDBScanner SKU",
 			fields: fields{
 				rule: "SKU",
 				target: &armcosmos.DatabaseAccountGetResults{
