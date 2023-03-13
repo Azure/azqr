@@ -214,6 +214,7 @@ func getZoneRedundancy() *armcontainerregistry.ZoneRedundancy {
 	s := armcontainerregistry.ZoneRedundancyEnabled
 	return &s
 }
+
 func getSKUName() *armcontainerregistry.SKUName {
 	s := armcontainerregistry.SKUNameStandard
 	return &s
