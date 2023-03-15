@@ -1,4 +1,4 @@
-package main
+package azqr
 
 import (
 	"context"
@@ -13,51 +13,16 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/cmendible/azqr/internal/renderers"
 	"github.com/cmendible/azqr/internal/scanners"
-	"github.com/cmendible/azqr/internal/scanners/afd"
-	"github.com/cmendible/azqr/internal/scanners/agw"
-	"github.com/cmendible/azqr/internal/scanners/aks"
-	"github.com/cmendible/azqr/internal/scanners/apim"
-	"github.com/cmendible/azqr/internal/scanners/appcs"
-	"github.com/cmendible/azqr/internal/scanners/cae"
-	"github.com/cmendible/azqr/internal/scanners/ci"
-	"github.com/cmendible/azqr/internal/scanners/cosmos"
-	"github.com/cmendible/azqr/internal/scanners/cr"
-	"github.com/cmendible/azqr/internal/scanners/evgd"
-	"github.com/cmendible/azqr/internal/scanners/evh"
-	"github.com/cmendible/azqr/internal/scanners/kv"
-	"github.com/cmendible/azqr/internal/scanners/plan"
-	"github.com/cmendible/azqr/internal/scanners/psql"
-	"github.com/cmendible/azqr/internal/scanners/redis"
-	"github.com/cmendible/azqr/internal/scanners/sb"
-	"github.com/cmendible/azqr/internal/scanners/sigr"
-	"github.com/cmendible/azqr/internal/scanners/sql"
-	"github.com/cmendible/azqr/internal/scanners/st"
-	"github.com/cmendible/azqr/internal/scanners/wps"
+	"github.com/spf13/cobra"
 	"golang.org/x/sync/semaphore"
 )
 
-const (
-	defaultConcurrency = 4
-)
-
-var (
-	version = "dev"
-)
-
-func main() {
-	subscriptionPtr := flag.String("s", "", "Azure Subscription Id (Required)")
-	resourceGroupPtr := flag.String("g", "", "Azure Resource Group")
-	outputPtr := flag.String("o", "azqr_report", "Output file prefix")
-	detail := flag.Bool("d", false, "Enable more details in the report")
-	maskPtr := flag.Bool("m", false, "Mask the subscription id in the report")
-	concurrency := flag.Int("p", defaultConcurrency, fmt.Sprintf("Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency.", defaultConcurrency))
-	ver := flag.Bool("v", false, "Print version and exit")
-
-	flag.Parse()
-
-	subscriptionID := *subscriptionPtr
-	resourceGroupName := *resourceGroupPtr
-	outputFilePrefix := *outputPtr
+func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
+	subscriptionID, _ := cmd.Flags().GetString("subscription-id")
+	resourceGroupName, _ := cmd.Flags().GetString("resource-group")
+	outputFilePrefix, _ := cmd.Flags().GetString("output-prefix")
+	mask, _ := cmd.Flags().GetBool("mask")
+	concurrency, _ := cmd.Flags().GetInt("concurrency")
 
 	current_time := time.Now()
 	outputFileStamp := fmt.Sprintf("%d_%02d_%02d_T%02d%02d%02d",
@@ -65,11 +30,6 @@ func main() {
 		current_time.Hour(), current_time.Minute(), current_time.Second())
 
 	outputFile := fmt.Sprintf("%s_%s", outputFilePrefix, outputFileStamp)
-
-	if *ver {
-		fmt.Printf("azqr version: %s", version)
-		os.Exit(0)
-	}
 
 	if subscriptionID == "" {
 		flag.Usage()
@@ -103,30 +63,6 @@ func main() {
 		}
 	}
 
-	svcScanners := []scanners.IAzureScanner{
-		&aks.AKSScanner{},
-		&apim.APIManagementScanner{},
-		&agw.ApplicationGatewayScanner{},
-		&cae.ContainerAppsScanner{},
-		&ci.ContainerInstanceScanner{},
-		&cosmos.CosmosDBScanner{},
-		&cr.ContainerRegistryScanner{},
-		&evh.EventHubScanner{},
-		&evgd.EventGridScanner{},
-		&kv.KeyVaultScanner{},
-		&appcs.AppConfigurationScanner{},
-		&plan.AppServiceScanner{},
-		&redis.RedisScanner{},
-		&sb.ServiceBusScanner{},
-		&sigr.SignalRScanner{},
-		&wps.WebPubSubScanner{},
-		&st.StorageScanner{},
-		&psql.PostgreScanner{},
-		&psql.PostgreFlexibleScanner{},
-		&sql.SQLScanner{},
-		&afd.FrontDoorScanner{},
-	}
-
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -134,7 +70,7 @@ func main() {
 		Ctx:                ctx,
 		SubscriptionID:     subscriptionID,
 		Cred:               cred,
-		EnableDetailedScan: *detail,
+		EnableDetailedScan: false,
 	}
 
 	peScanner := scanners.PrivateEndpointScanner{}
@@ -151,7 +87,7 @@ func main() {
 		PrivateEndpoints: peResults,
 	}
 
-	for _, a := range svcScanners {
+	for _, a := range serviceScanners {
 		err := a.Init(config)
 		if err != nil {
 			log.Fatal(err)
@@ -166,8 +102,8 @@ func main() {
 	}
 	for _, r := range resourceGroups {
 		log.Printf("Scanning Resource Group %s", r)
-		go scanRunner(&rc, r, &scanContext, &svcScanners, *concurrency)
-		res, err := waitForReviews(&rc, len(svcScanners))
+		go scanRunner(&rc, r, &scanContext, &serviceScanners, concurrency)
+		res, err := waitForReviews(&rc, len(serviceScanners))
 		// As soon as any error happen, we cancel every still running analysis
 		if err != nil {
 			cancel()
@@ -190,7 +126,7 @@ func main() {
 	reportData := renderers.ReportData{
 		OutputFileName:     outputFile,
 		EnableDetailedScan: config.EnableDetailedScan,
-		Mask:               *maskPtr,
+		Mask:               mask,
 		MainData:           all,
 		DefenderData:       defenderResults,
 	}
