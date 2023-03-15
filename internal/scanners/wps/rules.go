@@ -84,8 +84,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
-				sku := string(*i.SKU.Name)
-				return strings.Contains(sku, "Free"), sku
+				return false, string(*i.SKU.Name)
 			},
 			Url: "https://azure.microsoft.com/en-us/pricing/details/web-pubsub/",
 		},
