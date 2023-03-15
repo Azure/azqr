@@ -35,7 +35,10 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 			Description: "Service Bus should have availability zones enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, ""
+				i := target.(*armservicebus.SBNamespace)
+				sku := string(*i.SKU.Name)
+				zones := strings.Contains(sku, "Premium") && i.Properties.ZoneRedundant != nil && *i.Properties.ZoneRedundant
+				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-outages-disasters#availability-zones",
 		},
