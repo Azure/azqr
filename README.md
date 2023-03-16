@@ -78,7 +78,7 @@ To scan a specific resource group in a specific subscription run:
 ./azqr -s <subscription_id> -g <resource_group_name>
 ```
 
-For help run:
+For information on available commands and help run:
 
 ```bash
 ./azqr -h
