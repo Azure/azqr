@@ -2,7 +2,6 @@ package azqr
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -32,7 +31,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	outputFile := fmt.Sprintf("%s_%s", outputFilePrefix, outputFileStamp)
 
 	if subscriptionID == "" {
-		flag.Usage()
+		_ = cmd.Help()
 		os.Exit(1)
 	}
 
