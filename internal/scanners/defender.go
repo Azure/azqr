@@ -23,6 +23,7 @@ type DefenderScanner struct {
 // GetProperties - Returns the properties of the DefenderResult
 func (d *DefenderResult) GetProperties() []string {
 	return []string{
+		"SubscriptionID",
 		"Name",
 		"Tier",
 		"Deprecated",
