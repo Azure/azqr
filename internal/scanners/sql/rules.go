@@ -27,26 +27,6 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 				return !hasDiagnostics, ""
 			},
 		},
-		"AvailabilityZones": {
-			Id:          "sql-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
-			Description: "SQL should have availability zones enabled",
-			Severity:    "High",
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, ""
-			},
-		},
-		"SLA": {
-			Id:          "sql-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
-			Description: "SQL should have a SLA",
-			Severity:    "High",
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, ""
-			},
-		},
 		"Private": {
 			Id:          "sql-004",
 			Category:    "Security",
@@ -57,16 +37,6 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armsql.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
-			},
-		},
-		"SKU": {
-			Id:          "sql-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
-			Description: "SQL SKU",
-			Severity:    "High",
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, ""
 			},
 		},
 		"CAF": {
@@ -133,16 +103,6 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 				return false, sla
 			},
 		},
-		"Private": {
-			Id:          "sqldb-004",
-			Category:    "Security",
-			Subcategory: "Networking",
-			Description: "SQL Database should have private endpoints enabled",
-			Severity:    "High",
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, ""
-			},
-		},
 		"SKU": {
 			Id:          "sqldb-005",
 			Category:    "High Availability and Resiliency",
@@ -150,7 +110,8 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 			Description: "SQL Database SKU",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, ""
+				i := target.(*armsql.Database)
+				return false, string(*i.SKU.Name)
 			},
 		},
 		"CAF": {
