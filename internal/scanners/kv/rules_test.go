@@ -45,7 +45,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "KeyVaultScanner SLA 99.95%",
+			name: "KeyVaultScanner SLA",
 			fields: fields{
 				rule:                "SLA",
 				target:              &armkeyvault.Vault{},
