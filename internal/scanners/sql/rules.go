@@ -95,9 +95,7 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Database)
 				sla := "99.99%"
-				availabilityZones := *i.Properties.ZoneRedundant
-
-				if availabilityZones && *i.SKU.Tier == "Premium" {
+				if i.Properties.ZoneRedundant != nil && *i.Properties.ZoneRedundant && *i.SKU.Tier == "Premium" {
 					sla = "99.995%"
 				}
 				return false, sla
