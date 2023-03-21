@@ -188,7 +188,7 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
-				caf := strings.HasPrefix(*c.Name, "app")
+				caf := strings.HasPrefix(*c.Name, "func")
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
