@@ -66,6 +66,12 @@ Download the latest release from [here](https://github.com/cmendible/azqr/releas
 
 ### Running the Scan
 
+To scan all resource groups in all subscription run:
+
+```bash
+./azqr
+```
+
 To scan all resource groups in a specific subscription run:
 
 ```bash
@@ -87,6 +93,8 @@ For information on available commands and help run:
 ### Scan Results
 
 Azure Quick Review (azqr) creates an excel spreadsheet with the results of the scan.
+
+> By default the Subscription Ids are masked in the spreadsheet.
 
 Check the [Azure Quick Review Scan Results](docs/scan_results/README.md) documentation for more information.
 
