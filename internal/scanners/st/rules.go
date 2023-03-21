@@ -110,5 +110,18 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
+		"st-007": {
+			Id:          "st-007",
+			Category:    "Security",
+			Subcategory: "Network Security",
+			Description: "Storage Account should use HTTPS only",
+			Severity:    "High",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armstorage.Account)
+				h := *c.Properties.EnableHTTPSTrafficOnly
+				return !h, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer",
+		},
 	}
 }
