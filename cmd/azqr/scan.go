@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
 	"github.com/cmendible/azqr/internal/renderers"
 	"github.com/cmendible/azqr/internal/scanners"
 	"github.com/spf13/cobra"
@@ -23,6 +23,10 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	mask, _ := cmd.Flags().GetBool("mask")
 	concurrency, _ := cmd.Flags().GetInt("concurrency")
 
+	if subscriptionID == "" && resourceGroupName != "" {
+		log.Fatal("Resource Group name can only be used with a Subscription Id")
+	}
+
 	current_time := time.Now()
 	outputFileStamp := fmt.Sprintf("%d_%02d_%02d_T%02d%02d%02d",
 		current_time.Year(), current_time.Month(), current_time.Day(),
@@ -30,104 +34,117 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 	outputFile := fmt.Sprintf("%s_%s", outputFilePrefix, outputFileStamp)
 
-	if subscriptionID == "" {
-		_ = cmd.Help()
-		os.Exit(1)
-	}
-
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 	ctx := context.Background()
 
-	resourceGroups := []string{}
-	if resourceGroupName != "" {
-		exists, err := checkExistenceResourceGroup(ctx, subscriptionID, resourceGroupName, cred)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if !exists {
-			log.Fatalf("Resource Group %s does not exist", resourceGroupName)
-		}
-		resourceGroups = append(resourceGroups, resourceGroupName)
+	subscriptions := []string{}
+	if subscriptionID != "" {
+		subscriptions = append(subscriptions, subscriptionID)
 	} else {
-		rgs, err := listResourceGroup(ctx, subscriptionID, cred)
+		subs, err := listSubscriptions(ctx, cred)
 		if err != nil {
 			log.Fatal(err)
 		}
-		for _, rg := range rgs {
-			resourceGroups = append(resourceGroups, *rg.Name)
-		}
-	}
-
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	config := &scanners.ScannerConfig{
-		Ctx:                ctx,
-		SubscriptionID:     subscriptionID,
-		Cred:               cred,
-		EnableDetailedScan: false,
-	}
-
-	peScanner := scanners.PrivateEndpointScanner{}
-	err = peScanner.Init(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-	peResults, err := peScanner.ListResourcesWithPrivateEndpoints()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	scanContext := scanners.ScanContext{
-		PrivateEndpoints: peResults,
-	}
-
-	for _, a := range serviceScanners {
-		err := a.Init(config)
-		if err != nil {
-			log.Fatal(err)
+		for _, s := range subs {
+			subscriptions = append(subscriptions, *s.SubscriptionID)
 		}
 	}
 
 	var all []scanners.AzureServiceResult
-	rc := ReviewContext{
-		Ctx:   ctx,
-		ResCh: make(chan []scanners.AzureServiceResult),
-		ErrCh: make(chan error),
-	}
-	for _, r := range resourceGroups {
-		log.Printf("Scanning Resource Group %s", r)
-		go scanRunner(&rc, r, &scanContext, &serviceScanners, concurrency)
-		res, err := waitForReviews(&rc, len(serviceScanners))
-		// As soon as any error happen, we cancel every still running analysis
-		if err != nil {
-			cancel()
-			log.Fatal(err)
-		}
-		all = append(all, *res...)
-	}
+	var defenderResults []scanners.DefenderResult
+
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
 	defenderScanner := scanners.DefenderScanner{}
-	err = defenderScanner.Init(config)
-	if err != nil {
-		log.Fatal(err)
-	}
+	peScanner := scanners.PrivateEndpointScanner{}
+	
+	for _, s := range subscriptions {
+		resourceGroups := []string{}
+		if resourceGroupName != "" {
+			exists, err := checkExistenceResourceGroup(ctx, s, resourceGroupName, cred)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-	defenderResults, err := defenderScanner.ListConfiguration()
-	if err != nil {
-		log.Fatal(err)
+			if !exists {
+				log.Fatalf("Resource Group %s does not exist", resourceGroupName)
+			}
+			resourceGroups = append(resourceGroups, resourceGroupName)
+		} else {
+			rgs, err := listResourceGroup(ctx, s, cred)
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, rg := range rgs {
+				resourceGroups = append(resourceGroups, *rg.Name)
+			}
+		}
+
+		config := &scanners.ScannerConfig{
+			Ctx:                ctx,
+			SubscriptionID:     s,
+			Cred:               cred,
+			EnableDetailedScan: false,
+		}
+
+		err = peScanner.Init(config)
+		if err != nil {
+			log.Fatal(err)
+		}
+		peResults, err := peScanner.ListResourcesWithPrivateEndpoints()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		scanContext := scanners.ScanContext{
+			PrivateEndpoints: peResults,
+		}
+
+		for _, a := range serviceScanners {
+			err := a.Init(config)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		rc := ReviewContext{
+			Ctx:   ctx,
+			ResCh: make(chan []scanners.AzureServiceResult),
+			ErrCh: make(chan error),
+		}
+		for _, r := range resourceGroups {
+			log.Printf("Scanning Resource Group %s", r)
+			go scanRunner(&rc, r, &scanContext, &serviceScanners, concurrency)
+			res, err := waitForReviews(&rc, len(serviceScanners))
+			// As soon as any error happen, we cancel every still running analysis
+			if err != nil {
+				cancel()
+				log.Fatal(err)
+			}
+			all = append(all, *res...)
+		}
+
+		err = defenderScanner.Init(config)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		res, err :=defenderScanner.ListConfiguration()
+     	if err != nil {
+			log.Fatal(err)
+		}
+		defenderResults = append(defenderResults, res...)
 	}
 
 	reportData := renderers.ReportData{
-		OutputFileName:     outputFile,
-		EnableDetailedScan: config.EnableDetailedScan,
-		Mask:               mask,
-		MainData:           all,
-		DefenderData:       defenderResults,
+		OutputFileName: outputFile,
+		Mask:           mask,
+		MainData:       all,
+		DefenderData:   defenderResults,
 	}
 
 	renderers.CreateExcelReport(reportData)
@@ -226,4 +243,23 @@ func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.T
 		resourceGroups = append(resourceGroups, pageResp.ResourceGroupListResult.Value...)
 	}
 	return resourceGroups, nil
+}
+
+func listSubscriptions(ctx context.Context, cred azcore.TokenCredential) ([]*armsubscription.Subscription, error) {
+	client, err := armsubscription.NewSubscriptionsClient(cred, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resultPager := client.NewListPager(nil)
+
+	subscriptions := make([]*armsubscription.Subscription, 0)
+	for resultPager.More() {
+		pageResp, err := resultPager.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+		subscriptions = append(subscriptions, pageResp.Value...)
+	}
+	return subscriptions, nil
 }
