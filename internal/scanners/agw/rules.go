@@ -36,7 +36,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
-				zones := len(g.Zones) > 0
+				zones := len(g.Zones) > 1
 				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-autoscaling-zone-redundant",
