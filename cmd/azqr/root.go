@@ -5,6 +5,7 @@ import (
 
 	"github.com/cmendible/azqr/internal/scanners"
 	"github.com/cmendible/azqr/internal/scanners/afd"
+	"github.com/cmendible/azqr/internal/scanners/afw"
 	"github.com/cmendible/azqr/internal/scanners/agw"
 	"github.com/cmendible/azqr/internal/scanners/aks"
 	"github.com/cmendible/azqr/internal/scanners/apim"
@@ -71,6 +72,7 @@ var rootCmd = &cobra.Command{
 			&psql.PostgreFlexibleScanner{},
 			&sql.SQLScanner{},
 			&afd.FrontDoorScanner{},
+			&afw.FirewallScanner{},
 		}
 
 		scan(cmd, serviceScanners)
