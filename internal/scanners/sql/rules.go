@@ -111,6 +111,7 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 				i := target.(*armsql.Database)
 				return false, string(*i.SKU.Name)
 			},
+			Url: "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
 		},
 		"CAF": {
 			Id:          "sqldb-006",

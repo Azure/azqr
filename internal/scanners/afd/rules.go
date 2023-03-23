@@ -49,6 +49,7 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armcdn.Profile)
 				return false, string(*c.SKU.Name)
 			},
+			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/tier-comparison",
 		},
 		"CAF": {
 			Id:          "afd-006",
