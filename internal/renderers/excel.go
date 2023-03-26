@@ -25,6 +25,7 @@ func CreateExcelReport(data ReportData) {
 		renderRecommendations(f, data)
 		renderDefender(f, data)
 		renderServices(f, data)
+		renderAdvisor(f, data)
 
 		if err := f.SaveAs(filename); err != nil {
 			log.Fatal(err)
@@ -66,7 +67,6 @@ func mapToRow(heathers []string, m map[string]string) [][]string {
 
 	return [][]string{v}
 }
-
 
 func createFirstRow(f *excelize.File, sheet string, heathers []string) {
 	currentRow := 4

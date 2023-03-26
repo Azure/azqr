@@ -55,13 +55,15 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 	var all []scanners.AzureServiceResult
 	var defenderResults []scanners.DefenderResult
+	var scannerResults []scanners.AdvisorResult
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	defenderScanner := scanners.DefenderScanner{}
 	peScanner := scanners.PrivateEndpointScanner{}
-	
+	advisorScanner := scanners.AdvisorScanner{}
+
 	for _, s := range subscriptions {
 		resourceGroups := []string{}
 		if resourceGroupName != "" {
@@ -133,11 +135,22 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 			log.Fatal(err)
 		}
 
-		res, err :=defenderScanner.ListConfiguration()
-     	if err != nil {
+		res, err := defenderScanner.ListConfiguration()
+		if err != nil {
 			log.Fatal(err)
 		}
 		defenderResults = append(defenderResults, res...)
+
+		err = advisorScanner.Init(config)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		rec, err := advisorScanner.ListRecommendations()
+		if err != nil {
+			log.Fatal(err)
+		}
+		scannerResults = append(scannerResults, rec...)
 	}
 
 	reportData := renderers.ReportData{
@@ -145,6 +158,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		Mask:           mask,
 		MainData:       all,
 		DefenderData:   defenderResults,
+		AdvisorData:    scannerResults,
 	}
 
 	renderers.CreateExcelReport(reportData)

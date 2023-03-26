@@ -10,4 +10,5 @@ type ReportData struct {
 	Mask               bool
 	MainData           []scanners.AzureServiceResult
 	DefenderData       []scanners.DefenderResult
+	AdvisorData        []scanners.AdvisorResult
 }
