@@ -20,6 +20,8 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	subscriptionID, _ := cmd.Flags().GetString("subscription-id")
 	resourceGroupName, _ := cmd.Flags().GetString("resource-group")
 	outputFilePrefix, _ := cmd.Flags().GetString("output-prefix")
+	defender, _ := cmd.Flags().GetBool("defender")
+	advisor, _ := cmd.Flags().GetBool("advisor")
 	mask, _ := cmd.Flags().GetBool("mask")
 	concurrency, _ := cmd.Flags().GetInt("concurrency")
 
@@ -53,9 +55,9 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		}
 	}
 
-	var all []scanners.AzureServiceResult
+	var ruleResults []scanners.AzureServiceResult
 	var defenderResults []scanners.DefenderResult
-	var scannerResults []scanners.AdvisorResult
+	var advisorResults []scanners.AdvisorResult
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -127,38 +129,42 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 				cancel()
 				log.Fatal(err)
 			}
-			all = append(all, *res...)
+			ruleResults = append(ruleResults, *res...)
 		}
 
-		err = defenderScanner.Init(config)
-		if err != nil {
-			log.Fatal(err)
+		if defender {
+			err = defenderScanner.Init(config)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			res, err := defenderScanner.ListConfiguration()
+			if err != nil {
+				log.Fatal(err)
+			}
+			defenderResults = append(defenderResults, res...)
 		}
 
-		res, err := defenderScanner.ListConfiguration()
-		if err != nil {
-			log.Fatal(err)
-		}
-		defenderResults = append(defenderResults, res...)
+		if advisor {
+			err = advisorScanner.Init(config)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-		err = advisorScanner.Init(config)
-		if err != nil {
-			log.Fatal(err)
+			rec, err := advisorScanner.ListRecommendations()
+			if err != nil {
+				log.Fatal(err)
+			}
+			advisorResults = append(advisorResults, rec...)
 		}
-
-		rec, err := advisorScanner.ListRecommendations()
-		if err != nil {
-			log.Fatal(err)
-		}
-		scannerResults = append(scannerResults, rec...)
 	}
 
 	reportData := renderers.ReportData{
 		OutputFileName: outputFile,
 		Mask:           mask,
-		MainData:       all,
+		MainData:       ruleResults,
 		DefenderData:   defenderResults,
-		AdvisorData:    scannerResults,
+		AdvisorData:    advisorResults,
 	}
 
 	renderers.CreateExcelReport(reportData)

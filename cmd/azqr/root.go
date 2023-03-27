@@ -40,6 +40,8 @@ const (
 func init() {
 	rootCmd.PersistentFlags().StringP("subscription-id", "s", "", "Azure Subscription Id")
 	rootCmd.PersistentFlags().StringP("resource-group", "g", "", "Azure Resource Group (Use with --subscription-id)")
+	rootCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status")
+	rootCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations")
 	rootCmd.PersistentFlags().StringP("output-prefix", "o", "azqr_report", "Output file prefix")
 	rootCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
 	rootCmd.PersistentFlags().IntP("concurrency", "p", defaultConcurrency, fmt.Sprintf("Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency.", defaultConcurrency))
