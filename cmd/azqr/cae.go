@@ -14,6 +14,7 @@ var caeCmd = &cobra.Command{
 	Use:   "cae",
 	Short: "Scan Azure Container Apps",
 	Long:  "Scan Azure Container Apps",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&cae.ContainerAppsScanner{},

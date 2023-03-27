@@ -14,6 +14,7 @@ var sbCmd = &cobra.Command{
 	Use:   "sb",
 	Short: "Scan Azure Service Bus",
 	Long:  "Scan Azure Service Bus",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&sb.ServiceBusScanner{},

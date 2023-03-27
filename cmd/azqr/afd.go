@@ -14,6 +14,7 @@ var afdCmd = &cobra.Command{
 	Use:   "afd",
 	Short: "Scan Azure Front Door",
 	Long:  "Scan Azure Front Door",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&afd.FrontDoorScanner{},

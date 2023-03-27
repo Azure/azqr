@@ -14,6 +14,7 @@ var crCmd = &cobra.Command{
 	Use:   "cr",
 	Short: "Scan Azure Container Registries",
 	Long:  "Scan Azure Container Registries",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&cr.ContainerRegistryScanner{},

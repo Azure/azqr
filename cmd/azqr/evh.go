@@ -14,6 +14,7 @@ var evhCmd = &cobra.Command{
 	Use:   "evh",
 	Short: "Scan Azure Event Hubs",
 	Long:  "Scan Azure Event Hubs",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&evh.EventHubScanner{},

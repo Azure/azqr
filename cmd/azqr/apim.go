@@ -14,6 +14,7 @@ var apimCmd = &cobra.Command{
 	Use:   "apim",
 	Short: "Scan Azure API Management",
 	Long:  "Scan Azure API Management",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&apim.APIManagementScanner{},

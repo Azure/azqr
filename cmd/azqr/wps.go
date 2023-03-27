@@ -14,6 +14,7 @@ var wpsCmd = &cobra.Command{
 	Use:   "wps",
 	Short: "Scan Azure Web PubSub",
 	Long:  "Scan Azure Web PubSub",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&wps.WebPubSubScanner{},

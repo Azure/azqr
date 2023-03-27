@@ -12,8 +12,9 @@ func init() {
 
 var redisCmd = &cobra.Command{
 	Use:   "redis",
-	Short: "Scan Azure Cache for Redis", 
-	Long:  "Scan Azure Cache for Redis", 
+	Short: "Scan Azure Cache for Redis",
+	Long:  "Scan Azure Cache for Redis",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&redis.RedisScanner{},

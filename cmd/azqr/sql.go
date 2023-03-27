@@ -14,6 +14,7 @@ var sqlCmd = &cobra.Command{
 	Use:   "sql",
 	Short: "Scan Azure SQL Database",
 	Long:  "Scan Azure SQL Database",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&sql.SQLScanner{},

@@ -14,6 +14,7 @@ var mysqlCmd = &cobra.Command{
 	Use:   "mysql",
 	Short: "Scan Azure Database for MySQL",
 	Long:  "Scan Azure Database for MySQL",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&mysql.MySQLScanner{},

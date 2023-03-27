@@ -14,6 +14,7 @@ var agwCmd = &cobra.Command{
 	Use:   "agw",
 	Short: "Scan Azure Application Gateway",
 	Long:  "Scan Azure Application Gateway",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&agw.ApplicationGatewayScanner{},

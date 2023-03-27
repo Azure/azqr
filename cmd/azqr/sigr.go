@@ -14,6 +14,7 @@ var sigrCmd = &cobra.Command{
 	Use:   "sigr",
 	Short: "Scan Azure SignalR",
 	Long:  "Scan Azure SignalR",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&sigr.SignalRScanner{},

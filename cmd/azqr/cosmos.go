@@ -14,6 +14,7 @@ var cosmosCmd = &cobra.Command{
 	Use:   "cosmos",
 	Short: "Scan Azure Cosmos DB",
 	Long:  "Scan Azure Cosmos DB",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&cosmos.CosmosDBScanner{},

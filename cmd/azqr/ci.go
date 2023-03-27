@@ -14,6 +14,7 @@ var ciCmd = &cobra.Command{
 	Use:   "ci",
 	Short: "Scan Azure Container Instances",
 	Long:  "Scan Azure Container Instances",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&ci.ContainerInstanceScanner{},

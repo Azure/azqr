@@ -14,6 +14,7 @@ var psqlCmd = &cobra.Command{
 	Use:   "psql",
 	Short: "Scan Azure Database for psql",
 	Long:  "Scan Azure Database for psql",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&psql.PostgreScanner{},

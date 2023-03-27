@@ -14,6 +14,7 @@ var kvCmd = &cobra.Command{
 	Use:   "kv",
 	Short: "Scan Azure Key Vault",
 	Long:  "Scan Azure Key Vault",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&kv.KeyVaultScanner{},
