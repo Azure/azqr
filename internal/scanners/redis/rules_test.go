@@ -127,6 +127,40 @@ func TestRedisScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "RedisScanner disable non-SSL port",
+			fields: fields{
+				rule: "redis-008",
+				target: &armredis.ResourceInfo{
+					Properties: &armredis.Properties{
+						EnableNonSSLPort: to.BoolPtr(false),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "RedisScanner minimum TLS version",
+			fields: fields{
+				rule: "redis-009",
+				target: &armredis.ResourceInfo{
+					Properties: &armredis.Properties{
+						MinimumTLSVersion: getTLSVersion(),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -148,5 +182,10 @@ func TestRedisScanner_Rules(t *testing.T) {
 
 func getSKUNamePremium() *armredis.SKUName {
 	s := armredis.SKUNamePremium
+	return &s
+}
+
+func getTLSVersion() *armredis.TLSVersion {
+	s := armredis.TLSVersionOne2
 	return &s
 }

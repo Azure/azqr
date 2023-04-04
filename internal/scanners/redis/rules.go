@@ -102,5 +102,29 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"redis-008": {
+			Id:          "redis-008",
+			Category:    "Security",
+			Subcategory: "Networking",
+			Description: "Redis should not enable non SSL ports",
+			Severity:    "High",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armredis.ResourceInfo)
+				return c.Properties.EnableNonSSLPort != nil && *c.Properties.EnableNonSSLPort == true, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-configure#access-ports",
+		},
+		"redis-009": {
+			Id:          "redis-009",
+			Category:    "Security",
+			Subcategory: "Networking",
+			Description: "Redis should enforce TLS >= 1.2",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armredis.ResourceInfo)
+				return c.Properties.MinimumTLSVersion == nil || *c.Properties.MinimumTLSVersion != armredis.TLSVersionOne2, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-remove-tls-10-11",
+		},
 	}
 }
