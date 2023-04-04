@@ -96,7 +96,7 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 			Category:    "Security",
 			Subcategory: "Networking",
 			Description: "PostgreSQL should enforce SSL",
-			Severity:    "Low",
+			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				return c.Properties.SSLEnforcement == nil || *c.Properties.SSLEnforcement == armpostgresql.SSLEnforcementEnumDisabled, ""
