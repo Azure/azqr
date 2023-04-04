@@ -91,6 +91,30 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"psql-008": {
+			Id:          "psql-008",
+			Category:    "Security",
+			Subcategory: "Networking",
+			Description: "PostgreSQL should enforce SSL",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armpostgresql.Server)
+				return c.Properties.SSLEnforcement == nil || *c.Properties.SSLEnforcement == armpostgresql.SSLEnforcementEnumDisabled, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-ssl-connection-security#enforcing-tls-connections",
+		},
+		"psql-009": {
+			Id:          "psql-009",
+			Category:    "Security",
+			Subcategory: "Networking",
+			Description: "PostgreSQL should enforce TLS >= 1.2",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armpostgresql.Server)
+				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != armpostgresql.MinimalTLSVersionEnumTLS12, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/how-to-tls-configurations",
+		},
 	}
 }
 
@@ -185,8 +209,8 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
-		"psql-007": {
-			Id:          "psql-007",
+		"psqlf-007": {
+			Id:          "psqlf-007",
 			Category:    "Governance",
 			Subcategory: "Use tags to organize your resources",
 			Description: "PostgreSQL should have tags",

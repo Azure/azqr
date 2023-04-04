@@ -111,6 +111,40 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "PostgreScanner enforce SSL",
+			fields: fields{
+				rule: "psql-008",
+				target: &armpostgresql.Server{
+					Properties: &armpostgresql.ServerProperties{
+						SSLEnforcement: getSSLEnforcementEnabled(),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "PostgreScanner enforce TLS 1.2",
+			fields: fields{
+				rule: "psql-009",
+				target: &armpostgresql.Server{
+					Properties: &armpostgresql.ServerProperties{
+						MinimalTLSVersion: getMinimalTLSVersion(),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -320,5 +354,16 @@ func getHighAvailability() *armpostgresqlflexibleservers.HighAvailabilityMode {
 
 func getServerPublicNetworkAccessStateDisabled() *armpostgresqlflexibleservers.ServerPublicNetworkAccessState {
 	s := armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled
+	return &s
+}
+
+func getSSLEnforcementEnabled() *armpostgresql.SSLEnforcementEnum {
+	s := armpostgresql.SSLEnforcementEnumEnabled
+	return &s
+}
+
+
+func getMinimalTLSVersion() *armpostgresql.MinimalTLSVersionEnum {
+	s := armpostgresql.MinimalTLSVersionEnumTLS12
 	return &s
 }
