@@ -19,11 +19,10 @@ var rootCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Version: version,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Usage()
+		_ = cmd.Usage()
 	},
 }
 
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
 }
-
