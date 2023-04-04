@@ -80,6 +80,23 @@ func TestSQLScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "SQLScanner minimum TLS version",
+			fields: fields{
+				rule: "sql-008",
+				target: &armsql.Server{
+					Properties: &armsql.ServerProperties{
+						MinimalTLSVersion: to.StringPtr("1.2"),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

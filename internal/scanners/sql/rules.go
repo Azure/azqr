@@ -64,6 +64,18 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"sql-008": {
+			Id:          "sql-008",
+			Category:    "Security",
+			Subcategory: "Networking",
+			Description: "SQL should enforce TLS >= 1.2",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armsql.Server)
+				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != "1.2", ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-sql/database/connectivity-settings?view=azuresql&tabs=azure-portal#minimal-tls-version",
+		},
 	}
 }
 
