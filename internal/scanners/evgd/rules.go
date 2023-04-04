@@ -88,5 +88,17 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"evgd-008": {
+			Id:          "evgd-008",
+			Category:    "Security",
+			Subcategory: "Identity and Access Control",
+			Description: "Event Grid Domain should have local authentication disabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armeventgrid.Domain)
+				return c.Properties.DisableLocalAuth != nil && !*c.Properties.DisableLocalAuth, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/event-grid/authenticate-with-access-keys-shared-access-signatures",
+		},
 	}
 }

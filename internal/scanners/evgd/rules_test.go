@@ -106,6 +106,23 @@ func TestEventGridScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "EventGridScanner Disable Local Auth",
+			fields: fields{
+				rule: "evgd-008",
+				target: &armeventgrid.Domain{
+					Properties: &armeventgrid.DomainProperties{
+						DisableLocalAuth: to.BoolPtr(true),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
