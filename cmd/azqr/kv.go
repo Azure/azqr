@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(kvCmd)
+	scanCmd.AddCommand(kvCmd)
 }
 
 var kvCmd = &cobra.Command{

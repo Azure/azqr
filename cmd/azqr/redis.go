@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(redisCmd)
+	scanCmd.AddCommand(redisCmd)
 }
 
 var redisCmd = &cobra.Command{

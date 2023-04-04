@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(evhCmd)
+	scanCmd.AddCommand(evhCmd)
 }
 
 var evhCmd = &cobra.Command{

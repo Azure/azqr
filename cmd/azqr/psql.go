@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(psqlCmd)
+	scanCmd.AddCommand(psqlCmd)
 }
 
 var psqlCmd = &cobra.Command{

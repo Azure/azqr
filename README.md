@@ -11,6 +11,8 @@ Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure
 * Diagnostic Settings: checks if there are Diagnostic Settings configured for the service. 
 * CAF Naming convention: checks if the service follows [CAF Naming convention](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations).
 
+> Check the [rules](docs/rules/README.md) documentation for more information.
+
 ## Supported Azure Services
 
 * Azure App Services
@@ -72,19 +74,19 @@ Download the latest release from [here](https://github.com/cmendible/azqr/releas
 To scan all resource groups in all subscription run:
 
 ```bash
-./azqr
+./azqr scan
 ```
 
 To scan all resource groups in a specific subscription run:
 
 ```bash
-./azqr -s <subscription_id>
+./azqr scan -s <subscription_id>
 ```
 
 To scan a specific resource group in a specific subscription run:
 
 ```bash
-./azqr -s <subscription_id> -g <resource_group_name>
+./azqr scan -s <subscription_id> -g <resource_group_name>
 ```
 
 For information on available commands and help run:
@@ -120,10 +122,10 @@ ERROR CODE: ResourceRequestsThrottled
 }
 ```
 
-Reduce the number of parallel requests that `azqr` is making. You can do this by setting the value of the `-p` parameter to a lower value (default is 4) as follows:
+Reduce the number of parallel requests that `azqr` is making. You can do this by setting the value of the `-p` parameter to a lower value (default is 4) as in the following example:
 
 ```bash
-./azqr -s <subscription_id> -p 2
+./azqr scan -s <subscription_id> -p 2
 ```
 
 ## Contributors

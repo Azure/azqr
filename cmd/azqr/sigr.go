@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(sigrCmd)
+	scanCmd.AddCommand(sigrCmd)
 }
 
 var sigrCmd = &cobra.Command{

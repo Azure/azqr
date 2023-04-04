@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(wpsCmd)
+	scanCmd.AddCommand(wpsCmd)
 }
 
 var wpsCmd = &cobra.Command{

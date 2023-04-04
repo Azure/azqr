@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(aksCmd)
+	scanCmd.AddCommand(aksCmd)
 }
 
 var aksCmd = &cobra.Command{
