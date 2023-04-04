@@ -236,5 +236,17 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/azure/aks/concepts-scale",
 		},
+		"aks-015": {
+			Id:          "aks-015",
+			Category:    "Governance",
+			Subcategory: "Use tags to organize your resources",
+			Description: "AKS should have tags",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				return c.Tags == nil || len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
 	}
 }
