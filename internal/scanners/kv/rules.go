@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
+	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/cmendible/azqr/internal/scanners"
 )
 
@@ -88,6 +89,30 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 				return c.Tags == nil || len(c.Tags) == 0, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
+		"kv-008": {
+			Id:          "kv-008",
+			Category:    "High Availability and Resiliency",
+			Subcategory: "Reliability",
+			Description: "Key Vault should have soft delete enabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armkeyvault.Vault)
+				return c.Properties.EnableSoftDelete == nil || c.Properties.EnableSoftDelete == to.BoolPtr(false), ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview",
+		},
+		"kv-009": {
+			Id:          "kv-009",
+			Category:    "High Availability and Resiliency",
+			Subcategory: "Reliability",
+			Description: "Key Vault should have purge protection enabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armkeyvault.Vault)
+				return c.Properties.EnablePurgeProtection == nil || c.Properties.EnablePurgeProtection == to.BoolPtr(false), ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview#purge-protection",
 		},
 	}
 }

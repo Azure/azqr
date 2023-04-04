@@ -112,6 +112,40 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "KeyVaultScanner soft delete enabled",
+			fields: fields{
+				rule: "kv-008",
+				target: &armkeyvault.Vault{
+					Properties: &armkeyvault.VaultProperties{
+						EnableSoftDelete: to.BoolPtr(true),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "KeyVaultScanner purge protection enabled",
+			fields: fields{
+				rule: "kv-009",
+				target: &armkeyvault.Vault{
+					Properties: &armkeyvault.VaultProperties{
+						EnablePurgeProtection: to.BoolPtr(true),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
