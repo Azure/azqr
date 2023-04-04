@@ -131,6 +131,23 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "AppConfigurationScanner Disable Local Auth",
+			fields: fields{
+				rule: "appcs-008",
+				target: &armappconfiguration.ConfigurationStore{
+					Properties: &armappconfiguration.ConfigurationStoreProperties{
+						DisableLocalAuth: to.BoolPtr(true),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

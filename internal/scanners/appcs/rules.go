@@ -97,5 +97,17 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"appcs-008": {
+			Id:          "appcs-008",
+			Category:    "Security",
+			Subcategory: "Identity and Access Control",
+			Description: "AppConfiguration should have local authentication disabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappconfiguration.ConfigurationStore)
+				return c.Properties.DisableLocalAuth != nil && !*c.Properties.DisableLocalAuth, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/howto-disable-access-key-authentication?tabs=portal#disable-access-key-authentication",
+		},
 	}
 }
