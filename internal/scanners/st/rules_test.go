@@ -151,6 +151,23 @@ func TestStorageScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "StorageScanner minimum TLS version",
+			fields: fields{
+				rule: "st-009",
+				target: &armstorage.Account{
+					Properties: &armstorage.AccountProperties{
+						MinimumTLSVersion: getTLSVersion(),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -177,5 +194,10 @@ func getPremiumZRSSKU() *armstorage.SKUName {
 
 func getHotTier() *armstorage.AccessTier {
 	s := armstorage.AccessTierHot
+	return &s
+}
+
+func getTLSVersion() *armstorage.MinimumTLSVersion {
+	s := armstorage.MinimumTLSVersionTLS12
 	return &s
 }

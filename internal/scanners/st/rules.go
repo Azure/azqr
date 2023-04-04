@@ -135,5 +135,17 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"st-009": {
+			Id:          "st-009",
+			Category:    "Security",
+			Subcategory: "Networking",
+			Description: "Storage Account should enforce TLS >= 1.2",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armstorage.Account)
+				return c.Properties.MinimumTLSVersion == nil || *c.Properties.MinimumTLSVersion != armstorage.MinimumTLSVersionTLS12, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal",
+		},
 	}
 }
