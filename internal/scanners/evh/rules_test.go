@@ -119,7 +119,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 		{
 			name: "EventHubScanner SKU",
 			fields: fields{
-				rule:                "SKU",
+				rule: "SKU",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
 						Name: getSKUNamePremium(),
@@ -139,6 +139,23 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "CAF",
 				target: &armeventhub.EHNamespace{
 					Name: to.StringPtr("evh-test"),
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "EventHubScanner Disable Local Auth",
+			fields: fields{
+				rule: "evh-008",
+				target: &armeventhub.EHNamespace{
+					Properties: &armeventhub.EHNamespaceProperties{
+						DisableLocalAuth: to.BoolPtr(true),
+					},
 				},
 				scanContext:         &scanners.ScanContext{},
 				diagnosticsSettings: scanners.DiagnosticsSettings{},

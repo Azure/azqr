@@ -96,8 +96,8 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
-		"evgd-007": {
-			Id:          "evgd-007",
+		"evh-007": {
+			Id:          "evh-007",
 			Category:    "Governance",
 			Subcategory: "Use tags to organize your resources",
 			Description: "Event Hub should have tags",
@@ -107,6 +107,18 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				return c.Tags == nil || len(c.Tags) == 0, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
+		"evh-008": {
+			Id:          "evh-008",
+			Category:    "Security",
+			Subcategory: "Identity and Access Control",
+			Description: "Event Hub should have local authentication disabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armeventhub.EHNamespace)
+				return c.Properties.DisableLocalAuth != nil && !*c.Properties.DisableLocalAuth, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/authorize-access-event-hubs#shared-access-signatures",
 		},
 	}
 }
