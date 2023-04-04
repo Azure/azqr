@@ -110,7 +110,7 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armredis.ResourceInfo)
-				return c.Properties.EnableNonSSLPort != nil && *c.Properties.EnableNonSSLPort == true, ""
+				return c.Properties.EnableNonSSLPort != nil && *c.Properties.EnableNonSSLPort, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-configure#access-ports",
 		},
