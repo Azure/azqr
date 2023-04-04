@@ -191,6 +191,42 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "ContainerRegistryScanner Policies not present",
+			fields: fields{
+				rule: "cr-010",
+				target: &armcontainerregistry.Registry{
+					Properties: &armcontainerregistry.RegistryProperties{},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "ContainerRegistryScanner Retention Policies disabled",
+			fields: fields{
+				rule: "cr-010",
+				target: &armcontainerregistry.Registry{
+					Properties: &armcontainerregistry.RegistryProperties{
+						Policies: &armcontainerregistry.Policies{
+							RetentionPolicy: &armcontainerregistry.RetentionPolicy{
+								Status: getPolicyStatusDisabled(),
+							},
+						},
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -217,5 +253,10 @@ func getZoneRedundancy() *armcontainerregistry.ZoneRedundancy {
 
 func getSKUName() *armcontainerregistry.SKUName {
 	s := armcontainerregistry.SKUNameStandard
+	return &s
+}
+
+func getPolicyStatusDisabled() *armcontainerregistry.PolicyStatus {
+	s := armcontainerregistry.PolicyStatusDisabled
 	return &s
 }

@@ -128,5 +128,20 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"cr-010": {
+			Id:          "cr-010",
+			Category:    "Governance",
+			Subcategory: "Use retention policies",
+			Description: "ContainerRegistry should use retention policies",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerregistry.Registry)
+				return c.Properties.Policies == nil ||
+					c.Properties.Policies.RetentionPolicy == nil ||
+					c.Properties.Policies.RetentionPolicy.Status == nil ||
+					*c.Properties.Policies.RetentionPolicy.Status == armcontainerregistry.PolicyStatusDisabled, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
 	}
 }
