@@ -16,7 +16,7 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysql-001",
 			Category:    "Monitoring and Logging",
 			Subcategory: "Diagnostic Logs",
-			Description: "PostgreSQL should have diagnostic settings enabled",
+			Description: "Azure Database for MySQL - Flexible Server should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armmysql.Server)
@@ -33,7 +33,7 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysql-003",
 			Category:    "High Availability and Resiliency",
 			Subcategory: "SLA",
-			Description: "PostgreSQL should have a SLA",
+			Description: "Azure Database for MySQL - Flexible Server should have a SLA",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
@@ -44,7 +44,7 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysql-004",
 			Category:    "Security",
 			Subcategory: "Networking",
-			Description: "PostgreSQL should have private endpoints enabled",
+			Description: "Azure Database for MySQL - Flexible Server should have private endpoints enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysql.Server)
@@ -57,7 +57,7 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysql-005",
 			Category:    "High Availability and Resiliency",
 			Subcategory: "SKU",
-			Description: "PostgreSQL SKU",
+			Description: "Azure Database for MySQL - Flexible Server SKU",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysql.Server)
@@ -69,7 +69,7 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysql-006",
 			Category:    "Governance",
 			Subcategory: "Naming Convention (CAF)",
-			Description: "PostgreSQL Name should comply with naming conventions",
+			Description: "Azure Database for MySQL - Flexible Server Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmysql.Server)
@@ -89,6 +89,18 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/mysql/single-server/whats-happening-to-mysql-single-server",
 		},
+		"mysql-008": {
+			Id:          "mysql-008",
+			Category:    "Governance",
+			Subcategory: "Use tags to organize your resources",
+			Description: "Azure Database for MySQL - Single Server should have tags",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armmysql.Server)
+				return c.Tags == nil || len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
 	}
 }
 
@@ -99,7 +111,7 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysqlf-001",
 			Category:    "Monitoring and Logging",
 			Subcategory: "Diagnostic Logs",
-			Description: "PostgreSQL should have diagnostic settings enabled",
+			Description: "Azure Database for MySQL - Flexible Server should have diagnostic settings enabled",
 			Severity:    "Medium",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armmysqlflexibleservers.Server)
@@ -116,7 +128,7 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysqlf-002",
 			Category:    "High Availability and Resiliency",
 			Subcategory: "Availability Zones",
-			Description: "PostgreSQL should have availability zones enabled",
+			Description: "Azure Database for MySQL - Flexible Server should have availability zones enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
@@ -129,7 +141,7 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysqlf-003",
 			Category:    "High Availability and Resiliency",
 			Subcategory: "SLA",
-			Description: "PostgreSQL should have a SLA",
+			Description: "Azure Database for MySQL - Flexible Server should have a SLA",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
@@ -149,7 +161,7 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysqlf-004",
 			Category:    "Security",
 			Subcategory: "Private Access",
-			Description: "PostgreSQL should have private access enabled",
+			Description: "Azure Database for MySQL - Flexible Server should have private access enabled",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
@@ -162,7 +174,7 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysqlf-005",
 			Category:    "High Availability and Resiliency",
 			Subcategory: "SKU",
-			Description: "PostgreSQL SKU",
+			Description: "Azure Database for MySQL - Flexible Server SKU",
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
@@ -174,7 +186,7 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "mysqlf-006",
 			Category:    "Governance",
 			Subcategory: "Naming Convention (CAF)",
-			Description: "PostgreSQL Name should comply with naming conventions",
+			Description: "Azure Database for MySQL - Flexible Server Name should comply with naming conventions",
 			Severity:    "Low",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmysqlflexibleservers.Server)
@@ -182,6 +194,18 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		},
+		"mysqlf-007": {
+			Id:          "mysqlf-007",
+			Category:    "Governance",
+			Subcategory: "Use tags to organize your resources",
+			Description: "Azure Database for MySQL - Flexible Server should have tags",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armmysqlflexibleservers.Server)
+				return c.Tags == nil || len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

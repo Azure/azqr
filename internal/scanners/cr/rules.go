@@ -116,5 +116,17 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/azure/container-registry/container-registry-authentication-managed-identity",
 		},
+		"cr-009": {
+			Id:          "cr-009",
+			Category:    "Governance",
+			Subcategory: "Use tags to organize your resources",
+			Description: "ContainerRegistry should have tags",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerregistry.Registry)
+				return c.Tags == nil || len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
 	}
 }

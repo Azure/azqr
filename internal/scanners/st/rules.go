@@ -123,5 +123,17 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer",
 		},
+		"st-008": {
+			Id:          "st-008",
+			Category:    "Governance",
+			Subcategory: "Use tags to organize your resources",
+			Description: "Storage Account should have tags",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armstorage.Account)
+				return c.Tags == nil || len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
 	}
 }

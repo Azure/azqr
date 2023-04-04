@@ -82,6 +82,18 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
+		"plan-007": {
+			Id:          "plan-007",
+			Category:    "Governance",
+			Subcategory: "Use tags to organize your resources",
+			Description: "Plan should have tags",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Plan)
+				return c.Tags == nil || len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
 	}
 }
 
@@ -144,6 +156,18 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
 		},
+		"app-008": {
+			Id:          "app-008",
+			Category:    "Governance",
+			Subcategory: "Use tags to organize your resources",
+			Description: "App Service should have tags",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				return c.Tags == nil || len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
 	}
 }
 
@@ -205,6 +229,18 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 				return !h, ""
 			},
 			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
+		},
+		"func-008": {
+			Id:          "func-008",
+			Category:    "Governance",
+			Subcategory: "Use tags to organize your resources",
+			Description: "Function should have tags",
+			Severity:    "Low",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				return c.Tags == nil || len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }
