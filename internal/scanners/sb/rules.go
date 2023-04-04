@@ -109,5 +109,17 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"sb-008": {
+			Id:          "sb-008",
+			Category:    "Security",
+			Subcategory: "Identity and Access Control",
+			Description: "Service Bus should have local authentication disabled",
+			Severity:    "Medium",
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armservicebus.SBNamespace)
+				return c.Properties.DisableLocalAuth != nil && !*c.Properties.DisableLocalAuth, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas",
+		},
 	}
 }

@@ -151,6 +151,23 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "ServiceBusScanner Disable Local Auth",
+			fields: fields{
+				rule: "sb-008",
+				target: &armservicebus.SBNamespace{
+					Properties: &armservicebus.SBNamespaceProperties{
+						DisableLocalAuth: to.BoolPtr(true),
+					},
+				},
+				scanContext:         &scanners.ScanContext{},
+				diagnosticsSettings: scanners.DiagnosticsSettings{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
