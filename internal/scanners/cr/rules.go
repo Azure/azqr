@@ -141,7 +141,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 					c.Properties.Policies.RetentionPolicy.Status == nil ||
 					*c.Properties.Policies.RetentionPolicy.Status == armcontainerregistry.PolicyStatusDisabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			Url: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-retention-policy",
 		},
 	}
 }
