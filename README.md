@@ -11,7 +11,9 @@ Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure
 * Diagnostic Settings: checks if there are Diagnostic Settings configured for the service. 
 * CAF Naming convention: checks if the service follows [CAF Naming convention](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations).
 
-> Check the [rules](docs/rules/README.md) documentation for more information.
+## Azure Quick Review Rules
+
+Azure Quick Review (azqr) uses a set of rules to determine the status of each Azure Service. These rules are listed in the [rules](docs/rules/README.md) documentation.
 
 ## Supported Azure Services
 
