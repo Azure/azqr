@@ -138,7 +138,7 @@ Thanks to everyone who has contributed!
 
 ## Code of Conduct
 
-This project has adopted the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md)
+This project has adopted the [Microsoft Open Source Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## Trademark Notice
 
