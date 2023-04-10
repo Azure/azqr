@@ -24,11 +24,11 @@ type SQLScanner struct {
 func (c *SQLScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.sqlClient, err = armsql.NewServersClient(config.SubscriptionID, config.Cred, nil)
+	c.sqlClient, err = armsql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}
-	c.sqlDatabasedClient, err = armsql.NewDatabasesClient(config.SubscriptionID, config.Cred, nil)
+	c.sqlDatabasedClient, err = armsql.NewDatabasesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

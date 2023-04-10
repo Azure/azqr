@@ -22,7 +22,7 @@ type APIManagementScanner struct {
 func (a *APIManagementScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.serviceClient, err = armapimanagement.NewServiceClient(config.SubscriptionID, config.Cred, nil)
+	a.serviceClient, err = armapimanagement.NewServiceClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

@@ -22,7 +22,7 @@ type MySQLScanner struct {
 func (c *MySQLScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.postgreClient, err = armmysql.NewServersClient(config.SubscriptionID, config.Cred, nil)
+	c.postgreClient, err = armmysql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

@@ -22,7 +22,7 @@ type EventHubScanner struct {
 func (a *EventHubScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.client, err = armeventhub.NewNamespacesClient(config.SubscriptionID, config.Cred, nil)
+	a.client, err = armeventhub.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

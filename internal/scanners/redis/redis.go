@@ -22,7 +22,7 @@ type RedisScanner struct {
 func (c *RedisScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, nil)
+	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

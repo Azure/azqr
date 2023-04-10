@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 )
 
 type (
@@ -18,7 +19,7 @@ type (
 		Ctx                context.Context
 		Cred               azcore.TokenCredential
 		SubscriptionID     string
-		EnableDetailedScan bool
+		ClientOptions      *arm.ClientOptions
 	}
 
 	// ScanContext - Struct for Scanner Context

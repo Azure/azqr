@@ -22,7 +22,7 @@ type EventGridScanner struct {
 func (a *EventGridScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.domainsClient, err = armeventgrid.NewDomainsClient(config.SubscriptionID, config.Cred, nil)
+	a.domainsClient, err = armeventgrid.NewDomainsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

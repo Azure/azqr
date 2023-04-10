@@ -34,6 +34,8 @@ import (
 	"github.com/cmendible/azqr/internal/scanners/wps"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
@@ -49,7 +51,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations")
 	scanCmd.PersistentFlags().StringP("output-prefix", "o", "azqr_report", "Output file prefix")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
-	scanCmd.PersistentFlags().IntP("concurrency", "p", defaultConcurrency, fmt.Sprintf("Parallel processes. Default to %d. A < 0 value will use the maxmimum concurrency.", defaultConcurrency))
+	scanCmd.PersistentFlags().BoolP("parallel-processes", "p", true, "Use parallel processes to run scans")
 	rootCmd.AddCommand(scanCmd)
 }
 
@@ -97,7 +99,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	defender, _ := cmd.Flags().GetBool("defender")
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	mask, _ := cmd.Flags().GetBool("mask")
-	concurrency, _ := cmd.Flags().GetInt("concurrency")
+	concurrency, _ := cmd.Flags().GetBool("parallel-processes")
 
 	if subscriptionID == "" && resourceGroupName != "" {
 		log.Fatal("Resource Group name can only be used with a Subscription Id")
@@ -116,11 +118,21 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	}
 	ctx := context.Background()
 
+	clientOptions := &arm.ClientOptions{
+		ClientOptions: policy.ClientOptions{
+			Retry: policy.RetryOptions{
+				RetryDelay:    20 * time.Millisecond,
+				MaxRetries:    3,
+				MaxRetryDelay: 10 * time.Minute,
+			},
+		},
+	}
+
 	subscriptions := []string{}
 	if subscriptionID != "" {
 		subscriptions = append(subscriptions, subscriptionID)
 	} else {
-		subs, err := listSubscriptions(ctx, cred)
+		subs, err := listSubscriptions(ctx, cred, clientOptions)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -143,7 +155,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	for _, s := range subscriptions {
 		resourceGroups := []string{}
 		if resourceGroupName != "" {
-			exists, err := checkExistenceResourceGroup(ctx, s, resourceGroupName, cred)
+			exists, err := checkExistenceResourceGroup(ctx, s, resourceGroupName, cred, clientOptions)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -153,7 +165,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 			}
 			resourceGroups = append(resourceGroups, resourceGroupName)
 		} else {
-			rgs, err := listResourceGroup(ctx, s, cred)
+			rgs, err := listResourceGroup(ctx, s, cred, clientOptions)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -163,10 +175,10 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		}
 
 		config := &scanners.ScannerConfig{
-			Ctx:                ctx,
-			SubscriptionID:     s,
-			Cred:               cred,
-			EnableDetailedScan: false,
+			Ctx:            ctx,
+			SubscriptionID: s,
+			Cred:           cred,
+			ClientOptions:  clientOptions,
 		}
 
 		err = peScanner.Init(config)
@@ -257,11 +269,12 @@ type ReviewContext struct {
 }
 
 // Run a scan on a particular resource group "r" with the appropriates scanners using "concurrency" goroutines
-func scanRunner(rc *ReviewContext, r string, scanContext *scanners.ScanContext, svcAnalysers *[]scanners.IAzureScanner, concurrency int) {
-	if concurrency <= 0 {
-		concurrency = len(*svcAnalysers)
+func scanRunner(rc *ReviewContext, r string, scanContext *scanners.ScanContext, svcAnalysers *[]scanners.IAzureScanner, concurrency bool) {
+	processes := 1
+	if concurrency {
+		processes = len(*svcAnalysers)
 	}
-	sem := semaphore.NewWeighted(int64(concurrency))
+	sem := semaphore.NewWeighted(int64(processes))
 	for i := range *svcAnalysers {
 		if err := sem.Acquire(rc.Ctx, 1); err != nil {
 			rc.ErrCh <- err
@@ -307,8 +320,8 @@ func waitForReviews(rc *ReviewContext, nb int) (*[]scanners.AzureServiceResult, 
 	}
 }
 
-func checkExistenceResourceGroup(ctx context.Context, subscriptionID string, resourceGroupName string, cred azcore.TokenCredential) (bool, error) {
-	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, nil)
+func checkExistenceResourceGroup(ctx context.Context, subscriptionID string, resourceGroupName string, cred azcore.TokenCredential, options *arm.ClientOptions) (bool, error) {
+	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, options)
 	if err != nil {
 		return false, err
 	}
@@ -320,8 +333,8 @@ func checkExistenceResourceGroup(ctx context.Context, subscriptionID string, res
 	return boolResp.Success, nil
 }
 
-func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.TokenCredential) ([]*armresources.ResourceGroup, error) {
-	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, nil)
+func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.TokenCredential, options *arm.ClientOptions) ([]*armresources.ResourceGroup, error) {
+	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, options)
 	if err != nil {
 		return nil, err
 	}
@@ -339,8 +352,8 @@ func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.T
 	return resourceGroups, nil
 }
 
-func listSubscriptions(ctx context.Context, cred azcore.TokenCredential) ([]*armsubscription.Subscription, error) {
-	client, err := armsubscription.NewSubscriptionsClient(cred, nil)
+func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, options *arm.ClientOptions) ([]*armsubscription.Subscription, error) {
+	client, err := armsubscription.NewSubscriptionsClient(cred, options)
 	if err != nil {
 		return nil, err
 	}

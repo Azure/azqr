@@ -18,7 +18,7 @@ type PrivateEndpointScanner struct {
 func (s *PrivateEndpointScanner) Init(config *ScannerConfig) error {
 	s.config = config
 	var err error
-	s.client, err = armnetwork.NewPrivateEndpointsClient(s.config.SubscriptionID, s.config.Cred, nil)
+	s.client, err = armnetwork.NewPrivateEndpointsClient(s.config.SubscriptionID, s.config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

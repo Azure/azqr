@@ -22,7 +22,7 @@ type FirewallScanner struct {
 func (a *FirewallScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.client, err = armnetwork.NewAzureFirewallsClient(config.SubscriptionID, a.config.Cred, nil)
+	a.client, err = armnetwork.NewAzureFirewallsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
 	if err != nil {
 		return err
 	}
