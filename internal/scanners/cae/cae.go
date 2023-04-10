@@ -22,7 +22,7 @@ type ContainerAppsScanner struct {
 func (a *ContainerAppsScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.appsClient, err = armappcontainers.NewManagedEnvironmentsClient(config.SubscriptionID, config.Cred, nil)
+	a.appsClient, err = armappcontainers.NewManagedEnvironmentsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

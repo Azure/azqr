@@ -22,7 +22,7 @@ type ContainerInstanceScanner struct {
 func (c *ContainerInstanceScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.instancesClient, err = armcontainerinstance.NewContainerGroupsClient(config.SubscriptionID, config.Cred, nil)
+	c.instancesClient, err = armcontainerinstance.NewContainerGroupsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

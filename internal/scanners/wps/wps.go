@@ -22,7 +22,7 @@ type WebPubSubScanner struct {
 func (c *WebPubSubScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.client, err = armwebpubsub.NewClient(config.SubscriptionID, config.Cred, nil)
+	c.client, err = armwebpubsub.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

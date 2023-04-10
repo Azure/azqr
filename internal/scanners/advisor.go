@@ -52,7 +52,7 @@ func (r AdvisorResult) ToMap(mask bool) map[string]string {
 func (s *AdvisorScanner) Init(config *ScannerConfig) error {
 	s.config = config
 	var err error
-	s.client, err = armadvisor.NewRecommendationsClient(config.SubscriptionID, config.Cred, nil)
+	s.client, err = armadvisor.NewRecommendationsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

@@ -18,7 +18,7 @@ type DiagnosticsSettings struct {
 func (s *DiagnosticsSettings) Init(config *ScannerConfig) error {
 	s.config = config
 	var err error
-	s.diagnosticsSettingsClient, err = armmonitor.NewDiagnosticSettingsClient(s.config.Cred, nil)
+	s.diagnosticsSettingsClient, err = armmonitor.NewDiagnosticSettingsClient(s.config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

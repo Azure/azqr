@@ -22,7 +22,7 @@ type AKSScanner struct {
 func (a *AKSScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.clustersClient, err = armcontainerservice.NewManagedClustersClient(config.SubscriptionID, config.Cred, nil)
+	a.clustersClient, err = armcontainerservice.NewManagedClustersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

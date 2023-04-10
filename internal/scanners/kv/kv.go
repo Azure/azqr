@@ -22,7 +22,7 @@ type KeyVaultScanner struct {
 func (c *KeyVaultScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.vaultsClient, err = armkeyvault.NewVaultsClient(config.SubscriptionID, config.Cred, nil)
+	c.vaultsClient, err = armkeyvault.NewVaultsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

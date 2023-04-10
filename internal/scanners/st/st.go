@@ -22,7 +22,8 @@ type StorageScanner struct {
 func (c *StorageScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.storageClient, err = armstorage.NewAccountsClient(config.SubscriptionID, config.Cred, nil)
+
+	c.storageClient, err = armstorage.NewAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

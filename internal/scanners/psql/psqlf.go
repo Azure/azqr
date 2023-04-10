@@ -22,7 +22,7 @@ type PostgreFlexibleScanner struct {
 func (c *PostgreFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.flexibleClient, err = armpostgresqlflexibleservers.NewServersClient(config.SubscriptionID, config.Cred, nil)
+	c.flexibleClient, err = armpostgresqlflexibleservers.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

@@ -22,7 +22,7 @@ type ApplicationGatewayScanner struct {
 func (a *ApplicationGatewayScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.gatewaysClient, err = armnetwork.NewApplicationGatewaysClient(config.SubscriptionID, a.config.Cred, nil)
+	a.gatewaysClient, err = armnetwork.NewApplicationGatewaysClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
 	if err != nil {
 		return err
 	}

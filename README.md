@@ -124,10 +124,10 @@ ERROR CODE: ResourceRequestsThrottled
 }
 ```
 
-Reduce the number of parallel requests that `azqr` is making. You can do this by setting the value of the `-p` parameter to a lower value (default is 4) as in the following example:
+Reduce the number of parallel requests that `azqr` is making. You can do this by setting the value of the `-p` parameter to `false` as in the following example:
 
 ```bash
-./azqr scan -s <subscription_id> -p 2
+./azqr scan -s <subscription_id> -p=false
 ```
 
 ## Contributors

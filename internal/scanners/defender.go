@@ -47,7 +47,7 @@ func (r DefenderResult) ToMap(mask bool) map[string]string {
 func (s *DefenderScanner) Init(config *ScannerConfig) error {
 	s.config = config
 	var err error
-	s.client, err = armsecurity.NewPricingsClient(config.SubscriptionID, config.Cred, nil)
+	s.client, err = armsecurity.NewPricingsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

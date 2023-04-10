@@ -22,7 +22,7 @@ type ContainerRegistryScanner struct {
 func (c *ContainerRegistryScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.registriesClient, err = armcontainerregistry.NewRegistriesClient(config.SubscriptionID, config.Cred, nil)
+	c.registriesClient, err = armcontainerregistry.NewRegistriesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

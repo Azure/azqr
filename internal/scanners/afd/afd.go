@@ -22,7 +22,7 @@ type FrontDoorScanner struct {
 func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.client, err = armcdn.NewProfilesClient(config.SubscriptionID, a.config.Cred, nil)
+	a.client, err = armcdn.NewProfilesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
 	if err != nil {
 		return err
 	}

@@ -25,11 +25,11 @@ type AppServiceScanner struct {
 func (a *AppServiceScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.plansClient, err = armappservice.NewPlansClient(config.SubscriptionID, config.Cred, nil)
+	a.plansClient, err = armappservice.NewPlansClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}
-	a.sitesClient, err = armappservice.NewWebAppsClient(config.SubscriptionID, config.Cred, nil)
+	a.sitesClient, err = armappservice.NewWebAppsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

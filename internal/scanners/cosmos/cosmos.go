@@ -22,7 +22,7 @@ type CosmosDBScanner struct {
 func (a *CosmosDBScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.databasesClient, err = armcosmos.NewDatabaseAccountsClient(config.SubscriptionID, config.Cred, nil)
+	a.databasesClient, err = armcosmos.NewDatabaseAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

@@ -22,7 +22,7 @@ type SignalRScanner struct {
 func (c *SignalRScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.signalrClient, err = armsignalr.NewClient(config.SubscriptionID, config.Cred, nil)
+	c.signalrClient, err = armsignalr.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}

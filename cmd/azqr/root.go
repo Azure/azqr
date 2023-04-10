@@ -11,10 +11,6 @@ var (
 	version = "dev"
 )
 
-const (
-	defaultConcurrency = 4
-)
-
 var rootCmd = &cobra.Command{
 	Use:     "azqr",
 	Short:   "Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group",

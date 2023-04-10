@@ -22,7 +22,7 @@ type AppConfigurationScanner struct {
 func (a *AppConfigurationScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.client, err = armappconfiguration.NewConfigurationStoresClient(config.SubscriptionID, config.Cred, nil)
+	a.client, err = armappconfiguration.NewConfigurationStoresClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}
