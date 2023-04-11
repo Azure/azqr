@@ -3,6 +3,8 @@
 
 # Azure Quick Review
 
+[![Open in vscode.dev](https://img.shields.io/badge/Open%20in-vscode.dev-blue)](https://vscode.dev/github/Azure/azqr)
+
 Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group providing the following information for each Azure Service:
 
 * SLA: current expected SLA
@@ -129,6 +131,18 @@ Reduce the number of parallel requests that `azqr` is making. You can do this by
 ```bash
 ./azqr scan -s <subscription_id> -p=false
 ```
+
+## Support
+
+This project uses GitHub Issues to track bugs and feature requests.
+Before logging an issue please check our [troubleshooting](#troubleshooting) guide.
+
+Please search the existing issues before filing new issues to avoid duplicates.
+
+- For new issues, file your bug or feature request as a new [issue].
+- For help, discussion, and support questions about using this project, join or start a [discussion].
+
+Support for this project/ product is limited to the resources listed above.
 
 ## Contributors
 
