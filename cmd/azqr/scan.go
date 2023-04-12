@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/cmendible/azqr/internal/scanners"
@@ -290,13 +291,31 @@ func scanRunner(rc *ReviewContext, r string, scanContext *scanners.ScanContext, 
 			if context.Canceled == rc.Ctx.Err() {
 				return
 			}
-			res, err := (*a).Scan(r, scanContext)
+			res, err := retry(3, 10*time.Millisecond, a, r, scanContext)
 			if err != nil {
 				rc.ErrCh <- err
 			}
 			rc.ResCh <- res
 		}(analyserPtr, r)
 	}
+}
+
+func retry(attempts int, sleep time.Duration, a *scanners.IAzureScanner, r string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
+	var err error
+	for i := 0; ; i++ {
+		res, err := (*a).Scan(r, scanContext)
+		if err == nil {
+			return res, nil
+		}
+
+		if !strings.Contains(err.Error(), "AzureCLICredential: signal: killed") || i >= (attempts-1) {
+			break
+		}
+
+		time.Sleep(sleep)
+		sleep *= 2
+	}
+	return nil, err
 }
 
 // Wait for at least "nb" goroutines to hands their result and return them

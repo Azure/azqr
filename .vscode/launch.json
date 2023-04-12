@@ -9,7 +9,13 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${fileDirname}"
+            "program": "${fileDirname}",
+            "args": [
+                "scan"
+            ],
+            "env": {
+                "AZURE_SDK_GO_LOGGING": "all"
+            }
         }
     ]
 }
