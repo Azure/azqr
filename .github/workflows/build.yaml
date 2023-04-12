@@ -12,6 +12,9 @@ on:
     branches:
       - main
       - release-*
+
+permissions: read-all
+
 jobs:
   build:
     name: Build ${{ matrix.target_os }}_${{ matrix.target_arch }} binaries
@@ -125,6 +128,7 @@ jobs:
     needs: build
     if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    permissions: write-all
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
@@ -142,6 +146,7 @@ jobs:
   publish:
     name: Publish binaries
     needs: release
+    permissions: write-all
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
