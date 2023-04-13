@@ -6,6 +6,7 @@ package scanners
 import (
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity"
 )
@@ -60,6 +61,11 @@ func (s *DefenderScanner) ListConfiguration() ([]DefenderResult, error) {
 	if s.defenderFunc == nil {
 		resp, err := s.client.List(s.config.Ctx, nil)
 		if err != nil {
+			if strings.Contains(err.Error(), "ERROR CODE: Subscription Not Registered") {
+				log.Println("Subscription Not Registered for Defender. Skipping Defender Scan...")
+				return []DefenderResult{}, nil
+			}
+
 			return nil, err
 		}
 

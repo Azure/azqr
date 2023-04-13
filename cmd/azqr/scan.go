@@ -308,10 +308,17 @@ func retry(attempts int, sleep time.Duration, a *scanners.IAzureScanner, r strin
 			return res, nil
 		}
 
-		if !strings.Contains(err.Error(), "AzureCLICredential: signal: killed") || i >= (attempts-1) {
+		errAsString := err.Error()
+
+		if strings.Contains(errAsString, "ERROR CODE: Subscription Not Registered") {
+			log.Println("Subscription Not Registered for Defender. Skipping Defender Scan...")
+			return []scanners.AzureServiceResult{}, nil
+		}
+		
+		if !strings.Contains(errAsString, "AzureCLICredential: signal: killed") || i >= (attempts-1) {
 			break
 		}
-
+		
 		time.Sleep(sleep)
 		sleep *= 2
 	}
