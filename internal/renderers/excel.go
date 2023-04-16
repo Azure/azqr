@@ -26,9 +26,10 @@ func CreateExcelReport(data ReportData) {
 
 		renderOverview(f, data)
 		renderRecommendations(f, data)
-		renderDefender(f, data)
 		renderServices(f, data)
+		renderDefender(f, data)
 		renderAdvisor(f, data)
+		renderCosts(f, data)
 
 		if err := f.SaveAs(filename); err != nil {
 			log.Fatal(err)

@@ -50,6 +50,7 @@ func init() {
 	scanCmd.PersistentFlags().StringP("resource-group", "g", "", "Azure Resource Group (Use with --subscription-id)")
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations")
+	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs")
 	scanCmd.PersistentFlags().StringP("output-prefix", "o", "azqr_report", "Output file prefix")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
 	scanCmd.PersistentFlags().BoolP("parallel-processes", "p", true, "Use parallel processes to run scans")
@@ -99,6 +100,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	outputFilePrefix, _ := cmd.Flags().GetString("output-prefix")
 	defender, _ := cmd.Flags().GetBool("defender")
 	advisor, _ := cmd.Flags().GetBool("advisor")
+	cost, _ := cmd.Flags().GetBool("costs")
 	mask, _ := cmd.Flags().GetBool("mask")
 	concurrency, _ := cmd.Flags().GetBool("parallel-processes")
 
@@ -145,6 +147,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	var ruleResults []scanners.AzureServiceResult
 	var defenderResults []scanners.DefenderResult
 	var advisorResults []scanners.AdvisorResult
+	var costResult *scanners.CostResult
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -152,6 +155,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	defenderScanner := scanners.DefenderScanner{}
 	peScanner := scanners.PrivateEndpointScanner{}
 	advisorScanner := scanners.AdvisorScanner{}
+	costScanner := scanners.CostScanner{}
 
 	for _, s := range subscriptions {
 		resourceGroups := []string{}
@@ -244,6 +248,23 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 			}
 			advisorResults = append(advisorResults, rec...)
 		}
+
+		if cost {
+			err = costScanner.Init(config)
+			if err != nil {
+				log.Fatal(err)
+			}
+			costs, err := costScanner.QueryCosts()
+			if err != nil {
+				log.Fatal(err)
+			}
+			if costResult == nil {
+				costResult = costs
+			} else {
+				costResult.Items = append(costResult.Items, costs.Items...)
+			}
+		}
+
 	}
 
 	reportData := renderers.ReportData{
@@ -252,6 +273,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		MainData:       ruleResults,
 		DefenderData:   defenderResults,
 		AdvisorData:    advisorResults,
+		CostData:       costResult,
 	}
 
 	renderers.CreateExcelReport(reportData)
@@ -314,11 +336,11 @@ func retry(attempts int, sleep time.Duration, a *scanners.IAzureScanner, r strin
 			log.Println("Subscription Not Registered for Defender. Skipping Defender Scan...")
 			return []scanners.AzureServiceResult{}, nil
 		}
-		
+
 		if !strings.Contains(errAsString, "AzureCLICredential: signal: killed") || i >= (attempts-1) {
 			break
 		}
-		
+
 		time.Sleep(sleep)
 		sleep *= 2
 	}
