@@ -14,4 +14,5 @@ type ReportData struct {
 	MainData           []scanners.AzureServiceResult
 	DefenderData       []scanners.DefenderResult
 	AdvisorData        []scanners.AdvisorResult
+	CostData           *scanners.CostResult
 }
