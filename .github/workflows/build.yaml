@@ -110,9 +110,15 @@ jobs:
           echo "MINVERVERSIONOVERRIDE=$(minver -t v. -m 0.1 -d preview)" >> $env:GITHUB_ENV
         if: matrix.os == 'windows-latest'
 
-      - name: output folder variable
+      - name: output folder variable linux & mac
+        if: matrix.target_os != 'windows'
         run: |
           echo AZQR_OUTPUT_FOLDER=${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.target_arch }} >> $GITHUB_ENV
+
+      - name: output folder variable windows
+        if: matrix.target_os == 'windows'
+        run: |
+          echo AZQR_OUTPUT_FOLDER=${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.target_arch }} >> $env:GITHUB_ENV
       
       - name: Create output folder
         run: |
@@ -171,9 +177,15 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Artifact Name
+      - name: Artifact Name linux & mac
+        if: matrix.target_os != 'windows'
         run: |
-          echo "AZQR_ARTIFACT_NAME=${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}" >> $GITHUB_ENV
+          echo AZQR_ARTIFACT_NAME=${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }} >> $GITHUB_ENV
+
+      - name: Artifact Name windows
+        if: matrix.target_os == 'windows'
+        run: |
+          echo AZQR_ARTIFACT_NAME=${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }} >> $env:GITHUB_ENV
 
       - name: download artifacts - ${{ env.AZQR_ARTIFACT_NAME }}
         uses: actions/download-artifact@master
