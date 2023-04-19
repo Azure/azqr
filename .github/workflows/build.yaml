@@ -20,8 +20,8 @@ jobs:
     name: Build ${{ matrix.target_os }}_${{ matrix.target_arch }} binaries
     runs-on: ${{ matrix.os }}
     env:
-      GOVER: 1.19
-      GOLANGCILINT_VER: v1.50.1
+      GOVER: 1.20
+      GOLANGCILINT_VER: v1.52.2
       GOOS: ${{ matrix.target_os }}
       GOARCH: ${{ matrix.target_arch }}
       GOPROXY: https://proxy.golang.org
@@ -30,7 +30,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        target_arch: [arm, arm64, amd64]
+        target_arch: [amd64, arm, arm64]
         include:
           - os: ubuntu-latest
             target_os: linux
@@ -69,26 +69,26 @@ jobs:
           dotnet tool install --global minver-cli --version 4.2.0
 
       - name: golangci-lint
-        if: matrix.target_os == 'linux'
+        if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
         uses: golangci/golangci-lint-action@v3.3.1
         with:
           version: ${{ env.GOLANGCILINT_VER }}
           args: --timeout 3m --verbose
 
       - name: Run go mod tidy & check diff
-        if: matrix.target_os == 'linux'
+        if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
         run: |
           go mod tidy
           git diff --exit-code ./go.mod
           git diff --exit-code ./go.sum
 
       - name: Run Go vet
-        if: matrix.target_os == 'linux'
+        if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
         run: |
           go vet ./...
 
       - name: Run Tests
-        if: matrix.target_os == 'linux'
+        if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
         env:
           COVERAGE_OPTS: "-coverprofile=coverage.txt -covermode=atomic"
         run: |
@@ -97,7 +97,7 @@ jobs:
           go test ./...
 
       - name: Codecov
-        if: matrix.target_os == 'linux'
+        if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
         uses: codecov/codecov-action@v3
 
       - name: Calculate Version
@@ -112,23 +112,24 @@ jobs:
 
       - name: Create output folder
         run: |
-          mkdir -p ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}
+          echo "AZQR_OUTPUT_FOLDER=${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.target_arch }}" >> $GITHUB_ENV
+          mkdir -p ${{ env.AZQR_OUTPUT_FOLDER }}
 
       - name: Run build and archive non windows binaries
         if: matrix.target_os != 'windows'
         run: |
-          GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -ldflags "-s -w -X 'github.com/cmendible/azqr/cmd/azqr.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/main.go
+          GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -ldflags "-s -w -X 'github.com/cmendible/azqr/cmd/azqr.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }} ./cmd/main.go
 
       - name: Run build and archive windows binaries
         if: matrix.target_os == 'windows'
         run: |
-          go build -ldflags "-s -w -X 'github.com/cmendible/azqr/cmd/azqr.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }} ./cmd/main.go
+          go build -ldflags "-s -w -X 'github.com/cmendible/azqr/cmd/azqr.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }} ./cmd/main.go
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
-          path: ${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.filename }}
+          path: ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }}
 
   release:
     name: Create Release
@@ -157,7 +158,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        target_arch: [amd64]
+        target_arch: [amd64, arm, arm64]
     if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
     env:
       ARTIFACT_DIR: ${{ github.workspace }}/release
@@ -167,11 +168,15 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: download artifacts - ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
+      - name: Artifact Name
+        run: |
+          echo "AZQR_ARTIFACT_NAME=${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}" >> $GITHUB_ENV
+
+      - name: download artifacts - ${{ env.AZQR_ARTIFACT_NAME }}
         uses: actions/download-artifact@master
         with:
-          name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
-          path: ${{ env.ARTIFACT_DIR }}/${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}/
+          name: ${{ env.AZQR_ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/
 
       - name: upload linux artifact
         if: matrix.os != 'windows-latest'
@@ -180,8 +185,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}/azqr
-          asset_name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
+          asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/azqr
+          asset_name: ${{ env.AZQR_ARTIFACT_NAME }}
           asset_content_type: application/octet-stream
 
       - name: upload windows artifact
@@ -191,6 +196,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}/azqr.exe
-          asset_name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}.exe
+          asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/azqr.exe
+          asset_name: ${{ env.AZQR_ARTIFACT_NAME }}.exe
           asset_content_type: application/octet-stream
