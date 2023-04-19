@@ -110,9 +110,12 @@ jobs:
           echo "MINVERVERSIONOVERRIDE=$(minver -t v. -m 0.1 -d preview)" >> $env:GITHUB_ENV
         if: matrix.os == 'windows-latest'
 
-      - name: Create output folder
+      - name: output folder variable
         run: |
           echo "AZQR_OUTPUT_FOLDER=${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.target_arch }}" >> $GITHUB_ENV
+      
+      - name: Create output folder
+        run: |
           mkdir -p ${{ env.AZQR_OUTPUT_FOLDER }}
 
       - name: Run build and archive non windows binaries
