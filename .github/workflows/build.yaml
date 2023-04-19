@@ -112,7 +112,7 @@ jobs:
 
       - name: output folder variable
         run: |
-          echo "AZQR_OUTPUT_FOLDER=${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.target_arch }}" >> $GITHUB_ENV
+          echo AZQR_OUTPUT_FOLDER=${{ env.ARCHIVE_OUTDIR }}/${{ matrix.target_os }}/${{ matrix.target_arch }} >> $GITHUB_ENV
       
       - name: Create output folder
         run: |
