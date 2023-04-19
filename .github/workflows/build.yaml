@@ -168,6 +168,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         target_arch: [amd64, arm, arm64]
+        exclude:
+          - os: windows-latest
+            target_arch: arm
+          - os: windows-latest
+            target_arch: arm64
+          - os: macOS-latest
+            target_arch: arm
     if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
     env:
       ARTIFACT_DIR: ${{ github.workspace }}/release
