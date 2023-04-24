@@ -31,7 +31,7 @@ func renderCosts(f *excelize.File, data ReportData) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		
+
 		err = f.SetCellDefault(
 			"Costs",
 			cell,
@@ -54,5 +54,7 @@ func renderCosts(f *excelize.File, data ReportData) {
 		}
 
 		configureSheet(f, "Costs", heathers, currentRow)
+	} else {
+		log.Println("Skipping Costs. No data to render")
 	}
 }

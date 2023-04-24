@@ -40,5 +40,7 @@ func renderAdvisor(f *excelize.File, data ReportData) {
 		}
 
 		configureSheet(f, "Advisor", heathers, currentRow)
+	} else {
+		log.Println("Skipping Advisor. No data to render")
 	}
 }
