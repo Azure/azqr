@@ -79,9 +79,11 @@ func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
 		ar := AdvisorResult{
 			SubscriptionID: s.config.SubscriptionID,
 			Name:           *recommendation.Properties.ImpactedValue,
-			Type:           *recommendation.Properties.ImpactedField,
 			Category:       string(*recommendation.Properties.Category),
 			Description:    *recommendation.Properties.ShortDescription.Problem,
+		}
+		if recommendation.Properties.ImpactedField != nil {
+			ar.Type = *recommendation.Properties.ImpactedField
 		}
 		if recommendation.Properties.PotentialBenefits != nil {
 			ar.PotentialBenefits = *recommendation.Properties.PotentialBenefits
