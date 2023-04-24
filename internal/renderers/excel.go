@@ -14,26 +14,24 @@ import (
 )
 
 func CreateExcelReport(data ReportData) {
-	if len(data.MainData) > 0 {
-		filename := fmt.Sprintf("%s.xlsx", data.OutputFileName)
-		log.Printf("Generating Report: %s", filename)
-		f := excelize.NewFile()
-		defer func() {
-			if err := f.Close(); err != nil {
-				log.Fatal(err)
-			}
-		}()
-
-		renderOverview(f, data)
-		renderRecommendations(f, data)
-		renderServices(f, data)
-		renderDefender(f, data)
-		renderAdvisor(f, data)
-		renderCosts(f, data)
-
-		if err := f.SaveAs(filename); err != nil {
+	filename := fmt.Sprintf("%s.xlsx", data.OutputFileName)
+	log.Printf("Generating Report: %s", filename)
+	f := excelize.NewFile()
+	defer func() {
+		if err := f.Close(); err != nil {
 			log.Fatal(err)
 		}
+	}()
+
+	renderOverview(f, data)
+	renderRecommendations(f, data)
+	renderServices(f, data)
+	renderDefender(f, data)
+	renderAdvisor(f, data)
+	renderCosts(f, data)
+
+	if err := f.SaveAs(filename); err != nil {
+		log.Fatal(err)
 	}
 }
 

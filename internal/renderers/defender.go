@@ -40,5 +40,7 @@ func renderDefender(f *excelize.File, data ReportData) {
 		}
 
 		configureSheet(f, "Defender", heathers, currentRow)
+	} else {
+		log.Println("Skipping Defender. No data to render")
 	}
 }
