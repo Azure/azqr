@@ -74,6 +74,12 @@ Download the latest release from [here](https://github.com/cmendible/azqr/releas
   * AZURE_CLIENT_SECRET
   * AZURE_TENANT_ID
 
+### Authorization
+
+**azqr** requires the following permissions:
+
+* Subscription Reader
+
 ### Running the Scan
 
 To scan all resource groups in all subscription run:
