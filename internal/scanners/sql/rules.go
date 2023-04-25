@@ -109,7 +109,10 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 			Severity:    "High",
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Database)
-				zones := *i.Properties.ZoneRedundant
+				zones := false
+				if i.Properties.ZoneRedundant != nil {
+					zones = *i.Properties.ZoneRedundant
+				}
 				return !zones, ""
 			},
 		},
