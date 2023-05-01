@@ -50,7 +50,7 @@ func init() {
 	scanCmd.PersistentFlags().StringP("resource-group", "g", "", "Azure Resource Group (Use with --subscription-id)")
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations")
-	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs")
+	scanCmd.PersistentFlags().BoolP("costs", "c", false, "Scan Azure Costs")
 	scanCmd.PersistentFlags().StringP("output-prefix", "o", "azqr_report", "Output file prefix")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
 	scanCmd.PersistentFlags().BoolP("parallel-processes", "p", true, "Use parallel processes to run scans")
