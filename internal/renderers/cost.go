@@ -12,7 +12,7 @@ import (
 )
 
 func renderCosts(f *excelize.File, data ReportData) {
-	if len(data.CostData.Items) > 0 {
+	if data.CostData != nil && len(data.CostData.Items) > 0 {
 		_, err := f.NewSheet("Costs")
 		if err != nil {
 			log.Fatal(err)
