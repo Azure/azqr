@@ -15,10 +15,10 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"AvailabilityZones": {
 			Id:          "ci-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "ContainerInstance should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				zones := len(i.Zones) > 0
@@ -28,10 +28,10 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "ci-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "ContainerInstance should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
@@ -39,10 +39,10 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "ci-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateIP,
 			Description: "ContainerInstance should use private IP addresses",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				pe := false
@@ -54,10 +54,10 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "ci-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "ContainerInstance SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				return false, string(*i.Properties.SKU)
@@ -66,10 +66,10 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "ci-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "ContainerInstance Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerinstance.ContainerGroup)
 				caf := strings.HasPrefix(*c.Name, "ci")
@@ -79,10 +79,10 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"ci-007": {
 			Id:          "ci-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "ContainerInstance should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerinstance.ContainerGroup)
 				return c.Tags == nil || len(c.Tags) == 0, ""

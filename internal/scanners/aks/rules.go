@@ -16,10 +16,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "aks-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "AKS Cluster should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcontainerservice.ManagedCluster)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "aks-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "AKS Cluster should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				cluster := target.(*armcontainerservice.ManagedCluster)
 				zones := true
@@ -51,10 +51,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "aks-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "AKS Cluster should have an SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 
@@ -82,10 +82,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "aks-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "AKS Cluster should be private",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				pe := c.Properties.APIServerAccessProfile != nil && c.Properties.APIServerAccessProfile.EnablePrivateCluster != nil && *c.Properties.APIServerAccessProfile.EnablePrivateCluster
@@ -95,10 +95,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "aks-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "AKS Production Cluster should use Standard SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				sku := "Free"
@@ -111,10 +111,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "aks-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "AKS Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				caf := strings.HasPrefix(*c.Name, "aks")
@@ -124,10 +124,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"aks-007": {
 			Id:          "aks-007",
-			Category:    "Security",
-			Subcategory: "Identity and Access Control",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityIdentity,
 			Description: "AKS should integrate authentication with AAD",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				aad := c.Properties.AADProfile != nil
@@ -137,10 +137,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"aks-008": {
 			Id:          "aks-008",
-			Category:    "Security",
-			Subcategory: "Identity and Access Control",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityIdentity,
 			Description: "AKS should be RBAC enabled.",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				rbac := *c.Properties.EnableRBAC
@@ -150,10 +150,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"aks-009": {
 			Id:          "aks-009",
-			Category:    "Security",
-			Subcategory: "Identity and Access Control",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityIdentity,
 			Description: "AKS should have local accounts disabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 
@@ -166,10 +166,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"aks-010": {
 			Id:          "aks-010",
-			Category:    "Security",
+			Category:    scanners.RulesCategorySecurity,
 			Subcategory: "Best Practices",
 			Description: "AKS should have httpApplicationRouting disabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				p, exists := c.Properties.AddonProfiles["httpApplicationRouting"]
@@ -180,10 +180,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"aks-011": {
 			Id:          "aks-011",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Monitoring",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityMonitoring,
 			Description: "AKS should have Container Insights enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				p, exists := c.Properties.AddonProfiles["omsagent"]
@@ -194,10 +194,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"aks-012": {
 			Id:          "aks-012",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityNetworking,
 			Description: "AKS should have outbound type set to user defined routing",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				out := *c.Properties.NetworkProfile.OutboundType == armcontainerservice.OutboundTypeUserDefinedRouting
@@ -207,10 +207,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"aks-013": {
 			Id:          "aks-013",
-			Category:    "Networking",
-			Subcategory: "Best Practices",
+			Category:    scanners.RulesCategoryPerformanceEfficienccy,
+			Subcategory: scanners.RulesSubcategoryPerformanceEfficienccyNetworking,
 			Description: "AKS should avoid using kubenet network plugin",
-			Severity:    "High",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				out := *c.Properties.NetworkProfile.NetworkPlugin == armcontainerservice.NetworkPluginKubenet
@@ -220,10 +220,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"aks-014": {
 			Id:          "aks-014",
-			Category:    "Operations",
-			Subcategory: "Scalability",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryReliabilityScaling,
 			Description: "AKS should have autoscaler enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				if c.Properties.AgentPoolProfiles != nil {
@@ -241,10 +241,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"aks-015": {
 			Id:          "aks-015",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "AKS should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				return c.Tags == nil || len(c.Tags) == 0, ""

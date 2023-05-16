@@ -16,10 +16,10 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "cosmos-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "CosmosDB should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcosmos.DatabaseAccountGetResults)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "cosmos-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "CosmosDB should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				availabilityZones := false
@@ -59,10 +59,10 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "cosmos-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "CosmosDB should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				sla := "99.99%"
@@ -88,10 +88,10 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "cosmos-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "CosmosDB should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -101,10 +101,10 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "cosmos-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "CosmosDB SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				return false, string(*i.Properties.DatabaseAccountOfferType)
@@ -113,10 +113,10 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "cosmos-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "CosmosDB Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcosmos.DatabaseAccountGetResults)
 				caf := strings.HasPrefix(*c.Name, "cosmos")
@@ -126,10 +126,10 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"cosmos-007": {
 			Id:          "cosmos-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "CosmosDB should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcosmos.DatabaseAccountGetResults)
 				return c.Tags == nil || len(c.Tags) == 0, ""

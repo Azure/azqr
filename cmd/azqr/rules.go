@@ -5,6 +5,7 @@ package azqr
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/cmendible/azqr/internal/scanners"
 	"github.com/cmendible/azqr/internal/scanners/afd"
@@ -69,13 +70,28 @@ var rulesCmd = &cobra.Command{
 			&mysql.MySQLFlexibleScanner{},
 		}
 
-		fmt.Println("Id | Category | Subcategory | Name | Severity | More Info")
-		fmt.Println("---|---|---|---|---|---")
+		fmt.Println("#  | Id | Category | Subcategory | Name | Severity | More Info")
+		fmt.Println("---|---|---|---|---|---|---")
 
+		i := 0
 		for _, scanner := range serviceScanners {
-			rules := scanner.GetRules()
-			for _, rule := range rules {
-				fmt.Printf("%s | %s | %s | %s | %s | %s", rule.Id, rule.Category, rule.Subcategory, rule.Description, rule.Severity, rule.Url)
+			rulesMap := scanner.GetRules()
+
+			rules := map[string]scanners.AzureRule{}
+			for _, r := range rulesMap {
+				rules[r.Id] = r
+			}
+
+			keys := make([]string, 0, len(rules))
+			for k := range rules {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+
+			for _, k := range keys {
+				rule := rules[k]
+				i++
+				fmt.Printf("%s | %s | %s | %s | %s | %s | %s", fmt.Sprint(i), rule.Id, rule.Category, rule.Subcategory, rule.Description, rule.Severity, rule.Url)
 				fmt.Println()
 			}
 		}

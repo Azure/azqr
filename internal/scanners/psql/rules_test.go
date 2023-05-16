@@ -243,11 +243,10 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode: getHighAvailability(),
+							Mode:                    getHighAvailability(),
 							StandbyAvailabilityZone: to.StringPtr("2"),
 						},
 						AvailabilityZone: to.StringPtr("1"),
-						
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
@@ -265,11 +264,10 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode: getHighAvailability(),
+							Mode:                    getHighAvailability(),
 							StandbyAvailabilityZone: to.StringPtr("1"),
 						},
 						AvailabilityZone: to.StringPtr("1"),
-						
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
@@ -364,7 +362,6 @@ func getSSLEnforcementEnabled() *armpostgresql.SSLEnforcementEnum {
 	s := armpostgresql.SSLEnforcementEnumEnabled
 	return &s
 }
-
 
 func getMinimalTLSVersion() *armpostgresql.MinimalTLSVersionEnum {
 	s := armpostgresql.MinimalTLSVersionEnumTLS12

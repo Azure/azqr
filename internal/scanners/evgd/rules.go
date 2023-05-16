@@ -16,10 +16,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "evgd-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Event Grid Domain should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armeventgrid.Domain)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "evgd-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Event Grid Domain should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
@@ -44,10 +44,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "evgd-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "Event Grid Domain should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armeventgrid.Domain)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -57,10 +57,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "evgd-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Event Grid Domain SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "None"
 			},
@@ -68,10 +68,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "evgd-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Event Grid Domain Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventgrid.Domain)
 				caf := strings.HasPrefix(*c.Name, "evgd")
@@ -81,10 +81,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"evgd-007": {
 			Id:          "evgd-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Event Grid Domain should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventgrid.Domain)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -93,10 +93,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"evgd-008": {
 			Id:          "evgd-008",
-			Category:    "Security",
-			Subcategory: "Identity and Access Control",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityIdentity,
 			Description: "Event Grid Domain should have local authentication disabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventgrid.Domain)
 				return c.Properties.DisableLocalAuth != nil && !*c.Properties.DisableLocalAuth, ""

@@ -16,10 +16,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "evh-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Event Hub Namespace should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armeventhub.EHNamespace)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "evh-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "Event Hub Namespace should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armeventhub.EHNamespace)
 				zones := *i.Properties.ZoneRedundant
@@ -46,10 +46,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "evh-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Event Hub Namespace should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armeventhub.EHNamespace)
 				sku := string(*i.SKU.Name)
@@ -63,10 +63,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "evh-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "Event Hub Namespace should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armeventhub.EHNamespace)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -76,10 +76,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "evh-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Event Hub Namespace SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armeventhub.EHNamespace)
 				return false, string(*i.SKU.Name)
@@ -88,10 +88,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "evh-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Event Hub Namespace Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventhub.EHNamespace)
 				caf := strings.HasPrefix(*c.Name, "evh")
@@ -101,10 +101,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"evh-007": {
 			Id:          "evh-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Event Hub should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventhub.EHNamespace)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -113,10 +113,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"evh-008": {
 			Id:          "evh-008",
-			Category:    "Security",
-			Subcategory: "Identity and Access Control",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityIdentity,
 			Description: "Event Hub should have local authentication disabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventhub.EHNamespace)
 				return c.Properties.DisableLocalAuth != nil && !*c.Properties.DisableLocalAuth, ""

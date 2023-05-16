@@ -17,10 +17,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "kv-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Key Vault should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armkeyvault.Vault)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -34,10 +34,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "kv-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Key Vault should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
@@ -45,10 +45,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "kv-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "Key Vault should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armkeyvault.Vault)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -58,10 +58,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "kv-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Key Vault SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armkeyvault.Vault)
 				return false, string(*i.Properties.SKU.Name)
@@ -70,10 +70,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "kv-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Key Vault Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
 				caf := strings.HasPrefix(*c.Name, "kv")
@@ -83,10 +83,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"kv-007": {
 			Id:          "kv-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Key Vault should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -95,10 +95,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"kv-008": {
 			Id:          "kv-008",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Reliability",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySubcategoryReliability,
 			Description: "Key Vault should have soft delete enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
 				return c.Properties.EnableSoftDelete == nil || c.Properties.EnableSoftDelete == to.BoolPtr(false), ""
@@ -107,10 +107,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"kv-009": {
 			Id:          "kv-009",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Reliability",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySubcategoryReliability,
 			Description: "Key Vault should have purge protection enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
 				return c.Properties.EnablePurgeProtection == nil || c.Properties.EnablePurgeProtection == to.BoolPtr(false), ""

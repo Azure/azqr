@@ -6,17 +6,27 @@
 
 [![Open in vscode.dev](https://img.shields.io/badge/Open%20in-vscode.dev-blue)](https://vscode.dev/github/Azure/azqr)
 
-Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group providing the following information for each Azure Service:
+Azure Quick Review (azqr) is a CLI tool used to identify Azure resources that may be or not compliant with Azure best practices and recommendations. 
 
-* SLA: current expected SLA
-* Availability Zones: checks if the service is protected against Zone failures. 
-* Private Endpoints: checks if the service uses Private Endpoints.
-* Diagnostic Settings: checks if there are Diagnostic Settings configured for the service. 
-* CAF Naming convention: checks if the service follows [CAF Naming convention](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations).
+Azure Quick Review (azqr) outputs includes an overview section with the following information:
+
+* Subscription Id
+* Resoource Group name
+* Location
+* Resource Type
+* Resource Name
+* SKU
+* SLA: SLA for the service, given the current configuration.
+* AZ: True if the service is Availability Zone aware.
+* PVT: True if the service has a private IP address. 
+* DS: True if the service has diagnotics settings enabled.
+* CAF: True if the service is compliant with the [Cloud Adoption Framework](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/) naming covention.
+
+Check the [Scan Results](#scan-results) documentation for more information on Azure Quick Review (azqr) outputs.
 
 ## Azure Quick Review Rules
 
-Azure Quick Review (azqr) uses a set of rules to determine the status of each Azure Service. These rules are listed in the [rules](docs/rules/README.md) documentation.
+Azure Quick Review (azqr) recommendations are based on a set of rules. To learn more check the [rules](docs/rules/README.md) documentation.
 
 ## Supported Azure Services
 
