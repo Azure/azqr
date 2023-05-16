@@ -16,10 +16,10 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "afd-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Azure FrontDoor should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcdn.Profile)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "afd-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Azure FrontDoor SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
@@ -44,10 +44,10 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "afd-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Azure FrontDoor SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcdn.Profile)
 				return false, string(*c.SKU.Name)
@@ -56,10 +56,10 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "afd-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Azure FrontDoor Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcdn.Profile)
 				caf := strings.HasPrefix(*c.Name, "afd")
@@ -69,10 +69,10 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"afd-007": {
 			Id:          "afd-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Azure FrontDoor should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcdn.Profile)
 				return c.Tags == nil || len(c.Tags) == 0, ""

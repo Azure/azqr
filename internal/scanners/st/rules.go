@@ -16,10 +16,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "st-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Storage should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armstorage.Account)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "st-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "Storage should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				sku := string(*i.SKU.Name)
@@ -50,10 +50,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "st-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Storage should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				tier := ""
@@ -77,10 +77,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "st-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "Storage should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -90,10 +90,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "st-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Storage SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				return false, string(*i.SKU.Name)
@@ -102,10 +102,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "st-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Storage Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				caf := strings.HasPrefix(*c.Name, "st")
@@ -115,10 +115,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"st-007": {
 			Id:          "st-007",
-			Category:    "Security",
-			Subcategory: "Network Security",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityHTTPS,
 			Description: "Storage Account should use HTTPS only",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				h := *c.Properties.EnableHTTPSTrafficOnly
@@ -128,10 +128,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"st-008": {
 			Id:          "st-008",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Storage Account should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -140,10 +140,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"st-009": {
 			Id:          "st-009",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityTLS,
 			Description: "Storage Account should enforce TLS >= 1.2",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				return c.Properties.MinimumTLSVersion == nil || *c.Properties.MinimumTLSVersion != armstorage.MinimumTLSVersionTLS12, ""

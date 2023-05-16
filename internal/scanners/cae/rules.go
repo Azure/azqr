@@ -16,10 +16,10 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "cae-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "ContainerApp should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armappcontainers.ManagedEnvironment)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "cae-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "ContainerApp should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				app := target.(*armappcontainers.ManagedEnvironment)
 				zones := *app.Properties.ZoneRedundant
@@ -46,10 +46,10 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "cae-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "ContainerApp should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
@@ -57,10 +57,10 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "cae-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "ContainerApp should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				app := target.(*armappcontainers.ManagedEnvironment)
 				pe := app.Properties.VnetConfiguration != nil && *app.Properties.VnetConfiguration.Internal
@@ -70,10 +70,10 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "cae-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "ContainerApp Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ManagedEnvironment)
 				caf := strings.HasPrefix(*c.Name, "cae")
@@ -83,10 +83,10 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"cae-007": {
 			Id:          "cae-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "ContainerApp should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ManagedEnvironment)
 				return c.Tags == nil || len(c.Tags) == 0, ""

@@ -16,10 +16,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "redis-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Redis should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armredis.ResourceInfo)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "redis-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "Redis should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armredis.ResourceInfo)
 				zones := len(i.Zones) > 0
@@ -46,10 +46,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "redis-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Redis should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
@@ -57,10 +57,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "redis-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "Redis should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armredis.ResourceInfo)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -70,10 +70,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "redis-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Redis SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armredis.ResourceInfo)
 				return false, string(*i.Properties.SKU.Name)
@@ -82,10 +82,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "redis-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Redis Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armredis.ResourceInfo)
 				caf := strings.HasPrefix(*c.Name, "redis")
@@ -95,10 +95,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"redis-007": {
 			Id:          "redis-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Redis should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armredis.ResourceInfo)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -107,10 +107,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"redis-008": {
 			Id:          "redis-008",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecuritySSL,
 			Description: "Redis should not enable non SSL ports",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armredis.ResourceInfo)
 				return c.Properties.EnableNonSSLPort != nil && *c.Properties.EnableNonSSLPort, ""
@@ -119,10 +119,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"redis-009": {
 			Id:          "redis-009",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityTLS,
 			Description: "Redis should enforce TLS >= 1.2",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armredis.ResourceInfo)
 				return c.Properties.MinimumTLSVersion == nil || *c.Properties.MinimumTLSVersion != armredis.TLSVersionOne2, ""

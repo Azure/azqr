@@ -16,10 +16,10 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "plan-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Plan should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armappservice.Plan)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -32,10 +32,10 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "plan-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "Plan should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armappservice.Plan)
 				zones := *i.Properties.ZoneRedundant
@@ -45,10 +45,10 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "plan-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Plan should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armappservice.Plan)
 				sku := string(*i.SKU.Tier)
@@ -62,10 +62,10 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "plan-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Plan SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armappservice.Plan)
 				return false, string(*i.SKU.Name)
@@ -74,10 +74,10 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "plan-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Plan Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Plan)
 				caf := strings.HasPrefix(*c.Name, "asp")
@@ -87,10 +87,10 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"plan-007": {
 			Id:          "plan-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Plan should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Plan)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -105,10 +105,10 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "app-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "App Service should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armappservice.Site)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -122,10 +122,10 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "app-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "App Service should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armappservice.Site)
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
@@ -135,10 +135,10 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "app-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "App Service Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				caf := strings.HasPrefix(*c.Name, "app")
@@ -148,10 +148,10 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 		},
 		"app-007": {
 			Id:          "app-007",
-			Category:    "Security",
-			Subcategory: "Network Security",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityHTTPS,
 			Description: "App Service should use HTTPS only",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				h := *c.Properties.HTTPSOnly
@@ -161,10 +161,10 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 		},
 		"app-008": {
 			Id:          "app-008",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "App Service should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -179,10 +179,10 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "func-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Function should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armappservice.Site)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -196,10 +196,10 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "func-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "Function should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armappservice.Site)
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
@@ -209,10 +209,10 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "func-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Function Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				caf := strings.HasPrefix(*c.Name, "func")
@@ -222,10 +222,10 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 		},
 		"func-007": {
 			Id:          "func-007",
-			Category:    "Security",
-			Subcategory: "Network Security",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityHTTPS,
 			Description: "Function should use HTTPS only",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				h := c.Properties.HTTPSOnly != nil && *c.Properties.HTTPSOnly
@@ -235,10 +235,10 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 		},
 		"func-008": {
 			Id:          "func-008",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Function should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Tags == nil || len(c.Tags) == 0, ""

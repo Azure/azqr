@@ -17,10 +17,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "mysql-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Azure Database for MySQL - Flexible Server should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armmysql.Server)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -34,10 +34,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "mysql-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Azure Database for MySQL - Flexible Server should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
@@ -45,10 +45,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "mysql-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "Azure Database for MySQL - Flexible Server should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysql.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -58,10 +58,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "mysql-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Azure Database for MySQL - Flexible Server SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysql.Server)
 				return false, *i.SKU.Name
@@ -70,10 +70,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "mysql-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Azure Database for MySQL - Flexible Server Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmysql.Server)
 				caf := strings.HasPrefix(*c.Name, "mysql")
@@ -83,10 +83,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"mysql-007": {
 			Id:          "mysql-007",
-			Category:    "Operations",
-			Subcategory: "Best Practices",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Azure Database for MySQL - Single Server is on the retirement path",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return true, ""
 			},
@@ -94,10 +94,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"mysql-008": {
 			Id:          "mysql-008",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Azure Database for MySQL - Single Server should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmysql.Server)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -112,10 +112,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "mysqlf-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Azure Database for MySQL - Flexible Server should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armmysqlflexibleservers.Server)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -129,10 +129,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "mysqlf-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "Azure Database for MySQL - Flexible Server should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
 				zones := *i.Properties.HighAvailability.Mode == armmysqlflexibleservers.HighAvailabilityModeZoneRedundant
@@ -142,10 +142,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "mysqlf-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Azure Database for MySQL - Flexible Server should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
 				sla := "99.9%"
@@ -162,10 +162,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "mysqlf-004",
-			Category:    "Security",
-			Subcategory: "Private Access",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateIP,
 			Description: "Azure Database for MySQL - Flexible Server should have private access enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
 				pe := *i.Properties.Network.PublicNetworkAccess == armmysqlflexibleservers.EnableStatusEnumDisabled
@@ -175,10 +175,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "mysqlf-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Azure Database for MySQL - Flexible Server SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
 				return false, *i.SKU.Name
@@ -187,10 +187,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "mysqlf-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Azure Database for MySQL - Flexible Server Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmysqlflexibleservers.Server)
 				caf := strings.HasPrefix(*c.Name, "mysql")
@@ -200,10 +200,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"mysqlf-007": {
 			Id:          "mysqlf-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Azure Database for MySQL - Flexible Server should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmysqlflexibleservers.Server)
 				return c.Tags == nil || len(c.Tags) == 0, ""

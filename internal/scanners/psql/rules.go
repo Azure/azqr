@@ -17,10 +17,10 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "psql-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "PostgreSQL should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armpostgresql.Server)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -34,10 +34,10 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "psql-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "PostgreSQL should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
@@ -46,10 +46,10 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 
 		"Private": {
 			Id:          "psql-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "PostgreSQL should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresql.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -59,10 +59,10 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "psql-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "PostgreSQL SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresql.Server)
 				return false, *i.SKU.Name
@@ -71,10 +71,10 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "psql-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "PostgreSQL Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				caf := strings.HasPrefix(*c.Name, "psql")
@@ -84,10 +84,10 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"psql-007": {
 			Id:          "psql-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "PostgreSQL should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -96,10 +96,10 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"psql-008": {
 			Id:          "psql-008",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecuritySSL,
 			Description: "PostgreSQL should enforce SSL",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				return c.Properties.SSLEnforcement == nil || *c.Properties.SSLEnforcement == armpostgresql.SSLEnforcementEnumDisabled, ""
@@ -108,10 +108,10 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"psql-009": {
 			Id:          "psql-009",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityTLS,
 			Description: "PostgreSQL should enforce TLS >= 1.2",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != armpostgresql.MinimalTLSVersionEnumTLS12, ""
@@ -126,10 +126,10 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "psqlf-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "PostgreSQL should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armpostgresqlflexibleservers.Server)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -143,10 +143,10 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "psqlf-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "PostgreSQL should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresqlflexibleservers.Server)
 				zones := *i.Properties.HighAvailability.Mode == armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant
@@ -156,10 +156,10 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "psqlf-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "PostgreSQL should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresqlflexibleservers.Server)
 				sla := "99.9%"
@@ -176,10 +176,10 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "psqlf-004",
-			Category:    "Security",
-			Subcategory: "Private Access",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateIP,
 			Description: "PostgreSQL should have private access enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresqlflexibleservers.Server)
 				pe := *i.Properties.Network.PublicNetworkAccess == armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled
@@ -189,10 +189,10 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "psqlf-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "PostgreSQL SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresqlflexibleservers.Server)
 				return false, *i.SKU.Name
@@ -201,10 +201,10 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "psqlf-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "PostgreSQL Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresqlflexibleservers.Server)
 				caf := strings.HasPrefix(*c.Name, "psql")
@@ -214,10 +214,10 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"psqlf-007": {
 			Id:          "psqlf-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "PostgreSQL should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresqlflexibleservers.Server)
 				return c.Tags == nil || len(c.Tags) == 0, ""

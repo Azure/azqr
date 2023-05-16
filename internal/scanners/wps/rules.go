@@ -16,10 +16,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "wps-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Web Pub Sub should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armwebpubsub.ResourceInfo)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "wps-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "Web Pub Sub should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				sku := string(*i.SKU.Name)
@@ -50,10 +50,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "wps-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Web Pub Sub should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				sku := string(*i.SKU.Name)
@@ -68,10 +68,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "wps-004",
-			Category:    "Security",
-			Subcategory: "Networking",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "Web Pub Sub should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -81,10 +81,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "wps-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Web Pub Sub SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				return false, string(*i.SKU.Name)
@@ -93,10 +93,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "wps-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Web Pub Sub Name should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armwebpubsub.ResourceInfo)
 				caf := strings.HasPrefix(*c.Name, "wps")
@@ -106,10 +106,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"wps-007": {
 			Id:          "wps-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Web Pub Sub should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armwebpubsub.ResourceInfo)
 				return c.Tags == nil || len(c.Tags) == 0, ""

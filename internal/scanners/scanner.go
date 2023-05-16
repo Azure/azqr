@@ -16,10 +16,10 @@ import (
 type (
 	// ScannerConfig - Struct for Scanner Config
 	ScannerConfig struct {
-		Ctx                context.Context
-		Cred               azcore.TokenCredential
-		SubscriptionID     string
-		ClientOptions      *arm.ClientOptions
+		Ctx            context.Context
+		Cred           azcore.TokenCredential
+		SubscriptionID string
+		ClientOptions  *arm.ClientOptions
 	}
 
 	// ScanContext - Struct for Scanner Context
@@ -51,7 +51,6 @@ type (
 		Description string
 		Severity    string
 		Url         string
-		IsSpecific  bool
 		Eval        func(target interface{}, scanContext *ScanContext) (bool, string)
 	}
 
@@ -62,7 +61,6 @@ type (
 		Description string
 		Severity    string
 		Learn       string
-		IsSpecific  bool
 		Result      string
 		IsBroken    bool
 	}
@@ -80,7 +78,6 @@ func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContex
 		Description: rule.Description,
 		Severity:    rule.Severity,
 		Learn:       rule.Url,
-		IsSpecific:  rule.IsSpecific,
 		Result:      result,
 		IsBroken:    broken,
 	}
@@ -171,3 +168,40 @@ func MaskSubscriptionID(subscriptionID string, mask bool) string {
 	// Show only last 7 chars of the subscription ID
 	return fmt.Sprintf("xxxxxxxx-xxxx-xxxx-xxxx-xxxxx%s", subscriptionID[29:])
 }
+
+const (
+	SeverityCritical = "Critical"
+	SeverityHigh     = "High"
+	SeverityMedium   = "Medium"
+	SeverityLow      = "Low"
+
+	RulesCategoryReliability            = "Reliability"
+	RulesCategorySecurity               = "Security"
+	RulesCategoryCostOptimization       = "Cost Optimization"
+	RulesCategoryOperationalExcellence  = "Operational Excellence"
+	RulesCategoryPerformanceEfficienccy = "Performance Efficienccy"
+
+	RulesSubcategoryReliabilityAvailabilityZones      = "Availability Zones"
+	RulesSubcategoryReliabilitySLA                    = "SLA"
+	RulesSubcategoryReliabilitySKU                    = "SKU"
+	RulesSubcategoryReliabilityScaling                = "Scaling"
+	RulesSubcategoryReliabilityDiagnosticLogs         = "Diagnostic Logs"
+	RulesSubcategoryReliabilityMonitoring             = "Monitoring"
+	RulesSubcategoryReliabilitySubcategoryReliability = "Reliability"
+
+	RulesSubcategoryOperationalExcellenceCAF               = "Naming Convention (CAF)"
+	RulesSubcategoryOperationalExcellenceTags              = "Tags"
+	RulesSubcategoryOperationalExcellenceRetentionPolicies = "Retention Policies"
+
+	RulesSubcategorySecurityNetworkSecurityGroups = "Network Security Groups"
+	RulesSubcategorySecuritySSL                   = "SSL"
+	RulesSubcategorySecurityHTTPS                 = "HTTPS Only"
+	RulesSubcategorySecurityTLS                   = "TLS"
+	RulesSubcategorySecurityPrivateEndpoint       = "Private Endpoint"
+	RulesSubcategorySecurityPrivateIP             = "Private IP Address"
+	RulesSubcategorySecurityFirewall              = "Firewall"
+	RulesSubcategorySecurityIdentity              = "Identity and Access Control"
+	RulesSubcategorySecurityNetworking            = "Networking"
+
+	RulesSubcategoryPerformanceEfficienccyNetworking = "Networking"
+)

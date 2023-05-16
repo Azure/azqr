@@ -16,10 +16,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
 			Id:          "apim-001",
-			Category:    "Monitoring and Logging",
-			Subcategory: "Diagnostic Logs",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "APIM should have diagnostic settings enabled",
-			Severity:    "Medium",
+			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armapimanagement.ServiceResource)
 				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
@@ -33,10 +33,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"AvailabilityZones": {
 			Id:          "apim-002",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "Availability Zones",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "APIM should have availability zones enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				zones := len(a.Zones) > 0
@@ -46,10 +46,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SLA": {
 			Id:          "apim-003",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SLA",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "APIM should have a SLA",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				sku := string(*a.SKU.Name)
@@ -66,10 +66,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"Private": {
 			Id:          "apim-004",
-			Category:    "Networking",
-			Subcategory: "Private Endpoint",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
 			Description: "APIM should have private endpoints enabled",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
@@ -79,10 +79,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"SKU": {
 			Id:          "apim-005",
-			Category:    "High Availability and Resiliency",
-			Subcategory: "SKU",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Azure APIM SKU",
-			Severity:    "High",
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				sku := string(*a.SKU.Name)
@@ -92,10 +92,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"CAF": {
 			Id:          "apim-006",
-			Category:    "Governance",
-			Subcategory: "Naming Convention (CAF)",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "APIM should comply with naming conventions",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				caf := strings.HasPrefix(*c.Name, "apim")
@@ -105,10 +105,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"apim-007": {
 			Id:          "apim-007",
-			Category:    "Governance",
-			Subcategory: "Use tags to organize your resources",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "APIM should have tags",
-			Severity:    "Low",
+			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				return c.Tags == nil || len(c.Tags) == 0, ""
