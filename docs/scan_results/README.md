@@ -14,7 +14,7 @@ Azure Quick Review (azqr) creates an excel spreadsheet with the following sectio
 The overview section contains the following information:
 
 * Subscription Id
-* Resoource Group name
+* Resource Group name
 * Location
 * Resource Type
 * Resource Name
