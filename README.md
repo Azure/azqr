@@ -11,7 +11,7 @@ Azure Quick Review (azqr) is a CLI tool used to identify Azure resources that ma
 Azure Quick Review (azqr) outputs includes an overview section with the following information:
 
 * Subscription Id
-* Resoource Group name
+* Resource Group name
 * Location
 * Resource Type
 * Resource Name
