@@ -2,7 +2,7 @@
 
 Azure Quick Review uses the following rules to identify Azure resources that may be or not be compliant with Azure best practices and recommendations:
 
-#  | Id | Category | Subcategory | Name | Severity | More Info
+\#  | Id | Category | Subcategory | Name | Severity | More Info
 ---|---|---|---|---|---|---
 1 | aks-001 | Reliability | Diagnostic Logs | AKS Cluster should have diagnostic settings enabled | Medium | https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs
 2 | aks-002 | Reliability | Availability Zones | AKS Cluster should have availability zones enabled | High | https://learn.microsoft.com/en-us/azure/aks/availability-zones
