@@ -28,7 +28,7 @@ func renderServices(f *excelize.File, data ReportData) {
 				row := []string{
 					scanners.MaskSubscriptionID(d.SubscriptionID, data.Mask),
 					d.ResourceGroup,
-					d.Location,
+					scanners.ParseLocation(d.Location),
 					d.Type,
 					d.ServiceName,
 					fmt.Sprintf("%t", r.IsBroken),
