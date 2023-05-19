@@ -122,7 +122,7 @@ func (r AzureServiceResult) ToMap(mask bool) map[string]string {
 	return map[string]string{
 		"SubscriptionID": MaskSubscriptionID(r.SubscriptionID, mask),
 		"ResourceGroup":  r.ResourceGroup,
-		"Location":       parseLocation(r.Location),
+		"Location":       ParseLocation(r.Location),
 		"Type":           r.Type,
 		"Name":           r.ServiceName,
 		"SKU":            r.Rules["SKU"].Result,
@@ -156,7 +156,7 @@ func (r AzureServiceResult) GetHeathers() []string {
 	}
 }
 
-func parseLocation(location string) string {
+func ParseLocation(location string) string {
 	return strings.ToLower(strings.ReplaceAll(location, " ", ""))
 }
 
