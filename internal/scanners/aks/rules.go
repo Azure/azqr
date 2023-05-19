@@ -126,14 +126,14 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "aks-007",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityIdentity,
-			Description: "AKS should integrate authentication with AAD",
+			Description: "AKS should integrate authentication with AAD (Managed)",
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
-				aad := c.Properties.AADProfile != nil
+				aad := c.Properties.AADProfile != nil && c.Properties.AADProfile.Managed != nil && *c.Properties.AADProfile.Managed
 				return !aad, ""
 			},
-			Url: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
+			Url: "https://learn.microsoft.com/en-us/azure/aks/managed-azure-ad",
 		},
 		"aks-008": {
 			Id:          "aks-008",
