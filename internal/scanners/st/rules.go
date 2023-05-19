@@ -63,13 +63,13 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 						tier = string(*i.Properties.AccessTier)
 					}
 				}
-				sla := "99.9%"
+				sla := "99%"
 				if strings.Contains(sku, "RAGRS") && strings.Contains(tier, "Hot") {
 					sla = "99.99%"
 				} else if strings.Contains(sku, "RAGRS") && !strings.Contains(tier, "Hot") {
 					sla = "99.9%"
-				} else if !strings.Contains(tier, "Hot") {
-					sla = "99%"
+				} else if (strings.Contains(sku, "LRS") || strings.Contains(sku, "ZRS") || strings.Contains(sku, "GRS")) && strings.Contains(tier, "Hot") {
+					sla = "99.9%"
 				}
 				return false, sla
 			},
