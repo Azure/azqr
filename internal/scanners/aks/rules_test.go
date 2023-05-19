@@ -203,7 +203,9 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-007",
 				target: &armcontainerservice.ManagedCluster{
 					Properties: &armcontainerservice.ManagedClusterProperties{
-						AADProfile: &armcontainerservice.ManagedClusterAADProfile{},
+						AADProfile: &armcontainerservice.ManagedClusterAADProfile{
+							Managed: to.BoolPtr(true),
+						},
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
