@@ -78,9 +78,15 @@ func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
 	for _, recommendation := range recommendations {
 		ar := AdvisorResult{
 			SubscriptionID: s.config.SubscriptionID,
-			Name:           *recommendation.Properties.ImpactedValue,
-			Category:       string(*recommendation.Properties.Category),
-			Description:    *recommendation.Properties.ShortDescription.Problem,
+		}
+		if recommendation.Properties.ImpactedValue != nil {
+			ar.Name = *recommendation.Properties.ImpactedValue
+		}
+		if recommendation.Properties.Category != nil {
+			ar.Category = string(*recommendation.Properties.Category)
+		}
+		if recommendation.Properties.ShortDescription != nil && recommendation.Properties.ShortDescription.Problem != nil {
+			ar.Description = *recommendation.Properties.ShortDescription.Problem
 		}
 		if recommendation.Properties.ImpactedField != nil {
 			ar.Type = *recommendation.Properties.ImpactedField
