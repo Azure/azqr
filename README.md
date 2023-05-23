@@ -71,9 +71,17 @@ wget https://github.com/cmendible/azqr/releases/download/$latest_azqr/azqr-ubunt
 chmod +x azqr
 ```
 
-### Install on Windows or Mac
+### Install on Mac
 
 Download the latest release from [here](https://github.com/cmendible/azqr/releases).
+
+### Install on Windows
+
+```console
+winget install Microsoft.Azure.QuickReview
+```
+
+### 
 
 ### Authentication
 
