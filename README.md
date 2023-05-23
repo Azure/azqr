@@ -20,7 +20,7 @@ Azure Quick Review (azqr) outputs includes an overview section with the followin
 * AZ: True if the service is Availability Zone aware.
 * PVT: True if the service has a private IP address. 
 * DS: True if the service has diagnotics settings enabled.
-* CAF: True if the service is compliant with the [Cloud Adoption Framework](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/) naming covention.
+* CAF: True if the service is compliant with the [Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations) naming covention.
 
 Check the [Scan Results](#scan-results) documentation for more information on Azure Quick Review (azqr) outputs.
 
@@ -55,6 +55,7 @@ Azure Quick Review (azqr) recommendations are based on a set of rules. To learn 
 * Azure Front Door
 * Azure Storage Account
 * Azure Firewall
+* Azure Application Insights
 
 ## Microsoft Defender Status
 

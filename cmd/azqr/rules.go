@@ -30,6 +30,7 @@ import (
 	"github.com/cmendible/azqr/internal/scanners/sql"
 	"github.com/cmendible/azqr/internal/scanners/st"
 	"github.com/cmendible/azqr/internal/scanners/wps"
+	"github.com/cmendible/azqr/internal/scanners/appi"
 	"github.com/spf13/cobra"
 )
 
@@ -68,6 +69,7 @@ var rulesCmd = &cobra.Command{
 			&afw.FirewallScanner{},
 			&mysql.MySQLScanner{},
 			&mysql.MySQLFlexibleScanner{},
+			&appi.AppInsightsScanner{},
 		}
 
 		fmt.Println("#  | Id | Category | Subcategory | Name | Severity | More Info")
