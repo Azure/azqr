@@ -200,7 +200,17 @@ jobs:
           name: ${{ env.AZQR_ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/
 
-      - name: upload linux artifact
+      - name: Create sha256 Checksums for linux and mac
+        if: matrix.os != 'windows-latest'
+        run: |
+          sha256sum ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/azqr > ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}.sha256
+        
+      - name: Create sha256 Checksums for windows
+        if: matrix.os == 'windows-latest'
+        run: |
+           sha256sum ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/azqr.exe > ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}.exe.sha256
+
+      - name: upload linux & mac artifacts
         if: matrix.os != 'windows-latest'
         uses: actions/upload-release-asset@v1
         env:
@@ -209,6 +219,17 @@ jobs:
           upload_url: ${{ needs.release.outputs.upload_url }}
           asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/azqr
           asset_name: ${{ env.AZQR_ARTIFACT_NAME }}
+          asset_content_type: application/octet-stream
+
+      - name: upload linux & mac sha256
+        if: matrix.os != 'windows-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}.sha256
+          asset_name: ${{ env.AZQR_ARTIFACT_NAME }}.sha256
           asset_content_type: application/octet-stream
 
       - name: upload windows artifact
@@ -220,4 +241,15 @@ jobs:
           upload_url: ${{ needs.release.outputs.upload_url }}
           asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/azqr.exe
           asset_name: ${{ env.AZQR_ARTIFACT_NAME }}.exe
+          asset_content_type: application/octet-stream
+
+      - name: upload windows sha256
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}.exe.sha256
+          asset_name: ${{ env.AZQR_ARTIFACT_NAME }}.exe.sha256
           asset_content_type: application/octet-stream
