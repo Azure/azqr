@@ -78,7 +78,7 @@ Download the latest release from [here](https://github.com/cmendible/azqr/releas
 ### Install on Windows
 
 ```console
-winget install Microsoft.Azure.QuickReview
+winget install azqr
 ```
 
 ### 
