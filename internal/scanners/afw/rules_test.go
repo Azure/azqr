@@ -14,10 +14,9 @@ import (
 
 func TestFirewallScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -50,10 +48,9 @@ func TestFirewallScanner_Rules(t *testing.T) {
 		{
 			name: "FirewallScanner SLA 99.95%",
 			fields: fields{
-				rule:                "SLA",
-				target:              &armnetwork.AzureFirewall{},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				rule:        "SLA",
+				target:      &armnetwork.AzureFirewall{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -67,8 +64,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					Zones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -86,8 +82,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -101,8 +96,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					Name: to.StringPtr("afw-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -112,9 +106,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &FirewallScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &FirewallScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

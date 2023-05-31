@@ -4,7 +4,6 @@
 package st
 
 import (
-	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
@@ -22,12 +21,8 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armstorage.Account)
-				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
-				if err != nil {
-					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
-				}
-
-				return !hasDiagnostics, ""
+				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
+				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
 		},

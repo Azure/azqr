@@ -14,10 +14,9 @@ import (
 
 func TestRedisScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestRedisScanner_Rules(t *testing.T) {
 				target: &armredis.ResourceInfo{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -54,8 +52,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				target: &armredis.ResourceInfo{
 					Zones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -65,10 +62,9 @@ func TestRedisScanner_Rules(t *testing.T) {
 		{
 			name: "RedisScanner SLA",
 			fields: fields{
-				rule:                "SLA",
-				target:              &armredis.ResourceInfo{},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				rule:        "SLA",
+				target:      &armredis.ResourceInfo{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -88,8 +84,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -107,8 +102,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -122,8 +116,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				target: &armredis.ResourceInfo{
 					Name: to.StringPtr("redis-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -139,8 +132,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 						EnableNonSSLPort: to.BoolPtr(false),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -156,8 +148,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 						MinimumTLSVersion: getTLSVersion(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -167,9 +158,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &RedisScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &RedisScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

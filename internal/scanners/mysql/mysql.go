@@ -13,9 +13,7 @@ import (
 // MySQLScanner - Scanner for PostgreSQL
 type MySQLScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	postgreClient       *armmysql.ServersClient
-	listPostgreFunc     func(resourceGroupName string) ([]*armmysql.Server, error)
 }
 
 // Init - Initializes the MySQLScanner
@@ -26,19 +24,14 @@ func (c *MySQLScanner) Init(config *scanners.ScannerConfig) error {
 	if err != nil {
 		return err
 	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
-// Scan - Scans all PostgreSQL in a Resource Group
+// Scan - Scans all MySQL in a Resource Group
 func (c *MySQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Postgre in Resource Group %s", resourceGroupName)
+	log.Printf("Scanning MySQL in Resource Group %s", resourceGroupName)
 
-	postgre, err := c.listPostgre(resourceGroupName)
+	postgre, err := c.listMySQL(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
@@ -62,20 +55,16 @@ func (c *MySQLScanner) Scan(resourceGroupName string, scanContext *scanners.Scan
 	return results, nil
 }
 
-func (c *MySQLScanner) listPostgre(resourceGroupName string) ([]*armmysql.Server, error) {
-	if c.listPostgreFunc == nil {
-		pager := c.postgreClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *MySQLScanner) listMySQL(resourceGroupName string) ([]*armmysql.Server, error) {
+	pager := c.postgreClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		servers := make([]*armmysql.Server, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			servers = append(servers, resp.Value...)
+	servers := make([]*armmysql.Server, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return servers, nil
+		servers = append(servers, resp.Value...)
 	}
-
-	return c.listPostgreFunc(resourceGroupName)
+	return servers, nil
 }

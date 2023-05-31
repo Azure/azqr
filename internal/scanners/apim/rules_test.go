@@ -17,7 +17,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		rule                string
 		target              interface{}
 		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -55,7 +53,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					Zones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +67,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					Zones: []*string{},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: true,
@@ -91,7 +87,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: true,
@@ -112,7 +107,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -133,7 +127,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -154,7 +147,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -171,7 +163,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: true,
@@ -186,7 +177,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					Name: to.StringPtr("apim-test"),
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -197,7 +187,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &APIManagementScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
 			}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)

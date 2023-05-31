@@ -14,10 +14,9 @@ import (
 
 func TestServiceBusScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				target: &armservicebus.SBNamespace{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -59,8 +57,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						ZoneRedundant: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -76,8 +73,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						Name: getSKUNameStandard(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -93,8 +89,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						Name: getSKUNamePremium(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -114,8 +109,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -131,8 +125,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						Name: getSKUNamePremium(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -146,8 +139,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				target: &armservicebus.SBNamespace{
 					Name: to.StringPtr("sb-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -163,8 +155,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						DisableLocalAuth: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -174,9 +165,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &ServiceBusScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &ServiceBusScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -194,7 +183,6 @@ func getSKUNameStandard() *armservicebus.SKUName {
 	s := armservicebus.SKUNameStandard
 	return &s
 }
-
 
 func getSKUNamePremium() *armservicebus.SKUName {
 	s := armservicebus.SKUNamePremium

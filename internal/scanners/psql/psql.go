@@ -13,7 +13,6 @@ import (
 // PostgreScanner - Scanner for PostgreSQL
 type PostgreScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	postgreClient       *armpostgresql.ServersClient
 	listPostgreFunc     func(resourceGroupName string) ([]*armpostgresql.Server, error)
 }
@@ -23,11 +22,6 @@ func (c *PostgreScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.postgreClient, err = armpostgresql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

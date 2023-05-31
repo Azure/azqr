@@ -13,7 +13,6 @@ import (
 // CosmosDBScanner - Scanner for CosmosDB Databases
 type CosmosDBScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	databasesClient     *armcosmos.DatabaseAccountsClient
 	listDatabasesFunc   func(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error)
 }
@@ -23,11 +22,6 @@ func (a *CosmosDBScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.databasesClient, err = armcosmos.NewDatabaseAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

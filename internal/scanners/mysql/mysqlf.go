@@ -13,7 +13,6 @@ import (
 // MySQLFlexibleScanner - Scanner for PostgreSQL
 type MySQLFlexibleScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	flexibleClient      *armmysqlflexibleservers.ServersClient
 	listFlexibleFunc    func(resourceGroupName string) ([]*armmysqlflexibleservers.Server, error)
 }
@@ -26,17 +25,12 @@ func (c *MySQLFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 	if err != nil {
 		return err
 	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
-// Scan - Scans all PostgreSQL in a Resource Group
+// Scan - Scans all MySQL in a Resource Group
 func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Postgre in Resource Group %s", resourceGroupName)
+	log.Printf("Scanning MySQL in Resource Group %s", resourceGroupName)
 
 	flexibles, err := c.listFlexiblePostgre(resourceGroupName)
 	if err != nil {

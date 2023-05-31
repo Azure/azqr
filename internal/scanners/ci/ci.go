@@ -13,7 +13,6 @@ import (
 // ContainerInstanceScanner - Scanner for Container Instances
 type ContainerInstanceScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	instancesClient     *armcontainerinstance.ContainerGroupsClient
 	listInstancesFunc   func(resourceGroupName string) ([]*armcontainerinstance.ContainerGroup, error)
 }
@@ -23,11 +22,6 @@ func (c *ContainerInstanceScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.instancesClient, err = armcontainerinstance.NewContainerGroupsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

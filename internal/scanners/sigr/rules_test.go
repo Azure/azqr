@@ -14,10 +14,9 @@ import (
 
 func TestSignalRScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestSignalRScanner_Rules(t *testing.T) {
 				target: &armsignalr.ResourceInfo{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -56,8 +54,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 						Name: to.StringPtr("Premium"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -67,10 +64,9 @@ func TestSignalRScanner_Rules(t *testing.T) {
 		{
 			name: "SignalRScanner SLA",
 			fields: fields{
-				rule:                "SLA",
-				target:              &armsignalr.ResourceInfo{},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				rule:        "SLA",
+				target:      &armsignalr.ResourceInfo{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -90,8 +86,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -107,8 +102,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 						Name: to.StringPtr("Premium"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -122,8 +116,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 				target: &armsignalr.ResourceInfo{
 					Name: to.StringPtr("sigr-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -133,9 +126,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &SignalRScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &SignalRScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

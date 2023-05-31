@@ -13,7 +13,6 @@ import (
 // APIManagementScanner - Scanner for API Management Services
 type APIManagementScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	serviceClient       *armapimanagement.ServiceClient
 	listServicesFunc    func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error)
 }
@@ -23,11 +22,6 @@ func (a *APIManagementScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.serviceClient, err = armapimanagement.NewServiceClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

@@ -13,7 +13,6 @@ import (
 // ServiceBusScanner - Scanner for Service Bus
 type ServiceBusScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	servicebusClient    *armservicebus.NamespacesClient
 	listServiceBusFunc  func(resourceGroupName string) ([]*armservicebus.SBNamespace, error)
 }
@@ -23,11 +22,6 @@ func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.servicebusClient, err = armservicebus.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

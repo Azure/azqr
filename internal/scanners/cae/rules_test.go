@@ -14,10 +14,9 @@ import (
 
 func TestContainerAppsScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 				target: &armappcontainers.ManagedEnvironment{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -56,8 +54,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						ZoneRedundant: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -67,10 +64,9 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerAppsScanner SLA",
 			fields: fields{
-				rule:                "SLA",
-				target:              &armappcontainers.ManagedEnvironment{},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				rule:        "SLA",
+				target:      &armappcontainers.ManagedEnvironment{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -86,8 +82,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						VnetConfiguration: nil,
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -105,8 +100,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -120,8 +114,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 				target: &armappcontainers.ManagedEnvironment{
 					Name: to.StringPtr("cae-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -131,9 +124,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &ContainerAppsScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &ContainerAppsScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

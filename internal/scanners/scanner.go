@@ -6,11 +6,13 @@ package scanners
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	arg "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 )
 
 type (
@@ -24,7 +26,8 @@ type (
 
 	// ScanContext - Struct for Scanner Context
 	ScanContext struct {
-		PrivateEndpoints map[string]bool
+		PrivateEndpoints    map[string]bool
+		DiagnosticsSettings map[string]bool
 	}
 
 	// IAzureScanner - Interface for all Azure Scanners
@@ -66,6 +69,15 @@ type (
 	}
 
 	RuleEngine struct{}
+
+	GraphQuery struct {
+		client *arg.Client
+	}
+
+	GraphResult struct {
+		Count int64
+		Data  []interface{}
+	}
 )
 
 func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContext *ScanContext) AzureRuleResult {
@@ -206,3 +218,35 @@ const (
 
 	RulesSubcategoryPerformanceEfficienccyNetworking = "Networking"
 )
+
+func (q *GraphQuery) Query(ctx context.Context, cred azcore.TokenCredential, query string, subscriptionIDs []*string) *GraphResult {
+	format := arg.ResultFormatObjectArray
+	request := arg.QueryRequest{
+		Subscriptions: subscriptionIDs,
+		Query:         &query,
+		Options: &arg.QueryRequestOptions{
+			ResultFormat: &format,
+		},
+	}
+
+	if q.client == nil {
+		client, err := arg.NewClient(cred, nil)
+		if err != nil {
+			log.Fatal(err.Error())
+			return nil
+		}
+		q.client = client
+	}
+
+	// Run the query and get the results
+	results, err := q.client.Resources(ctx, request, nil)
+	if err == nil {
+		result := GraphResult{}
+		result.Count = *results.TotalRecords
+		result.Data = results.Data.([]interface{})
+		return &result
+	} else {
+		log.Fatal(err.Error())
+		return nil
+	}
+}

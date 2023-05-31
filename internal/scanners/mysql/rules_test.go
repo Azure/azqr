@@ -15,10 +15,9 @@ import (
 
 func TestMySQLScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -36,10 +35,9 @@ func TestMySQLScanner_Rules(t *testing.T) {
 				target: &armmysql.Server{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -51,10 +49,9 @@ func TestMySQLScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLScanner SLA",
 			fields: fields{
-				rule:                "SLA",
-				target:              &armmysql.Server{},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				rule:        "SLA",
+				target:      &armmysql.Server{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -74,8 +71,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -91,8 +87,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 						Name: to.StringPtr("GPGen58"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -106,8 +101,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 				target: &armmysql.Server{
 					Name: to.StringPtr("mysql-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -117,10 +111,9 @@ func TestMySQLScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLScanner Deprecated",
 			fields: fields{
-				rule:                "mysql-007",
-				target:              &armmysql.Server{},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				rule:        "mysql-007",
+				target:      &armmysql.Server{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -130,9 +123,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &MySQLScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &MySQLScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -151,7 +142,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 		rule                string
 		target              interface{}
 		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
 	}
 	type want struct {
 		broken bool
@@ -169,10 +159,9 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -193,7 +182,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -208,7 +196,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 					Properties: &armmysqlflexibleservers.ServerProperties{},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -229,7 +216,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -250,7 +236,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -269,7 +254,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -286,7 +270,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -301,7 +284,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 					Name: to.StringPtr("mysql-test"),
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -311,9 +293,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &MySQLFlexibleScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &MySQLFlexibleScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

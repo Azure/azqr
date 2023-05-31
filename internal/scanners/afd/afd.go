@@ -13,7 +13,6 @@ import (
 // FrontDoorScanner - Scanner for Front Door
 type FrontDoorScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	client              *armcdn.ProfilesClient
 	listFunc            func(resourceGroupName string) ([]*armcdn.Profile, error)
 }
@@ -23,11 +22,6 @@ func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armcdn.NewProfilesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}
