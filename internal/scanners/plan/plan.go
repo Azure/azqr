@@ -14,7 +14,6 @@ import (
 // AppServiceScanner - Scanner for App Service Plans
 type AppServiceScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	plansClient         *armappservice.PlansClient
 	sitesClient         *armappservice.WebAppsClient
 	listPlansFunc       func(resourceGroupName string) ([]*armappservice.Plan, error)
@@ -30,11 +29,6 @@ func (a *AppServiceScanner) Init(config *scanners.ScannerConfig) error {
 		return err
 	}
 	a.sitesClient, err = armappservice.NewWebAppsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

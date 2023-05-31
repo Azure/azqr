@@ -4,7 +4,6 @@
 package appcs
 
 import (
-	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
@@ -22,12 +21,8 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armappconfiguration.ConfigurationStore)
-				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
-				if err != nil {
-					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
-				}
-
-				return !hasDiagnostics, ""
+				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
+				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
 		},

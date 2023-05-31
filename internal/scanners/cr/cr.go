@@ -13,7 +13,6 @@ import (
 // ContainerRegistryScanner - Scanner for Container Registries
 type ContainerRegistryScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	registriesClient    *armcontainerregistry.RegistriesClient
 	listRegistriesFunc  func(resourceGroupName string) ([]*armcontainerregistry.Registry, error)
 }
@@ -23,11 +22,6 @@ func (c *ContainerRegistryScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.registriesClient, err = armcontainerregistry.NewRegistriesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

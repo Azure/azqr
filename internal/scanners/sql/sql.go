@@ -13,7 +13,6 @@ import (
 // SQLScanner - Scanner for SQL
 type SQLScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	sqlClient           *armsql.ServersClient
 	sqlDatabasedClient  *armsql.DatabasesClient
 	listServersFunc     func(resourceGroupName string) ([]*armsql.Server, error)
@@ -29,11 +28,6 @@ func (c *SQLScanner) Init(config *scanners.ScannerConfig) error {
 		return err
 	}
 	c.sqlDatabasedClient, err = armsql.NewDatabasesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

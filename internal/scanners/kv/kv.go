@@ -13,7 +13,6 @@ import (
 // KeyVaultScanner - Scanner for Key Vaults
 type KeyVaultScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	vaultsClient        *armkeyvault.VaultsClient
 	listVaultsFunc      func(resourceGroupName string) ([]*armkeyvault.Vault, error)
 }
@@ -23,11 +22,6 @@ func (c *KeyVaultScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.vaultsClient, err = armkeyvault.NewVaultsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

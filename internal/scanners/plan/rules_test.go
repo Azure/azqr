@@ -14,10 +14,9 @@ import (
 
 func TestAppServiceScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				target: &armappservice.Plan{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -56,8 +54,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 						ZoneRedundant: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -73,8 +70,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 						Tier: to.StringPtr("Free"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -90,8 +86,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 						Tier: to.StringPtr("ElasticPremium"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -107,8 +102,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 						Name: to.StringPtr("EP1"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -122,8 +116,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				target: &armappservice.Plan{
 					Name: to.StringPtr("asp-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -133,9 +126,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &AppServiceScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &AppServiceScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -151,10 +142,9 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 
 func TestAppServiceScanner_AppRules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -172,10 +162,9 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				target: &armappservice.Site{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -196,7 +185,6 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 						"test": true,
 					},
 				},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -210,8 +198,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				target: &armappservice.Site{
 					Name: to.StringPtr("app-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -227,8 +214,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 						HTTPSOnly: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -238,9 +224,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &AppServiceScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &AppServiceScanner{}
 			rules := s.GetAppRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -256,10 +240,9 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 
 func TestAppServiceScanner_FunctionRules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -277,10 +260,9 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				target: &armappservice.Site{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -301,7 +283,6 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 						"test": true,
 					},
 				},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -315,8 +296,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				target: &armappservice.Site{
 					Name: to.StringPtr("func-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -332,8 +312,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 						HTTPSOnly: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -343,9 +322,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &AppServiceScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &AppServiceScanner{}
 			rules := s.GetFunctionRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

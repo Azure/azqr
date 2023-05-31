@@ -13,7 +13,6 @@ import (
 // EventHubScanner - Scanner for Event Hubs
 type EventHubScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	client              *armeventhub.NamespacesClient
 	listEventHubsFunc   func(resourceGroupName string) ([]*armeventhub.EHNamespace, error)
 }
@@ -23,11 +22,6 @@ func (a *EventHubScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armeventhub.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

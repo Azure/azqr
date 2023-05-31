@@ -13,7 +13,6 @@ import (
 // SignalRScanner - Scanner for SignalR
 type SignalRScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	signalrClient       *armsignalr.Client
 	listSignalRFunc     func(resourceGroupName string) ([]*armsignalr.ResourceInfo, error)
 }
@@ -23,11 +22,6 @@ func (c *SignalRScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.signalrClient, err = armsignalr.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

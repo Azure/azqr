@@ -14,10 +14,9 @@ import (
 
 func TestSQLScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestSQLScanner_Rules(t *testing.T) {
 				target: &armsql.Server{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -60,8 +58,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -75,8 +72,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 				target: &armsql.Server{
 					Name: to.StringPtr("sql-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -92,8 +88,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 						MinimalTLSVersion: to.StringPtr("1.2"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -103,9 +98,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &SQLScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &SQLScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -121,10 +114,9 @@ func TestSQLScanner_Rules(t *testing.T) {
 
 func TestSQLScanner_DatabaseRules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -142,10 +134,9 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				target: &armsql.Database{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -163,8 +154,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 						ZoneRedundant: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -183,8 +173,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 						Tier: to.StringPtr("Premium"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -198,8 +187,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				target: &armsql.Database{
 					Properties: &armsql.DatabaseProperties{},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -215,8 +203,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 						Name: to.StringPtr("P3"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -230,8 +217,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				target: &armsql.Database{
 					Name: to.StringPtr("sqldb-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -241,9 +227,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &SQLScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &SQLScanner{}
 			rules := s.GetDatabaseRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

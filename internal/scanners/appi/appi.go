@@ -13,7 +13,6 @@ import (
 // AppInsightsScanner - Scanner for Front Door
 type AppInsightsScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	client              *armapplicationinsights.ComponentsClient
 }
 
@@ -22,11 +21,6 @@ func (a *AppInsightsScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armapplicationinsights.NewComponentsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

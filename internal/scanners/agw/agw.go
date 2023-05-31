@@ -12,10 +12,9 @@ import (
 
 // ApplicationGatewayScanner - Scanner for Application Gateways
 type ApplicationGatewayScanner struct {
-	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
-	gatewaysClient      *armnetwork.ApplicationGatewaysClient
-	listGatewaysFunc    func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error)
+	config           *scanners.ScannerConfig
+	gatewaysClient   *armnetwork.ApplicationGatewaysClient
+	listGatewaysFunc func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error)
 }
 
 // Init - Initializes the ApplicationGatewayAnalyzer
@@ -23,11 +22,6 @@ func (a *ApplicationGatewayScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.gatewaysClient, err = armnetwork.NewApplicationGatewaysClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

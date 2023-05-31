@@ -13,7 +13,6 @@ import (
 // RedisScanner - Scanner for Redis
 type RedisScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	redisClient         *armredis.Client
 	listRedisFunc       func(resourceGroupName string) ([]*armredis.ResourceInfo, error)
 }
@@ -23,11 +22,6 @@ func (c *RedisScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

@@ -13,7 +13,6 @@ import (
 // ContainerAppsScanner - Scanner for Container Apps
 type ContainerAppsScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	appsClient          *armappcontainers.ManagedEnvironmentsClient
 	listAppsFunc        func(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error)
 }
@@ -23,11 +22,6 @@ func (a *ContainerAppsScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.appsClient, err = armappcontainers.NewManagedEnvironmentsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

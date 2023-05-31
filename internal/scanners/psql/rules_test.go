@@ -15,10 +15,9 @@ import (
 
 func TestPostgreScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -36,10 +35,9 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				target: &armpostgresql.Server{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -51,10 +49,9 @@ func TestPostgreScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreScanner SLA",
 			fields: fields{
-				rule:                "SLA",
-				target:              &armpostgresql.Server{},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				rule:        "SLA",
+				target:      &armpostgresql.Server{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -74,8 +71,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -91,8 +87,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						Name: to.StringPtr("GPGen58"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -106,8 +101,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				target: &armpostgresql.Server{
 					Name: to.StringPtr("psql-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -123,8 +117,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						SSLEnforcement: getSSLEnforcementEnabled(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -140,8 +133,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						MinimalTLSVersion: getMinimalTLSVersion(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -151,9 +143,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &PostgreScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &PostgreScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -169,10 +159,9 @@ func TestPostgreScanner_Rules(t *testing.T) {
 
 func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -190,10 +179,9 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -213,8 +201,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -228,8 +215,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -249,8 +235,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.StringPtr("1"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -270,8 +255,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.StringPtr("1"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -289,8 +273,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -306,8 +289,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						Name: to.StringPtr("StandardD4sv3"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -321,8 +303,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Name: to.StringPtr("psql-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -332,9 +313,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &PostgreFlexibleScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &PostgreFlexibleScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

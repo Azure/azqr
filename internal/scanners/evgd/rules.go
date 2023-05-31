@@ -4,7 +4,6 @@
 package evgd
 
 import (
-	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
@@ -22,12 +21,8 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armeventgrid.Domain)
-				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
-				if err != nil {
-					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
-				}
-
-				return !hasDiagnostics, ""
+				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
+				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
 		},

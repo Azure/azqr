@@ -13,7 +13,6 @@ import (
 // FirewallScanner - Scanner for Azure Firewall
 type FirewallScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	client              *armnetwork.AzureFirewallsClient
 	listFunc            func(resourceGroupName string) ([]*armnetwork.AzureFirewall, error)
 }
@@ -23,11 +22,6 @@ func (a *FirewallScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armnetwork.NewAzureFirewallsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

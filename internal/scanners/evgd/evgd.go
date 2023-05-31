@@ -13,7 +13,6 @@ import (
 // EventGridScanner - Scanner for EventGrid Domains
 type EventGridScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	domainsClient       *armeventgrid.DomainsClient
 	listDomainFunc      func(resourceGroupName string) ([]*armeventgrid.Domain, error)
 }
@@ -23,11 +22,6 @@ func (a *EventGridScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.domainsClient, err = armeventgrid.NewDomainsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	a.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = a.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

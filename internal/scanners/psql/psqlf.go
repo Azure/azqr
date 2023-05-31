@@ -13,7 +13,6 @@ import (
 // PostgreFlexibleScanner - Scanner for PostgreSQL
 type PostgreFlexibleScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	flexibleClient      *armpostgresqlflexibleservers.ServersClient
 	listFlexibleFunc    func(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error)
 }
@@ -23,11 +22,6 @@ func (c *PostgreFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.flexibleClient, err = armpostgresqlflexibleservers.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

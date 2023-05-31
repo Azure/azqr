@@ -17,7 +17,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 		rule                string
 		target              interface{}
 		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				target: &armappconfiguration.ConfigurationStore{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -57,7 +55,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: true,
@@ -74,7 +71,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -95,7 +91,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -112,7 +107,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -127,7 +121,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 					Name: to.StringPtr("appcs-test"),
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -144,7 +137,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 					},
 				},
 				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
 			},
 			want: want{
 				broken: false,
@@ -155,7 +147,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &AppConfigurationScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
 			}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)

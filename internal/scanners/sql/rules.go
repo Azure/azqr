@@ -4,7 +4,6 @@
 package sql
 
 import (
-	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
@@ -22,12 +21,8 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armsql.Server)
-				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
-				if err != nil {
-					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
-				}
-
-				return !hasDiagnostics, ""
+				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
+				return !ok, ""
 			},
 		},
 		"Private": {
@@ -93,12 +88,8 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armsql.Database)
-				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
-				if err != nil {
-					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
-				}
-
-				return !hasDiagnostics, ""
+				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
+				return !ok, ""
 			},
 		},
 		"AvailabilityZones": {

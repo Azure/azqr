@@ -13,7 +13,6 @@ import (
 // WebPubSubScanner - Scanner for WebPubSub
 type WebPubSubScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	client              *armwebpubsub.Client
 	listWebPubSubFunc   func(resourceGroupName string) ([]*armwebpubsub.ResourceInfo, error)
 }
@@ -23,11 +22,6 @@ func (c *WebPubSubScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armwebpubsub.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

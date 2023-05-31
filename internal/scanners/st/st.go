@@ -13,7 +13,6 @@ import (
 // StorageScanner - Scanner for Storage
 type StorageScanner struct {
 	config              *scanners.ScannerConfig
-	diagnosticsSettings scanners.DiagnosticsSettings
 	storageClient       *armstorage.AccountsClient
 	listStorageFunc     func(resourceGroupName string) ([]*armstorage.Account, error)
 }
@@ -24,11 +23,6 @@ func (c *StorageScanner) Init(config *scanners.ScannerConfig) error {
 	var err error
 
 	c.storageClient, err = armstorage.NewAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	c.diagnosticsSettings = scanners.DiagnosticsSettings{}
-	err = c.diagnosticsSettings.Init(config)
 	if err != nil {
 		return err
 	}

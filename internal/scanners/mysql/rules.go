@@ -4,7 +4,6 @@
 package mysql
 
 import (
-	"log"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysql"
@@ -23,12 +22,8 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armmysql.Server)
-				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
-				if err != nil {
-					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
-				}
-
-				return !hasDiagnostics, ""
+				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
+				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-monitoring#server-logs",
 		},
@@ -118,12 +113,8 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armmysqlflexibleservers.Server)
-				hasDiagnostics, err := a.diagnosticsSettings.HasDiagnostics(*service.ID)
-				if err != nil {
-					log.Fatalf("Error checking diagnostic settings for service %s: %s", *service.Name, err)
-				}
-
-				return !hasDiagnostics, ""
+				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
+				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
 		},

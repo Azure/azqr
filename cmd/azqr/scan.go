@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cmendible/azqr/internal/scanners"
@@ -43,7 +44,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
 	"github.com/cmendible/azqr/internal/renderers"
 	"github.com/spf13/cobra"
-	"golang.org/x/sync/semaphore"
 )
 
 func init() {
@@ -104,7 +104,6 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
 	mask, _ := cmd.Flags().GetBool("mask")
-	concurrency, _ := cmd.Flags().GetBool("parallel-processes")
 
 	if subscriptionID == "" && resourceGroupName != "" {
 		log.Fatal("Resource Group name can only be used with a Subscription Id")
@@ -121,7 +120,8 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx := context.Background()
+
+    ctx := context.Background()
 
 	clientOptions := &arm.ClientOptions{
 		ClientOptions: policy.ClientOptions{
@@ -156,6 +156,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 	defenderScanner := scanners.DefenderScanner{}
 	peScanner := scanners.PrivateEndpointScanner{}
+	diagnosticsScanner := scanners.DiagnosticSettingsScanner{}
 	advisorScanner := scanners.AdvisorScanner{}
 	costScanner := scanners.CostScanner{}
 
@@ -197,8 +198,18 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 			log.Fatal(err)
 		}
 
+		err = diagnosticsScanner.Init(config)
+		if err != nil {
+			log.Fatal(err)
+		}
+		diagResults, err := diagnosticsScanner.ListResourcesWithDiagnosticSettings()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		scanContext := scanners.ScanContext{
-			PrivateEndpoints: peResults,
+			PrivateEndpoints:    peResults,
+			DiagnosticsSettings: diagResults,
 		}
 
 		for _, a := range serviceScanners {
@@ -208,21 +219,34 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 			}
 		}
 
-		rc := ReviewContext{
-			Ctx:   ctx,
-			ResCh: make(chan []scanners.AzureServiceResult),
-			ErrCh: make(chan error),
-		}
 		for _, r := range resourceGroups {
 			log.Printf("Scanning Resource Group %s", r)
-			go scanRunner(&rc, r, &scanContext, &serviceScanners, concurrency)
-			res, err := waitForReviews(&rc, len(serviceScanners))
-			// As soon as any error happen, we cancel every still running analysis
-			if err != nil {
-				cancel()
-				log.Fatal(err)
+			var wg sync.WaitGroup
+			ch := make(chan []scanners.AzureServiceResult, 5)
+			wg.Add(len(serviceScanners))
+
+			go func() {
+				wg.Wait()
+				close(ch)
+			}()
+
+			for _, s := range serviceScanners {
+				go func(r string, s scanners.IAzureScanner) {
+					defer wg.Done()
+
+					res, err := retry(3, 10*time.Millisecond, s, r, &scanContext)
+					if err != nil {
+						cancel()
+						log.Fatal(err)
+					}
+					ch <- res
+				}(r, s)
 			}
-			ruleResults = append(ruleResults, *res...)
+
+			for i := 0; i < len(serviceScanners); i++ {
+				res := <-ch
+				ruleResults = append(ruleResults, res...)
+			}
 		}
 
 		if defender {
@@ -283,51 +307,10 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	log.Println("Scan completed.")
 }
 
-// ReviewContext A running resource group analysis support context
-type ReviewContext struct {
-	// Review context, will be passed to every created goroutines
-	Ctx context.Context
-	// Communication interface for each review results
-	ResCh chan []scanners.AzureServiceResult
-	// Communication interface for errors
-	ErrCh chan error
-}
-
-// Run a scan on a particular resource group "r" with the appropriates scanners using "concurrency" goroutines
-func scanRunner(rc *ReviewContext, r string, scanContext *scanners.ScanContext, svcAnalysers *[]scanners.IAzureScanner, concurrency bool) {
-	processes := 1
-	if concurrency {
-		processes = len(*svcAnalysers)
-	}
-	sem := semaphore.NewWeighted(int64(processes))
-	for i := range *svcAnalysers {
-		if err := sem.Acquire(rc.Ctx, 1); err != nil {
-			rc.ErrCh <- err
-			return
-		}
-		// When starting a goroutine from a loop, we cannot directly use
-		// the iteration variable, as only the last element of the loop will
-		// be processed
-		analyserPtr := &(*svcAnalysers)[i]
-		go func(a *scanners.IAzureScanner, r string) {
-			defer sem.Release(1)
-			// In case the analysis was cancelled, we don't need to execute the review
-			if context.Canceled == rc.Ctx.Err() {
-				return
-			}
-			res, err := retry(3, 10*time.Millisecond, a, r, scanContext)
-			if err != nil {
-				rc.ErrCh <- err
-			}
-			rc.ResCh <- res
-		}(analyserPtr, r)
-	}
-}
-
-func retry(attempts int, sleep time.Duration, a *scanners.IAzureScanner, r string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
+func retry(attempts int, sleep time.Duration, a scanners.IAzureScanner, r string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
 	var err error
 	for i := 0; ; i++ {
-		res, err := (*a).Scan(r, scanContext)
+		res, err := a.Scan(r, scanContext)
 		if err == nil {
 			return res, nil
 		}
@@ -335,11 +318,12 @@ func retry(attempts int, sleep time.Duration, a *scanners.IAzureScanner, r strin
 		errAsString := err.Error()
 
 		if strings.Contains(errAsString, "ERROR CODE: Subscription Not Registered") {
-			log.Println("Subscription Not Registered for Defender. Skipping Defender Scan...")
+			log.Println("Subscription Not Registered. Skipping Scan...")
 			return []scanners.AzureServiceResult{}, nil
 		}
 
-		if !strings.Contains(errAsString, "AzureCLICredential: signal: killed") || i >= (attempts-1) {
+		if i >= (attempts - 1) {
+			log.Printf("Retry limit reached. Error: %s", errAsString)
 			break
 		}
 
@@ -347,27 +331,6 @@ func retry(attempts int, sleep time.Duration, a *scanners.IAzureScanner, r strin
 		sleep *= 2
 	}
 	return nil, err
-}
-
-// Wait for at least "nb" goroutines to hands their result and return them
-func waitForReviews(rc *ReviewContext, nb int) (*[]scanners.AzureServiceResult, error) {
-	received := 0
-	reviews := make([]scanners.AzureServiceResult, 0)
-	for {
-		select {
-		// In case a timeout is set
-		case <-rc.Ctx.Done():
-			return nil, rc.Ctx.Err()
-		case err := <-rc.ErrCh:
-			return nil, err
-		case res := <-rc.ResCh:
-			received++
-			reviews = append(reviews, res...)
-			if received >= nb {
-				return &reviews, nil
-			}
-		}
-	}
 }
 
 func checkExistenceResourceGroup(ctx context.Context, subscriptionID string, resourceGroupName string, cred azcore.TokenCredential, options *arm.ClientOptions) (bool, error) {

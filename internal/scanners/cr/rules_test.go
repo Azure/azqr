@@ -14,10 +14,9 @@ import (
 
 func TestContainerRegistryScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
-		diagnosticsSettings scanners.DiagnosticsSettings
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,10 +34,9 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				target: &armcontainerregistry.Registry{
 					ID: to.StringPtr("test"),
 				},
-				scanContext: &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{
-					HasDiagnosticsFunc: func(resourceId string) (bool, error) {
-						return true, nil
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
 					},
 				},
 			},
@@ -56,8 +54,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						ZoneRedundancy: getZoneRedundancy(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -67,10 +64,9 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerRegistryScanner SLA",
 			fields: fields{
-				rule:                "SLA",
-				target:              &armcontainerregistry.Registry{},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				rule:        "SLA",
+				target:      &armcontainerregistry.Registry{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -90,8 +86,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -107,8 +102,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						Name: getSKUName(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -122,8 +116,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				target: &armcontainerregistry.Registry{
 					Name: to.StringPtr("cr-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -137,8 +130,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -154,8 +146,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						AnonymousPullEnabled: to.BoolPtr(false),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -169,8 +160,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -186,8 +176,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						AdminUserEnabled: to.BoolPtr(false),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -201,8 +190,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -222,8 +210,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
-				diagnosticsSettings: scanners.DiagnosticsSettings{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -233,9 +220,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &ContainerRegistryScanner{
-				diagnosticsSettings: tt.fields.diagnosticsSettings,
-			}
+			s := &ContainerRegistryScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

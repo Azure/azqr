@@ -4,6 +4,8 @@
 package scanners
 
 import (
+	"log"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
 
@@ -27,6 +29,7 @@ func (s *PrivateEndpointScanner) Init(config *ScannerConfig) error {
 
 // ListResourcesWithPrivateEndpoints - Lists all resources with private endpoints
 func (s *PrivateEndpointScanner) ListResourcesWithPrivateEndpoints() (map[string]bool, error) {
+	log.Print("Preflight: Scanning Private Endpoints")
 	res := map[string]bool{}
 	if s.hasPrivateEndpointFunc == nil {
 		opt := armnetwork.PrivateEndpointsClientListBySubscriptionOptions{}
