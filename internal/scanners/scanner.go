@@ -179,7 +179,7 @@ const (
 	RulesCategorySecurity               = "Security"
 	RulesCategoryCostOptimization       = "Cost Optimization"
 	RulesCategoryOperationalExcellence  = "Operational Excellence"
-	RulesCategoryPerformanceEfficienccy = "Performance Efficienccy"
+	RulesCategoryPerformanceEfficienccy = "Performance Efficiency"
 
 	RulesSubcategoryReliabilityAvailabilityZones      = "Availability Zones"
 	RulesSubcategoryReliabilitySLA                    = "SLA"

@@ -18,7 +18,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "agw-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityScaling,
-			Description: "Application Gatewway: Ensure autoscaling is used with a minimum of 2 instances",
+			Description: "Application Gateway: Ensure autoscaling is used with a minimum of 2 instances",
 			Severity:    scanners.SeverityCritical,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
@@ -31,7 +31,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "agw-002",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecuritySSL,
-			Description: "Application Gatewway: Secure all incoming connections with SSL",
+			Description: "Application Gateway: Secure all incoming connections with SSL",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
@@ -53,7 +53,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "agw-003",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityFirewall,
-			Description: "Application Gatewway: Enable WAF policies",
+			Description: "Application Gateway: Enable WAF policies",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
@@ -66,7 +66,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "agw-004",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
-			Description: "Application Gatewway: Use Application GW V2 instead of V1",
+			Description: "Application Gateway: Use Application GW V2 instead of V1",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
