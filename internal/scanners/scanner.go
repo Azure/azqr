@@ -188,6 +188,7 @@ const (
 	RulesSubcategoryReliabilityDiagnosticLogs         = "Diagnostic Logs"
 	RulesSubcategoryReliabilityMonitoring             = "Monitoring"
 	RulesSubcategoryReliabilitySubcategoryReliability = "Reliability"
+	RulesSubcategoryReliabilitySubcategoryMaintenance = "Maintenance"
 
 	RulesSubcategoryOperationalExcellenceCAF               = "Naming Convention (CAF)"
 	RulesSubcategoryOperationalExcellenceTags              = "Tags"

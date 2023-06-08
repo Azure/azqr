@@ -108,7 +108,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 		"agw-008": {
 			Id:          "agw-008",
 			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
+			Subcategory: scanners.RulesSubcategoryReliabilitySubcategoryMaintenance,
 			Description: "Application Gateway: Plan for backend maintenance by using connection draining",
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
