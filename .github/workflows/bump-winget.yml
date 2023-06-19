@@ -1,0 +1,39 @@
+name: Bump azqr version on winget
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'SemVer format release tag, i.e. 0.24.5'
+        required: true
+  repository_dispatch:
+    types: [ bump-winget ]
+
+jobs:
+  winget-bump:
+    name: Bump azqr winget
+    runs-on: windows-2019
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - name: Get version
+        id: get_version
+        run: |
+          $version=""
+          if ("${{ github.event_name }}" -eq "repository_dispatch")
+          {
+            $version="${{ github.event.client_payload.version }}"
+          }
+          else
+          {
+            $version="${{ github.event.inputs.version }}"
+          }
+          echo "WINGETVERSION=$($version.replace('v.',''))" >> $env:GITHUB_ENV
+      - name: Create winget PR
+        run: |
+          iwr https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          .\wingetcreate.exe update Microsoft.Azure.QuickReview -u $Env:URL -v ${{ env.WINGETVERSION }} -t $Env:TOKEN --submit
+        env:
+          TOKEN: ${{ secrets.WINGET_PAT_ACCESS_TOKEN }}
+          URL: ${{ format('https://github.com/Azure/azqr/releases/download/v.{0}/azqr-windows-latest-amd64.exe', env.WINGETVERSION) }}
