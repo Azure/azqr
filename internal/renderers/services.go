@@ -8,7 +8,7 @@ import (
 	_ "image/png"
 	"log"
 
-	"github.com/cmendible/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/xuri/excelize/v2"
 )
 

@@ -6,15 +6,15 @@ package psql
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // PostgreFlexibleScanner - Scanner for PostgreSQL
 type PostgreFlexibleScanner struct {
-	config              *scanners.ScannerConfig
-	flexibleClient      *armpostgresqlflexibleservers.ServersClient
-	listFlexibleFunc    func(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error)
+	config           *scanners.ScannerConfig
+	flexibleClient   *armpostgresqlflexibleservers.ServersClient
+	listFlexibleFunc func(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error)
 }
 
 // Init - Initializes the PostgreFlexibleScanner

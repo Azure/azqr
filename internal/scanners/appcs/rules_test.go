@@ -7,16 +7,16 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 func TestAppConfigurationScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -54,7 +54,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 						Name: getFreeSKUName(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -70,7 +70,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 						Name: getStandardSKUName(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -90,7 +90,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -106,7 +106,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 						Name: getStandardSKUName(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -120,7 +120,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				target: &armappconfiguration.ConfigurationStore{
 					Name: to.StringPtr("appcs-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -136,7 +136,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 						DisableLocalAuth: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -146,8 +146,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &AppConfigurationScanner{
-			}
+			s := &AppConfigurationScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

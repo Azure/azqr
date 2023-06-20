@@ -6,17 +6,17 @@ package sql
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // SQLScanner - Scanner for SQL
 type SQLScanner struct {
-	config              *scanners.ScannerConfig
-	sqlClient           *armsql.ServersClient
-	sqlDatabasedClient  *armsql.DatabasesClient
-	listServersFunc     func(resourceGroupName string) ([]*armsql.Server, error)
-	listDatabasesFunc   func(resourceGroupName, serverName string) ([]*armsql.Database, error)
+	config             *scanners.ScannerConfig
+	sqlClient          *armsql.ServersClient
+	sqlDatabasedClient *armsql.DatabasesClient
+	listServersFunc    func(resourceGroupName string) ([]*armsql.Server, error)
+	listDatabasesFunc  func(resourceGroupName, serverName string) ([]*armsql.Database, error)
 }
 
 // Init - Initializes the SQLScanner

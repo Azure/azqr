@@ -6,15 +6,15 @@ package kv
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // KeyVaultScanner - Scanner for Key Vaults
 type KeyVaultScanner struct {
-	config              *scanners.ScannerConfig
-	vaultsClient        *armkeyvault.VaultsClient
-	listVaultsFunc      func(resourceGroupName string) ([]*armkeyvault.Vault, error)
+	config         *scanners.ScannerConfig
+	vaultsClient   *armkeyvault.VaultsClient
+	listVaultsFunc func(resourceGroupName string) ([]*armkeyvault.Vault, error)
 }
 
 // Init - Initializes the KeyVaultScanner

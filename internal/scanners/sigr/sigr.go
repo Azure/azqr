@@ -6,15 +6,15 @@ package sigr
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // SignalRScanner - Scanner for SignalR
 type SignalRScanner struct {
-	config              *scanners.ScannerConfig
-	signalrClient       *armsignalr.Client
-	listSignalRFunc     func(resourceGroupName string) ([]*armsignalr.ResourceInfo, error)
+	config          *scanners.ScannerConfig
+	signalrClient   *armsignalr.Client
+	listSignalRFunc func(resourceGroupName string) ([]*armsignalr.ResourceInfo, error)
 }
 
 // Init - Initializes the SignalRScanner

@@ -6,15 +6,15 @@ package cosmos
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // CosmosDBScanner - Scanner for CosmosDB Databases
 type CosmosDBScanner struct {
-	config              *scanners.ScannerConfig
-	databasesClient     *armcosmos.DatabaseAccountsClient
-	listDatabasesFunc   func(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error)
+	config            *scanners.ScannerConfig
+	databasesClient   *armcosmos.DatabaseAccountsClient
+	listDatabasesFunc func(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error)
 }
 
 // Init - Initializes the CosmosDBScanner

@@ -6,15 +6,15 @@ package evgd
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // EventGridScanner - Scanner for EventGrid Domains
 type EventGridScanner struct {
-	config              *scanners.ScannerConfig
-	domainsClient       *armeventgrid.DomainsClient
-	listDomainFunc      func(resourceGroupName string) ([]*armeventgrid.Domain, error)
+	config         *scanners.ScannerConfig
+	domainsClient  *armeventgrid.DomainsClient
+	listDomainFunc func(resourceGroupName string) ([]*armeventgrid.Domain, error)
 }
 
 // Init - Initializes the EventGridScanner

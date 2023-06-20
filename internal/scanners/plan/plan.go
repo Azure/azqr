@@ -7,17 +7,17 @@ import (
 	"log"
 	"strings"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // AppServiceScanner - Scanner for App Service Plans
 type AppServiceScanner struct {
-	config              *scanners.ScannerConfig
-	plansClient         *armappservice.PlansClient
-	sitesClient         *armappservice.WebAppsClient
-	listPlansFunc       func(resourceGroupName string) ([]*armappservice.Plan, error)
-	listSitesFunc       func(resourceGroupName string, planName string) ([]*armappservice.Site, error)
+	config        *scanners.ScannerConfig
+	plansClient   *armappservice.PlansClient
+	sitesClient   *armappservice.WebAppsClient
+	listPlansFunc func(resourceGroupName string) ([]*armappservice.Plan, error)
+	listSitesFunc func(resourceGroupName string, planName string) ([]*armappservice.Site, error)
 }
 
 // Init - Initializes the AppServiceScanner

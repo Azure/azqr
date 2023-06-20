@@ -6,15 +6,15 @@ package appcs
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // AppConfigurationScanner - Scanner for Container Apps
 type AppConfigurationScanner struct {
-	config              *scanners.ScannerConfig
-	client              *armappconfiguration.ConfigurationStoresClient
-	listFunc            func(resourceGroupName string) ([]*armappconfiguration.ConfigurationStore, error)
+	config   *scanners.ScannerConfig
+	client   *armappconfiguration.ConfigurationStoresClient
+	listFunc func(resourceGroupName string) ([]*armappconfiguration.ConfigurationStore, error)
 }
 
 // Init - Initializes the AppConfigurationScanner

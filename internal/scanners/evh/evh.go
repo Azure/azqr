@@ -6,15 +6,15 @@ package evh
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // EventHubScanner - Scanner for Event Hubs
 type EventHubScanner struct {
-	config              *scanners.ScannerConfig
-	client              *armeventhub.NamespacesClient
-	listEventHubsFunc   func(resourceGroupName string) ([]*armeventhub.EHNamespace, error)
+	config            *scanners.ScannerConfig
+	client            *armeventhub.NamespacesClient
+	listEventHubsFunc func(resourceGroupName string) ([]*armeventhub.EHNamespace, error)
 }
 
 // Init - Initializes the EventHubScanner

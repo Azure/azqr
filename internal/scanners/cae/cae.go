@@ -6,15 +6,15 @@ package cae
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // ContainerAppsScanner - Scanner for Container Apps
 type ContainerAppsScanner struct {
-	config              *scanners.ScannerConfig
-	appsClient          *armappcontainers.ManagedEnvironmentsClient
-	listAppsFunc        func(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error)
+	config       *scanners.ScannerConfig
+	appsClient   *armappcontainers.ManagedEnvironmentsClient
+	listAppsFunc func(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error)
 }
 
 // Init - Initializes the ContainerAppsScanner

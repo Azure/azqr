@@ -6,15 +6,15 @@ package afd
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // FrontDoorScanner - Scanner for Front Door
 type FrontDoorScanner struct {
-	config              *scanners.ScannerConfig
-	client              *armcdn.ProfilesClient
-	listFunc            func(resourceGroupName string) ([]*armcdn.Profile, error)
+	config   *scanners.ScannerConfig
+	client   *armcdn.ProfilesClient
+	listFunc func(resourceGroupName string) ([]*armcdn.Profile, error)
 }
 
 // Init - Initializes the FrontDoor Scanner

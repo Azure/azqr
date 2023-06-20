@@ -6,15 +6,15 @@ package apim
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // APIManagementScanner - Scanner for API Management Services
 type APIManagementScanner struct {
-	config              *scanners.ScannerConfig
-	serviceClient       *armapimanagement.ServiceClient
-	listServicesFunc    func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error)
+	config           *scanners.ScannerConfig
+	serviceClient    *armapimanagement.ServiceClient
+	listServicesFunc func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error)
 }
 
 // Init - Initializes the APIManagementScanner

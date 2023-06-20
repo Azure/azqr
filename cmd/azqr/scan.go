@@ -11,38 +11,38 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cmendible/azqr/internal/scanners"
-	"github.com/cmendible/azqr/internal/scanners/afd"
-	"github.com/cmendible/azqr/internal/scanners/afw"
-	"github.com/cmendible/azqr/internal/scanners/agw"
-	"github.com/cmendible/azqr/internal/scanners/aks"
-	"github.com/cmendible/azqr/internal/scanners/apim"
-	"github.com/cmendible/azqr/internal/scanners/appcs"
-	"github.com/cmendible/azqr/internal/scanners/appi"
-	"github.com/cmendible/azqr/internal/scanners/cae"
-	"github.com/cmendible/azqr/internal/scanners/ci"
-	"github.com/cmendible/azqr/internal/scanners/cosmos"
-	"github.com/cmendible/azqr/internal/scanners/cr"
-	"github.com/cmendible/azqr/internal/scanners/evgd"
-	"github.com/cmendible/azqr/internal/scanners/evh"
-	"github.com/cmendible/azqr/internal/scanners/kv"
-	"github.com/cmendible/azqr/internal/scanners/mysql"
-	"github.com/cmendible/azqr/internal/scanners/plan"
-	"github.com/cmendible/azqr/internal/scanners/psql"
-	"github.com/cmendible/azqr/internal/scanners/redis"
-	"github.com/cmendible/azqr/internal/scanners/sb"
-	"github.com/cmendible/azqr/internal/scanners/sigr"
-	"github.com/cmendible/azqr/internal/scanners/sql"
-	"github.com/cmendible/azqr/internal/scanners/st"
-	"github.com/cmendible/azqr/internal/scanners/wps"
+	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/scanners/afd"
+	"github.com/Azure/azqr/internal/scanners/afw"
+	"github.com/Azure/azqr/internal/scanners/agw"
+	"github.com/Azure/azqr/internal/scanners/aks"
+	"github.com/Azure/azqr/internal/scanners/apim"
+	"github.com/Azure/azqr/internal/scanners/appcs"
+	"github.com/Azure/azqr/internal/scanners/appi"
+	"github.com/Azure/azqr/internal/scanners/cae"
+	"github.com/Azure/azqr/internal/scanners/ci"
+	"github.com/Azure/azqr/internal/scanners/cosmos"
+	"github.com/Azure/azqr/internal/scanners/cr"
+	"github.com/Azure/azqr/internal/scanners/evgd"
+	"github.com/Azure/azqr/internal/scanners/evh"
+	"github.com/Azure/azqr/internal/scanners/kv"
+	"github.com/Azure/azqr/internal/scanners/mysql"
+	"github.com/Azure/azqr/internal/scanners/plan"
+	"github.com/Azure/azqr/internal/scanners/psql"
+	"github.com/Azure/azqr/internal/scanners/redis"
+	"github.com/Azure/azqr/internal/scanners/sb"
+	"github.com/Azure/azqr/internal/scanners/sigr"
+	"github.com/Azure/azqr/internal/scanners/sql"
+	"github.com/Azure/azqr/internal/scanners/st"
+	"github.com/Azure/azqr/internal/scanners/wps"
 
+	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
-	"github.com/cmendible/azqr/internal/renderers"
 	"github.com/spf13/cobra"
 )
 
@@ -121,7 +121,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		log.Fatal(err)
 	}
 
-    ctx := context.Background()
+	ctx := context.Background()
 
 	clientOptions := &arm.ClientOptions{
 		ClientOptions: policy.ClientOptions{

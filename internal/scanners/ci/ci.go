@@ -6,15 +6,15 @@ package ci
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // ContainerInstanceScanner - Scanner for Container Instances
 type ContainerInstanceScanner struct {
-	config              *scanners.ScannerConfig
-	instancesClient     *armcontainerinstance.ContainerGroupsClient
-	listInstancesFunc   func(resourceGroupName string) ([]*armcontainerinstance.ContainerGroup, error)
+	config            *scanners.ScannerConfig
+	instancesClient   *armcontainerinstance.ContainerGroupsClient
+	listInstancesFunc func(resourceGroupName string) ([]*armcontainerinstance.ContainerGroup, error)
 }
 
 // Init - Initializes the ContainerInstanceScanner
