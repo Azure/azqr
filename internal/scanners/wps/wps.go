@@ -6,15 +6,15 @@ package wps
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // WebPubSubScanner - Scanner for WebPubSub
 type WebPubSubScanner struct {
-	config              *scanners.ScannerConfig
-	client              *armwebpubsub.Client
-	listWebPubSubFunc   func(resourceGroupName string) ([]*armwebpubsub.ResourceInfo, error)
+	config            *scanners.ScannerConfig
+	client            *armwebpubsub.Client
+	listWebPubSubFunc func(resourceGroupName string) ([]*armwebpubsub.ResourceInfo, error)
 }
 
 // Init - Initializes the WebPubSubScanner

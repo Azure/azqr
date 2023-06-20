@@ -6,14 +6,14 @@ package mysql
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysql"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // MySQLScanner - Scanner for PostgreSQL
 type MySQLScanner struct {
-	config              *scanners.ScannerConfig
-	postgreClient       *armmysql.ServersClient
+	config        *scanners.ScannerConfig
+	postgreClient *armmysql.ServersClient
 }
 
 // Init - Initializes the MySQLScanner

@@ -6,15 +6,15 @@ package redis
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // RedisScanner - Scanner for Redis
 type RedisScanner struct {
-	config              *scanners.ScannerConfig
-	redisClient         *armredis.Client
-	listRedisFunc       func(resourceGroupName string) ([]*armredis.ResourceInfo, error)
+	config        *scanners.ScannerConfig
+	redisClient   *armredis.Client
+	listRedisFunc func(resourceGroupName string) ([]*armredis.ResourceInfo, error)
 }
 
 // Init - Initializes the RedisScanner

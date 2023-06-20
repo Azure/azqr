@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 func TestPostgreScanner_Rules(t *testing.T) {

@@ -6,15 +6,15 @@ package psql
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // PostgreScanner - Scanner for PostgreSQL
 type PostgreScanner struct {
-	config              *scanners.ScannerConfig
-	postgreClient       *armpostgresql.ServersClient
-	listPostgreFunc     func(resourceGroupName string) ([]*armpostgresql.Server, error)
+	config          *scanners.ScannerConfig
+	postgreClient   *armpostgresql.ServersClient
+	listPostgreFunc func(resourceGroupName string) ([]*armpostgresql.Server, error)
 }
 
 // Init - Initializes the PostgreScanner

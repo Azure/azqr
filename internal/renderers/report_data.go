@@ -4,7 +4,7 @@
 package renderers
 
 import (
-	"github.com/cmendible/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/scanners"
 )
 
 type ReportData struct {

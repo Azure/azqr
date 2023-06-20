@@ -1,4 +1,4 @@
-[![build](https://github.com/cmendible/azqr/actions/workflows/build.yaml/badge.svg)](https://github.com/cmendible/azqr/actions/workflows/build.yaml)
+[![build](https://github.com/Azure/azqr/actions/workflows/build.yaml/badge.svg)](https://github.com/Azure/azqr/actions/workflows/build.yaml)
 [![CodeQL](https://github.com/Azure/azqr/actions/workflows/codeql.yml/badge.svg)](https://github.com/Azure/azqr/actions/workflows/codeql.yml)
 [![codecov](https://codecov.io/gh/cmendible/azqr/branch/main/graph/badge.svg?token=VReik9rs3l)](https://codecov.io/gh/cmendible/azqr)
 [![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/Azure/azqr.svg)](http://isitmaintained.com/project/Azure/azqr "Average time to resolve an issue")
@@ -68,14 +68,14 @@ Azure Quick Review (azqr) also reports on the status of Microsoft Defender for C
 ### Install on Linux or Azure Cloud Shell
 
 ```bash
-latest_azqr=$(curl -sL https://api.github.com/repos/cmendible/azqr/releases/latest | jq -r ".tag_name" | cut -c1-)
-wget https://github.com/cmendible/azqr/releases/download/$latest_azqr/azqr-ubuntu-latest-amd64 -O azqr
+latest_azqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-)
+wget https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-ubuntu-latest-amd64 -O azqr
 chmod +x azqr
 ```
 
 ### Install on Mac
 
-Download the latest release from [here](https://github.com/cmendible/azqr/releases).
+Download the latest release from [here](https://github.com/Azure/azqr/releases).
 
 ### Install on Windows
 
@@ -176,7 +176,7 @@ Support for this project / product is limited to the resources listed above.
 
 Thanks to everyone who has contributed!
 
-<a href="https://github.com/cmendible/azqr/graphs/contributors">
+<a href="https://github.com/Azure/azqr/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=cmendible/azqr" />
 </a>
 

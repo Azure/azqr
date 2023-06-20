@@ -4,8 +4,8 @@
 package azqr
 
 import (
-	"github.com/cmendible/azqr/internal/scanners"
-	"github.com/cmendible/azqr/internal/scanners/kv"
+	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/scanners/kv"
 	"github.com/spf13/cobra"
 )
 

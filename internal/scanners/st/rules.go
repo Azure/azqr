@@ -6,8 +6,8 @@ package st
 import (
 	"strings"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // GetRules - Returns the rules for the StorageScanner

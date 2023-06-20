@@ -6,8 +6,8 @@ package ci
 import (
 	"strings"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // GetRules - Returns the rules for the ContainerInstanceScanner

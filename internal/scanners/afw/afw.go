@@ -6,15 +6,15 @@ package afw
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // FirewallScanner - Scanner for Azure Firewall
 type FirewallScanner struct {
-	config              *scanners.ScannerConfig
-	client              *armnetwork.AzureFirewallsClient
-	listFunc            func(resourceGroupName string) ([]*armnetwork.AzureFirewall, error)
+	config   *scanners.ScannerConfig
+	client   *armnetwork.AzureFirewallsClient
+	listFunc func(resourceGroupName string) ([]*armnetwork.AzureFirewall, error)
 }
 
 // Init - Initializes the Azure Firewall

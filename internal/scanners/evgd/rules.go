@@ -6,8 +6,8 @@ package evgd
 import (
 	"strings"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // GetRules - Returns the rules for the EventGridScanner

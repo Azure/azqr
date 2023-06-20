@@ -6,8 +6,8 @@ package afw
 import (
 	"strings"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {

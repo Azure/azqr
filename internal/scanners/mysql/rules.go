@@ -6,9 +6,9 @@ package mysql
 import (
 	"strings"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // GetRules - Returns the rules for the MySQLScanner

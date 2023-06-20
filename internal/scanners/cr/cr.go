@@ -6,15 +6,15 @@ package cr
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // ContainerRegistryScanner - Scanner for Container Registries
 type ContainerRegistryScanner struct {
-	config              *scanners.ScannerConfig
-	registriesClient    *armcontainerregistry.RegistriesClient
-	listRegistriesFunc  func(resourceGroupName string) ([]*armcontainerregistry.Registry, error)
+	config             *scanners.ScannerConfig
+	registriesClient   *armcontainerregistry.RegistriesClient
+	listRegistriesFunc func(resourceGroupName string) ([]*armcontainerregistry.Registry, error)
 }
 
 // Init - Initializes the ContainerRegistryScanner

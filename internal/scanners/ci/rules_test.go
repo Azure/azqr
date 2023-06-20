@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 func TestContainerInstanceScanner_Rules(t *testing.T) {

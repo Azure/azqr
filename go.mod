@@ -1,4 +1,4 @@
-module github.com/cmendible/azqr
+module github.com/Azure/azqr
 
 go 1.19
 

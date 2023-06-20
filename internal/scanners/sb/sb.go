@@ -6,15 +6,15 @@ package sb
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // ServiceBusScanner - Scanner for Service Bus
 type ServiceBusScanner struct {
-	config              *scanners.ScannerConfig
-	servicebusClient    *armservicebus.NamespacesClient
-	listServiceBusFunc  func(resourceGroupName string) ([]*armservicebus.SBNamespace, error)
+	config             *scanners.ScannerConfig
+	servicebusClient   *armservicebus.NamespacesClient
+	listServiceBusFunc func(resourceGroupName string) ([]*armservicebus.SBNamespace, error)
 }
 
 // Init - Initializes the ServiceBusScanner

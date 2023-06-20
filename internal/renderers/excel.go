@@ -9,7 +9,7 @@ import (
 	"log"
 	"unicode/utf8"
 
-	"github.com/cmendible/azqr/internal/embeded"
+	"github.com/Azure/azqr/internal/embeded"
 	"github.com/xuri/excelize/v2"
 )
 

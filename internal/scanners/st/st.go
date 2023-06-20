@@ -6,15 +6,15 @@ package st
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // StorageScanner - Scanner for Storage
 type StorageScanner struct {
-	config              *scanners.ScannerConfig
-	storageClient       *armstorage.AccountsClient
-	listStorageFunc     func(resourceGroupName string) ([]*armstorage.Account, error)
+	config          *scanners.ScannerConfig
+	storageClient   *armstorage.AccountsClient
+	listStorageFunc func(resourceGroupName string) ([]*armstorage.Account, error)
 }
 
 // Init - Initializes the StorageScanner

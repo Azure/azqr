@@ -7,16 +7,16 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 func TestAKSScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -61,7 +61,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -82,7 +82,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -105,7 +105,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -128,7 +128,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -151,7 +151,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -167,7 +167,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						Tier: getSKUTierFree(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -181,7 +181,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				target: &armcontainerservice.ManagedCluster{
 					Name: to.StringPtr("aks-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -199,7 +199,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -215,7 +215,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						AADProfile: nil,
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -231,7 +231,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						EnableRBAC: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -247,7 +247,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						EnableRBAC: to.BoolPtr(false),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -263,7 +263,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						DisableLocalAccounts: to.BoolPtr(true),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -279,7 +279,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						DisableLocalAccounts: nil,
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -299,7 +299,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -319,7 +319,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -339,7 +339,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -359,7 +359,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -375,7 +375,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						AddonProfiles: map[string]*armcontainerservice.ManagedClusterAddonProfile{},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -391,7 +391,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						AddonProfiles: map[string]*armcontainerservice.ManagedClusterAddonProfile{},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -409,7 +409,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -427,7 +427,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -445,7 +445,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -461,7 +461,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						AgentPoolProfiles: nil,
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -477,7 +477,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -497,7 +497,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -517,7 +517,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -527,8 +527,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &AKSScanner{
-			}
+			s := &AKSScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

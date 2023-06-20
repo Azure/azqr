@@ -6,15 +6,15 @@ package mysql
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // MySQLFlexibleScanner - Scanner for PostgreSQL
 type MySQLFlexibleScanner struct {
-	config              *scanners.ScannerConfig
-	flexibleClient      *armmysqlflexibleservers.ServersClient
-	listFlexibleFunc    func(resourceGroupName string) ([]*armmysqlflexibleservers.Server, error)
+	config           *scanners.ScannerConfig
+	flexibleClient   *armmysqlflexibleservers.ServersClient
+	listFlexibleFunc func(resourceGroupName string) ([]*armmysqlflexibleservers.Server, error)
 }
 
 // Init - Initializes the MySQLFlexibleScanner

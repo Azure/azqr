@@ -7,16 +7,16 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 func TestAPIManagementScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -52,7 +52,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					Zones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -66,7 +66,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					Zones: []*string{},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -86,7 +86,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -106,7 +106,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -126,7 +126,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -146,7 +146,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -162,7 +162,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						Name: getFreeSKUName(),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -176,7 +176,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					Name: to.StringPtr("apim-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -186,8 +186,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &APIManagementScanner{
-			}
+			s := &APIManagementScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{

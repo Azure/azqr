@@ -6,14 +6,14 @@ package appi
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // AppInsightsScanner - Scanner for Front Door
 type AppInsightsScanner struct {
-	config              *scanners.ScannerConfig
-	client              *armapplicationinsights.ComponentsClient
+	config *scanners.ScannerConfig
+	client *armapplicationinsights.ComponentsClient
 }
 
 // Init - Initializes the Application Insights Scanner

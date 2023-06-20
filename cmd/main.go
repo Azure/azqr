@@ -4,9 +4,9 @@
 package main
 
 import (
-	"github.com/cmendible/azqr/cmd/azqr"
+	"github.com/Azure/azqr/cmd/azqr"
 )
 
 func main() {
-  azqr.Execute()
+	azqr.Execute()
 }

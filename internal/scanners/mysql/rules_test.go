@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 func TestMySQLScanner_Rules(t *testing.T) {
@@ -139,9 +139,9 @@ func TestMySQLScanner_Rules(t *testing.T) {
 
 func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 	type fields struct {
-		rule                string
-		target              interface{}
-		scanContext         *scanners.ScanContext
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -181,7 +181,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -195,7 +195,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -215,7 +215,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.StringPtr("1"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -235,7 +235,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.StringPtr("1"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -253,7 +253,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -269,7 +269,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 						Name: to.StringPtr("StandardD4sv3"),
 					},
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -283,7 +283,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Name: to.StringPtr("mysql-test"),
 				},
-				scanContext:         &scanners.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,

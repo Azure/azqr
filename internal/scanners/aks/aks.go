@@ -6,15 +6,15 @@ package aks
 import (
 	"log"
 
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
-	"github.com/cmendible/azqr/internal/scanners"
 )
 
 // AKSScanner - Scanner for AKS Clusters
 type AKSScanner struct {
-	config              *scanners.ScannerConfig
-	clustersClient      *armcontainerservice.ManagedClustersClient
-	listClustersFunc    func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error)
+	config           *scanners.ScannerConfig
+	clustersClient   *armcontainerservice.ManagedClustersClient
+	listClustersFunc func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error)
 }
 
 // Init - Initializes the AKSScanner
