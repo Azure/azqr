@@ -7,7 +7,7 @@ import (
 	"embed"
 )
 
-//go:embed *.png
+//go:embed *.png *.pbit
 var embededFiles embed.FS
 
 // GetTemplates - Returns the template for the given name
