@@ -135,31 +135,6 @@ Azure Quick Review (azqr) creates an excel spreadsheet with the results of the s
 
 Check the [Azure Quick Review Scan Results](docs/scan_results/README.md) documentation for more information.
 
-## Troubleshooting
-
-### Error: "RESPONSE 429: 429 Too Many Requests"
-
-If the output of `azqr` shows an error similar to the following:
-
-```bash
---------------------------------------------------------------------------------
-RESPONSE 429: 429 Too Many Requests
-ERROR CODE: ResourceRequestsThrottled
---------------------------------------------------------------------------------
-{
-  "error": {
-    "code": "ResourceRequestsThrottled",
-    "message": "Number of requests for action 'Microsoft.Cdn/profiles/read' exceeded the limit of '50' for time interval '00:05:00'. Please try again after '372' seconds."
-  }
-}
-```
-
-Reduce the number of parallel requests that `azqr` is making. You can do this by setting the value of the `-p` parameter to `false` as in the following example:
-
-```bash
-./azqr scan -s <subscription_id> -p=false
-```
-
 ## Support
 
 This project uses GitHub Issues to track bugs and feature requests.
@@ -177,7 +152,7 @@ Support for this project / product is limited to the resources listed above.
 Thanks to everyone who has contributed!
 
 <a href="https://github.com/Azure/azqr/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=cmendible/azqr" />
+  <img src="https://contributors-img.web.app/image?repo=Azure/azqr" />
 </a>
 
 ## Code of Conduct
