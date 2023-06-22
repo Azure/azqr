@@ -54,7 +54,6 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("costs", "c", false, "Scan Azure Costs")
 	scanCmd.PersistentFlags().StringP("output-prefix", "o", "azqr_report", "Output file prefix")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
-	scanCmd.PersistentFlags().BoolP("parallel-processes", "p", true, "Use parallel processes to run scans")
 	rootCmd.AddCommand(scanCmd)
 }
 
