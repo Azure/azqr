@@ -39,6 +39,7 @@ require (
 	github.com/Azure/go-autorest/autorest/to v0.4.0
 	github.com/spf13/cobra v1.6.1
 	github.com/xuri/excelize/v2 v2.7.0
+	golang.org/x/text v0.10.0
 )
 
 require (
@@ -61,5 +62,4 @@ require (
 	golang.org/x/image v0.5.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
 )

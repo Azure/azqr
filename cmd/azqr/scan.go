@@ -289,7 +289,6 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 				costResult.Items = append(costResult.Items, costs.Items...)
 			}
 		}
-
 	}
 
 	reportData := renderers.ReportData{
@@ -302,6 +301,9 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	}
 
 	renderers.CreateExcelReport(reportData)
+
+	xslx := fmt.Sprintf("%s.xlsx", reportData.OutputFileName)
+	renderers.CreatePBIReport(xslx)
 
 	log.Println("Scan completed.")
 }
