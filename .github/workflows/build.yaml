@@ -272,3 +272,29 @@ jobs:
         with:
           event-type: bump-winget
           client-payload: '{"version": "${{ env.MINVERVERSIONOVERRIDE }}"}'
+
+  bump-winget:
+    name: bump-winget
+    needs: publish
+    permissions: write-all
+    if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Setup MinVer
+        run: |
+          dotnet tool install --global minver-cli --version 4.2.0
+
+      - name: Calculate Version
+        run: |
+          echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 0.1 -d preview)" >> $GITHUB_ENV
+
+      - name: Trigger Bump Winget
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          event-type: bump-winget
+          client-payload: '{"version": "${{ env.MINVERVERSIONOVERRIDE }}"}'
