@@ -12,9 +12,8 @@ import (
 
 // APIManagementScanner - Scanner for API Management Services
 type APIManagementScanner struct {
-	config           *scanners.ScannerConfig
-	serviceClient    *armapimanagement.ServiceClient
-	listServicesFunc func(resourceGroupName string) ([]*armapimanagement.ServiceResource, error)
+	config        *scanners.ScannerConfig
+	serviceClient *armapimanagement.ServiceClient
 }
 
 // Init - Initializes the APIManagementScanner
@@ -22,10 +21,7 @@ func (a *APIManagementScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.serviceClient, err = armapimanagement.NewServiceClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan -Scans all API Management Services in a Resource Group
@@ -56,19 +52,15 @@ func (a *APIManagementScanner) Scan(resourceGroupName string, scanContext *scann
 }
 
 func (a *APIManagementScanner) listServices(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
-	if a.listServicesFunc == nil {
-		pager := a.serviceClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := a.serviceClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		services := make([]*armapimanagement.ServiceResource, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			services = append(services, resp.Value...)
+	services := make([]*armapimanagement.ServiceResource, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return services, nil
+		services = append(services, resp.Value...)
 	}
-
-	return a.listServicesFunc(resourceGroupName)
+	return services, nil
 }

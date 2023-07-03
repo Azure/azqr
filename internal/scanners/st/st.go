@@ -12,21 +12,16 @@ import (
 
 // StorageScanner - Scanner for Storage
 type StorageScanner struct {
-	config          *scanners.ScannerConfig
-	storageClient   *armstorage.AccountsClient
-	listStorageFunc func(resourceGroupName string) ([]*armstorage.Account, error)
+	config        *scanners.ScannerConfig
+	storageClient *armstorage.AccountsClient
 }
 
 // Init - Initializes the StorageScanner
 func (c *StorageScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-
 	c.storageClient, err = armstorage.NewAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Storage in a Resource Group
@@ -57,19 +52,15 @@ func (c *StorageScanner) Scan(resourceGroupName string, scanContext *scanners.Sc
 }
 
 func (c *StorageScanner) listStorage(resourceGroupName string) ([]*armstorage.Account, error) {
-	if c.listStorageFunc == nil {
-		pager := c.storageClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.storageClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		staccounts := make([]*armstorage.Account, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			staccounts = append(staccounts, resp.Value...)
+	staccounts := make([]*armstorage.Account, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return staccounts, nil
+		staccounts = append(staccounts, resp.Value...)
 	}
-
-	return c.listStorageFunc(resourceGroupName)
+	return staccounts, nil
 }

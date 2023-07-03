@@ -21,10 +21,7 @@ func (c *MySQLScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.postgreClient, err = armmysql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all MySQL in a Resource Group

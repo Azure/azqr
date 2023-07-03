@@ -12,9 +12,8 @@ import (
 
 // AppConfigurationScanner - Scanner for Container Apps
 type AppConfigurationScanner struct {
-	config   *scanners.ScannerConfig
-	client   *armappconfiguration.ConfigurationStoresClient
-	listFunc func(resourceGroupName string) ([]*armappconfiguration.ConfigurationStore, error)
+	config *scanners.ScannerConfig
+	client *armappconfiguration.ConfigurationStoresClient
 }
 
 // Init - Initializes the AppConfigurationScanner
@@ -22,10 +21,7 @@ func (a *AppConfigurationScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armappconfiguration.NewConfigurationStoresClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all App Configurations in a Resource Group
@@ -56,18 +52,14 @@ func (a *AppConfigurationScanner) Scan(resourceGroupName string, scanContext *sc
 }
 
 func (a *AppConfigurationScanner) list(resourceGroupName string) ([]*armappconfiguration.ConfigurationStore, error) {
-	if a.listFunc == nil {
-		pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
-		apps := make([]*armappconfiguration.ConfigurationStore, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			apps = append(apps, resp.Value...)
+	pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
+	apps := make([]*armappconfiguration.ConfigurationStore, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return apps, nil
+		apps = append(apps, resp.Value...)
 	}
-
-	return a.listFunc(resourceGroupName)
+	return apps, nil
 }

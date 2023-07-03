@@ -12,9 +12,8 @@ import (
 
 // RedisScanner - Scanner for Redis
 type RedisScanner struct {
-	config        *scanners.ScannerConfig
-	redisClient   *armredis.Client
-	listRedisFunc func(resourceGroupName string) ([]*armredis.ResourceInfo, error)
+	config      *scanners.ScannerConfig
+	redisClient *armredis.Client
 }
 
 // Init - Initializes the RedisScanner
@@ -22,10 +21,7 @@ func (c *RedisScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Redis in a Resource Group
@@ -56,19 +52,15 @@ func (c *RedisScanner) Scan(resourceGroupName string, scanContext *scanners.Scan
 }
 
 func (c *RedisScanner) listRedis(resourceGroupName string) ([]*armredis.ResourceInfo, error) {
-	if c.listRedisFunc == nil {
-		pager := c.redisClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.redisClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		redis := make([]*armredis.ResourceInfo, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			redis = append(redis, resp.Value...)
+	redis := make([]*armredis.ResourceInfo, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return redis, nil
+		redis = append(redis, resp.Value...)
 	}
-
-	return c.listRedisFunc(resourceGroupName)
+	return redis, nil
 }

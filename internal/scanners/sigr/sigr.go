@@ -12,9 +12,8 @@ import (
 
 // SignalRScanner - Scanner for SignalR
 type SignalRScanner struct {
-	config          *scanners.ScannerConfig
-	signalrClient   *armsignalr.Client
-	listSignalRFunc func(resourceGroupName string) ([]*armsignalr.ResourceInfo, error)
+	config        *scanners.ScannerConfig
+	signalrClient *armsignalr.Client
 }
 
 // Init - Initializes the SignalRScanner
@@ -22,10 +21,7 @@ func (c *SignalRScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.signalrClient, err = armsignalr.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all SignalR in a Resource Group
@@ -56,19 +52,15 @@ func (c *SignalRScanner) Scan(resourceGroupName string, scanContext *scanners.Sc
 }
 
 func (c *SignalRScanner) listSignalR(resourceGroupName string) ([]*armsignalr.ResourceInfo, error) {
-	if c.listSignalRFunc == nil {
-		pager := c.signalrClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.signalrClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		signalrs := make([]*armsignalr.ResourceInfo, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			signalrs = append(signalrs, resp.Value...)
+	signalrs := make([]*armsignalr.ResourceInfo, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return signalrs, nil
+		signalrs = append(signalrs, resp.Value...)
 	}
-
-	return c.listSignalRFunc(resourceGroupName)
+	return signalrs, nil
 }

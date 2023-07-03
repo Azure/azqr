@@ -12,9 +12,8 @@ import (
 
 // KeyVaultScanner - Scanner for Key Vaults
 type KeyVaultScanner struct {
-	config         *scanners.ScannerConfig
-	vaultsClient   *armkeyvault.VaultsClient
-	listVaultsFunc func(resourceGroupName string) ([]*armkeyvault.Vault, error)
+	config       *scanners.ScannerConfig
+	vaultsClient *armkeyvault.VaultsClient
 }
 
 // Init - Initializes the KeyVaultScanner
@@ -22,10 +21,7 @@ func (c *KeyVaultScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.vaultsClient, err = armkeyvault.NewVaultsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Key Vaults in a Resource Group
@@ -56,19 +52,15 @@ func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *scanners.S
 }
 
 func (c *KeyVaultScanner) listVaults(resourceGroupName string) ([]*armkeyvault.Vault, error) {
-	if c.listVaultsFunc == nil {
-		pager := c.vaultsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.vaultsClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		vaults := make([]*armkeyvault.Vault, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			vaults = append(vaults, resp.Value...)
+	vaults := make([]*armkeyvault.Vault, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return vaults, nil
+		vaults = append(vaults, resp.Value...)
 	}
-
-	return c.listVaultsFunc(resourceGroupName)
+	return vaults, nil
 }

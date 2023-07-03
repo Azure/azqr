@@ -12,9 +12,8 @@ import (
 
 // ContainerRegistryScanner - Scanner for Container Registries
 type ContainerRegistryScanner struct {
-	config             *scanners.ScannerConfig
-	registriesClient   *armcontainerregistry.RegistriesClient
-	listRegistriesFunc func(resourceGroupName string) ([]*armcontainerregistry.Registry, error)
+	config           *scanners.ScannerConfig
+	registriesClient *armcontainerregistry.RegistriesClient
 }
 
 // Init - Initializes the ContainerRegistryScanner
@@ -22,10 +21,7 @@ func (c *ContainerRegistryScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.registriesClient, err = armcontainerregistry.NewRegistriesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Container Registries in a Resource Group
@@ -56,19 +52,15 @@ func (c *ContainerRegistryScanner) Scan(resourceGroupName string, scanContext *s
 }
 
 func (c *ContainerRegistryScanner) listRegistries(resourceGroupName string) ([]*armcontainerregistry.Registry, error) {
-	if c.listRegistriesFunc == nil {
-		pager := c.registriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.registriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		registries := make([]*armcontainerregistry.Registry, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			registries = append(registries, resp.Value...)
+	registries := make([]*armcontainerregistry.Registry, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return registries, nil
+		registries = append(registries, resp.Value...)
 	}
-
-	return c.listRegistriesFunc(resourceGroupName)
+	return registries, nil
 }

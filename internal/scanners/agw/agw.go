@@ -12,9 +12,8 @@ import (
 
 // ApplicationGatewayScanner - Scanner for Application Gateways
 type ApplicationGatewayScanner struct {
-	config           *scanners.ScannerConfig
-	gatewaysClient   *armnetwork.ApplicationGatewaysClient
-	listGatewaysFunc func(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error)
+	config         *scanners.ScannerConfig
+	gatewaysClient *armnetwork.ApplicationGatewaysClient
 }
 
 // Init - Initializes the ApplicationGatewayAnalyzer
@@ -22,10 +21,7 @@ func (a *ApplicationGatewayScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.gatewaysClient, err = armnetwork.NewApplicationGatewaysClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Application Gateways in a Resource Group
@@ -56,18 +52,14 @@ func (a *ApplicationGatewayScanner) Scan(resourceGroupName string, scanContext *
 }
 
 func (a *ApplicationGatewayScanner) listGateways(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error) {
-	if a.listGatewaysFunc == nil {
-		pager := a.gatewaysClient.NewListPager(resourceGroupName, nil)
-		results := []*armnetwork.ApplicationGateway{}
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			results = append(results, resp.Value...)
+	pager := a.gatewaysClient.NewListPager(resourceGroupName, nil)
+	results := []*armnetwork.ApplicationGateway{}
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return results, nil
+		results = append(results, resp.Value...)
 	}
-
-	return a.listGatewaysFunc(resourceGroupName)
+	return results, nil
 }

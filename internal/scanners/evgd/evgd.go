@@ -12,9 +12,8 @@ import (
 
 // EventGridScanner - Scanner for EventGrid Domains
 type EventGridScanner struct {
-	config         *scanners.ScannerConfig
-	domainsClient  *armeventgrid.DomainsClient
-	listDomainFunc func(resourceGroupName string) ([]*armeventgrid.Domain, error)
+	config        *scanners.ScannerConfig
+	domainsClient *armeventgrid.DomainsClient
 }
 
 // Init - Initializes the EventGridScanner
@@ -22,10 +21,7 @@ func (a *EventGridScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.domainsClient, err = armeventgrid.NewDomainsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all EventGrid Domains in a Resource Group
@@ -56,19 +52,15 @@ func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *scanners.
 }
 
 func (a *EventGridScanner) listDomain(resourceGroupName string) ([]*armeventgrid.Domain, error) {
-	if a.listDomainFunc == nil {
-		pager := a.domainsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := a.domainsClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		domains := make([]*armeventgrid.Domain, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			domains = append(domains, resp.Value...)
+	domains := make([]*armeventgrid.Domain, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return domains, nil
+		domains = append(domains, resp.Value...)
 	}
-
-	return a.listDomainFunc(resourceGroupName)
+	return domains, nil
 }

@@ -182,7 +182,6 @@ func MaskSubscriptionID(subscriptionID string, mask bool) string {
 }
 
 const (
-	SeverityCritical = "Critical"
 	SeverityHigh     = "High"
 	SeverityMedium   = "Medium"
 	SeverityLow      = "Low"

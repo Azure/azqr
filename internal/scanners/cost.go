@@ -30,7 +30,7 @@ type CostScanner struct {
 }
 
 // GetProperties - Returns the properties of the CostResult
-func (d *CostResult) GetProperties() []string {
+func (d CostResult) GetProperties() []string {
 	return []string{
 		"SubscriptionID",
 		"ServiceName",

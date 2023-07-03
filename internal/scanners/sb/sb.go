@@ -12,9 +12,8 @@ import (
 
 // ServiceBusScanner - Scanner for Service Bus
 type ServiceBusScanner struct {
-	config             *scanners.ScannerConfig
-	servicebusClient   *armservicebus.NamespacesClient
-	listServiceBusFunc func(resourceGroupName string) ([]*armservicebus.SBNamespace, error)
+	config           *scanners.ScannerConfig
+	servicebusClient *armservicebus.NamespacesClient
 }
 
 // Init - Initializes the ServiceBusScanner
@@ -22,10 +21,7 @@ func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.servicebusClient, err = armservicebus.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Service Bus in a Resource Group
@@ -56,19 +52,15 @@ func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *scanners
 }
 
 func (c *ServiceBusScanner) listServiceBus(resourceGroupName string) ([]*armservicebus.SBNamespace, error) {
-	if c.listServiceBusFunc == nil {
-		pager := c.servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		namespaces := make([]*armservicebus.SBNamespace, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			namespaces = append(namespaces, resp.Value...)
+	namespaces := make([]*armservicebus.SBNamespace, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return namespaces, nil
+		namespaces = append(namespaces, resp.Value...)
 	}
-
-	return c.listServiceBusFunc(resourceGroupName)
+	return namespaces, nil
 }

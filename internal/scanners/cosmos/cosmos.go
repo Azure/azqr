@@ -12,9 +12,8 @@ import (
 
 // CosmosDBScanner - Scanner for CosmosDB Databases
 type CosmosDBScanner struct {
-	config            *scanners.ScannerConfig
-	databasesClient   *armcosmos.DatabaseAccountsClient
-	listDatabasesFunc func(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error)
+	config          *scanners.ScannerConfig
+	databasesClient *armcosmos.DatabaseAccountsClient
 }
 
 // Init - Initializes the CosmosDBScanner
@@ -22,10 +21,7 @@ func (a *CosmosDBScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.databasesClient, err = armcosmos.NewDatabaseAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all CosmosDB Databases in a Resource Group
@@ -56,19 +52,15 @@ func (c *CosmosDBScanner) Scan(resourceGroupName string, scanContext *scanners.S
 }
 
 func (c *CosmosDBScanner) listDatabases(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error) {
-	if c.listDatabasesFunc == nil {
-		pager := c.databasesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.databasesClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		domains := make([]*armcosmos.DatabaseAccountGetResults, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			domains = append(domains, resp.Value...)
+	domains := make([]*armcosmos.DatabaseAccountGetResults, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return domains, nil
+		domains = append(domains, resp.Value...)
 	}
-
-	return c.listDatabasesFunc(resourceGroupName)
+	return domains, nil
 }
