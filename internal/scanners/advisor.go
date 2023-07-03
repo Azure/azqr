@@ -21,7 +21,7 @@ type AdvisorScanner struct {
 }
 
 // GetProperties - Returns the properties of the AdvisorResult
-func (d *AdvisorResult) GetProperties() []string {
+func (a AdvisorResult) GetProperties() []string {
 	return []string{
 		"SubscriptionID",
 		"Name",
@@ -35,16 +35,16 @@ func (d *AdvisorResult) GetProperties() []string {
 }
 
 // ToMap - Returns the properties of the AdvisorResult as a map
-func (r AdvisorResult) ToMap(mask bool) map[string]string {
+func (a AdvisorResult) ToMap(mask bool) map[string]string {
 	return map[string]string{
-		"SubscriptionID":     MaskSubscriptionID(r.SubscriptionID, mask),
-		"Name":               r.Name,
-		"Type":               r.Type,
-		"Category":           r.Category,
-		"Description":        r.Description,
-		"Potential Benefits": r.PotentialBenefits,
-		"Risk":               r.Risk,
-		"Learn":              r.LearnMoreLink,
+		"SubscriptionID":     MaskSubscriptionID(a.SubscriptionID, mask),
+		"Name":               a.Name,
+		"Type":               a.Type,
+		"Category":           a.Category,
+		"Description":        a.Description,
+		"Potential Benefits": a.PotentialBenefits,
+		"Risk":               a.Risk,
+		"Learn":              a.LearnMoreLink,
 	}
 }
 

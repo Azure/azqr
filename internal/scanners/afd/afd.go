@@ -12,9 +12,8 @@ import (
 
 // FrontDoorScanner - Scanner for Front Door
 type FrontDoorScanner struct {
-	config   *scanners.ScannerConfig
-	client   *armcdn.ProfilesClient
-	listFunc func(resourceGroupName string) ([]*armcdn.Profile, error)
+	config *scanners.ScannerConfig
+	client *armcdn.ProfilesClient
 }
 
 // Init - Initializes the FrontDoor Scanner
@@ -22,10 +21,7 @@ func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armcdn.NewProfilesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Front Doors in a Resource Group
@@ -56,19 +52,15 @@ func (a *FrontDoorScanner) Scan(resourceGroupName string, scanContext *scanners.
 }
 
 func (a *FrontDoorScanner) list(resourceGroupName string) ([]*armcdn.Profile, error) {
-	if a.listFunc == nil {
-		pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		services := make([]*armcdn.Profile, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			services = append(services, resp.Value...)
+	services := make([]*armcdn.Profile, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return services, nil
+		services = append(services, resp.Value...)
 	}
-
-	return a.listFunc(resourceGroupName)
+	return services, nil
 }

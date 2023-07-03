@@ -12,9 +12,8 @@ import (
 
 // AKSScanner - Scanner for AKS Clusters
 type AKSScanner struct {
-	config           *scanners.ScannerConfig
-	clustersClient   *armcontainerservice.ManagedClustersClient
-	listClustersFunc func(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error)
+	config         *scanners.ScannerConfig
+	clustersClient *armcontainerservice.ManagedClustersClient
 }
 
 // Init - Initializes the AKSScanner
@@ -22,10 +21,7 @@ func (a *AKSScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.clustersClient, err = armcontainerservice.NewManagedClustersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all AKS Clusters in a Resource Group
@@ -58,19 +54,15 @@ func (a *AKSScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 }
 
 func (a *AKSScanner) listClusters(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error) {
-	if a.listClustersFunc == nil {
-		pager := a.clustersClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := a.clustersClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		clusters := make([]*armcontainerservice.ManagedCluster, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			clusters = append(clusters, resp.Value...)
+	clusters := make([]*armcontainerservice.ManagedCluster, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return clusters, nil
+		clusters = append(clusters, resp.Value...)
 	}
-
-	return a.listClustersFunc(resourceGroupName)
+	return clusters, nil
 }

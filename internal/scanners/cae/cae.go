@@ -12,9 +12,8 @@ import (
 
 // ContainerAppsScanner - Scanner for Container Apps
 type ContainerAppsScanner struct {
-	config       *scanners.ScannerConfig
-	appsClient   *armappcontainers.ManagedEnvironmentsClient
-	listAppsFunc func(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error)
+	config     *scanners.ScannerConfig
+	appsClient *armappcontainers.ManagedEnvironmentsClient
 }
 
 // Init - Initializes the ContainerAppsScanner
@@ -22,10 +21,7 @@ func (a *ContainerAppsScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.appsClient, err = armappcontainers.NewManagedEnvironmentsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Container Apps in a Resource Group
@@ -56,18 +52,14 @@ func (a *ContainerAppsScanner) Scan(resourceGroupName string, scanContext *scann
 }
 
 func (a *ContainerAppsScanner) listApps(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error) {
-	if a.listAppsFunc == nil {
-		pager := a.appsClient.NewListByResourceGroupPager(resourceGroupName, nil)
-		apps := make([]*armappcontainers.ManagedEnvironment, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			apps = append(apps, resp.Value...)
+	pager := a.appsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	apps := make([]*armappcontainers.ManagedEnvironment, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return apps, nil
+		apps = append(apps, resp.Value...)
 	}
-
-	return a.listAppsFunc(resourceGroupName)
+	return apps, nil
 }

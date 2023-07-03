@@ -18,7 +18,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityScaling,
 			Description: "Application Gateway: Ensure autoscaling is used with a minimum of 2 instances",
-			Severity:    scanners.SeverityCritical,
+			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				autoscale := g.Properties.AutoscaleConfiguration != nil && g.Properties.AutoscaleConfiguration.MinCapacity != nil && *g.Properties.AutoscaleConfiguration.MinCapacity >= 2

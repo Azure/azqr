@@ -12,9 +12,8 @@ import (
 
 // EventHubScanner - Scanner for Event Hubs
 type EventHubScanner struct {
-	config            *scanners.ScannerConfig
-	client            *armeventhub.NamespacesClient
-	listEventHubsFunc func(resourceGroupName string) ([]*armeventhub.EHNamespace, error)
+	config *scanners.ScannerConfig
+	client *armeventhub.NamespacesClient
 }
 
 // Init - Initializes the EventHubScanner
@@ -22,10 +21,7 @@ func (a *EventHubScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armeventhub.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Event Hubs in a Resource Group
@@ -56,19 +52,15 @@ func (c *EventHubScanner) Scan(resourceGroupName string, scanContext *scanners.S
 }
 
 func (c *EventHubScanner) listEventHubs(resourceGroupName string) ([]*armeventhub.EHNamespace, error) {
-	if c.listEventHubsFunc == nil {
-		pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		namespaces := make([]*armeventhub.EHNamespace, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			namespaces = append(namespaces, resp.Value...)
+	namespaces := make([]*armeventhub.EHNamespace, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return namespaces, nil
+		namespaces = append(namespaces, resp.Value...)
 	}
-
-	return c.listEventHubsFunc(resourceGroupName)
+	return namespaces, nil
 }

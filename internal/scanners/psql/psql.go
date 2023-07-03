@@ -12,9 +12,8 @@ import (
 
 // PostgreScanner - Scanner for PostgreSQL
 type PostgreScanner struct {
-	config          *scanners.ScannerConfig
-	postgreClient   *armpostgresql.ServersClient
-	listPostgreFunc func(resourceGroupName string) ([]*armpostgresql.Server, error)
+	config        *scanners.ScannerConfig
+	postgreClient *armpostgresql.ServersClient
 }
 
 // Init - Initializes the PostgreScanner
@@ -22,10 +21,7 @@ func (c *PostgreScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.postgreClient, err = armpostgresql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all PostgreSQL in a Resource Group
@@ -57,19 +53,15 @@ func (c *PostgreScanner) Scan(resourceGroupName string, scanContext *scanners.Sc
 }
 
 func (c *PostgreScanner) listPostgre(resourceGroupName string) ([]*armpostgresql.Server, error) {
-	if c.listPostgreFunc == nil {
-		pager := c.postgreClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.postgreClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		servers := make([]*armpostgresql.Server, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			servers = append(servers, resp.Value...)
+	servers := make([]*armpostgresql.Server, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return servers, nil
+		servers = append(servers, resp.Value...)
 	}
-
-	return c.listPostgreFunc(resourceGroupName)
+	return servers, nil
 }

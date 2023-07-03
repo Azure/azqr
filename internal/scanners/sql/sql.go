@@ -15,8 +15,6 @@ type SQLScanner struct {
 	config             *scanners.ScannerConfig
 	sqlClient          *armsql.ServersClient
 	sqlDatabasedClient *armsql.DatabasesClient
-	listServersFunc    func(resourceGroupName string) ([]*armsql.Server, error)
-	listDatabasesFunc  func(resourceGroupName, serverName string) ([]*armsql.Database, error)
 }
 
 // Init - Initializes the SQLScanner
@@ -81,37 +79,29 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 }
 
 func (c *SQLScanner) listSQL(resourceGroupName string) ([]*armsql.Server, error) {
-	if c.listServersFunc == nil {
-		pager := c.sqlClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.sqlClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		servers := make([]*armsql.Server, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			servers = append(servers, resp.Value...)
+	servers := make([]*armsql.Server, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return servers, nil
+		servers = append(servers, resp.Value...)
 	}
-
-	return c.listServersFunc(resourceGroupName)
+	return servers, nil
 }
 
 func (c *SQLScanner) listDatabases(resourceGroupName, serverName string) ([]*armsql.Database, error) {
-	if c.listDatabasesFunc == nil {
-		pager := c.sqlDatabasedClient.NewListByServerPager(resourceGroupName, serverName, nil)
+	pager := c.sqlDatabasedClient.NewListByServerPager(resourceGroupName, serverName, nil)
 
-		databases := make([]*armsql.Database, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			databases = append(databases, resp.Value...)
+	databases := make([]*armsql.Database, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return databases, nil
+		databases = append(databases, resp.Value...)
 	}
-
-	return c.listDatabasesFunc(resourceGroupName, serverName)
+	return databases, nil
 }

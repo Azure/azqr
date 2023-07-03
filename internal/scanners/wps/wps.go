@@ -12,9 +12,8 @@ import (
 
 // WebPubSubScanner - Scanner for WebPubSub
 type WebPubSubScanner struct {
-	config            *scanners.ScannerConfig
-	client            *armwebpubsub.Client
-	listWebPubSubFunc func(resourceGroupName string) ([]*armwebpubsub.ResourceInfo, error)
+	config *scanners.ScannerConfig
+	client *armwebpubsub.Client
 }
 
 // Init - Initializes the WebPubSubScanner
@@ -22,10 +21,7 @@ func (c *WebPubSubScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armwebpubsub.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all WebPubSub in a Resource Group
@@ -56,19 +52,15 @@ func (c *WebPubSubScanner) Scan(resourceGroupName string, scanContext *scanners.
 }
 
 func (c *WebPubSubScanner) listWebPubSub(resourceGroupName string) ([]*armwebpubsub.ResourceInfo, error) {
-	if c.listWebPubSubFunc == nil {
-		pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
 
-		WebPubSubs := make([]*armwebpubsub.ResourceInfo, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(c.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			WebPubSubs = append(WebPubSubs, resp.Value...)
+	WebPubSubs := make([]*armwebpubsub.ResourceInfo, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return WebPubSubs, nil
+		WebPubSubs = append(WebPubSubs, resp.Value...)
 	}
-
-	return c.listWebPubSubFunc(resourceGroupName)
+	return WebPubSubs, nil
 }

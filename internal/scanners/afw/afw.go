@@ -12,9 +12,8 @@ import (
 
 // FirewallScanner - Scanner for Azure Firewall
 type FirewallScanner struct {
-	config   *scanners.ScannerConfig
-	client   *armnetwork.AzureFirewallsClient
-	listFunc func(resourceGroupName string) ([]*armnetwork.AzureFirewall, error)
+	config *scanners.ScannerConfig
+	client *armnetwork.AzureFirewallsClient
 }
 
 // Init - Initializes the Azure Firewall
@@ -22,10 +21,7 @@ func (a *FirewallScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armnetwork.NewAzureFirewallsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Scan - Scans all Azure Firewall in a Resource Group
@@ -56,19 +52,15 @@ func (a *FirewallScanner) Scan(resourceGroupName string, scanContext *scanners.S
 }
 
 func (a *FirewallScanner) list(resourceGroupName string) ([]*armnetwork.AzureFirewall, error) {
-	if a.listFunc == nil {
-		pager := a.client.NewListPager(resourceGroupName, nil)
+	pager := a.client.NewListPager(resourceGroupName, nil)
 
-		services := make([]*armnetwork.AzureFirewall, 0)
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			services = append(services, resp.Value...)
+	services := make([]*armnetwork.AzureFirewall, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return services, nil
+		services = append(services, resp.Value...)
 	}
-
-	return a.listFunc(resourceGroupName)
+	return services, nil
 }

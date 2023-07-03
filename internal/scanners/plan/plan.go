@@ -13,11 +13,9 @@ import (
 
 // AppServiceScanner - Scanner for App Service Plans
 type AppServiceScanner struct {
-	config        *scanners.ScannerConfig
-	plansClient   *armappservice.PlansClient
-	sitesClient   *armappservice.WebAppsClient
-	listPlansFunc func(resourceGroupName string) ([]*armappservice.Plan, error)
-	listSitesFunc func(resourceGroupName string, planName string) ([]*armappservice.Site, error)
+	config      *scanners.ScannerConfig
+	plansClient *armappservice.PlansClient
+	sitesClient *armappservice.WebAppsClient
 }
 
 // Init - Initializes the AppServiceScanner
@@ -135,36 +133,28 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 }
 
 func (a *AppServiceScanner) listPlans(resourceGroupName string) ([]*armappservice.Plan, error) {
-	if a.listPlansFunc == nil {
-		pager := a.plansClient.NewListByResourceGroupPager(resourceGroupName, nil)
-		results := []*armappservice.Plan{}
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			results = append(results, resp.Value...)
+	pager := a.plansClient.NewListByResourceGroupPager(resourceGroupName, nil)
+	results := []*armappservice.Plan{}
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-
-		return results, nil
+		results = append(results, resp.Value...)
 	}
 
-	return a.listPlansFunc(resourceGroupName)
+	return results, nil
 }
 
 func (a *AppServiceScanner) listSites(resourceGroupName string, plan string) ([]*armappservice.Site, error) {
-	if a.listSitesFunc == nil {
-		pager := a.plansClient.NewListWebAppsPager(resourceGroupName, plan, nil)
-		results := []*armappservice.Site{}
-		for pager.More() {
-			resp, err := pager.NextPage(a.config.Ctx)
-			if err != nil {
-				return nil, err
-			}
-			results = append(results, resp.Value...)
+	pager := a.plansClient.NewListWebAppsPager(resourceGroupName, plan, nil)
+	results := []*armappservice.Site{}
+	for pager.More() {
+		resp, err := pager.NextPage(a.config.Ctx)
+		if err != nil {
+			return nil, err
 		}
-		return results, nil
+		results = append(results, resp.Value...)
 	}
-
-	return a.listSitesFunc(resourceGroupName, plan)
+	return results, nil
 }
