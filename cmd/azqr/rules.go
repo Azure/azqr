@@ -31,6 +31,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/sql"
 	"github.com/Azure/azqr/internal/scanners/st"
 	"github.com/Azure/azqr/internal/scanners/wps"
+	"github.com/Azure/azqr/internal/scanners/vwan"
 	"github.com/spf13/cobra"
 )
 
@@ -70,6 +71,7 @@ var rulesCmd = &cobra.Command{
 			&mysql.MySQLScanner{},
 			&mysql.MySQLFlexibleScanner{},
 			&appi.AppInsightsScanner{},
+			&vwan.VirtualWanScanner{},
 		}
 
 		fmt.Println("#  | Id | Category | Subcategory | Name | Severity | More Info")
