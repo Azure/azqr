@@ -6,13 +6,13 @@ package scanners
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	arg "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+	"github.com/rs/zerolog/log"
 )
 
 type (
@@ -182,9 +182,9 @@ func MaskSubscriptionID(subscriptionID string, mask bool) string {
 }
 
 const (
-	SeverityHigh     = "High"
-	SeverityMedium   = "Medium"
-	SeverityLow      = "Low"
+	SeverityHigh   = "High"
+	SeverityMedium = "Medium"
+	SeverityLow    = "Low"
 
 	RulesCategoryReliability            = "Reliability"
 	RulesCategorySecurity               = "Security"
@@ -231,7 +231,7 @@ func (q *GraphQuery) Query(ctx context.Context, cred azcore.TokenCredential, que
 	if q.client == nil {
 		client, err := arg.NewClient(cred, nil)
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Fatal().Err(err)
 			return nil
 		}
 		q.client = client
@@ -245,7 +245,7 @@ func (q *GraphQuery) Query(ctx context.Context, cred azcore.TokenCredential, que
 		result.Data = results.Data.([]interface{})
 		return &result
 	} else {
-		log.Fatal(err.Error())
+		log.Fatal().Err(err)
 		return nil
 	}
 }

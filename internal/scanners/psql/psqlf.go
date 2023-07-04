@@ -4,7 +4,7 @@
 package psql
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
@@ -26,7 +26,7 @@ func (c *PostgreFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all PostgreSQL in a Resource Group
 func (c *PostgreFlexibleScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Postgre in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning Postgre in Resource Group %s", resourceGroupName)
 
 	flexibles, err := c.listFlexiblePostgre(resourceGroupName)
 	if err != nil {

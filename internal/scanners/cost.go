@@ -4,7 +4,7 @@ package scanners
 
 import (
 	"fmt"
-	"log"
+	"github.com/rs/zerolog/log"
 	"strings"
 	"time"
 
@@ -62,7 +62,7 @@ func (s *CostScanner) Init(config *ScannerConfig) error {
 
 // QueryCosts - Query Costs.
 func (s *CostScanner) QueryCosts() (*CostResult, error) {
-	log.Println("Scanning Costs...")
+	log.Info().Msg("Scanning Costs...")
 	timeframeType := armcostmanagement.TimeframeTypeCustom
 	etype := armcostmanagement.ExportTypeActualCost
 	toTime := time.Now().UTC()
@@ -105,7 +105,7 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 	resp, err := s.client.Usage(s.config.Ctx, fmt.Sprintf("/subscriptions/%s", s.config.SubscriptionID), qd, nil)
 	if err != nil {
 		if strings.Contains(err.Error(), "ERROR CODE: Subscription Not Registered") {
-			log.Println("Subscription Not Registered for Cost scanning. Skipping Cost Scan...")
+			log.Info().Msg("Subscription Not Registered for Cost scanning. Skipping Cost Scan...")
 			return &CostResult{
 				From:  fromTime,
 				To:    toTime,

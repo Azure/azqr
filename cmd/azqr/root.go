@@ -4,7 +4,13 @@
 package azqr
 
 import (
+	"os"
+	"time"
+
 	"github.com/spf13/cobra"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -23,5 +29,9 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+
+	log.Logger = zerolog.New(output).With().Timestamp().Logger()
+
 	cobra.CheckErr(rootCmd.Execute())
 }

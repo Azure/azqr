@@ -4,7 +4,7 @@
 package kv
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
@@ -26,7 +26,7 @@ func (c *KeyVaultScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Key Vaults in a Resource Group
 func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Key Vaults in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning Key Vaults in Resource Group %s", resourceGroupName)
 
 	vaults, err := c.listVaults(resourceGroupName)
 	if err != nil {

@@ -5,7 +5,6 @@ package scanners
 
 import (
 	"context"
-	"log"
 	"math"
 	"net/http"
 	"strings"
@@ -15,6 +14,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
+	"github.com/rs/zerolog/log"
 )
 
 // DiagnosticSettingsScanner - scanner for diagnostic settings
@@ -40,7 +40,7 @@ func (s *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 	resources := []string{}
 	res := map[string]bool{}
 
-	log.Print("Preflight: Scanning Resource Ids")
+	log.Info().Msg("Preflight: Scanning Resource Ids")
 	graphQuery := GraphQuery{}
 	result := graphQuery.Query(s.config.Ctx, s.config.Cred, "resources | project id", []*string{&s.config.SubscriptionID})
 	for _, row := range result.Data {
@@ -59,7 +59,7 @@ func (s *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 		close(ch)
 	}()
 
-	log.Printf("Preflight: Scanning Diagnostic Settings")
+	log.Info().Msg("Preflight: Scanning Diagnostic Settings")
 	// Split resources into batches of 20 items.
 	batch := 20
 	for i := 0; i < len(resources); i += batch {
@@ -71,7 +71,7 @@ func (s *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 			defer wg.Done()
 			resp, err := s.restCall(s.config.Ctx, r, s.config.Cred, s.config.ClientOptions)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			asyncRes := map[string]bool{}
 			for _, response := range resp.Responses {

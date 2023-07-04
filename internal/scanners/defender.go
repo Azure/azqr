@@ -4,7 +4,7 @@
 package scanners
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 	"strconv"
 	"strings"
 
@@ -57,12 +57,12 @@ func (s *DefenderScanner) Init(config *ScannerConfig) error {
 
 // ListConfiguration - Lists Microsoft Defender for Cloud pricing configurations in the subscription.
 func (s *DefenderScanner) ListConfiguration() ([]DefenderResult, error) {
-	log.Println("Scanning Defender Status...")
+	log.Info().Msg("Scanning Defender Status...")
 	if s.defenderFunc == nil {
 		resp, err := s.client.List(s.config.Ctx, nil)
 		if err != nil {
 			if strings.Contains(err.Error(), "ERROR CODE: Subscription Not Registered") {
-				log.Println("Subscription Not Registered for Defender. Skipping Defender Scan...")
+				log.Info().Msg("Subscription Not Registered for Defender. Skipping Defender Scan...")
 				return []DefenderResult{}, nil
 			}
 

@@ -4,7 +4,7 @@
 package sb
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
@@ -26,7 +26,7 @@ func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Service Bus in a Resource Group
 func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Service Bus in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning Service Bus in Resource Group %s", resourceGroupName)
 
 	servicebus, err := c.listServiceBus(resourceGroupName)
 	if err != nil {

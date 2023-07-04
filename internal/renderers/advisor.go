@@ -5,8 +5,8 @@ package renderers
 
 import (
 	_ "image/png"
-	"log"
 
+	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -14,7 +14,7 @@ func renderAdvisor(f *excelize.File, data ReportData) {
 	if len(data.AdvisorData) > 0 {
 		_, err := f.NewSheet("Advisor")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 
 		heathers := data.AdvisorData[0].GetProperties()
@@ -31,16 +31,16 @@ func renderAdvisor(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			err = f.SetSheetRow("Advisor", cell, &row)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 		}
 
 		configureSheet(f, "Advisor", heathers, currentRow)
 	} else {
-		log.Println("Skipping Advisor. No data to render")
+		log.Info().Msg("Skipping Advisor. No data to render")
 	}
 }

@@ -6,9 +6,9 @@ package renderers
 import (
 	"fmt"
 	_ "image/png"
-	"log"
 
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -16,7 +16,7 @@ func renderServices(f *excelize.File, data ReportData) {
 	if len(data.MainData) > 0 {
 		_, err := f.NewSheet("Services")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 
 		heathers := []string{"Subscription", "Resource Group", "Location", "Type", "Service Name", "Broken", "Category", "Subcategory", "Severity", "Description", "Result", "Learn"}
@@ -56,17 +56,17 @@ func renderServices(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			err = f.SetSheetRow("Services", cell, &row)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			setHyperLink(f, "Services", 12, currentRow)
 		}
 
 		configureSheet(f, "Services", heathers, currentRow)
 	} else {
-		log.Println("Skipping Services. No data to render")
+		log.Info().Msg("Skipping Services. No data to render")
 	}
 }

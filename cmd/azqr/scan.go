@@ -6,7 +6,6 @@ package azqr
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -35,6 +34,8 @@ import (
 	"github.com/Azure/azqr/internal/scanners/sql"
 	"github.com/Azure/azqr/internal/scanners/st"
 	"github.com/Azure/azqr/internal/scanners/wps"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -54,6 +55,8 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("costs", "c", false, "Scan Azure Costs")
 	scanCmd.PersistentFlags().StringP("output-prefix", "o", "azqr_report", "Output file prefix")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
+	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
+
 	rootCmd.AddCommand(scanCmd)
 }
 
@@ -103,9 +106,17 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
 	mask, _ := cmd.Flags().GetBool("mask")
+	debug, _ := cmd.Flags().GetBool("debug")
+
+	// Default level for this example is info, unless debug flag is present
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.Debug().Msg("Debug logging enabled")
+	}
 
 	if subscriptionID == "" && resourceGroupName != "" {
-		log.Fatal("Resource Group name can only be used with a Subscription Id")
+		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
 	}
 
 	current_time := time.Now()
@@ -117,7 +128,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 
 	ctx := context.Background()
@@ -138,7 +149,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	} else {
 		subs, err := listSubscriptions(ctx, cred, clientOptions)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 		for _, s := range subs {
 			subscriptions = append(subscriptions, *s.SubscriptionID)
@@ -164,17 +175,17 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		if resourceGroupName != "" {
 			exists, err := checkExistenceResourceGroup(ctx, s, resourceGroupName, cred, clientOptions)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 
 			if !exists {
-				log.Fatalf("Resource Group %s does not exist", resourceGroupName)
+				log.Fatal().Msgf("Resource Group %s does not exist", resourceGroupName)
 			}
 			resourceGroups = append(resourceGroups, resourceGroupName)
 		} else {
 			rgs, err := listResourceGroup(ctx, s, cred, clientOptions)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			for _, rg := range rgs {
 				resourceGroups = append(resourceGroups, *rg.Name)
@@ -190,20 +201,20 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 		err = peScanner.Init(config)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 		peResults, err := peScanner.ListResourcesWithPrivateEndpoints()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 
 		err = diagnosticsScanner.Init(config)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 		diagResults, err := diagnosticsScanner.ListResourcesWithDiagnosticSettings()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 
 		scanContext := scanners.ScanContext{
@@ -214,12 +225,12 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		for _, a := range serviceScanners {
 			err := a.Init(config)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 		}
 
 		for _, r := range resourceGroups {
-			log.Printf("Scanning Resource Group %s", r)
+			log.Info().Msgf("Scanning Resource Group %s", r)
 			var wg sync.WaitGroup
 			ch := make(chan []scanners.AzureServiceResult, 5)
 			wg.Add(len(serviceScanners))
@@ -236,7 +247,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 					res, err := retry(3, 10*time.Millisecond, s, r, &scanContext)
 					if err != nil {
 						cancel()
-						log.Fatal(err)
+						log.Fatal().Err(err)
 					}
 					ch <- res
 				}(r, s)
@@ -251,12 +262,12 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		if defender {
 			err = defenderScanner.Init(config)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 
 			res, err := defenderScanner.ListConfiguration()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			defenderResults = append(defenderResults, res...)
 		}
@@ -264,12 +275,12 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		if advisor {
 			err = advisorScanner.Init(config)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 
 			rec, err := advisorScanner.ListRecommendations()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			advisorResults = append(advisorResults, rec...)
 		}
@@ -277,11 +288,11 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		if cost {
 			err = costScanner.Init(config)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			costs, err := costScanner.QueryCosts()
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			if costResult == nil {
 				costResult = costs
@@ -305,7 +316,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	xslx := fmt.Sprintf("%s.xlsx", reportData.OutputFileName)
 	renderers.CreatePBIReport(xslx)
 
-	log.Println("Scan completed.")
+	log.Info().Msg("Scan completed.")
 }
 
 func retry(attempts int, sleep time.Duration, a scanners.IAzureScanner, r string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
@@ -319,14 +330,16 @@ func retry(attempts int, sleep time.Duration, a scanners.IAzureScanner, r string
 		errAsString := err.Error()
 
 		if strings.Contains(errAsString, "ERROR CODE: Subscription Not Registered") {
-			log.Println("Subscription Not Registered. Skipping Scan...")
+			log.Info().Msg("Subscription Not Registered. Skipping Scan...")
 			return []scanners.AzureServiceResult{}, nil
 		}
 
 		if i >= (attempts - 1) {
-			log.Printf("Retry limit reached. Error: %s", errAsString)
+			log.Info().Msgf("Retry limit reached. Error: %s", errAsString)
 			break
 		}
+
+		log.Debug().Msgf("Retrying after error: %s", errAsString)
 
 		time.Sleep(sleep)
 		sleep *= 2

@@ -6,8 +6,8 @@ package renderers
 import (
 	"fmt"
 	_ "image/png"
-	"log"
 
+	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -15,7 +15,7 @@ func renderCosts(f *excelize.File, data ReportData) {
 	if data.CostData != nil && len(data.CostData.Items) > 0 {
 		_, err := f.NewSheet("Costs")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 
 		heathers := data.CostData.GetProperties()
@@ -29,7 +29,7 @@ func renderCosts(f *excelize.File, data ReportData) {
 
 		cell, err := excelize.CoordinatesToCellName(2, 1)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 
 		err = f.SetCellDefault(
@@ -37,7 +37,7 @@ func renderCosts(f *excelize.File, data ReportData) {
 			cell,
 			fmt.Sprintf("Costs from %s to %s", data.CostData.From.Format("2006-01-02"), data.CostData.To.Format("2006-01-02")))
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 
 		currentRow := 4
@@ -45,16 +45,16 @@ func renderCosts(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			err = f.SetSheetRow("Costs", cell, &row)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 		}
 
 		configureSheet(f, "Costs", heathers, currentRow)
 	} else {
-		log.Println("Skipping Costs. No data to render")
+		log.Info().Msg("Skipping Costs. No data to render")
 	}
 }

@@ -4,7 +4,7 @@
 package evh
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
@@ -26,7 +26,7 @@ func (a *EventHubScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Event Hubs in a Resource Group
 func (c *EventHubScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Event Hubs in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning Event Hubs in Resource Group %s", resourceGroupName)
 
 	eventHubs, err := c.listEventHubs(resourceGroupName)
 	if err != nil {
