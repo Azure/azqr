@@ -10,7 +10,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
 
-// VirtualWanScanner - Scanner for WebPubSub
+// VirtualWanScanner - Scanner for VirtualWanScanner
 type VirtualWanScanner struct {
 	config *scanners.ScannerConfig
 	client *armnetwork.VirtualWansClient
@@ -24,7 +24,7 @@ func (c *VirtualWanScanner) Init(config *scanners.ScannerConfig) error {
 	return err
 }
 
-// Scan - Scans all WebPubSub in a Resource Group
+// Scan - Scans all VirtualWanScanner in a Resource Group
 func (c *VirtualWanScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
 	log.Info().Msgf("Scanning Virtual WAN in Resource Group %s", resourceGroupName)
 
