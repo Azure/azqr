@@ -17,7 +17,7 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "vwa-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "Virtual Wan should have diagnostic settings enabled",
+			Description: "Virtual WAN should have diagnostic settings enabled",
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armnetwork.VirtualWAN)
@@ -30,7 +30,7 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "vwa-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
-			Description: "Virtual Wan should have availability zones enabled",
+			Description: "Virtual WAN should have availability zones enabled",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, ""
@@ -41,7 +41,7 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "vwa-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
-			Description: "Virtual Wan should have a SLA",
+			Description: "Virtual WAN should have a SLA",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
@@ -52,7 +52,7 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "vwa-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
-			Description: "Virtual Wan Type",
+			Description: "Virtual WAN Type",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armnetwork.VirtualWAN)
@@ -64,7 +64,7 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "vwa-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "Virtual Wan Name should comply with naming conventions",
+			Description: "Virtual WAN Name should comply with naming conventions",
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualWAN)
@@ -77,7 +77,7 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "vwa-007",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "Virtual Wan should have tags",
+			Description: "Virtual WAN should have tags",
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualWAN)
