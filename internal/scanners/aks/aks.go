@@ -4,8 +4,7 @@
 package aks
 
 import (
-	"log"
-
+	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
 )
@@ -26,7 +25,7 @@ func (a *AKSScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all AKS Clusters in a Resource Group
 func (a *AKSScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning AKS Clusters in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning AKS Clusters in Resource Group %s", resourceGroupName)
 
 	clusters, err := a.listClusters(resourceGroupName)
 	if err != nil {

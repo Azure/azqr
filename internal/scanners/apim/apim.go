@@ -4,8 +4,7 @@
 package apim
 
 import (
-	"log"
-
+	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
@@ -26,7 +25,7 @@ func (a *APIManagementScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan -Scans all API Management Services in a Resource Group
 func (a *APIManagementScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning API Management Services in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning API Management Services in Resource Group %s", resourceGroupName)
 
 	services, err := a.listServices(resourceGroupName)
 	if err != nil {

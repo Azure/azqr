@@ -4,8 +4,7 @@
 package appcs
 
 import (
-	"log"
-
+	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
 )
@@ -26,7 +25,7 @@ func (a *AppConfigurationScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all App Configurations in a Resource Group
 func (a *AppConfigurationScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Container Apps in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning Container Apps in Resource Group %s", resourceGroupName)
 
 	apps, err := a.list(resourceGroupName)
 	if err != nil {

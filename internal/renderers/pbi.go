@@ -7,12 +7,12 @@ import (
 	"archive/zip"
 	"bytes"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/embeded"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
@@ -20,16 +20,16 @@ import (
 
 func CreatePBIReport(source string) {
 	if runtime.GOOS != "windows" {
-		log.Println("Skipping PowerBI report generation. Since it's only supported on Windows")
+		log.Info().Msg("Skipping PowerBI report generation. Since it's only supported on Windows")
 		return
 	}
 
 	if source == "" {
-		log.Fatal("Please specify the path to the Excel report file")
+		log.Fatal().Msg("Please specify the path to the Excel report file")
 	}
 
 	xlsx, err := filepath.Abs(source)
-	log.Printf("Generating Power BI dashboard template: %s.pbit", source)
+	log.Info().Msgf("Generating Power BI dashboard template: %s.pbit", source)
 	xlsx = strings.Replace(xlsx, "\\", "\\\\", -1)
 	if err != nil {
 		panic(err)

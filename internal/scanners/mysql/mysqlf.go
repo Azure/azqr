@@ -4,7 +4,7 @@
 package mysql
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
@@ -26,7 +26,7 @@ func (c *MySQLFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all MySQL in a Resource Group
 func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning MySQL in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning MySQL in Resource Group %s", resourceGroupName)
 
 	flexibles, err := c.listFlexiblePostgre(resourceGroupName)
 	if err != nil {

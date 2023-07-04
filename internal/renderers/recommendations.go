@@ -5,8 +5,8 @@ package renderers
 
 import (
 	_ "image/png"
-	"log"
 
+	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -14,7 +14,7 @@ func renderRecommendations(f *excelize.File, data ReportData) {
 	if len(data.MainData) > 0 {
 		_, err := f.NewSheet("Recommendations")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 
 		renderedRules := map[string]bool{}
@@ -46,11 +46,11 @@ func renderRecommendations(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			err = f.SetSheetRow("Recommendations", cell, &row)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 
 			setHyperLink(f, "Recommendations", 6, currentRow)
@@ -58,6 +58,6 @@ func renderRecommendations(f *excelize.File, data ReportData) {
 
 		configureSheet(f, "Recommendations", heathers, currentRow)
 	} else {
-		log.Println("Skipping Recommendations. No data to render")
+		log.Info().Msg("Skipping Recommendations. No data to render")
 	}
 }

@@ -4,8 +4,7 @@
 package agw
 
 import (
-	"log"
-
+	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
@@ -26,7 +25,7 @@ func (a *ApplicationGatewayScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Application Gateways in a Resource Group
 func (a *ApplicationGatewayScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Application Gateways in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning Application Gateways in Resource Group %s", resourceGroupName)
 
 	gateways, err := a.listGateways(resourceGroupName)
 	if err != nil {

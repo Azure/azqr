@@ -5,8 +5,8 @@ package renderers
 
 import (
 	_ "image/png"
-	"log"
 
+	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -14,7 +14,7 @@ func renderOverview(f *excelize.File, data ReportData) {
 	if len(data.MainData) > 0 {
 		err := f.SetSheetName("Sheet1", "Overview")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 
 		heathers := data.MainData[0].GetHeathers()
@@ -31,16 +31,16 @@ func renderOverview(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 			err = f.SetSheetRow("Overview", cell, &row)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 		}
 
 		configureSheet(f, "Overview", heathers, currentRow)
 	} else {
-		log.Println("Skipping Overview. No data to render")
+		log.Info().Msg("Skipping Overview. No data to render")
 	}
 }

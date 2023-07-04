@@ -4,7 +4,7 @@
 package sigr
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
@@ -26,7 +26,7 @@ func (c *SignalRScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all SignalR in a Resource Group
 func (c *SignalRScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning SignalR in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning SignalR in Resource Group %s", resourceGroupName)
 
 	signalr, err := c.listSignalR(resourceGroupName)
 	if err != nil {

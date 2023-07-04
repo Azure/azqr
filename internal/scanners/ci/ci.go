@@ -4,7 +4,7 @@
 package ci
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
@@ -26,7 +26,7 @@ func (c *ContainerInstanceScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Container Instances in a Resource Group
 func (c *ContainerInstanceScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Container Instances in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning Container Instances in Resource Group %s", resourceGroupName)
 
 	instances, err := c.listInstances(resourceGroupName)
 	if err != nil {

@@ -6,20 +6,20 @@ package renderers
 import (
 	"fmt"
 	_ "image/png"
-	"log"
 	"unicode/utf8"
 
 	"github.com/Azure/azqr/internal/embeded"
+	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
 func CreateExcelReport(data ReportData) {
 	filename := fmt.Sprintf("%s.xlsx", data.OutputFileName)
-	log.Printf("Generating Report: %s", filename)
+	log.Info().Msgf("Generating Report: %s", filename)
 	f := excelize.NewFile()
 	defer func() {
 		if err := f.Close(); err != nil {
-			log.Fatal(err)
+			log.Fatal().Err(err)
 		}
 	}()
 
@@ -31,7 +31,7 @@ func CreateExcelReport(data ReportData) {
 	renderCosts(f, data)
 
 	if err := f.SaveAs(filename); err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 }
 
@@ -74,20 +74,20 @@ func createFirstRow(f *excelize.File, sheet string, heathers []string) {
 	currentRow := 4
 	cell, err := excelize.CoordinatesToCellName(1, currentRow)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 	err = f.SetSheetRow(sheet, cell, &heathers)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 	font := excelize.Font{Bold: true}
 	style, err := f.NewStyle(&excelize.Style{Font: &font})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 	err = f.SetRowStyle(sheet, 4, 4, style)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 }
 
@@ -107,11 +107,11 @@ func configureSheet(f *excelize.File, sheet string, heathers []string, currentRo
 
 	cell, err := excelize.CoordinatesToCellName(len(heathers), currentRow)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 	err = f.AutoFilter(sheet, fmt.Sprintf("A4:%s", cell), nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 
 	logo := embeded.GetTemplates("microsoft.png")
@@ -121,6 +121,6 @@ func configureSheet(f *excelize.File, sheet string, heathers []string, currentRo
 		Positioning: "absolute",
 	}
 	if err := f.AddPictureFromBytes(sheet, "A1", "Azure Logo", ".png", logo, opt); err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 }

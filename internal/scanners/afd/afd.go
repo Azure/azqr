@@ -4,8 +4,7 @@
 package afd
 
 import (
-	"log"
-
+	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
 )
@@ -26,7 +25,7 @@ func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Front Doors in a Resource Group
 func (a *FrontDoorScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning Front Doors in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning Front Doors in Resource Group %s", resourceGroupName)
 
 	gateways, err := a.list(resourceGroupName)
 	if err != nil {

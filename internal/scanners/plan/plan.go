@@ -4,8 +4,9 @@
 package plan
 
 import (
-	"log"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
@@ -35,7 +36,7 @@ func (a *AppServiceScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all App Service Plans in a Resource Group
 func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Printf("Scanning App Service Plans in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning App Service Plans in Resource Group %s", resourceGroupName)
 
 	plan, err := a.listPlans(resourceGroupName)
 	if err != nil {
