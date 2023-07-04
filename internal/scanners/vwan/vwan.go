@@ -26,9 +26,9 @@ func (c *VirtualWanScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all WebPubSub in a Resource Group
 func (c *VirtualWanScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning WebPubSub in Resource Group %s", resourceGroupName)
+	log.Info().Msgf("Scanning Virtual WAN in Resource Group %s", resourceGroupName)
 
-	WebPubSub, err := c.list(resourceGroupName)
+	vwans, err := c.list(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (c *VirtualWanScanner) Scan(resourceGroupName string, scanContext *scanners
 	rules := c.GetRules()
 	results := []scanners.AzureServiceResult{}
 
-	for _, w := range WebPubSub {
+	for _, w := range vwans {
 		rr := engine.EvaluateRules(rules, w, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
@@ -54,13 +54,13 @@ func (c *VirtualWanScanner) Scan(resourceGroupName string, scanContext *scanners
 func (c *VirtualWanScanner) list(resourceGroupName string) ([]*armnetwork.VirtualWAN, error) {
 	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	vwas := make([]*armnetwork.VirtualWAN, 0)
+	vwans := make([]*armnetwork.VirtualWAN, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err
 		}
-		vwas = append(vwas, resp.Value...)
+		vwans = append(vwans, resp.Value...)
 	}
-	return vwas, nil
+	return vwans, nil
 }
