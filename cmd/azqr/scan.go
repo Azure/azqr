@@ -55,7 +55,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("costs", "c", false, "Scan Azure Costs")
 	scanCmd.PersistentFlags().StringP("output-prefix", "o", "azqr_report", "Output file prefix")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
-	scanCmd.PersistentFlags().BoolP("debug", "", true, "Set log level to debug")
+	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
 
 	rootCmd.AddCommand(scanCmd)
 }
