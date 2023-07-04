@@ -5,8 +5,8 @@ package azqr
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -207,7 +207,11 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		}
 		peResults, err := peScanner.ListResourcesWithPrivateEndpoints()
 		if err != nil {
-			log.Fatal().Err(err)
+			if shouldSkipError(err) {
+				peResults = map[string]bool{}
+			} else {
+				log.Fatal().Err(err)
+			}
 		}
 
 		err = diagnosticsScanner.Init(config)
@@ -216,7 +220,11 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		}
 		diagResults, err := diagnosticsScanner.ListResourcesWithDiagnosticSettings()
 		if err != nil {
-			log.Fatal().Err(err)
+			if shouldSkipError(err) {
+				diagResults = map[string]bool{}
+			} else {
+				log.Fatal().Err(err)
+			}
 		}
 
 		scanContext := scanners.ScanContext{
@@ -269,7 +277,11 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 			res, err := defenderScanner.ListConfiguration()
 			if err != nil {
-				log.Fatal().Err(err)
+				if shouldSkipError(err) {
+					res = []scanners.DefenderResult{}
+				} else {
+					log.Fatal().Err(err)
+				}
 			}
 			defenderResults = append(defenderResults, res...)
 		}
@@ -282,7 +294,11 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 			rec, err := advisorScanner.ListRecommendations()
 			if err != nil {
-				log.Fatal().Err(err)
+				if shouldSkipError(err) {
+					rec = []scanners.AdvisorResult{}
+				} else {
+					log.Fatal().Err(err)
+				}
 			}
 			advisorResults = append(advisorResults, rec...)
 		}
@@ -294,7 +310,13 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 			}
 			costs, err := costScanner.QueryCosts()
 			if err != nil {
-				log.Fatal().Err(err)
+				if shouldSkipError(err) {
+					costs = &scanners.CostResult{
+						Items: []*scanners.CostResultItem{},
+					}
+				} else {
+					log.Fatal().Err(err)
+				}
 			}
 			if costResult == nil {
 				costResult = costs
@@ -329,12 +351,11 @@ func retry(attempts int, sleep time.Duration, a scanners.IAzureScanner, r string
 			return res, nil
 		}
 
-		errAsString := err.Error()
-
-		if strings.Contains(errAsString, "ERROR CODE: Subscription Not Registered") {
-			log.Info().Msg("Subscription Not Registered. Skipping Scan...")
+		if shouldSkipError(err) {
 			return []scanners.AzureServiceResult{}, nil
 		}
+
+		errAsString := err.Error()
 
 		if i >= (attempts - 1) {
 			log.Info().Msgf("Retry limit reached. Error: %s", errAsString)
@@ -398,4 +419,16 @@ func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, options
 		subscriptions = append(subscriptions, pageResp.Value...)
 	}
 	return subscriptions, nil
+}
+
+func shouldSkipError(err error) bool {
+	var respErr *azcore.ResponseError
+	if errors.As(err, &respErr) {
+		switch respErr.ErrorCode {
+		case "MissingRegistrationForResourceProvider", "MissingSubscriptionRegistration", "DisallowedOperation":
+			log.Warn().Msgf("Subscription failed with code: %s. Skipping Scan...", respErr.ErrorCode)
+			return true
+		}
+	}
+	return false
 }
