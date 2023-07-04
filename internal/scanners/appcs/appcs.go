@@ -25,9 +25,9 @@ func (a *AppConfigurationScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all App Configurations in a Resource Group
 func (a *AppConfigurationScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Container Apps in Resource Group %s", resourceGroupName)
+	log.Printf("Scanning App Configuration Services in Resource Group %s", resourceGroupName)
 
-	apps, err := a.list(resourceGroupName)
+  apps, err := a.list(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
