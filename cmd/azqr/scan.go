@@ -35,6 +35,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/st"
 	"github.com/Azure/azqr/internal/scanners/wps"
 	"github.com/Azure/azqr/internal/scanners/lb"
+	"github.com/Azure/azqr/internal/scanners/vnet"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -94,6 +95,7 @@ var scanCmd = &cobra.Command{
 			&mysql.MySQLFlexibleScanner{},
 			&appi.AppInsightsScanner{},
 			&lb.LoadBalancerScanner{},
+			&vnet.VirtualNetworkScanner{},
 		}
 
 		scan(cmd, serviceScanners)

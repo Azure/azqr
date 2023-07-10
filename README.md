@@ -60,6 +60,7 @@ Azure Quick Review (azqr) recommendations are based on a set of rules. To learn 
 * Azure Application Insights
 * Azure Virtual WAN
 * Azure Load Balancer
+* Azure Vitual Network
 
 ## Microsoft Defender Status
 

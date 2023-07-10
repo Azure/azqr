@@ -31,6 +31,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/sigr"
 	"github.com/Azure/azqr/internal/scanners/sql"
 	"github.com/Azure/azqr/internal/scanners/st"
+	"github.com/Azure/azqr/internal/scanners/vnet"
 	"github.com/Azure/azqr/internal/scanners/vwan"
 	"github.com/Azure/azqr/internal/scanners/wps"
 	"github.com/spf13/cobra"
@@ -74,6 +75,7 @@ var rulesCmd = &cobra.Command{
 			&appi.AppInsightsScanner{},
 			&vwan.VirtualWanScanner{},
 			&lb.LoadBalancerScanner{},
+			&vnet.VirtualNetworkScanner{},
 		}
 
 		fmt.Println("#  | Id | Category | Subcategory | Name | Severity | More Info")
