@@ -34,6 +34,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/vnet"
 	"github.com/Azure/azqr/internal/scanners/vwan"
 	"github.com/Azure/azqr/internal/scanners/wps"
+	"github.com/Azure/azqr/internal/scanners/vm"
 	"github.com/spf13/cobra"
 )
 
@@ -76,6 +77,7 @@ var rulesCmd = &cobra.Command{
 			&vwan.VirtualWanScanner{},
 			&lb.LoadBalancerScanner{},
 			&vnet.VirtualNetworkScanner{},
+			&vm.VirtualMachineScanner{},
 		}
 
 		fmt.Println("#  | Id | Category | Subcategory | Name | Severity | More Info")
