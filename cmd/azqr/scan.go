@@ -25,6 +25,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/evgd"
 	"github.com/Azure/azqr/internal/scanners/evh"
 	"github.com/Azure/azqr/internal/scanners/kv"
+	"github.com/Azure/azqr/internal/scanners/lb"
 	"github.com/Azure/azqr/internal/scanners/mysql"
 	"github.com/Azure/azqr/internal/scanners/plan"
 	"github.com/Azure/azqr/internal/scanners/psql"
@@ -33,9 +34,9 @@ import (
 	"github.com/Azure/azqr/internal/scanners/sigr"
 	"github.com/Azure/azqr/internal/scanners/sql"
 	"github.com/Azure/azqr/internal/scanners/st"
-	"github.com/Azure/azqr/internal/scanners/wps"
-	"github.com/Azure/azqr/internal/scanners/lb"
+	"github.com/Azure/azqr/internal/scanners/vm"
 	"github.com/Azure/azqr/internal/scanners/vnet"
+	"github.com/Azure/azqr/internal/scanners/wps"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -96,8 +97,8 @@ var scanCmd = &cobra.Command{
 			&appi.AppInsightsScanner{},
 			&lb.LoadBalancerScanner{},
 			&vnet.VirtualNetworkScanner{},
+			&vm.VirtualMachineScanner{},
 		}
-
 		scan(cmd, serviceScanners)
 	},
 }
