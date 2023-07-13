@@ -280,6 +280,11 @@ jobs:
     if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
