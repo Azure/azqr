@@ -13,17 +13,17 @@ Azure Quick Review (azqr) creates an excel spreadsheet with the following sectio
 
 The overview section contains the following information:
 
-* Subscription Id
-* Resource Group name
-* Location
-* Resource Type
-* Resource Name
-* SKU
-* SLA: SLA for the service given the current configuration.
-* AZ: True if the service is Availability Zone aware.
-* PVT: True if the service has a private IP address. 
-* DS: True if the service has diagnotic settings enabled.
-* CAF: True if the service is compliant with the [Cloud Adoption Framework](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/) naming covention.
+* **SubscriptionID**: This is the unique identifier for the Azure subscription under which the resource is deployed.
+* **ResourceGroup**: The resource group where the resource is deployed.
+* **Location**: The geographical region where the resource is deployed.
+* **Type**: The specific type or category of the Azure resource.
+* **Name**: The name assigned to the resource, providing a human-readable identifier for easy reference and management.
+* **SKU**: The SKU represents the specific variant or configuration of the Azure resource. It defines the characteristics and capabilities of the resource.
+* **SLA**: The Service Level Agreement (SLA) represents the agreed-upon performance and availability guarantees for the Azure service based on its current configuration.
+* **AZ**: A Boolean value indicating whether the service is "Availability Zone aware." Availability Zones are physically separate datacenters within an Azure region, providing increased resiliency and fault tolerance for critical services.
+* **PVT**: A Boolean value indicating whether the service has a private IP address. Private IP addresses are used for internal communication within Azure Virtual Networks.
+* **DS**: A Boolean value indicating whether diagnostic settings are enabled for the service. Diagnostic settings allow you to collect logs, metrics, and other monitoring data for Azure resources.
+* **CAF**: A Boolean value indicating whether the service is compliant with the [Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations) (CAF) naming convention. The CAF provides best practices and guidance for organizations adopting Azure.
 
 ![overview](img/overview.png)
 
@@ -31,12 +31,12 @@ The overview section contains the following information:
 
 The recommendations section contains a summary of the recommendations for the scanned services:
 
-* Rule Id
-* Category: Rule category 
-* Subcategory: Rule subcategory
-* Description: Rule description
-* Severity: Rule severity
-* Learn: Link to relevant documentation
+* **Id**: The unique identifier for the rule.
+* **Category**: The category of the rule.
+* **Subcategory**: The subcategory of the rule.
+* **Description**: The description of the rule.
+* **Severity**: The severity of the rule (High, Medium, Low).
+* **Learn**: Link to relevant documentation.
 
 ![recommendations](img/recommendations.png)
 
@@ -44,18 +44,18 @@ The recommendations section contains a summary of the recommendations for the sc
 
 The services section contains the following information:
 
-* Subscription: Subscription Id
-* Resource Group: Resource Group name
-* Location
-* Type: Resource type
-* Service Name 
-* Category: Rule category 
-* Subcategory: Rule subcategory
-* Severity: Rule severity
-* Description: Rule description
-* Result: Rule result
-* Broken: True if the rule is broken 
-* Learn: Link to relevant documentation
+* **Subscription**: This is the unique identifier for the Azure subscription under which the resource is deployed.
+* **Resource Group**: The resource group where the resource is deployed. 
+* **Location**: The geographical region where the resource is deployed.
+* **Type**: The specific type or category of the Azure resource.
+* **Service Name**: The name assigned to the resource.
+* **Category**: The category of the rule.
+* **Subcategory**: The subcategory of the rule.
+* **Severity**: The severity of the rule (High, Medium, Low).
+* **Description**: The description of the rule.
+* **Result**: The result of the rule evaluation.
+* **Broken**: True if the rule is broken.
+* **Learn**: Link to relevant documentation.
 
 ![services](img/services.png)
 
@@ -63,9 +63,9 @@ The services section contains the following information:
 
 The defender section contains the following information:
 
-* Name: Microsoft Defender for Cloud plan name.
-* Tier
-* Deprecated: True if the plan is deprecated.
+* **Name**: Microsoft Defender for Cloud plan name.
+* **Tier**: The tier of the plan.
+* **Deprecated**: True if the plan is deprecated.
 
 ![defender](img/defender.png)
 
@@ -73,15 +73,15 @@ The defender section contains the following information:
 
 This section shows the Azure Advisor Recommendations with the following information:
 
-* Subscription Id
-* Name
-* Type
-* Category
-* Description
-* PotentialBenefits
-* Risk
-* LearnMoreLink
+* **Subscription Id**: This is the unique identifier for the Azure subscription under which the resource is deployed.
+* **Name**: The name of the resource identified by Advisor.
+* **Type**: The resource type of the resource identified by Advisor.
+* **Category**: The category of the recommendation.
+* **Description**: The description of the recommendation.
+* **PotentialBenefits**: The potential benefits of the recommendation.
+* **Risk**: Risk related to the recommendation.
+* **LearnMoreLink** Link to relevant documentation.
 
 ## Costs
 
-Shows the Azure Costs for the period between the 1st day of the previous month and the day Azure Quick Review (azqr) is used to scan the services.
+Shows the Azure Costs for the period between the 1st day of the previous month and the day **Azure Quick Review (azqr)** is used to scan the services.
