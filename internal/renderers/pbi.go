@@ -12,8 +12,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/embeded"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -27,13 +27,15 @@ func CreatePBIReport(source string) {
 	if source == "" {
 		log.Fatal().Msg("Please specify the path to the Excel report file")
 	}
-
+	
+	fileName := strings.Replace(source, ".xlsx", "", -1)
+	log.Info().Msgf("Generating Power BI dashboard template: %s.pbit", fileName)	
+	
 	xlsx, err := filepath.Abs(source)
-	log.Info().Msgf("Generating Power BI dashboard template: %s.pbit", source)
-	xlsx = strings.Replace(xlsx, "\\", "\\\\", -1)
 	if err != nil {
 		panic(err)
 	}
+	xlsx = strings.Replace(xlsx, "\\", "\\\\", -1)
 
 	azqrPath := ".azqr"
 	if _, err := os.Stat(azqrPath); err == nil {
