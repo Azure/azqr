@@ -17,6 +17,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/appi"
 	"github.com/Azure/azqr/internal/scanners/cae"
 	"github.com/Azure/azqr/internal/scanners/ci"
+	"github.com/Azure/azqr/internal/scanners/cog"
 	"github.com/Azure/azqr/internal/scanners/cosmos"
 	"github.com/Azure/azqr/internal/scanners/cr"
 	"github.com/Azure/azqr/internal/scanners/evgd"
@@ -78,6 +79,7 @@ var rulesCmd = &cobra.Command{
 			&lb.LoadBalancerScanner{},
 			&vnet.VirtualNetworkScanner{},
 			&vm.VirtualMachineScanner{},
+			&cog.CognitiveScanner{},
 		}
 
 		fmt.Println("#  | Id | Category | Subcategory | Name | Severity | More Info")
