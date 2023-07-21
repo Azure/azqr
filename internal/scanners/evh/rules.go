@@ -114,7 +114,8 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventhub.EHNamespace)
-				return c.Properties.DisableLocalAuth != nil && !*c.Properties.DisableLocalAuth, ""
+				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
+				return !localAuth, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/authorize-access-event-hubs#shared-access-signatures",
 		},

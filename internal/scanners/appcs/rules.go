@@ -103,7 +103,8 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappconfiguration.ConfigurationStore)
-				return c.Properties.DisableLocalAuth != nil && !*c.Properties.DisableLocalAuth, ""
+				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
+				return !localAuth, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/howto-disable-access-key-authentication?tabs=portal#disable-access-key-authentication",
 		},

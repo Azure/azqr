@@ -107,6 +107,36 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "CognitiveScanner DisableLocalAuth nil",
+			fields: fields{
+				rule: "cog-008",
+				target: &armcognitiveservices.Account{
+					Properties: &armcognitiveservices.AccountProperties{},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner DisableLocalAuth true",
+			fields: fields{
+				rule: "cog-008",
+				target: &armcognitiveservices.Account{
+					Properties: &armcognitiveservices.AccountProperties{
+						DisableLocalAuth: to.BoolPtr(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

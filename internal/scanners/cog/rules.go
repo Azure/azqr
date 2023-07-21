@@ -87,5 +87,18 @@ func (a *CognitiveScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"cog-008": {
+			Id:          "cog-008",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityIdentity,
+			Description: "Cognitive Service Account should have local authentication disabled",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcognitiveservices.Account)
+				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
+				return !localAuth, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/ai-services/policy-reference#azure-ai-services",
+		},
 	}
 }
