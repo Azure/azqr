@@ -115,7 +115,8 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
-				return c.Properties.DisableLocalAuth != nil && !*c.Properties.DisableLocalAuth, ""
+				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
+				return !localAuth, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas",
 		},
