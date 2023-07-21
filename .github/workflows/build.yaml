@@ -149,14 +149,25 @@ jobs:
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Create changelog text
+        id: changelog
+        uses: loopwerk/tag-changelog@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          exclude_types: chore
+
       - name: release
         uses: actions/create-release@v1
         id: create_release
         with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ env.MINVERVERSIONOVERRIDE }}
+          body: ${{ steps.changelog.outputs.changes }}
           draft: false
           prerelease: false
-          release_name: ${{ env.MINVERVERSIONOVERRIDE }}
-          tag_name: ${{ github.ref }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
