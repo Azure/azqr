@@ -17,14 +17,14 @@ func renderAdvisor(f *excelize.File, data ReportData) {
 			log.Fatal().Err(err)
 		}
 
-		heathers := data.AdvisorData[0].GetProperties()
+		headers := data.AdvisorData[0].GetProperties()
 
 		rows := [][]string{}
 		for _, r := range data.AdvisorData {
-			rows = append(mapToRow(heathers, r.ToMap(data.Mask)), rows...)
+			rows = append(mapToRow(headers, r.ToMap(data.Mask)), rows...)
 		}
 
-		createFirstRow(f, "Advisor", heathers)
+		createFirstRow(f, "Advisor", headers)
 
 		currentRow := 4
 		for _, row := range rows {
@@ -39,7 +39,7 @@ func renderAdvisor(f *excelize.File, data ReportData) {
 			}
 		}
 
-		configureSheet(f, "Advisor", heathers, currentRow)
+		configureSheet(f, "Advisor", headers, currentRow)
 	} else {
 		log.Info().Msg("Skipping Advisor. No data to render")
 	}

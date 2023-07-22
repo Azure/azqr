@@ -19,7 +19,7 @@ func renderServices(f *excelize.File, data ReportData) {
 			log.Fatal().Err(err)
 		}
 
-		heathers := []string{"Subscription", "Resource Group", "Location", "Type", "Service Name", "Broken", "Category", "Subcategory", "Severity", "Description", "Result", "Learn"}
+		headers := []string{"Subscription", "Resource Group", "Location", "Type", "Service Name", "Broken", "Category", "Subcategory", "Severity", "Description", "Result", "Learn"}
 
 		rbroken := [][]string{}
 		rok := [][]string{}
@@ -47,7 +47,7 @@ func renderServices(f *excelize.File, data ReportData) {
 			}
 		}
 
-		createFirstRow(f, "Services", heathers)
+		createFirstRow(f, "Services", headers)
 
 		rows := append(rbroken, rok...)
 
@@ -65,7 +65,7 @@ func renderServices(f *excelize.File, data ReportData) {
 			setHyperLink(f, "Services", 12, currentRow)
 		}
 
-		configureSheet(f, "Services", heathers, currentRow)
+		configureSheet(f, "Services", headers, currentRow)
 	} else {
 		log.Info().Msg("Skipping Services. No data to render")
 	}

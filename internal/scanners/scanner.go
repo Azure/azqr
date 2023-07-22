@@ -151,8 +151,8 @@ func (r AzureServiceResult) GetResourceType() string {
 	return r.Type
 }
 
-// GetHeathers - Returns the headers of the Azure Service Result
-func (r AzureServiceResult) GetHeathers() []string {
+// GetHeaders - Returns the headers of the Azure Service Result
+func (r AzureServiceResult) GetHeaders() []string {
 	return []string{
 		"SubscriptionID",
 		"ResourceGroup",

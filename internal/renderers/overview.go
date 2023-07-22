@@ -17,14 +17,14 @@ func renderOverview(f *excelize.File, data ReportData) {
 			log.Fatal().Err(err)
 		}
 
-		heathers := data.MainData[0].GetHeathers()
+		headers := data.MainData[0].GetHeaders()
 
 		rows := [][]string{}
 		for _, r := range data.MainData {
-			rows = append(mapToRow(heathers, r.ToMap(data.Mask)), rows...)
+			rows = append(mapToRow(headers, r.ToMap(data.Mask)), rows...)
 		}
 
-		createFirstRow(f, "Overview", heathers)
+		createFirstRow(f, "Overview", headers)
 
 		currentRow := 4
 		for _, row := range rows {
@@ -39,7 +39,7 @@ func renderOverview(f *excelize.File, data ReportData) {
 			}
 		}
 
-		configureSheet(f, "Overview", heathers, currentRow)
+		configureSheet(f, "Overview", headers, currentRow)
 	} else {
 		log.Info().Msg("Skipping Overview. No data to render")
 	}

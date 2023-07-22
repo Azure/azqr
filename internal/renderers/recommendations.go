@@ -19,7 +19,7 @@ func renderRecommendations(f *excelize.File, data ReportData) {
 
 		renderedRules := map[string]bool{}
 
-		heathers := []string{"Id", "Category", "Subcategory", "Description", "Severity", "Learn"}
+		headers := []string{"Id", "Category", "Subcategory", "Description", "Severity", "Learn"}
 		rows := [][]string{}
 		for _, result := range data.MainData {
 			for _, rr := range result.Rules {
@@ -34,12 +34,12 @@ func renderRecommendations(f *excelize.File, data ReportData) {
 						"Learn":       rr.Learn,
 					}
 					renderedRules[rr.Id] = true
-					rows = append(rows, mapToRow(heathers, rulesToRender)...)
+					rows = append(rows, mapToRow(headers, rulesToRender)...)
 				}
 			}
 		}
 
-		createFirstRow(f, "Recommendations", heathers)
+		createFirstRow(f, "Recommendations", headers)
 
 		currentRow := 4
 		for _, row := range rows {
@@ -56,7 +56,7 @@ func renderRecommendations(f *excelize.File, data ReportData) {
 			setHyperLink(f, "Recommendations", 6, currentRow)
 		}
 
-		configureSheet(f, "Recommendations", heathers, currentRow)
+		configureSheet(f, "Recommendations", headers, currentRow)
 	} else {
 		log.Info().Msg("Skipping Recommendations. No data to render")
 	}

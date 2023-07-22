@@ -18,14 +18,14 @@ func renderCosts(f *excelize.File, data ReportData) {
 			log.Fatal().Err(err)
 		}
 
-		heathers := data.CostData.GetProperties()
+		headers := data.CostData.GetProperties()
 
 		rows := [][]string{}
 		for _, r := range data.CostData.Items {
-			rows = append(mapToRow(heathers, r.ToMap(data.Mask)), rows...)
+			rows = append(mapToRow(headers, r.ToMap(data.Mask)), rows...)
 		}
 
-		createFirstRow(f, "Costs", heathers)
+		createFirstRow(f, "Costs", headers)
 
 		cell, err := excelize.CoordinatesToCellName(2, 1)
 		if err != nil {
@@ -53,7 +53,7 @@ func renderCosts(f *excelize.File, data ReportData) {
 			}
 		}
 
-		configureSheet(f, "Costs", heathers, currentRow)
+		configureSheet(f, "Costs", headers, currentRow)
 	} else {
 		log.Info().Msg("Skipping Costs. No data to render")
 	}
