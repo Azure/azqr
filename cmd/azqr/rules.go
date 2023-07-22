@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/scanners/adx"
 	"github.com/Azure/azqr/internal/scanners/afd"
 	"github.com/Azure/azqr/internal/scanners/afw"
 	"github.com/Azure/azqr/internal/scanners/agw"
@@ -32,10 +33,10 @@ import (
 	"github.com/Azure/azqr/internal/scanners/sigr"
 	"github.com/Azure/azqr/internal/scanners/sql"
 	"github.com/Azure/azqr/internal/scanners/st"
+	"github.com/Azure/azqr/internal/scanners/vm"
 	"github.com/Azure/azqr/internal/scanners/vnet"
 	"github.com/Azure/azqr/internal/scanners/vwan"
 	"github.com/Azure/azqr/internal/scanners/wps"
-	"github.com/Azure/azqr/internal/scanners/vm"
 	"github.com/spf13/cobra"
 )
 
@@ -50,6 +51,7 @@ var rulesCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
+			&adx.DataExplorerScanner{},
 			&aks.AKSScanner{},
 			&apim.APIManagementScanner{},
 			&agw.ApplicationGatewayScanner{},

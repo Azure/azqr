@@ -60,23 +60,23 @@ func autofit(f *excelize.File, sheetName string) error {
 	return nil
 }
 
-func mapToRow(heathers []string, m map[string]string) [][]string {
+func mapToRow(headers []string, m map[string]string) [][]string {
 	v := make([]string, 0, len(m))
 
-	for _, k := range heathers {
+	for _, k := range headers {
 		v = append(v, m[k])
 	}
 
 	return [][]string{v}
 }
 
-func createFirstRow(f *excelize.File, sheet string, heathers []string) {
+func createFirstRow(f *excelize.File, sheet string, headers []string) {
 	currentRow := 4
 	cell, err := excelize.CoordinatesToCellName(1, currentRow)
 	if err != nil {
 		log.Fatal().Err(err)
 	}
-	err = f.SetSheetRow(sheet, cell, &heathers)
+	err = f.SetSheetRow(sheet, cell, &headers)
 	if err != nil {
 		log.Fatal().Err(err)
 	}
@@ -102,10 +102,10 @@ func setHyperLink(f *excelize.File, sheet string, col, currentRow int) {
 	}
 }
 
-func configureSheet(f *excelize.File, sheet string, heathers []string, currentRow int) {
+func configureSheet(f *excelize.File, sheet string, headers []string, currentRow int) {
 	_ = autofit(f, sheet)
 
-	cell, err := excelize.CoordinatesToCellName(len(heathers), currentRow)
+	cell, err := excelize.CoordinatesToCellName(len(headers), currentRow)
 	if err != nil {
 		log.Fatal().Err(err)
 	}
