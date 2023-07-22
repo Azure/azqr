@@ -40,37 +40,38 @@ To learn more about the rules used by **Azure Quick Review (azqr)** for generati
 
 **Azure Quick Review (azqr)** currently supports the following Azure services:
 
+* Azure API Management
+* Azure App Configuration
 * Azure App Services
-* Azure Functions
+* Azure Application Gateway
+* Azure Application Insights
+* Azure Cache for Redis
+* Azure Cognitive Services Account
 * Azure Container Apps
-* Azure Kubernetes Service
 * Azure Container Instances
 * Azure Container Registry
-* Azure API Management
-* Azure Event Hub
-* Azure Service Bus
-* Azure Event Grid
-* Azure SignalR Service
-* Azure Web PubSub
-* Azure Cache for Redis
 * Azure Cosmos DB
-* Azure Database for PostgreSQL Single Server
-* Azure Database for PostgreSQL Flexible Server
-* Azure Database for MySQL Single Server
+* Azure Data Explorer
 * Azure Database for MySQL Flexible Server
-* Azure SQL Database
-* Azure Key Vault
-* Azure App Configuration
-* Azure Application Gateway
-* Azure Front Door
-* Azure Storage Account
+* Azure Database for MySQL Single Server
+* Azure Database for PostgreSQL Flexible Server
+* Azure Database for PostgreSQL Single Server
+* Azure Event Grid
+* Azure Event Hub
 * Azure Firewall
-* Azure Application Insights
-* Azure Virtual WAN
+* Azure Front Door
+* Azure Functions
+* Azure Key Vault
+* Azure Kubernetes Service
 * Azure Load Balancer
-* Azure Virtual Network
+* Azure Service Bus
+* Azure SignalR Service
+* Azure SQL Database
+* Azure Storage Account
 * Azure Virtual Machine
-* Azure Cognitive Services Account
+* Azure Virtual Network
+* Azure Virtual WAN
+* Azure Web PubSub
 
 ## Usage
 
