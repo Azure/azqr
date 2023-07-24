@@ -35,7 +35,6 @@ import (
 	"github.com/Azure/azqr/internal/scanners/st"
 	"github.com/Azure/azqr/internal/scanners/vm"
 	"github.com/Azure/azqr/internal/scanners/vnet"
-	"github.com/Azure/azqr/internal/scanners/vwan"
 	"github.com/Azure/azqr/internal/scanners/wps"
 	"github.com/spf13/cobra"
 )
@@ -52,37 +51,35 @@ var rulesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
 			&adx.DataExplorerScanner{},
+			&afd.FrontDoorScanner{},
+			&afw.FirewallScanner{},
+			&agw.ApplicationGatewayScanner{},
 			&aks.AKSScanner{},
 			&apim.APIManagementScanner{},
-			&agw.ApplicationGatewayScanner{},
+			&appcs.AppConfigurationScanner{},
+			&appi.AppInsightsScanner{},
 			&cae.ContainerAppsScanner{},
 			&ci.ContainerInstanceScanner{},
+			&cog.CognitiveScanner{},
 			&cosmos.CosmosDBScanner{},
 			&cr.ContainerRegistryScanner{},
-			&evh.EventHubScanner{},
 			&evgd.EventGridScanner{},
+			&evh.EventHubScanner{},
 			&kv.KeyVaultScanner{},
-			&appcs.AppConfigurationScanner{},
+			&lb.LoadBalancerScanner{},
+			&mysql.MySQLFlexibleScanner{},
+			&mysql.MySQLScanner{},
 			&plan.AppServiceScanner{},
+			&psql.PostgreFlexibleScanner{},
+			&psql.PostgreScanner{},
 			&redis.RedisScanner{},
 			&sb.ServiceBusScanner{},
 			&sigr.SignalRScanner{},
-			&wps.WebPubSubScanner{},
-			&st.StorageScanner{},
-			&psql.PostgreScanner{},
-			&psql.PostgreFlexibleScanner{},
 			&sql.SQLScanner{},
-			&afd.FrontDoorScanner{},
-			&afw.FirewallScanner{},
-			&mysql.MySQLScanner{},
-			&mysql.MySQLFlexibleScanner{},
-			&appi.AppInsightsScanner{},
-			&vwan.VirtualWanScanner{},
-			&lb.LoadBalancerScanner{},
-			&vnet.VirtualNetworkScanner{},
+			&st.StorageScanner{},
 			&vm.VirtualMachineScanner{},
-			&cog.CognitiveScanner{},
-			&adx.DataExplorerScanner{},
+			&vnet.VirtualNetworkScanner{},
+			&wps.WebPubSubScanner{},
 		}
 
 		fmt.Println("#  | Id | Category | Subcategory | Name | Severity | More Info")
