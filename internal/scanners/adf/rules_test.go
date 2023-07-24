@@ -31,7 +31,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			name: "DataFactoryScanner DiagnosticSettings",
 			fields: fields{
 				rule: "DiagnosticSettings",
-				target: &armdatafactory.Cluster{
+				target: &armdatafactory.Factory{
 					ID: to.StringPtr("test"),
 				},
 				scanContext: &scanners.ScanContext{
@@ -49,7 +49,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			name: "DataFactoryScanner SLA",
 			fields: fields{
 				rule:        "SLA",
-				target:      &armdatafactory.Cluster{},
+				target:      &armdatafactory.Factory{},
 				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
@@ -61,7 +61,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			name: "DataFactoryScanner CAF",
 			fields: fields{
 				rule: "CAF",
-				target: &armdatafactory.Cluster{
+				target: &armdatafactory.Factory{
 					Name: to.StringPtr("dec-test"),
 				},
 				scanContext: &scanners.ScanContext{},
