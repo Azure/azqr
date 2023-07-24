@@ -5,22 +5,22 @@ package azqr
 
 import (
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azqr/internal/scanners/adx"
+	"github.com/Azure/azqr/internal/scanners/dec"
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	scanCmd.AddCommand(adxCmd)
+	scanCmd.AddCommand(decCmd)
 }
 
-var adxCmd = &cobra.Command{
-	Use:   "adx",
+var decCmd = &cobra.Command{
+	Use:   "dec",
 	Short: "Scan Azure Data Explorer",
 	Long:  "Scan Azure Data Explorer",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
-			&adx.DataExplorerScanner{},
+			&dec.DataExplorerScanner{},
 		}
 
 		scan(cmd, serviceScanners)

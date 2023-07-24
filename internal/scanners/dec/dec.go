@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package adx
+package dec
 
 import (
 	"github.com/Azure/azqr/internal/scanners"

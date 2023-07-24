@@ -8,7 +8,6 @@ import (
 	"sort"
 
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azqr/internal/scanners/adx"
 	"github.com/Azure/azqr/internal/scanners/afd"
 	"github.com/Azure/azqr/internal/scanners/afw"
 	"github.com/Azure/azqr/internal/scanners/agw"
@@ -21,6 +20,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/cog"
 	"github.com/Azure/azqr/internal/scanners/cosmos"
 	"github.com/Azure/azqr/internal/scanners/cr"
+	"github.com/Azure/azqr/internal/scanners/dec"
 	"github.com/Azure/azqr/internal/scanners/evgd"
 	"github.com/Azure/azqr/internal/scanners/evh"
 	"github.com/Azure/azqr/internal/scanners/kv"
@@ -50,7 +50,6 @@ var rulesCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
-			&adx.DataExplorerScanner{},
 			&afd.FrontDoorScanner{},
 			&afw.FirewallScanner{},
 			&agw.ApplicationGatewayScanner{},
@@ -63,6 +62,7 @@ var rulesCmd = &cobra.Command{
 			&cog.CognitiveScanner{},
 			&cosmos.CosmosDBScanner{},
 			&cr.ContainerRegistryScanner{},
+			&dec.DataExplorerScanner{},
 			&evgd.EventGridScanner{},
 			&evh.EventHubScanner{},
 			&kv.KeyVaultScanner{},
