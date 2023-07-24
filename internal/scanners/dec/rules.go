@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package adx
+package dec
 
 import (
 	"strings"
@@ -14,7 +14,7 @@ import (
 func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"DiagnosticSettings": {
-			Id:          "adx-001",
+			Id:          "dec-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Azure Data Explorer should have diagnostic settings enabled",
@@ -27,7 +27,7 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
 		},
 		"SLA": {
-			Id:          "adx-002",
+			Id:          "dec-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Azure Data Explorer SLA",
@@ -38,7 +38,7 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"SKU": {
-			Id:          "adx-003",
+			Id:          "dec-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Azure Data Explorer SKU",
@@ -50,7 +50,7 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku",
 		},
 		"CAF": {
-			Id:          "adx-004",
+			Id:          "dec-004",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Azure Data Explorer Name should comply with naming conventions",
@@ -62,8 +62,8 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
-		"adx-007": {
-			Id:          "adx-005",
+		"dec-007": {
+			Id:          "dec-005",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Azure Data Explorer should have tags",
