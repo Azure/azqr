@@ -43,6 +43,12 @@ func (s *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 	log.Info().Msg("Preflight: Scanning Resource Ids")
 	graphQuery := GraphQuery{}
 	result := graphQuery.Query(s.config.Ctx, s.config.Cred, "resources | project id", []*string{&s.config.SubscriptionID})
+
+	if result == nil || result.Data == nil {
+		log.Info().Msg("Preflight: No resources found")
+		return res, nil
+	}
+
 	for _, row := range result.Data {
 		m := row.(map[string]interface{})
 		resources = append(resources, strings.ToLower(m["id"].(string)))
