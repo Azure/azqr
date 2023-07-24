@@ -82,6 +82,7 @@ var rulesCmd = &cobra.Command{
 			&vnet.VirtualNetworkScanner{},
 			&vm.VirtualMachineScanner{},
 			&cog.CognitiveScanner{},
+			&adx.DataExplorerScanner{},
 		}
 
 		fmt.Println("#  | Id | Category | Subcategory | Name | Severity | More Info")
