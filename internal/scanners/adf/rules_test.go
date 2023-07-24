@@ -62,7 +62,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armdatafactory.Factory{
-					Name: to.StringPtr("dec-test"),
+					Name: to.StringPtr("adf-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
