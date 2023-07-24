@@ -169,7 +169,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.ApplicationGateway)
-				return c.Tags == nil || len(c.Tags) == 0, ""
+				return len(c.Tags) == 0, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
