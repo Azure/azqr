@@ -102,6 +102,7 @@ var scanCmd = &cobra.Command{
 			&vnet.VirtualNetworkScanner{},
 			&vm.VirtualMachineScanner{},
 			&cog.CognitiveScanner{},
+			&adx.DataExplorerScanner{},
 		}
 		scan(cmd, serviceScanners)
 	},
