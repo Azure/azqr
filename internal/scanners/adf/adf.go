@@ -11,15 +11,15 @@ import (
 
 // DataFactoryScanner - Scanner for Data Factory
 type DataFactoryScanner struct {
-	config *scanners.ScannerConfig
-	client *armdatafactory.FactoriesClient
+	config          *scanners.ScannerConfig
+	factoriesClient *armdatafactory.FactoriesClient
 }
 
 // Init - Initializes the FrontDoor Scanner
 func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.client, err = armdatafactory.NewFactoriesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
+	a.factoriesClient, err = armdatafactory.NewFactoriesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
 	return err
 }
 
@@ -51,7 +51,7 @@ func (a *DataFactoryScanner) Scan(resourceGroupName string, scanContext *scanner
 }
 
 func (a *DataFactoryScanner) listFactories(resourceGroupName string) ([]*armdatafactory.Factory, error) {
-	pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
+	pager := a.factoriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
 	factories := make([]*armdatafactory.Factory, 0)
 	for pager.More() {

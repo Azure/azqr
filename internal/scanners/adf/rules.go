@@ -26,8 +26,20 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
 		},
-		"SLA": {
+		"Private": {
 			Id:          "adf-002",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
+			Description: "Azure Data Factory should have private endpoints enabled",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				i := target.(*armdatafactory.Factory)
+				_, pe := scanContext.PrivateEndpoints[*i.ID]
+				return !pe, ""
+			},
+		},
+		"SLA": {
+			Id:          "adf-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Azure Data Factory SLA",
@@ -38,7 +50,7 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"CAF": {
-			Id:          "adf-003",
+			Id:          "adf-004",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Azure Data Factory Name should comply with naming conventions",
@@ -50,8 +62,8 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
-		"adf-007": {
-			Id:          "adf-004",
+		"adf-005": {
+			Id:          "adf-005",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Azure Data Factory should have tags",
