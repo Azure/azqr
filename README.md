@@ -53,6 +53,7 @@ To learn more about the rules used by **Azure Quick Review (azqr)** for generati
 * Azure Cosmos DB
 * Azure Data Explorer
 * Azure Data Factory
+* Azure Database for MariaDB
 * Azure Database for MySQL Flexible Server
 * Azure Database for MySQL Single Server
 * Azure Database for PostgreSQL Flexible Server
