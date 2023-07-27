@@ -150,14 +150,16 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Create changelog text
-        id: changelog
-        uses: loopwerk/tag-changelog@v1
+        uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          exclude_types: chore
+          fetch-depth: 0
+
+      # - name: Create changelog text
+      #   id: changelog
+      #   uses: loopwerk/tag-changelog@v1
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     exclude_types: chore
 
       - name: release
         uses: actions/create-release@v1
@@ -165,7 +167,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ env.MINVERVERSIONOVERRIDE }}
-          body: ${{ steps.changelog.outputs.changes }}
+          body: "" #${{ steps.changelog.outputs.changes }}
           draft: false
           prerelease: false
         env:
@@ -193,7 +195,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Artifact Name linux & mac
         if: matrix.target_os != 'windows'
