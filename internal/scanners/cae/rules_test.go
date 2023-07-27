@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestContainerAppsScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armappcontainers.ManagedEnvironment{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 				rule: "AvailabilityZones",
 				target: &armappcontainers.ManagedEnvironment{
 					Properties: &armappcontainers.ManagedEnvironmentProperties{
-						ZoneRedundant: to.BoolPtr(true),
+						ZoneRedundant: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -96,7 +96,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 				target: &armappcontainers.ManagedEnvironment{
 					Properties: &armappcontainers.ManagedEnvironmentProperties{
 						VnetConfiguration: &armappcontainers.VnetConfiguration{
-							Internal: to.BoolPtr(true),
+							Internal: ref.Of(true),
 						},
 					},
 				},
@@ -112,7 +112,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armappcontainers.ManagedEnvironment{
-					Name: to.StringPtr("cae-test"),
+					Name: ref.Of("cae-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

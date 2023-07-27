@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestRedisScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armredis.ResourceInfo{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -50,7 +50,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "AvailabilityZones",
 				target: &armredis.ResourceInfo{
-					Zones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
+					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -79,7 +79,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 					Properties: &armredis.Properties{
 						PrivateEndpointConnections: []*armredis.PrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -114,7 +114,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armredis.ResourceInfo{
-					Name: to.StringPtr("redis-test"),
+					Name: ref.Of("redis-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -129,7 +129,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				rule: "redis-008",
 				target: &armredis.ResourceInfo{
 					Properties: &armredis.Properties{
-						EnableNonSSLPort: to.BoolPtr(false),
+						EnableNonSSLPort: ref.Of(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestAppServiceScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armappservice.Plan{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				rule: "AvailabilityZones",
 				target: &armappservice.Plan{
 					Properties: &armappservice.PlanProperties{
-						ZoneRedundant: to.BoolPtr(true),
+						ZoneRedundant: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,7 +67,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				rule: "SLA",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
-						Tier: to.StringPtr("Free"),
+						Tier: ref.Of("Free"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -83,7 +83,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				rule: "SLA",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
-						Tier: to.StringPtr("ElasticPremium"),
+						Tier: ref.Of("ElasticPremium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -99,7 +99,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				rule: "SKU",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
-						Name: to.StringPtr("EP1"),
+						Name: ref.Of("EP1"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -114,7 +114,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armappservice.Plan{
-					Name: to.StringPtr("asp-test"),
+					Name: ref.Of("asp-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -160,7 +160,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armappservice.Site{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -178,7 +178,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule: "Private",
 				target: &armappservice.Site{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					PrivateEndpoints: map[string]bool{
@@ -196,7 +196,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armappservice.Site{
-					Name: to.StringPtr("app-test"),
+					Name: ref.Of("app-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -211,7 +211,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				rule: "app-007",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						HTTPSOnly: to.BoolPtr(true),
+						HTTPSOnly: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -258,7 +258,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armappservice.Site{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -276,7 +276,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule: "Private",
 				target: &armappservice.Site{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					PrivateEndpoints: map[string]bool{
@@ -294,7 +294,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armappservice.Site{
-					Name: to.StringPtr("func-test"),
+					Name: ref.Of("func-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -309,7 +309,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				rule: "func-007",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						HTTPSOnly: to.BoolPtr(true),
+						HTTPSOnly: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

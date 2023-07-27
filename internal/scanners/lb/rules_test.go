@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestLoadBalancerScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armnetwork.LoadBalancer{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -57,9 +57,9 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 						FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 							{
 								Zones: []*string{
-									to.StringPtr("1"),
-									to.StringPtr("2"),
-									to.StringPtr("3"),
+									ref.Of("1"),
+									ref.Of("2"),
+									ref.Of("3"),
 								},
 							},
 						},
@@ -109,12 +109,12 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armnetwork.LoadBalancer{
-					Name: to.StringPtr("lbi"),
+					Name: ref.Of("lbi"),
 					Properties: &armnetwork.LoadBalancerPropertiesFormat{
 						FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 							{
 								Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
-									PrivateIPAddress: to.StringPtr("10.0.0.1"),
+									PrivateIPAddress: ref.Of("10.0.0.1"),
 								},
 							},
 						},
@@ -132,7 +132,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armnetwork.LoadBalancer{
-					Name: to.StringPtr("lbe"),
+					Name: ref.Of("lbe"),
 					Properties: &armnetwork.LoadBalancerPropertiesFormat{
 						FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 							{

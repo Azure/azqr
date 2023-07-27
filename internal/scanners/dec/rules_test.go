@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestDataExplorerScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armkusto.Cluster{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -78,7 +78,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armkusto.Cluster{
-					Name: to.StringPtr("dec-test"),
+					Name: ref.Of("dec-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

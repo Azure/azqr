@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestVirtualMachineScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armcompute.VirtualMachine{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -76,7 +76,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armcompute.VirtualMachine{
-					Name: to.StringPtr("vm-test"),
+					Name: ref.Of("vm-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

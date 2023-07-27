@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestAKSScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armcontainerservice.ManagedCluster{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -56,7 +56,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
 							{
-								AvailabilityZones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
+								AvailabilityZones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 							},
 						},
 					},
@@ -78,7 +78,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 					},
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						APIServerAccessProfile: &armcontainerservice.ManagedClusterAPIServerAccessProfile{
-							EnablePrivateCluster: to.BoolPtr(true),
+							EnablePrivateCluster: ref.Of(true),
 						},
 					},
 				},
@@ -146,7 +146,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
 							{
-								AvailabilityZones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
+								AvailabilityZones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 							},
 						},
 					},
@@ -179,7 +179,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armcontainerservice.ManagedCluster{
-					Name: to.StringPtr("aks-test"),
+					Name: ref.Of("aks-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -195,7 +195,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				target: &armcontainerservice.ManagedCluster{
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AADProfile: &armcontainerservice.ManagedClusterAADProfile{
-							Managed: to.BoolPtr(true),
+							Managed: ref.Of(true),
 						},
 					},
 				},
@@ -228,7 +228,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-008",
 				target: &armcontainerservice.ManagedCluster{
 					Properties: &armcontainerservice.ManagedClusterProperties{
-						EnableRBAC: to.BoolPtr(true),
+						EnableRBAC: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -244,7 +244,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-008",
 				target: &armcontainerservice.ManagedCluster{
 					Properties: &armcontainerservice.ManagedClusterProperties{
-						EnableRBAC: to.BoolPtr(false),
+						EnableRBAC: ref.Of(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -260,7 +260,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-009",
 				target: &armcontainerservice.ManagedCluster{
 					Properties: &armcontainerservice.ManagedClusterProperties{
-						DisableLocalAccounts: to.BoolPtr(true),
+						DisableLocalAccounts: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -294,7 +294,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AddonProfiles: map[string]*armcontainerservice.ManagedClusterAddonProfile{
 							"httpApplicationRouting": {
-								Enabled: to.BoolPtr(true),
+								Enabled: ref.Of(true),
 							},
 						},
 					},
@@ -314,7 +314,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AddonProfiles: map[string]*armcontainerservice.ManagedClusterAddonProfile{
 							"httpApplicationRouting": {
-								Enabled: to.BoolPtr(false),
+								Enabled: ref.Of(false),
 							},
 						},
 					},
@@ -334,7 +334,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AddonProfiles: map[string]*armcontainerservice.ManagedClusterAddonProfile{
 							"omsagent": {
-								Enabled: to.BoolPtr(true),
+								Enabled: ref.Of(true),
 							},
 						},
 					},
@@ -354,7 +354,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AddonProfiles: map[string]*armcontainerservice.ManagedClusterAddonProfile{
 							"omsagent": {
-								Enabled: to.BoolPtr(false),
+								Enabled: ref.Of(false),
 							},
 						},
 					},
@@ -492,7 +492,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
 							{
-								EnableAutoScaling: to.BoolPtr(false),
+								EnableAutoScaling: ref.Of(false),
 							},
 						},
 					},
@@ -512,7 +512,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
 							{
-								EnableAutoScaling: to.BoolPtr(true),
+								EnableAutoScaling: ref.Of(true),
 							},
 						},
 					},

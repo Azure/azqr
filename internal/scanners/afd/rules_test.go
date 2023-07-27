@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestFrontDoorScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armcdn.Profile{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -78,7 +78,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armcdn.Profile{
-					Name: to.StringPtr("afd-test"),
+					Name: ref.Of("afd-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

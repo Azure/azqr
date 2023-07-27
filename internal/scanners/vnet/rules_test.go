@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestVirtualNetworkScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armnetwork.VirtualNetwork{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -62,7 +62,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armnetwork.VirtualNetwork{
-					Name: to.StringPtr("vnet-test"),
+					Name: ref.Of("vnet-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -79,10 +79,10 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 					Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 						Subnets: []*armnetwork.Subnet{
 							{
-								Name: to.StringPtr("subnet1"),
+								Name: ref.Of("subnet1"),
 								Properties: &armnetwork.SubnetPropertiesFormat{
 									NetworkSecurityGroup: &armnetwork.SecurityGroup{
-										ID: to.StringPtr("nsg"),
+										ID: ref.Of("nsg"),
 									},
 								},
 							},
@@ -104,7 +104,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 					Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 						Subnets: []*armnetwork.Subnet{
 							{
-								Name:       to.StringPtr("subnet1"),
+								Name:       ref.Of("subnet1"),
 								Properties: &armnetwork.SubnetPropertiesFormat{},
 							},
 						},
@@ -125,7 +125,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 					Properties: &armnetwork.VirtualNetworkPropertiesFormat{
 						DhcpOptions: &armnetwork.DhcpOptions{
 							DNSServers: []*string{
-								to.StringPtr("10.0.0.5"),
+								ref.Of("10.0.0.5"),
 							},
 						},
 					},

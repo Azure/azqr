@@ -6,9 +6,9 @@ package kv
 import (
 	"strings"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 // GetRules - Returns the rules for the KeyVaultScanner
@@ -96,7 +96,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
-				return c.Properties.EnableSoftDelete == nil || c.Properties.EnableSoftDelete == to.BoolPtr(false), ""
+				return c.Properties.EnableSoftDelete == nil || c.Properties.EnableSoftDelete == ref.Of(false), ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview",
 		},
@@ -108,7 +108,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
-				return c.Properties.EnablePurgeProtection == nil || c.Properties.EnablePurgeProtection == to.BoolPtr(false), ""
+				return c.Properties.EnablePurgeProtection == nil || c.Properties.EnablePurgeProtection == ref.Of(false), ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview#purge-protection",
 		},

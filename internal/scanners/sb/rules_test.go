@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestServiceBusScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armservicebus.SBNamespace{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -54,7 +54,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						Name: getSKUNamePremium(),
 					},
 					Properties: &armservicebus.SBNamespaceProperties{
-						ZoneRedundant: to.BoolPtr(true),
+						ZoneRedundant: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -104,7 +104,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 					Properties: &armservicebus.SBNamespaceProperties{
 						PrivateEndpointConnections: []*armservicebus.PrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -137,7 +137,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armservicebus.SBNamespace{
-					Name: to.StringPtr("sb-test"),
+					Name: ref.Of("sb-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -152,7 +152,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-008",
 				target: &armservicebus.SBNamespace{
 					Properties: &armservicebus.SBNamespaceProperties{
-						DisableLocalAuth: to.BoolPtr(true),
+						DisableLocalAuth: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

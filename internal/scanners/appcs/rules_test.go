@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestAppConfigurationScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armappconfiguration.ConfigurationStore{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -85,7 +85,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 					Properties: &armappconfiguration.ConfigurationStoreProperties{
 						PrivateEndpointConnections: []*armappconfiguration.PrivateEndpointConnectionReference{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -118,7 +118,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armappconfiguration.ConfigurationStore{
-					Name: to.StringPtr("appcs-test"),
+					Name: ref.Of("appcs-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -133,7 +133,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-008",
 				target: &armappconfiguration.ConfigurationStore{
 					Properties: &armappconfiguration.ConfigurationStoreProperties{
-						DisableLocalAuth: to.BoolPtr(true),
+						DisableLocalAuth: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

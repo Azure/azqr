@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestDataExplorerScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armdatafactory.Factory{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -62,7 +62,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armdatafactory.Factory{
-					Name: to.StringPtr("adf-test"),
+					Name: ref.Of("adf-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

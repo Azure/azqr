@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestSignalRScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armsignalr.ResourceInfo{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 				rule: "AvailabilityZones",
 				target: &armsignalr.ResourceInfo{
 					SKU: &armsignalr.ResourceSKU{
-						Name: to.StringPtr("Premium"),
+						Name: ref.Of("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -81,7 +81,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 					Properties: &armsignalr.Properties{
 						PrivateEndpointConnections: []*armsignalr.PrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -99,7 +99,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 				rule: "SKU",
 				target: &armsignalr.ResourceInfo{
 					SKU: &armsignalr.ResourceSKU{
-						Name: to.StringPtr("Premium"),
+						Name: ref.Of("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -114,7 +114,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armsignalr.ResourceInfo{
-					Name: to.StringPtr("sigr-test"),
+					Name: ref.Of("sigr-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

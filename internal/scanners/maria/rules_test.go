@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package sql
+package maria
 
 import (
 	"reflect"
@@ -9,10 +9,10 @@ import (
 
 	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb"
 )
 
-func TestSQLScanner_Rules(t *testing.T) {
+func TestMariaScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
@@ -28,10 +28,10 @@ func TestSQLScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "SQLScanner DiagnosticSettings",
+			name: "MariaScanner DiagnosticSettings",
 			fields: fields{
 				rule: "DiagnosticSettings",
-				target: &armsql.Server{
+				target: &armmariadb.Server{
 					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
@@ -46,12 +46,12 @@ func TestSQLScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "SQLScanner Private Endpoint",
+			name: "MariaScanner Private Endpoint",
 			fields: fields{
 				rule: "Private",
-				target: &armsql.Server{
-					Properties: &armsql.ServerProperties{
-						PrivateEndpointConnections: []*armsql.ServerPrivateEndpointConnection{
+				target: &armmariadb.Server{
+					Properties: &armmariadb.ServerProperties{
+						PrivateEndpointConnections: []*armmariadb.ServerPrivateEndpointConnection{
 							{
 								ID: ref.Of("test"),
 							},
@@ -66,11 +66,11 @@ func TestSQLScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "SQLScanner CAF",
+			name: "MariaScanner CAF",
 			fields: fields{
 				rule: "CAF",
-				target: &armsql.Server{
-					Name: ref.Of("sql-test"),
+				target: &armmariadb.Server{
+					Name: ref.Of("maria-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -79,26 +79,28 @@ func TestSQLScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
-		{
-			name: "SQLScanner minimum TLS version",
-			fields: fields{
-				rule: "sql-008",
-				target: &armsql.Server{
-					Properties: &armsql.ServerProperties{
-						MinimalTLSVersion: ref.Of("1.2"),
+		/*
+			{
+				name: "MariaScanner minimum TLS version",
+				fields: fields{
+					rule: "maria-008",
+					target: &armmariadb.Server{
+						Properties: &armmariadb.ServerProperties{
+							MinimalTLSVersion: &armmariadb.MinimalTLSVersionEnumTLS12,
+						},
 					},
+					scanContext: &scanners.ScanContext{},
 				},
-				scanContext: &scanners.ScanContext{},
+				want: want{
+					broken: false,
+					result: "",
+				},
 			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
+		*/
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &SQLScanner{}
+			s := &MariaScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -106,13 +108,13 @@ func TestSQLScanner_Rules(t *testing.T) {
 				result: w,
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SQLScanner Rule.Eval() = %v, want %v", got, tt.want)
+				t.Errorf("MariaScanner Rule.Eval() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestSQLScanner_DatabaseRules(t *testing.T) {
+func TestMariaScanner_DatabaseRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
@@ -128,10 +130,10 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "SQLScanner DiagnosticSettings",
+			name: "MariaScanner DiagnosticSettings",
 			fields: fields{
 				rule: "DiagnosticSettings",
-				target: &armsql.Database{
+				target: &armmariadb.Database{
 					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
@@ -146,46 +148,11 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 			},
 		},
 		{
-			name: "SQLScanner Availability Zones",
-			fields: fields{
-				rule: "AvailabilityZones",
-				target: &armsql.Database{
-					Properties: &armsql.DatabaseProperties{
-						ZoneRedundant: ref.Of(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "SQLScanner SLA 99.995%",
+			name: "MariaScanner SLA 99.99%",
 			fields: fields{
 				rule: "SLA",
-				target: &armsql.Database{
-					Properties: &armsql.DatabaseProperties{
-						ZoneRedundant: ref.Of(true),
-					},
-					SKU: &armsql.SKU{
-						Tier: ref.Of("Premium"),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "99.995%",
-			},
-		},
-		{
-			name: "SQLScanner SLA 99.99%",
-			fields: fields{
-				rule: "SLA",
-				target: &armsql.Database{
-					Properties: &armsql.DatabaseProperties{},
+				target: &armmariadb.Database{
+					Properties: &armmariadb.DatabaseProperties{},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -195,27 +162,11 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 			},
 		},
 		{
-			name: "SQLScanner SKU",
-			fields: fields{
-				rule: "SKU",
-				target: &armsql.Database{
-					SKU: &armsql.SKU{
-						Name: ref.Of("P3"),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "P3",
-			},
-		},
-		{
-			name: "SQLScanner CAF",
+			name: "MariaScanner CAF",
 			fields: fields{
 				rule: "CAF",
-				target: &armsql.Database{
-					Name: ref.Of("sqldb-test"),
+				target: &armmariadb.Database{
+					Name: ref.Of("mariadb-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -227,7 +178,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &SQLScanner{}
+			s := &MariaScanner{}
 			rules := s.GetDatabaseRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -235,7 +186,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				result: w,
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SQLScanner Rule.Eval() = %v, want %v", got, tt.want)
+				t.Errorf("MariaScanner Rule.Eval() = %v, want %v", got, tt.want)
 			}
 		})
 	}

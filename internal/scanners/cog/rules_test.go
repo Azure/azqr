@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestCognitiveScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armcognitiveservices.Account{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -65,7 +65,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Properties: &armcognitiveservices.AccountProperties{
 						PrivateEndpointConnections: []*armcognitiveservices.PrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -83,7 +83,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 				rule: "SKU",
 				target: &armcognitiveservices.Account{
 					SKU: &armcognitiveservices.SKU{
-						Name: to.StringPtr("test"),
+						Name: ref.Of("test"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -98,7 +98,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armcognitiveservices.Account{
-					Name: to.StringPtr("cog-test"),
+					Name: ref.Of("cog-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -127,7 +127,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 				rule: "cog-008",
 				target: &armcognitiveservices.Account{
 					Properties: &armcognitiveservices.AccountProperties{
-						DisableLocalAuth: to.BoolPtr(true),
+						DisableLocalAuth: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

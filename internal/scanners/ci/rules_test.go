@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestContainerInstanceScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "AvailabilityZones",
 				target: &armcontainerinstance.ContainerGroup{
-					Zones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
+					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -126,7 +126,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armcontainerinstance.ContainerGroup{
-					Name: to.StringPtr("ci-test"),
+					Name: ref.Of("ci-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

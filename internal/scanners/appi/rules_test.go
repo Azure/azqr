@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestAppInsightsScanner_Rules(t *testing.T) {
@@ -44,7 +44,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armapplicationinsights.Component{
-					Name: to.StringPtr("appi-test"),
+					Name: ref.Of("appi-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

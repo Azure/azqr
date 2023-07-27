@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestWebPubSubScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armwebpubsub.ResourceInfo{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				rule: "AvailabilityZones",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
-						Name: to.StringPtr("Premium"),
+						Name: ref.Of("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,7 +67,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				rule: "SLA",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
-						Name: to.StringPtr("Premium"),
+						Name: ref.Of("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -83,7 +83,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				rule: "SLA",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
-						Name: to.StringPtr("Free"),
+						Name: ref.Of("Free"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -101,7 +101,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 					Properties: &armwebpubsub.Properties{
 						PrivateEndpointConnections: []*armwebpubsub.PrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -119,7 +119,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				rule: "SKU",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
-						Name: to.StringPtr("Premium"),
+						Name: ref.Of("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -134,7 +134,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armwebpubsub.ResourceInfo{
-					Name: to.StringPtr("wps-test"),
+					Name: ref.Of("wps-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

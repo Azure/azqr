@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestEventHubScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armeventhub.EHNamespace{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "AvailabilityZones",
 				target: &armeventhub.EHNamespace{
 					Properties: &armeventhub.EHNamespaceProperties{
-						ZoneRedundant: to.BoolPtr(true),
+						ZoneRedundant: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -101,7 +101,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 					Properties: &armeventhub.EHNamespaceProperties{
 						PrivateEndpointConnections: []*armeventhub.PrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -134,7 +134,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armeventhub.EHNamespace{
-					Name: to.StringPtr("evh-test"),
+					Name: ref.Of("evh-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -149,7 +149,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "evh-008",
 				target: &armeventhub.EHNamespace{
 					Properties: &armeventhub.EHNamespaceProperties{
-						DisableLocalAuth: to.BoolPtr(true),
+						DisableLocalAuth: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

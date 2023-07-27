@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestContainerRegistryScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armcontainerregistry.Registry{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -81,7 +81,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 					Properties: &armcontainerregistry.RegistryProperties{
 						PrivateEndpointConnections: []*armcontainerregistry.PrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -114,7 +114,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armcontainerregistry.Registry{
-					Name: to.StringPtr("cr-test"),
+					Name: ref.Of("cr-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -143,7 +143,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				rule: "cr-007",
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{
-						AnonymousPullEnabled: to.BoolPtr(false),
+						AnonymousPullEnabled: ref.Of(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -173,7 +173,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				rule: "cr-008",
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{
-						AdminUserEnabled: to.BoolPtr(false),
+						AdminUserEnabled: ref.Of(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
