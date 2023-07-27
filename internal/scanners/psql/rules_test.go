@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestPostgreScanner_Rules(t *testing.T) {
@@ -33,7 +33,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armpostgresql.Server{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -66,7 +66,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 					Properties: &armpostgresql.ServerProperties{
 						PrivateEndpointConnections: []*armpostgresql.ServerPrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -84,7 +84,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				rule: "SKU",
 				target: &armpostgresql.Server{
 					SKU: &armpostgresql.SKU{
-						Name: to.StringPtr("GPGen58"),
+						Name: ref.Of("GPGen58"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -99,7 +99,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armpostgresql.Server{
-					Name: to.StringPtr("psql-test"),
+					Name: ref.Of("psql-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -177,7 +177,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armpostgresqlflexibleservers.Server{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -230,9 +230,9 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
 							Mode:                    getHighAvailability(),
-							StandbyAvailabilityZone: to.StringPtr("2"),
+							StandbyAvailabilityZone: ref.Of("2"),
 						},
-						AvailabilityZone: to.StringPtr("1"),
+						AvailabilityZone: ref.Of("1"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -250,9 +250,9 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
 							Mode:                    getHighAvailability(),
-							StandbyAvailabilityZone: to.StringPtr("1"),
+							StandbyAvailabilityZone: ref.Of("1"),
 						},
-						AvailabilityZone: to.StringPtr("1"),
+						AvailabilityZone: ref.Of("1"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -286,7 +286,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				rule: "SKU",
 				target: &armpostgresqlflexibleservers.Server{
 					SKU: &armpostgresqlflexibleservers.SKU{
-						Name: to.StringPtr("StandardD4sv3"),
+						Name: ref.Of("StandardD4sv3"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -301,7 +301,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armpostgresqlflexibleservers.Server{
-					Name: to.StringPtr("psql-test"),
+					Name: ref.Of("psql-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

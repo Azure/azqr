@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestApplicationGatewayScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armnetwork.ApplicationGateway{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -80,7 +80,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armnetwork.ApplicationGateway{
-					Name: to.StringPtr("agw-test"),
+					Name: ref.Of("agw-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

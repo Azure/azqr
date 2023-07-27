@@ -4,12 +4,13 @@ package scanners
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
+
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 // CostResult - Cost result
@@ -82,21 +83,21 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 			// Granularity: &daily,
 			Aggregation: map[string]*armcostmanagement.QueryAggregation{
 				"TotalCost": {
-					Name:     to.StringPtr("Cost"),
+					Name:     ref.Of("Cost"),
 					Function: &sum,
 				},
 			},
 			Grouping: []*armcostmanagement.QueryGrouping{
 				{
-					Name: to.StringPtr("ServiceName"),
+					Name: ref.Of("ServiceName"),
 					Type: &dimension,
 				},
 			},
 			Filter: &armcostmanagement.QueryFilter{
 				Dimensions: &armcostmanagement.QueryComparisonExpression{
-					Name:     to.StringPtr("PublisherType"),
+					Name:     ref.Of("PublisherType"),
 					Operator: &inOperator,
-					Values:   []*string{to.StringPtr("azure")},
+					Values:   []*string{ref.Of("azure")},
 				},
 			},
 		},

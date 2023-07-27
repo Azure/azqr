@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestEventGridScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armeventgrid.Domain{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -65,7 +65,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 					Properties: &armeventgrid.DomainProperties{
 						PrivateEndpointConnections: []*armeventgrid.PrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -94,7 +94,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armeventgrid.Domain{
-					Name: to.StringPtr("evgd-test"),
+					Name: ref.Of("evgd-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -109,7 +109,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 				rule: "evgd-008",
 				target: &armeventgrid.Domain{
 					Properties: &armeventgrid.DomainProperties{
-						DisableLocalAuth: to.BoolPtr(true),
+						DisableLocalAuth: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

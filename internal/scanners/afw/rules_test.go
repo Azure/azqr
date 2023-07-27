@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestFirewallScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armnetwork.AzureFirewall{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -62,7 +62,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "SLA",
 				target: &armnetwork.AzureFirewall{
-					Zones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
+					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -94,7 +94,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armnetwork.AzureFirewall{
-					Name: to.StringPtr("afw-test"),
+					Name: ref.Of("afw-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

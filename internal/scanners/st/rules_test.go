@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestStorageScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armstorage.Account{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -88,7 +88,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 					Properties: &armstorage.AccountProperties{
 						PrivateEndpointConnections: []*armstorage.PrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -121,7 +121,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armstorage.Account{
-					Name: to.StringPtr("sttest"),
+					Name: ref.Of("sttest"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -136,7 +136,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-007",
 				target: &armstorage.Account{
 					Properties: &armstorage.AccountProperties{
-						EnableHTTPSTrafficOnly: to.BoolPtr(true),
+						EnableHTTPSTrafficOnly: ref.Of(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

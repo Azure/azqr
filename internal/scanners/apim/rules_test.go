@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestAPIManagementScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armapimanagement.ServiceResource{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -50,7 +50,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "AvailabilityZones",
 				target: &armapimanagement.ServiceResource{
-					Zones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
+					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -101,7 +101,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					SKU: &armapimanagement.ServiceSKUProperties{
 						Name: getPremiumSKUName(),
 					},
-					Zones: []*string{to.StringPtr("1"), to.StringPtr("2"), to.StringPtr("3")},
+					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 					Properties: &armapimanagement.ServiceProperties{
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
@@ -141,7 +141,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					Properties: &armapimanagement.ServiceProperties{
 						PrivateEndpointConnections: []*armapimanagement.RemotePrivateEndpointConnectionWrapper{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -174,7 +174,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armapimanagement.ServiceResource{
-					Name: to.StringPtr("apim-test"),
+					Name: ref.Of("apim-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
