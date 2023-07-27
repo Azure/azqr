@@ -26,6 +26,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/evh"
 	"github.com/Azure/azqr/internal/scanners/kv"
 	"github.com/Azure/azqr/internal/scanners/lb"
+	"github.com/Azure/azqr/internal/scanners/maria"
 	"github.com/Azure/azqr/internal/scanners/mysql"
 	"github.com/Azure/azqr/internal/scanners/plan"
 	"github.com/Azure/azqr/internal/scanners/psql"
@@ -69,6 +70,7 @@ var rulesCmd = &cobra.Command{
 			&evh.EventHubScanner{},
 			&kv.KeyVaultScanner{},
 			&lb.LoadBalancerScanner{},
+			&maria.MariaScanner{},
 			&mysql.MySQLFlexibleScanner{},
 			&mysql.MySQLScanner{},
 			&plan.AppServiceScanner{},

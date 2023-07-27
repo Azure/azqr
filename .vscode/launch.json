@@ -11,7 +11,11 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "args": [
-                "scan"
+                "scan",
+                "maria",
+                "-m=false",
+                "-s",
+                "e6cb052d-6004-4e1d-afce-f9ab8555b306",
             ],
             "env": {
                 "AZURE_SDK_GO_LOGGING": "all"
