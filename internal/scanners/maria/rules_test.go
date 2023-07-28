@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb"
-	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func TestMariaScanner_Rules(t *testing.T) {
@@ -32,7 +32,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "DiagnosticSettings",
 				target: &armmariadb.Server{
-					ID: to.StringPtr("test"),
+					ID: ref.Of("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -53,7 +53,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 					Properties: &armmariadb.ServerProperties{
 						PrivateEndpointConnections: []*armmariadb.ServerPrivateEndpointConnection{
 							{
-								ID: to.StringPtr("test"),
+								ID: ref.Of("test"),
 							},
 						},
 					},
@@ -70,7 +70,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armmariadb.Server{
-					Name: to.StringPtr("maria-test"),
+					Name: ref.Of("maria-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -79,24 +79,33 @@ func TestMariaScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
-		/*
-			{
-				name: "MariaScanner minimum TLS version",
-				fields: fields{
-					rule: "maria-008",
-					target: &armmariadb.Server{
-						Properties: &armmariadb.ServerProperties{
-							MinimalTLSVersion: &armmariadb.MinimalTLSVersionEnumTLS12,
-						},
-					},
-					scanContext: &scanners.ScanContext{},
-				},
-				want: want{
-					broken: false,
-					result: "",
-				},
+		{
+			name: "MariaScanner SLA",
+			fields: fields{
+				rule:        "SLA",
+				target:      &armmariadb.Server{},
+				scanContext: &scanners.ScanContext{},
 			},
-		*/
+			want: want{
+				broken: false,
+				result: "99.99%",
+			},
+		}, {
+			name: "MariaScanner minimum TLS version",
+			fields: fields{
+				rule: "maria-006",
+				target: &armmariadb.Server{
+					Properties: &armmariadb.ServerProperties{
+						MinimalTLSVersion: ref.Of(armmariadb.MinimalTLSVersionEnumTLS12),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -130,43 +139,11 @@ func TestMariaScanner_DatabaseRules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "MariaScanner DiagnosticSettings",
-			fields: fields{
-				rule: "DiagnosticSettings",
-				target: &armmariadb.Database{
-					ID: to.StringPtr("test"),
-				},
-				scanContext: &scanners.ScanContext{
-					DiagnosticsSettings: map[string]bool{
-						"test": true,
-					},
-				},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "MariaScanner SLA 99.99%",
-			fields: fields{
-				rule: "SLA",
-				target: &armmariadb.Database{
-					Properties: &armmariadb.DatabaseProperties{},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "99.99%",
-			},
-		},
-		{
 			name: "MariaScanner CAF",
 			fields: fields{
 				rule: "CAF",
 				target: &armmariadb.Database{
-					Name: to.StringPtr("mariadb-test"),
+					Name: ref.Of("mariadb-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
