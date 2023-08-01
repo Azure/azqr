@@ -43,6 +43,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.0.
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.0.0/go.mod h1:PFVgFsclKzPqYRT/BiwpfUN22cab0C7FlgXR3iWpwMo=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto v1.3.1 h1:ik0pyYcwUqdiPPXOioZfKL62SVu7iN5eh5zxHEbV3VE=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto v1.3.1/go.mod h1:st4TFPle8b16a2B9MEN+ofQT6iJjWBPAD9F5rfMQtZg=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb v1.1.1 h1:enm1l0hL9NXwetMOl2s9fIZrHDNQqAKUJafgCz+X1Pw=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb v1.1.1/go.mod h1:XTDYspbMnf4yoJ6DxcA67WIZmFoJiwDZgemGVKWFRQ4=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.8.0 h1:dKxKBzh+XIEoYNmx/c8HeiwghuRExXf61WmVotWESeA=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.8.0/go.mod h1:kzRLpzzlw6eBUXE7eBw3oqfmKR/kxaHOk4+h9sAe6Yo=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysql v1.0.0 h1:3AMzl6OaajsEhmlQJBxZviy1jq5HNrQSRHlS87acXb4=
