@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the EventGridScanner
 func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"evgd-001": {
 			Id:          "evgd-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
+			Url:   "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"SLA": {
+		"evgd-003": {
 			Id:          "evgd-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -35,9 +36,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/event-grid/",
+			Url:   "https://www.azure.cn/en-us/support/sla/event-grid/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"evgd-004": {
 			Id:          "evgd-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -48,9 +50,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-grid/configure-private-endpoints",
+			Url:   "https://learn.microsoft.com/en-us/azure/event-grid/configure-private-endpoints",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"evgd-005": {
 			Id:          "evgd-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -59,9 +62,10 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "None"
 			},
-			Url: "https://azure.microsoft.com/en-gb/pricing/details/event-grid/",
+			Url:   "https://azure.microsoft.com/en-gb/pricing/details/event-grid/",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"evgd-006": {
 			Id:          "evgd-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -72,7 +76,8 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "evgd")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"evgd-007": {
 			Id:          "evgd-007",

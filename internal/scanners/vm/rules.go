@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the VirtualMachineScanner
 func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"vm-001": {
 			Id:          "vm-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-monitor/agents/diagnostics-extension-windows-install",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-monitor/agents/diagnostics-extension-windows-install",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"vm-002": {
 			Id:          "vm-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -37,9 +38,10 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 				hasZones := v.Zones != nil && len(v.Zones) > 1
 				return !hasZones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/virtual-machines/availability#availability-zones",
+			Url:   "https://learn.microsoft.com/en-us/azure/virtual-machines/availability#availability-zones",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"vm-003": {
 			Id:          "vm-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -58,9 +60,10 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"CAF": {
+		"vm-006": {
 			Id:          "vm-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -71,7 +74,8 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "vm")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"vm-007": {
 			Id:          "vm-007",

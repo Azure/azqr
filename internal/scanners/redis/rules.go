@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the RedisScanner
 func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"redis-001": {
 			Id:          "redis-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-monitor-diagnostic-settings",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-monitor-diagnostic-settings",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"redis-002": {
 			Id:          "redis-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -37,9 +38,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 				zones := len(i.Zones) > 0
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-high-availability",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-high-availability",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"redis-003": {
 			Id:          "redis-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -48,9 +50,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"redis-004": {
 			Id:          "redis-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -61,9 +64,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-private-link",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-private-link",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"redis-005": {
 			Id:          "redis-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -73,9 +77,10 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armredis.ResourceInfo)
 				return false, string(*i.Properties.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-gb/pricing/details/cache/",
+			Url:   "https://azure.microsoft.com/en-gb/pricing/details/cache/",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"redis-006": {
 			Id:          "redis-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -86,7 +91,8 @@ func (a *RedisScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "redis")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"redis-007": {
 			Id:          "redis-007",

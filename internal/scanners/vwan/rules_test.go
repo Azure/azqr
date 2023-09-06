@@ -30,7 +30,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualWanScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "vwa-001",
 				target: &armnetwork.VirtualWAN{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualWanScanner Availability Zones",
 			fields: fields{
-				rule:        "AvailabilityZones",
+				rule:        "vwa-002",
 				target:      &armnetwork.VirtualWAN{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +60,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualWanScanner SLA 99.95%",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "vwa-003",
 				target:      &armnetwork.VirtualWAN{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -72,7 +72,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualWanScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "vwa-005",
 				target: &armnetwork.VirtualWAN{
 					Properties: &armnetwork.VirtualWanProperties{
 						Type: ref.Of("Standard"),
@@ -88,7 +88,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualWanScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "vwa-006",
 				target: &armnetwork.VirtualWAN{
 					Name: ref.Of("vwa-test"),
 				},

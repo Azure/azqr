@@ -30,7 +30,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerRegistryScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "cr-001",
 				target: &armcontainerregistry.Registry{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerRegistryScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "cr-002",
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{
 						ZoneRedundancy: getZoneRedundancy(),
@@ -64,7 +64,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerRegistryScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "cr-003",
 				target:      &armcontainerregistry.Registry{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -76,7 +76,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerRegistryScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "cr-004",
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{
 						PrivateEndpointConnections: []*armcontainerregistry.PrivateEndpointConnection{
@@ -96,7 +96,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerRegistryScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "cr-005",
 				target: &armcontainerregistry.Registry{
 					SKU: &armcontainerregistry.SKU{
 						Name: getSKUName(),
@@ -112,7 +112,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerRegistryScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "cr-006",
 				target: &armcontainerregistry.Registry{
 					Name: ref.Of("cr-test"),
 				},

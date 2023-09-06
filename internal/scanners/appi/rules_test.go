@@ -30,7 +30,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 		{
 			name: "AppInsightsScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "appi-001",
 				target:      &armapplicationinsights.Component{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -42,7 +42,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 		{
 			name: "AppInsightsScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "appi-002",
 				target: &armapplicationinsights.Component{
 					Name: ref.Of("appi-test"),
 				},

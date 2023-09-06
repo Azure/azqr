@@ -43,9 +43,9 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 		return nil, err
 	}
 	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	appRules := a.GetAppRules()
-	functionRules := a.GetFunctionRules()
+	rules := a.getPlanRules()
+	appRules := a.getAppRules()
+	functionRules := a.getFunctionRules()
 	results := []scanners.AzureServiceResult{}
 
 	for _, p := range plan {
@@ -80,40 +80,6 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 					Location:       *p.Location,
 					Rules:          rr,
 				}
-
-				// if a.enableDetailedScan {
-				// 	// can't trust s.Properties.SiteConfig since values are nil or empty
-				// 	c, err := a.sitesClient.ListApplicationSettings(a.config.Ctx, resourceGroupName, *s.Name, nil)
-				// 	if err != nil {
-				// 		return nil, err
-				// 	}
-
-				// 	for appSetting, value := range c.Properties {
-				// 		switch strings.ToLower(appSetting) {
-				// 		case "azurewebjobsdashboard":
-				// 			funcresult.AzureWebJobsDashboard = len(*value) > 0
-				// 		case "website_run_from_package":
-				// 			funcresult.RunFromPackage = *value == "1"
-				// 		case "scale_controller_logging_enabled":
-				// 			funcresult.ScaleControllerLoggingEnabled = *value == "1"
-				// 		case "website_contentovervnet":
-				// 			funcresult.ContentOverVNET = *value == "1"
-				// 		case "website_vnet_route_all":
-				// 			funcresult.VNETRouteAll = *value == "1"
-				// 		case "appinsights_instrumentationkey", "applicationinsights_connection_string":
-				// 			funcresult.AppInsightsEnabled = len(*value) > 0
-				// 		}
-				// 	}
-
-				// 	// can't trust s.Properties.SiteConfig since values are nil or empty
-				// 	sc, err := a.sitesClient.GetConfiguration(a.config.Ctx, resourceGroupName, *s.Name, nil)
-				// 	if err != nil {
-				// 		return nil, err
-				// 	}
-
-				// 	// overrides the WEBSITE_VNET_ROUTE_ALL appsettings
-				// 	funcresult.VNETRouteAll = sc.Properties.VnetRouteAllEnabled != nil && *sc.Properties.VnetRouteAllEnabled
-				// }
 			} else {
 				rr := engine.EvaluateRules(appRules, s, scanContext)
 				result = scanners.AzureServiceResult{

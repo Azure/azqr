@@ -12,8 +12,19 @@ import (
 
 // GetRules - Returns the rules for the AppServiceScanner
 func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
+	result := a.getPlanRules()
+	for k, v := range a.getAppRules() {
+		result[k] = v
+	}
+	for k, v := range a.getFunctionRules() {
+		result[k] = v
+	}
+	return result
+}
+
+func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"plan-001": {
 			Id:          "plan-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,8 +35,9 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"plan-002": {
 			Id:          "plan-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -36,9 +48,10 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 				zones := *i.Properties.ZoneRedundant
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/reliability/migrate-app-service",
+			Url:   "https://learn.microsoft.com/en-us/azure/reliability/migrate-app-service",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"plan-003": {
 			Id:          "plan-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -53,9 +66,10 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return sla == "None", sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/app-service/",
+			Url:   "https://www.azure.cn/en-us/support/sla/app-service/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"SKU": {
+		"plan-005": {
 			Id:          "plan-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -65,9 +79,10 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armappservice.Plan)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
+			Url:   "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"plan-006": {
 			Id:          "plan-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -78,7 +93,8 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "asp")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"plan-007": {
 			Id:          "plan-007",
@@ -95,10 +111,9 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 	}
 }
 
-// GetAppRules - Returns the rules for the AppServiceScanner
-func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
+func (a *AppServiceScanner) getAppRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"app-001": {
 			Id:          "app-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -109,9 +124,10 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
+			Url:   "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"Private": {
+		"app-004": {
 			Id:          "app-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -122,9 +138,10 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/networking/private-endpoint",
+			Url:   "https://learn.microsoft.com/en-us/azure/app-service/networking/private-endpoint",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"CAF": {
+		"app-006": {
 			Id:          "app-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -135,7 +152,8 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "app")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"app-007": {
 			Id:          "app-007",
@@ -165,10 +183,9 @@ func (a *AppServiceScanner) GetAppRules() map[string]scanners.AzureRule {
 	}
 }
 
-// GetFunctionRules - Returns the rules for the AppServiceScanner
-func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
+func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"func-001": {
 			Id:          "func-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -179,9 +196,10 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-monitor-log-analytics?tabs=csharp",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-functions/functions-monitor-log-analytics?tabs=csharp",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"Private": {
+		"func-004": {
 			Id:          "func-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -192,9 +210,10 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-vnet",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-vnet",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"CAF": {
+		"func-006": {
 			Id:          "func-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -205,7 +224,8 @@ func (a *AppServiceScanner) GetFunctionRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "func")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"func-007": {
 			Id:          "func-007",

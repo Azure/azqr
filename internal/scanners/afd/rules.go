@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the FrontDoorScanner
 func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"afd-001": {
 			Id:          "afd-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
+			Url:   "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"SLA": {
+		"afd-003": {
 			Id:          "afd-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -35,9 +36,10 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/cdn/",
+			Url:   "https://www.azure.cn/en-us/support/sla/cdn/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"SKU": {
+		"afd-005": {
 			Id:          "afd-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -47,9 +49,10 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armcdn.Profile)
 				return false, string(*c.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/tier-comparison",
+			Url:   "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/tier-comparison",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"afd-006": {
 			Id:          "afd-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -60,7 +63,8 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "afd")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"afd-007": {
 			Id:          "afd-007",

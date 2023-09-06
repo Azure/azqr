@@ -30,7 +30,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 		{
 			name: "WebPubSubScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "wps-001",
 				target: &armwebpubsub.ResourceInfo{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 		{
 			name: "WebPubSubScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "wps-002",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
 						Name: ref.Of("Premium"),
@@ -64,7 +64,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 		{
 			name: "WebPubSubScanner SLA 99.9%",
 			fields: fields{
-				rule: "SLA",
+				rule: "wps-003",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
 						Name: ref.Of("Premium"),
@@ -80,7 +80,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 		{
 			name: "WebPubSubScanner SLA None",
 			fields: fields{
-				rule: "SLA",
+				rule: "wps-003",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
 						Name: ref.Of("Free"),
@@ -96,7 +96,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 		{
 			name: "WebPubSubScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "wps-004",
 				target: &armwebpubsub.ResourceInfo{
 					Properties: &armwebpubsub.Properties{
 						PrivateEndpointConnections: []*armwebpubsub.PrivateEndpointConnection{
@@ -116,7 +116,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 		{
 			name: "WebPubSubScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "wps-005",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
 						Name: ref.Of("Premium"),
@@ -132,7 +132,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 		{
 			name: "WebPubSubScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "wps-006",
 				target: &armwebpubsub.ResourceInfo{
 					Name: ref.Of("wps-test"),
 				},

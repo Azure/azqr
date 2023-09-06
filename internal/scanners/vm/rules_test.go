@@ -30,7 +30,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualMachineScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "vm-001",
 				target: &armcompute.VirtualMachine{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualMachineScanner Availability Zones",
 			fields: fields{
-				rule:        "AvailabilityZones",
+				rule:        "vm-002",
 				target:      &armcompute.VirtualMachine{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +60,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualMachineScanner SLA 99.9%",
 			fields: fields{
-				rule: "SLA",
+				rule: "vm-003",
 				target: &armcompute.VirtualMachine{
 					Properties: &armcompute.VirtualMachineProperties{},
 				},
@@ -74,7 +74,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualMachineScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "vm-006",
 				target: &armcompute.VirtualMachine{
 					Name: ref.Of("vm-test"),
 				},

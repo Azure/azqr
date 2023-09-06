@@ -31,7 +31,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "mysql-001",
 				target: &armmysql.Server{
 					ID: ref.Of("test"),
 				},
@@ -49,7 +49,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "mysql-003",
 				target:      &armmysql.Server{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -61,7 +61,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "mysql-004",
 				target: &armmysql.Server{
 					Properties: &armmysql.ServerProperties{
 						PrivateEndpointConnections: []*armmysql.ServerPrivateEndpointConnection{
@@ -81,7 +81,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "mysql-005",
 				target: &armmysql.Server{
 					SKU: &armmysql.SKU{
 						Name: ref.Of("GPGen58"),
@@ -97,7 +97,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "mysql-006",
 				target: &armmysql.Server{
 					Name: ref.Of("mysql-test"),
 				},
@@ -155,7 +155,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLFlexibleScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "mysqlf-001",
 				target: &armmysqlflexibleservers.Server{
 					ID: ref.Of("test"),
 				},
@@ -173,7 +173,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLFlexibleScanner AvailabilityZones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "mysqlf-002",
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						HighAvailability: &armmysqlflexibleservers.HighAvailability{
@@ -191,7 +191,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLFlexibleScanner SLA 99.9%",
 			fields: fields{
-				rule: "SLA",
+				rule: "mysqlf-003",
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{},
 				},
@@ -205,7 +205,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLFlexibleScanner SLA 99.99%",
 			fields: fields{
-				rule: "SLA",
+				rule: "mysqlf-003",
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						HighAvailability: &armmysqlflexibleservers.HighAvailability{
@@ -225,7 +225,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLFlexibleScanner SLA 99.95%",
 			fields: fields{
-				rule: "SLA",
+				rule: "mysqlf-003",
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						HighAvailability: &armmysqlflexibleservers.HighAvailability{
@@ -245,7 +245,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLFlexibleScanner Private",
 			fields: fields{
-				rule: "Private",
+				rule: "mysqlf-004",
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						Network: &armmysqlflexibleservers.Network{
@@ -263,7 +263,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLFlexibleScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "mysqlf-005",
 				target: &armmysqlflexibleservers.Server{
 					SKU: &armmysqlflexibleservers.SKU{
 						Name: ref.Of("StandardD4sv3"),
@@ -279,7 +279,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "MySQLFlexibleScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "mysqlf-006",
 				target: &armmysqlflexibleservers.Server{
 					Name: ref.Of("mysql-test"),
 				},

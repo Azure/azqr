@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the LoadBalancerScanner
 func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"lb-001": {
 			Id:          "lb-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
+			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"lb-002": {
 			Id:          "lb-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -44,9 +45,10 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-availability-zones#zone-redundant",
+			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-availability-zones#zone-redundant",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"lb-003": {
 			Id:          "lb-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -61,9 +63,10 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return sla == "None", sla
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
+			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"SKU": {
+		"lb-005": {
 			Id:          "lb-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -74,9 +77,10 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				sku := *i.SKU.Name
 				return sku != armnetwork.LoadBalancerSKUNameStandard, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
+			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"lb-006": {
 			Id:          "lb-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -103,7 +107,8 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				caf := (strings.HasPrefix(*c.Name, "lbi") && hasPrivateIP) || (strings.HasPrefix(*c.Name, "lbe") && hasPublicIP)
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"lb-007": {
 			Id:          "lb-007",

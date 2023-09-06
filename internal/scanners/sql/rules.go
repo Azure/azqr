@@ -12,8 +12,16 @@ import (
 
 // GetRules - Returns the rules for the SQLScanner
 func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
+	result := a.getServerRules()
+	for k, v := range a.getDatabaseRules() {
+		result[k] = v
+	}
+	return result
+}
+
+func (a *SQLScanner) getServerRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"sql-001": {
 			Id:          "sql-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,8 +32,9 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"Private": {
+		"sql-004": {
 			Id:          "sql-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -36,8 +45,9 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"CAF": {
+		"sql-006": {
 			Id:          "sql-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -48,7 +58,8 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "sql")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"sql-007": {
 			Id:          "sql-007",
@@ -77,10 +88,9 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 	}
 }
 
-// GetRules - Returns the rules for the SQLScanner
-func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
+func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"sqldb-001": {
 			Id:          "sqldb-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -91,8 +101,9 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"sqldb-002": {
 			Id:          "sqldb-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -106,8 +117,9 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 				}
 				return !zones, ""
 			},
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"sqldb-003": {
 			Id:          "sqldb-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -121,8 +133,9 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
+			Field: scanners.OverviewFieldSLA,
 		},
-		"SKU": {
+		"sqldb-005": {
 			Id:          "sqldb-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -132,9 +145,10 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 				i := target.(*armsql.Database)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
+			Url:   "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"sqldb-006": {
 			Id:          "sqldb-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -145,7 +159,8 @@ func (a *SQLScanner) GetDatabaseRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "sqldb")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"sqldb-007": {
 			Id:          "sqldb-007",

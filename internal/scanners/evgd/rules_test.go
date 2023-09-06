@@ -30,7 +30,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 		{
 			name: "EventGridScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "evgd-001",
 				target: &armeventgrid.Domain{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 		{
 			name: "EventGridScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "evgd-003",
 				target:      &armeventgrid.Domain{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +60,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 		{
 			name: "EventGridScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "evgd-004",
 				target: &armeventgrid.Domain{
 					Properties: &armeventgrid.DomainProperties{
 						PrivateEndpointConnections: []*armeventgrid.PrivateEndpointConnection{
@@ -80,7 +80,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 		{
 			name: "EventGridScanner SKU",
 			fields: fields{
-				rule:        "SKU",
+				rule:        "evgd-005",
 				target:      &armeventgrid.Domain{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -92,7 +92,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 		{
 			name: "EventGridScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "evgd-006",
 				target: &armeventgrid.Domain{
 					Name: ref.Of("evgd-test"),
 				},

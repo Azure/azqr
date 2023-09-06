@@ -74,7 +74,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://azure.microsoft.com/en-us/updates/application-gateway-v1-will-be-retired-on-28-april-2026-transition-to-application-gateway-v2/",
 		},
-		"DiagnosticSettings": {
+		"agw-005": {
 			Id:          "agw-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -85,9 +85,10 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
+			Url:   "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"agw-007": {
 			Id:          "agw-007",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -98,7 +99,8 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 				zones := g.Zones != nil && len(g.Zones) > 1
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-autoscaling-zone-redundant",
+			Url:   "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-autoscaling-zone-redundant",
+			Field: scanners.OverviewFieldAZ,
 		},
 		"agw-008": {
 			Id:          "agw-008",
@@ -125,7 +127,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/features#connection-draining",
 		},
-		"SLA": {
+		"agw-103": {
 			Id:          "agw-103",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -134,9 +136,10 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/application-gateway/",
+			Url:   "https://www.azure.cn/en-us/support/sla/application-gateway/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"SKU": {
+		"agw-104": {
 			Id:          "agw-104",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -146,9 +149,10 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 				g := target.(*armnetwork.ApplicationGateway)
 				return false, string(*g.Properties.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/understanding-pricing",
+			Url:   "https://learn.microsoft.com/en-us/azure/application-gateway/understanding-pricing",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"agw-105": {
 			Id:          "agw-105",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -159,9 +163,10 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*g.Name, "agw")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
-		"agw-007": {
+		"agw-106": {
 			Id:          "agw-106",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,

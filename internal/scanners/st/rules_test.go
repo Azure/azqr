@@ -30,7 +30,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 		{
 			name: "StorageScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "st-001",
 				target: &armstorage.Account{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 		{
 			name: "StorageScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "st-002",
 				target: &armstorage.Account{
 					SKU: &armstorage.SKU{
 						Name: getPremiumZRSSKU(),
@@ -64,7 +64,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 		{
 			name: "StorageScanner SLA 99.9%",
 			fields: fields{
-				rule: "SLA",
+				rule: "st-003",
 				target: &armstorage.Account{
 					SKU: &armstorage.SKU{
 						Name: getPremiumZRSSKU(),
@@ -83,7 +83,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 		{
 			name: "StorageScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "st-004",
 				target: &armstorage.Account{
 					Properties: &armstorage.AccountProperties{
 						PrivateEndpointConnections: []*armstorage.PrivateEndpointConnection{
@@ -103,7 +103,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 		{
 			name: "StorageScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "st-005",
 				target: &armstorage.Account{
 					SKU: &armstorage.SKU{
 						Name: getPremiumZRSSKU(),
@@ -119,7 +119,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 		{
 			name: "StorageScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "st-006",
 				target: &armstorage.Account{
 					Name: ref.Of("sttest"),
 				},

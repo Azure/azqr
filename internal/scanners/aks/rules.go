@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the AKSScanner
 func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"aks-001": {
 			Id:          "aks-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
+			Url:   "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"aks-002": {
 			Id:          "aks-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -42,9 +43,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/availability-zones",
+			Url:   "https://learn.microsoft.com/en-us/azure/aks/availability-zones",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"aks-003": {
 			Id:          "aks-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -73,9 +75,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return sla == "None", sla
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers#uptime-sla-terms-and-conditions",
+			Url:   "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers#uptime-sla-terms-and-conditions",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"aks-004": {
 			Id:          "aks-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -86,9 +89,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				pe := c.Properties.APIServerAccessProfile != nil && c.Properties.APIServerAccessProfile.EnablePrivateCluster != nil && *c.Properties.APIServerAccessProfile.EnablePrivateCluster
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
+			Url:   "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"aks-005": {
 			Id:          "aks-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -102,9 +106,10 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return sku == "Free", sku
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers",
+			Url:   "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"aks-006": {
 			Id:          "aks-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -115,7 +120,8 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "aks")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"aks-007": {
 			Id:          "aks-007",

@@ -30,7 +30,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 		{
 			name: "KeyVaultScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "kv-001",
 				target: &armkeyvault.Vault{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 		{
 			name: "KeyVaultScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "kv-003",
 				target:      &armkeyvault.Vault{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +60,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 		{
 			name: "KeyVaultScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "kv-004",
 				target: &armkeyvault.Vault{
 					Properties: &armkeyvault.VaultProperties{
 						PrivateEndpointConnections: []*armkeyvault.PrivateEndpointConnectionItem{
@@ -80,7 +80,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 		{
 			name: "KeyVaultScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "kv-005",
 				target: &armkeyvault.Vault{
 					Properties: &armkeyvault.VaultProperties{
 						SKU: &armkeyvault.SKU{
@@ -98,7 +98,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 		{
 			name: "KeyVaultScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "kv-006",
 				target: &armkeyvault.Vault{
 					Name: ref.Of("kv-test"),
 				},

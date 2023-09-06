@@ -30,7 +30,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 		{
 			name: "RedisScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "redis-001",
 				target: &armredis.ResourceInfo{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 		{
 			name: "RedisScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "redis-002",
 				target: &armredis.ResourceInfo{
 					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 				},
@@ -62,7 +62,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 		{
 			name: "RedisScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "redis-003",
 				target:      &armredis.ResourceInfo{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -74,7 +74,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 		{
 			name: "RedisScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "redis-004",
 				target: &armredis.ResourceInfo{
 					Properties: &armredis.Properties{
 						PrivateEndpointConnections: []*armredis.PrivateEndpointConnection{
@@ -94,7 +94,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 		{
 			name: "RedisScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "redis-005",
 				target: &armredis.ResourceInfo{
 					Properties: &armredis.Properties{
 						SKU: &armredis.SKU{
@@ -112,7 +112,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 		{
 			name: "RedisScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "redis-006",
 				target: &armredis.ResourceInfo{
 					Name: ref.Of("redis-test"),
 				},

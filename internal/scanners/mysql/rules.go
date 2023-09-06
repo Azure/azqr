@@ -14,7 +14,7 @@ import (
 // GetRules - Returns the rules for the MySQLScanner
 func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"mysql-001": {
 			Id:          "mysql-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -25,9 +25,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-monitoring#server-logs",
+			Url:   "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-monitoring#server-logs",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"SLA": {
+		"mysql-003": {
 			Id:          "mysql-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -36,9 +37,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/mysql/",
+			Url:   "https://www.azure.cn/en-us/support/sla/mysql/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"mysql-004": {
 			Id:          "mysql-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -49,9 +51,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-data-access-security-private-link",
+			Url:   "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-data-access-security-private-link",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"mysql-005": {
 			Id:          "mysql-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -61,9 +64,10 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armmysql.Server)
 				return false, *i.SKU.Name
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-pricing-tiers",
+			Url:   "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-pricing-tiers",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"mysql-006": {
 			Id:          "mysql-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -74,7 +78,8 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "mysql")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"mysql-007": {
 			Id:          "mysql-007",
@@ -105,7 +110,7 @@ func (a *MySQLScanner) GetRules() map[string]scanners.AzureRule {
 // GetRules - Returns the rules for the MySQLFlexibleScanner
 func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"mysqlf-001": {
 			Id:          "mysqlf-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -116,9 +121,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
+			Url:   "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"mysqlf-002": {
 			Id:          "mysqlf-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -129,9 +135,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				zones := *i.Properties.HighAvailability.Mode == armmysqlflexibleservers.HighAvailabilityModeZoneRedundant
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-configure-high-availability-cli",
+			Url:   "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-configure-high-availability-cli",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"mysqlf-003": {
 			Id:          "mysqlf-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -149,9 +156,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Url: "hhttps://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			Url:   "hhttps://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"mysqlf-004": {
 			Id:          "mysqlf-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateIP,
@@ -162,9 +170,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				pe := *i.Properties.Network.PublicNetworkAccess == armmysqlflexibleservers.EnableStatusEnumDisabled
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli",
+			Url:   "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"mysqlf-005": {
 			Id:          "mysqlf-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -174,9 +183,10 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armmysqlflexibleservers.Server)
 				return false, *i.SKU.Name
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/concepts-service-tiers-storage",
+			Url:   "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/concepts-service-tiers-storage",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"mysqlf-006": {
 			Id:          "mysqlf-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -187,7 +197,8 @@ func (a *MySQLFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "mysql")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"mysqlf-007": {
 			Id:          "mysqlf-007",

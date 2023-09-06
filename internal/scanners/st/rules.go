@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the StorageScanner
 func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"st-001": {
 			Id:          "st-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
+			Url:   "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"st-002": {
 			Id:          "st-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -41,9 +42,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/EN-US/azure/reliability/migrate-storage",
+			Url:   "https://learn.microsoft.com/EN-US/azure/reliability/migrate-storage",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"st-003": {
 			Id:          "st-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -68,9 +70,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/storage/",
+			Url:   "https://www.azure.cn/en-us/support/sla/storage/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"st-004": {
 			Id:          "st-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -81,9 +84,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/storage/common/storage-private-endpoints",
+			Url:   "https://learn.microsoft.com/en-us/azure/storage/common/storage-private-endpoints",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"st-005": {
 			Id:          "st-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -93,9 +97,10 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armstorage.Account)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/rest/api/storagerp/srp_sku_types",
+			Url:   "https://learn.microsoft.com/en-us/rest/api/storagerp/srp_sku_types",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"st-006": {
 			Id:          "st-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -106,7 +111,8 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "st")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"st-007": {
 			Id:          "st-007",

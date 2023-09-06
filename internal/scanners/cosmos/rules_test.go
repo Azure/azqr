@@ -30,7 +30,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 		{
 			name: "CosmosDBScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "cosmos-001",
 				target: &armcosmos.DatabaseAccountGetResults{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 		{
 			name: "CosmosDBScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "cosmos-002",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{
 						Locations: []*armcosmos.Location{
@@ -71,7 +71,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 		{
 			name: "CosmosDBScanner SLA 99.99%",
 			fields: fields{
-				rule: "SLA",
+				rule: "cosmos-003",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{},
 				},
@@ -85,7 +85,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 		{
 			name: "CosmosDBScanner SLA 99.995%",
 			fields: fields{
-				rule: "SLA",
+				rule: "cosmos-003",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{
 						Locations: []*armcosmos.Location{
@@ -105,7 +105,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 		{
 			name: "CosmosDBScanner SLA 99.999%",
 			fields: fields{
-				rule: "SLA",
+				rule: "cosmos-003",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{
 						Locations: []*armcosmos.Location{
@@ -128,7 +128,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 		{
 			name: "CosmosDBScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "cosmos-004",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{
 						PrivateEndpointConnections: []*armcosmos.PrivateEndpointConnection{
@@ -148,7 +148,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 		{
 			name: "CosmosDBScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "cosmos-005",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{
 						DatabaseAccountOfferType: getDatabaseAccountOfferType(),
@@ -164,7 +164,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 		{
 			name: "CosmosDBScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "cosmos-006",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Name: ref.Of("cosmos-test"),
 				},

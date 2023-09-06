@@ -14,7 +14,7 @@ import (
 // GetRules - Returns the rules for the KeyVaultScanner
 func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"kv-001": {
 			Id:          "kv-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -25,9 +25,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
+			Url:   "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"SLA": {
+		"kv-003": {
 			Id:          "kv-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -36,9 +37,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/key-vault/",
+			Url:   "https://www.azure.cn/en-us/support/sla/key-vault/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"kv-004": {
 			Id:          "kv-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -49,9 +51,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/private-link-service",
+			Url:   "https://learn.microsoft.com/en-us/azure/key-vault/general/private-link-service",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"kv-005": {
 			Id:          "kv-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -61,9 +64,10 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armkeyvault.Vault)
 				return false, string(*i.Properties.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/key-vault/",
+			Url:   "https://azure.microsoft.com/en-us/pricing/details/key-vault/",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"kv-006": {
 			Id:          "kv-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -74,7 +78,8 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "kv")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"kv-007": {
 			Id:          "kv-007",

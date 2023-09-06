@@ -30,7 +30,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 		{
 			name: "AppConfigurationScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "appcs-001",
 				target: &armappconfiguration.ConfigurationStore{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 		{
 			name: "AppConfigurationScanner SLA Free SKU",
 			fields: fields{
-				rule: "SLA",
+				rule: "appcs-003",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
 						Name: getFreeSKUName(),
@@ -64,7 +64,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 		{
 			name: "AppConfigurationScanner SLA Standard",
 			fields: fields{
-				rule: "SLA",
+				rule: "appcs-003",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
 						Name: getStandardSKUName(),
@@ -80,7 +80,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 		{
 			name: "AppConfigurationScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "appcs-004",
 				target: &armappconfiguration.ConfigurationStore{
 					Properties: &armappconfiguration.ConfigurationStoreProperties{
 						PrivateEndpointConnections: []*armappconfiguration.PrivateEndpointConnectionReference{
@@ -100,7 +100,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 		{
 			name: "AppConfigurationScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "appcs-005",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
 						Name: getStandardSKUName(),
@@ -116,7 +116,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 		{
 			name: "AppConfigurationScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "appcs-006",
 				target: &armappconfiguration.ConfigurationStore{
 					Name: ref.Of("appcs-test"),
 				},

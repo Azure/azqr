@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the APIManagementScanner
 func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"apim-001": {
 			Id:          "apim-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
+			Url:   "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"apim-002": {
 			Id:          "apim-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -37,9 +38,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				zones := len(a.Zones) > 0
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/reliability/migrate-api-mgt",
+			Url:   "https://learn.microsoft.com/en-us/azure/reliability/migrate-api-mgt",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"apim-003": {
 			Id:          "apim-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -57,9 +59,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 
 				return sla == "None", sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/api-management/",
+			Url:   "https://www.azure.cn/en-us/support/sla/api-management/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"apim-004": {
 			Id:          "apim-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -70,9 +73,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
+			Url:   "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"apim-005": {
 			Id:          "apim-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -83,9 +87,10 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				sku := string(*a.SKU.Name)
 				return strings.Contains(sku, "Developer"), sku
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-features",
+			Url:   "https://learn.microsoft.com/en-us/azure/api-management/api-management-features",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"apim-006": {
 			Id:          "apim-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -96,7 +101,8 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "apim")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"apim-007": {
 			Id:          "apim-007",

@@ -30,7 +30,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "aks-001",
 				target: &armcontainerservice.ManagedCluster{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner AvailabilityZones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "aks-002",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
 						Tier: getSKUTierPaid(),
@@ -71,7 +71,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner Private Cluster",
 			fields: fields{
-				rule: "Private",
+				rule: "aks-004",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
 						Tier: getSKUTierPaid(),
@@ -92,7 +92,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner SLA Free",
 			fields: fields{
-				rule: "SLA",
+				rule: "aks-003",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
 						Tier: getSKUTierFree(),
@@ -115,7 +115,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner SLA Paid",
 			fields: fields{
-				rule: "SLA",
+				rule: "aks-003",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
 						Tier: getSKUTierPaid(),
@@ -138,7 +138,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner SLA Paid with AZ",
 			fields: fields{
-				rule: "SLA",
+				rule: "aks-003",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
 						Tier: getSKUTierPaid(),
@@ -161,7 +161,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "aks-005",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
 						Tier: getSKUTierFree(),
@@ -177,7 +177,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "aks-006",
 				target: &armcontainerservice.ManagedCluster{
 					Name: ref.Of("aks-test"),
 				},

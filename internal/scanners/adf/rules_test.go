@@ -30,7 +30,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 		{
 			name: "DataFactoryScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "adf-001",
 				target: &armdatafactory.Factory{
 					ID: ref.Of("test"),
 				},
@@ -46,9 +46,27 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			},
 		},
 		{
+			name: "DataFactoryScanner Private Endpoint",
+			fields: fields{
+				rule:        "adf-002",
+				target: &armdatafactory.Factory{
+					ID: ref.Of("test"),
+				},
+				scanContext: &scanners.ScanContext{
+					PrivateEndpoints: map[string]bool{
+						"test": true,
+					},
+				},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
 			name: "DataFactoryScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "adf-003",
 				target:      &armdatafactory.Factory{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +78,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 		{
 			name: "DataFactoryScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "adf-004",
 				target: &armdatafactory.Factory{
 					Name: ref.Of("adf-test"),
 				},

@@ -30,7 +30,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 		{
 			name: "DataExplorerScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "dec-001",
 				target: &armkusto.Cluster{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 		{
 			name: "DataExplorerScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "dec-002",
 				target:      &armkusto.Cluster{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +60,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 		{
 			name: "DataExplorerScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "dec-003",
 				target: &armkusto.Cluster{
 					SKU: &armkusto.AzureSKU{
 						Name: getSKU(),
@@ -76,7 +76,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 		{
 			name: "DataExplorerScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "dec-004",
 				target: &armkusto.Cluster{
 					Name: ref.Of("dec-test"),
 				},

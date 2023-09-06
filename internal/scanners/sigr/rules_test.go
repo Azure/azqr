@@ -30,7 +30,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 		{
 			name: "SignalRScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "sigr-001",
 				target: &armsignalr.ResourceInfo{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 		{
 			name: "SignalRScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "sigr-002",
 				target: &armsignalr.ResourceInfo{
 					SKU: &armsignalr.ResourceSKU{
 						Name: ref.Of("Premium"),
@@ -64,7 +64,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 		{
 			name: "SignalRScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "sigr-003",
 				target:      &armsignalr.ResourceInfo{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -76,7 +76,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 		{
 			name: "SignalRScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "sigr-004",
 				target: &armsignalr.ResourceInfo{
 					Properties: &armsignalr.Properties{
 						PrivateEndpointConnections: []*armsignalr.PrivateEndpointConnection{
@@ -96,7 +96,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 		{
 			name: "SignalRScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "sigr-005",
 				target: &armsignalr.ResourceInfo{
 					SKU: &armsignalr.ResourceSKU{
 						Name: ref.Of("Premium"),
@@ -112,7 +112,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 		{
 			name: "SignalRScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "sigr-006",
 				target: &armsignalr.ResourceInfo{
 					Name: ref.Of("sigr-test"),
 				},
