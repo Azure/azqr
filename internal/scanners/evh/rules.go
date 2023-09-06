@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the EventHubScanner
 func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"evh-001": {
 			Id:          "evh-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+			Url:   "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"evh-002": {
 			Id:          "evh-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -37,9 +38,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				zones := *i.Properties.ZoneRedundant
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-premium-overview#high-availability-with-availability-zones",
+			Url:   "https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-premium-overview#high-availability-with-availability-zones",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"evh-003": {
 			Id:          "evh-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -54,9 +56,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/event-hubs/",
+			Url:   "https://www.azure.cn/en-us/support/sla/event-hubs/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"evh-004": {
 			Id:          "evh-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -67,9 +70,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/network-security",
+			Url:   "https://learn.microsoft.com/en-us/azure/event-hubs/network-security",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"evh-005": {
 			Id:          "evh-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -79,9 +83,10 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armeventhub.EHNamespace)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/compare-tiers",
+			Url:   "https://learn.microsoft.com/en-us/azure/event-hubs/compare-tiers",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"evh-006": {
 			Id:          "evh-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -92,7 +97,8 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "evh")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"evh-007": {
 			Id:          "evh-007",

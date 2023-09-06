@@ -30,7 +30,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerInstanceScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "ci-002",
 				target: &armcontainerinstance.ContainerGroup{
 					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 				},
@@ -44,7 +44,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerInstanceScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "ci-003",
 				target:      &armcontainerinstance.ContainerGroup{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -56,7 +56,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerInstanceScanner IPAddress not present",
 			fields: fields{
-				rule: "Private",
+				rule: "ci-004",
 				target: &armcontainerinstance.ContainerGroup{
 					Properties: &armcontainerinstance.ContainerGroupProperties{
 						IPAddress: nil,
@@ -72,7 +72,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerInstanceScanner IPAddress Type not present",
 			fields: fields{
-				rule: "Private",
+				rule: "ci-004",
 				target: &armcontainerinstance.ContainerGroup{
 					Properties: &armcontainerinstance.ContainerGroupProperties{
 						IPAddress: &armcontainerinstance.IPAddress{
@@ -90,7 +90,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerInstanceScanner IPAddress Internal",
 			fields: fields{
-				rule: "Private",
+				rule: "ci-004",
 				target: &armcontainerinstance.ContainerGroup{
 					Properties: &armcontainerinstance.ContainerGroupProperties{
 						IPAddress: &armcontainerinstance.IPAddress{
@@ -108,7 +108,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerInstanceScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "ci-005",
 				target: &armcontainerinstance.ContainerGroup{
 					Properties: &armcontainerinstance.ContainerGroupProperties{
 						SKU: getStandardSKU(),
@@ -124,7 +124,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerInstanceScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "ci-006",
 				target: &armcontainerinstance.ContainerGroup{
 					Name: ref.Of("ci-test"),
 				},

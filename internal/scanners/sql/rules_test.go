@@ -30,7 +30,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 		{
 			name: "SQLScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "sql-001",
 				target: &armsql.Server{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 		{
 			name: "SQLScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "sql-004",
 				target: &armsql.Server{
 					Properties: &armsql.ServerProperties{
 						PrivateEndpointConnections: []*armsql.ServerPrivateEndpointConnection{
@@ -68,7 +68,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 		{
 			name: "SQLScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "sql-006",
 				target: &armsql.Server{
 					Name: ref.Of("sql-test"),
 				},
@@ -99,7 +99,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &SQLScanner{}
-			rules := s.GetRules()
+			rules := s.getServerRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
@@ -130,7 +130,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 		{
 			name: "SQLScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "sqldb-001",
 				target: &armsql.Database{
 					ID: ref.Of("test"),
 				},
@@ -148,7 +148,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 		{
 			name: "SQLScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "sqldb-002",
 				target: &armsql.Database{
 					Properties: &armsql.DatabaseProperties{
 						ZoneRedundant: ref.Of(true),
@@ -164,7 +164,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 		{
 			name: "SQLScanner SLA 99.995%",
 			fields: fields{
-				rule: "SLA",
+				rule: "sqldb-003",
 				target: &armsql.Database{
 					Properties: &armsql.DatabaseProperties{
 						ZoneRedundant: ref.Of(true),
@@ -183,7 +183,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 		{
 			name: "SQLScanner SLA 99.99%",
 			fields: fields{
-				rule: "SLA",
+				rule: "sqldb-003",
 				target: &armsql.Database{
 					Properties: &armsql.DatabaseProperties{},
 				},
@@ -197,7 +197,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 		{
 			name: "SQLScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "sqldb-005",
 				target: &armsql.Database{
 					SKU: &armsql.SKU{
 						Name: ref.Of("P3"),
@@ -213,7 +213,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 		{
 			name: "SQLScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "sqldb-006",
 				target: &armsql.Database{
 					Name: ref.Of("sqldb-test"),
 				},
@@ -228,7 +228,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &SQLScanner{}
-			rules := s.GetDatabaseRules()
+			rules := s.getDatabaseRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

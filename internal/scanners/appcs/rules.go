@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the AppConfigurationScanner
 func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"appcs-001": {
 			Id:          "appcs-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"SLA": {
+		"appcs-003": {
 			Id:          "appcs-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -42,9 +43,10 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 
 				return sla == "None", sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/app-configuration/",
+			Url:   "https://www.azure.cn/en-us/support/sla/app-configuration/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"appcs-004": {
 			Id:          "appcs-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -55,9 +57,10 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"appcs-005": {
 			Id:          "appcs-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -68,9 +71,10 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 				sku := string(*a.SKU.Name)
 				return false, sku
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/app-configuration/",
+			Url:   "https://azure.microsoft.com/en-us/pricing/details/app-configuration/",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"appcs-006": {
 			Id:          "appcs-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -81,7 +85,8 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "appcs")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"appcs-007": {
 			Id:          "appcs-007",

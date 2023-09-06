@@ -30,7 +30,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualNetworkScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "vnet-001",
 				target: &armnetwork.VirtualNetwork{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualNetworkScanner Availability Zones",
 			fields: fields{
-				rule:        "AvailabilityZones",
+				rule:        "vnet-002",
 				target:      &armnetwork.VirtualNetwork{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +60,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualNetworkScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "vnet-006",
 				target: &armnetwork.VirtualNetwork{
 					Name: ref.Of("vnet-test"),
 				},

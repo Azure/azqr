@@ -30,7 +30,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 		{
 			name: "ApplicationGatewayScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "agw-005",
 				target: &armnetwork.ApplicationGateway{
 					ID: ref.Of("test"),
 				},
@@ -46,9 +46,24 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			},
 		},
 		{
+			name: "ApplicationGatewayScanner AvailabilityZones",
+			fields: fields{
+				rule: "agw-007",
+				target: &armnetwork.ApplicationGateway{
+					ID:    ref.Of("test"),
+					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
 			name: "ApplicationGatewayScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "agw-103",
 				target:      &armnetwork.ApplicationGateway{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +75,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 		{
 			name: "ApplicationGatewayScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "agw-104",
 				target: &armnetwork.ApplicationGateway{
 					Properties: &armnetwork.ApplicationGatewayPropertiesFormat{
 						SKU: &armnetwork.ApplicationGatewaySKU{
@@ -78,7 +93,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 		{
 			name: "ApplicationGatewayScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "agw-105",
 				target: &armnetwork.ApplicationGateway{
 					Name: ref.Of("agw-test"),
 				},

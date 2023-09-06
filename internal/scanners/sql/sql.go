@@ -41,8 +41,8 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 		return nil, err
 	}
 	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	databaseRules := c.GetDatabaseRules()
+	rules := c.getServerRules()
+	databaseRules := c.getDatabaseRules()
 	results := []scanners.AzureServiceResult{}
 
 	for _, sql := range sql {

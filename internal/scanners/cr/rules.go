@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the ContainerRegistryScanner
 func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"cr-001": {
 			Id:          "cr-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
+			Url:   "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"cr-002": {
 			Id:          "cr-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -37,9 +38,10 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				zones := *i.Properties.ZoneRedundancy == armcontainerregistry.ZoneRedundancyEnabled
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-registry/zone-redundancy",
+			Url:   "https://learn.microsoft.com/en-us/azure/container-registry/zone-redundancy",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"cr-003": {
 			Id:          "cr-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -48,9 +50,10 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/container-registry/",
+			Url:   "https://www.azure.cn/en-us/support/sla/container-registry/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"cr-004": {
 			Id:          "cr-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -61,9 +64,10 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link",
+			Url:   "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"cr-005": {
 			Id:          "cr-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -73,9 +77,10 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armcontainerregistry.Registry)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-skus",
+			Url:   "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-skus",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"cr-006": {
 			Id:          "cr-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -86,7 +91,8 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "cr")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"cr-007": {
 			Id:          "cr-007",

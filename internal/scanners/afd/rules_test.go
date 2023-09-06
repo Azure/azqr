@@ -30,7 +30,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 		{
 			name: "FrontDoorScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "afd-001",
 				target: &armcdn.Profile{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 		{
 			name: "FrontDoorScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "afd-003",
 				target:      &armcdn.Profile{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +60,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 		{
 			name: "FrontDoorScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "afd-005",
 				target: &armcdn.Profile{
 					SKU: &armcdn.SKU{
 						Name: getSKU(),
@@ -76,7 +76,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 		{
 			name: "FrontDoorScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "afd-006",
 				target: &armcdn.Profile{
 					Name: ref.Of("afd-test"),
 				},

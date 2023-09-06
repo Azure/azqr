@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the MariaScanner
 func (a *MariaScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"maria-001": {
 			Id:          "maria-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,8 +24,9 @@ func (a *MariaScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"Private": {
+		"maria-002": {
 			Id:          "maria-002",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -36,8 +37,9 @@ func (a *MariaScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"CAF": {
+		"maria-003": {
 			Id:          "maria-003",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -49,8 +51,9 @@ func (a *MariaScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
-		"SLA": {
+		"maria-004": {
 			Id:          "maria-004",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -59,6 +62,7 @@ func (a *MariaScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
+			Field: scanners.OverviewFieldSLA,
 		},
 		"maria-005": {
 			Id:          "maria-005",

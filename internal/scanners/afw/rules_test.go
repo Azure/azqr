@@ -30,7 +30,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 		{
 			name: "FirewallScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "afw-001",
 				target: &armnetwork.AzureFirewall{
 					ID: ref.Of("test"),
 				},
@@ -46,9 +46,24 @@ func TestFirewallScanner_Rules(t *testing.T) {
 			},
 		},
 		{
+			name: "FirewallScanner AvailabilityZones",
+			fields: fields{
+				rule: "afw-002",
+				target: &armnetwork.AzureFirewall{
+					ID:    ref.Of("test"),
+					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
 			name: "FirewallScanner SLA 99.95%",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "afw-003",
 				target:      &armnetwork.AzureFirewall{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +75,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 		{
 			name: "FirewallScanner SLA 99.99%",
 			fields: fields{
-				rule: "SLA",
+				rule: "afw-003",
 				target: &armnetwork.AzureFirewall{
 					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 				},
@@ -74,7 +89,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 		{
 			name: "FirewallScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "afw-005",
 				target: &armnetwork.AzureFirewall{
 					Properties: &armnetwork.AzureFirewallPropertiesFormat{
 						SKU: &armnetwork.AzureFirewallSKU{
@@ -92,7 +107,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 		{
 			name: "FirewallScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "afw-006",
 				target: &armnetwork.AzureFirewall{
 					Name: ref.Of("afw-test"),
 				},

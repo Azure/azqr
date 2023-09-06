@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the DataFactoryScanner
 func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"adf-001": {
 			Id:          "adf-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
+			Url:   "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"Private": {
+		"adf-002": {
 			Id:          "adf-002",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -37,8 +38,9 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SLA": {
+		"adf-003": {
 			Id:          "adf-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -47,9 +49,10 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"CAF": {
+		"adf-004": {
 			Id:          "adf-004",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -60,7 +63,8 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "adf")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"adf-005": {
 			Id:          "adf-005",

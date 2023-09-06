@@ -54,6 +54,7 @@ type (
 		Description string
 		Severity    string
 		Url         string
+		Field       OverviewField
 		Eval        func(target interface{}, scanContext *ScanContext) (bool, string)
 	}
 
@@ -65,6 +66,7 @@ type (
 		Severity    string
 		Learn       string
 		Result      string
+		Field       OverviewField
 		IsBroken    bool
 	}
 
@@ -78,6 +80,18 @@ type (
 		Count int64
 		Data  []interface{}
 	}
+
+	OverviewField int
+)
+
+const (
+	OverviewFieldNone OverviewField = iota
+	OverviewFieldSKU
+	OverviewFieldSLA
+	OverviewFieldAZ
+	OverviewFieldPrivate
+	OverviewFieldDiagnostics
+	OverviewFieldCAF
 )
 
 func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContext *ScanContext) AzureRuleResult {
@@ -92,6 +106,7 @@ func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContex
 		Learn:       rule.Url,
 		Result:      result,
 		IsBroken:    broken,
+		Field:       rule.Field,
 	}
 }
 
@@ -107,28 +122,28 @@ func (e *RuleEngine) EvaluateRules(rules map[string]AzureRule, target interface{
 
 // ToMap - Returns a map representation of the Azure Service Result
 func (r AzureServiceResult) ToMap(mask bool) map[string]string {
+	sku := ""
+	sla := ""
 	az := ""
-	_, exists := r.Rules["AvailabilityZones"]
-	if exists {
-		az = strconv.FormatBool(!r.Rules["AvailabilityZones"].IsBroken)
-	}
-
 	pvt := ""
-	_, exists = r.Rules["Private"]
-	if exists {
-		pvt = strconv.FormatBool(!r.Rules["Private"].IsBroken)
-	}
-
 	ds := ""
-	_, exists = r.Rules["DiagnosticSettings"]
-	if exists {
-		ds = strconv.FormatBool(!r.Rules["DiagnosticSettings"].IsBroken)
-	}
-
 	caf := ""
-	_, exists = r.Rules["CAF"]
-	if exists {
-		caf = strconv.FormatBool(!r.Rules["CAF"].IsBroken)
+
+	for _, v := range r.Rules {
+		switch v.Field {
+		case OverviewFieldSKU:
+			sku = v.Result
+		case OverviewFieldSLA:
+			sla = v.Result
+		case OverviewFieldAZ:
+			az = strconv.FormatBool(!v.IsBroken)
+		case OverviewFieldPrivate:
+			pvt = strconv.FormatBool(!v.IsBroken)
+		case OverviewFieldDiagnostics:
+			ds = strconv.FormatBool(!v.IsBroken)
+		case OverviewFieldCAF:
+			caf = strconv.FormatBool(!v.IsBroken)
+		}
 	}
 
 	return map[string]string{
@@ -137,8 +152,8 @@ func (r AzureServiceResult) ToMap(mask bool) map[string]string {
 		"Location":       ParseLocation(r.Location),
 		"Type":           r.Type,
 		"Name":           r.ServiceName,
-		"SKU":            r.Rules["SKU"].Result,
-		"SLA":            r.Rules["SLA"].Result,
+		"SKU":            sku,
+		"SLA":            sla,
 		"AZ":             az,
 		"PVT":            pvt,
 		"DS":             ds,

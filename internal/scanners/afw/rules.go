@@ -12,7 +12,7 @@ import (
 
 func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"afw-001": {
 			Id:          "afw-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -23,9 +23,10 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://docs.microsoft.com/en-us/azure/firewall/logs-and-metrics",
+			Url:   "https://docs.microsoft.com/en-us/azure/firewall/logs-and-metrics",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"afw-002": {
 			Id:          "afw-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -36,9 +37,10 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 				zones := len(g.Zones) > 1
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/firewall/features#availability-zones",
+			Url:   "https://learn.microsoft.com/en-us/azure/firewall/features#availability-zones",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"afw-003": {
 			Id:          "afw-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -53,9 +55,10 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 
 				return false, sla
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"SKU": {
+		"afw-005": {
 			Id:          "afw-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -65,9 +68,10 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armnetwork.AzureFirewall)
 				return false, string(*c.Properties.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/firewall/choose-firewall-sku",
+			Url:   "https://learn.microsoft.com/en-us/azure/firewall/choose-firewall-sku",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"afw-006": {
 			Id:          "afw-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -78,7 +82,8 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "afw")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"afw-007": {
 			Id:          "afw-007",

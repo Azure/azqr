@@ -30,7 +30,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 		{
 			name: "MariaScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "maria-001",
 				target: &armmariadb.Server{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 		{
 			name: "MariaScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "maria-002",
 				target: &armmariadb.Server{
 					Properties: &armmariadb.ServerProperties{
 						PrivateEndpointConnections: []*armmariadb.ServerPrivateEndpointConnection{
@@ -68,7 +68,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 		{
 			name: "MariaScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "maria-003",
 				target: &armmariadb.Server{
 					Name: ref.Of("maria-test"),
 				},
@@ -82,7 +82,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 		{
 			name: "MariaScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "maria-004",
 				target:      &armmariadb.Server{},
 				scanContext: &scanners.ScanContext{},
 			},

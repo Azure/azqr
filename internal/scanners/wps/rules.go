@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the WebPubSubScanner
 func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"wps-001": {
 			Id:          "wps-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -24,9 +24,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"wps-002": {
 			Id:          "wps-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -41,9 +42,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"wps-003": {
 			Id:          "wps-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -59,9 +61,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 
 				return sla == "None", sla
 			},
-			Url: "https://azure.microsoft.com/en-gb/support/legal/sla/web-pubsub/",
+			Url:   "https://azure.microsoft.com/en-gb/support/legal/sla/web-pubsub/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"wps-004": {
 			Id:          "wps-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -72,9 +75,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
+			Url:   "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"wps-005": {
 			Id:          "wps-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -84,9 +88,10 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armwebpubsub.ResourceInfo)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/web-pubsub/",
+			Url:   "https://azure.microsoft.com/en-us/pricing/details/web-pubsub/",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"wps-006": {
 			Id:          "wps-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -97,7 +102,8 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "wps")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"wps-007": {
 			Id:          "wps-007",

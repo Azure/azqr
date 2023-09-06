@@ -30,7 +30,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerAppsScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "cae-001",
 				target: &armappcontainers.ManagedEnvironment{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerAppsScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "cae-002",
 				target: &armappcontainers.ManagedEnvironment{
 					Properties: &armappcontainers.ManagedEnvironmentProperties{
 						ZoneRedundant: ref.Of(true),
@@ -64,7 +64,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerAppsScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "cae-003",
 				target:      &armappcontainers.ManagedEnvironment{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -76,7 +76,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerAppsScanner VnetConfiguration not present",
 			fields: fields{
-				rule: "Private",
+				rule: "cae-004",
 				target: &armappcontainers.ManagedEnvironment{
 					Properties: &armappcontainers.ManagedEnvironmentProperties{
 						VnetConfiguration: nil,
@@ -92,7 +92,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerAppsScanner VnetConfiguration Internal",
 			fields: fields{
-				rule: "Private",
+				rule: "cae-004",
 				target: &armappcontainers.ManagedEnvironment{
 					Properties: &armappcontainers.ManagedEnvironmentProperties{
 						VnetConfiguration: &armappcontainers.VnetConfiguration{
@@ -110,7 +110,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 		{
 			name: "ContainerAppsScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "cae-006",
 				target: &armappcontainers.ManagedEnvironment{
 					Name: ref.Of("cae-test"),
 				},

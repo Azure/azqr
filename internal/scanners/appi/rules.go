@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the FrontDoorScanner
 func (a *AppInsightsScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"SLA": {
+		"appi-001": {
 			Id:          "appi-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -22,9 +22,10 @@ func (a *AppInsightsScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/application-insights/index.html",
+			Url:   "https://www.azure.cn/en-us/support/sla/application-insights/index.html",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"CAF": {
+		"appi-002": {
 			Id:          "appi-002",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -35,7 +36,8 @@ func (a *AppInsightsScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "appi")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldSKU,
 		},
 		"appi-003": {
 			Id:          "appi-003",

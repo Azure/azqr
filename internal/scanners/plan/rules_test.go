@@ -30,7 +30,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "plan-001",
 				target: &armappservice.Plan{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "plan-002",
 				target: &armappservice.Plan{
 					Properties: &armappservice.PlanProperties{
 						ZoneRedundant: ref.Of(true),
@@ -64,7 +64,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner SLA None",
 			fields: fields{
-				rule: "SLA",
+				rule: "plan-003",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
 						Tier: ref.Of("Free"),
@@ -80,7 +80,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner SLA 99.95%",
 			fields: fields{
-				rule: "SLA",
+				rule: "plan-003",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
 						Tier: ref.Of("ElasticPremium"),
@@ -96,7 +96,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "plan-005",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
 						Name: ref.Of("EP1"),
@@ -112,7 +112,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "plan-006",
 				target: &armappservice.Plan{
 					Name: ref.Of("asp-test"),
 				},
@@ -127,7 +127,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &AppServiceScanner{}
-			rules := s.GetRules()
+			rules := s.getPlanRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
@@ -158,7 +158,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 		{
 			name: "AppServiceScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "app-001",
 				target: &armappservice.Site{
 					ID: ref.Of("test"),
 				},
@@ -176,7 +176,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 		{
 			name: "AppServiceScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "app-004",
 				target: &armappservice.Site{
 					ID: ref.Of("test"),
 				},
@@ -194,7 +194,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 		{
 			name: "AppServiceScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "app-006",
 				target: &armappservice.Site{
 					Name: ref.Of("app-test"),
 				},
@@ -225,7 +225,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &AppServiceScanner{}
-			rules := s.GetAppRules()
+			rules := s.getAppRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
@@ -256,7 +256,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 		{
 			name: "AppServiceScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "func-001",
 				target: &armappservice.Site{
 					ID: ref.Of("test"),
 				},
@@ -274,7 +274,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 		{
 			name: "AppServiceScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "func-004",
 				target: &armappservice.Site{
 					ID: ref.Of("test"),
 				},
@@ -292,7 +292,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 		{
 			name: "AppServiceScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "func-006",
 				target: &armappservice.Site{
 					Name: ref.Of("func-test"),
 				},
@@ -323,7 +323,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &AppServiceScanner{}
-			rules := s.GetFunctionRules()
+			rules := s.getFunctionRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

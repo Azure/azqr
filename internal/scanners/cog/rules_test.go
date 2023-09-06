@@ -30,7 +30,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 		{
 			name: "CognitiveScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "cog-001",
 				target: &armcognitiveservices.Account{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 		{
 			name: "CognitiveScanner SLA 99.99%",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "cog-003",
 				target:      &armcognitiveservices.Account{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -60,7 +60,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 		{
 			name: "CognitiveScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "cog-004",
 				target: &armcognitiveservices.Account{
 					Properties: &armcognitiveservices.AccountProperties{
 						PrivateEndpointConnections: []*armcognitiveservices.PrivateEndpointConnection{
@@ -80,7 +80,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 		{
 			name: "CognitiveScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "cog-005",
 				target: &armcognitiveservices.Account{
 					SKU: &armcognitiveservices.SKU{
 						Name: ref.Of("test"),
@@ -96,7 +96,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 		{
 			name: "CognitiveScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "cog-006",
 				target: &armcognitiveservices.Account{
 					Name: ref.Of("cog-test"),
 				},

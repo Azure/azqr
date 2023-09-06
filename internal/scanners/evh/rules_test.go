@@ -30,7 +30,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 		{
 			name: "EventHubScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "evh-001",
 				target: &armeventhub.EHNamespace{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 		{
 			name: "EventHubScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "evh-002",
 				target: &armeventhub.EHNamespace{
 					Properties: &armeventhub.EHNamespaceProperties{
 						ZoneRedundant: ref.Of(true),
@@ -64,7 +64,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 		{
 			name: "EventHubScanner SLA 99.95%",
 			fields: fields{
-				rule: "SLA",
+				rule: "evh-003",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
 						Name: getSKUNameStandard(),
@@ -80,7 +80,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 		{
 			name: "EventHubScanner SLA 99.99%",
 			fields: fields{
-				rule: "SLA",
+				rule: "evh-003",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
 						Name: getSKUNamePremium(),
@@ -96,7 +96,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 		{
 			name: "EventHubScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "evh-004",
 				target: &armeventhub.EHNamespace{
 					Properties: &armeventhub.EHNamespaceProperties{
 						PrivateEndpointConnections: []*armeventhub.PrivateEndpointConnection{
@@ -116,7 +116,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 		{
 			name: "EventHubScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "evh-005",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
 						Name: getSKUNamePremium(),
@@ -132,7 +132,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 		{
 			name: "EventHubScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "evh-006",
 				target: &armeventhub.EHNamespace{
 					Name: ref.Of("evh-test"),
 				},

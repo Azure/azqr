@@ -30,7 +30,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 		{
 			name: "LoadBalancerScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "lb-001",
 				target: &armnetwork.LoadBalancer{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 		{
 			name: "LoadBalancerScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "lb-002",
 				target: &armnetwork.LoadBalancer{
 					SKU: &armnetwork.LoadBalancerSKU{
 						Name: getLoadBalancerStandardSKU(),
@@ -75,7 +75,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 		{
 			name: "LoadBalancerScanner SLA 99.99%",
 			fields: fields{
-				rule: "SLA",
+				rule: "lb-003",
 				target: &armnetwork.LoadBalancer{
 					SKU: &armnetwork.LoadBalancerSKU{
 						Name: getLoadBalancerStandardSKU(),
@@ -91,7 +91,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 		{
 			name: "LoadBalancerScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "lb-005",
 				target: &armnetwork.LoadBalancer{
 					SKU: &armnetwork.LoadBalancerSKU{
 						Name: getLoadBalancerStandardSKU(),
@@ -107,7 +107,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 		{
 			name: "LoadBalancerScanner CAF Internal Load Balancer",
 			fields: fields{
-				rule: "CAF",
+				rule: "lb-006",
 				target: &armnetwork.LoadBalancer{
 					Name: ref.Of("lbi"),
 					Properties: &armnetwork.LoadBalancerPropertiesFormat{
@@ -130,7 +130,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 		{
 			name: "LoadBalancerScanner CAF External Load Balancer",
 			fields: fields{
-				rule: "CAF",
+				rule: "lb-006",
 				target: &armnetwork.LoadBalancer{
 					Name: ref.Of("lbe"),
 					Properties: &armnetwork.LoadBalancerPropertiesFormat{

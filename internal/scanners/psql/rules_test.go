@@ -31,7 +31,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "psql-001",
 				target: &armpostgresql.Server{
 					ID: ref.Of("test"),
 				},
@@ -49,7 +49,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreScanner SLA",
 			fields: fields{
-				rule:        "SLA",
+				rule:        "psql-003",
 				target:      &armpostgresql.Server{},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -61,7 +61,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "psql-004",
 				target: &armpostgresql.Server{
 					Properties: &armpostgresql.ServerProperties{
 						PrivateEndpointConnections: []*armpostgresql.ServerPrivateEndpointConnection{
@@ -81,7 +81,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "psql-005",
 				target: &armpostgresql.Server{
 					SKU: &armpostgresql.SKU{
 						Name: ref.Of("GPGen58"),
@@ -97,7 +97,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "psql-006",
 				target: &armpostgresql.Server{
 					Name: ref.Of("psql-test"),
 				},
@@ -175,7 +175,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreFlexibleScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "psqlf-001",
 				target: &armpostgresqlflexibleservers.Server{
 					ID: ref.Of("test"),
 				},
@@ -193,7 +193,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreFlexibleScanner AvailabilityZones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "psqlf-002",
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
@@ -211,7 +211,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreFlexibleScanner SLA 99.9%",
 			fields: fields{
-				rule: "SLA",
+				rule: "psqlf-003",
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{},
 				},
@@ -225,7 +225,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreFlexibleScanner SLA 99.99%",
 			fields: fields{
-				rule: "SLA",
+				rule: "psqlf-003",
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
@@ -245,7 +245,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreFlexibleScanner SLA 99.95%",
 			fields: fields{
-				rule: "SLA",
+				rule: "psqlf-003",
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
@@ -265,7 +265,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreFlexibleScanner Private",
 			fields: fields{
-				rule: "Private",
+				rule: "psqlf-004",
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						Network: &armpostgresqlflexibleservers.Network{
@@ -283,7 +283,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreFlexibleScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "psqlf-005",
 				target: &armpostgresqlflexibleservers.Server{
 					SKU: &armpostgresqlflexibleservers.SKU{
 						Name: ref.Of("StandardD4sv3"),
@@ -299,7 +299,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 		{
 			name: "PostgreFlexibleScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "psqlf-006",
 				target: &armpostgresqlflexibleservers.Server{
 					Name: ref.Of("psql-test"),
 				},

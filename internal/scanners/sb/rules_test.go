@@ -30,7 +30,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 		{
 			name: "ServiceBusScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "sb-001",
 				target: &armservicebus.SBNamespace{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 		{
 			name: "ServiceBusScanner Availability Zones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "sb-002",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
 						Name: getSKUNamePremium(),
@@ -67,7 +67,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 		{
 			name: "ServiceBusScanner SLA 99.9%",
 			fields: fields{
-				rule: "SLA",
+				rule: "sb-003",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
 						Name: getSKUNameStandard(),
@@ -83,7 +83,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 		{
 			name: "ServiceBusScanner SLA 99.95%",
 			fields: fields{
-				rule: "SLA",
+				rule: "sb-003",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
 						Name: getSKUNamePremium(),
@@ -99,7 +99,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 		{
 			name: "ServiceBusScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "sb-004",
 				target: &armservicebus.SBNamespace{
 					Properties: &armservicebus.SBNamespaceProperties{
 						PrivateEndpointConnections: []*armservicebus.PrivateEndpointConnection{
@@ -119,7 +119,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 		{
 			name: "ServiceBusScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "sb-005",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
 						Name: getSKUNamePremium(),
@@ -135,7 +135,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 		{
 			name: "ServiceBusScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "sb-006",
 				target: &armservicebus.SBNamespace{
 					Name: ref.Of("sb-test"),
 				},

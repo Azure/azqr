@@ -13,7 +13,7 @@ import (
 // GetRules - Returns the rules for the ServiceBusScanner
 func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"sb-001": {
 			Id:          "sb-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -25,8 +25,9 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"sb-002": {
 			Id:          "sb-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -39,8 +40,9 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-outages-disasters#availability-zones",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"sb-003": {
 			Id:          "sb-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -56,8 +58,9 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return false, sla
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/service-bus/",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"sb-004": {
 			Id:          "sb-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -69,8 +72,9 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/network-security",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"sb-005": {
 			Id:          "sb-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -81,8 +85,9 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return false, string(*i.SKU.Name)
 			},
 			Url: "https://azure.microsoft.com/en-us/pricing/details/service-bus/",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"sb-006": {
 			Id:          "sb-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -94,6 +99,7 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"sb-007": {
 			Id:          "sb-007",

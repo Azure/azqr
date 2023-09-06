@@ -14,7 +14,7 @@ import (
 // GetRules - Returns the rules for the PostgreScanner
 func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"psql-001": {
 			Id:          "psql-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -26,8 +26,9 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-server-logs#resource-logs",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"SLA": {
+		"psql-003": {
 			Id:          "psql-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -37,9 +38,9 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return false, "99.99%"
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/postgresql/",
+			Field: scanners.OverviewFieldSLA,
 		},
-
-		"Private": {
+		"psql-004": {
 			Id:          "psql-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
@@ -51,8 +52,9 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-data-access-and-security-private-link",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"psql-005": {
 			Id:          "psql-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -63,8 +65,9 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return false, *i.SKU.Name
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-pricing-tiers",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"psql-006": {
 			Id:          "psql-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -76,6 +79,7 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"psql-007": {
 			Id:          "psql-007",
@@ -119,7 +123,7 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 // GetRules - Returns the rules for the PostgreFlexibleScanner
 func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"DiagnosticSettings": {
+		"psqlf-001": {
 			Id:          "psqlf-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
@@ -131,8 +135,9 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
+			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"AvailabilityZones": {
+		"psqlf-002": {
 			Id:          "psqlf-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
@@ -144,8 +149,9 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview#architecture-and-high-availability",
+			Field: scanners.OverviewFieldAZ,
 		},
-		"SLA": {
+		"psqlf-003": {
 			Id:          "psqlf-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
@@ -164,8 +170,9 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return false, sla
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server",
+			Field: scanners.OverviewFieldSLA,
 		},
-		"Private": {
+		"psqlf-004": {
 			Id:          "psqlf-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateIP,
@@ -177,8 +184,9 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking#private-access-vnet-integration",
+			Field: scanners.OverviewFieldPrivate,
 		},
-		"SKU": {
+		"psqlf-005": {
 			Id:          "psqlf-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
@@ -189,8 +197,9 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return false, *i.SKU.Name
 			},
 			Url: "https://azure.microsoft.com/en-gb/pricing/details/postgresql/flexible-server/",
+			Field: scanners.OverviewFieldSKU,
 		},
-		"CAF": {
+		"psqlf-006": {
 			Id:          "psqlf-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
@@ -202,6 +211,7 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
 		},
 		"psqlf-007": {
 			Id:          "psqlf-007",

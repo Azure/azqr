@@ -30,7 +30,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		{
 			name: "APIManagementScanner DiagnosticSettings",
 			fields: fields{
-				rule: "DiagnosticSettings",
+				rule: "apim-001",
 				target: &armapimanagement.ServiceResource{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner AvailabilityZones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "apim-002",
 				target: &armapimanagement.ServiceResource{
 					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 				},
@@ -62,7 +62,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		{
 			name: "AKSScanner no AvailabilityZones",
 			fields: fields{
-				rule: "AvailabilityZones",
+				rule: "apim-002",
 				target: &armapimanagement.ServiceResource{
 					Zones: []*string{},
 				},
@@ -76,7 +76,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		{
 			name: "APIManagementScanner SLA Free SKU",
 			fields: fields{
-				rule: "SLA",
+				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
 						Name: getFreeSKUName(),
@@ -96,7 +96,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		{
 			name: "APIManagementScanner SLA Free Premimum SKU and Availability Zones",
 			fields: fields{
-				rule: "SLA",
+				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
 						Name: getPremiumSKUName(),
@@ -116,7 +116,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		{
 			name: "APIManagementScanner SLA Consumption SKU",
 			fields: fields{
-				rule: "SLA",
+				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
 						Name: getConsumptionSKUName(),
@@ -136,7 +136,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		{
 			name: "APIManagementScanner Private Endpoint",
 			fields: fields{
-				rule: "Private",
+				rule: "apim-004",
 				target: &armapimanagement.ServiceResource{
 					Properties: &armapimanagement.ServiceProperties{
 						PrivateEndpointConnections: []*armapimanagement.RemotePrivateEndpointConnectionWrapper{
@@ -156,7 +156,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		{
 			name: "APIManagementScanner SKU",
 			fields: fields{
-				rule: "SKU",
+				rule: "apim-005",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
 						Name: getFreeSKUName(),
@@ -172,7 +172,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		{
 			name: "APIManagementScanner CAF",
 			fields: fields{
-				rule: "CAF",
+				rule: "apim-006",
 				target: &armapimanagement.ServiceResource{
 					Name: ref.Of("apim-test"),
 				},
