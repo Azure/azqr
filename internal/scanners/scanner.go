@@ -246,7 +246,7 @@ func (q *GraphQuery) Query(ctx context.Context, cred azcore.TokenCredential, que
 	if q.client == nil {
 		client, err := arg.NewClient(cred, nil)
 		if err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to create Resource Graph client")
 			return nil
 		}
 		q.client = client
@@ -260,7 +260,7 @@ func (q *GraphQuery) Query(ctx context.Context, cred azcore.TokenCredential, que
 		result.Data = results.Data.([]interface{})
 		return &result
 	} else {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to run Resource Graph query")
 		return nil
 	}
 }

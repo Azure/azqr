@@ -14,7 +14,7 @@ func renderRecommendations(f *excelize.File, data ReportData) {
 	if len(data.MainData) > 0 {
 		_, err := f.NewSheet("Recommendations")
 		if err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to create Recommendations sheet")
 		}
 
 		renderedRules := map[string]bool{}
@@ -46,11 +46,11 @@ func renderRecommendations(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to get cell")
 			}
 			err = f.SetSheetRow("Recommendations", cell, &row)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to set row")
 			}
 
 			setHyperLink(f, "Recommendations", 6, currentRow)

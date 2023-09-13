@@ -4,7 +4,6 @@ package scanners
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -67,11 +66,9 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 	timeframeType := armcostmanagement.TimeframeTypeCustom
 	etype := armcostmanagement.ExportTypeActualCost
 	toTime := time.Now().UTC()
-	fromTime := time.Date(toTime.Year(), toTime.Month(), 1, 0, 0, 0, 0, time.UTC).AddDate(0, -1, 0)
-	// daily := armcostmanagement.GranularityTypeDaily
+	fromTime := time.Date(toTime.Year(), toTime.Month(), 1, 0, 0, 0, 0, time.UTC)
 	sum := armcostmanagement.FunctionTypeSum
 	dimension := armcostmanagement.QueryColumnTypeDimension
-	inOperator := armcostmanagement.QueryOperatorTypeIn
 	qd := armcostmanagement.QueryDefinition{
 		Type:      &etype,
 		Timeframe: &timeframeType,
@@ -93,34 +90,18 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 					Type: &dimension,
 				},
 			},
-			Filter: &armcostmanagement.QueryFilter{
-				Dimensions: &armcostmanagement.QueryComparisonExpression{
-					Name:     ref.Of("PublisherType"),
-					Operator: &inOperator,
-					Values:   []*string{ref.Of("azure")},
-				},
-			},
 		},
 	}
 
 	resp, err := s.client.Usage(s.config.Ctx, fmt.Sprintf("/subscriptions/%s", s.config.SubscriptionID), qd, nil)
 	if err != nil {
-		if strings.Contains(err.Error(), "ERROR CODE: Subscription Not Registered") {
-			log.Info().Msg("Subscription Not Registered for Cost scanning. Skipping Cost Scan...")
-			return &CostResult{
-				From:  fromTime,
-				To:    toTime,
-				Items: []*CostResultItem{},
-			}, nil
-		}
-
 		return nil, err
 	}
 
 	result := CostResult{
 		From:  fromTime,
 		To:    toTime,
-		Items: make([]*CostResultItem, 0, len(resp.Properties.Rows)),
+		Items: []*CostResultItem{},
 	}
 
 	for _, v := range resp.Properties.Rows {

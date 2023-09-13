@@ -14,7 +14,7 @@ func renderOverview(f *excelize.File, data ReportData) {
 	if len(data.MainData) > 0 {
 		err := f.SetSheetName("Sheet1", "Overview")
 		if err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to rename sheet")
 		}
 
 		headers := data.MainData[0].GetHeaders()
@@ -31,11 +31,11 @@ func renderOverview(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to get cell")
 			}
 			err = f.SetSheetRow("Overview", cell, &row)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to set row")
 			}
 		}
 

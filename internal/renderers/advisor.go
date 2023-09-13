@@ -14,7 +14,7 @@ func renderAdvisor(f *excelize.File, data ReportData) {
 	if len(data.AdvisorData) > 0 {
 		_, err := f.NewSheet("Advisor")
 		if err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to create Advisor sheet")
 		}
 
 		headers := data.AdvisorData[0].GetProperties()
@@ -31,11 +31,11 @@ func renderAdvisor(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to get cell")
 			}
 			err = f.SetSheetRow("Advisor", cell, &row)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to set row")
 			}
 		}
 
