@@ -141,7 +141,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to get Azure credentials")
 	}
 
 	ctx := context.Background()
@@ -162,7 +162,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	} else {
 		subs, err := listSubscriptions(ctx, cred, clientOptions)
 		if err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to list subscriptions")
 		}
 		for _, s := range subs {
 			subscriptions = append(subscriptions, *s.SubscriptionID)
@@ -172,7 +172,9 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	var ruleResults []scanners.AzureServiceResult
 	var defenderResults []scanners.DefenderResult
 	var advisorResults []scanners.AdvisorResult
-	var costResult *scanners.CostResult
+	costResult := &scanners.CostResult{
+		Items: []*scanners.CostResultItem{},
+	}
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -188,7 +190,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		if resourceGroupName != "" {
 			exists, err := checkExistenceResourceGroup(ctx, s, resourceGroupName, cred, clientOptions)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to check existence of Resource Group")
 			}
 
 			if !exists {
@@ -198,7 +200,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		} else {
 			rgs, err := listResourceGroup(ctx, s, cred, clientOptions)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to list Resource Groups")
 			}
 			for _, rg := range rgs {
 				resourceGroups = append(resourceGroups, *rg.Name)
@@ -214,27 +216,27 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 		err = peScanner.Init(config)
 		if err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to initialize Private Endpoint Scanner")
 		}
 		peResults, err := peScanner.ListResourcesWithPrivateEndpoints()
 		if err != nil {
 			if shouldSkipError(err) {
 				peResults = map[string]bool{}
 			} else {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to list resources with Private Endpoints")
 			}
 		}
 
 		err = diagnosticsScanner.Init(config)
 		if err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to initialize Diagnostic Settings Scanner")
 		}
 		diagResults, err := diagnosticsScanner.ListResourcesWithDiagnosticSettings()
 		if err != nil {
 			if shouldSkipError(err) {
 				diagResults = map[string]bool{}
 			} else {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to list resources with Diagnostic Settings")
 			}
 		}
 
@@ -246,7 +248,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		for _, a := range serviceScanners {
 			err := a.Init(config)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to initialize scanner")
 			}
 		}
 
@@ -268,7 +270,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 					res, err := retry(3, 10*time.Millisecond, s, r, &scanContext)
 					if err != nil {
 						cancel()
-						log.Fatal().Err(err)
+						log.Fatal().Err(err).Msg("Failed to scan")
 					}
 					ch <- res
 				}(r, s)
@@ -283,7 +285,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		if defender {
 			err = defenderScanner.Init(config)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to initialize Defender Scanner")
 			}
 
 			res, err := defenderScanner.ListConfiguration()
@@ -291,7 +293,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 				if shouldSkipError(err) {
 					res = []scanners.DefenderResult{}
 				} else {
-					log.Fatal().Err(err)
+					log.Fatal().Err(err).Msg("Failed to list Defender configuration")
 				}
 			}
 			defenderResults = append(defenderResults, res...)
@@ -300,7 +302,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		if advisor {
 			err = advisorScanner.Init(config)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to initialize Advisor Scanner")
 			}
 
 			rec, err := advisorScanner.ListRecommendations()
@@ -308,7 +310,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 				if shouldSkipError(err) {
 					rec = []scanners.AdvisorResult{}
 				} else {
-					log.Fatal().Err(err)
+					log.Fatal().Err(err).Msg("Failed to list Advisor recommendations")
 				}
 			}
 			advisorResults = append(advisorResults, rec...)
@@ -317,23 +319,15 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		if cost {
 			err = costScanner.Init(config)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to initialize Cost Scanner")
 			}
 			costs, err := costScanner.QueryCosts()
-			if err != nil {
-				if shouldSkipError(err) {
-					costs = &scanners.CostResult{
-						Items: []*scanners.CostResultItem{},
-					}
-				} else {
-					log.Fatal().Err(err)
-				}
+			if err != nil && !shouldSkipError(err) {
+				log.Fatal().Err(err).Msg("Failed to query costs")
 			}
-			if costResult == nil {
-				costResult = costs
-			} else {
-				costResult.Items = append(costResult.Items, costs.Items...)
-			}
+			costResult.From = costs.From
+			costResult.To = costs.To
+			costResult.Items = append(costResult.Items, costs.Items...)
 		}
 	}
 

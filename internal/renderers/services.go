@@ -16,7 +16,7 @@ func renderServices(f *excelize.File, data ReportData) {
 	if len(data.MainData) > 0 {
 		_, err := f.NewSheet("Services")
 		if err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to create Services sheet")
 		}
 
 		headers := []string{"Subscription", "Resource Group", "Location", "Type", "Service Name", "Broken", "Category", "Subcategory", "Severity", "Description", "Result", "Learn"}
@@ -56,11 +56,11 @@ func renderServices(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to get cell")
 			}
 			err = f.SetSheetRow("Services", cell, &row)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to set row")
 			}
 			setHyperLink(f, "Services", 12, currentRow)
 		}

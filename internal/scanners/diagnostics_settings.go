@@ -77,7 +77,7 @@ func (s *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 			defer wg.Done()
 			resp, err := s.restCall(s.config.Ctx, r, s.config.Cred, s.config.ClientOptions)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to get diagnostic settings")
 			}
 			asyncRes := map[string]bool{}
 			for _, response := range resp.Responses {

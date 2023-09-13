@@ -84,4 +84,4 @@ This section shows the Azure Advisor Recommendations with the following informat
 
 ## Costs
 
-Shows the Azure Costs for the period between the 1st day of the previous month and the day **Azure Quick Review (azqr)** is used to scan the services.
+Displays the Azure Actual Costs for the period from the first day of the current month until the day Azure Quick Review (azqr) is used.

@@ -19,7 +19,7 @@ func CreateExcelReport(data ReportData) {
 	f := excelize.NewFile()
 	defer func() {
 		if err := f.Close(); err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to close Excel file")
 		}
 	}()
 
@@ -31,7 +31,7 @@ func CreateExcelReport(data ReportData) {
 	renderCosts(f, data)
 
 	if err := f.SaveAs(filename); err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to save Excel file")
 	}
 }
 
@@ -74,20 +74,20 @@ func createFirstRow(f *excelize.File, sheet string, headers []string) {
 	currentRow := 4
 	cell, err := excelize.CoordinatesToCellName(1, currentRow)
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to get cell")
 	}
 	err = f.SetSheetRow(sheet, cell, &headers)
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to set row")
 	}
 	font := excelize.Font{Bold: true}
 	style, err := f.NewStyle(&excelize.Style{Font: &font})
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to create style")
 	}
 	err = f.SetRowStyle(sheet, 4, 4, style)
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to set style")
 	}
 }
 
@@ -107,11 +107,11 @@ func configureSheet(f *excelize.File, sheet string, headers []string, currentRow
 
 	cell, err := excelize.CoordinatesToCellName(len(headers), currentRow)
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to get cell")
 	}
 	err = f.AutoFilter(sheet, fmt.Sprintf("A4:%s", cell), nil)
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to set autofilter")
 	}
 
 	logo := embeded.GetTemplates("microsoft.png")
@@ -121,6 +121,6 @@ func configureSheet(f *excelize.File, sheet string, headers []string, currentRow
 		Positioning: "absolute",
 	}
 	if err := f.AddPictureFromBytes(sheet, "A1", "Azure Logo", ".png", logo, opt); err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Msg("Failed to add logo")
 	}
 }

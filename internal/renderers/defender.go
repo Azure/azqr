@@ -14,7 +14,7 @@ func renderDefender(f *excelize.File, data ReportData) {
 	if len(data.DefenderData) > 0 {
 		_, err := f.NewSheet("Defender")
 		if err != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(err).Msg("Failed to create Defender sheet")
 		}
 
 		headers := data.DefenderData[0].GetProperties()
@@ -31,11 +31,11 @@ func renderDefender(f *excelize.File, data ReportData) {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to get cell")
 			}
 			err = f.SetSheetRow("Defender", cell, &row)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msg("Failed to set row")
 			}
 		}
 
