@@ -30,7 +30,7 @@ The **Overview** sheet provides a summary of the Azure resources scanned by the 
 
 > By default, Azure Quick Review (azqr) masks the Subscription Ids in the spreadsheet, ensuring that they are not directly visible in the output. This helps protect sensitive information and maintain data privacy and security. To view the Subscription Ids, you can use the `--mask=false` flag when running the tool.
 
-To learn more about the **Recommendations**, **Services**, **Defender**, **Advisor** and **Costs** sheets, check the [Scan Results](#scan-results) documentation.
+To learn more about the **Recommendations**, **Services**, **Defender**, **Advisor** and **Costs** sheets, check the [Scan Results](docs/scan_results/README.md) documentation.
 
 ## Azure Quick Review Rules
 
