@@ -1,4 +1,8 @@
-# Azure Quick Review Rules
+---
+title: Rules
+description: Rules
+weight: 3
+---
 
 Azure Quick Review uses the following rules to identify Azure resources that may be or not be compliant with Azure best practices and recommendations:
 
