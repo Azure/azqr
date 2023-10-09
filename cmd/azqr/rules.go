@@ -107,7 +107,7 @@ var rulesCmd = &cobra.Command{
 			for _, k := range keys {
 				rule := rules[k]
 				i++
-				fmt.Printf("%s | %s | %s | %s | %s | %s | %s", fmt.Sprint(i), rule.Id, rule.Category, rule.Subcategory, rule.Description, rule.Severity, rule.Url)
+				fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), rule.Id, rule.Category, rule.Subcategory, rule.Description, rule.Severity, rule.Url)
 				fmt.Println()
 			}
 		}

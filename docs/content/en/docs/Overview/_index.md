@@ -1,6 +1,6 @@
 ---
 title: Overview
-description: Azure Quick Review &mdash; Analyze Azure resources and identify whether they comply with Azure's best practices and recommendations."
+description: Azure Quick Review &mdash; Analyze Azure resources and identify whether they comply with Azure's best practices and recommendations.
 weight: 1
 ---
 
