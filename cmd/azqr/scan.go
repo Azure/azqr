@@ -60,7 +60,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations")
 	scanCmd.PersistentFlags().BoolP("costs", "c", false, "Scan Azure Costs")
-	scanCmd.PersistentFlags().StringP("output-prefix", "o", "azqr_report", "Output file prefix")
+	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
 	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
 
@@ -114,7 +114,7 @@ var scanCmd = &cobra.Command{
 func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	subscriptionID, _ := cmd.Flags().GetString("subscription-id")
 	resourceGroupName, _ := cmd.Flags().GetString("resource-group")
-	outputFilePrefix, _ := cmd.Flags().GetString("output-prefix")
+	outputFileName, _ := cmd.Flags().GetString("output-name")
 	defender, _ := cmd.Flags().GetBool("defender")
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
@@ -132,12 +132,15 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
 	}
 
-	current_time := time.Now()
-	outputFileStamp := fmt.Sprintf("%d_%02d_%02d_T%02d%02d%02d",
-		current_time.Year(), current_time.Month(), current_time.Day(),
-		current_time.Hour(), current_time.Minute(), current_time.Second())
+	outputFile := outputFileName
+	if outputFile == "" {
+		current_time := time.Now()
+		outputFileStamp := fmt.Sprintf("%d_%02d_%02d_T%02d%02d%02d",
+			current_time.Year(), current_time.Month(), current_time.Day(),
+			current_time.Hour(), current_time.Minute(), current_time.Second())
 
-	outputFile := fmt.Sprintf("%s_%s", outputFilePrefix, outputFileStamp)
+		outputFile = fmt.Sprintf("%s_%s", "azqr_report", outputFileStamp)
+	}
 
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
