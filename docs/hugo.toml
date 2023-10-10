@@ -85,7 +85,7 @@ description = "Azure Quick Review"
 section = ["HTML", "print", "RSS"]
 
 [params]
-copyright = "The Azure Quick Review"
+copyright = "Microsoft Corporation"
 # privacy_policy = "https://github.com/azure/azqr/SECURITY.md"
 
 # First one is picked as the Twitter card image if not set on page.
