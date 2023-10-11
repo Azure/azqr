@@ -29,8 +29,6 @@ The overview section contains the following information:
 * **DS**: A Boolean value indicating whether diagnostic settings are enabled for the service. Diagnostic settings allow you to collect logs, metrics, and other monitoring data for Azure resources.
 * **CAF**: A Boolean value indicating whether the service is compliant with the [Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations) (CAF) naming convention. The CAF provides best practices and guidance for organizations adopting Azure.
 
-{{< figure src="/img/overview.png" link="An elephant at sunset" >}}
-
 ![overview](/azqr/img/overview.png)
 
 ## Recommendations
