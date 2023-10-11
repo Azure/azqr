@@ -29,7 +29,9 @@ The overview section contains the following information:
 * **DS**: A Boolean value indicating whether diagnostic settings are enabled for the service. Diagnostic settings allow you to collect logs, metrics, and other monitoring data for Azure resources.
 * **CAF**: A Boolean value indicating whether the service is compliant with the [Cloud Adoption Framework](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations) (CAF) naming convention. The CAF provides best practices and guidance for organizations adopting Azure.
 
-![overview](/img/overview.png)
+{{< figure src="/img/overview.png" link="An elephant at sunset" >}}
+
+![overview](/azqr/img/overview.png)
 
 ## Recommendations
 
@@ -42,7 +44,7 @@ The recommendations section contains a summary of the recommendations for the sc
 * **Severity**: The severity of the rule (High, Medium, Low).
 * **Learn**: Link to relevant documentation.
 
-![recommendations](/img/recommendations.png)
+![recommendations](/azqr/img/recommendations.png)
 
 ## Services
 
@@ -61,7 +63,7 @@ The services section contains the following information:
 * **Broken**: True if the rule is broken.
 * **Learn**: Link to relevant documentation.
 
-![services](/img/services.png)
+![services](/azqr/img/services.png)
 
 ## Defender
 
@@ -71,7 +73,7 @@ The defender section contains the following information:
 * **Tier**: The tier of the plan.
 * **Deprecated**: True if the plan is deprecated.
 
-![defender](/img/defender.png)
+![defender](/azqr/img/defender.png)
 
 ## Advisor
 
