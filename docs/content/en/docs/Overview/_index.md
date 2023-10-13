@@ -71,68 +71,6 @@ To learn more about the rules used by **Azure Quick Review (azqr)** for generati
 * Azure Virtual WAN
 * Azure Web PubSub
 
-## Usage
-
-### Install on Linux or Azure Cloud Shell
-
-```bash
-latest_azqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-)
-wget https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-ubuntu-latest-amd64 -O azqr
-chmod +x azqr
-```
-
-### Install on Mac
-
-Download the latest release from [here](https://github.com/Azure/azqr/releases).
-
-### Install on Windows
-
-```console
-winget install azqr
-```
-
-### Authentication
-
-**Azure Quick Review (azqr)** supports the following authentication methods:
-
-* Azure CLI
-* Service Principal. You'll need to set the following environment variables:
-  * AZURE_CLIENT_ID
-  * AZURE_CLIENT_SECRET
-  * AZURE_TENANT_ID
-
-### Authorization
-
-**Azure Quick Review (azqr)** requires the following permissions:
-
-* Subscription Reader
-
-### Running the Scan
-
-To scan all resource groups in all subscription run:
-
-```bash
-./azqr scan
-```
-
-To scan all resource groups in a specific subscription run:
-
-```bash
-./azqr scan -s <subscription_id>
-```
-
-To scan a specific resource group in a specific subscription run:
-
-```bash
-./azqr scan -s <subscription_id> -g <resource_group_name>
-```
-
-For information on available commands and help run:
-
-```bash
-./azqr -h
-```
-
 ## Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](CODE_OF_CONDUCT.md)
