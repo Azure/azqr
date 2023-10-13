@@ -3,12 +3,16 @@ name: "azqr-build"
 on:
   workflow_dispatch:
   push:
+    paths-ignore:
+      - docs/**
     branches:
       - main
       - release-*
     tags:
       - v*
   pull_request:
+    paths-ignore:
+      - docs/**
     branches:
       - main
       - release-*
