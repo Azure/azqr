@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/scanners/adf"
 	"github.com/Azure/azqr/internal/scanners/afd"
@@ -424,7 +425,13 @@ func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, options
 		if err != nil {
 			return nil, err
 		}
-		subscriptions = append(subscriptions, pageResp.Value...)
+
+		for _, s := range pageResp.Value {
+			if s.State != ref.Of(armsubscription.SubscriptionStateDisabled) &&
+				s.State != ref.Of(armsubscription.SubscriptionStateDeleted) {
+				subscriptions = append(subscriptions, s)
+			}
+		}
 	}
 	return subscriptions, nil
 }
