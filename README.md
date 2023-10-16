@@ -52,6 +52,7 @@ To learn more about the rules used by **Azure Quick Review (azqr)** for generati
 * Azure Container Instances
 * Azure Container Registry
 * Azure Cosmos DB
+* Azure Databricks
 * Azure Data Explorer
 * Azure Data Factory
 * Azure Database for MariaDB
