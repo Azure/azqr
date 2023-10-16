@@ -22,15 +22,15 @@ title: Azure Quick Review
 
 {{% blocks/section color="dark" type="row" %}}
 
-{{% blocks/feature icon="fab fa-github" title="Read the Docs!" url="https://azure.github.io/azqr/" %}}
+{{% blocks/feature icon="fa-solid fa-file-lines" title="Read the Docs!" url="https://azure.github.io/azqr/" %}}
 Learn how to use Azure Quick Review (azqr)
 {{% /blocks/feature %}}
 
-{{% blocks/feature icon="fab fa-github" title="Install azqr!" url="https://github.com/azure/azqr/" %}}
+{{% blocks/feature icon="fa-solid fa-laptop-code" title="Install azqr!" url="https://github.com/azure/azqr/" %}}
 Learn how to install Azure Quick Review (azqr)
 {{% /blocks/feature %}}
 
-{{% blocks/feature icon="fab fa-github" title="Contributions welcome!" url="https://github.com/azure/azqr" %}}
+{{% blocks/feature icon="fa-solid fa-code-pull-request" title="Contributions welcome!" url="https://github.com/azure/azqr" %}}
 We do a [Pull Request](https://github.com/azure/azqr/pulls) contributions workflow on **GitHub**. New users are always welcome!
 {{% /blocks/feature %}}
 
