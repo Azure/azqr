@@ -167,10 +167,10 @@ enable = false
 [params.links]
 # Developer relevant links. These will show up on right side of footer and in the community page if you have one.
 [[params.links.developer]]
-  name = "GitHub"
+  name = "Microsoft - Azure Quick Review"
   url = "https://github.com/azure/azqr"
-  icon = "fab fa-github"
-  desc = "Development takes place here!"
+  icon = "fab fa-microsoft"
+  desc = ""
 
 # hugo module configuration
 
