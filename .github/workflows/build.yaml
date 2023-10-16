@@ -158,20 +158,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      # - name: Create changelog text
-      #   id: changelog
-      #   uses: loopwerk/tag-changelog@v1
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     exclude_types: chore
-
+      - name: Conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v3
+        with:
+          github-token: ${{ github.token }}
+          output-file: "false"
+  
       - name: release
         uses: actions/create-release@v1
         id: create_release
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ env.MINVERVERSIONOVERRIDE }}
-          body: "" #${{ steps.changelog.outputs.changes }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
           draft: false
           prerelease: false
         env:
