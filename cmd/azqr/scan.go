@@ -25,6 +25,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/cog"
 	"github.com/Azure/azqr/internal/scanners/cosmos"
 	"github.com/Azure/azqr/internal/scanners/cr"
+	"github.com/Azure/azqr/internal/scanners/dbw"
 	"github.com/Azure/azqr/internal/scanners/dec"
 	"github.com/Azure/azqr/internal/scanners/evgd"
 	"github.com/Azure/azqr/internal/scanners/evh"
@@ -75,6 +76,7 @@ var scanCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
+			&dbw.DatabricksScanner{},
 			&adf.DataFactoryScanner{},
 			&afd.FrontDoorScanner{},
 			&afw.FirewallScanner{},
