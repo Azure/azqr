@@ -166,6 +166,8 @@ jobs:
           output-file: "false"
           skip-commit: "true"
           skip-tag: "true"
+          git-push: "false"
+          skip-git-pull: "true"
   
       - name: release
         uses: actions/create-release@v1
