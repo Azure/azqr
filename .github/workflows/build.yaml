@@ -164,6 +164,8 @@ jobs:
         with:
           github-token: ${{ github.token }}
           output-file: "false"
+          skip-commit: "true"
+          skip-tag: "true"
   
       - name: release
         uses: actions/create-release@v1
