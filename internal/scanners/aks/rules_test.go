@@ -524,6 +524,29 @@ func TestAKSScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "AKSScanner Max Surge",
+			fields: fields{
+				rule: "aks-016",
+				target: &armcontainerservice.ManagedCluster{
+					SKU: &armcontainerservice.ManagedClusterSKU{
+						Tier: getSKUTierPaid(),
+					},
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
+							{
+								UpgradeSettings: &armcontainerservice.AgentPoolUpgradeSettings{},
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
