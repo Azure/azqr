@@ -6,6 +6,7 @@ package aks
 import (
 	"strings"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
 )
@@ -39,6 +40,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				for _, profile := range cluster.Properties.AgentPoolProfiles {
 					if profile.AvailabilityZones == nil || (profile.AvailabilityZones != nil && len(profile.AvailabilityZones) <= 1) {
 						zones = false
+						break
 					}
 				}
 				return !zones, ""
@@ -59,6 +61,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				for _, profile := range c.Properties.AgentPoolProfiles {
 					if profile.AvailabilityZones == nil || (profile.AvailabilityZones != nil && len(profile.AvailabilityZones) <= 1) {
 						zones = false
+						break
 					}
 				}
 
@@ -251,6 +254,25 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				return len(c.Tags) == 0, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
+		"aks-016": {
+			Id:          "aks-016",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
+			Description: "AKS should have tags",
+			Severity:    scanners.SeverityLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				defaultMaxSurge := false
+				for _, profile := range c.Properties.AgentPoolProfiles {
+					if profile.UpgradeSettings.MaxSurge == nil || (profile.UpgradeSettings.MaxSurge == ref.Of("1")) {
+						defaultMaxSurge = true
+						break
+					}
+				}
+				return defaultMaxSurge, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-at-scale#cluster-upgrade-considerations-and-best-practices",
 		},
 	}
 }
