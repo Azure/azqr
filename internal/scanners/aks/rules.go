@@ -259,7 +259,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "aks-016",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "AKS should have tags",
+			Description: "AKS Node Pools should have MaxSurge set",
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)

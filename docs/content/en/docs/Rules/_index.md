@@ -56,7 +56,7 @@ Azure Quick Review uses the following rules to identify Azure resources that may
 46 | aks-013 | Performance Efficiency | Networking | AKS should avoid using kubenet network plugin | Medium | [Learn](https://learn.microsoft.com/azure/aks/operator-best-practices-network)
 47 | aks-014 | Operational Excellence | Scaling | AKS should have autoscaler enabled | Medium | [Learn](https://learn.microsoft.com/azure/aks/concepts-scale)
 48 | aks-015 | Operational Excellence | Tags | AKS should have tags | Low | [Learn](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json)
-49 | aks-016 | Operational Excellence | Tags | AKS should have tags | Low | [Learn](https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-at-scale#cluster-upgrade-considerations-and-best-practices)
+49 | aks-016 | Operational Excellence | Tags | AKS Node Pools should have MaxSurge set | Low | [Learn](https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-at-scale#cluster-upgrade-considerations-and-best-practices)
 50 | apim-001 | Reliability | Diagnostic Logs | APIM should have diagnostic settings enabled | Medium | [Learn](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs)
 51 | apim-002 | Reliability | Availability Zones | APIM should have availability zones enabled | High | [Learn](https://learn.microsoft.com/en-us/azure/reliability/migrate-api-mgt)
 52 | apim-003 | Reliability | SLA | APIM should have a SLA | High | [Learn](https://www.azure.cn/en-us/support/sla/api-management/)
