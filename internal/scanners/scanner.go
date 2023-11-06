@@ -11,6 +11,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 	arg "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 )
@@ -28,6 +29,7 @@ type (
 	ScanContext struct {
 		PrivateEndpoints    map[string]bool
 		DiagnosticsSettings map[string]bool
+		PublicIPs		   	map[string]*armnetwork.PublicIPAddress
 	}
 
 	// IAzureScanner - Interface for all Azure Scanners
