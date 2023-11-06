@@ -51,6 +51,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
 	"github.com/spf13/cobra"
@@ -187,6 +188,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 
 	defenderScanner := scanners.DefenderScanner{}
 	peScanner := scanners.PrivateEndpointScanner{}
+	pipScanner := scanners.PublicIPScanner{}
 	diagnosticsScanner := scanners.DiagnosticSettingsScanner{}
 	advisorScanner := scanners.AdvisorScanner{}
 	costScanner := scanners.CostScanner{}
@@ -246,9 +248,23 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 			}
 		}
 
+		err = pipScanner.Init(config)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to initialize Diagnostic Settings Scanner")
+		}
+		pips, err := pipScanner.ListPublicIPs()
+		if err != nil {
+			if shouldSkipError(err) {
+				pips = map[string]*armnetwork.PublicIPAddress{}
+			} else {
+				log.Fatal().Err(err).Msg("Failed to list Public IPs")
+			}
+		}
+
 		scanContext := scanners.ScanContext{
 			PrivateEndpoints:    peResults,
 			DiagnosticsSettings: diagResults,
+			PublicIPs:           pips,
 		}
 
 		for _, a := range serviceScanners {

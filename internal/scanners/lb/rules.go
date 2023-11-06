@@ -37,9 +37,15 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armnetwork.LoadBalancer)
 				broken := false
 				for _, ipc := range i.Properties.FrontendIPConfigurations {
-					if ipc.Zones == nil || len(ipc.Zones) <= 1 {
+					if ipc.Properties.PrivateIPAddress != nil && (ipc.Zones == nil || len(ipc.Zones) <= 1) {
 						broken = true
 						break
+					} else if ipc.Properties.PublicIPAddress != nil {
+						pip, ok := scanContext.PublicIPs[*ipc.Properties.PublicIPAddress.ID]
+						if ok && (pip.Zones == nil || len(pip.Zones) <= 1) {
+							broken = true
+							break
+						}
 					}
 				}
 

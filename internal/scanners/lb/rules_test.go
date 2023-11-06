@@ -56,6 +56,9 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 					Properties: &armnetwork.LoadBalancerPropertiesFormat{
 						FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 							{
+								Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
+									PrivateIPAddress: ref.Of("127.0.0.1"),
+								},
 								Zones: []*string{
 									ref.Of("1"),
 									ref.Of("2"),
