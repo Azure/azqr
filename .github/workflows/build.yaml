@@ -53,15 +53,15 @@ jobs:
           - os: macOS-latest
             target_arch: arm
     steps:
-      - name: Set up Go ${{ env.GOVER }}
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GOVER }}
-
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Set up Go ${{ env.GOVER }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GOVER }}
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
