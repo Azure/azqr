@@ -54,7 +54,7 @@ jobs:
             target_arch: arm
     steps:
       - name: Set up Go ${{ env.GOVER }}
-        uses: actions/setup-go@v2.1.3
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GOVER }}
 
