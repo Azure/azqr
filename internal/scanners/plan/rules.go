@@ -19,6 +19,9 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 	for k, v := range a.getFunctionRules() {
 		result[k] = v
 	}
+	for k, v := range a.getLogicRules() {
+		result[k] = v
+	}
 	return result
 }
 
@@ -254,3 +257,76 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzureRule {
 		},
 	}
 }
+
+func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzureRule {
+	return map[string]scanners.AzureRule{
+		"logics-001": {
+			Id:          "logics-001",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
+			Description: "Logic App should have diagnostic settings enabled",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				service := target.(*armappservice.Site)
+				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
+				return !ok, ""
+			},
+			Url:   "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
+			Field: scanners.OverviewFieldDiagnostics,
+		},
+		"logics-004": {
+			Id:          "logics-004",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
+			Description: "Logic App should have private endpoints enabled",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				i := target.(*armappservice.Site)
+				_, pe := scanContext.PrivateEndpoints[*i.ID]
+				return !pe, ""
+			},
+			Url:   "https://learn.microsoft.com/en-us/azure/logic-apps/secure-single-tenant-workflow-virtual-network-private-endpoint",
+			Field: scanners.OverviewFieldPrivate,
+		},
+		"logics-006": {
+			Id:          "logics-006",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
+			Description: "Logic App Name should comply with naming conventions",
+			Severity:    scanners.SeverityLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				caf := strings.HasPrefix(*c.Name, "logic")
+				return !caf, ""
+			},
+			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			Field: scanners.OverviewFieldCAF,
+		},
+		"logics-007": {
+			Id:          "logics-007",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityHTTPS,
+			Description: "Logic App should use HTTPS only",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				h := c.Properties.HTTPSOnly != nil && *c.Properties.HTTPSOnly
+				return !h, ""
+			},
+			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
+		},
+		"logics-008": {
+			Id:          "logics-008",
+			Category:    scanners.RulesCategoryOperationalExcellence,
+			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
+			Description: "Logic App should have tags",
+			Severity:    scanners.SeverityLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				return len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
+	}
+}
+

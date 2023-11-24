@@ -63,6 +63,7 @@ To learn more about the rules used by **Azure Quick Review (azqr)** for generati
 * Azure Key Vault
 * Azure Kubernetes Service
 * Azure Load Balancer
+* Azure Logic Apps
 * Azure Service Bus
 * Azure SignalR Service
 * Azure SQL Database

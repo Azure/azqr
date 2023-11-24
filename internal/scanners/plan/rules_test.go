@@ -335,3 +335,101 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 		})
 	}
 }
+
+func TestAppServiceScanner_LogicRules(t *testing.T) {
+	type fields struct {
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
+	}
+	type want struct {
+		broken bool
+		result string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   want
+	}{
+		{
+			name: "AppServiceScanner DiagnosticSettings",
+			fields: fields{
+				rule: "logics-001",
+				target: &armappservice.Site{
+					ID: ref.Of("test"),
+				},
+				scanContext: &scanners.ScanContext{
+					DiagnosticsSettings: map[string]bool{
+						"test": true,
+					},
+				},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Private Endpoint",
+			fields: fields{
+				rule: "logics-004",
+				target: &armappservice.Site{
+					ID: ref.Of("test"),
+				},
+				scanContext: &scanners.ScanContext{
+					PrivateEndpoints: map[string]bool{
+						"test": true,
+					},
+				},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner CAF",
+			fields: fields{
+				rule: "logics-006",
+				target: &armappservice.Site{
+					Name: ref.Of("logics-test"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner HTTPS only",
+			fields: fields{
+				rule: "logics-007",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						HTTPSOnly: ref.Of(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &AppServiceScanner{}
+			rules := s.getLogicRules()
+			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
+			got := want{
+				broken: b,
+				result: w,
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AppServiceScanner Rule.Eval() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
