@@ -46,6 +46,7 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 	rules := a.getPlanRules()
 	appRules := a.getAppRules()
 	functionRules := a.getFunctionRules()
+	logicRules := a.getLogicRules()
 	results := []scanners.AzureServiceResult{}
 
 	for _, p := range plan {
@@ -69,7 +70,8 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 			var result scanners.AzureServiceResult
 			// https://learn.microsoft.com/en-us/azure/azure-functions/functions-app-settings
 			kind := strings.ToLower(*s.Kind)
-			if strings.Contains(kind, "functionapp") {
+			switch kind {
+			case "functionapp":
 				rr := engine.EvaluateRules(functionRules, s, scanContext)
 
 				result = scanners.AzureServiceResult{
@@ -80,7 +82,18 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 					Location:       *p.Location,
 					Rules:          rr,
 				}
-			} else {
+			case "functionapp,workflowapp":
+				rr := engine.EvaluateRules(logicRules, s, scanContext)
+
+				result = scanners.AzureServiceResult{
+					SubscriptionID: a.config.SubscriptionID,
+					ResourceGroup:  resourceGroupName,
+					ServiceName:    *s.Name,
+					Type:           *s.Type,
+					Location:       *p.Location,
+					Rules:          rr,
+				}
+			default:
 				rr := engine.EvaluateRules(appRules, s, scanContext)
 				result = scanners.AzureServiceResult{
 					SubscriptionID: a.config.SubscriptionID,
