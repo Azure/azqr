@@ -27,6 +27,18 @@ func (a *LogicAppScanner) GetRules() map[string]scanners.AzureRule {
 			Url:   "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
 			Field: scanners.OverviewFieldDiagnostics,
 		},
+		"logic-003": {
+			Id:          "logic-003",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
+			Description: "Logic App should have a SLA",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				return false, "99.9%"
+			},
+			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			Field: scanners.OverviewFieldSLA,
+		},
 		"logic-004": {
 			Id:          "logic-004",
 			Category:    scanners.RulesCategorySecurity,
