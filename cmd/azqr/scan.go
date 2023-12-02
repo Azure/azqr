@@ -12,6 +12,19 @@ import (
 
 	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
+	"github.com/Azure/azqr/internal/renderers"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
+	"github.com/spf13/cobra"
+
 	"github.com/Azure/azqr/internal/scanners/adf"
 	"github.com/Azure/azqr/internal/scanners/afd"
 	"github.com/Azure/azqr/internal/scanners/afw"
@@ -44,18 +57,6 @@ import (
 	"github.com/Azure/azqr/internal/scanners/vm"
 	"github.com/Azure/azqr/internal/scanners/vnet"
 	"github.com/Azure/azqr/internal/scanners/wps"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-
-	"github.com/Azure/azqr/internal/renderers"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
-	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -77,42 +78,7 @@ var scanCmd = &cobra.Command{
 	Long:  "Scan Azure Resources",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := []scanners.IAzureScanner{
-			&dbw.DatabricksScanner{},
-			&adf.DataFactoryScanner{},
-			&afd.FrontDoorScanner{},
-			&afw.FirewallScanner{},
-			&agw.ApplicationGatewayScanner{},
-			&aks.AKSScanner{},
-			&apim.APIManagementScanner{},
-			&appcs.AppConfigurationScanner{},
-			&appi.AppInsightsScanner{},
-			&cae.ContainerAppsScanner{},
-			&ci.ContainerInstanceScanner{},
-			&cog.CognitiveScanner{},
-			&cosmos.CosmosDBScanner{},
-			&cr.ContainerRegistryScanner{},
-			&dec.DataExplorerScanner{},
-			&evgd.EventGridScanner{},
-			&evh.EventHubScanner{},
-			&kv.KeyVaultScanner{},
-			&lb.LoadBalancerScanner{},
-			&logic.LogicAppScanner{},
-			&maria.MariaScanner{},
-			&mysql.MySQLFlexibleScanner{},
-			&mysql.MySQLScanner{},
-			&plan.AppServiceScanner{},
-			&psql.PostgreFlexibleScanner{},
-			&psql.PostgreScanner{},
-			&redis.RedisScanner{},
-			&sb.ServiceBusScanner{},
-			&sigr.SignalRScanner{},
-			&sql.SQLScanner{},
-			&st.StorageScanner{},
-			&vm.VirtualMachineScanner{},
-			&vnet.VirtualNetworkScanner{},
-			&wps.WebPubSubScanner{},
-		}
+		serviceScanners := GetScanners()
 		scan(cmd, serviceScanners)
 	},
 }
@@ -466,4 +432,43 @@ func shouldSkipError(err error) bool {
 		}
 	}
 	return false
+}
+
+func GetScanners() []scanners.IAzureScanner {
+	return []scanners.IAzureScanner{
+		&dbw.DatabricksScanner{},
+		&adf.DataFactoryScanner{},
+		&afd.FrontDoorScanner{},
+		&afw.FirewallScanner{},
+		&agw.ApplicationGatewayScanner{},
+		&aks.AKSScanner{},
+		&apim.APIManagementScanner{},
+		&appcs.AppConfigurationScanner{},
+		&appi.AppInsightsScanner{},
+		&cae.ContainerAppsScanner{},
+		&ci.ContainerInstanceScanner{},
+		&cog.CognitiveScanner{},
+		&cosmos.CosmosDBScanner{},
+		&cr.ContainerRegistryScanner{},
+		&dec.DataExplorerScanner{},
+		&evgd.EventGridScanner{},
+		&evh.EventHubScanner{},
+		&kv.KeyVaultScanner{},
+		&lb.LoadBalancerScanner{},
+		&logic.LogicAppScanner{},
+		&maria.MariaScanner{},
+		&mysql.MySQLFlexibleScanner{},
+		&mysql.MySQLScanner{},
+		&plan.AppServiceScanner{},
+		&psql.PostgreFlexibleScanner{},
+		&psql.PostgreScanner{},
+		&redis.RedisScanner{},
+		&sb.ServiceBusScanner{},
+		&sigr.SignalRScanner{},
+		&sql.SQLScanner{},
+		&st.StorageScanner{},
+		&vm.VirtualMachineScanner{},
+		&vnet.VirtualNetworkScanner{},
+		&wps.WebPubSubScanner{},
+	}
 }
