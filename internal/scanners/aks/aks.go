@@ -6,7 +6,7 @@ package aks
 import (
 	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
 // AKSScanner - Scanner for AKS Clusters

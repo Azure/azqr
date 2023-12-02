@@ -119,8 +119,15 @@ func configureSheet(f *excelize.File, sheet string, headers []string, currentRow
 		ScaleX:      1,
 		ScaleY:      1,
 		Positioning: "absolute",
+		AltText:     "Azure Logo",
 	}
-	if err := f.AddPictureFromBytes(sheet, "A1", "Azure Logo", ".png", logo, opt); err != nil {
+	pic := &excelize.Picture{
+		Extension: ".png",
+		File:      logo,
+		Format:    opt,
+	}
+
+	if err := f.AddPictureFromBytes(sheet, "A1", pic); err != nil {
 		log.Fatal().Err(err).Msg("Failed to add logo")
 	}
 }

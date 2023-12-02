@@ -9,7 +9,7 @@ import (
 
 	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
 func TestAKSScanner_Rules(t *testing.T) {
@@ -575,7 +575,7 @@ func getSKUTierFree() *armcontainerservice.ManagedClusterSKUTier {
 }
 
 func getSKUTierPaid() *armcontainerservice.ManagedClusterSKUTier {
-	s := armcontainerservice.ManagedClusterSKUTierPaid
+	s := armcontainerservice.ManagedClusterSKUTierStandard
 	return &s
 }
 
