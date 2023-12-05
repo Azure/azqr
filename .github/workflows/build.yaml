@@ -24,8 +24,8 @@ jobs:
     name: Build ${{ matrix.target_os }}_${{ matrix.target_arch }} binaries
     runs-on: ${{ matrix.os }}
     env:
-      GOVER: 1.20.3
-      GOLANGCILINT_VER: v1.52.2
+      GOVER: '1.21'
+      GOLANGCILINT_VER: v1.54
       GOOS: ${{ matrix.target_os }}
       GOARCH: ${{ matrix.target_arch }}
       GOPROXY: https://proxy.golang.org
@@ -74,7 +74,7 @@ jobs:
 
       - name: golangci-lint
         if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
-        uses: golangci/golangci-lint-action@v3.3.1
+        uses: golangci/golangci-lint-action@v3
         with:
           version: ${{ env.GOLANGCILINT_VER }}
           args: --timeout 3m --verbose
