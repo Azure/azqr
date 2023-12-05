@@ -5,7 +5,7 @@ package azqr
 
 import (
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azqr/internal/scanners/plan"
+	"github.com/Azure/azqr/internal/scanners/asp"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ var planCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
-			&plan.AppServiceScanner{},
+			&asp.AppServiceScanner{},
 		}
 
 		scan(cmd, serviceScanners)

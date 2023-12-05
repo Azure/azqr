@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package plan
+package asp
 
 import (
 	"strings"
@@ -27,8 +27,8 @@ func (a *AppServiceScanner) GetRules() map[string]scanners.AzureRule {
 
 func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"plan-001": {
-			Id:          "plan-001",
+		"asp-001": {
+			Id:          "asp-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
 			Description: "Plan should have diagnostic settings enabled",
@@ -40,8 +40,8 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 			},
 			Field: scanners.OverviewFieldDiagnostics,
 		},
-		"plan-002": {
-			Id:          "plan-002",
+		"asp-002": {
+			Id:          "asp-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
 			Description: "Plan should have availability zones enabled",
@@ -54,8 +54,8 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 			Url:   "https://learn.microsoft.com/en-us/azure/reliability/migrate-app-service",
 			Field: scanners.OverviewFieldAZ,
 		},
-		"plan-003": {
-			Id:          "plan-003",
+		"asp-003": {
+			Id:          "asp-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
 			Description: "Plan should have a SLA",
@@ -72,8 +72,8 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 			Url:   "https://www.azure.cn/en-us/support/sla/app-service/",
 			Field: scanners.OverviewFieldSLA,
 		},
-		"plan-005": {
-			Id:          "plan-005",
+		"asp-005": {
+			Id:          "asp-005",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
 			Description: "Plan SKU",
@@ -85,8 +85,8 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 			Url:   "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
 			Field: scanners.OverviewFieldSKU,
 		},
-		"plan-006": {
-			Id:          "plan-006",
+		"asp-006": {
+			Id:          "asp-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Plan Name should comply with naming conventions",
@@ -99,8 +99,8 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 			Field: scanners.OverviewFieldCAF,
 		},
-		"plan-007": {
-			Id:          "plan-007",
+		"asp-007": {
+			Id:          "asp-007",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
 			Description: "Plan should have tags",

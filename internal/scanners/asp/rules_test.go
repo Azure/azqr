@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package plan
+package asp
 
 import (
 	"reflect"
@@ -30,7 +30,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner DiagnosticSettings",
 			fields: fields{
-				rule: "plan-001",
+				rule: "asp-001",
 				target: &armappservice.Plan{
 					ID: ref.Of("test"),
 				},
@@ -48,7 +48,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner Availability Zones",
 			fields: fields{
-				rule: "plan-002",
+				rule: "asp-002",
 				target: &armappservice.Plan{
 					Properties: &armappservice.PlanProperties{
 						ZoneRedundant: ref.Of(true),
@@ -64,7 +64,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner SLA None",
 			fields: fields{
-				rule: "plan-003",
+				rule: "asp-003",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
 						Tier: ref.Of("Free"),
@@ -80,7 +80,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner SLA 99.95%",
 			fields: fields{
-				rule: "plan-003",
+				rule: "asp-003",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
 						Tier: ref.Of("ElasticPremium"),
@@ -96,7 +96,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner SKU",
 			fields: fields{
-				rule: "plan-005",
+				rule: "asp-005",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
 						Name: ref.Of("EP1"),
@@ -112,7 +112,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 		{
 			name: "AppServiceScanner CAF",
 			fields: fields{
-				rule: "plan-006",
+				rule: "asp-006",
 				target: &armappservice.Plan{
 					Name: ref.Of("asp-test"),
 				},
