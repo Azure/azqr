@@ -49,19 +49,21 @@ func (a *LogicAppScanner) GetRules() map[string]scanners.AzureRule {
 				service := target.(*armlogic.Workflow)
 				http := false
 				if service.Properties.Definition != nil {
-					triggers := service.Properties.Definition.(map[string]interface{})["triggers"].(map[string]interface{})
-					for _, t := range triggers {
-						trigger := t.(map[string]interface{})
-						if trigger["type"] == "Request" && trigger["kind"] == "Http" {
-							http = true
-							break
-						}	
+					triggers, ok := service.Properties.Definition.(map[string]interface{})["triggers"]
+					if ok {
+						for _, t := range triggers.(map[string]interface{}) {
+							trigger := t.(map[string]interface{})
+							if trigger["type"] == "Request" && trigger["kind"] == "Http" {
+								http = true
+								break
+							}
+						}
 					}
 				}
 
 				broken := http
 
-				if http && service.Properties.AccessControl != nil && service.Properties.AccessControl.Triggers == nil {
+				if http && service.Properties.AccessControl != nil && service.Properties.AccessControl.Triggers != nil {
 					broken = len(service.Properties.AccessControl.Triggers.AllowedCallerIPAddresses) == 0
 				}
 				return broken, ""
