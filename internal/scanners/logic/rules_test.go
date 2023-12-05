@@ -46,15 +46,73 @@ func TestLogicAppScanner_Rules(t *testing.T) {
 			},
 		},
 		{
+			name: "LogicAppScanner No Http Triggers",
+			fields: fields{
+				rule: "logic-004",
+				target: &armlogic.Workflow{
+					ID: ref.Of("test"),
+					Properties: &armlogic.WorkflowProperties{
+						Definition: map[string]interface{}{},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "LogicAppScanner Limit Http Triggers without access control",
+			fields: fields{
+				rule: "logic-004",
+				target: &armlogic.Workflow{
+					ID: ref.Of("test"),
+					Properties: &armlogic.WorkflowProperties{
+						Definition: map[string]interface{}{
+							"triggers": map[string]interface{}{
+								"trigger1": map[string]interface{}{
+									"type": "Request",
+									"kind": "Http",
+								},
+							},
+						},
+						AccessControl: &armlogic.FlowAccessControlConfiguration{
+							Triggers: &armlogic.FlowAccessControlConfigurationPolicy{
+								AllowedCallerIPAddresses: []*armlogic.IPAddressRange{},
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
 			name: "LogicAppScanner Limit Http Triggers",
 			fields: fields{
 				rule: "logic-004",
 				target: &armlogic.Workflow{
 					ID: ref.Of("test"),
 					Properties: &armlogic.WorkflowProperties{
+						Definition: map[string]interface{}{
+							"triggers": map[string]interface{}{
+								"trigger1": map[string]interface{}{
+									"type": "Request",
+									"kind": "Http",
+								},
+							},
+						},
 						AccessControl: &armlogic.FlowAccessControlConfiguration{
 							Triggers: &armlogic.FlowAccessControlConfigurationPolicy{
-								AllowedCallerIPAddresses: []*armlogic.IPAddressRange{},
+								AllowedCallerIPAddresses: []*armlogic.IPAddressRange{
+									{
+										AddressRange : ref.Of("127.0.0.1/32"),
+									},
+								},
 							},
 						},
 					},
