@@ -156,7 +156,7 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Database)
-				caf := strings.HasPrefix(*c.Name, "sqldb")
+				caf := *c.Name == "master" || strings.HasPrefix(*c.Name, "sqldb")
 				return !caf, ""
 			},
 			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",

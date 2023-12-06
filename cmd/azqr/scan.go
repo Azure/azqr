@@ -47,7 +47,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/logic"
 	"github.com/Azure/azqr/internal/scanners/maria"
 	"github.com/Azure/azqr/internal/scanners/mysql"
-	"github.com/Azure/azqr/internal/scanners/plan"
+	"github.com/Azure/azqr/internal/scanners/asp"
 	"github.com/Azure/azqr/internal/scanners/psql"
 	"github.com/Azure/azqr/internal/scanners/redis"
 	"github.com/Azure/azqr/internal/scanners/sb"
@@ -459,7 +459,7 @@ func GetScanners() []scanners.IAzureScanner {
 		&maria.MariaScanner{},
 		&mysql.MySQLFlexibleScanner{},
 		&mysql.MySQLScanner{},
-		&plan.AppServiceScanner{},
+		&asp.AppServiceScanner{},
 		&psql.PostgreFlexibleScanner{},
 		&psql.PostgreScanner{},
 		&redis.RedisScanner{},

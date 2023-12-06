@@ -265,7 +265,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armcontainerservice.ManagedCluster)
 				defaultMaxSurge := false
 				for _, profile := range c.Properties.AgentPoolProfiles {
-					if profile.UpgradeSettings.MaxSurge == nil || (profile.UpgradeSettings.MaxSurge == ref.Of("1")) {
+					if profile.UpgradeSettings == nil || profile.UpgradeSettings.MaxSurge == nil || (profile.UpgradeSettings.MaxSurge == ref.Of("1")) {
 						defaultMaxSurge = true
 						break
 					}

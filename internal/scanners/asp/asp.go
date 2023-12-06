@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package plan
+package asp
 
 import (
 	"strings"
@@ -71,7 +71,7 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 			// https://learn.microsoft.com/en-us/azure/azure-functions/functions-app-settings
 			kind := strings.ToLower(*s.Kind)
 			switch kind {
-			case "functionapp":
+			case "functionapp,linux", "functionapp":
 				rr := engine.EvaluateRules(functionRules, s, scanContext)
 
 				result = scanners.AzureServiceResult{
