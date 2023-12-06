@@ -77,6 +77,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: ${{ env.GOLANGCILINT_VER }}
+          skip-pkg-cache: true
           args: --timeout 3m --verbose
 
       - name: Run go mod tidy & check diff
