@@ -81,6 +81,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.5.0 
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage v1.5.0/go.mod h1:T5RfihdXtBDxt1Ch2wobif3TvzTdumDy29kahv6AV9A=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription v1.2.0 h1:UrGzkHueDwAWDdjQxC+QaXHd4tVCkISYE9j7fSSXF8k=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription v1.2.0/go.mod h1:qskvSQeW+cxEE2bcKYyKimB1/KiQ9xpJ99bcHY0BX6c=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/trafficmanager/armtrafficmanager v1.3.0 h1:e3kTG23M5ps+DjvPolK4dcgohDY8sHsXU7zrdHj1WzY=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/trafficmanager/armtrafficmanager v1.3.0/go.mod h1:Os5dq8Cvvz97rJauZhZJAfKHN+OEvF/0nVmHzF4aVys=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub v1.2.0 h1:U+zDy6lU9scW8b58JpcQAlI+lsitiVSjz/RzBqbS5gM=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub v1.2.0/go.mod h1:gz64akQ/0Cfq2ZQCNsGE5RmRpl9ySpuV4zURgjBuyB0=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.2.0 h1:hVeq+yCyUi+MsoO/CU95yqCIcdzra5ovzk8Q2BBpV2M=

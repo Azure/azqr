@@ -96,7 +96,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 		"kv-008": {
 			Id:          "kv-008",
 			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySubcategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
 			Description: "Key Vault should have soft delete enabled",
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -108,7 +108,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 		"kv-009": {
 			Id:          "kv-009",
 			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySubcategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
 			Description: "Key Vault should have purge protection enabled",
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

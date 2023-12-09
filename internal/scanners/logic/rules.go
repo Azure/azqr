@@ -42,7 +42,7 @@ func (a *LogicAppScanner) GetRules() map[string]scanners.AzureRule {
 		"logic-004": {
 			Id:          "logic-004",
 			Category:    scanners.RulesCategorySecurity,
-			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
+			Subcategory: scanners.RulesSubcategorySecurityFirewall,
 			Description: "Logic App should limit access to Http Triggers",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

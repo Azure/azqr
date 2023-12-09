@@ -92,7 +92,7 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 		"vm-008": {
 			Id:          "vm-008",
 			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySubcategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
 			Description: "Virtual Machine should use managed disks",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
@@ -105,7 +105,7 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 		"vm-009": {
 			Id:          "vm-009",
 			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySubcategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
 			Description: "Virtual Machine should host application or database data on a data disk",
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {

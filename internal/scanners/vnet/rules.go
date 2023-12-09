@@ -89,7 +89,7 @@ func (a *VirtualNetworkScanner) GetRules() map[string]scanners.AzureRule {
 		"vnet-009": {
 			Id:          "vnet-009",
 			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySubcategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
 			Description: "Virtual NetworK should have at least two DNS servers assigned",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
