@@ -33,6 +33,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/apim"
 	"github.com/Azure/azqr/internal/scanners/appcs"
 	"github.com/Azure/azqr/internal/scanners/appi"
+	"github.com/Azure/azqr/internal/scanners/asp"
 	"github.com/Azure/azqr/internal/scanners/cae"
 	"github.com/Azure/azqr/internal/scanners/ci"
 	"github.com/Azure/azqr/internal/scanners/cog"
@@ -47,13 +48,13 @@ import (
 	"github.com/Azure/azqr/internal/scanners/logic"
 	"github.com/Azure/azqr/internal/scanners/maria"
 	"github.com/Azure/azqr/internal/scanners/mysql"
-	"github.com/Azure/azqr/internal/scanners/asp"
 	"github.com/Azure/azqr/internal/scanners/psql"
 	"github.com/Azure/azqr/internal/scanners/redis"
 	"github.com/Azure/azqr/internal/scanners/sb"
 	"github.com/Azure/azqr/internal/scanners/sigr"
 	"github.com/Azure/azqr/internal/scanners/sql"
 	"github.com/Azure/azqr/internal/scanners/st"
+	"github.com/Azure/azqr/internal/scanners/traf"
 	"github.com/Azure/azqr/internal/scanners/vm"
 	"github.com/Azure/azqr/internal/scanners/vnet"
 	"github.com/Azure/azqr/internal/scanners/wps"
@@ -466,6 +467,7 @@ func GetScanners() []scanners.IAzureScanner {
 		&sb.ServiceBusScanner{},
 		&sigr.SignalRScanner{},
 		&sql.SQLScanner{},
+		&traf.TrafficManagerScanner{},
 		&st.StorageScanner{},
 		&vm.VirtualMachineScanner{},
 		&vnet.VirtualNetworkScanner{},

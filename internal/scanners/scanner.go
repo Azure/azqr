@@ -29,7 +29,7 @@ type (
 	ScanContext struct {
 		PrivateEndpoints    map[string]bool
 		DiagnosticsSettings map[string]bool
-		PublicIPs		   	map[string]*armnetwork.PublicIPAddress
+		PublicIPs           map[string]*armnetwork.PublicIPAddress
 	}
 
 	// IAzureScanner - Interface for all Azure Scanners
@@ -209,14 +209,14 @@ const (
 	RulesCategoryOperationalExcellence  = "Operational Excellence"
 	RulesCategoryPerformanceEfficienccy = "Performance Efficiency"
 
-	RulesSubcategoryReliabilityAvailabilityZones      = "Availability Zones"
-	RulesSubcategoryReliabilitySLA                    = "SLA"
-	RulesSubcategoryReliabilitySKU                    = "SKU"
-	RulesSubcategoryReliabilityScaling                = "Scaling"
-	RulesSubcategoryReliabilityDiagnosticLogs         = "Diagnostic Logs"
-	RulesSubcategoryReliabilityMonitoring             = "Monitoring"
-	RulesSubcategoryReliabilitySubcategoryReliability = "Reliability"
-	RulesSubcategoryReliabilitySubcategoryMaintenance = "Maintenance"
+	RulesSubcategoryReliabilityAvailabilityZones = "Availability Zones"
+	RulesSubcategoryReliabilitySLA               = "SLA"
+	RulesSubcategoryReliabilitySKU               = "SKU"
+	RulesSubcategoryReliabilityScaling           = "Scaling"
+	RulesSubcategoryReliabilityDiagnosticLogs    = "Diagnostic Logs"
+	RulesSubcategoryReliabilityMonitoring        = "Monitoring"
+	RulesSubcategoryReliabilityReliability       = "Reliability"
+	RulesSubcategoryReliabilityMaintenance       = "Maintenance"
 
 	RulesSubcategoryOperationalExcellenceCAF               = "Naming Convention (CAF)"
 	RulesSubcategoryOperationalExcellenceTags              = "Tags"
