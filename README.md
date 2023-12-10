@@ -48,6 +48,7 @@ To learn more about the rules used by **Azure Quick Review (azqr)** for generati
 * Azure Application Insights
 * Azure Cache for Redis
 * Azure Cognitive Services Account
+* Azure Container Apps Environment
 * Azure Container Apps
 * Azure Container Instances
 * Azure Container Registry
@@ -73,6 +74,7 @@ To learn more about the rules used by **Azure Quick Review (azqr)** for generati
 * Azure SignalR Service
 * Azure SQL Database
 * Azure Storage Account
+* Azure Traffic Manager
 * Azure Virtual Machine
 * Azure Virtual Network
 * Azure Virtual WAN

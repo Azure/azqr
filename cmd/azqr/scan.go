@@ -34,6 +34,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/appcs"
 	"github.com/Azure/azqr/internal/scanners/appi"
 	"github.com/Azure/azqr/internal/scanners/asp"
+	"github.com/Azure/azqr/internal/scanners/ca"
 	"github.com/Azure/azqr/internal/scanners/cae"
 	"github.com/Azure/azqr/internal/scanners/ci"
 	"github.com/Azure/azqr/internal/scanners/cog"
@@ -446,7 +447,8 @@ func GetScanners() []scanners.IAzureScanner {
 		&apim.APIManagementScanner{},
 		&appcs.AppConfigurationScanner{},
 		&appi.AppInsightsScanner{},
-		&cae.ContainerAppsScanner{},
+		&cae.ContainerAppsEnvironmentScanner{},
+		&ca.ContainerAppsScanner{},
 		&ci.ContainerInstanceScanner{},
 		&cog.CognitiveScanner{},
 		&cosmos.CosmosDBScanner{},

@@ -10,8 +10,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanage
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement v1.1.1/go.mod h1:a0Ug1l73Il7EhrCJEEt2dGjlNjvphppZq5KqJdgnwuw=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration v1.1.1 h1:iRc20pGuVlc1HwRO2bg0m1tfP9rkPB0K88trl8Fei2w=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration v1.1.1/go.mod h1:21Lewei+tg5zp5xmyOxfDY//2tBvWQXee0UoM8xZjr8=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers v1.1.0 h1:fdAOz6TFldGDoEcRa975i5L5QvWU8ptut+SJAIfuWUY=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers v1.1.0/go.mod h1:qV+BWew22CAalRTwJEAHs+aSLP49k/csNlspqhMIDRU=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2 v2.1.0 h1:zDZaE5l/F3aAAITZa6y2oTc7SdiYNJ0a5vFnE+sF5ro=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2 v2.1.0/go.mod h1:Wyp5SZpwTP9gXJE0J2JuhTj1s+uMJzA1HQY1P9v3l/I=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights v1.2.0 h1:7FX6sHNPamIAyukt6w9Gw5Qa5bu+gVN2Iy70yHc0xns=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights v1.2.0/go.mod h1:S7Ss6Rm0nlKDRHKrO9eL2Be5EnX29Z09CNPWgK7o4+I=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2 v2.3.0 h1:JI8PcWOImyvIUEZ0Bbmfe05FOlWkMi2KhjG+cAKaUms=
