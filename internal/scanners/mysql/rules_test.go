@@ -177,7 +177,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						HighAvailability: &armmysqlflexibleservers.HighAvailability{
-							Mode: getHighAvailability(),
+							Mode: ref.Of(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
 						},
 					},
 				},
@@ -209,7 +209,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						HighAvailability: &armmysqlflexibleservers.HighAvailability{
-							Mode:                    getHighAvailability(),
+							Mode:                    ref.Of(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
 							StandbyAvailabilityZone: ref.Of("2"),
 						},
 						AvailabilityZone: ref.Of("1"),
@@ -229,7 +229,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						HighAvailability: &armmysqlflexibleservers.HighAvailability{
-							Mode:                    getHighAvailability(),
+							Mode:                    ref.Of(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
 							StandbyAvailabilityZone: ref.Of("1"),
 						},
 						AvailabilityZone: ref.Of("1"),
@@ -249,7 +249,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						Network: &armmysqlflexibleservers.Network{
-							PublicNetworkAccess: getServerPublicNetworkAccessStateDisabled(),
+							PublicNetworkAccess: ref.Of(armmysqlflexibleservers.EnableStatusEnumDisabled),
 						},
 					},
 				},
@@ -305,14 +305,4 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getHighAvailability() *armmysqlflexibleservers.HighAvailabilityMode {
-	s := armmysqlflexibleservers.HighAvailabilityModeZoneRedundant
-	return &s
-}
-
-func getServerPublicNetworkAccessStateDisabled() *armmysqlflexibleservers.EnableStatusEnum {
-	s := armmysqlflexibleservers.EnableStatusEnumDisabled
-	return &s
 }

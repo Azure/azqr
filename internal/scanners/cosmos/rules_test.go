@@ -151,7 +151,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 				rule: "cosmos-005",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{
-						DatabaseAccountOfferType: getDatabaseAccountOfferType(),
+						DatabaseAccountOfferType: ref.Of("Standard"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -190,9 +190,4 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getDatabaseAccountOfferType() *string {
-	s := "Standard"
-	return &s
 }

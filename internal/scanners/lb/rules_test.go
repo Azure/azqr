@@ -51,7 +51,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 				rule: "lb-002",
 				target: &armnetwork.LoadBalancer{
 					SKU: &armnetwork.LoadBalancerSKU{
-						Name: getLoadBalancerStandardSKU(),
+						Name: ref.Of(armnetwork.LoadBalancerSKUNameStandard),
 					},
 					Properties: &armnetwork.LoadBalancerPropertiesFormat{
 						FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
@@ -81,7 +81,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 				rule: "lb-003",
 				target: &armnetwork.LoadBalancer{
 					SKU: &armnetwork.LoadBalancerSKU{
-						Name: getLoadBalancerStandardSKU(),
+						Name: ref.Of(armnetwork.LoadBalancerSKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -97,7 +97,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 				rule: "lb-005",
 				target: &armnetwork.LoadBalancer{
 					SKU: &armnetwork.LoadBalancerSKU{
-						Name: getLoadBalancerStandardSKU(),
+						Name: ref.Of(armnetwork.LoadBalancerSKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -170,7 +170,3 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 	}
 }
 
-func getLoadBalancerStandardSKU() *armnetwork.LoadBalancerSKUName {
-	s := armnetwork.LoadBalancerSKUNameStandard
-	return &s
-}

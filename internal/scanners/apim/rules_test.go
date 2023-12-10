@@ -79,7 +79,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: getFreeSKUName(),
+						Name: ref.Of(armapimanagement.SKUTypeDeveloper),
 					},
 					Zones: []*string{},
 					Properties: &armapimanagement.ServiceProperties{
@@ -99,7 +99,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: getPremiumSKUName(),
+						Name: ref.Of(armapimanagement.SKUTypePremium),
 					},
 					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
 					Properties: &armapimanagement.ServiceProperties{
@@ -119,7 +119,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: getConsumptionSKUName(),
+						Name: ref.Of(armapimanagement.SKUTypeConsumption),
 					},
 					Zones: []*string{},
 					Properties: &armapimanagement.ServiceProperties{
@@ -159,7 +159,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-005",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: getFreeSKUName(),
+						Name: ref.Of(armapimanagement.SKUTypeDeveloper),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -200,17 +200,3 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 	}
 }
 
-func getFreeSKUName() *armapimanagement.SKUType {
-	s := armapimanagement.SKUTypeDeveloper
-	return &s
-}
-
-func getPremiumSKUName() *armapimanagement.SKUType {
-	s := armapimanagement.SKUTypePremium
-	return &s
-}
-
-func getConsumptionSKUName() *armapimanagement.SKUType {
-	s := armapimanagement.SKUTypeConsumption
-	return &s
-}

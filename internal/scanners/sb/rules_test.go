@@ -51,7 +51,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-002",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
-						Name: getSKUNamePremium(),
+						Name: ref.Of(armservicebus.SKUNamePremium),
 					},
 					Properties: &armservicebus.SBNamespaceProperties{
 						ZoneRedundant: ref.Of(true),
@@ -70,7 +70,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-003",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
-						Name: getSKUNameStandard(),
+						Name: ref.Of(armservicebus.SKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -86,7 +86,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-003",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
-						Name: getSKUNamePremium(),
+						Name: ref.Of(armservicebus.SKUNamePremium),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -122,7 +122,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-005",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
-						Name: getSKUNamePremium(),
+						Name: ref.Of(armservicebus.SKUNamePremium),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -177,14 +177,4 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getSKUNameStandard() *armservicebus.SKUName {
-	s := armservicebus.SKUNameStandard
-	return &s
-}
-
-func getSKUNamePremium() *armservicebus.SKUName {
-	s := armservicebus.SKUNamePremium
-	return &s
 }

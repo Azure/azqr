@@ -63,7 +63,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 				rule: "afd-005",
 				target: &armcdn.Profile{
 					SKU: &armcdn.SKU{
-						Name: getSKU(),
+						Name: ref.Of(armcdn.SKUNameStandardMicrosoft),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -102,9 +102,4 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getSKU() *armcdn.SKUName {
-	s := armcdn.SKUNameStandardMicrosoft
-	return &s
 }

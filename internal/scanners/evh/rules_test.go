@@ -67,7 +67,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "evh-003",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
-						Name: getSKUNameStandard(),
+						Name: ref.Of(armeventhub.SKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -83,7 +83,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "evh-003",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
-						Name: getSKUNamePremium(),
+						Name: ref.Of(armeventhub.SKUNamePremium),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -119,7 +119,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "evh-005",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
-						Name: getSKUNamePremium(),
+						Name: ref.Of(armeventhub.SKUNamePremium),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -174,14 +174,4 @@ func TestEventHubScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getSKUNameStandard() *armeventhub.SKUName {
-	s := armeventhub.SKUNameStandard
-	return &s
-}
-
-func getSKUNamePremium() *armeventhub.SKUName {
-	s := armeventhub.SKUNamePremium
-	return &s
 }

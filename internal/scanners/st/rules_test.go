@@ -51,7 +51,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-002",
 				target: &armstorage.Account{
 					SKU: &armstorage.SKU{
-						Name: getPremiumZRSSKU(),
+						Name: ref.Of(armstorage.SKUNamePremiumZRS),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,10 +67,10 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-003",
 				target: &armstorage.Account{
 					SKU: &armstorage.SKU{
-						Name: getPremiumZRSSKU(),
+						Name: ref.Of(armstorage.SKUNamePremiumZRS),
 					},
 					Properties: &armstorage.AccountProperties{
-						AccessTier: getHotTier(),
+						AccessTier: ref.Of(armstorage.AccessTierHot),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -106,7 +106,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-005",
 				target: &armstorage.Account{
 					SKU: &armstorage.SKU{
-						Name: getPremiumZRSSKU(),
+						Name: ref.Of(armstorage.SKUNamePremiumZRS),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -152,7 +152,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-009",
 				target: &armstorage.Account{
 					Properties: &armstorage.AccountProperties{
-						MinimumTLSVersion: getTLSVersion(),
+						MinimumTLSVersion: ref.Of(armstorage.MinimumTLSVersionTLS12),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -177,19 +177,4 @@ func TestStorageScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getPremiumZRSSKU() *armstorage.SKUName {
-	s := armstorage.SKUNamePremiumZRS
-	return &s
-}
-
-func getHotTier() *armstorage.AccessTier {
-	s := armstorage.AccessTierHot
-	return &s
-}
-
-func getTLSVersion() *armstorage.MinimumTLSVersion {
-	s := armstorage.MinimumTLSVersionTLS12
-	return &s
 }

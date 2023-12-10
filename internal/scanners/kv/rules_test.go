@@ -84,7 +84,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				target: &armkeyvault.Vault{
 					Properties: &armkeyvault.VaultProperties{
 						SKU: &armkeyvault.SKU{
-							Name: getSKUName(),
+							Name: ref.Of(armkeyvault.SKUNameStandard),
 						},
 					},
 				},
@@ -156,9 +156,4 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getSKUName() *armkeyvault.SKUName {
-	s := armkeyvault.SKUNameStandard
-	return &s
 }
