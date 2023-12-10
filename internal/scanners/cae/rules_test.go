@@ -9,10 +9,10 @@ import (
 
 	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
-func TestContainerAppsScanner_Rules(t *testing.T) {
+func TestContainerAppsEnvironmentScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
@@ -28,7 +28,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "ContainerAppsScanner DiagnosticSettings",
+			name: "ContainerAppsEnvironmentScanner DiagnosticSettings",
 			fields: fields{
 				rule: "cae-001",
 				target: &armappcontainers.ManagedEnvironment{
@@ -46,7 +46,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerAppsScanner Availability Zones",
+			name: "ContainerAppsEnvironmentScanner Availability Zones",
 			fields: fields{
 				rule: "cae-002",
 				target: &armappcontainers.ManagedEnvironment{
@@ -62,7 +62,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerAppsScanner SLA",
+			name: "ContainerAppsEnvironmentScanner SLA",
 			fields: fields{
 				rule:        "cae-003",
 				target:      &armappcontainers.ManagedEnvironment{},
@@ -74,7 +74,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerAppsScanner VnetConfiguration not present",
+			name: "ContainerAppsEnvironmentScanner VnetConfiguration not present",
 			fields: fields{
 				rule: "cae-004",
 				target: &armappcontainers.ManagedEnvironment{
@@ -90,7 +90,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerAppsScanner VnetConfiguration Internal",
+			name: "ContainerAppsEnvironmentScanner VnetConfiguration Internal",
 			fields: fields{
 				rule: "cae-004",
 				target: &armappcontainers.ManagedEnvironment{
@@ -108,7 +108,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerAppsScanner CAF",
+			name: "ContainerAppsEnvironmentScanner CAF",
 			fields: fields{
 				rule: "cae-006",
 				target: &armappcontainers.ManagedEnvironment{
@@ -124,7 +124,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &ContainerAppsScanner{}
+			s := &ContainerAppsEnvironmentScanner{}
 			rules := s.GetRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -132,7 +132,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 				result: w,
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ContainerAppsScanner Rule.Eval() = %v, want %v", got, tt.want)
+				t.Errorf("ContainerAppsEnvironmentScanner Rule.Eval() = %v, want %v", got, tt.want)
 			}
 		})
 	}

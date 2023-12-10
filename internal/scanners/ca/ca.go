@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package cae
+package ca
 
 import (
 	"github.com/rs/zerolog/log"
@@ -9,23 +9,23 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
-// ContainerAppsEnvironmentScanner - Scanner for Container Apps
-type ContainerAppsEnvironmentScanner struct {
+// ContainerAppsScanner - Scanner for Container Apps
+type ContainerAppsScanner struct {
 	config     *scanners.ScannerConfig
-	appsClient *armappcontainers.ManagedEnvironmentsClient
+	appsClient *armappcontainers.ContainerAppsClient
 }
 
-// Init - Initializes the ContainerAppsEnvironmentScanner
-func (a *ContainerAppsEnvironmentScanner) Init(config *scanners.ScannerConfig) error {
+// Init - Initializes the ContainerAppsScanner
+func (a *ContainerAppsScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.appsClient, err = armappcontainers.NewManagedEnvironmentsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
+	a.appsClient, err = armappcontainers.NewContainerAppsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	return err
 }
 
 // Scan - Scans all Container Apps in a Resource Group
-func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Container Apps Environments in Resource Group %s", resourceGroupName)
+func (a *ContainerAppsScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
+	log.Info().Msgf("Scanning Container Apps in Resource Group %s", resourceGroupName)
 
 	apps, err := a.listApps(resourceGroupName)
 	if err != nil {
@@ -50,9 +50,9 @@ func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanCon
 	return results, nil
 }
 
-func (a *ContainerAppsEnvironmentScanner) listApps(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error) {
+func (a *ContainerAppsScanner) listApps(resourceGroupName string) ([]*armappcontainers.ContainerApp, error) {
 	pager := a.appsClient.NewListByResourceGroupPager(resourceGroupName, nil)
-	apps := make([]*armappcontainers.ManagedEnvironment, 0)
+	apps := make([]*armappcontainers.ContainerApp, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {

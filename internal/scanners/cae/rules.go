@@ -7,17 +7,17 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
-// GetRules - Returns the rules for the ContainerAppsScanner
-func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
+// GetRules - Returns the rules for the ContainerAppsEnvironmentScanner
+func (a *ContainerAppsEnvironmentScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"cae-001": {
 			Id:          "cae-001",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "ContainerApp should have diagnostic settings enabled",
+			Description: "Container Apps Environment should have diagnostic settings enabled",
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armappcontainers.ManagedEnvironment)
@@ -31,7 +31,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "cae-002",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
-			Description: "ContainerApp should have availability zones enabled",
+			Description: "Container Apps Environment should have availability zones enabled",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				app := target.(*armappcontainers.ManagedEnvironment)
@@ -45,7 +45,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "cae-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
-			Description: "ContainerApp should have a SLA",
+			Description: "Container Apps Environment should have a SLA",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
@@ -57,7 +57,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "cae-004",
 			Category:    scanners.RulesCategorySecurity,
 			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
-			Description: "ContainerApp should have private endpoints enabled",
+			Description: "Container Apps Environment should have private endpoints enabled",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				app := target.(*armappcontainers.ManagedEnvironment)
@@ -71,7 +71,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "cae-006",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "ContainerApp Name should comply with naming conventions",
+			Description: "Container Apps Environment Name should comply with naming conventions",
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ManagedEnvironment)
@@ -85,7 +85,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "cae-007",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "ContainerApp should have tags",
+			Description: "Container Apps Environment should have tags",
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ManagedEnvironment)
