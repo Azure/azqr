@@ -51,7 +51,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-002",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
-						Tier: getSKUTierPaid(),
+						Tier: ref.Of(armcontainerservice.ManagedClusterSKUTierStandard),
 					},
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
@@ -74,7 +74,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-004",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
-						Tier: getSKUTierPaid(),
+						Tier: ref.Of(armcontainerservice.ManagedClusterSKUTierStandard),
 					},
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						APIServerAccessProfile: &armcontainerservice.ManagedClusterAPIServerAccessProfile{
@@ -95,7 +95,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-003",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
-						Tier: getSKUTierFree(),
+						Tier: ref.Of(armcontainerservice.ManagedClusterSKUTierFree),
 					},
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
@@ -118,7 +118,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-003",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
-						Tier: getSKUTierPaid(),
+						Tier: ref.Of(armcontainerservice.ManagedClusterSKUTierStandard),
 					},
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
@@ -141,7 +141,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-003",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
-						Tier: getSKUTierPaid(),
+						Tier: ref.Of(armcontainerservice.ManagedClusterSKUTierStandard),
 					},
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
@@ -164,7 +164,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-005",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
-						Tier: getSKUTierFree(),
+						Tier: ref.Of(armcontainerservice.ManagedClusterSKUTierFree),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -405,7 +405,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				target: &armcontainerservice.ManagedCluster{
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						NetworkProfile: &armcontainerservice.NetworkProfile{
-							OutboundType: getOutboundTypeUserDefinedRouting(),
+							OutboundType: ref.Of(armcontainerservice.OutboundTypeUserDefinedRouting),
 						},
 					},
 				},
@@ -423,7 +423,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				target: &armcontainerservice.ManagedCluster{
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						NetworkProfile: &armcontainerservice.NetworkProfile{
-							OutboundType: getOutboundTypeLoadBalancer(),
+							OutboundType: ref.Of(armcontainerservice.OutboundTypeLoadBalancer),
 						},
 					},
 				},
@@ -441,7 +441,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				target: &armcontainerservice.ManagedCluster{
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						NetworkProfile: &armcontainerservice.NetworkProfile{
-							NetworkPlugin: getNetworkPluginKubenet(),
+							NetworkPlugin: ref.Of(armcontainerservice.NetworkPluginKubenet),
 						},
 					},
 				},
@@ -530,7 +530,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-016",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
-						Tier: getSKUTierPaid(),
+						Tier: ref.Of(armcontainerservice.ManagedClusterSKUTierStandard),
 					},
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
@@ -553,7 +553,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 				rule: "aks-016",
 				target: &armcontainerservice.ManagedCluster{
 					SKU: &armcontainerservice.ManagedClusterSKU{
-						Tier: getSKUTierPaid(),
+						Tier: ref.Of(armcontainerservice.ManagedClusterSKUTierStandard),
 					},
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
@@ -583,29 +583,4 @@ func TestAKSScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getNetworkPluginKubenet() *armcontainerservice.NetworkPlugin {
-	s := armcontainerservice.NetworkPluginKubenet
-	return &s
-}
-
-func getSKUTierFree() *armcontainerservice.ManagedClusterSKUTier {
-	s := armcontainerservice.ManagedClusterSKUTierFree
-	return &s
-}
-
-func getSKUTierPaid() *armcontainerservice.ManagedClusterSKUTier {
-	s := armcontainerservice.ManagedClusterSKUTierStandard
-	return &s
-}
-
-func getOutboundTypeUserDefinedRouting() *armcontainerservice.OutboundType {
-	s := armcontainerservice.OutboundTypeUserDefinedRouting
-	return &s
-}
-
-func getOutboundTypeLoadBalancer() *armcontainerservice.OutboundType {
-	s := armcontainerservice.OutboundTypeLoadBalancer
-	return &s
 }

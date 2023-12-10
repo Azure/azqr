@@ -114,7 +114,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				rule: "psql-008",
 				target: &armpostgresql.Server{
 					Properties: &armpostgresql.ServerProperties{
-						SSLEnforcement: getSSLEnforcementEnabled(),
+						SSLEnforcement: ref.Of(armpostgresql.SSLEnforcementEnumEnabled),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -130,7 +130,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				rule: "psql-009",
 				target: &armpostgresql.Server{
 					Properties: &armpostgresql.ServerProperties{
-						MinimalTLSVersion: getMinimalTLSVersion(),
+						MinimalTLSVersion: ref.Of(armpostgresql.MinimalTLSVersionEnumTLS12),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -197,7 +197,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode: getHighAvailability(),
+							Mode: ref.Of(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
 						},
 					},
 				},
@@ -229,7 +229,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode:                    getHighAvailability(),
+							Mode:                    ref.Of(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
 							StandbyAvailabilityZone: ref.Of("2"),
 						},
 						AvailabilityZone: ref.Of("1"),
@@ -249,7 +249,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode:                    getHighAvailability(),
+							Mode:                    ref.Of(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
 							StandbyAvailabilityZone: ref.Of("1"),
 						},
 						AvailabilityZone: ref.Of("1"),
@@ -269,7 +269,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						Network: &armpostgresqlflexibleservers.Network{
-							PublicNetworkAccess: getServerPublicNetworkAccessStateDisabled(),
+							PublicNetworkAccess: ref.Of(armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled),
 						},
 					},
 				},
@@ -325,24 +325,4 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getHighAvailability() *armpostgresqlflexibleservers.HighAvailabilityMode {
-	s := armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant
-	return &s
-}
-
-func getServerPublicNetworkAccessStateDisabled() *armpostgresqlflexibleservers.ServerPublicNetworkAccessState {
-	s := armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled
-	return &s
-}
-
-func getSSLEnforcementEnabled() *armpostgresql.SSLEnforcementEnum {
-	s := armpostgresql.SSLEnforcementEnumEnabled
-	return &s
-}
-
-func getMinimalTLSVersion() *armpostgresql.MinimalTLSVersionEnum {
-	s := armpostgresql.MinimalTLSVersionEnumTLS12
-	return &s
 }

@@ -93,7 +93,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					Properties: &armnetwork.AzureFirewallPropertiesFormat{
 						SKU: &armnetwork.AzureFirewallSKU{
-							Name: getSKU(),
+							Name: ref.Of(armnetwork.AzureFirewallSKUNameAZFWVnet),
 						},
 					},
 				},
@@ -133,9 +133,4 @@ func TestFirewallScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getSKU() *armnetwork.AzureFirewallSKUName {
-	s := armnetwork.AzureFirewallSKUNameAZFWVnet
-	return &s
 }

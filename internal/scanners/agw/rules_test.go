@@ -79,7 +79,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 				target: &armnetwork.ApplicationGateway{
 					Properties: &armnetwork.ApplicationGatewayPropertiesFormat{
 						SKU: &armnetwork.ApplicationGatewaySKU{
-							Name: getSKUName(),
+							Name: ref.Of(armnetwork.ApplicationGatewaySKUNameStandardV2),
 						},
 					},
 				},
@@ -119,9 +119,4 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getSKUName() *armnetwork.ApplicationGatewaySKUName {
-	s := armnetwork.ApplicationGatewaySKUNameStandardV2
-	return &s
 }

@@ -94,7 +94,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 				target: &armcontainerinstance.ContainerGroup{
 					Properties: &armcontainerinstance.ContainerGroupProperties{
 						IPAddress: &armcontainerinstance.IPAddress{
-							Type: getContainerGroupIPAddressTypePrivate(),
+							Type: ref.Of(armcontainerinstance.ContainerGroupIPAddressTypePrivate),
 						},
 					},
 				},
@@ -111,7 +111,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 				rule: "ci-005",
 				target: &armcontainerinstance.ContainerGroup{
 					Properties: &armcontainerinstance.ContainerGroupProperties{
-						SKU: getStandardSKU(),
+						SKU: ref.Of(armcontainerinstance.ContainerGroupSKUStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -150,14 +150,4 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getContainerGroupIPAddressTypePrivate() *armcontainerinstance.ContainerGroupIPAddressType {
-	s := armcontainerinstance.ContainerGroupIPAddressTypePrivate
-	return &s
-}
-
-func getStandardSKU() *armcontainerinstance.ContainerGroupSKU {
-	s := armcontainerinstance.ContainerGroupSKUStandard
-	return &s
 }

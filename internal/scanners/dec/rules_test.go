@@ -63,7 +63,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				rule: "dec-003",
 				target: &armkusto.Cluster{
 					SKU: &armkusto.AzureSKU{
-						Name: getSKU(),
+						Name: ref.Of(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -102,9 +102,4 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getSKU() *armkusto.AzureSKUName {
-	s := armkusto.AzureSKUNameDevNoSLAStandardD11V2
-	return &s
 }

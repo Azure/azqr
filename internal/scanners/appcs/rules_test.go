@@ -51,7 +51,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-003",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
-						Name: getFreeSKUName(),
+						Name: ref.Of("Free"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,7 +67,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-003",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
-						Name: getStandardSKUName(),
+						Name: ref.Of("Standard"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -103,7 +103,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-005",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
-						Name: getStandardSKUName(),
+						Name: ref.Of("Standard"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -158,14 +158,4 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getFreeSKUName() *string {
-	s := "Free"
-	return &s
-}
-
-func getStandardSKUName() *string {
-	s := "Standard"
-	return &s
 }

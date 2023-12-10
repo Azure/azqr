@@ -98,7 +98,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				target: &armredis.ResourceInfo{
 					Properties: &armredis.Properties{
 						SKU: &armredis.SKU{
-							Name: getSKUNamePremium(),
+							Name: ref.Of(armredis.SKUNamePremium),
 						},
 					},
 				},
@@ -145,7 +145,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				rule: "redis-009",
 				target: &armredis.ResourceInfo{
 					Properties: &armredis.Properties{
-						MinimumTLSVersion: getTLSVersion(),
+						MinimumTLSVersion: ref.Of(armredis.TLSVersionOne2),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -170,14 +170,4 @@ func TestRedisScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getSKUNamePremium() *armredis.SKUName {
-	s := armredis.SKUNamePremium
-	return &s
-}
-
-func getTLSVersion() *armredis.TLSVersion {
-	s := armredis.TLSVersionOne2
-	return &s
 }

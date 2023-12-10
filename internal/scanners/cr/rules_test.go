@@ -51,7 +51,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				rule: "cr-002",
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{
-						ZoneRedundancy: getZoneRedundancy(),
+						ZoneRedundancy: ref.Of(armcontainerregistry.ZoneRedundancyEnabled),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -99,7 +99,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				rule: "cr-005",
 				target: &armcontainerregistry.Registry{
 					SKU: &armcontainerregistry.SKU{
-						Name: getSKUName(),
+						Name: ref.Of(armcontainerregistry.SKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -205,7 +205,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 					Properties: &armcontainerregistry.RegistryProperties{
 						Policies: &armcontainerregistry.Policies{
 							RetentionPolicy: &armcontainerregistry.RetentionPolicy{
-								Status: getPolicyStatusDisabled(),
+								Status: ref.Of(armcontainerregistry.PolicyStatusDisabled),
 							},
 						},
 					},
@@ -232,19 +232,4 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 			}
 		})
 	}
-}
-
-func getZoneRedundancy() *armcontainerregistry.ZoneRedundancy {
-	s := armcontainerregistry.ZoneRedundancyEnabled
-	return &s
-}
-
-func getSKUName() *armcontainerregistry.SKUName {
-	s := armcontainerregistry.SKUNameStandard
-	return &s
-}
-
-func getPolicyStatusDisabled() *armcontainerregistry.PolicyStatus {
-	s := armcontainerregistry.PolicyStatusDisabled
-	return &s
 }
