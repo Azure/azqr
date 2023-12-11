@@ -231,6 +231,7 @@ const (
 	RulesSubcategorySecurityFirewall              = "Firewall"
 	RulesSubcategorySecurityIdentity              = "Identity and Access Control"
 	RulesSubcategorySecurityNetworking            = "Networking"
+	RulesSubcategorySecurityDiskEncryption        = "Disk Encryption"
 
 	RulesSubcategoryPerformanceEfficienccyNetworking = "Networking"
 )

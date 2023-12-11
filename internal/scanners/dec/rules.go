@@ -89,5 +89,29 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"dec-008": {
+			Id:          "dec-008",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityDiskEncryption,
+			Description: "Azure Data Explorer should use Disk Encryption",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armkusto.Cluster)
+				return c.Properties.EnableDiskEncryption == nil || !*c.Properties.EnableDiskEncryption, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/cluster-encryption-overview",
+		},
+		"dec-009": {
+			Id:          "dec-009",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityIdentity,
+			Description: "Azure Data Explorer should use Managed Identities",
+			Severity:    scanners.SeverityLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armkusto.Cluster)
+				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armkusto.IdentityTypeNone, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/configure-managed-identities-cluster?tabs=portal",
+		},
 	}
 }

@@ -48,7 +48,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 		{
 			name: "DataExplorerScanner SLA None",
 			fields: fields{
-				rule:        "dec-002",
+				rule: "dec-002",
 				target: &armkusto.Cluster{
 					SKU: &armkusto.AzureSKU{
 						Name: ref.Of(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
@@ -64,7 +64,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 		{
 			name: "DataExplorerScanner SLA",
 			fields: fields{
-				rule:        "dec-002",
+				rule: "dec-002",
 				target: &armkusto.Cluster{
 					SKU: &armkusto.AzureSKU{
 						Name: ref.Of(armkusto.AzureSKUNameStandardD11V2),
@@ -104,6 +104,54 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			},
 			want: want{
 				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "DataExplorerScanner Enable Disk Encryption False",
+			fields: fields{
+				rule: "dec-008",
+				target: &armkusto.Cluster{
+					Properties: &armkusto.ClusterProperties{
+						EnableDiskEncryption: ref.Of(false),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "DataExplorerScanner Enable Disk Encryption Nil",
+			fields: fields{
+				rule: "dec-008",
+				target: &armkusto.Cluster{
+					Properties: &armkusto.ClusterProperties{
+						EnableDiskEncryption: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "DataExplorerScanner Managed Identity",
+			fields: fields{
+				rule: "dec-009",
+				target: &armkusto.Cluster{
+					Identity: &armkusto.Identity{
+						Type: ref.Of(armkusto.IdentityTypeNone),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
 				result: "",
 			},
 		},
