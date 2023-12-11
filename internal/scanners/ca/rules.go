@@ -59,7 +59,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
-				if c.Properties.Configuration.Ingress != nil {
+				if c.Properties.Configuration.Ingress != nil && c.Properties.Configuration.Ingress.AllowInsecure != nil {
 					return *c.Properties.Configuration.Ingress.AllowInsecure, ""
 				}
 				return false, ""
