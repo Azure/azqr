@@ -46,15 +46,35 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			},
 		},
 		{
+			name: "DataExplorerScanner SLA None",
+			fields: fields{
+				rule:        "dec-002",
+				target: &armkusto.Cluster{
+					SKU: &armkusto.AzureSKU{
+						Name: ref.Of(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "None",
+			},
+		},
+		{
 			name: "DataExplorerScanner SLA",
 			fields: fields{
 				rule:        "dec-002",
-				target:      &armkusto.Cluster{},
+				target: &armkusto.Cluster{
+					SKU: &armkusto.AzureSKU{
+						Name: ref.Of(armkusto.AzureSKUNameStandardD11V2),
+					},
+				},
 				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
-				result: "99.99%",
+				result: "99.9%",
 			},
 		},
 		{
@@ -69,7 +89,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
-				broken: false,
+				broken: true,
 				result: "Dev(No SLA)_Standard_D11_v2",
 			},
 		},

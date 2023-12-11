@@ -34,7 +34,13 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Description: "Azure Data Explorer SLA",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, "99.99%"
+				c := target.(*armkusto.Cluster)
+				sla := "99.9%"
+				if c.SKU != nil && c.SKU.Name != nil && strings.HasPrefix(string(*c.SKU.Name), "Dev") {
+					sla = "None"
+				}
+
+				return sla == "None", sla
 			},
 			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 			Field: scanners.OverviewFieldSLA,
@@ -43,11 +49,16 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Id:          "dec-003",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
-			Description: "Azure Data Explorer SKU",
+			Description: "Azure Data Explorer Production Cluster should not use Dev SKU",
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
-				return false, string(*c.SKU.Name)
+				broken := false
+				if c.SKU != nil && c.SKU.Name != nil {
+					sku := string(*c.SKU.Name)
+					broken = strings.HasPrefix(sku, "Dev")
+				}
+				return broken, string(*c.SKU.Name)
 			},
 			Url:   "https://learn.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku",
 			Field: scanners.OverviewFieldSKU,
