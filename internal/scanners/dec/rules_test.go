@@ -94,9 +94,29 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			},
 		},
 		{
+			name: "DataExplorerScanner Private Endpoint",
+			fields: fields{
+				rule: "dec-008",
+				target: &armkusto.Cluster{
+					Properties: &armkusto.ClusterProperties{
+						PrivateEndpointConnections: []*armkusto.PrivateEndpointConnection{
+							{
+								Name: ref.Of("test"),
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
 			name: "DataExplorerScanner CAF",
 			fields: fields{
-				rule: "dec-004",
+				rule: "dec-006",
 				target: &armkusto.Cluster{
 					Name: ref.Of("dec-test"),
 				},
