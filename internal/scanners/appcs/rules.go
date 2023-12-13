@@ -113,5 +113,18 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/howto-disable-access-key-authentication?tabs=portal#disable-access-key-authentication",
 		},
+		"appcs-009": {
+			Id:          "appcs-009",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
+			Description: "AppConfiguration should have purge protection enabled",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappconfiguration.ConfigurationStore)
+				purgeProtection := c.Properties.EnablePurgeProtection != nil && *c.Properties.EnablePurgeProtection
+				return !purgeProtection, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-soft-delete#purge-protection",
+		},
 	}
 }
