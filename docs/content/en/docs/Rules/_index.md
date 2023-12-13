@@ -121,7 +121,7 @@ Azure Quick Review uses the following rules to identify Azure resources that may
 111 | dec-001 | Reliability | Diagnostic Logs | Azure Data Explorer should have diagnostic settings enabled | Medium | [Learn](https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs)
 112 | dec-002 | Reliability | SLA | Azure Data Explorer SLA | High | [Learn](https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services)
 113 | dec-003 | Reliability | SKU | Azure Data Explorer Production Cluster should not use Dev SKU | High | [Learn](https://learn.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku)
-114 | dec-004 | Operational Excellence | Naming Convention (CAF) | Azure Data Explorer Name should comply with naming conventions | Low | [Learn](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations)
+114 | dec-004 | Security | Private Endpoint | Azure Data Explorer should have private endpoints enabled | High | [Learn](https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint)
 115 | dec-005 | Operational Excellence | Tags | Azure Data Explorer should have tags | Low | [Learn](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json)
 116 | dec-008 | Security | Disk Encryption | Azure Data Explorer should use Disk Encryption | High | [Learn](https://learn.microsoft.com/en-us/azure/data-explorer/cluster-encryption-overview)
 117 | dec-009 | Security | Identity and Access Control | Azure Data Explorer should use Managed Identities | Low | [Learn](https://learn.microsoft.com/en-us/azure/data-explorer/configure-managed-identities-cluster?tabs=portal)

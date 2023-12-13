@@ -65,6 +65,20 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"dec-004": {
 			Id:          "dec-004",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
+			Description: "Azure Data Explorer should have private endpoints enabled",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				i := target.(*armkusto.Cluster)
+				pe := len(i.Properties.PrivateEndpointConnections) > 0
+				return !pe, ""
+			},
+			Url:   "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
+			Field: scanners.OverviewFieldPrivate,
+		},
+		"dec-006": {
+			Id:          "dec-004",
 			Category:    scanners.RulesCategoryOperationalExcellence,
 			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
 			Description: "Azure Data Explorer Name should comply with naming conventions",
