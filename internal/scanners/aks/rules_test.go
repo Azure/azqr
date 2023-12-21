@@ -435,6 +435,22 @@ func TestAKSScanner_Rules(t *testing.T) {
 			},
 		},
 		{
+			name: "AKSScanner OutboundType nil",
+			fields: fields{
+				rule: "aks-012",
+				target: &armcontainerservice.ManagedCluster{
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						NetworkProfile: &armcontainerservice.NetworkProfile{},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
 			name: "AKSScanner kubenet",
 			fields: fields{
 				rule: "aks-013",

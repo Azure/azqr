@@ -204,8 +204,8 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
-				out := *c.Properties.NetworkProfile.OutboundType == armcontainerservice.OutboundTypeUserDefinedRouting
-				return !out, ""
+				broken := c.Properties.NetworkProfile.OutboundType == nil || *c.Properties.NetworkProfile.OutboundType != armcontainerservice.OutboundTypeUserDefinedRouting
+				return broken, ""
 			},
 			Url: "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
 		},
