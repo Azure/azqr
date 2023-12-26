@@ -5,6 +5,7 @@ package apim
 
 import (
 	"strings"
+	"time"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
@@ -115,6 +116,106 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				return len(c.Tags) == 0, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
+		"apim-008": {
+			Id:          "apim-008",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityIdentity,
+			Description: "APIM should use Managed Identities",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armapimanagement.ServiceResource)
+				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armapimanagement.ApimIdentityTypeNone, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-managed-service-identity",
+		},
+		"apim-009": {
+			Id:          "apim-009",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityTLS,
+			Description: "APIM should only accept a minimum of TLS 1.2",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				notAllowed := []string{
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30",
+				}
+				c := target.(*armapimanagement.ServiceResource)
+
+				if c.Properties.CustomProperties != nil {
+					for _, v := range notAllowed {
+						broken := c.Properties.CustomProperties[v] == nil || strings.ToLower(*c.Properties.CustomProperties[v]) == "true"
+						if broken {
+							return broken, ""
+						}
+					}
+				} else {
+					return true, ""
+				}
+
+				return false, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
+		},
+		"apim-010": {
+			Id:          "apim-010",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityCyphers,
+			Description: "APIM should should not accept weak or deprecated ciphers.",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				notAllowed := []string{
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA256",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA256",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_GCM_SHA256",
+				}
+				c := target.(*armapimanagement.ServiceResource)
+
+				if c.Properties.CustomProperties != nil {
+					for _, v := range notAllowed {
+						broken := c.Properties.CustomProperties[v] == nil || strings.ToLower(*c.Properties.CustomProperties[v]) == "true"
+						if broken {
+							return broken, ""
+						}
+					}
+				} else {
+					return true, ""
+				}
+
+				return false, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
+		},
+		"apim-011": {
+			Id:          "apim-011",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityCertificates,
+			Description: "APIM: Renew expiring certificates",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armapimanagement.ServiceResource)
+				if c.Properties.HostnameConfigurations != nil {
+					for _, v := range c.Properties.HostnameConfigurations {
+						if v.Certificate != nil && v.Certificate.Expiry != nil {
+							days := time.Until(*v.Certificate.Expiry).Hours() / 24
+							if days <= 30 {
+								return true, ""
+							}
+						}
+					}
+				}
+				return false, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/api-management/configure-custom-domain?tabs=custom",
 		},
 	}
 }
