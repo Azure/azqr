@@ -159,16 +159,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Conventional Changelog Action
-        id: changelog
-        uses: TriPSs/conventional-changelog-action@v3
-        with:
-          github-token: ${{ github.token }}
-          output-file: "false"
-          skip-commit: "true"
-          skip-tag: "true"
-          git-push: "false"
-          skip-git-pull: "true"
+      - name: Get changes since lastest tag
+        run: |
+          echo "AZQR_CHANGE_LOG=$(git log $(git describe --tags --abbrev=0)..HEAD --oneline)" >> $GITHUB_ENV
   
       - name: release
         uses: actions/create-release@v1
@@ -176,7 +169,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ env.MINVERVERSIONOVERRIDE }}
-          body: ${{ steps.changelog.outputs.clean_changelog }}
+          body: ${{ env.AZQR_CHANGE_LOG }}
           draft: false
           prerelease: false
         env:
