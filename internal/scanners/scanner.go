@@ -225,6 +225,8 @@ const (
 	RulesSubcategorySecurityNetworkSecurityGroups = "Network Security Groups"
 	RulesSubcategorySecuritySSL                   = "SSL"
 	RulesSubcategorySecurityHTTPS                 = "HTTPS Only"
+	RulesSubcategorySecurityCyphers               = "Cyphers"
+	RulesSubcategorySecurityCertificates          = "Certificates"
 	RulesSubcategorySecurityTLS                   = "TLS"
 	RulesSubcategorySecurityPrivateEndpoint       = "Private Endpoint"
 	RulesSubcategorySecurityPrivateIP             = "Private IP Address"

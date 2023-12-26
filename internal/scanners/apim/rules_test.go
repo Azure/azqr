@@ -6,6 +6,7 @@ package apim
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
@@ -183,6 +184,146 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "APIManagementScanner ManagedIdentity None",
+			fields: fields{
+				rule: "apim-008",
+				target: &armapimanagement.ServiceResource{
+					Identity: &armapimanagement.ServiceIdentity{
+						Type: ref.Of(armapimanagement.ApimIdentityTypeNone),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "APIManagementScanner TLS 1.2",
+			fields: fields{
+				rule: "apim-009",
+				target: &armapimanagement.ServiceResource{
+					Properties: &armapimanagement.ServiceProperties{
+						CustomProperties: map[string]*string{
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":         ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":         ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":         ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10": ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11": ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30": ref.Of("false"),
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "APIManagementScanner CustomProperties nil",
+			fields: fields{
+				rule: "apim-009",
+				target: &armapimanagement.ServiceResource{
+					Properties: &armapimanagement.ServiceProperties{
+						CustomProperties: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "APIManagementScanner Cyphers",
+			fields: fields{
+				rule: "apim-010",
+				target: &armapimanagement.ServiceResource{
+					Properties: &armapimanagement.ServiceProperties{
+						CustomProperties: map[string]*string{
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":                       ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA":       ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA":       ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA256":    ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA": ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA256":    ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA": ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_GCM_SHA256":    ref.Of("false"),
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "APIManagementScanner CustomProperties nil",
+			fields: fields{
+				rule: "apim-010",
+				target: &armapimanagement.ServiceResource{
+					Properties: &armapimanagement.ServiceProperties{
+						CustomProperties: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "APIManagementScanner Certificate expiring",
+			fields: fields{
+				rule: "apim-011",
+				target: &armapimanagement.ServiceResource{
+					Properties: &armapimanagement.ServiceProperties{
+						HostnameConfigurations: []*armapimanagement.HostnameConfiguration{
+							{
+								Certificate: &armapimanagement.CertificateInformation{
+									Expiry: ref.Of(time.Now()),
+								},
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "APIManagementScanner Certificate not expiring",
+			fields: fields{
+				rule: "apim-011",
+				target: &armapimanagement.ServiceResource{
+					Properties: &armapimanagement.ServiceProperties{
+						HostnameConfigurations: []*armapimanagement.HostnameConfiguration{
+							{
+								Certificate: &armapimanagement.CertificateInformation{
+									Expiry: ref.Of(time.Now().Add(time.Hour * 24 * 45)),
+								},
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -199,4 +340,3 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 		})
 	}
 }
-
