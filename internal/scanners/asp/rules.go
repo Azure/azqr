@@ -183,6 +183,30 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"app-009": {
+			Id:          "app-009",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityNetworking,
+			Description: "App Service should use VNET integration",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				return c.Properties.VirtualNetworkSubnetID == nil || len(*c.Properties.VirtualNetworkSubnetID) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		},
+		"app-010": {
+			Id:          "app-010",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityNetworking,
+			Description: "App Service should have VNET Route all enabled for VNET integration",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				return c.Properties.VnetRouteAllEnabled == nil || !*c.Properties.VnetRouteAllEnabled, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		},
 	}
 }
 
@@ -254,6 +278,30 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzureRule {
 				return len(c.Tags) == 0, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
+		"func-009": {
+			Id:          "func-009",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityNetworking,
+			Description: "Function should use VNET integration",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				return c.Properties.VirtualNetworkSubnetID == nil || len(*c.Properties.VirtualNetworkSubnetID) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		},
+		"func-010": {
+			Id:          "func-010",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityNetworking,
+			Description: "Function should have VNET Route all enabled for VNET integration",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				return c.Properties.VnetRouteAllEnabled == nil || !*c.Properties.VnetRouteAllEnabled, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
 		},
 	}
 }
@@ -327,6 +375,29 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"logics-009": {
+			Id:          "logics-009",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityNetworking,
+			Description: "Logic App should use VNET integration",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				return c.Properties.VirtualNetworkSubnetID == nil || len(*c.Properties.VirtualNetworkSubnetID) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		},
+		"logics-010": {
+			Id:          "logics-010",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurityNetworking,
+			Description: "Logic App  should have VNET Route all enabled for VNET integration",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armappservice.Site)
+				return c.Properties.VnetRouteAllEnabled == nil || !*c.Properties.VnetRouteAllEnabled, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		},
 	}
 }
-

@@ -221,6 +221,86 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "AppServiceScanner VNET Integration",
+			fields: fields{
+				rule: "app-009",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VirtualNetworkSubnetID: ref.Of("test"),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Integration disabled",
+			fields: fields{
+				rule: "app-009",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VirtualNetworkSubnetID: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Route all",
+			fields: fields{
+				rule: "app-010",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VnetRouteAllEnabled: ref.Of(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Route disabled",
+			fields: fields{
+				rule: "app-010",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VnetRouteAllEnabled: ref.Of(false),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Route nil",
+			fields: fields{
+				rule: "app-010",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VnetRouteAllEnabled: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -319,6 +399,86 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "AppServiceScanner VNET Integration",
+			fields: fields{
+				rule: "func-009",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VirtualNetworkSubnetID: ref.Of("test"),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Integration disabled",
+			fields: fields{
+				rule: "func-009",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VirtualNetworkSubnetID: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Route all",
+			fields: fields{
+				rule: "func-010",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VnetRouteAllEnabled: ref.Of(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Route disabled",
+			fields: fields{
+				rule: "func-010",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VnetRouteAllEnabled: ref.Of(false),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Route nil",
+			fields: fields{
+				rule: "func-010",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VnetRouteAllEnabled: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -414,6 +574,86 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 			},
 			want: want{
 				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Integration",
+			fields: fields{
+				rule: "logics-009",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VirtualNetworkSubnetID: ref.Of("test"),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Integration disabled",
+			fields: fields{
+				rule: "logics-009",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VirtualNetworkSubnetID: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Route all",
+			fields: fields{
+				rule: "logics-010",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VnetRouteAllEnabled: ref.Of(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Route disabled",
+			fields: fields{
+				rule: "logics-010",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VnetRouteAllEnabled: ref.Of(false),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner VNET Route nil",
+			fields: fields{
+				rule: "logics-010",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						VnetRouteAllEnabled: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
 				result: "",
 			},
 		},
