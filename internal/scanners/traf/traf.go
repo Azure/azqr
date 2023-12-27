@@ -24,7 +24,7 @@ func (c *TrafficManagerScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all TrafficManager in a Resource Group
 func (c *TrafficManagerScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Storage")
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Traffic Manager")
 
 	vnets, err := c.list(resourceGroupName)
 	if err != nil {
