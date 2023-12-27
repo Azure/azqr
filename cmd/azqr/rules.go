@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/Azure/azqr/internal"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +22,7 @@ var rulesCmd = &cobra.Command{
 	Long:  "Print all azqr rules as markdown table",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := GetScanners()
+		serviceScanners := internal.GetScanners()
 
 		fmt.Println("#  | Id | Category | Subcategory | Name | Severity | More Info")
 		fmt.Println("---|---|---|---|---|---|---")
