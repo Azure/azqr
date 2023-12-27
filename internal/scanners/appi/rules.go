@@ -53,8 +53,8 @@ func (a *AppInsightsScanner) GetRules() map[string]scanners.AzureRule {
 		},
 		"appi-004": {
 			Id:          "appi-004",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
 			Description: "Azure Application Insights should store data in a Log Analytics Workspace",
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
