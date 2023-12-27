@@ -12,8 +12,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	arg "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-	"github.com/rs/zerolog/log"
 )
 
 type (
@@ -51,10 +49,10 @@ type (
 
 	AzureRule struct {
 		Id          string
-		Category    string
-		Subcategory string
+		Category    RulesCategory
+		Subcategory RulesSubCategory
 		Description string
-		Severity    string
+		Severity    SeverityType
 		Url         string
 		Field       OverviewField
 		Eval        func(target interface{}, scanContext *ScanContext) (bool, string)
@@ -62,10 +60,10 @@ type (
 
 	AzureRuleResult struct {
 		Id          string
-		Category    string
-		Subcategory string
+		Category    RulesCategory
+		Subcategory RulesSubCategory
 		Description string
-		Severity    string
+		Severity    SeverityType
 		Learn       string
 		Result      string
 		Field       OverviewField
@@ -73,15 +71,6 @@ type (
 	}
 
 	RuleEngine struct{}
-
-	GraphQuery struct {
-		client *arg.Client
-	}
-
-	GraphResult struct {
-		Count int64
-		Data  []interface{}
-	}
 
 	OverviewField int
 )
@@ -198,74 +187,46 @@ func MaskSubscriptionID(subscriptionID string, mask bool) string {
 	return fmt.Sprintf("xxxxxxxx-xxxx-xxxx-xxxx-xxxxx%s", subscriptionID[29:])
 }
 
+type SeverityType string
+type RulesCategory string
+type RulesSubCategory string
+
 const (
-	SeverityHigh   = "High"
-	SeverityMedium = "Medium"
-	SeverityLow    = "Low"
+	SeverityHigh   SeverityType = "High"
+	SeverityMedium SeverityType = "Medium"
+	SeverityLow    SeverityType = "Low"
 
-	RulesCategoryReliability            = "Reliability"
-	RulesCategorySecurity               = "Security"
-	RulesCategoryCostOptimization       = "Cost Optimization"
-	RulesCategoryOperationalExcellence  = "Operational Excellence"
-	RulesCategoryPerformanceEfficienccy = "Performance Efficiency"
+	RulesCategoryReliability            RulesCategory = "Reliability"
+	RulesCategorySecurity               RulesCategory = "Security"
+	RulesCategoryCostOptimization       RulesCategory = "Cost Optimization"
+	RulesCategoryOperationalExcellence  RulesCategory = "Operational Excellence"
+	RulesCategoryPerformanceEfficienccy RulesCategory = "Performance Efficiency"
 
-	RulesSubcategoryReliabilityAvailabilityZones = "Availability Zones"
-	RulesSubcategoryReliabilitySLA               = "SLA"
-	RulesSubcategoryReliabilitySKU               = "SKU"
-	RulesSubcategoryReliabilityScaling           = "Scaling"
-	RulesSubcategoryReliabilityDiagnosticLogs    = "Diagnostic Logs"
-	RulesSubcategoryReliabilityMonitoring        = "Monitoring"
-	RulesSubcategoryReliabilityReliability       = "Reliability"
-	RulesSubcategoryReliabilityMaintenance       = "Maintenance"
+	RulesSubcategoryReliabilityAvailabilityZones RulesSubCategory = "Availability Zones"
+	RulesSubcategoryReliabilitySLA               RulesSubCategory = "SLA"
+	RulesSubcategoryReliabilitySKU               RulesSubCategory = "SKU"
+	RulesSubcategoryReliabilityScaling           RulesSubCategory = "Scaling"
+	RulesSubcategoryReliabilityDiagnosticLogs    RulesSubCategory = "Diagnostic Logs"
+	RulesSubcategoryReliabilityMonitoring        RulesSubCategory = "Monitoring"
+	RulesSubcategoryReliabilityReliability       RulesSubCategory = "Reliability"
+	RulesSubcategoryReliabilityMaintenance       RulesSubCategory = "Maintenance"
 
-	RulesSubcategoryOperationalExcellenceCAF               = "Naming Convention (CAF)"
-	RulesSubcategoryOperationalExcellenceTags              = "Tags"
-	RulesSubcategoryOperationalExcellenceRetentionPolicies = "Retention Policies"
+	RulesSubcategoryOperationalExcellenceCAF               RulesSubCategory = "Naming Convention (CAF)"
+	RulesSubcategoryOperationalExcellenceTags              RulesSubCategory = "Tags"
+	RulesSubcategoryOperationalExcellenceRetentionPolicies RulesSubCategory = "Retention Policies"
 
-	RulesSubcategorySecurityNetworkSecurityGroups = "Network Security Groups"
-	RulesSubcategorySecuritySSL                   = "SSL"
-	RulesSubcategorySecurityHTTPS                 = "HTTPS Only"
-	RulesSubcategorySecurityCyphers               = "Cyphers"
-	RulesSubcategorySecurityCertificates          = "Certificates"
-	RulesSubcategorySecurityTLS                   = "TLS"
-	RulesSubcategorySecurityPrivateEndpoint       = "Private Endpoint"
-	RulesSubcategorySecurityPrivateIP             = "Private IP Address"
-	RulesSubcategorySecurityFirewall              = "Firewall"
-	RulesSubcategorySecurityIdentity              = "Identity and Access Control"
-	RulesSubcategorySecurityNetworking            = "Networking"
-	RulesSubcategorySecurityDiskEncryption        = "Disk Encryption"
+	RulesSubcategorySecurityNetworkSecurityGroups RulesSubCategory = "Network Security Groups"
+	RulesSubcategorySecuritySSL                   RulesSubCategory = "SSL"
+	RulesSubcategorySecurityHTTPS                 RulesSubCategory = "HTTPS Only"
+	RulesSubcategorySecurityCyphers               RulesSubCategory = "Cyphers"
+	RulesSubcategorySecurityCertificates          RulesSubCategory = "Certificates"
+	RulesSubcategorySecurityTLS                   RulesSubCategory = "TLS"
+	RulesSubcategorySecurityPrivateEndpoint       RulesSubCategory = "Private Endpoint"
+	RulesSubcategorySecurityPrivateIP             RulesSubCategory = "Private IP Address"
+	RulesSubcategorySecurityFirewall              RulesSubCategory = "Firewall"
+	RulesSubcategorySecurityIdentity              RulesSubCategory = "Identity and Access Control"
+	RulesSubcategorySecurityNetworking            RulesSubCategory = "Networking"
+	RulesSubcategorySecurityDiskEncryption        RulesSubCategory = "Disk Encryption"
 
-	RulesSubcategoryPerformanceEfficienccyNetworking = "Networking"
+	RulesSubcategoryPerformanceEfficienccyNetworking RulesSubCategory = "Networking"
 )
-
-func (q *GraphQuery) Query(ctx context.Context, cred azcore.TokenCredential, query string, subscriptionIDs []*string) *GraphResult {
-	format := arg.ResultFormatObjectArray
-	request := arg.QueryRequest{
-		Subscriptions: subscriptionIDs,
-		Query:         &query,
-		Options: &arg.QueryRequestOptions{
-			ResultFormat: &format,
-		},
-	}
-
-	if q.client == nil {
-		client, err := arg.NewClient(cred, nil)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create Resource Graph client")
-			return nil
-		}
-		q.client = client
-	}
-
-	// Run the query and get the results
-	results, err := q.client.Resources(ctx, request, nil)
-	if err == nil {
-		result := GraphResult{}
-		result.Count = *results.TotalRecords
-		result.Data = results.Data.([]interface{})
-		return &result
-	} else {
-		log.Fatal().Err(err).Msg("Failed to run Resource Graph query")
-		return nil
-	}
-}

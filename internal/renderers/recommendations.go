@@ -27,10 +27,10 @@ func renderRecommendations(f *excelize.File, data ReportData) {
 				if !exists && rr.IsBroken {
 					rulesToRender := map[string]string{
 						"Id":          rr.Id,
-						"Category":    rr.Category,
-						"Subcategory": rr.Subcategory,
+						"Category":    string(rr.Category),
+						"Subcategory": string(rr.Subcategory),
 						"Description": rr.Description,
-						"Severity":    rr.Severity,
+						"Severity":    string(rr.Severity),
 						"Learn":       rr.Learn,
 					}
 					renderedRules[rr.Id] = true
