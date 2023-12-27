@@ -399,8 +399,8 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
 		},
-		"app-013": {
-			Id:          "app-013",
+		"func-013": {
+			Id:          "func-013",
 			Category:    scanners.RulesCategoryReliability,
 			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
 			Description: "Function should avoid using Client Affinity",
