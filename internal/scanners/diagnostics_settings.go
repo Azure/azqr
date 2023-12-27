@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
@@ -19,30 +20,30 @@ import (
 
 // DiagnosticSettingsScanner - scanner for diagnostic settings
 type DiagnosticSettingsScanner struct {
-	config *ScannerConfig
-	client *arm.Client
+	config     *ScannerConfig
+	client     *arm.Client
+	graphQuery *graph.GraphQuery
 }
 
 // Init - Initializes the DiagnosticSettingsScanner
-func (s *DiagnosticSettingsScanner) Init(config *ScannerConfig) error {
-	s.config = config
-	client, err := arm.NewClient(moduleName+".DiagnosticSettingsBatch", moduleVersion, s.config.Cred, s.config.ClientOptions)
+func (d *DiagnosticSettingsScanner) Init(config *ScannerConfig) error {
+	d.config = config
+	client, err := arm.NewClient(moduleName+".DiagnosticSettingsBatch", moduleVersion, d.config.Cred, d.config.ClientOptions)
 	if err != nil {
 		return err
 	}
-	s.client = client
-
+	d.client = client
+	d.graphQuery = graph.NewGraphQuery(d.config.Cred)
 	return nil
 }
 
 // ListResourcesWithDiagnosticSettings - Lists all resources with diagnostic settings
-func (s *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[string]bool, error) {
+func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[string]bool, error) {
 	resources := []string{}
 	res := map[string]bool{}
 
 	log.Info().Msg("Preflight: Scanning Resource Ids")
-	graphQuery := GraphQuery{}
-	result := graphQuery.Query(s.config.Ctx, s.config.Cred, "resources | project id", []*string{&s.config.SubscriptionID})
+	result := d.graphQuery.Query(d.config.Ctx, "resources | project id", []*string{&d.config.SubscriptionID})
 
 	if result == nil || result.Data == nil {
 		log.Info().Msg("Preflight: No resources found")
@@ -75,7 +76,7 @@ func (s *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 		}
 		go func(r []string) {
 			defer wg.Done()
-			resp, err := s.restCall(s.config.Ctx, r, s.config.Cred, s.config.ClientOptions)
+			resp, err := d.restCall(d.config.Ctx, r, d.config.Cred, d.config.ClientOptions)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to get diagnostic settings")
 			}
@@ -104,8 +105,8 @@ const (
 	moduleVersion = "v1.1.1"
 )
 
-func (s *DiagnosticSettingsScanner) restCall(ctx context.Context, resourceIds []string, credential azcore.TokenCredential, options *arm.ClientOptions) (*ArmBatchResponse, error) {
-	req, err := runtime.NewRequest(ctx, http.MethodPost, runtime.JoinPaths(s.client.Endpoint(), "batch"))
+func (d *DiagnosticSettingsScanner) restCall(ctx context.Context, resourceIds []string, credential azcore.TokenCredential, options *arm.ClientOptions) (*ArmBatchResponse, error) {
+	req, err := runtime.NewRequest(ctx, http.MethodPost, runtime.JoinPaths(d.client.Endpoint(), "batch"))
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +132,7 @@ func (s *DiagnosticSettingsScanner) restCall(ctx context.Context, resourceIds []
 		return nil, err
 	}
 
-	resp, err := s.client.Pipeline().Do(req)
+	resp, err := d.client.Pipeline().Do(req)
 	if err != nil {
 		return nil, err
 	}
