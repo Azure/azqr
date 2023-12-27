@@ -4,7 +4,6 @@
 package appi
 
 import (
-	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights"
 )
@@ -25,7 +24,7 @@ func (a *AppInsightsScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Application Insights in a Resource Group
 func (a *AppInsightsScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Application Insights in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Application Insights")
 
 	gateways, err := a.list(resourceGroupName)
 	if err != nil {

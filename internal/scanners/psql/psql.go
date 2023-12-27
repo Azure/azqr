@@ -4,8 +4,6 @@
 package psql
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 )
@@ -26,7 +24,7 @@ func (c *PostgreScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all PostgreSQL in a Resource Group
 func (c *PostgreScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Postgre in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "PostgreSQL")
 
 	postgre, err := c.listPostgre(resourceGroupName)
 	if err != nil {

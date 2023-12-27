@@ -5,7 +5,6 @@ package scanners
 
 import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/rs/zerolog/log"
 )
 
 // PublicIPScanner - Scanner for Public IPs
@@ -27,7 +26,8 @@ func (s *PublicIPScanner) Init(config *ScannerConfig) error {
 
 // ListPublicIPs - Lists all Public IPs
 func (s *PublicIPScanner) ListPublicIPs() (map[string]*armnetwork.PublicIPAddress, error) {
-	log.Info().Msg("Preflight: Scanning Public IPs")
+	LogSubscriptionScan(s.config.SubscriptionID, "Public IPs")
+
 	res := map[string]*armnetwork.PublicIPAddress{}
 	opt := armnetwork.PublicIPAddressesClientListAllOptions{}
 

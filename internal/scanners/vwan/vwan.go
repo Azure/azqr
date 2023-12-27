@@ -4,8 +4,6 @@
 package vwan
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
@@ -24,9 +22,9 @@ func (c *VirtualWanScanner) Init(config *scanners.ScannerConfig) error {
 	return err
 }
 
-// Scan - Scans all VirtualWanScanner in a Resource Group
+// Scan - Scans all VirtualWan in a Resource Group
 func (c *VirtualWanScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Virtual WAN in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "VWAN")
 
 	vwans, err := c.list(resourceGroupName)
 	if err != nil {

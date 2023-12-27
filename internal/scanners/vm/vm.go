@@ -4,8 +4,6 @@
 package vm
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 )
@@ -24,9 +22,9 @@ func (c *VirtualMachineScanner) Init(config *scanners.ScannerConfig) error {
 	return err
 }
 
-// Scan - Scans all VirtualMachineScanner in a Resource Group
+// Scan - Scans all Virtual Machines in a Resource Group
 func (c *VirtualMachineScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Virtual Machines in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Virtual Machine")
 
 	vwans, err := c.list(resourceGroupName)
 	if err != nil {

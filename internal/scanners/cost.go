@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement"
 )
@@ -62,7 +60,7 @@ func (s *CostScanner) Init(config *ScannerConfig) error {
 
 // QueryCosts - Query Costs.
 func (s *CostScanner) QueryCosts() (*CostResult, error) {
-	log.Info().Msg("Scanning Costs...")
+	LogSubscriptionScan(s.config.SubscriptionID, "Costs")
 	timeframeType := armcostmanagement.TimeframeTypeCustom
 	etype := armcostmanagement.ExportTypeActualCost
 	toTime := time.Now().UTC()

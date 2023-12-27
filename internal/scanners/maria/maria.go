@@ -4,8 +4,6 @@
 package maria
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb"
 )
@@ -34,7 +32,7 @@ func (c *MariaScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all MariaDB servers in a Resource Group
 func (c *MariaScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning MariaDB servers in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "MariaDB")
 
 	servers, err := c.listServers(resourceGroupName)
 	if err != nil {

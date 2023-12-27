@@ -245,7 +245,6 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		}
 
 		for _, r := range resourceGroups {
-			log.Info().Msgf("Scanning Resource Group %s", r)
 			var wg sync.WaitGroup
 			ch := make(chan []scanners.AzureServiceResult, 5)
 			wg.Add(len(serviceScanners))

@@ -42,7 +42,8 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 	resources := []string{}
 	res := map[string]bool{}
 
-	log.Info().Msg("Preflight: Scanning Resource Ids")
+	LogSubscriptionScan(d.config.SubscriptionID, "Resource Ids")
+	
 	result := d.graphQuery.Query(d.config.Ctx, "resources | project id", []*string{&d.config.SubscriptionID})
 
 	if result == nil || result.Data == nil {
@@ -66,7 +67,8 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 		close(ch)
 	}()
 
-	log.Info().Msg("Preflight: Scanning Diagnostic Settings")
+	LogSubscriptionScan(d.config.SubscriptionID, "Diagnostic Settings")
+	
 	// Split resources into batches of 20 items.
 	batch := 20
 	for i := 0; i < len(resources); i += batch {

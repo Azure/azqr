@@ -4,8 +4,6 @@
 package redis
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
@@ -26,7 +24,7 @@ func (c *RedisScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Redis in a Resource Group
 func (c *RedisScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Redis in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Redis")
 
 	redis, err := c.listRedis(resourceGroupName)
 	if err != nil {

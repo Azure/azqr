@@ -4,8 +4,6 @@
 package st
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
@@ -26,7 +24,7 @@ func (c *StorageScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Storage in a Resource Group
 func (c *StorageScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Storage in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Storage")
 
 	storage, err := c.listStorage(resourceGroupName)
 	if err != nil {

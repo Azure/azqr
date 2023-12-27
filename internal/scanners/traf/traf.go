@@ -4,8 +4,6 @@
 package traf
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/trafficmanager/armtrafficmanager"
 )
@@ -26,7 +24,7 @@ func (c *TrafficManagerScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all TrafficManager in a Resource Group
 func (c *TrafficManagerScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Traffic Manager in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Storage")
 
 	vnets, err := c.list(resourceGroupName)
 	if err != nil {

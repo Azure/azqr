@@ -4,8 +4,6 @@
 package evgd
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
 )
@@ -26,7 +24,7 @@ func (a *EventGridScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all EventGrid Domains in a Resource Group
 func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning EventGrid Domains in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "EventGrid")
 
 	domains, err := a.listDomain(resourceGroupName)
 	if err != nil {

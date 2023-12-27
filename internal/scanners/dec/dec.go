@@ -6,7 +6,6 @@ package dec
 import (
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto"
-	"github.com/rs/zerolog/log"
 )
 
 // DataExplorerScanner - Scanner for Data Explorer
@@ -25,7 +24,7 @@ func (a *DataExplorerScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Data Explorers in a Resource Group
 func (a *DataExplorerScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Data Explorers in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "DataExplorer")
 
 	kustoclusters, err := a.listClusters(resourceGroupName)
 	if err != nil {

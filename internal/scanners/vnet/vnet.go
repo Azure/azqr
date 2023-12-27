@@ -4,8 +4,6 @@
 package vnet
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
@@ -26,7 +24,7 @@ func (c *VirtualNetworkScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all VirtualNetwork in a Resource Group
 func (c *VirtualNetworkScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Virtual Network in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Virtual Network")
 
 	vnets, err := c.list(resourceGroupName)
 	if err != nil {

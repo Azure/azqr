@@ -4,8 +4,6 @@
 package lb
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
@@ -26,7 +24,7 @@ func (c *LoadBalancerScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Loadbalancer in a Resource Group
 func (c *LoadBalancerScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Loadbalancer in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Load Balancer")
 
 	lbs, err := c.list(resourceGroupName)
 	if err != nil {

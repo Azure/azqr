@@ -6,7 +6,6 @@ package adf
 import (
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
-	"github.com/rs/zerolog/log"
 )
 
 // DataFactoryScanner - Scanner for Data Factory
@@ -15,7 +14,7 @@ type DataFactoryScanner struct {
 	factoriesClient *armdatafactory.FactoriesClient
 }
 
-// Init - Initializes the FrontDoor Scanner
+// Init - Initializes the DataFactory Scanner
 func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
@@ -23,9 +22,9 @@ func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
 	return err
 }
 
-// Scan - Scans all Data Explorers in a Resource Group
+// Scan - Scans all Data Factories in a Resource Group
 func (a *DataFactoryScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Data Explorers in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "DataFactory")
 
 	factories, err := a.listFactories(resourceGroupName)
 	if err != nil {
