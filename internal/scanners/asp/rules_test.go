@@ -301,6 +301,118 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "AppServiceScanner TLS 1.2",
+			fields: fields{
+				rule:   "app-011",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								MinTLSVersion: ref.Of(armappservice.SupportedTLSVersionsOne2),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Remote Debugging",
+			fields: fields{
+				rule:   "app-012",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								RemoteDebuggingEnabled: ref.Of(true),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Insecure FTP",
+			fields: fields{
+				rule:   "app-013",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								FtpsState: ref.Of(armappservice.FtpsStateAllAllowed),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Always On",
+			fields: fields{
+				rule:   "app-014",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								AlwaysOn: ref.Of(false),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Client Affinity Enabled",
+			fields: fields{
+				rule: "app-015",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						ClientAffinityEnabled: ref.Of(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Managed Identity None",
+			fields: fields{
+				rule: "app-016",
+				target: &armappservice.Site{
+					Identity: &armappservice.ManagedServiceIdentity{
+						Type: ref.Of(armappservice.ManagedServiceIdentityTypeNone),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -479,6 +591,78 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "AppServiceScanner TLS 1.2",
+			fields: fields{
+				rule:   "func-011",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								MinTLSVersion: ref.Of(armappservice.SupportedTLSVersionsOne2),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Remote Debugging",
+			fields: fields{
+				rule:   "func-012",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								RemoteDebuggingEnabled: ref.Of(true),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Client Affinity Enabled",
+			fields: fields{
+				rule: "func-013",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						ClientAffinityEnabled: ref.Of(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Managed Identity None",
+			fields: fields{
+				rule: "func-014",
+				target: &armappservice.Site{
+					Identity: &armappservice.ManagedServiceIdentity{
+						Type: ref.Of(armappservice.ManagedServiceIdentityTypeNone),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -648,6 +832,78 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
 						VnetRouteAllEnabled: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner TLS 1.2",
+			fields: fields{
+				rule:   "logics-011",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								MinTLSVersion: ref.Of(armappservice.SupportedTLSVersionsOne2),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Remote Debugging",
+			fields: fields{
+				rule:   "logics-012",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								RemoteDebuggingEnabled: ref.Of(true),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Client Affinity Enabled",
+			fields: fields{
+				rule: "logics-013",
+				target: &armappservice.Site{
+					Properties: &armappservice.SiteProperties{
+						ClientAffinityEnabled: ref.Of(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Managed Identity None",
+			fields: fields{
+				rule: "logics-014",
+				target: &armappservice.Site{
+					Identity: &armappservice.ManagedServiceIdentity{
+						Type: ref.Of(armappservice.ManagedServiceIdentityTypeNone),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
