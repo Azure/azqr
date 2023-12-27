@@ -14,7 +14,7 @@ func init() {
 }
 
 var planCmd = &cobra.Command{
-	Use:   "plan",
+	Use:   "asp",
 	Short: "Scan Azure App Service",
 	Long:  "Scan Azure App Service",
 	Args:  cobra.NoArgs,
