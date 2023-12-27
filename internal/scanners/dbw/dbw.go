@@ -4,8 +4,6 @@
 package dbw
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
@@ -26,7 +24,7 @@ func (c *DatabricksScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Azure Databricks in a Resource Group
 func (c *DatabricksScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Stack().Msgf("Scanning Azure Databricks in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Databricks")
 
 	workspaces, err := c.listWorkspaces(resourceGroupName)
 	if err != nil {

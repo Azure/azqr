@@ -4,8 +4,6 @@
 package cosmos
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
@@ -26,7 +24,7 @@ func (a *CosmosDBScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all CosmosDB Databases in a Resource Group
 func (c *CosmosDBScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning CosmosDB Databases in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "CosmosDB")
 
 	databases, err := c.listDatabases(resourceGroupName)
 	if err != nil {

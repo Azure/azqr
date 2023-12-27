@@ -4,8 +4,6 @@
 package scanners
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/advisor/armadvisor"
 )
 
@@ -61,7 +59,7 @@ func (s *AdvisorScanner) Init(config *ScannerConfig) error {
 
 // ListRecommendations - Lists Azure Advisor recommendations.
 func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
-	log.Info().Msg("Scanning Advisor Recommendations...")
+	LogSubscriptionScan(s.config.SubscriptionID, "Advisor Recommendations")
 
 	pager := s.client.NewListPager(&armadvisor.RecommendationsClientListOptions{})
 

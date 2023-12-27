@@ -4,8 +4,6 @@
 package sql
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 )
@@ -34,7 +32,7 @@ func (c *SQLScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all SQL in a Resource Group
 func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning SQL in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "SQL")
 
 	sql, err := c.listSQL(resourceGroupName)
 	if err != nil {

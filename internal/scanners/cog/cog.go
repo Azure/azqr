@@ -4,8 +4,6 @@
 package cog
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices"
 )
@@ -26,7 +24,7 @@ func (a *CognitiveScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Cognitive Services Accounts in a Resource Group
 func (c *CognitiveScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Cognitive Services Accounts in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Cognitive Services")
 
 	eventHubs, err := c.listEventHubs(resourceGroupName)
 	if err != nil {

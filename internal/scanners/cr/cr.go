@@ -4,8 +4,6 @@
 package cr
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
@@ -26,7 +24,7 @@ func (c *ContainerRegistryScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Container Registries in a Resource Group
 func (c *ContainerRegistryScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Stack().Msgf("Scanning Container Registries in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Container Registries")
 
 	regsitries, err := c.listRegistries(resourceGroupName)
 	if err != nil {

@@ -4,7 +4,6 @@
 package afw
 
 import (
-	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
@@ -25,7 +24,7 @@ func (a *FirewallScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Azure Firewall in a Resource Group
 func (a *FirewallScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Azure Firewalls in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Azure Firewall")
 
 	gateways, err := a.list(resourceGroupName)
 	if err != nil {

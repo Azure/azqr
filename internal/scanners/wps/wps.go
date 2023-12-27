@@ -4,8 +4,6 @@
 package wps
 
 import (
-	"github.com/rs/zerolog/log"
-
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
 )
@@ -26,7 +24,7 @@ func (c *WebPubSubScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all WebPubSub in a Resource Group
 func (c *WebPubSubScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning WebPubSub in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "WebPubSub")
 
 	WebPubSub, err := c.listWebPubSub(resourceGroupName)
 	if err != nil {

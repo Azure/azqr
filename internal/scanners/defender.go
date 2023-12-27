@@ -57,7 +57,7 @@ func (s *DefenderScanner) Init(config *ScannerConfig) error {
 
 // ListConfiguration - Lists Microsoft Defender for Cloud pricing configurations in the subscription.
 func (s *DefenderScanner) ListConfiguration() ([]DefenderResult, error) {
-	log.Info().Msg("Scanning Defender Status...")
+	LogSubscriptionScan(s.config.SubscriptionID, "Defender Status")
 	if s.defenderFunc == nil {
 		resp, err := s.client.List(s.config.Ctx, nil)
 		if err != nil {

@@ -12,6 +12,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/rs/zerolog/log"
 )
 
 type (
@@ -185,6 +186,14 @@ func MaskSubscriptionID(subscriptionID string, mask bool) string {
 
 	// Show only last 7 chars of the subscription ID
 	return fmt.Sprintf("xxxxxxxx-xxxx-xxxx-xxxx-xxxxx%s", subscriptionID[29:])
+}
+
+func LogResourceGroupScan(subscriptionID string, resourceGroupName string, serviceName string) {
+	log.Info().Msgf("Scanning subscriptions/...%s/resourceGroups/%s for %s", subscriptionID[29:], resourceGroupName, serviceName)
+}
+
+func LogSubscriptionScan(subscriptionID string, serviceName string) {
+	log.Info().Msgf("Scanning subscriptions/...%s for %s", subscriptionID[29:], serviceName)
 }
 
 type SeverityType string

@@ -4,7 +4,6 @@
 package cae
 
 import (
-	"github.com/rs/zerolog/log"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
@@ -25,7 +24,7 @@ func (a *ContainerAppsEnvironmentScanner) Init(config *scanners.ScannerConfig) e
 
 // Scan - Scans all Container Apps in a Resource Group
 func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	log.Info().Msgf("Scanning Container Apps Environments in Resource Group %s", resourceGroupName)
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Container Apps Environment")
 
 	apps, err := a.listApps(resourceGroupName)
 	if err != nil {
