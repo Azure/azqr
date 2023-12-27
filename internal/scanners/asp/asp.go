@@ -59,12 +59,18 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 			Rules:          rr,
 		})
 
-		sites, err := a.listSites(resourceGroupName, *p.Name)
+		sites, err := a.listSites(resourceGroupName, *p.Name)   
 		if err != nil {
 			return nil, err
 		}
 
 		for _, s := range sites {
+			config, err := a.sitesClient.GetConfiguration(a.config.Ctx, resourceGroupName, *s.Name, nil)
+			if err != nil {
+				return nil, err
+			}                                                     
+			scanContext.SiteConfig = &config
+
 			var result scanners.AzureServiceResult
 			// https://learn.microsoft.com/en-us/azure/azure-functions/functions-app-settings
 			kind := strings.ToLower(*s.Kind)

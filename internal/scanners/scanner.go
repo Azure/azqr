@@ -11,6 +11,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 	"github.com/rs/zerolog/log"
 )
@@ -29,6 +30,7 @@ type (
 		PrivateEndpoints    map[string]bool
 		DiagnosticsSettings map[string]bool
 		PublicIPs           map[string]*armnetwork.PublicIPAddress
+		SiteConfig          *armappservice.WebAppsClientGetConfigurationResponse
 	}
 
 	// IAzureScanner - Interface for all Azure Scanners
@@ -236,6 +238,7 @@ const (
 	RulesSubcategorySecurityIdentity              RulesSubCategory = "Identity and Access Control"
 	RulesSubcategorySecurityNetworking            RulesSubCategory = "Networking"
 	RulesSubcategorySecurityDiskEncryption        RulesSubCategory = "Disk Encryption"
+	RulesSubcategorySecurity                      RulesSubCategory = "Security"
 
 	RulesSubcategoryPerformanceEfficienccyNetworking RulesSubCategory = "Networking"
 )
