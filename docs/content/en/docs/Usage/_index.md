@@ -1,7 +1,7 @@
 ---
 title: Usage
 description: Use Azure Quick Review &mdash; to analyze Azure resources and identify whether they comply with Azure's best practices and recommendations.
-weight: 1
+weight: 2
 ---
 
 ## Authentication

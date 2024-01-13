@@ -1,6 +1,6 @@
 ---
 title: Install
-weight: 2
+weight: 3
 description: Learn how to install Azure Quick Review (azqr)
 ---
 

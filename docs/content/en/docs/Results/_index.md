@@ -1,7 +1,7 @@
 ---
 title: Scan Results
 description: Scan Results
-weight: 4
+weight: 5
 ---
 
 Azure Quick Review (azqr) creates an excel spreadsheet with the following sections:

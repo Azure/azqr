@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting & Support
 description: Troubleshooting & Support
-weight: 8
+weight: 20
 ---
 
 If you encounter any issue while using **Azure Quick Review (azqr)**, please set the `AZURE_SDK_GO_LOGGING` environment variable to `all`, run the tool with the `--debug` flag and then share the console output with us by filing a new [issue](https://github.com/Azure/azqr/issues).
