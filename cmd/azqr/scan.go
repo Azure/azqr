@@ -18,6 +18,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("costs", "c", false, "Scan Azure Costs")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
+	scanCmd.PersistentFlags().BoolP("azure-cli-credential", "f", false, "Force the use of Azure CLI Credential")
 	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
 
 	rootCmd.AddCommand(scanCmd)
@@ -43,17 +44,19 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	cost, _ := cmd.Flags().GetBool("costs")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
+	forceAzureCliCredential, _ := cmd.Flags().GetBool("azure-credential-type")
 
 	params := internal.ScanParams{
-		SubscriptionID:  subscriptionID,
-		ResourceGroup:   resourceGroupName,
-		OutputName:      outputFileName,
-		Defender:        defender,
-		Advisor:         advisor,
-		Cost:            cost,
-		Mask:            mask,
-		Debug:           debug,
-		ServiceScanners: serviceScanners,
+		SubscriptionID:          subscriptionID,
+		ResourceGroup:           resourceGroupName,
+		OutputName:              outputFileName,
+		Defender:                defender,
+		Advisor:                 advisor,
+		Cost:                    cost,
+		Mask:                    mask,
+		Debug:                   debug,
+		ServiceScanners:         serviceScanners,
+		ForceAzureCliCredential: forceAzureCliCredential,
 	}
 
 	internal.Scan(&params)
