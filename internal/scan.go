@@ -61,15 +61,16 @@ import (
 )
 
 type ScanParams struct {
-	SubscriptionID  string
-	ResourceGroup   string
-	OutputName      string
-	Defender        bool
-	Advisor         bool
-	Cost           bool
-	Mask            bool
-	Debug           bool
-	ServiceScanners []scanners.IAzureScanner
+	SubscriptionID          string
+	ResourceGroup           string
+	OutputName              string
+	Defender                bool
+	Advisor                 bool
+	Cost                    bool
+	Mask                    bool
+	Debug                   bool
+	ServiceScanners         []scanners.IAzureScanner
+	ForceAzureCliCredential bool
 }
 
 func Scan(params *ScanParams) {
@@ -81,6 +82,7 @@ func Scan(params *ScanParams) {
 	cost := params.Cost
 	mask := params.Mask
 	debug := params.Debug
+	forceAzureCliCredential := params.ForceAzureCliCredential
 
 	// Default level for this example is info, unless debug flag is present
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
@@ -103,9 +105,18 @@ func Scan(params *ScanParams) {
 		outputFile = fmt.Sprintf("%s_%s", "azqr_report", outputFileStamp)
 	}
 
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to get Azure credentials")
+	var cred azcore.TokenCredential
+	var err error
+	if !forceAzureCliCredential {
+		cred, err = azidentity.NewDefaultAzureCredential(nil)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get Azure credentials")
+		}
+	} else {
+		cred, err = azidentity.NewAzureCLICredential(nil)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get Azure CLI credentials")
+		}
 	}
 
 	ctx := context.Background()
