@@ -44,7 +44,7 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 
 	LogSubscriptionScan(d.config.SubscriptionID, "Resource Ids")
 	
-	result := d.graphQuery.Query(d.config.Ctx, "resources | project id", []*string{&d.config.SubscriptionID})
+	result := d.graphQuery.Query(d.config.Ctx, "resources | project id | order by id asc", []*string{&d.config.SubscriptionID})
 
 	if result == nil || result.Data == nil {
 		log.Info().Msg("Preflight: No resources found")
