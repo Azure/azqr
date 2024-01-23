@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 
+	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	arg "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
@@ -40,6 +41,7 @@ func (q *GraphQuery) Query(ctx context.Context, query string, subscriptionIDs []
 		Query:         &query,
 		Options: &arg.QueryRequestOptions{
 			ResultFormat: &format,
+			Top:          ref.Of(int32(1000)),
 		},
 	}
 
@@ -47,15 +49,21 @@ func (q *GraphQuery) Query(ctx context.Context, query string, subscriptionIDs []
 		log.Fatal().Msg("Resource Graph client not initialized")
 	}
 
-	// Run the query and get the results
-	results, err := q.client.Resources(ctx, request, nil)
-	if err == nil {
-		result := GraphResult{}
-		result.Count = *results.TotalRecords
-		result.Data = results.Data.([]interface{})
-		return &result
-	} else {
-		log.Fatal().Err(err).Msg("Failed to run Resource Graph query")
-		return nil
+	result := GraphResult{}
+	result.Data = make([]interface{}, 0)
+	var skipToken *string = nil
+	for ok := true; ok; ok = skipToken != nil {
+		request.Options.SkipToken = skipToken
+		// Run the query and get the results
+		results, err := q.client.Resources(ctx, request, nil)
+		if err == nil {
+			result.Count = *results.TotalRecords
+			result.Data = append(result.Data, results.Data.([]interface{})...)
+			skipToken = results.SkipToken
+		} else {
+			log.Fatal().Err(err).Msg("Failed to run Resource Graph query")
+			return nil
+		}
 	}
+	return &result
 }
