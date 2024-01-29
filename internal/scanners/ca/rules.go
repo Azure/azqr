@@ -59,7 +59,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
-				if c.Properties.Configuration.Ingress != nil && c.Properties.Configuration.Ingress.AllowInsecure != nil {
+				if c.Properties.Configuration != nil && c.Properties.Configuration.Ingress != nil && c.Properties.Configuration.Ingress.AllowInsecure != nil {
 					return *c.Properties.Configuration.Ingress.AllowInsecure, ""
 				}
 				return false, ""
@@ -87,7 +87,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
 				ok := true
-				if c.Properties.Template.Volumes != nil {
+				if c.Properties.Template != nil && c.Properties.Template.Volumes != nil {
 					for _, v := range c.Properties.Template.Volumes {
 						if *v.StorageType != armappcontainers.StorageTypeAzureFile {
 							ok = false
@@ -107,9 +107,10 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
-				return c.Properties.Configuration.Ingress != nil && 
-					c.Properties.Configuration.Ingress.StickySessions != nil && 
-					c.Properties.Configuration.Ingress.StickySessions.Affinity != nil && 
+				return c.Properties.Configuration != nil &&
+					c.Properties.Configuration.Ingress != nil &&
+					c.Properties.Configuration.Ingress.StickySessions != nil &&
+					c.Properties.Configuration.Ingress.StickySessions.Affinity != nil &&
 					*c.Properties.Configuration.Ingress.StickySessions.Affinity == armappcontainers.AffinitySticky, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-apps/sticky-sessions?pivots=azure-portal",
