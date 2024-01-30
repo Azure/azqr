@@ -217,5 +217,17 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/api-management/configure-custom-domain?tabs=custom",
 		},
+		"apim-012": {
+			Id:          "apim-012",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
+			Description: "APIM: Migrate instance hosted on the stv1 platform to stv2",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armapimanagement.ServiceResource)
+				return *c.Properties.PlatformVersion == armapimanagement.PlatformVersionStv1, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/api-management/migrate-stv1-to-stv2?tabs=portal",
+		},
 	}
 }
