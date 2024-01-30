@@ -27,7 +27,6 @@ $latest_azqr=$(iwr https://api.github.com/repos/Azure/azqr/releases/latest).cont
 iwr https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-windows-latest-amd64.exe -OutFile azqr.exe
 ```
 
-
 ## Install on Mac
 
 Download the latest release from [here](https://github.com/Azure/azqr/releases).

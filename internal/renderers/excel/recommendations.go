@@ -1,37 +1,36 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package renderers
+package excel
 
 import (
 	_ "image/png"
 
+	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
-func renderRecommendations(f *excelize.File, data ReportData) {
+func renderRecommendations(f *excelize.File, data *renderers.ReportData) {
 	if len(data.MainData) > 0 {
-		_, err := f.NewSheet("Recommendations")
+		err := f.SetSheetName("Sheet1", "Recommendations")
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to create Recommendations sheet")
 		}
 
 		renderedRules := map[string]bool{}
 
-		headers := []string{"Id", "Category", "Subcategory", "Description", "Severity", "Learn"}
+		headers := []string{"Category", "Impact", "Recommendation", "Learn"}
 		rows := [][]string{}
 		for _, result := range data.MainData {
 			for _, rr := range result.Rules {
 				_, exists := renderedRules[rr.Id]
-				if !exists && rr.IsBroken {
+				if !exists && rr.NotCompliant {
 					rulesToRender := map[string]string{
-						"Id":          rr.Id,
-						"Category":    string(rr.Category),
-						"Subcategory": string(rr.Subcategory),
-						"Description": rr.Description,
-						"Severity":    string(rr.Severity),
-						"Learn":       rr.Learn,
+						"Category":       string(rr.Category),
+						"Impact":         string(rr.Impact),
+						"Recommendation": rr.Recommendation,
+						"Learn":          rr.Learn,
 					}
 					renderedRules[rr.Id] = true
 					rows = append(rows, mapToRow(headers, rulesToRender)...)

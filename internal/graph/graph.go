@@ -6,7 +6,7 @@ package graph
 import (
 	"context"
 
-	"github.com/Azure/azqr/internal/ref"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	arg "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
@@ -41,7 +41,7 @@ func (q *GraphQuery) Query(ctx context.Context, query string, subscriptionIDs []
 		Query:         &query,
 		Options: &arg.QueryRequestOptions{
 			ResultFormat: &format,
-			Top:          ref.Of(int32(1000)),
+			Top:          to.Ptr(int32(1000)),
 		},
 	}
 

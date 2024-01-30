@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
 )
 
@@ -32,7 +32,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "adf-001",
 				target: &armdatafactory.Factory{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -48,9 +48,9 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 		{
 			name: "DataFactoryScanner Private Endpoint",
 			fields: fields{
-				rule:        "adf-002",
+				rule: "adf-002",
 				target: &armdatafactory.Factory{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					PrivateEndpoints: map[string]bool{
@@ -80,7 +80,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "adf-004",
 				target: &armdatafactory.Factory{
-					Name: ref.Of("adf-test"),
+					Name: to.Ptr("adf-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

@@ -14,25 +14,22 @@ import (
 func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"sb-001": {
-			Id:          "sb-001",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "Service Bus should have diagnostic settings enabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "sb-001",
+			Category:       scanners.RulesCategoryMonitoringAndAlerting,
+			Recommendation: "Service Bus should have diagnostic settings enabled",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armservicebus.SBNamespace)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"sb-002": {
-			Id:          "sb-002",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
-			Description: "Service Bus should have availability zones enabled",
-			Severity:    scanners.SeverityHigh,
+			Id:             "sb-002",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Service Bus should have availability zones enabled",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armservicebus.SBNamespace)
 				sku := string(*i.SKU.Name)
@@ -40,14 +37,12 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-outages-disasters#availability-zones",
-			Field: scanners.OverviewFieldAZ,
 		},
 		"sb-003": {
-			Id:          "sb-003",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
-			Description: "Service Bus should have a SLA",
-			Severity:    scanners.SeverityHigh,
+			Id:             "sb-003",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Service Bus should have a SLA",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armservicebus.SBNamespace)
 				sku := string(*i.SKU.Name)
@@ -58,55 +53,47 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return false, sla
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/service-bus/",
-			Field: scanners.OverviewFieldSLA,
 		},
 		"sb-004": {
-			Id:          "sb-004",
-			Category:    scanners.RulesCategorySecurity,
-			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
-			Description: "Service Bus should have private endpoints enabled",
-			Severity:    scanners.SeverityHigh,
+			Id:             "sb-004",
+			Category:       scanners.RulesCategorySecurity,
+			Recommendation: "Service Bus should have private endpoints enabled",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armservicebus.SBNamespace)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/network-security",
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"sb-005": {
-			Id:          "sb-005",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
-			Description: "Service Bus SKU",
-			Severity:    scanners.SeverityHigh,
+			Id:             "sb-005",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Service Bus SKU",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armservicebus.SBNamespace)
 				return false, string(*i.SKU.Name)
 			},
 			Url: "https://azure.microsoft.com/en-us/pricing/details/service-bus/",
-			Field: scanners.OverviewFieldSKU,
 		},
 		"sb-006": {
-			Id:          "sb-006",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "Service Bus Name should comply with naming conventions",
-			Severity:    scanners.SeverityLow,
+			Id:             "sb-006",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Service Bus Name should comply with naming conventions",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
 				caf := strings.HasPrefix(*c.Name, "sb")
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
 		},
 		"sb-007": {
-			Id:          "sb-007",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "Service Bus should have tags",
-			Severity:    scanners.SeverityLow,
+			Id:             "sb-007",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Service Bus should have tags",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
 				return len(c.Tags) == 0, ""
@@ -114,11 +101,10 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"sb-008": {
-			Id:          "sb-008",
-			Category:    scanners.RulesCategorySecurity,
-			Subcategory: scanners.RulesSubcategorySecurityIdentity,
-			Description: "Service Bus should have local authentication disabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "sb-008",
+			Category:       scanners.RulesCategorySecurity,
+			Recommendation: "Service Bus should have local authentication disabled",
+			Impact:         scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth

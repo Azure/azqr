@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
@@ -32,7 +32,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "cr-001",
 				target: &armcontainerregistry.Registry{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				rule: "cr-002",
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{
-						ZoneRedundancy: ref.Of(armcontainerregistry.ZoneRedundancyEnabled),
+						ZoneRedundancy: to.Ptr(armcontainerregistry.ZoneRedundancyEnabled),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -81,7 +81,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 					Properties: &armcontainerregistry.RegistryProperties{
 						PrivateEndpointConnections: []*armcontainerregistry.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -99,7 +99,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				rule: "cr-005",
 				target: &armcontainerregistry.Registry{
 					SKU: &armcontainerregistry.SKU{
-						Name: ref.Of(armcontainerregistry.SKUNameStandard),
+						Name: to.Ptr(armcontainerregistry.SKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -114,7 +114,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "cr-006",
 				target: &armcontainerregistry.Registry{
-					Name: ref.Of("cr-test"),
+					Name: to.Ptr("cr-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -143,7 +143,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				rule: "cr-007",
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{
-						AnonymousPullEnabled: ref.Of(false),
+						AnonymousPullEnabled: to.Ptr(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -173,7 +173,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				rule: "cr-008",
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{
-						AdminUserEnabled: ref.Of(false),
+						AdminUserEnabled: to.Ptr(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -205,7 +205,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 					Properties: &armcontainerregistry.RegistryProperties{
 						Policies: &armcontainerregistry.Policies{
 							RetentionPolicy: &armcontainerregistry.RetentionPolicy{
-								Status: ref.Of(armcontainerregistry.PolicyStatusDisabled),
+								Status: to.Ptr(armcontainerregistry.PolicyStatusDisabled),
 							},
 						},
 					},

@@ -5,7 +5,6 @@ package scanners
 
 import (
 	"github.com/rs/zerolog/log"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity"
@@ -22,26 +21,6 @@ type DefenderScanner struct {
 	config       *ScannerConfig
 	client       *armsecurity.PricingsClient
 	defenderFunc func() ([]DefenderResult, error)
-}
-
-// GetProperties - Returns the properties of the DefenderResult
-func (d DefenderResult) GetProperties() []string {
-	return []string{
-		"SubscriptionID",
-		"Name",
-		"Tier",
-		"Deprecated",
-	}
-}
-
-// ToMap - Returns the properties of the DefenderResult as a map
-func (r DefenderResult) ToMap(mask bool) map[string]string {
-	return map[string]string{
-		"SubscriptionID": MaskSubscriptionID(r.SubscriptionID, mask),
-		"Name":           r.Name,
-		"Tier":           r.Tier,
-		"Deprecated":     strconv.FormatBool(r.Deprecated),
-	}
 }
 
 // Init - Initializes the Defender Scanner

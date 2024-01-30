@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
 
@@ -32,7 +32,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "cosmos-001",
 				target: &armcosmos.DatabaseAccountGetResults{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -53,10 +53,10 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 					Properties: &armcosmos.DatabaseAccountGetProperties{
 						Locations: []*armcosmos.Location{
 							{
-								IsZoneRedundant: ref.Of(true),
+								IsZoneRedundant: to.Ptr(true),
 							},
 							{
-								IsZoneRedundant: ref.Of(true),
+								IsZoneRedundant: to.Ptr(true),
 							},
 						},
 					},
@@ -90,7 +90,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 					Properties: &armcosmos.DatabaseAccountGetProperties{
 						Locations: []*armcosmos.Location{
 							{
-								IsZoneRedundant: ref.Of(true),
+								IsZoneRedundant: to.Ptr(true),
 							},
 						},
 					},
@@ -110,10 +110,10 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 					Properties: &armcosmos.DatabaseAccountGetProperties{
 						Locations: []*armcosmos.Location{
 							{
-								IsZoneRedundant: ref.Of(true),
+								IsZoneRedundant: to.Ptr(true),
 							},
 							{
-								IsZoneRedundant: ref.Of(true),
+								IsZoneRedundant: to.Ptr(true),
 							},
 						},
 					},
@@ -133,7 +133,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 					Properties: &armcosmos.DatabaseAccountGetProperties{
 						PrivateEndpointConnections: []*armcosmos.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -151,7 +151,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 				rule: "cosmos-005",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{
-						DatabaseAccountOfferType: ref.Of("Standard"),
+						DatabaseAccountOfferType: to.Ptr("Standard"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -166,7 +166,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "cosmos-006",
 				target: &armcosmos.DatabaseAccountGetResults{
-					Name: ref.Of("cosmos-test"),
+					Name: to.Ptr("cosmos-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -181,7 +181,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 				rule: "cosmos-008",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{
-						DisableLocalAuth: ref.Of(true),
+						DisableLocalAuth: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -197,7 +197,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 				rule: "cosmos-009",
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{
-						DisableKeyBasedMetadataWriteAccess: ref.Of(true),
+						DisableKeyBasedMetadataWriteAccess: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

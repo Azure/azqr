@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package ref
+package to
 
-func Of[E any](e E) *E {
+func Ptr[E any](e E) *E {
 	return &e
 }

@@ -14,39 +14,34 @@ import (
 func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"vm-001": {
-			Id:          "vm-001",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "Virtual Machine should have diagnostic settings enabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "vm-001",
+			Category:       scanners.RulesCategoryMonitoringAndAlerting,
+			Recommendation: "Virtual Machine should have diagnostic settings enabled",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcompute.VirtualMachine)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-monitor/agents/diagnostics-extension-windows-install",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-monitor/agents/diagnostics-extension-windows-install",
 		},
 		"vm-002": {
-			Id:          "vm-002",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
-			Description: "Virtual Machine should have availability zones enabled",
-			Severity:    scanners.SeverityHigh,
+			Id:             "vm-002",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Virtual Machine should have availability zones enabled",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				v := target.(*armcompute.VirtualMachine)
 				hasZones := v.Zones != nil && len(v.Zones) > 1
 				return !hasZones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/virtual-machines/availability#availability-zones",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/virtual-machines/availability#availability-zones",
 		},
 		"vm-003": {
-			Id:          "vm-003",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
-			Description: "Virtual Machine should have a SLA",
-			Severity:    scanners.SeverityHigh,
+			Id:             "vm-003",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Virtual Machine should have a SLA",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				v := target.(*armcompute.VirtualMachine)
 				sla := "99.9%"
@@ -60,29 +55,25 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
 		"vm-006": {
-			Id:          "vm-006",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "Virtual Machine Name should comply with naming conventions",
-			Severity:    scanners.SeverityLow,
+			Id:             "vm-006",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Virtual Machine Name should comply with naming conventions",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcompute.VirtualMachine)
 				caf := strings.HasPrefix(*c.Name, "vm")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"vm-007": {
-			Id:          "vm-007",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "Virtual Machine should have tags",
-			Severity:    scanners.SeverityLow,
+			Id:             "vm-007",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Virtual Machine should have tags",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcompute.VirtualMachine)
 				return len(c.Tags) == 0, ""
@@ -90,11 +81,10 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"vm-008": {
-			Id:          "vm-008",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
-			Description: "Virtual Machine should use managed disks",
-			Severity:    scanners.SeverityHigh,
+			Id:             "vm-008",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Virtual Machine should use managed disks",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcompute.VirtualMachine)
 				hasManagedDisks := c.Properties.StorageProfile.OSDisk.ManagedDisk != nil
@@ -103,11 +93,10 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/architecture/checklist/resiliency-per-service#virtual-machines",
 		},
 		"vm-009": {
-			Id:          "vm-009",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
-			Description: "Virtual Machine should host application or database data on a data disk",
-			Severity:    scanners.SeverityLow,
+			Id:             "vm-009",
+			Category:       scanners.RulesCategoryScalability,
+			Recommendation: "Virtual Machine should host application or database data on a data disk",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcompute.VirtualMachine)
 				hasDataDisks := len(c.Properties.StorageProfile.DataDisks) > 0
