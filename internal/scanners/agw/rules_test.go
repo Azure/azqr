@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
 
@@ -32,7 +32,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "agw-005",
 				target: &armnetwork.ApplicationGateway{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -50,8 +50,8 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "agw-007",
 				target: &armnetwork.ApplicationGateway{
-					ID:    ref.Of("test"),
-					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
+					ID:    to.Ptr("test"),
+					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -79,7 +79,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 				target: &armnetwork.ApplicationGateway{
 					Properties: &armnetwork.ApplicationGatewayPropertiesFormat{
 						SKU: &armnetwork.ApplicationGatewaySKU{
-							Name: ref.Of(armnetwork.ApplicationGatewaySKUNameStandardV2),
+							Name: to.Ptr(armnetwork.ApplicationGatewaySKUNameStandardV2),
 						},
 					},
 				},
@@ -95,7 +95,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "agw-105",
 				target: &armnetwork.ApplicationGateway{
-					Name: ref.Of("agw-test"),
+					Name: to.Ptr("agw-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

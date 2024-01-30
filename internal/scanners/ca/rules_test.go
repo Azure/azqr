@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
@@ -44,7 +44,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "ca-006",
 				target: &armappcontainers.ContainerApp{
-					Name: ref.Of("ca-test"),
+					Name: to.Ptr("ca-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -61,7 +61,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 					Properties: &armappcontainers.ContainerAppProperties{
 						Configuration: &armappcontainers.Configuration{
 							Ingress: &armappcontainers.Ingress{
-								AllowInsecure: ref.Of(true),
+								AllowInsecure: to.Ptr(true),
 							},
 						},
 					},
@@ -79,7 +79,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 				rule: "ca-009",
 				target: &armappcontainers.ContainerApp{
 					Identity: &armappcontainers.ManagedServiceIdentity{
-						Type: ref.Of(armappcontainers.ManagedServiceIdentityTypeNone),
+						Type: to.Ptr(armappcontainers.ManagedServiceIdentityTypeNone),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -98,7 +98,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						Template: &armappcontainers.Template{
 							Volumes: []*armappcontainers.Volume{
 								{
-									StorageType: ref.Of(armappcontainers.StorageTypeAzureFile),
+									StorageType: to.Ptr(armappcontainers.StorageTypeAzureFile),
 								},
 							},
 						},
@@ -120,7 +120,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						Template: &armappcontainers.Template{
 							Volumes: []*armappcontainers.Volume{
 								{
-									StorageType: ref.Of(armappcontainers.StorageTypeEmptyDir),
+									StorageType: to.Ptr(armappcontainers.StorageTypeEmptyDir),
 								},
 							},
 						},
@@ -142,7 +142,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						Configuration: &armappcontainers.Configuration{
 							Ingress: &armappcontainers.Ingress{
 								StickySessions: &armappcontainers.IngressStickySessions{
-									Affinity: ref.Of(armappcontainers.AffinitySticky),
+									Affinity: to.Ptr(armappcontainers.AffinitySticky),
 								},
 							},
 						},

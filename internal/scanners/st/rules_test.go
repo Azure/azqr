@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
@@ -32,7 +32,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "st-001",
 				target: &armstorage.Account{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-002",
 				target: &armstorage.Account{
 					SKU: &armstorage.SKU{
-						Name: ref.Of(armstorage.SKUNamePremiumZRS),
+						Name: to.Ptr(armstorage.SKUNamePremiumZRS),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,10 +67,10 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-003",
 				target: &armstorage.Account{
 					SKU: &armstorage.SKU{
-						Name: ref.Of(armstorage.SKUNamePremiumZRS),
+						Name: to.Ptr(armstorage.SKUNamePremiumZRS),
 					},
 					Properties: &armstorage.AccountProperties{
-						AccessTier: ref.Of(armstorage.AccessTierHot),
+						AccessTier: to.Ptr(armstorage.AccessTierHot),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -88,7 +88,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 					Properties: &armstorage.AccountProperties{
 						PrivateEndpointConnections: []*armstorage.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -106,7 +106,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-005",
 				target: &armstorage.Account{
 					SKU: &armstorage.SKU{
-						Name: ref.Of(armstorage.SKUNamePremiumZRS),
+						Name: to.Ptr(armstorage.SKUNamePremiumZRS),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -121,7 +121,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "st-006",
 				target: &armstorage.Account{
-					Name: ref.Of("sttest"),
+					Name: to.Ptr("sttest"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -136,7 +136,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-007",
 				target: &armstorage.Account{
 					Properties: &armstorage.AccountProperties{
-						EnableHTTPSTrafficOnly: ref.Of(true),
+						EnableHTTPSTrafficOnly: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -152,10 +152,70 @@ func TestStorageScanner_Rules(t *testing.T) {
 				rule: "st-009",
 				target: &armstorage.Account{
 					Properties: &armstorage.AccountProperties{
-						MinimumTLSVersion: ref.Of(armstorage.MinimumTLSVersionTLS12),
+						MinimumTLSVersion: to.Ptr(armstorage.MinimumTLSVersionTLS12),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "StorageScanner inmutable storage versioning disabled",
+			fields: fields{
+				rule: "st-010",
+				target: &armstorage.Account{
+					Properties: &armstorage.AccountProperties{
+						ImmutableStorageWithVersioning: &armstorage.ImmutableStorageAccount{
+							Enabled: to.Ptr(false),
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "StorageScanner inmutable storage versioning enabled",
+			fields: fields{
+				rule: "st-010",
+				target: &armstorage.Account{
+					Properties: &armstorage.AccountProperties{
+						ImmutableStorageWithVersioning: &armstorage.ImmutableStorageAccount{
+							Enabled: to.Ptr(true),
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "StorageScanner inmutable storage versioning enabled",
+			fields: fields{
+				rule: "st-011",
+				target: &armstorage.Account{
+					Properties: &armstorage.AccountProperties{},
+				},
+				scanContext: &scanners.ScanContext{
+					BlobServiceProperties: &armstorage.BlobServicesClientGetServicePropertiesResponse{
+						BlobServiceProperties: armstorage.BlobServiceProperties{
+							BlobServiceProperties: &armstorage.BlobServicePropertiesProperties{
+								ContainerDeleteRetentionPolicy: &armstorage.DeleteRetentionPolicy{
+									Enabled: to.Ptr(true),
+								},
+							},
+						},
+					},
+				},
 			},
 			want: want{
 				broken: false,

@@ -1,19 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package renderers
+package excel
 
 import (
 	"fmt"
 	_ "image/png"
 	"unicode/utf8"
 
+	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/embeded"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
-func CreateExcelReport(data ReportData) {
+func CreateExcelReport(data *renderers.ReportData) {
 	filename := fmt.Sprintf("%s.xlsx", data.OutputFileName)
 	log.Info().Msgf("Generating Report: %s", filename)
 	f := excelize.NewFile()
@@ -23,7 +24,6 @@ func CreateExcelReport(data ReportData) {
 		}
 	}()
 
-	renderOverview(f, data)
 	renderRecommendations(f, data)
 	renderServices(f, data)
 	renderDefender(f, data)

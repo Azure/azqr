@@ -6,13 +6,13 @@ package scanners
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 	"github.com/rs/zerolog/log"
 )
 
@@ -27,10 +27,11 @@ type (
 
 	// ScanContext - Struct for Scanner Context
 	ScanContext struct {
-		PrivateEndpoints    map[string]bool
-		DiagnosticsSettings map[string]bool
-		PublicIPs           map[string]*armnetwork.PublicIPAddress
-		SiteConfig          *armappservice.WebAppsClientGetConfigurationResponse
+		PrivateEndpoints      map[string]bool
+		DiagnosticsSettings   map[string]bool
+		PublicIPs             map[string]*armnetwork.PublicIPAddress
+		SiteConfig            *armappservice.WebAppsClientGetConfigurationResponse
+		BlobServiceProperties *armstorage.BlobServicesClientGetServicePropertiesResponse
 	}
 
 	// IAzureScanner - Interface for all Azure Scanners
@@ -51,56 +52,38 @@ type (
 	}
 
 	AzureRule struct {
-		Id          string
-		Category    RulesCategory
-		Subcategory RulesSubCategory
-		Description string
-		Severity    SeverityType
-		Url         string
-		Field       OverviewField
-		Eval        func(target interface{}, scanContext *ScanContext) (bool, string)
+		Id             string
+		Category       RulesCategory
+		Recommendation string
+		Impact         ImpactType
+		Url            string
+		Eval           func(target interface{}, scanContext *ScanContext) (bool, string)
 	}
 
 	AzureRuleResult struct {
-		Id          string
-		Category    RulesCategory
-		Subcategory RulesSubCategory
-		Description string
-		Severity    SeverityType
-		Learn       string
-		Result      string
-		Field       OverviewField
-		IsBroken    bool
+		Id             string
+		Category       RulesCategory
+		Recommendation string
+		Impact         ImpactType
+		Learn          string
+		Result         string
+		NotCompliant   bool
 	}
 
 	RuleEngine struct{}
-
-	OverviewField int
-)
-
-const (
-	OverviewFieldNone OverviewField = iota
-	OverviewFieldSKU
-	OverviewFieldSLA
-	OverviewFieldAZ
-	OverviewFieldPrivate
-	OverviewFieldDiagnostics
-	OverviewFieldCAF
 )
 
 func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContext *ScanContext) AzureRuleResult {
 	broken, result := rule.Eval(target, scanContext)
 
 	return AzureRuleResult{
-		Id:          rule.Id,
-		Category:    rule.Category,
-		Subcategory: rule.Subcategory,
-		Description: rule.Description,
-		Severity:    rule.Severity,
-		Learn:       rule.Url,
-		Result:      result,
-		IsBroken:    broken,
-		Field:       rule.Field,
+		Id:             rule.Id,
+		Category:       rule.Category,
+		Recommendation: rule.Recommendation,
+		Impact:         rule.Impact,
+		Learn:          rule.Url,
+		Result:         result,
+		NotCompliant:   broken,
 	}
 }
 
@@ -112,69 +95,6 @@ func (e *RuleEngine) EvaluateRules(rules map[string]AzureRule, target interface{
 	}
 
 	return results
-}
-
-// ToMap - Returns a map representation of the Azure Service Result
-func (r AzureServiceResult) ToMap(mask bool) map[string]string {
-	sku := ""
-	sla := ""
-	az := ""
-	pvt := ""
-	ds := ""
-	caf := ""
-
-	for _, v := range r.Rules {
-		switch v.Field {
-		case OverviewFieldSKU:
-			sku = v.Result
-		case OverviewFieldSLA:
-			sla = v.Result
-		case OverviewFieldAZ:
-			az = strconv.FormatBool(!v.IsBroken)
-		case OverviewFieldPrivate:
-			pvt = strconv.FormatBool(!v.IsBroken)
-		case OverviewFieldDiagnostics:
-			ds = strconv.FormatBool(!v.IsBroken)
-		case OverviewFieldCAF:
-			caf = strconv.FormatBool(!v.IsBroken)
-		}
-	}
-
-	return map[string]string{
-		"SubscriptionID": MaskSubscriptionID(r.SubscriptionID, mask),
-		"ResourceGroup":  r.ResourceGroup,
-		"Location":       ParseLocation(r.Location),
-		"Type":           r.Type,
-		"Name":           r.ServiceName,
-		"SKU":            sku,
-		"SLA":            sla,
-		"AZ":             az,
-		"PVT":            pvt,
-		"DS":             ds,
-		"CAF":            caf,
-	}
-}
-
-// GetResourceType - Returns the resource type of the Azure Service Result
-func (r AzureServiceResult) GetResourceType() string {
-	return r.Type
-}
-
-// GetHeaders - Returns the headers of the Azure Service Result
-func (r AzureServiceResult) GetHeaders() []string {
-	return []string{
-		"SubscriptionID",
-		"ResourceGroup",
-		"Location",
-		"Type",
-		"Name",
-		"SKU",
-		"SLA",
-		"AZ",
-		"PVT",
-		"DS",
-		"CAF",
-	}
 }
 
 func ParseLocation(location string) string {
@@ -198,47 +118,18 @@ func LogSubscriptionScan(subscriptionID string, serviceName string) {
 	log.Info().Msgf("Scanning subscriptions/...%s for %s", subscriptionID[29:], serviceName)
 }
 
-type SeverityType string
+type ImpactType string
 type RulesCategory string
-type RulesSubCategory string
 
 const (
-	SeverityHigh   SeverityType = "High"
-	SeverityMedium SeverityType = "Medium"
-	SeverityLow    SeverityType = "Low"
+	ImpactHigh   ImpactType = "High"
+	ImpactMedium ImpactType = "Medium"
+	ImpactLow    ImpactType = "Low"
 
-	RulesCategoryReliability            RulesCategory = "Reliability"
-	RulesCategorySecurity               RulesCategory = "Security"
-	RulesCategoryCostOptimization       RulesCategory = "Cost Optimization"
-	RulesCategoryOperationalExcellence  RulesCategory = "Operational Excellence"
-	RulesCategoryPerformanceEfficienccy RulesCategory = "Performance Efficiency"
-
-	RulesSubcategoryReliabilityAvailabilityZones RulesSubCategory = "Availability Zones"
-	RulesSubcategoryReliabilitySLA               RulesSubCategory = "SLA"
-	RulesSubcategoryReliabilitySKU               RulesSubCategory = "SKU"
-	RulesSubcategoryReliabilityScaling           RulesSubCategory = "Scaling"
-	RulesSubcategoryReliabilityDiagnosticLogs    RulesSubCategory = "Diagnostic Logs"
-	RulesSubcategoryReliabilityMonitoring        RulesSubCategory = "Monitoring"
-	RulesSubcategoryReliabilityReliability       RulesSubCategory = "Reliability"
-	RulesSubcategoryReliabilityMaintenance       RulesSubCategory = "Maintenance"
-
-	RulesSubcategoryOperationalExcellenceCAF               RulesSubCategory = "Naming Convention (CAF)"
-	RulesSubcategoryOperationalExcellenceTags              RulesSubCategory = "Tags"
-	RulesSubcategoryOperationalExcellenceRetentionPolicies RulesSubCategory = "Retention Policies"
-
-	RulesSubcategorySecurityNetworkSecurityGroups RulesSubCategory = "Network Security Groups"
-	RulesSubcategorySecuritySSL                   RulesSubCategory = "SSL"
-	RulesSubcategorySecurityHTTPS                 RulesSubCategory = "HTTPS Only"
-	RulesSubcategorySecurityCyphers               RulesSubCategory = "Cyphers"
-	RulesSubcategorySecurityCertificates          RulesSubCategory = "Certificates"
-	RulesSubcategorySecurityTLS                   RulesSubCategory = "TLS"
-	RulesSubcategorySecurityPrivateEndpoint       RulesSubCategory = "Private Endpoint"
-	RulesSubcategorySecurityPrivateIP             RulesSubCategory = "Private IP Address"
-	RulesSubcategorySecurityFirewall              RulesSubCategory = "Firewall"
-	RulesSubcategorySecurityIdentity              RulesSubCategory = "Identity and Access Control"
-	RulesSubcategorySecurityNetworking            RulesSubCategory = "Networking"
-	RulesSubcategorySecurityDiskEncryption        RulesSubCategory = "Disk Encryption"
-	RulesSubcategorySecurity                      RulesSubCategory = "Security"
-
-	RulesSubcategoryPerformanceEfficienccyNetworking RulesSubCategory = "Networking"
+	RulesCategoryHighAvailability      RulesCategory = "High Availability"
+	RulesCategoryMonitoringAndAlerting RulesCategory = "Monitoring and Alerting"
+	RulesCategoryScalability           RulesCategory = "Scalability"
+	RulesCategoryDisasterRecovery      RulesCategory = "Disaster Recovery"
+	RulesCategorySecurity              RulesCategory = "Security"
+	RulesCategoryGovernance            RulesCategory = "Governance"
 )

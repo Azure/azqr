@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
@@ -32,7 +32,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "sigr-001",
 				target: &armsignalr.ResourceInfo{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 				rule: "sigr-002",
 				target: &armsignalr.ResourceInfo{
 					SKU: &armsignalr.ResourceSKU{
-						Name: ref.Of("Premium"),
+						Name: to.Ptr("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -81,7 +81,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 					Properties: &armsignalr.Properties{
 						PrivateEndpointConnections: []*armsignalr.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -99,7 +99,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 				rule: "sigr-005",
 				target: &armsignalr.ResourceInfo{
 					SKU: &armsignalr.ResourceSKU{
-						Name: ref.Of("Premium"),
+						Name: to.Ptr("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -114,7 +114,7 @@ func TestSignalRScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "sigr-006",
 				target: &armsignalr.ResourceInfo{
-					Name: ref.Of("sigr-test"),
+					Name: to.Ptr("sigr-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

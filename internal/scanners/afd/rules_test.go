@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
 )
 
@@ -32,7 +32,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "afd-001",
 				target: &armcdn.Profile{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -63,7 +63,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 				rule: "afd-005",
 				target: &armcdn.Profile{
 					SKU: &armcdn.SKU{
-						Name: ref.Of(armcdn.SKUNameStandardMicrosoft),
+						Name: to.Ptr(armcdn.SKUNameStandardMicrosoft),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -78,7 +78,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "afd-006",
 				target: &armcdn.Profile{
-					Name: ref.Of("afd-test"),
+					Name: to.Ptr("afd-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

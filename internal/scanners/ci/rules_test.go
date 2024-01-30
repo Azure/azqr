@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
 )
 
@@ -32,7 +32,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "ci-002",
 				target: &armcontainerinstance.ContainerGroup{
-					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
+					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -94,7 +94,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 				target: &armcontainerinstance.ContainerGroup{
 					Properties: &armcontainerinstance.ContainerGroupProperties{
 						IPAddress: &armcontainerinstance.IPAddress{
-							Type: ref.Of(armcontainerinstance.ContainerGroupIPAddressTypePrivate),
+							Type: to.Ptr(armcontainerinstance.ContainerGroupIPAddressTypePrivate),
 						},
 					},
 				},
@@ -111,7 +111,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 				rule: "ci-005",
 				target: &armcontainerinstance.ContainerGroup{
 					Properties: &armcontainerinstance.ContainerGroupProperties{
-						SKU: ref.Of(armcontainerinstance.ContainerGroupSKUStandard),
+						SKU: to.Ptr(armcontainerinstance.ContainerGroupSKUStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -126,7 +126,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "ci-006",
 				target: &armcontainerinstance.ContainerGroup{
-					Name: ref.Of("ci-test"),
+					Name: to.Ptr("ci-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

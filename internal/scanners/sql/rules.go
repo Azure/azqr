@@ -22,51 +22,44 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 func (a *SQLScanner) getServerRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"sql-001": {
-			Id:          "sql-001",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "SQL should have diagnostic settings enabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "sql-001",
+			Category:       scanners.RulesCategoryMonitoringAndAlerting,
+			Recommendation: "SQL should have diagnostic settings enabled",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armsql.Server)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"sql-004": {
-			Id:          "sql-004",
-			Category:    scanners.RulesCategorySecurity,
-			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
-			Description: "SQL should have private endpoints enabled",
-			Severity:    scanners.SeverityHigh,
+			Id:             "sql-004",
+			Category:       scanners.RulesCategorySecurity,
+			Recommendation: "SQL should have private endpoints enabled",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"sql-006": {
-			Id:          "sql-006",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "SQL Name should comply with naming conventions",
-			Severity:    scanners.SeverityLow,
+			Id:             "sql-006",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "SQL Name should comply with naming conventions",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Server)
 				caf := strings.HasPrefix(*c.Name, "sql")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sql-007": {
-			Id:          "sql-007",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "SQL should have tags",
-			Severity:    scanners.SeverityLow,
+			Id:             "sql-007",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "SQL should have tags",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Server)
 				return len(c.Tags) == 0, ""
@@ -74,11 +67,10 @@ func (a *SQLScanner) getServerRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"sql-008": {
-			Id:          "sql-008",
-			Category:    scanners.RulesCategorySecurity,
-			Subcategory: scanners.RulesSubcategorySecurityTLS,
-			Description: "SQL should enforce TLS >= 1.2",
-			Severity:    scanners.SeverityLow,
+			Id:             "sql-008",
+			Category:       scanners.RulesCategorySecurity,
+			Recommendation: "SQL should enforce TLS >= 1.2",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Server)
 				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != "1.2", ""
@@ -91,24 +83,21 @@ func (a *SQLScanner) getServerRules() map[string]scanners.AzureRule {
 func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"sqldb-001": {
-			Id:          "sqldb-001",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "SQL Database should have diagnostic settings enabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "sqldb-001",
+			Category:       scanners.RulesCategoryMonitoringAndAlerting,
+			Recommendation: "SQL Database should have diagnostic settings enabled",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armsql.Database)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"sqldb-002": {
-			Id:          "sqldb-002",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
-			Description: "SQL Database should have availability zones enabled",
-			Severity:    scanners.SeverityHigh,
+			Id:             "sqldb-002",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "SQL Database should have availability zones enabled",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Database)
 				zones := false
@@ -117,14 +106,12 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 				}
 				return !zones, ""
 			},
-			Field: scanners.OverviewFieldAZ,
 		},
 		"sqldb-003": {
-			Id:          "sqldb-003",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
-			Description: "SQL Database should have a SLA",
-			Severity:    scanners.SeverityHigh,
+			Id:             "sqldb-003",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "SQL Database should have a SLA",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Database)
 				sla := "99.99%"
@@ -133,41 +120,35 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Field: scanners.OverviewFieldSLA,
 		},
 		"sqldb-005": {
-			Id:          "sqldb-005",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
-			Description: "SQL Database SKU",
-			Severity:    scanners.SeverityHigh,
+			Id:             "sqldb-005",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "SQL Database SKU",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Database)
 				return false, string(*i.SKU.Name)
 			},
-			Url:   "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
 		},
 		"sqldb-006": {
-			Id:          "sqldb-006",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "SQL Database Name should comply with naming conventions",
-			Severity:    scanners.SeverityLow,
+			Id:             "sqldb-006",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "SQL Database Name should comply with naming conventions",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Database)
 				caf := *c.Name == "master" || strings.HasPrefix(*c.Name, "sqldb")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sqldb-007": {
-			Id:          "sqldb-007",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "SQL Database should have tags",
-			Severity:    scanners.SeverityLow,
+			Id:             "sqldb-007",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "SQL Database should have tags",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Database)
 				return len(c.Tags) == 0, ""

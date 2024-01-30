@@ -14,25 +14,22 @@ import (
 func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"appcs-001": {
-			Id:          "appcs-001",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "AppConfiguration should have diagnostic settings enabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "appcs-001",
+			Category:       scanners.RulesCategoryMonitoringAndAlerting,
+			Recommendation: "AppConfiguration should have diagnostic settings enabled",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armappconfiguration.ConfigurationStore)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
 		},
 		"appcs-003": {
-			Id:          "appcs-003",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
-			Description: "AppConfiguration should have a SLA",
-			Severity:    scanners.SeverityHigh,
+			Id:             "appcs-003",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "AppConfiguration should have a SLA",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armappconfiguration.ConfigurationStore)
 				sku := *a.SKU.Name
@@ -43,57 +40,49 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 
 				return sla == "None", sla
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/app-configuration/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/app-configuration/",
 		},
 		"appcs-004": {
-			Id:          "appcs-004",
-			Category:    scanners.RulesCategorySecurity,
-			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
-			Description: "AppConfiguration should have private endpoints enabled",
-			Severity:    scanners.SeverityHigh,
+			Id:             "appcs-004",
+			Category:       scanners.RulesCategorySecurity,
+			Recommendation: "AppConfiguration should have private endpoints enabled",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armappconfiguration.ConfigurationStore)
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
 		},
 		"appcs-005": {
-			Id:          "appcs-005",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
-			Description: "AppConfiguration SKU",
-			Severity:    scanners.SeverityHigh,
+			Id:             "appcs-005",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "AppConfiguration SKU",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armappconfiguration.ConfigurationStore)
 				sku := string(*a.SKU.Name)
 				return false, sku
 			},
-			Url:   "https://azure.microsoft.com/en-us/pricing/details/app-configuration/",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://azure.microsoft.com/en-us/pricing/details/app-configuration/",
 		},
 		"appcs-006": {
-			Id:          "appcs-006",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "AppConfiguration Name should comply with naming conventions",
-			Severity:    scanners.SeverityLow,
+			Id:             "appcs-006",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "AppConfiguration Name should comply with naming conventions",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappconfiguration.ConfigurationStore)
 				caf := strings.HasPrefix(*c.Name, "appcs")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"appcs-007": {
-			Id:          "appcs-007",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "AppConfiguration should have tags",
-			Severity:    scanners.SeverityLow,
+			Id:             "appcs-007",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "AppConfiguration should have tags",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappconfiguration.ConfigurationStore)
 				return len(c.Tags) == 0, ""
@@ -101,11 +90,10 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"appcs-008": {
-			Id:          "appcs-008",
-			Category:    scanners.RulesCategorySecurity,
-			Subcategory: scanners.RulesSubcategorySecurityIdentity,
-			Description: "AppConfiguration should have local authentication disabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "appcs-008",
+			Category:       scanners.RulesCategorySecurity,
+			Recommendation: "AppConfiguration should have local authentication disabled",
+			Impact:         scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappconfiguration.ConfigurationStore)
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
@@ -114,11 +102,10 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/howto-disable-access-key-authentication?tabs=portal#disable-access-key-authentication",
 		},
 		"appcs-009": {
-			Id:          "appcs-009",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
-			Description: "AppConfiguration should have purge protection enabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "appcs-009",
+			Category:       scanners.RulesCategoryDisasterRecovery,
+			Recommendation: "AppConfiguration should have purge protection enabled",
+			Impact:         scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappconfiguration.ConfigurationStore)
 				purgeProtection := c.Properties.EnablePurgeProtection != nil && *c.Properties.EnablePurgeProtection

@@ -14,25 +14,22 @@ import (
 func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"lb-001": {
-			Id:          "lb-001",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "Load Balancer should have diagnostic settings enabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "lb-001",
+			Category:       scanners.RulesCategoryMonitoringAndAlerting,
+			Recommendation: "Load Balancer should have diagnostic settings enabled",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armnetwork.LoadBalancer)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
 		},
 		"lb-002": {
-			Id:          "lb-002",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
-			Description: "Load Balancer should have availability zones enabled",
-			Severity:    scanners.SeverityHigh,
+			Id:             "lb-002",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Load Balancer should have availability zones enabled",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armnetwork.LoadBalancer)
 				broken := false
@@ -51,15 +48,13 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 
 				return broken, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-availability-zones#zone-redundant",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-availability-zones#zone-redundant",
 		},
 		"lb-003": {
-			Id:          "lb-003",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
-			Description: "Load Balancer should have a SLA",
-			Severity:    scanners.SeverityHigh,
+			Id:             "lb-003",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Load Balancer should have a SLA",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armnetwork.LoadBalancer)
 				sla := "99.99%"
@@ -69,29 +64,25 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return sla == "None", sla
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
 		},
 		"lb-005": {
-			Id:          "lb-005",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySKU,
-			Description: "Load Balancer SKU",
-			Severity:    scanners.SeverityHigh,
+			Id:             "lb-005",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Load Balancer SKU",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armnetwork.LoadBalancer)
 				sku := *i.SKU.Name
 				return sku != armnetwork.LoadBalancerSKUNameStandard, string(*i.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
 		},
 		"lb-006": {
-			Id:          "lb-006",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "Load Balancer Name should comply with naming conventions",
-			Severity:    scanners.SeverityLow,
+			Id:             "lb-006",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Load Balancer Name should comply with naming conventions",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.LoadBalancer)
 				hasPrivateIP := false
@@ -113,15 +104,13 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				caf := (strings.HasPrefix(*c.Name, "lbi") && hasPrivateIP) || (strings.HasPrefix(*c.Name, "lbe") && hasPublicIP)
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"lb-007": {
-			Id:          "lb-007",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "Load Balancer should have tags",
-			Severity:    scanners.SeverityLow,
+			Id:             "lb-007",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Load Balancer should have tags",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.LoadBalancer)
 				return len(c.Tags) == 0, ""

@@ -14,51 +14,44 @@ import (
 func (a *VirtualNetworkScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"vnet-001": {
-			Id:          "vnet-001",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "Virtual Network should have diagnostic settings enabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "vnet-001",
+			Category:       scanners.RulesCategoryMonitoringAndAlerting,
+			Recommendation: "Virtual Network should have diagnostic settings enabled",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armnetwork.VirtualNetwork)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
 		},
 		"vnet-002": {
-			Id:          "vnet-002",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityAvailabilityZones,
-			Description: "Virtual Network should have availability zones enabled",
-			Severity:    scanners.SeverityHigh,
+			Id:             "vnet-002",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Virtual Network should have availability zones enabled",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview#virtual-networks-and-availability-zones",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview#virtual-networks-and-availability-zones",
 		},
 		"vnet-006": {
-			Id:          "vnet-006",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "Virtual Network Name should comply with naming conventions",
-			Severity:    scanners.SeverityLow,
+			Id:             "vnet-006",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Virtual Network Name should comply with naming conventions",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualNetwork)
 				caf := strings.HasPrefix(*c.Name, "vnet")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"vnet-007": {
-			Id:          "vnet-007",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "Virtual Network should have tags",
-			Severity:    scanners.SeverityLow,
+			Id:             "vnet-007",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Virtual Network should have tags",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualNetwork)
 				return len(c.Tags) == 0, ""
@@ -66,11 +59,10 @@ func (a *VirtualNetworkScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"vnet-008": {
-			Id:          "vnet-008",
-			Category:    scanners.RulesCategorySecurity,
-			Subcategory: scanners.RulesSubcategorySecurityNetworking,
-			Description: "Virtual Network: All Subnets should have a Network Security Group associated",
-			Severity:    scanners.SeverityHigh,
+			Id:             "vnet-008",
+			Category:       scanners.RulesCategorySecurity,
+			Recommendation: "Virtual Network: All Subnets should have a Network Security Group associated",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualNetwork)
 				broken := false
@@ -87,11 +79,10 @@ func (a *VirtualNetworkScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/azure/virtual-network/concepts-and-best-practices",
 		},
 		"vnet-009": {
-			Id:          "vnet-009",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
-			Description: "Virtual NetworK should have at least two DNS servers assigned",
-			Severity:    scanners.SeverityHigh,
+			Id:             "vnet-009",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Virtual Network should have at least two DNS servers assigned",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualNetwork)
 				if c.Properties.DhcpOptions == nil {

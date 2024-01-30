@@ -18,34 +18,6 @@ type AdvisorScanner struct {
 	client *armadvisor.RecommendationsClient
 }
 
-// GetProperties - Returns the properties of the AdvisorResult
-func (a AdvisorResult) GetProperties() []string {
-	return []string{
-		"SubscriptionID",
-		"Name",
-		"Type",
-		"Category",
-		"Description",
-		"PotentialBenefits",
-		"Risk",
-		"LearnMoreLink",
-	}
-}
-
-// ToMap - Returns the properties of the AdvisorResult as a map
-func (a AdvisorResult) ToMap(mask bool) map[string]string {
-	return map[string]string{
-		"SubscriptionID":     MaskSubscriptionID(a.SubscriptionID, mask),
-		"Name":               a.Name,
-		"Type":               a.Type,
-		"Category":           a.Category,
-		"Description":        a.Description,
-		"Potential Benefits": a.PotentialBenefits,
-		"Risk":               a.Risk,
-		"Learn":              a.LearnMoreLink,
-	}
-}
-
 // Init - Initializes the Advisor Scanner
 func (s *AdvisorScanner) Init(config *ScannerConfig) error {
 	s.config = config

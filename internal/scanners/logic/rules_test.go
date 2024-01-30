@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/logic/armlogic"
 )
 
@@ -32,7 +32,7 @@ func TestLogicAppScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "logic-001",
 				target: &armlogic.Workflow{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -50,7 +50,7 @@ func TestLogicAppScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "logic-004",
 				target: &armlogic.Workflow{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 					Properties: &armlogic.WorkflowProperties{
 						Definition: map[string]interface{}{},
 					},
@@ -67,7 +67,7 @@ func TestLogicAppScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "logic-004",
 				target: &armlogic.Workflow{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 					Properties: &armlogic.WorkflowProperties{
 						Definition: map[string]interface{}{
 							"triggers": map[string]interface{}{
@@ -96,7 +96,7 @@ func TestLogicAppScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "logic-004",
 				target: &armlogic.Workflow{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 					Properties: &armlogic.WorkflowProperties{
 						Definition: map[string]interface{}{
 							"triggers": map[string]interface{}{
@@ -110,7 +110,7 @@ func TestLogicAppScanner_Rules(t *testing.T) {
 							Triggers: &armlogic.FlowAccessControlConfigurationPolicy{
 								AllowedCallerIPAddresses: []*armlogic.IPAddressRange{
 									{
-										AddressRange : ref.Of("127.0.0.1/32"),
+										AddressRange: to.Ptr("127.0.0.1/32"),
 									},
 								},
 							},
@@ -129,7 +129,7 @@ func TestLogicAppScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "logic-006",
 				target: &armlogic.Workflow{
-					Name: ref.Of("logic-test"),
+					Name: to.Ptr("logic-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

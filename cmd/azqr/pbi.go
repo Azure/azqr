@@ -4,22 +4,22 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/renderers"
+	"github.com/Azure/azqr/internal/renderers/pbi"
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	pbiCmd.PersistentFlags().StringP("excel-report", "x", "", "Path to azqr Excel report file")
+	pbiCmd.PersistentFlags().StringP("template-path", "p", "", "Path were the PowerBI template will be created")
 	rootCmd.AddCommand(pbiCmd)
 }
 
 var pbiCmd = &cobra.Command{
 	Use:   "pbi",
-	Short: "Creates PowerBI desktop dashboard template",
-	Long:  "Creates PowerBI desktop dashboard template",
+	Short: "Creates Power BI Desktop dashboard template",
+	Long:  "Creates Power BI Desktop dashboard template",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		xlsx, _ := cmd.Flags().GetString("excel-report")
-		renderers.CreatePBIReport(xlsx)
+		path, _ := cmd.Flags().GetString("template-path")
+		pbi.CreatePBIReport(path)
 	},
 }

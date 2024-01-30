@@ -14,64 +14,55 @@ import (
 func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"adf-001": {
-			Id:          "adf-001",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilityDiagnosticLogs,
-			Description: "Azure Data Factory should have diagnostic settings enabled",
-			Severity:    scanners.SeverityMedium,
+			Id:             "adf-001",
+			Category:       scanners.RulesCategoryMonitoringAndAlerting,
+			Recommendation: "Azure Data Factory should have diagnostic settings enabled",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armdatafactory.Factory)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
 		},
 		"adf-002": {
-			Id:          "adf-002",
-			Category:    scanners.RulesCategorySecurity,
-			Subcategory: scanners.RulesSubcategorySecurityPrivateEndpoint,
-			Description: "Azure Data Factory should have private endpoints enabled",
-			Severity:    scanners.SeverityHigh,
+			Id:             "adf-002",
+			Category:       scanners.RulesCategorySecurity,
+			Recommendation: "Azure Data Factory should have private endpoints enabled",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armdatafactory.Factory)
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"adf-003": {
-			Id:          "adf-003",
-			Category:    scanners.RulesCategoryReliability,
-			Subcategory: scanners.RulesSubcategoryReliabilitySLA,
-			Description: "Azure Data Factory SLA",
-			Severity:    scanners.SeverityHigh,
+			Id:             "adf-003",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Azure Data Factory SLA",
+			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"adf-004": {
-			Id:          "adf-004",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceCAF,
-			Description: "Azure Data Factory Name should comply with naming conventions",
-			Severity:    scanners.SeverityLow,
+			Id:             "adf-004",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Azure Data Factory Name should comply with naming conventions",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdatafactory.Factory)
 				caf := strings.HasPrefix(*c.Name, "adf")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"adf-005": {
-			Id:          "adf-005",
-			Category:    scanners.RulesCategoryOperationalExcellence,
-			Subcategory: scanners.RulesSubcategoryOperationalExcellenceTags,
-			Description: "Azure Data Factory should have tags",
-			Severity:    scanners.SeverityLow,
+			Id:             "adf-005",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "Azure Data Factory should have tags",
+			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdatafactory.Factory)
 				return len(c.Tags) == 0, ""

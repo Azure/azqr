@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
 
@@ -32,7 +32,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "kv-001",
 				target: &armkeyvault.Vault{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -65,7 +65,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 					Properties: &armkeyvault.VaultProperties{
 						PrivateEndpointConnections: []*armkeyvault.PrivateEndpointConnectionItem{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -84,7 +84,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				target: &armkeyvault.Vault{
 					Properties: &armkeyvault.VaultProperties{
 						SKU: &armkeyvault.SKU{
-							Name: ref.Of(armkeyvault.SKUNameStandard),
+							Name: to.Ptr(armkeyvault.SKUNameStandard),
 						},
 					},
 				},
@@ -100,7 +100,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "kv-006",
 				target: &armkeyvault.Vault{
-					Name: ref.Of("kv-test"),
+					Name: to.Ptr("kv-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -115,7 +115,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				rule: "kv-008",
 				target: &armkeyvault.Vault{
 					Properties: &armkeyvault.VaultProperties{
-						EnableSoftDelete: ref.Of(true),
+						EnableSoftDelete: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -131,7 +131,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				rule: "kv-009",
 				target: &armkeyvault.Vault{
 					Properties: &armkeyvault.VaultProperties{
-						EnablePurgeProtection: ref.Of(true),
+						EnablePurgeProtection: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
