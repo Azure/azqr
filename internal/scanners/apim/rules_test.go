@@ -324,6 +324,38 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "APIManagementScanner stv1",
+			fields: fields{
+				rule: "apim-012",
+				target: &armapimanagement.ServiceResource{
+					Properties: &armapimanagement.ServiceProperties{
+						PlatformVersion: ref.Of(armapimanagement.PlatformVersionStv1),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "APIManagementScanner stv2",
+			fields: fields{
+				rule: "apim-012",
+				target: &armapimanagement.ServiceResource{
+					Properties: &armapimanagement.ServiceProperties{
+						PlatformVersion: ref.Of(armapimanagement.PlatformVersionStv2),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
