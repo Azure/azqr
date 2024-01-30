@@ -24,8 +24,7 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
 		},
 		"cosmos-002": {
 			Id:          "cosmos-002",
@@ -51,8 +50,7 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability",
 		},
 		"cosmos-003": {
 			Id:          "cosmos-003",
@@ -81,8 +79,7 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability#slas",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability#slas",
 		},
 		"cosmos-004": {
 			Id:          "cosmos-004",
@@ -95,8 +92,7 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-configure-private-endpoints",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-configure-private-endpoints",
 		},
 		"cosmos-005": {
 			Id:          "cosmos-005",
@@ -108,8 +104,7 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				return false, string(*i.Properties.DatabaseAccountOfferType)
 			},
-			Url:   "https://azure.microsoft.com/en-us/pricing/details/cosmos-db/autoscale-provisioned/",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://azure.microsoft.com/en-us/pricing/details/cosmos-db/autoscale-provisioned/",
 		},
 		"cosmos-006": {
 			Id:          "cosmos-006",
@@ -122,8 +117,7 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "cosmos")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"cosmos-007": {
 			Id:          "cosmos-007",

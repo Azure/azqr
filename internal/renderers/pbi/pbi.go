@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package renderers
+package pbi
 
 import (
 	"archive/zip"

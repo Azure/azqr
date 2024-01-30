@@ -24,8 +24,7 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 				zones := len(i.Zones) > 0
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/container-instances/availability-zones",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/container-instances/availability-zones",
 		},
 		"ci-003": {
 			Id:          "ci-003",
@@ -36,8 +35,7 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/container-instances/v1_0/index.html",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/container-instances/v1_0/index.html",
 		},
 		"ci-004": {
 			Id:          "ci-004",
@@ -53,7 +51,6 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return !pe, ""
 			},
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"ci-005": {
 			Id:          "ci-005",
@@ -65,8 +62,7 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				return false, string(*i.Properties.SKU)
 			},
-			Url:   "https://azure.microsoft.com/en-us/pricing/details/container-instances/",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://azure.microsoft.com/en-us/pricing/details/container-instances/",
 		},
 		"ci-006": {
 			Id:          "ci-006",
@@ -79,8 +75,7 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "ci")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"ci-007": {
 			Id:          "ci-007",

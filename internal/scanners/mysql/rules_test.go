@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 )
@@ -33,7 +33,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "mysql-001",
 				target: &armmysql.Server{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -66,7 +66,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 					Properties: &armmysql.ServerProperties{
 						PrivateEndpointConnections: []*armmysql.ServerPrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -84,7 +84,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 				rule: "mysql-005",
 				target: &armmysql.Server{
 					SKU: &armmysql.SKU{
-						Name: ref.Of("GPGen58"),
+						Name: to.Ptr("GPGen58"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -99,7 +99,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "mysql-006",
 				target: &armmysql.Server{
-					Name: ref.Of("mysql-test"),
+					Name: to.Ptr("mysql-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -157,7 +157,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "mysqlf-001",
 				target: &armmysqlflexibleservers.Server{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -177,7 +177,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						HighAvailability: &armmysqlflexibleservers.HighAvailability{
-							Mode: ref.Of(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
+							Mode: to.Ptr(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
 						},
 					},
 				},
@@ -209,10 +209,10 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						HighAvailability: &armmysqlflexibleservers.HighAvailability{
-							Mode:                    ref.Of(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
-							StandbyAvailabilityZone: ref.Of("2"),
+							Mode:                    to.Ptr(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
+							StandbyAvailabilityZone: to.Ptr("2"),
 						},
-						AvailabilityZone: ref.Of("1"),
+						AvailabilityZone: to.Ptr("1"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -229,10 +229,10 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						HighAvailability: &armmysqlflexibleservers.HighAvailability{
-							Mode:                    ref.Of(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
-							StandbyAvailabilityZone: ref.Of("1"),
+							Mode:                    to.Ptr(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
+							StandbyAvailabilityZone: to.Ptr("1"),
 						},
-						AvailabilityZone: ref.Of("1"),
+						AvailabilityZone: to.Ptr("1"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -249,7 +249,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{
 						Network: &armmysqlflexibleservers.Network{
-							PublicNetworkAccess: ref.Of(armmysqlflexibleservers.EnableStatusEnumDisabled),
+							PublicNetworkAccess: to.Ptr(armmysqlflexibleservers.EnableStatusEnumDisabled),
 						},
 					},
 				},
@@ -266,7 +266,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				rule: "mysqlf-005",
 				target: &armmysqlflexibleservers.Server{
 					SKU: &armmysqlflexibleservers.SKU{
-						Name: ref.Of("StandardD4sv3"),
+						Name: to.Ptr("StandardD4sv3"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -281,7 +281,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "mysqlf-006",
 				target: &armmysqlflexibleservers.Server{
-					Name: ref.Of("mysql-test"),
+					Name: to.Ptr("mysql-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

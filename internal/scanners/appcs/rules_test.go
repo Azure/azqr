@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
 )
 
@@ -32,7 +32,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "appcs-001",
 				target: &armappconfiguration.ConfigurationStore{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-003",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
-						Name: ref.Of("Free"),
+						Name: to.Ptr("Free"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,7 +67,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-003",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
-						Name: ref.Of("Standard"),
+						Name: to.Ptr("Standard"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -85,7 +85,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 					Properties: &armappconfiguration.ConfigurationStoreProperties{
 						PrivateEndpointConnections: []*armappconfiguration.PrivateEndpointConnectionReference{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -103,7 +103,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-005",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
-						Name: ref.Of("Standard"),
+						Name: to.Ptr("Standard"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -118,7 +118,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "appcs-006",
 				target: &armappconfiguration.ConfigurationStore{
-					Name: ref.Of("appcs-test"),
+					Name: to.Ptr("appcs-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -133,7 +133,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-008",
 				target: &armappconfiguration.ConfigurationStore{
 					Properties: &armappconfiguration.ConfigurationStoreProperties{
-						DisableLocalAuth: ref.Of(true),
+						DisableLocalAuth: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -149,7 +149,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-009",
 				target: &armappconfiguration.ConfigurationStore{
 					Properties: &armappconfiguration.ConfigurationStoreProperties{
-						EnablePurgeProtection: ref.Of(true),
+						EnablePurgeProtection: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

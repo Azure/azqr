@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
 )
 
@@ -32,7 +32,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "wps-001",
 				target: &armwebpubsub.ResourceInfo{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				rule: "wps-002",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
-						Name: ref.Of("Premium"),
+						Name: to.Ptr("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,7 +67,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				rule: "wps-003",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
-						Name: ref.Of("Premium"),
+						Name: to.Ptr("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -83,7 +83,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				rule: "wps-003",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
-						Name: ref.Of("Free"),
+						Name: to.Ptr("Free"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -101,7 +101,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 					Properties: &armwebpubsub.Properties{
 						PrivateEndpointConnections: []*armwebpubsub.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -119,7 +119,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				rule: "wps-005",
 				target: &armwebpubsub.ResourceInfo{
 					SKU: &armwebpubsub.ResourceSKU{
-						Name: ref.Of("Premium"),
+						Name: to.Ptr("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -134,7 +134,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "wps-006",
 				target: &armwebpubsub.ResourceInfo{
-					Name: ref.Of("wps-test"),
+					Name: to.Ptr("wps-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

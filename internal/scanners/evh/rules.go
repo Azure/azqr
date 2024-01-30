@@ -24,8 +24,7 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
 		},
 		"evh-002": {
 			Id:          "evh-002",
@@ -38,8 +37,7 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				zones := *i.Properties.ZoneRedundant
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-premium-overview#high-availability-with-availability-zones",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-premium-overview#high-availability-with-availability-zones",
 		},
 		"evh-003": {
 			Id:          "evh-003",
@@ -56,8 +54,7 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/event-hubs/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/event-hubs/",
 		},
 		"evh-004": {
 			Id:          "evh-004",
@@ -70,8 +67,7 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/event-hubs/network-security",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/network-security",
 		},
 		"evh-005": {
 			Id:          "evh-005",
@@ -83,8 +79,7 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armeventhub.EHNamespace)
 				return false, string(*i.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/event-hubs/compare-tiers",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/compare-tiers",
 		},
 		"evh-006": {
 			Id:          "evh-006",
@@ -97,8 +92,7 @@ func (a *EventHubScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "evh")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"evh-007": {
 			Id:          "evh-007",

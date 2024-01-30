@@ -24,8 +24,7 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
 		},
 		"lb-002": {
 			Id:          "lb-002",
@@ -51,8 +50,7 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 
 				return broken, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-availability-zones#zone-redundant",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-availability-zones#zone-redundant",
 		},
 		"lb-003": {
 			Id:          "lb-003",
@@ -69,8 +67,7 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return sla == "None", sla
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
 		},
 		"lb-005": {
 			Id:          "lb-005",
@@ -83,8 +80,7 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				sku := *i.SKU.Name
 				return sku != armnetwork.LoadBalancerSKUNameStandard, string(*i.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
 		},
 		"lb-006": {
 			Id:          "lb-006",
@@ -113,8 +109,7 @@ func (a *LoadBalancerScanner) GetRules() map[string]scanners.AzureRule {
 				caf := (strings.HasPrefix(*c.Name, "lbi") && hasPrivateIP) || (strings.HasPrefix(*c.Name, "lbe") && hasPublicIP)
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"lb-007": {
 			Id:          "lb-007",

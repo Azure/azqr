@@ -24,8 +24,7 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
 		},
 		"evgd-003": {
 			Id:          "evgd-003",
@@ -36,8 +35,7 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/event-grid/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/event-grid/",
 		},
 		"evgd-004": {
 			Id:          "evgd-004",
@@ -50,8 +48,7 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/event-grid/configure-private-endpoints",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/event-grid/configure-private-endpoints",
 		},
 		"evgd-005": {
 			Id:          "evgd-005",
@@ -62,8 +59,7 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "None"
 			},
-			Url:   "https://azure.microsoft.com/en-gb/pricing/details/event-grid/",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://azure.microsoft.com/en-gb/pricing/details/event-grid/",
 		},
 		"evgd-006": {
 			Id:          "evgd-006",
@@ -76,8 +72,7 @@ func (a *EventGridScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "evgd")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"evgd-007": {
 			Id:          "evgd-007",

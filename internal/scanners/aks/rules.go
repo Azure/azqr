@@ -6,8 +6,8 @@ package aks
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
@@ -25,8 +25,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
 		},
 		"aks-002": {
 			Id:          "aks-002",
@@ -45,8 +44,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/aks/availability-zones",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/aks/availability-zones",
 		},
 		"aks-003": {
 			Id:          "aks-003",
@@ -78,8 +76,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return sla == "None", sla
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers#uptime-sla-terms-and-conditions",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers#uptime-sla-terms-and-conditions",
 		},
 		"aks-004": {
 			Id:          "aks-004",
@@ -92,8 +89,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				pe := c.Properties.APIServerAccessProfile != nil && c.Properties.APIServerAccessProfile.EnablePrivateCluster != nil && *c.Properties.APIServerAccessProfile.EnablePrivateCluster
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
 		},
 		"aks-005": {
 			Id:          "aks-005",
@@ -109,8 +105,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return sku == "Free", sku
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers",
 		},
 		"aks-006": {
 			Id:          "aks-006",
@@ -123,8 +118,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "aks")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"aks-007": {
 			Id:          "aks-007",
@@ -265,7 +259,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armcontainerservice.ManagedCluster)
 				defaultMaxSurge := false
 				for _, profile := range c.Properties.AgentPoolProfiles {
-					if profile.UpgradeSettings == nil || profile.UpgradeSettings.MaxSurge == nil || (profile.UpgradeSettings.MaxSurge == ref.Of("1")) {
+					if profile.UpgradeSettings == nil || profile.UpgradeSettings.MaxSurge == nil || (profile.UpgradeSettings.MaxSurge == to.Ptr("1")) {
 						defaultMaxSurge = true
 						break
 					}

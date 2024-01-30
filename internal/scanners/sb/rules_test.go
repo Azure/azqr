@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
 
@@ -32,7 +32,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "sb-001",
 				target: &armservicebus.SBNamespace{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,10 +51,10 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-002",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
-						Name: ref.Of(armservicebus.SKUNamePremium),
+						Name: to.Ptr(armservicebus.SKUNamePremium),
 					},
 					Properties: &armservicebus.SBNamespaceProperties{
-						ZoneRedundant: ref.Of(true),
+						ZoneRedundant: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -70,7 +70,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-003",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
-						Name: ref.Of(armservicebus.SKUNameStandard),
+						Name: to.Ptr(armservicebus.SKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -86,7 +86,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-003",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
-						Name: ref.Of(armservicebus.SKUNamePremium),
+						Name: to.Ptr(armservicebus.SKUNamePremium),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -104,7 +104,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 					Properties: &armservicebus.SBNamespaceProperties{
 						PrivateEndpointConnections: []*armservicebus.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -122,7 +122,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-005",
 				target: &armservicebus.SBNamespace{
 					SKU: &armservicebus.SBSKU{
-						Name: ref.Of(armservicebus.SKUNamePremium),
+						Name: to.Ptr(armservicebus.SKUNamePremium),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -137,7 +137,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "sb-006",
 				target: &armservicebus.SBNamespace{
-					Name: ref.Of("sb-test"),
+					Name: to.Ptr("sb-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -152,7 +152,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				rule: "sb-008",
 				target: &armservicebus.SBNamespace{
 					Properties: &armservicebus.SBNamespaceProperties{
-						DisableLocalAuth: ref.Of(true),
+						DisableLocalAuth: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

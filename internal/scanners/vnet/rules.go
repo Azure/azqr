@@ -24,8 +24,7 @@ func (a *VirtualNetworkScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
 		},
 		"vnet-002": {
 			Id:          "vnet-002",
@@ -36,8 +35,7 @@ func (a *VirtualNetworkScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview#virtual-networks-and-availability-zones",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview#virtual-networks-and-availability-zones",
 		},
 		"vnet-006": {
 			Id:          "vnet-006",
@@ -50,8 +48,7 @@ func (a *VirtualNetworkScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "vnet")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"vnet-007": {
 			Id:          "vnet-007",

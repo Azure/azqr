@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 )
 
@@ -32,7 +32,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "asp-001",
 				target: &armappservice.Plan{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				rule: "asp-002",
 				target: &armappservice.Plan{
 					Properties: &armappservice.PlanProperties{
-						ZoneRedundant: ref.Of(true),
+						ZoneRedundant: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,7 +67,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				rule: "asp-003",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
-						Tier: ref.Of("Free"),
+						Tier: to.Ptr("Free"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -83,7 +83,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				rule: "asp-003",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
-						Tier: ref.Of("ElasticPremium"),
+						Tier: to.Ptr("ElasticPremium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -99,7 +99,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				rule: "asp-005",
 				target: &armappservice.Plan{
 					SKU: &armappservice.SKUDescription{
-						Name: ref.Of("EP1"),
+						Name: to.Ptr("EP1"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -114,7 +114,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "asp-006",
 				target: &armappservice.Plan{
-					Name: ref.Of("asp-test"),
+					Name: to.Ptr("asp-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -160,7 +160,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule: "app-001",
 				target: &armappservice.Site{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -178,7 +178,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule: "app-004",
 				target: &armappservice.Site{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					PrivateEndpoints: map[string]bool{
@@ -196,7 +196,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule: "app-006",
 				target: &armappservice.Site{
-					Name: ref.Of("app-test"),
+					Name: to.Ptr("app-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -211,7 +211,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				rule: "app-007",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						HTTPSOnly: ref.Of(true),
+						HTTPSOnly: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -227,7 +227,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				rule: "app-009",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						VirtualNetworkSubnetID: ref.Of("test"),
+						VirtualNetworkSubnetID: to.Ptr("test"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -259,7 +259,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				rule: "app-010",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						VnetRouteAllEnabled: ref.Of(true),
+						VnetRouteAllEnabled: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -275,7 +275,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				rule: "app-010",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						VnetRouteAllEnabled: ref.Of(false),
+						VnetRouteAllEnabled: to.Ptr(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -310,7 +310,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
-								MinTLSVersion: ref.Of(armappservice.SupportedTLSVersionsOne2),
+								MinTLSVersion: to.Ptr(armappservice.SupportedTLSVersionsOne2),
 							},
 						},
 					},
@@ -330,7 +330,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
-								RemoteDebuggingEnabled: ref.Of(true),
+								RemoteDebuggingEnabled: to.Ptr(true),
 							},
 						},
 					},
@@ -350,7 +350,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
-								FtpsState: ref.Of(armappservice.FtpsStateAllAllowed),
+								FtpsState: to.Ptr(armappservice.FtpsStateAllAllowed),
 							},
 						},
 					},
@@ -370,7 +370,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
-								AlwaysOn: ref.Of(false),
+								AlwaysOn: to.Ptr(false),
 							},
 						},
 					},
@@ -387,7 +387,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				rule: "app-015",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						ClientAffinityEnabled: ref.Of(true),
+						ClientAffinityEnabled: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -403,7 +403,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				rule: "app-016",
 				target: &armappservice.Site{
 					Identity: &armappservice.ManagedServiceIdentity{
-						Type: ref.Of(armappservice.ManagedServiceIdentityTypeNone),
+						Type: to.Ptr(armappservice.ManagedServiceIdentityTypeNone),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -450,7 +450,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule: "func-001",
 				target: &armappservice.Site{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -468,7 +468,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule: "func-004",
 				target: &armappservice.Site{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					PrivateEndpoints: map[string]bool{
@@ -486,7 +486,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule: "func-006",
 				target: &armappservice.Site{
-					Name: ref.Of("func-test"),
+					Name: to.Ptr("func-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -501,7 +501,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				rule: "func-007",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						HTTPSOnly: ref.Of(true),
+						HTTPSOnly: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -517,7 +517,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				rule: "func-009",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						VirtualNetworkSubnetID: ref.Of("test"),
+						VirtualNetworkSubnetID: to.Ptr("test"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -549,7 +549,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				rule: "func-010",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						VnetRouteAllEnabled: ref.Of(true),
+						VnetRouteAllEnabled: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -565,7 +565,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				rule: "func-010",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						VnetRouteAllEnabled: ref.Of(false),
+						VnetRouteAllEnabled: to.Ptr(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -600,7 +600,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
-								MinTLSVersion: ref.Of(armappservice.SupportedTLSVersionsOne2),
+								MinTLSVersion: to.Ptr(armappservice.SupportedTLSVersionsOne2),
 							},
 						},
 					},
@@ -620,7 +620,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
-								RemoteDebuggingEnabled: ref.Of(true),
+								RemoteDebuggingEnabled: to.Ptr(true),
 							},
 						},
 					},
@@ -637,7 +637,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				rule: "func-013",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						ClientAffinityEnabled: ref.Of(true),
+						ClientAffinityEnabled: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -653,7 +653,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				rule: "func-014",
 				target: &armappservice.Site{
 					Identity: &armappservice.ManagedServiceIdentity{
-						Type: ref.Of(armappservice.ManagedServiceIdentityTypeNone),
+						Type: to.Ptr(armappservice.ManagedServiceIdentityTypeNone),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -700,7 +700,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 			fields: fields{
 				rule: "logics-001",
 				target: &armappservice.Site{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -718,7 +718,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 			fields: fields{
 				rule: "logics-004",
 				target: &armappservice.Site{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					PrivateEndpoints: map[string]bool{
@@ -736,7 +736,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 			fields: fields{
 				rule: "logics-006",
 				target: &armappservice.Site{
-					Name: ref.Of("logics-test"),
+					Name: to.Ptr("logics-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -751,7 +751,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				rule: "logics-007",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						HTTPSOnly: ref.Of(true),
+						HTTPSOnly: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -767,7 +767,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				rule: "logics-009",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						VirtualNetworkSubnetID: ref.Of("test"),
+						VirtualNetworkSubnetID: to.Ptr("test"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -799,7 +799,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				rule: "logics-010",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						VnetRouteAllEnabled: ref.Of(true),
+						VnetRouteAllEnabled: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -815,7 +815,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				rule: "logics-010",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						VnetRouteAllEnabled: ref.Of(false),
+						VnetRouteAllEnabled: to.Ptr(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -850,7 +850,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
-								MinTLSVersion: ref.Of(armappservice.SupportedTLSVersionsOne2),
+								MinTLSVersion: to.Ptr(armappservice.SupportedTLSVersionsOne2),
 							},
 						},
 					},
@@ -870,7 +870,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
-								RemoteDebuggingEnabled: ref.Of(true),
+								RemoteDebuggingEnabled: to.Ptr(true),
 							},
 						},
 					},
@@ -887,7 +887,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				rule: "logics-013",
 				target: &armappservice.Site{
 					Properties: &armappservice.SiteProperties{
-						ClientAffinityEnabled: ref.Of(true),
+						ClientAffinityEnabled: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -903,7 +903,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				rule: "logics-014",
 				target: &armappservice.Site{
 					Identity: &armappservice.ManagedServiceIdentity{
-						Type: ref.Of(armappservice.ManagedServiceIdentityTypeNone),
+						Type: to.Ptr(armappservice.ManagedServiceIdentityTypeNone),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

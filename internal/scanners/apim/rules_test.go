@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
 
@@ -33,7 +33,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "apim-001",
 				target: &armapimanagement.ServiceResource{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "apim-002",
 				target: &armapimanagement.ServiceResource{
-					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
+					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -80,7 +80,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: ref.Of(armapimanagement.SKUTypeDeveloper),
+						Name: to.Ptr(armapimanagement.SKUTypeDeveloper),
 					},
 					Zones: []*string{},
 					Properties: &armapimanagement.ServiceProperties{
@@ -100,9 +100,9 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: ref.Of(armapimanagement.SKUTypePremium),
+						Name: to.Ptr(armapimanagement.SKUTypePremium),
 					},
-					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
+					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
 					Properties: &armapimanagement.ServiceProperties{
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
@@ -120,7 +120,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: ref.Of(armapimanagement.SKUTypeConsumption),
+						Name: to.Ptr(armapimanagement.SKUTypeConsumption),
 					},
 					Zones: []*string{},
 					Properties: &armapimanagement.ServiceProperties{
@@ -142,7 +142,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 					Properties: &armapimanagement.ServiceProperties{
 						PrivateEndpointConnections: []*armapimanagement.RemotePrivateEndpointConnectionWrapper{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -160,7 +160,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-005",
 				target: &armapimanagement.ServiceResource{
 					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: ref.Of(armapimanagement.SKUTypeDeveloper),
+						Name: to.Ptr(armapimanagement.SKUTypeDeveloper),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -175,7 +175,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "apim-006",
 				target: &armapimanagement.ServiceResource{
-					Name: ref.Of("apim-test"),
+					Name: to.Ptr("apim-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -190,7 +190,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-008",
 				target: &armapimanagement.ServiceResource{
 					Identity: &armapimanagement.ServiceIdentity{
-						Type: ref.Of(armapimanagement.ApimIdentityTypeNone),
+						Type: to.Ptr(armapimanagement.ApimIdentityTypeNone),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -207,12 +207,12 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					Properties: &armapimanagement.ServiceProperties{
 						CustomProperties: map[string]*string{
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":         ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":         ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":         ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10": ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11": ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30": ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10":         to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11":         to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30":         to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10": to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11": to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30": to.Ptr("false"),
 						},
 					},
 				},
@@ -246,14 +246,14 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					Properties: &armapimanagement.ServiceProperties{
 						CustomProperties: map[string]*string{
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":                       ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA":       ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA":       ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA256":    ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA": ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA256":    ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA": ref.Of("false"),
-							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_GCM_SHA256":    ref.Of("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168":                       to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA":       to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA":       to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA256":    to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA": to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA256":    to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA": to.Ptr("false"),
+							"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_GCM_SHA256":    to.Ptr("false"),
 						},
 					},
 				},
@@ -289,7 +289,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						HostnameConfigurations: []*armapimanagement.HostnameConfiguration{
 							{
 								Certificate: &armapimanagement.CertificateInformation{
-									Expiry: ref.Of(time.Now()),
+									Expiry: to.Ptr(time.Now()),
 								},
 							},
 						},
@@ -311,7 +311,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						HostnameConfigurations: []*armapimanagement.HostnameConfiguration{
 							{
 								Certificate: &armapimanagement.CertificateInformation{
-									Expiry: ref.Of(time.Now().Add(time.Hour * 24 * 45)),
+									Expiry: to.Ptr(time.Now().Add(time.Hour * 24 * 45)),
 								},
 							},
 						},
@@ -330,7 +330,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-012",
 				target: &armapimanagement.ServiceResource{
 					Properties: &armapimanagement.ServiceProperties{
-						PlatformVersion: ref.Of(armapimanagement.PlatformVersionStv1),
+						PlatformVersion: to.Ptr(armapimanagement.PlatformVersionStv1),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -346,7 +346,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				rule: "apim-012",
 				target: &armapimanagement.ServiceResource{
 					Properties: &armapimanagement.ServiceProperties{
-						PlatformVersion: ref.Of(armapimanagement.PlatformVersionStv2),
+						PlatformVersion: to.Ptr(armapimanagement.PlatformVersionStv2),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

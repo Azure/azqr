@@ -22,8 +22,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url:   "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
 		},
 		"ca-006": {
 			Id:          "ca-006",
@@ -36,8 +35,7 @@ func (a *ContainerAppsScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "ca")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"ca-007": {
 			Id:          "ca-007",

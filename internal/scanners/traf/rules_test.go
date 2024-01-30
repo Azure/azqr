@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/trafficmanager/armtrafficmanager"
 )
 
@@ -32,7 +32,7 @@ func TestTrafficManagerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "traf-001",
 				target: &armtrafficmanager.Profile{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -74,7 +74,7 @@ func TestTrafficManagerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "traf-006",
 				target: &armtrafficmanager.Profile{
-					Name: ref.Of("traf-test"),
+					Name: to.Ptr("traf-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -92,12 +92,12 @@ func TestTrafficManagerScanner_Rules(t *testing.T) {
 						Endpoints: []*armtrafficmanager.Endpoint{
 							{
 								Properties: &armtrafficmanager.EndpointProperties{
-									EndpointStatus: ref.Of(armtrafficmanager.EndpointStatusEnabled),
+									EndpointStatus: to.Ptr(armtrafficmanager.EndpointStatusEnabled),
 								},
 							},
 							{
 								Properties: &armtrafficmanager.EndpointProperties{
-									EndpointStatus: ref.Of(armtrafficmanager.EndpointStatusEnabled),
+									EndpointStatus: to.Ptr(armtrafficmanager.EndpointStatusEnabled),
 								},
 							},
 						},
@@ -119,12 +119,12 @@ func TestTrafficManagerScanner_Rules(t *testing.T) {
 						Endpoints: []*armtrafficmanager.Endpoint{
 							{
 								Properties: &armtrafficmanager.EndpointProperties{
-									EndpointStatus: ref.Of(armtrafficmanager.EndpointStatusEnabled),
+									EndpointStatus: to.Ptr(armtrafficmanager.EndpointStatusEnabled),
 								},
 							},
 							{
 								Properties: &armtrafficmanager.EndpointProperties{
-									EndpointStatus: ref.Of(armtrafficmanager.EndpointStatusDisabled),
+									EndpointStatus: to.Ptr(armtrafficmanager.EndpointStatusDisabled),
 								},
 							},
 						},
@@ -144,8 +144,8 @@ func TestTrafficManagerScanner_Rules(t *testing.T) {
 				target: &armtrafficmanager.Profile{
 					Properties: &armtrafficmanager.ProfileProperties{
 						MonitorConfig: &armtrafficmanager.MonitorConfig{
-							Protocol: ref.Of(armtrafficmanager.MonitorProtocolHTTP),
-							Port:     ref.Of(int64(80)),
+							Protocol: to.Ptr(armtrafficmanager.MonitorProtocolHTTP),
+							Port:     to.Ptr(int64(80)),
 						},
 					},
 				},
@@ -163,8 +163,8 @@ func TestTrafficManagerScanner_Rules(t *testing.T) {
 				target: &armtrafficmanager.Profile{
 					Properties: &armtrafficmanager.ProfileProperties{
 						MonitorConfig: &armtrafficmanager.MonitorConfig{
-							Protocol: ref.Of(armtrafficmanager.MonitorProtocolHTTP),
-							Port:     ref.Of(int64(443)),
+							Protocol: to.Ptr(armtrafficmanager.MonitorProtocolHTTP),
+							Port:     to.Ptr(int64(443)),
 						},
 					},
 				},

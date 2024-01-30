@@ -24,8 +24,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
 		},
 		"cr-002": {
 			Id:          "cr-002",
@@ -38,8 +37,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				zones := *i.Properties.ZoneRedundancy == armcontainerregistry.ZoneRedundancyEnabled
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/container-registry/zone-redundancy",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/container-registry/zone-redundancy",
 		},
 		"cr-003": {
 			Id:          "cr-003",
@@ -50,8 +48,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/container-registry/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/container-registry/",
 		},
 		"cr-004": {
 			Id:          "cr-004",
@@ -64,8 +61,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link",
 		},
 		"cr-005": {
 			Id:          "cr-005",
@@ -77,8 +73,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armcontainerregistry.Registry)
 				return false, string(*i.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-skus",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-skus",
 		},
 		"cr-006": {
 			Id:          "cr-006",
@@ -91,8 +86,7 @@ func (a *ContainerRegistryScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "cr")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"cr-007": {
 			Id:          "cr-007",

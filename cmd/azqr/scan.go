@@ -16,6 +16,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations")
 	scanCmd.PersistentFlags().BoolP("costs", "c", false, "Scan Azure Costs")
+	scanCmd.PersistentFlags().BoolP("xlsx", "x", false, "Create excel report")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
 	scanCmd.PersistentFlags().BoolP("azure-cli-credential", "f", false, "Force the use of Azure CLI Credential")
@@ -42,6 +43,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	defender, _ := cmd.Flags().GetBool("defender")
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
+	xlsx, _ := cmd.Flags().GetBool("xlsx")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
 	forceAzureCliCredential, _ := cmd.Flags().GetBool("azure-credential-type")
@@ -53,6 +55,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		Defender:                defender,
 		Advisor:                 advisor,
 		Cost:                    cost,
+		Xlsx:                    xlsx,
 		Mask:                    mask,
 		Debug:                   debug,
 		ServiceScanners:         serviceScanners,

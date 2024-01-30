@@ -24,8 +24,7 @@ func (a *CognitiveScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
 		},
 		"cog-003": {
 			Id:          "cog-003",
@@ -36,8 +35,7 @@ func (a *CognitiveScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
 		"cog-004": {
 			Id:          "cog-004",
@@ -50,8 +48,7 @@ func (a *CognitiveScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-virtual-networks",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-virtual-networks",
 		},
 		"cog-005": {
 			Id:          "cog-005",
@@ -63,8 +60,7 @@ func (a *CognitiveScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armcognitiveservices.Account)
 				return false, string(*i.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts?pivots=deployment-language-bicep#sku",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts?pivots=deployment-language-bicep#sku",
 		},
 		"cog-006": {
 			Id:          "cog-006",
@@ -77,8 +73,7 @@ func (a *CognitiveScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "cog")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"cog-007": {
 			Id:          "cog-007",

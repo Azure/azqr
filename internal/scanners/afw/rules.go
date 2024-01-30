@@ -23,8 +23,7 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://docs.microsoft.com/en-us/azure/firewall/logs-and-metrics",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://docs.microsoft.com/en-us/azure/firewall/logs-and-metrics",
 		},
 		"afw-002": {
 			Id:          "afw-002",
@@ -37,8 +36,7 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 				zones := len(g.Zones) > 1
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/firewall/features#availability-zones",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/firewall/features#availability-zones",
 		},
 		"afw-003": {
 			Id:          "afw-003",
@@ -55,8 +53,7 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 
 				return false, sla
 			},
-			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"afw-005": {
 			Id:          "afw-005",
@@ -68,8 +65,7 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armnetwork.AzureFirewall)
 				return false, string(*c.Properties.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/firewall/choose-firewall-sku",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/firewall/choose-firewall-sku",
 		},
 		"afw-006": {
 			Id:          "afw-006",
@@ -82,8 +78,7 @@ func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "afw")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"afw-007": {
 			Id:          "afw-007",

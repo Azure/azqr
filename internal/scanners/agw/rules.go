@@ -85,8 +85,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
 		},
 		"agw-007": {
 			Id:          "agw-007",
@@ -99,8 +98,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 				zones := g.Zones != nil && len(g.Zones) > 1
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-autoscaling-zone-redundant",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-autoscaling-zone-redundant",
 		},
 		"agw-008": {
 			Id:          "agw-008",
@@ -136,8 +134,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/application-gateway/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/application-gateway/",
 		},
 		"agw-104": {
 			Id:          "agw-104",
@@ -149,8 +146,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 				g := target.(*armnetwork.ApplicationGateway)
 				return false, string(*g.Properties.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/application-gateway/understanding-pricing",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/understanding-pricing",
 		},
 		"agw-105": {
 			Id:          "agw-105",
@@ -163,8 +159,7 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*g.Name, "agw")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"agw-106": {
 			Id:          "agw-106",

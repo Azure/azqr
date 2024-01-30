@@ -25,7 +25,6 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/virtual-wan/monitor-virtual-wan",
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"vwa-002": {
 			Id:          "vwa-002",
@@ -37,7 +36,6 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 				return false, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-are-availability-zones-and-resiliency-handled-in-virtual-wan",
-			Field: scanners.OverviewFieldAZ,
 		},
 		"vwa-003": {
 			Id:          "vwa-003",
@@ -49,7 +47,6 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 				return false, "99.95%"
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-is-virtual-wan-sla-calculated",
-			Field: scanners.OverviewFieldSLA,
 		},
 		"vwa-005": {
 			Id:          "vwa-005",
@@ -62,7 +59,6 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 				return false, string(*i.Properties.Type)
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-about#basicstandard",
-			Field: scanners.OverviewFieldSKU,
 		},
 		"vwa-006": {
 			Id:          "vwa-006",
@@ -76,7 +72,6 @@ func (a *VirtualWanScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
 		},
 		"vwa-007": {
 			Id:          "vwa-007",

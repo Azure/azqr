@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Azure/azqr/internal/ref"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement"
 )
 
@@ -25,26 +25,6 @@ type CostResultItem struct {
 type CostScanner struct {
 	config *ScannerConfig
 	client *armcostmanagement.QueryClient
-}
-
-// GetProperties - Returns the properties of the CostResult
-func (d CostResult) GetProperties() []string {
-	return []string{
-		"SubscriptionID",
-		"ServiceName",
-		"Value",
-		"Currency",
-	}
-}
-
-// ToMap - Returns the properties of the CostResult as a map
-func (r CostResultItem) ToMap(mask bool) map[string]string {
-	return map[string]string{
-		"SubscriptionID": MaskSubscriptionID(r.SubscriptionID, mask),
-		"ServiceName":    r.ServiceName,
-		"Value":          r.Value,
-		"Currency":       r.Currency,
-	}
 }
 
 // Init - Initializes the Cost Scanner
@@ -78,13 +58,13 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 			// Granularity: &daily,
 			Aggregation: map[string]*armcostmanagement.QueryAggregation{
 				"TotalCost": {
-					Name:     ref.Of("Cost"),
+					Name:     to.Ptr("Cost"),
 					Function: &sum,
 				},
 			},
 			Grouping: []*armcostmanagement.QueryGrouping{
 				{
-					Name: ref.Of("ServiceName"),
+					Name: to.Ptr("ServiceName"),
 					Type: &dimension,
 				},
 			},

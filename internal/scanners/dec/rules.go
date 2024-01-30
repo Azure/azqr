@@ -24,8 +24,7 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
 		},
 		"dec-002": {
 			Id:          "dec-002",
@@ -42,8 +41,7 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 
 				return sla == "None", sla
 			},
-			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"dec-003": {
 			Id:          "dec-003",
@@ -60,8 +58,7 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return broken, string(*c.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku",
 		},
 		"dec-004": {
 			Id:          "dec-004",
@@ -74,8 +71,7 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
 		},
 		"dec-006": {
 			Id:          "dec-004",
@@ -88,8 +84,7 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "dec")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"dec-007": {
 			Id:          "dec-005",

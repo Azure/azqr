@@ -38,7 +38,6 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"asp-002": {
 			Id:          "asp-002",
@@ -51,8 +50,7 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 				zones := *i.Properties.ZoneRedundant
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/reliability/migrate-app-service",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/reliability/migrate-app-service",
 		},
 		"asp-003": {
 			Id:          "asp-003",
@@ -69,8 +67,7 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 				}
 				return sla == "None", sla
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/app-service/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/app-service/",
 		},
 		"asp-005": {
 			Id:          "asp-005",
@@ -82,8 +79,7 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 				i := target.(*armappservice.Plan)
 				return false, string(*i.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
 		},
 		"asp-006": {
 			Id:          "asp-006",
@@ -96,8 +92,7 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "asp")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"asp-007": {
 			Id:          "asp-007",
@@ -127,8 +122,7 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
 		},
 		"app-004": {
 			Id:          "app-004",
@@ -141,8 +135,7 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzureRule {
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/app-service/networking/private-endpoint",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/app-service/networking/private-endpoint",
 		},
 		"app-006": {
 			Id:          "app-006",
@@ -155,8 +148,7 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "app")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"app-007": {
 			Id:          "app-007",
@@ -295,8 +287,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-functions/functions-monitor-log-analytics?tabs=csharp",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-monitor-log-analytics?tabs=csharp",
 		},
 		"func-004": {
 			Id:          "func-004",
@@ -309,8 +300,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzureRule {
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-vnet",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-vnet",
 		},
 		"func-006": {
 			Id:          "func-006",
@@ -323,8 +313,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "func")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"func-007": {
 			Id:          "func-007",
@@ -439,8 +428,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
 		},
 		"logics-004": {
 			Id:          "logics-004",
@@ -453,8 +441,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzureRule {
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/logic-apps/secure-single-tenant-workflow-virtual-network-private-endpoint",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/logic-apps/secure-single-tenant-workflow-virtual-network-private-endpoint",
 		},
 		"logics-006": {
 			Id:          "logics-006",
@@ -467,8 +454,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "logic")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"logics-007": {
 			Id:          "logics-007",

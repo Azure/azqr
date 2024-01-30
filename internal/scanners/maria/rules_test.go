@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb"
 )
 
@@ -32,7 +32,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "maria-001",
 				target: &armmariadb.Server{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -53,7 +53,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 					Properties: &armmariadb.ServerProperties{
 						PrivateEndpointConnections: []*armmariadb.ServerPrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -70,7 +70,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "maria-003",
 				target: &armmariadb.Server{
-					Name: ref.Of("maria-test"),
+					Name: to.Ptr("maria-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -96,7 +96,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 				rule: "maria-006",
 				target: &armmariadb.Server{
 					Properties: &armmariadb.ServerProperties{
-						MinimalTLSVersion: ref.Of(armmariadb.MinimalTLSVersionEnumTLS12),
+						MinimalTLSVersion: to.Ptr(armmariadb.MinimalTLSVersionEnumTLS12),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -143,7 +143,7 @@ func TestMariaScanner_DatabaseRules(t *testing.T) {
 			fields: fields{
 				rule: "CAF",
 				target: &armmariadb.Database{
-					Name: ref.Of("mariadb-test"),
+					Name: to.Ptr("mariadb-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

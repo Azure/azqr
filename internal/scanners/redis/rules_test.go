@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
@@ -32,7 +32,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "redis-001",
 				target: &armredis.ResourceInfo{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -50,7 +50,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "redis-002",
 				target: &armredis.ResourceInfo{
-					Zones: []*string{ref.Of("1"), ref.Of("2"), ref.Of("3")},
+					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -79,7 +79,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 					Properties: &armredis.Properties{
 						PrivateEndpointConnections: []*armredis.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -98,7 +98,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				target: &armredis.ResourceInfo{
 					Properties: &armredis.Properties{
 						SKU: &armredis.SKU{
-							Name: ref.Of(armredis.SKUNamePremium),
+							Name: to.Ptr(armredis.SKUNamePremium),
 						},
 					},
 				},
@@ -114,7 +114,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "redis-006",
 				target: &armredis.ResourceInfo{
-					Name: ref.Of("redis-test"),
+					Name: to.Ptr("redis-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -129,7 +129,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				rule: "redis-008",
 				target: &armredis.ResourceInfo{
 					Properties: &armredis.Properties{
-						EnableNonSSLPort: ref.Of(false),
+						EnableNonSSLPort: to.Ptr(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -145,7 +145,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				rule: "redis-009",
 				target: &armredis.ResourceInfo{
 					Properties: &armredis.Properties{
-						MinimumTLSVersion: ref.Of(armredis.TLSVersionOne2),
+						MinimumTLSVersion: to.Ptr(armredis.TLSVersionOne2),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

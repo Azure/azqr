@@ -6,7 +6,6 @@ package scanners
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -57,7 +56,6 @@ type (
 		Description string
 		Severity    SeverityType
 		Url         string
-		Field       OverviewField
 		Eval        func(target interface{}, scanContext *ScanContext) (bool, string)
 	}
 
@@ -69,23 +67,10 @@ type (
 		Severity    SeverityType
 		Learn       string
 		Result      string
-		Field       OverviewField
 		IsBroken    bool
 	}
 
 	RuleEngine struct{}
-
-	OverviewField int
-)
-
-const (
-	OverviewFieldNone OverviewField = iota
-	OverviewFieldSKU
-	OverviewFieldSLA
-	OverviewFieldAZ
-	OverviewFieldPrivate
-	OverviewFieldDiagnostics
-	OverviewFieldCAF
 )
 
 func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContext *ScanContext) AzureRuleResult {
@@ -100,7 +85,6 @@ func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContex
 		Learn:       rule.Url,
 		Result:      result,
 		IsBroken:    broken,
-		Field:       rule.Field,
 	}
 }
 
@@ -112,69 +96,6 @@ func (e *RuleEngine) EvaluateRules(rules map[string]AzureRule, target interface{
 	}
 
 	return results
-}
-
-// ToMap - Returns a map representation of the Azure Service Result
-func (r AzureServiceResult) ToMap(mask bool) map[string]string {
-	sku := ""
-	sla := ""
-	az := ""
-	pvt := ""
-	ds := ""
-	caf := ""
-
-	for _, v := range r.Rules {
-		switch v.Field {
-		case OverviewFieldSKU:
-			sku = v.Result
-		case OverviewFieldSLA:
-			sla = v.Result
-		case OverviewFieldAZ:
-			az = strconv.FormatBool(!v.IsBroken)
-		case OverviewFieldPrivate:
-			pvt = strconv.FormatBool(!v.IsBroken)
-		case OverviewFieldDiagnostics:
-			ds = strconv.FormatBool(!v.IsBroken)
-		case OverviewFieldCAF:
-			caf = strconv.FormatBool(!v.IsBroken)
-		}
-	}
-
-	return map[string]string{
-		"SubscriptionID": MaskSubscriptionID(r.SubscriptionID, mask),
-		"ResourceGroup":  r.ResourceGroup,
-		"Location":       ParseLocation(r.Location),
-		"Type":           r.Type,
-		"Name":           r.ServiceName,
-		"SKU":            sku,
-		"SLA":            sla,
-		"AZ":             az,
-		"PVT":            pvt,
-		"DS":             ds,
-		"CAF":            caf,
-	}
-}
-
-// GetResourceType - Returns the resource type of the Azure Service Result
-func (r AzureServiceResult) GetResourceType() string {
-	return r.Type
-}
-
-// GetHeaders - Returns the headers of the Azure Service Result
-func (r AzureServiceResult) GetHeaders() []string {
-	return []string{
-		"SubscriptionID",
-		"ResourceGroup",
-		"Location",
-		"Type",
-		"Name",
-		"SKU",
-		"SLA",
-		"AZ",
-		"PVT",
-		"DS",
-		"CAF",
-	}
 }
 
 func ParseLocation(location string) string {

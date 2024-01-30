@@ -24,8 +24,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
 		},
 		"appcs-003": {
 			Id:          "appcs-003",
@@ -43,8 +42,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 
 				return sla == "None", sla
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/app-configuration/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/app-configuration/",
 		},
 		"appcs-004": {
 			Id:          "appcs-004",
@@ -57,8 +55,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
 		},
 		"appcs-005": {
 			Id:          "appcs-005",
@@ -71,8 +68,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 				sku := string(*a.SKU.Name)
 				return false, sku
 			},
-			Url:   "https://azure.microsoft.com/en-us/pricing/details/app-configuration/",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://azure.microsoft.com/en-us/pricing/details/app-configuration/",
 		},
 		"appcs-006": {
 			Id:          "appcs-006",
@@ -85,8 +81,7 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "appcs")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"appcs-007": {
 			Id:          "appcs-007",

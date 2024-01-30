@@ -10,12 +10,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Azure/azqr/internal/ref"
+	"github.com/Azure/azqr/internal/renderers"
+	"github.com/Azure/azqr/internal/renderers/csv"
+	"github.com/Azure/azqr/internal/renderers/excel"
+	"github.com/Azure/azqr/internal/renderers/pbi"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
@@ -68,6 +71,7 @@ type ScanParams struct {
 	Advisor                 bool
 	Cost                    bool
 	Mask                    bool
+	Xlsx                    bool
 	Debug                   bool
 	ServiceScanners         []scanners.IAzureScanner
 	ForceAzureCliCredential bool
@@ -80,6 +84,7 @@ func Scan(params *ScanParams) {
 	defender := params.Defender
 	advisor := params.Advisor
 	cost := params.Cost
+	createXlsx := params.Xlsx
 	mask := params.Mask
 	debug := params.Debug
 	forceAzureCliCredential := params.ForceAzureCliCredential
@@ -329,10 +334,13 @@ func Scan(params *ScanParams) {
 		CostData:       costResult,
 	}
 
-	renderers.CreateExcelReport(reportData)
+	if createXlsx {
+		excel.CreateExcelReport(&reportData)
+		xslx := fmt.Sprintf("%s.xlsx", reportData.OutputFileName)
+		pbi.CreatePBIReport(xslx)
+	}
 
-	xslx := fmt.Sprintf("%s.xlsx", reportData.OutputFileName)
-	renderers.CreatePBIReport(xslx)
+	csv.CreateCsvReport(&reportData)
 
 	log.Info().Msg("Scan completed.")
 }
@@ -412,8 +420,8 @@ func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, options
 		}
 
 		for _, s := range pageResp.Value {
-			if s.State != ref.Of(armsubscription.SubscriptionStateDisabled) &&
-				s.State != ref.Of(armsubscription.SubscriptionStateDeleted) {
+			if s.State != to.Ptr(armsubscription.SubscriptionStateDisabled) &&
+				s.State != to.Ptr(armsubscription.SubscriptionStateDeleted) {
 				subscriptions = append(subscriptions, s)
 			}
 		}

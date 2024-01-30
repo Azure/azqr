@@ -26,7 +26,6 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-server-logs#resource-logs",
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"psql-003": {
 			Id:          "psql-003",
@@ -38,7 +37,6 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return false, "99.99%"
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/postgresql/",
-			Field: scanners.OverviewFieldSLA,
 		},
 		"psql-004": {
 			Id:          "psql-004",
@@ -52,7 +50,6 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-data-access-and-security-private-link",
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"psql-005": {
 			Id:          "psql-005",
@@ -65,7 +62,6 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return false, *i.SKU.Name
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-pricing-tiers",
-			Field: scanners.OverviewFieldSKU,
 		},
 		"psql-006": {
 			Id:          "psql-006",
@@ -79,7 +75,6 @@ func (a *PostgreScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
 		},
 		"psql-007": {
 			Id:          "psql-007",
@@ -135,7 +130,6 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"psqlf-002": {
 			Id:          "psqlf-002",
@@ -149,7 +143,6 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview#architecture-and-high-availability",
-			Field: scanners.OverviewFieldAZ,
 		},
 		"psqlf-003": {
 			Id:          "psqlf-003",
@@ -170,7 +163,6 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return false, sla
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server",
-			Field: scanners.OverviewFieldSLA,
 		},
 		"psqlf-004": {
 			Id:          "psqlf-004",
@@ -184,7 +176,6 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking#private-access-vnet-integration",
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"psqlf-005": {
 			Id:          "psqlf-005",
@@ -197,7 +188,6 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return false, *i.SKU.Name
 			},
 			Url: "https://azure.microsoft.com/en-gb/pricing/details/postgresql/flexible-server/",
-			Field: scanners.OverviewFieldSKU,
 		},
 		"psqlf-006": {
 			Id:          "psqlf-006",
@@ -211,7 +201,6 @@ func (a *PostgreFlexibleScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
 		},
 		"psqlf-007": {
 			Id:          "psqlf-007",

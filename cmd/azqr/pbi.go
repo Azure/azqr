@@ -4,7 +4,7 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/renderers"
+	"github.com/Azure/azqr/internal/renderers/pbi"
 	"github.com/spf13/cobra"
 )
 
@@ -20,6 +20,6 @@ var pbiCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		xlsx, _ := cmd.Flags().GetString("excel-report")
-		renderers.CreatePBIReport(xlsx)
+		pbi.CreatePBIReport(xlsx)
 	},
 }

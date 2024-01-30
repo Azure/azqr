@@ -24,8 +24,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
 		},
 		"wps-002": {
 			Id:          "wps-002",
@@ -42,8 +41,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
 		},
 		"wps-003": {
 			Id:          "wps-003",
@@ -61,8 +59,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 
 				return sla == "None", sla
 			},
-			Url:   "https://azure.microsoft.com/en-gb/support/legal/sla/web-pubsub/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://azure.microsoft.com/en-gb/support/legal/sla/web-pubsub/",
 		},
 		"wps-004": {
 			Id:          "wps-004",
@@ -75,8 +72,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
 		},
 		"wps-005": {
 			Id:          "wps-005",
@@ -88,8 +84,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armwebpubsub.ResourceInfo)
 				return false, string(*i.SKU.Name)
 			},
-			Url:   "https://azure.microsoft.com/en-us/pricing/details/web-pubsub/",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://azure.microsoft.com/en-us/pricing/details/web-pubsub/",
 		},
 		"wps-006": {
 			Id:          "wps-006",
@@ -102,8 +97,7 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "wps")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"wps-007": {
 			Id:          "wps-007",

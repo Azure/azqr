@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
@@ -32,7 +32,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "lb-001",
 				target: &armnetwork.LoadBalancer{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,18 +51,18 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 				rule: "lb-002",
 				target: &armnetwork.LoadBalancer{
 					SKU: &armnetwork.LoadBalancerSKU{
-						Name: ref.Of(armnetwork.LoadBalancerSKUNameStandard),
+						Name: to.Ptr(armnetwork.LoadBalancerSKUNameStandard),
 					},
 					Properties: &armnetwork.LoadBalancerPropertiesFormat{
 						FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 							{
 								Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
-									PrivateIPAddress: ref.Of("127.0.0.1"),
+									PrivateIPAddress: to.Ptr("127.0.0.1"),
 								},
 								Zones: []*string{
-									ref.Of("1"),
-									ref.Of("2"),
-									ref.Of("3"),
+									to.Ptr("1"),
+									to.Ptr("2"),
+									to.Ptr("3"),
 								},
 							},
 						},
@@ -81,7 +81,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 				rule: "lb-003",
 				target: &armnetwork.LoadBalancer{
 					SKU: &armnetwork.LoadBalancerSKU{
-						Name: ref.Of(armnetwork.LoadBalancerSKUNameStandard),
+						Name: to.Ptr(armnetwork.LoadBalancerSKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -97,7 +97,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 				rule: "lb-005",
 				target: &armnetwork.LoadBalancer{
 					SKU: &armnetwork.LoadBalancerSKU{
-						Name: ref.Of(armnetwork.LoadBalancerSKUNameStandard),
+						Name: to.Ptr(armnetwork.LoadBalancerSKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -112,12 +112,12 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "lb-006",
 				target: &armnetwork.LoadBalancer{
-					Name: ref.Of("lbi"),
+					Name: to.Ptr("lbi"),
 					Properties: &armnetwork.LoadBalancerPropertiesFormat{
 						FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 							{
 								Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
-									PrivateIPAddress: ref.Of("10.0.0.1"),
+									PrivateIPAddress: to.Ptr("10.0.0.1"),
 								},
 							},
 						},
@@ -135,7 +135,7 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "lb-006",
 				target: &armnetwork.LoadBalancer{
-					Name: ref.Of("lbe"),
+					Name: to.Ptr("lbe"),
 					Properties: &armnetwork.LoadBalancerPropertiesFormat{
 						FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
 							{
@@ -169,4 +169,3 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 		})
 	}
 }
-

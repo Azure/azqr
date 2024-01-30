@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package renderers
+package excel
 
 import (
 	_ "image/png"
 
+	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
-func renderRecommendations(f *excelize.File, data ReportData) {
+func renderRecommendations(f *excelize.File, data *renderers.ReportData) {
 	if len(data.MainData) > 0 {
 		_, err := f.NewSheet("Recommendations")
 		if err != nil {

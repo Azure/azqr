@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto"
 )
 
@@ -32,7 +32,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "dec-001",
 				target: &armkusto.Cluster{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				rule: "dec-002",
 				target: &armkusto.Cluster{
 					SKU: &armkusto.AzureSKU{
-						Name: ref.Of(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
+						Name: to.Ptr(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,7 +67,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				rule: "dec-002",
 				target: &armkusto.Cluster{
 					SKU: &armkusto.AzureSKU{
-						Name: ref.Of(armkusto.AzureSKUNameStandardD11V2),
+						Name: to.Ptr(armkusto.AzureSKUNameStandardD11V2),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -83,7 +83,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				rule: "dec-003",
 				target: &armkusto.Cluster{
 					SKU: &armkusto.AzureSKU{
-						Name: ref.Of(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
+						Name: to.Ptr(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -101,7 +101,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 					Properties: &armkusto.ClusterProperties{
 						PrivateEndpointConnections: []*armkusto.PrivateEndpointConnection{
 							{
-								Name: ref.Of("test"),
+								Name: to.Ptr("test"),
 							},
 						},
 					},
@@ -118,7 +118,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "dec-006",
 				target: &armkusto.Cluster{
-					Name: ref.Of("dec-test"),
+					Name: to.Ptr("dec-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -133,7 +133,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				rule: "dec-008",
 				target: &armkusto.Cluster{
 					Properties: &armkusto.ClusterProperties{
-						EnableDiskEncryption: ref.Of(false),
+						EnableDiskEncryption: to.Ptr(false),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -165,7 +165,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				rule: "dec-009",
 				target: &armkusto.Cluster{
 					Identity: &armkusto.Identity{
-						Type: ref.Of(armkusto.IdentityTypeNone),
+						Type: to.Ptr(armkusto.IdentityTypeNone),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

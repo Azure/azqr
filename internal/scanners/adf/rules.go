@@ -24,8 +24,7 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
 		},
 		"adf-002": {
 			Id:          "adf-002",
@@ -38,7 +37,6 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"adf-003": {
 			Id:          "adf-003",
@@ -49,8 +47,7 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url:   "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"adf-004": {
 			Id:          "adf-004",
@@ -63,8 +60,7 @@ func (a *DataFactoryScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "adf")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"adf-005": {
 			Id:          "adf-005",

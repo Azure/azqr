@@ -25,7 +25,6 @@ func (a *SignalRScanner) GetRules() map[string]scanners.AzureRule {
 				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-howto-diagnostic-logs",
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"sigr-002": {
 			Id:          "sigr-002",
@@ -43,7 +42,6 @@ func (a *SignalRScanner) GetRules() map[string]scanners.AzureRule {
 				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-signalr/availability-zones",
-			Field: scanners.OverviewFieldAZ,
 		},
 		"sigr-003": {
 			Id:          "sigr-003",
@@ -55,7 +53,6 @@ func (a *SignalRScanner) GetRules() map[string]scanners.AzureRule {
 				return false, "99.9%"
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/signalr-service/",
-			Field: scanners.OverviewFieldSLA,
 		},
 		"sigr-004": {
 			Id:          "sigr-004",
@@ -69,7 +66,6 @@ func (a *SignalRScanner) GetRules() map[string]scanners.AzureRule {
 				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-signalr/howto-private-endpoints",
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"sigr-005": {
 			Id:          "sigr-005",
@@ -82,7 +78,6 @@ func (a *SignalRScanner) GetRules() map[string]scanners.AzureRule {
 				return false, string(*i.SKU.Name)
 			},
 			Url: "https://azure.microsoft.com/en-us/pricing/details/signalr-service/",
-			Field: scanners.OverviewFieldSKU,
 		},
 		"sigr-006": {
 			Id:          "sigr-006",
@@ -95,8 +90,7 @@ func (a *SignalRScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "sigr")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sigr-007": {
 			Id:          "sigr-007",

@@ -25,7 +25,6 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"sb-002": {
 			Id:          "sb-002",
@@ -40,7 +39,6 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return !zones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-outages-disasters#availability-zones",
-			Field: scanners.OverviewFieldAZ,
 		},
 		"sb-003": {
 			Id:          "sb-003",
@@ -58,7 +56,6 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return false, sla
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/service-bus/",
-			Field: scanners.OverviewFieldSLA,
 		},
 		"sb-004": {
 			Id:          "sb-004",
@@ -72,7 +69,6 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return !pe, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/network-security",
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"sb-005": {
 			Id:          "sb-005",
@@ -85,7 +81,6 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return false, string(*i.SKU.Name)
 			},
 			Url: "https://azure.microsoft.com/en-us/pricing/details/service-bus/",
-			Field: scanners.OverviewFieldSKU,
 		},
 		"sb-006": {
 			Id:          "sb-006",
@@ -99,7 +94,6 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
 		},
 		"sb-007": {
 			Id:          "sb-007",

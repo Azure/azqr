@@ -6,8 +6,8 @@ package kv
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
 
@@ -25,8 +25,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
 		},
 		"kv-003": {
 			Id:          "kv-003",
@@ -37,8 +36,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/key-vault/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/key-vault/",
 		},
 		"kv-004": {
 			Id:          "kv-004",
@@ -51,8 +49,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/key-vault/general/private-link-service",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/private-link-service",
 		},
 		"kv-005": {
 			Id:          "kv-005",
@@ -64,8 +61,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armkeyvault.Vault)
 				return false, string(*i.Properties.SKU.Name)
 			},
-			Url:   "https://azure.microsoft.com/en-us/pricing/details/key-vault/",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://azure.microsoft.com/en-us/pricing/details/key-vault/",
 		},
 		"kv-006": {
 			Id:          "kv-006",
@@ -78,8 +74,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "kv")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"kv-007": {
 			Id:          "kv-007",
@@ -101,7 +96,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
-				return c.Properties.EnableSoftDelete == nil || c.Properties.EnableSoftDelete == ref.Of(false), ""
+				return c.Properties.EnableSoftDelete == nil || c.Properties.EnableSoftDelete == to.Ptr(false), ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview",
 		},
@@ -113,7 +108,7 @@ func (a *KeyVaultScanner) GetRules() map[string]scanners.AzureRule {
 			Severity:    scanners.SeverityMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
-				return c.Properties.EnablePurgeProtection == nil || c.Properties.EnablePurgeProtection == ref.Of(false), ""
+				return c.Properties.EnablePurgeProtection == nil || c.Properties.EnablePurgeProtection == to.Ptr(false), ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview#purge-protection",
 		},

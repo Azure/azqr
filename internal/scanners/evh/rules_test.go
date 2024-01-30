@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
 
@@ -32,7 +32,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "evh-001",
 				target: &armeventhub.EHNamespace{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -51,7 +51,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "evh-002",
 				target: &armeventhub.EHNamespace{
 					Properties: &armeventhub.EHNamespaceProperties{
-						ZoneRedundant: ref.Of(true),
+						ZoneRedundant: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -67,7 +67,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "evh-003",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
-						Name: ref.Of(armeventhub.SKUNameStandard),
+						Name: to.Ptr(armeventhub.SKUNameStandard),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -83,7 +83,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "evh-003",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
-						Name: ref.Of(armeventhub.SKUNamePremium),
+						Name: to.Ptr(armeventhub.SKUNamePremium),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -101,7 +101,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 					Properties: &armeventhub.EHNamespaceProperties{
 						PrivateEndpointConnections: []*armeventhub.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -119,7 +119,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "evh-005",
 				target: &armeventhub.EHNamespace{
 					SKU: &armeventhub.SKU{
-						Name: ref.Of(armeventhub.SKUNamePremium),
+						Name: to.Ptr(armeventhub.SKUNamePremium),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -134,7 +134,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "evh-006",
 				target: &armeventhub.EHNamespace{
-					Name: ref.Of("evh-test"),
+					Name: to.Ptr("evh-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -149,7 +149,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				rule: "evh-008",
 				target: &armeventhub.EHNamespace{
 					Properties: &armeventhub.EHNamespaceProperties{
-						DisableLocalAuth: ref.Of(true),
+						DisableLocalAuth: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

@@ -32,7 +32,6 @@ func (a *SQLScanner) getServerRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"sql-004": {
 			Id:          "sql-004",
@@ -45,7 +44,6 @@ func (a *SQLScanner) getServerRules() map[string]scanners.AzureRule {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Field: scanners.OverviewFieldPrivate,
 		},
 		"sql-006": {
 			Id:          "sql-006",
@@ -58,8 +56,7 @@ func (a *SQLScanner) getServerRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "sql")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sql-007": {
 			Id:          "sql-007",
@@ -101,7 +98,6 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Field: scanners.OverviewFieldDiagnostics,
 		},
 		"sqldb-002": {
 			Id:          "sqldb-002",
@@ -117,7 +113,6 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 				}
 				return !zones, ""
 			},
-			Field: scanners.OverviewFieldAZ,
 		},
 		"sqldb-003": {
 			Id:          "sqldb-003",
@@ -133,7 +128,6 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Field: scanners.OverviewFieldSLA,
 		},
 		"sqldb-005": {
 			Id:          "sqldb-005",
@@ -145,8 +139,7 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 				i := target.(*armsql.Database)
 				return false, string(*i.SKU.Name)
 			},
-			Url:   "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
 		},
 		"sqldb-006": {
 			Id:          "sqldb-006",
@@ -159,8 +152,7 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 				caf := *c.Name == "master" || strings.HasPrefix(*c.Name, "sqldb")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sqldb-007": {
 			Id:          "sqldb-007",

@@ -24,8 +24,7 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
 		},
 		"afd-003": {
 			Id:          "afd-003",
@@ -36,8 +35,7 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/cdn/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/cdn/",
 		},
 		"afd-005": {
 			Id:          "afd-005",
@@ -49,8 +47,7 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armcdn.Profile)
 				return false, string(*c.SKU.Name)
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/tier-comparison",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/tier-comparison",
 		},
 		"afd-006": {
 			Id:          "afd-006",
@@ -63,8 +60,7 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "afd")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"afd-007": {
 			Id:          "afd-007",

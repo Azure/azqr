@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
 
@@ -32,7 +32,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "dbw-001",
 				target: &armdatabricks.Workspace{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -65,7 +65,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 					Properties: &armdatabricks.WorkspaceProperties{
 						PrivateEndpointConnections: []*armdatabricks.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -83,7 +83,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 				rule: "dbw-005",
 				target: &armdatabricks.Workspace{
 					SKU: &armdatabricks.SKU{
-						Name: ref.Of("Standard"),
+						Name: to.Ptr("Standard"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -98,7 +98,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "dbw-006",
 				target: &armdatabricks.Workspace{
-					Name: ref.Of("dbw-test"),
+					Name: to.Ptr("dbw-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -115,7 +115,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 					Properties: &armdatabricks.WorkspaceProperties{
 						Parameters: &armdatabricks.WorkspaceCustomParameters{
 							EnableNoPublicIP: &armdatabricks.WorkspaceCustomBooleanParameter{
-								Value: ref.Of(true),
+								Value: to.Ptr(true),
 							},
 						},
 					},

@@ -1,29 +1,27 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package renderers
+package excel
 
 import (
 	"fmt"
 	_ "image/png"
 
+	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
-func renderCosts(f *excelize.File, data ReportData) {
+func renderCosts(f *excelize.File, data *renderers.ReportData) {
 	if data.CostData != nil && len(data.CostData.Items) > 0 {
 		_, err := f.NewSheet("Costs")
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to create Costs sheet")
 		}
 
-		headers := data.CostData.GetProperties()
-
-		rows := [][]string{}
-		for _, r := range data.CostData.Items {
-			rows = append(mapToRow(headers, r.ToMap(data.Mask)), rows...)
-		}
+		records := data.CostTable()
+		headers := records[0]
+		records = records[1:]
 
 		createFirstRow(f, "Costs", headers)
 
@@ -41,7 +39,7 @@ func renderCosts(f *excelize.File, data ReportData) {
 		}
 
 		currentRow := 4
-		for _, row := range rows {
+		for _, row := range records {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {

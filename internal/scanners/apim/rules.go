@@ -25,8 +25,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
 		},
 		"apim-002": {
 			Id:          "apim-002",
@@ -39,8 +38,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				zones := len(a.Zones) > 0
 				return !zones, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/reliability/migrate-api-mgt",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/reliability/migrate-api-mgt",
 		},
 		"apim-003": {
 			Id:          "apim-003",
@@ -60,8 +58,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 
 				return sla == "None", sla
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/api-management/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/api-management/",
 		},
 		"apim-004": {
 			Id:          "apim-004",
@@ -74,8 +71,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
-			Field: scanners.OverviewFieldPrivate,
+			Url: "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
 		},
 		"apim-005": {
 			Id:          "apim-005",
@@ -88,8 +84,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				sku := string(*a.SKU.Name)
 				return strings.Contains(sku, "Developer"), sku
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/api-management/api-management-features",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-features",
 		},
 		"apim-006": {
 			Id:          "apim-006",
@@ -102,8 +97,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "apim")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"apim-007": {
 			Id:          "apim-007",

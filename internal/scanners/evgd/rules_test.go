@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
 )
 
@@ -32,7 +32,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "evgd-001",
 				target: &armeventgrid.Domain{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -65,7 +65,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 					Properties: &armeventgrid.DomainProperties{
 						PrivateEndpointConnections: []*armeventgrid.PrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -94,7 +94,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "evgd-006",
 				target: &armeventgrid.Domain{
-					Name: ref.Of("evgd-test"),
+					Name: to.Ptr("evgd-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -109,7 +109,7 @@ func TestEventGridScanner_Rules(t *testing.T) {
 				rule: "evgd-008",
 				target: &armeventgrid.Domain{
 					Properties: &armeventgrid.DomainProperties{
-						DisableLocalAuth: ref.Of(true),
+						DisableLocalAuth: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 )
 
@@ -32,7 +32,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "sql-001",
 				target: &armsql.Server{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -53,7 +53,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 					Properties: &armsql.ServerProperties{
 						PrivateEndpointConnections: []*armsql.ServerPrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -70,7 +70,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "sql-006",
 				target: &armsql.Server{
-					Name: ref.Of("sql-test"),
+					Name: to.Ptr("sql-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -85,7 +85,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 				rule: "sql-008",
 				target: &armsql.Server{
 					Properties: &armsql.ServerProperties{
-						MinimalTLSVersion: ref.Of("1.2"),
+						MinimalTLSVersion: to.Ptr("1.2"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -132,7 +132,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 			fields: fields{
 				rule: "sqldb-001",
 				target: &armsql.Database{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -151,7 +151,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				rule: "sqldb-002",
 				target: &armsql.Database{
 					Properties: &armsql.DatabaseProperties{
-						ZoneRedundant: ref.Of(true),
+						ZoneRedundant: to.Ptr(true),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -167,10 +167,10 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				rule: "sqldb-003",
 				target: &armsql.Database{
 					Properties: &armsql.DatabaseProperties{
-						ZoneRedundant: ref.Of(true),
+						ZoneRedundant: to.Ptr(true),
 					},
 					SKU: &armsql.SKU{
-						Tier: ref.Of("Premium"),
+						Tier: to.Ptr("Premium"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -200,7 +200,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				rule: "sqldb-005",
 				target: &armsql.Database{
 					SKU: &armsql.SKU{
-						Name: ref.Of("P3"),
+						Name: to.Ptr("P3"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -215,7 +215,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 			fields: fields{
 				rule: "sqldb-006",
 				target: &armsql.Database{
-					Name: ref.Of("sqldb-test"),
+					Name: to.Ptr("sqldb-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

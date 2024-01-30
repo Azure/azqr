@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
 )
@@ -33,7 +33,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "psql-001",
 				target: &armpostgresql.Server{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -66,7 +66,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 					Properties: &armpostgresql.ServerProperties{
 						PrivateEndpointConnections: []*armpostgresql.ServerPrivateEndpointConnection{
 							{
-								ID: ref.Of("test"),
+								ID: to.Ptr("test"),
 							},
 						},
 					},
@@ -84,7 +84,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				rule: "psql-005",
 				target: &armpostgresql.Server{
 					SKU: &armpostgresql.SKU{
-						Name: ref.Of("GPGen58"),
+						Name: to.Ptr("GPGen58"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -99,7 +99,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "psql-006",
 				target: &armpostgresql.Server{
-					Name: ref.Of("psql-test"),
+					Name: to.Ptr("psql-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
@@ -114,7 +114,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				rule: "psql-008",
 				target: &armpostgresql.Server{
 					Properties: &armpostgresql.ServerProperties{
-						SSLEnforcement: ref.Of(armpostgresql.SSLEnforcementEnumEnabled),
+						SSLEnforcement: to.Ptr(armpostgresql.SSLEnforcementEnumEnabled),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -130,7 +130,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				rule: "psql-009",
 				target: &armpostgresql.Server{
 					Properties: &armpostgresql.ServerProperties{
-						MinimalTLSVersion: ref.Of(armpostgresql.MinimalTLSVersionEnumTLS12),
+						MinimalTLSVersion: to.Ptr(armpostgresql.MinimalTLSVersionEnumTLS12),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -177,7 +177,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "psqlf-001",
 				target: &armpostgresqlflexibleservers.Server{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -197,7 +197,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode: ref.Of(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
+							Mode: to.Ptr(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
 						},
 					},
 				},
@@ -229,10 +229,10 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode:                    ref.Of(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
-							StandbyAvailabilityZone: ref.Of("2"),
+							Mode:                    to.Ptr(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
+							StandbyAvailabilityZone: to.Ptr("2"),
 						},
-						AvailabilityZone: ref.Of("1"),
+						AvailabilityZone: to.Ptr("1"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -249,10 +249,10 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode:                    ref.Of(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
-							StandbyAvailabilityZone: ref.Of("1"),
+							Mode:                    to.Ptr(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
+							StandbyAvailabilityZone: to.Ptr("1"),
 						},
-						AvailabilityZone: ref.Of("1"),
+						AvailabilityZone: to.Ptr("1"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -269,7 +269,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{
 						Network: &armpostgresqlflexibleservers.Network{
-							PublicNetworkAccess: ref.Of(armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled),
+							PublicNetworkAccess: to.Ptr(armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled),
 						},
 					},
 				},
@@ -286,7 +286,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				rule: "psqlf-005",
 				target: &armpostgresqlflexibleservers.Server{
 					SKU: &armpostgresqlflexibleservers.SKU{
-						Name: ref.Of("StandardD4sv3"),
+						Name: to.Ptr("StandardD4sv3"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -301,7 +301,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "psqlf-006",
 				target: &armpostgresqlflexibleservers.Server{
-					Name: ref.Of("psql-test"),
+					Name: to.Ptr("psql-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},

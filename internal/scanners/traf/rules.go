@@ -6,8 +6,8 @@ package traf
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/trafficmanager/armtrafficmanager"
 )
 
@@ -25,8 +25,7 @@ func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-diagnostic-logs",
-			Field: scanners.OverviewFieldDiagnostics,
+			Url: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-diagnostic-logs",
 		},
 		"traf-002": {
 			Id:          "traf-002",
@@ -37,8 +36,7 @@ func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/architecture/high-availability/reference-architecture-traffic-manager-application-gateway",
-			Field: scanners.OverviewFieldAZ,
+			Url: "https://learn.microsoft.com/en-us/azure/architecture/high-availability/reference-architecture-traffic-manager-application-gateway",
 		},
 		"traf-003": {
 			Id:          "traf-003",
@@ -49,8 +47,7 @@ func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/traffic-manager/",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/traffic-manager/",
 		},
 		"traf-006": {
 			Id:          "traf-006",
@@ -63,8 +60,7 @@ func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "traf")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldCAF,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"traf-007": {
 			Id:          "traf-007",
@@ -105,7 +101,7 @@ func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armtrafficmanager.Profile)
 				httpMonitor := *c.Properties.MonitorConfig.Port == int64(80) || *c.Properties.MonitorConfig.Port == int64(443)
-				return httpMonitor && c.Properties.MonitorConfig.Protocol != ref.Of(armtrafficmanager.MonitorProtocolHTTPS), ""
+				return httpMonitor && c.Properties.MonitorConfig.Protocol != to.Ptr(armtrafficmanager.MonitorProtocolHTTPS), ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-monitoring",
 		},

@@ -22,8 +22,7 @@ func (a *AppInsightsScanner) GetRules() map[string]scanners.AzureRule {
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url:   "https://www.azure.cn/en-us/support/sla/application-insights/index.html",
-			Field: scanners.OverviewFieldSLA,
+			Url: "https://www.azure.cn/en-us/support/sla/application-insights/index.html",
 		},
 		"appi-002": {
 			Id:          "appi-002",
@@ -36,8 +35,7 @@ func (a *AppInsightsScanner) GetRules() map[string]scanners.AzureRule {
 				caf := strings.HasPrefix(*c.Name, "appi")
 				return !caf, ""
 			},
-			Url:   "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-			Field: scanners.OverviewFieldSKU,
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"appi-003": {
 			Id:          "appi-003",

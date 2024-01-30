@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/ref"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
 
@@ -32,7 +32,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "vwa-001",
 				target: &armnetwork.VirtualWAN{
-					ID: ref.Of("test"),
+					ID: to.Ptr("test"),
 				},
 				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
@@ -75,7 +75,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 				rule: "vwa-005",
 				target: &armnetwork.VirtualWAN{
 					Properties: &armnetwork.VirtualWanProperties{
-						Type: ref.Of("Standard"),
+						Type: to.Ptr("Standard"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -90,7 +90,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule: "vwa-006",
 				target: &armnetwork.VirtualWAN{
-					Name: ref.Of("vwa-test"),
+					Name: to.Ptr("vwa-test"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
