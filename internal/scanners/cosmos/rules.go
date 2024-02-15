@@ -137,5 +137,31 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
+		"cosmos-008": {
+			Id:          "cosmos-008",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurity,
+			Description: "CosmosDB should have local authentication disabled",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcosmos.DatabaseAccountGetResults)
+				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
+				return !localAuth, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-setup-rbac#disable-local-auth",
+		},
+		"cosmos-009": {
+			Id:          "cosmos-009",
+			Category:    scanners.RulesCategorySecurity,
+			Subcategory: scanners.RulesSubcategorySecurity,
+			Description: "CosmosDB: disable write operations on metadata resources (databases, containers, throughput) via account keys",
+			Severity:    scanners.SeverityHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcosmos.DatabaseAccountGetResults)
+				disabled := c.Properties.DisableKeyBasedMetadataWriteAccess != nil && *c.Properties.DisableKeyBasedMetadataWriteAccess
+				return !disabled, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/role-based-access-control#set-via-arm-template",
+		},
 	}
 }
