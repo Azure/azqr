@@ -175,6 +175,38 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "CosmosDBScanner DisableLocalAuth",
+			fields: fields{
+				rule: "cosmos-008",
+				target: &armcosmos.DatabaseAccountGetResults{
+					Properties: &armcosmos.DatabaseAccountGetProperties{
+						DisableLocalAuth: ref.Of(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CosmosDBScanner DisableKeyBasedMetadataWriteAccess",
+			fields: fields{
+				rule: "cosmos-009",
+				target: &armcosmos.DatabaseAccountGetResults{
+					Properties: &armcosmos.DatabaseAccountGetProperties{
+						DisableKeyBasedMetadataWriteAccess: ref.Of(true),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
