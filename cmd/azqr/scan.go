@@ -44,7 +44,7 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	cost, _ := cmd.Flags().GetBool("costs")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
-	forceAzureCliCredential, _ := cmd.Flags().GetBool("azure-credential-type")
+	forceAzureCliCredential, _ := cmd.Flags().GetBool("azure-cli-credential")
 
 	params := internal.ScanParams{
 		SubscriptionID:          subscriptionID,
