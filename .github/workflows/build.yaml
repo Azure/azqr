@@ -277,6 +277,8 @@ jobs:
   bump-winget:
     name: bump-winget
     needs: publish
+    permissions:
+      contents: write
     if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
