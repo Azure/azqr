@@ -14,9 +14,19 @@ chmod +x azqr
 
 ## Install on Windows
 
+Use `winget`:
+
 ```console
 winget install azqr
 ```
+
+or download the executable file:
+
+```
+$latest_azqr=$(iwr https://api.github.com/repos/Azure/azqr/releases/latest).content | convertfrom-json | Select-Object -ExpandProperty tag_name
+iwr https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-windows-latest-amd64.exe -OutFile azqr.exe
+```
+
 
 ## Install on Mac
 
