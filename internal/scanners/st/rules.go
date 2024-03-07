@@ -151,5 +151,33 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal",
 		},
+		"st-010": {
+			Id:          "st-010",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
+			Description: "Storage Account should have inmutable storage versioning enabled",
+			Severity:    scanners.SeverityLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armstorage.Account)
+				return c.Properties.ImmutableStorageWithVersioning == nil || c.Properties.ImmutableStorageWithVersioning.Enabled == nil || !*c.Properties.ImmutableStorageWithVersioning.Enabled, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
+		},
+		"st-011": {
+			Id:          "st-011",
+			Category:    scanners.RulesCategoryReliability,
+			Subcategory: scanners.RulesSubcategoryReliabilityReliability,
+			Description: "Storage Account should have soft delete enabled",
+			Severity:    scanners.SeverityMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				broken := false
+				broken = scanContext.BlobServiceProperties != nil && (scanContext.BlobServiceProperties.BlobServiceProperties.BlobServiceProperties.ContainerDeleteRetentionPolicy == nil ||
+					scanContext.BlobServiceProperties.BlobServiceProperties.BlobServiceProperties.ContainerDeleteRetentionPolicy.Enabled == nil ||
+					!*scanContext.BlobServiceProperties.BlobServiceProperties.BlobServiceProperties.ContainerDeleteRetentionPolicy.Enabled)
+
+				return broken, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
+		},
 	}
 }

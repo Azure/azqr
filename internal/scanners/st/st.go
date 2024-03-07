@@ -10,8 +10,9 @@ import (
 
 // StorageScanner - Scanner for Storage
 type StorageScanner struct {
-	config        *scanners.ScannerConfig
-	storageClient *armstorage.AccountsClient
+	config             *scanners.ScannerConfig
+	storageClient      *armstorage.AccountsClient
+	blobServicesClient *armstorage.BlobServicesClient
 }
 
 // Init - Initializes the StorageScanner
@@ -19,6 +20,10 @@ func (c *StorageScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.storageClient, err = armstorage.NewAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
+	if err != nil {
+		return err
+	}
+	c.blobServicesClient, err = armstorage.NewBlobServicesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	return err
 }
 
@@ -35,6 +40,12 @@ func (c *StorageScanner) Scan(resourceGroupName string, scanContext *scanners.Sc
 	results := []scanners.AzureServiceResult{}
 
 	for _, storage := range storage {
+		scanContext.BlobServiceProperties = nil
+		blobServicesProperties, err := c.blobServicesClient.GetServiceProperties(c.config.Ctx, resourceGroupName, *storage.Name, nil)
+		if err == nil {
+			scanContext.BlobServiceProperties = &blobServicesProperties
+		}
+
 		rr := engine.EvaluateRules(rules, storage, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{

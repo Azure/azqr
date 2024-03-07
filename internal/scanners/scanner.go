@@ -13,6 +13,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 	"github.com/rs/zerolog/log"
 )
 
@@ -31,6 +32,7 @@ type (
 		DiagnosticsSettings map[string]bool
 		PublicIPs           map[string]*armnetwork.PublicIPAddress
 		SiteConfig          *armappservice.WebAppsClientGetConfigurationResponse
+		BlobServiceProperties *armstorage.BlobServicesClientGetServicePropertiesResponse
 	}
 
 	// IAzureScanner - Interface for all Azure Scanners

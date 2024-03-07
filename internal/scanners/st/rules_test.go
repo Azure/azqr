@@ -162,6 +162,66 @@ func TestStorageScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+		{
+			name: "StorageScanner inmutable storage versioning disabled",
+			fields: fields{
+				rule: "st-010",
+				target: &armstorage.Account{
+					Properties: &armstorage.AccountProperties{
+						ImmutableStorageWithVersioning: &armstorage.ImmutableStorageAccount{
+							Enabled: ref.Of(false),
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "StorageScanner inmutable storage versioning enabled",
+			fields: fields{
+				rule: "st-010",
+				target: &armstorage.Account{
+					Properties: &armstorage.AccountProperties{
+						ImmutableStorageWithVersioning: &armstorage.ImmutableStorageAccount{
+							Enabled: ref.Of(true),
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "StorageScanner inmutable storage versioning enabled",
+			fields: fields{
+				rule: "st-011",
+				target: &armstorage.Account{
+					Properties: &armstorage.AccountProperties{},
+				},
+				scanContext: &scanners.ScanContext{
+					BlobServiceProperties: &armstorage.BlobServicesClientGetServicePropertiesResponse{
+						BlobServiceProperties: armstorage.BlobServiceProperties{
+							BlobServiceProperties: &armstorage.BlobServicePropertiesProperties{
+								ContainerDeleteRetentionPolicy: &armstorage.DeleteRetentionPolicy{
+									Enabled: ref.Of(true),
+								},
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
