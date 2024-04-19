@@ -91,6 +91,8 @@ To learn more about the recommendations used by **Azure Quick Review (azqr)**, y
 * Azure SignalR Service
 * Azure SQL Database
 * Azure Storage Account
+* Azure Synapse Analytics Workspace
+* Azure Synapse Spark Pool
 * Azure Traffic Manager
 * Azure Virtual Machine
 * Azure Virtual Network
