@@ -28,7 +28,7 @@ func (a *SynapseSparkPoolScanner) Init(config *scanners.ScannerConfig) error {
 func (a *SynapseSparkPoolScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
 	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Synapse Spark Pool")
 
-	factories, err := a.listFactories(resourceGroupName)
+	pools, err := a.listPools(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (a *SynapseSparkPoolScanner) Scan(resourceGroupName string, scanContext *sc
 	rules := a.GetRules()
 	results := []scanners.AzureServiceResult{}
 
-	for _, g := range factories {
+	for _, g := range pools {
 		rr := engine.EvaluateRules(rules, g, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
@@ -51,20 +51,20 @@ func (a *SynapseSparkPoolScanner) Scan(resourceGroupName string, scanContext *sc
 	return results, nil
 }
 
-func (a *SynapseSparkPoolScanner) listFactories(resourceGroupName string) ([]*armsynapse.BigDataPoolResourceInfo, error) {
+func (a *SynapseSparkPoolScanner) listPools(resourceGroupName string) ([]*armsynapse.BigDataPoolResourceInfo, error) {
 	pager := a.workspaceClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	factories := make([]*armsynapse.Workspace, 0)
+	workspaces := make([]*armsynapse.Workspace, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
 		}
-		factories = append(factories, resp.Value...)
+		workspaces = append(workspaces, resp.Value...)
 	}
 
 	pools := make([]*armsynapse.BigDataPoolResourceInfo, 0)
-	for _, f := range factories {
+	for _, f := range workspaces {
 		poolPager := a.poolClient.NewListByWorkspacePager(resourceGroupName, *f.Name, nil)
 
 		for poolPager.More() {

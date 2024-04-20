@@ -10,15 +10,15 @@ import (
 
 // SynapseWorkspaceScanner - Scanner for Synapse Analytics Workspace
 type SynapseWorkspaceScanner struct {
-	config          *scanners.ScannerConfig
-	factoriesClient *armsynapse.WorkspacesClient
+	config           *scanners.ScannerConfig
+	workspacesClient *armsynapse.WorkspacesClient
 }
 
 // Init - Initializes the SynapseWorkspaceScanner Scanner
 func (a *SynapseWorkspaceScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.factoriesClient, err = armsynapse.NewWorkspacesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
+	a.workspacesClient, err = armsynapse.NewWorkspacesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
 	return err
 }
 
@@ -26,7 +26,7 @@ func (a *SynapseWorkspaceScanner) Init(config *scanners.ScannerConfig) error {
 func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
 	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Synapse Workspace")
 
-	factories, err := a.listFactories(resourceGroupName)
+	workspaces, err := a.listWorkspaces(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *sc
 	rules := a.GetRules()
 	results := []scanners.AzureServiceResult{}
 
-	for _, g := range factories {
+	for _, g := range workspaces {
 		rr := engine.EvaluateRules(rules, g, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
@@ -49,16 +49,16 @@ func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *sc
 	return results, nil
 }
 
-func (a *SynapseWorkspaceScanner) listFactories(resourceGroupName string) ([]*armsynapse.Workspace, error) {
-	pager := a.factoriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *SynapseWorkspaceScanner) listWorkspaces(resourceGroupName string) ([]*armsynapse.Workspace, error) {
+	pager := a.workspacesClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
-	factories := make([]*armsynapse.Workspace, 0)
+	workspaces := make([]*armsynapse.Workspace, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
 		}
-		factories = append(factories, resp.Value...)
+		workspaces = append(workspaces, resp.Value...)
 	}
-	return factories, nil
+	return workspaces, nil
 }
