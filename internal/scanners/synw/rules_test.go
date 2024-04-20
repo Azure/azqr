@@ -12,7 +12,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse"
 )
 
-func TestDataExplorerScanner_Rules(t *testing.T) {
+func TestSynapseWorkspaceScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
