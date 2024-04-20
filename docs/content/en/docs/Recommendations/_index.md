@@ -326,3 +326,6 @@ Azure Quick Review checks the following recommendations for Azure resources. The
 314 | High Availability | High | Azure Synapse Spark Pool SLA | [Learn](https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services)
 315 | Governance | Low | Azure Synapse Spark Pool Name should comply with naming conventions | [Learn](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations)
 316 | Governance | Low | Azure Synapse Spark Pool should have tags | [Learn](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json)
+317 | High Availability | High | Azure Synapse Dedicated SQL Pool SLA | [Learn](https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services)
+318 | Governance | Low | Azure Synapse Dedicated SQL Pool Name should comply with naming conventions | [Learn](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations)
+319 | Governance | Low | Azure Synapse Dedicated SQL Pool should have tags | [Learn](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json)
