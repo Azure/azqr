@@ -19,7 +19,7 @@ type SynapseSparkPoolScanner struct {
 func (a *SynapseSparkPoolScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
-	a.workspaceClient, err = armsynapse.NewWorkspacesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
+	a.workspaceClient, _ = armsynapse.NewWorkspacesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
 	a.poolClient, err = armsynapse.NewBigDataPoolsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
 	return err
 }
