@@ -56,6 +56,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/sigr"
 	"github.com/Azure/azqr/internal/scanners/sql"
 	"github.com/Azure/azqr/internal/scanners/st"
+	"github.com/Azure/azqr/internal/scanners/syndp"
 	"github.com/Azure/azqr/internal/scanners/synsp"
 	"github.com/Azure/azqr/internal/scanners/synw"
 	"github.com/Azure/azqr/internal/scanners/traf"
@@ -475,6 +476,7 @@ func GetScanners() []scanners.IAzureScanner {
 		&sql.SQLScanner{},
 		&synw.SynapseWorkspaceScanner{},
 		&synsp.SynapseSparkPoolScanner{},
+		&syndp.SynapseSqlPoolScanner{},
 		&traf.TrafficManagerScanner{},
 		&st.StorageScanner{},
 		&vm.VirtualMachineScanner{},
