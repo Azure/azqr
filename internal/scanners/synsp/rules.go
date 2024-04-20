@@ -10,7 +10,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse"
 )
 
-// GetRules - Returns the rules for the DataFactoryScanner
+// GetRules - Returns the rules for the SynapseSparkPoolScanner
 func (a *SynapseSparkPoolScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"synsp-001": {
