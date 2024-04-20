@@ -28,7 +28,7 @@ func (a *SynapseSparkPoolScanner) GetRules() map[string]scanners.AzureRule {
 		"synsp-002": {
 			Id:             "synsp-002",
 			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure Synapse Spark Pool  SLA",
+			Recommendation: "Azure Synapse Spark Pool SLA",
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
@@ -38,7 +38,7 @@ func (a *SynapseSparkPoolScanner) GetRules() map[string]scanners.AzureRule {
 		"synsp-003": {
 			Id:             "synsp-003",
 			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Azure Synapse Spark Pool  should have tags",
+			Recommendation: "Azure Synapse Spark Pool should have tags",
 			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsynapse.BigDataPoolResourceInfo)
