@@ -8,14 +8,14 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse"
 )
 
-// DataFactoryScanner - Scanner for Data Factory
+// SynapseSparkPoolScanner - Scanner for Synapse Analytics Spark Pool
 type SynapseSparkPoolScanner struct {
 	config          *scanners.ScannerConfig
 	poolClient      *armsynapse.BigDataPoolsClient
 	workspaceClient *armsynapse.WorkspacesClient
 }
 
-// Init - Initializes the DataFactory Scanner
+// Init - Initializes the SynapseSparkPoolScanner Scanner
 func (a *SynapseSparkPoolScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
@@ -24,7 +24,7 @@ func (a *SynapseSparkPoolScanner) Init(config *scanners.ScannerConfig) error {
 	return err
 }
 
-// Scan - Scans all Data Factories in a Resource Group
+// Scan - Scans all Synapse Analytics Spark Pools in a Resource Group
 func (a *SynapseSparkPoolScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
 	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Synapse Spark Pool")
 

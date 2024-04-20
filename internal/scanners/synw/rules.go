@@ -10,7 +10,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse"
 )
 
-// GetRules - Returns the rules for the DataFactoryScanner
+// GetRules - Returns the rules for the SynapseWorkspaceScanner
 func (a *SynapseWorkspaceScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"synw-001": {

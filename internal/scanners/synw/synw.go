@@ -8,13 +8,13 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse"
 )
 
-// DataFactoryScanner - Scanner for Data Factory
+// SynapseWorkspaceScanner - Scanner for Synapse Analytics Workspace
 type SynapseWorkspaceScanner struct {
 	config          *scanners.ScannerConfig
 	factoriesClient *armsynapse.WorkspacesClient
 }
 
-// Init - Initializes the DataFactory Scanner
+// Init - Initializes the SynapseWorkspaceScanner Scanner
 func (a *SynapseWorkspaceScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
@@ -22,7 +22,7 @@ func (a *SynapseWorkspaceScanner) Init(config *scanners.ScannerConfig) error {
 	return err
 }
 
-// Scan - Scans all Data Factories in a Resource Group
+// Scan - Scans all Synapse Workspaces in a Resource Group
 func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
 	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Synapse Workspace")
 
