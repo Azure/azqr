@@ -107,6 +107,7 @@ To learn more about the recommendations used by **Azure Quick Review (azqr)**, y
 * Azure Virtual Machine
 * Azure Virtual Network
 * Azure Virtual WAN
+* Azure VPN Gateway
 * Azure Web PubSub
 
 ## Usage
