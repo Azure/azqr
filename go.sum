@@ -32,6 +32,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos v1.0.0 h1
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos v1.0.0/go.mod h1:Qpe/qN9d5IQ7WPtTXMRCd6+BWTnhi3sxXVys6oJ5Vho=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement v1.1.1 h1:ehSLdbLah6kk6HTVc6e/lrbmbz7MMbpNxkOd3OYlhB0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement v1.1.1/go.mod h1:Am1cUioOk0HdZIsjpXJkQ4RIeQbwYsW6LkNIc5z/5XY=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard v1.2.0 h1:MRPU8Bge2f9tkfG3PCr4vEnqXl8XOSjlhuK3l+8Hvkc=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard v1.2.0/go.mod h1:xYrOYxajQvXMlp6M1E3amlaqPDXspyJxmjqTsGo6Jmw=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks v1.1.0 h1:rQyNHB/4ntzvm5F9WAiaAl7jWII+jaI4rL6sSWxTNeM=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks v1.1.0/go.mod h1:4jtknLqzaPtwIz8Y9NBp2rXxeA7BbSICWBD0FDzG2VM=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory v1.3.0 h1:pmKRJksZidUYbOMQ2wtVm4L9q0BadVfBsF/fPKUUnjg=

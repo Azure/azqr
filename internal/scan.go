@@ -31,6 +31,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/afw"
 	"github.com/Azure/azqr/internal/scanners/agw"
 	"github.com/Azure/azqr/internal/scanners/aks"
+	"github.com/Azure/azqr/internal/scanners/amg"
 	"github.com/Azure/azqr/internal/scanners/apim"
 	"github.com/Azure/azqr/internal/scanners/appcs"
 	"github.com/Azure/azqr/internal/scanners/appi"
@@ -449,6 +450,7 @@ func GetScanners() []scanners.IAzureScanner {
 		&afw.FirewallScanner{},
 		&agw.ApplicationGatewayScanner{},
 		&aks.AKSScanner{},
+		&amg.ManagedGrafanaScanner{},
 		&apim.APIManagementScanner{},
 		&appcs.AppConfigurationScanner{},
 		&appi.AppInsightsScanner{},
