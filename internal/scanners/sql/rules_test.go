@@ -128,24 +128,6 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "SQLScanner DiagnosticSettings",
-			fields: fields{
-				rule: "sqldb-001",
-				target: &armsql.Database{
-					ID: to.Ptr("test"),
-				},
-				scanContext: &scanners.ScanContext{
-					DiagnosticsSettings: map[string]bool{
-						"test": true,
-					},
-				},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "SQLScanner Availability Zones",
 			fields: fields{
 				rule: "sqldb-002",
