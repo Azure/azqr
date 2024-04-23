@@ -104,8 +104,25 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
-				broken: false,
+				broken: true,
 				result: "99.9%",
+			},
+		},
+		{
+			name: "VPNGatewayScanner SLA 99.9%",
+			fields: fields{
+				rule: "vpng-004",
+				target: &armnetwork.VirtualNetworkGateway{
+					Properties: &armnetwork.VirtualNetworkGatewayPropertiesFormat{
+						SKU: &armnetwork.VirtualNetworkGatewaySKU{
+							Tier: to.Ptr(armnetwork.VirtualNetworkGatewaySKUTierErGw1AZ),
+						}},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "99.95%",
 			},
 		},
 	}

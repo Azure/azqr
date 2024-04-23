@@ -34,7 +34,7 @@ func (a *VPNGatewayScanner) GetVirtualNetworkGatewayRules() map[string]scanners.
 				if sku != "Basic" {
 					sla = "99.95%"
 				}
-				return sla != "99.9%", sla
+				return sla == "99.9%", sla
 			},
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
