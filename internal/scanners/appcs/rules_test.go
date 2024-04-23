@@ -51,7 +51,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				rule: "appcs-003",
 				target: &armappconfiguration.ConfigurationStore{
 					SKU: &armappconfiguration.SKU{
-						Name: to.Ptr("Free"),
+						Name: to.Ptr("free"),
 					},
 				},
 				scanContext: &scanners.ScanContext{},
