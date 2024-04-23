@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
 )
 
 func (a *FirewallScanner) GetRules() map[string]scanners.AzureRule {

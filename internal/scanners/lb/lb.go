@@ -5,7 +5,7 @@ package lb
 
 import (
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
 )
 
 // LoadBalancerScanner - Scanner for Loadbalancer

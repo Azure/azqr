@@ -4,7 +4,7 @@
 package scanners
 
 import (
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
 )
 
 // PublicIPScanner - Scanner for Public IPs

@@ -5,7 +5,7 @@ package agw
 
 import (
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
 )
 
 // ApplicationGatewayScanner - Scanner for Application Gateways
