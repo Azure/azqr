@@ -4,9 +4,9 @@
 package vpng
 
 import (
+	"context"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"strings"
 )
 
 // VPNGatewayScanner - Scanner for VPN Gateway
@@ -52,29 +52,23 @@ func (c *VPNGatewayScanner) Scan(resourceGroupName string, scanContext *scanners
 			Location:       *w.Location,
 			Rules:          rr,
 		})
-	}
 
-	gateways, err := c.listVirtualNetworkGateways(resourceGroupName)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, g := range gateways {
-		gatewayType := strings.ToLower(string(*g.Properties.GatewayType))
-		switch gatewayType {
-		case "vpn":
-			rr := engine.EvaluateRules(gatewayRules, g, scanContext)
-
-			results = append(results, scanners.AzureServiceResult{
-				SubscriptionID: c.config.SubscriptionID,
-				ResourceGroup:  resourceGroupName,
-				ServiceName:    *g.Name,
-				Type:           *g.Type,
-				Location:       *g.Location,
-				Rules:          rr,
-			})
+		gateway, err := c.listVirtualNetworkGateways(resourceGroupName, *w.Name)
+		if err != nil {
+			return nil, err
 		}
+		var result scanners.AzureServiceResult
+		rrg := engine.EvaluateRules(gatewayRules, gateway, scanContext)
 
+		result = scanners.AzureServiceResult{
+			SubscriptionID: c.config.SubscriptionID,
+			ResourceGroup:  resourceGroupName,
+			ServiceName:    *gateway.Name,
+			Type:           *gateway.Type,
+			Location:       *w.Location,
+			Rules:          rrg,
+		}
+		results = append(results, result)
 	}
 	return results, nil
 }
@@ -93,16 +87,8 @@ func (c *VPNGatewayScanner) listVPNGateways(resourceGroupName string) ([]*armnet
 	return vpns, nil
 }
 
-func (c *VPNGatewayScanner) listVirtualNetworkGateways(resourceGroupName string) ([]*armnetwork.VirtualNetworkGateway, error) {
-	pager := c.networkClient.NewListPager(resourceGroupName, nil)
-
-	gateways := make([]*armnetwork.VirtualNetworkGateway, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		gateways = append(gateways, resp.Value...)
-	}
-	return gateways, nil
+func (c *VPNGatewayScanner) listVirtualNetworkGateways(resourceGroupName string, resourceName string) (*armnetwork.VirtualNetworkGateway, error) {
+	gatewayResponse, _ := c.networkClient.Get(context.Background(), resourceGroupName, resourceName, nil)
+	gateway := &gatewayResponse.VirtualNetworkGateway
+	return gateway, nil
 }
