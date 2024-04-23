@@ -6,6 +6,7 @@ package vpng
 import (
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"strings"
 )
 
 // VPNGatewayScanner - Scanner for VPN Gateway
@@ -59,16 +60,21 @@ func (c *VPNGatewayScanner) Scan(resourceGroupName string, scanContext *scanners
 	}
 
 	for _, g := range gateways {
-		rr := engine.EvaluateRules(gatewayRules, g, scanContext)
+		gatewayType := strings.ToLower(string(*g.Properties.GatewayType))
+		switch gatewayType {
+		case "vpn":
+			rr := engine.EvaluateRules(gatewayRules, g, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *g.Name,
-			Type:           *g.Type,
-			Location:       *g.Location,
-			Rules:          rr,
-		})
+			results = append(results, scanners.AzureServiceResult{
+				SubscriptionID: c.config.SubscriptionID,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *g.Name,
+				Type:           *g.Type,
+				Location:       *g.Location,
+				Rules:          rr,
+			})
+		}
+
 	}
 	return results, nil
 }
