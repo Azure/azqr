@@ -32,9 +32,9 @@ func (a *AppConfigurationScanner) GetRules() map[string]scanners.AzureRule {
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				a := target.(*armappconfiguration.ConfigurationStore)
-				sku := *a.SKU.Name
-				sla := "None"
-				if sku == "Standard" {
+				sku := strings.ToLower(*a.SKU.Name)
+				sla := "none"
+				if sku == "standard" {
 					sla = "99.9%"
 				}
 
