@@ -12,6 +12,37 @@ import (
 
 // GetRules - Returns the rules for the VPNGatewayScanner
 func (a *VPNGatewayScanner) GetRules() map[string]scanners.AzureRule {
+	result := a.GetVirtualNetworkGatewayRules()
+	for k, v := range a.GetVirtualNetworkGatewayRules() {
+		result[k] = v
+	}
+	return result
+}
+
+// GetVirtualNetworkGatewayRules - Returns the rules for the VPNGatewayScanner
+func (a *VPNGatewayScanner) GetVirtualNetworkGatewayRules() map[string]scanners.AzureRule {
+	return map[string]scanners.AzureRule{
+		"vpng-004": {
+			Id:             "vpng-004",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "VPN Gateway should have a SLA",
+			Impact:         scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				g := target.(*armnetwork.VirtualNetworkGateway)
+				sku := string(*g.Properties.SKU.Tier)
+				sla := "99.9%"
+				if sku != "Basic" {
+					sla = "99.95%"
+				}
+				return sla != "99.9%", sla
+			},
+			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		},
+	}
+}
+
+// GetVPNGatewayRules - Returns the rules for the VPNGatewayScanner
+func (a *VPNGatewayScanner) GetVPNGatewayRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
 		"vpng-001": {
 			Id:             "vpng-001",
