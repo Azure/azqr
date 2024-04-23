@@ -58,7 +58,7 @@ func TestVirtualMachineScaleSetScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "VirtualMachineScaleSetScanner SLA 99.9%",
+			name: "VirtualMachineScaleSetScanner SLA 99.95%",
 			fields: fields{
 				rule: "vmss-003",
 				target: &armcompute.VirtualMachineScaleSet{
@@ -68,13 +68,13 @@ func TestVirtualMachineScaleSetScanner_Rules(t *testing.T) {
 			},
 			want: want{
 				broken: false,
-				result: "99.9%",
+				result: "99.95%",
 			},
 		},
 		{
 			name: "VirtualMachineScaleSetScanner CAF",
 			fields: fields{
-				rule: "vmss-006",
+				rule: "vmss-004",
 				target: &armcompute.VirtualMachineScaleSet{
 					Name: to.Ptr("vmss-test"),
 				},
@@ -88,7 +88,7 @@ func TestVirtualMachineScaleSetScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualMachineScaleSetScanner Tags",
 			fields: fields{
-				rule:        "vmss-007",
+				rule:        "vmss-005",
 				target:      &armcompute.VirtualMachineScaleSet{},
 				scanContext: &scanners.ScanContext{},
 			},

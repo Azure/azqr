@@ -53,8 +53,8 @@ func (a *VirtualMachineScaleSetScanner) GetRules() map[string]scanners.AzureRule
 			},
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
-		"vmss-006": {
-			Id:             "vmss-006",
+		"vmss-004": {
+			Id:             "vmss-004",
 			Category:       scanners.RulesCategoryGovernance,
 			Recommendation: "Virtual Machine Scale Set Name should comply with naming conventions",
 			Impact:         scanners.ImpactLow,
@@ -65,8 +65,8 @@ func (a *VirtualMachineScaleSetScanner) GetRules() map[string]scanners.AzureRule
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
-		"vmss-007": {
-			Id:             "vmss-007",
+		"vmss-005": {
+			Id:             "vmss-005",
 			Category:       scanners.RulesCategoryGovernance,
 			Recommendation: "Virtual Machine Scale Set should have tags",
 			Impact:         scanners.ImpactLow,
@@ -75,32 +75,6 @@ func (a *VirtualMachineScaleSetScanner) GetRules() map[string]scanners.AzureRule
 				return len(c.Tags) == 0, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		},
-
-		//TO CHECK:
-		"vm-008": {
-			Id:             "vm-008",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Virtual Machine should use managed disks",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcompute.VirtualMachine)
-				hasManagedDisks := c.Properties.StorageProfile.OSDisk.ManagedDisk != nil
-				return !hasManagedDisks, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/architecture/checklist/resiliency-per-service#virtual-machines",
-		},
-		"vm-009": {
-			Id:             "vm-009",
-			Category:       scanners.RulesCategoryScalability,
-			Recommendation: "Virtual Machine should host application or database data on a data disk",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcompute.VirtualMachine)
-				hasDataDisks := len(c.Properties.StorageProfile.DataDisks) > 0
-				return !hasDataDisks, ""
-			},
-			Url: "https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview#data-disk",
 		},
 	}
 }
