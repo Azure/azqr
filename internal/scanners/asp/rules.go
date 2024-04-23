@@ -247,8 +247,11 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzureRule {
 			Recommendation: "App Service should use Managed Identities",
 			Impact:         scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armappservice.Site)
-				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappservice.ManagedServiceIdentityTypeNone, ""
+				// c := target.(*armappservice.Site)
+				// c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappservice.ManagedServiceIdentityTypeNone
+				// not working because SDK set's Identity to nil even when configured.
+				ok := scanContext.SiteConfig.Properties.ManagedServiceIdentityID != nil || scanContext.SiteConfig.Properties.XManagedServiceIdentityID != nil
+				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
 		},
@@ -377,8 +380,11 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzureRule {
 			Recommendation: "Function should use Managed Identities",
 			Impact:         scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armappservice.Site)
-				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappservice.ManagedServiceIdentityTypeNone, ""
+				// c := target.(*armappservice.Site)
+				// c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappservice.ManagedServiceIdentityTypeNone
+				// not working because SDK set's Identity to nil even when configured.
+				ok := scanContext.SiteConfig.Properties.ManagedServiceIdentityID != nil || scanContext.SiteConfig.Properties.XManagedServiceIdentityID != nil
+				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
 		},
@@ -507,8 +513,11 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzureRule {
 			Recommendation: "Logic App should use Managed Identities",
 			Impact:         scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armappservice.Site)
-				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappservice.ManagedServiceIdentityTypeNone, ""
+				// c := target.(*armappservice.Site)
+				// c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappservice.ManagedServiceIdentityTypeNone
+				// not working because SDK set's Identity to nil even when configured.
+				ok := scanContext.SiteConfig.Properties.ManagedServiceIdentityID != nil || scanContext.SiteConfig.Properties.XManagedServiceIdentityID != nil
+				return !ok, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
 		},
