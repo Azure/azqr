@@ -4,6 +4,8 @@
 package sql
 
 import (
+	"strings"
+
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 )
@@ -60,6 +62,10 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 			return nil, err
 		}
 		for _, database := range databases {
+			if strings.ToLower(*database.Name) == "master" {
+				continue
+			}
+
 			rr := engine.EvaluateRules(databaseRules, database, scanContext)
 
 			results = append(results, scanners.AzureServiceResult{
