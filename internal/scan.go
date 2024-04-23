@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Azure/azqr/internal/scanners/vmss"
 	"sync"
 	"time"
 
@@ -476,6 +477,7 @@ func GetScanners() []scanners.IAzureScanner {
 		&traf.TrafficManagerScanner{},
 		&st.StorageScanner{},
 		&vm.VirtualMachineScanner{},
+		&vmss.VirtualMachineScaleSetScanner{},
 		&vnet.VirtualNetworkScanner{},
 		&wps.WebPubSubScanner{},
 	}
