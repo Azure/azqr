@@ -401,15 +401,39 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			name: "AppServiceScanner Managed Identity None",
 			fields: fields{
 				rule: "app-016",
-				target: &armappservice.Site{
-					Identity: &armappservice.ManagedServiceIdentity{
-						Type: to.Ptr(armappservice.ManagedServiceIdentityTypeNone),
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								ManagedServiceIdentityID: nil,
+							},
+						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Managed Identity",
+			fields: fields{
+				rule: "app-016",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								ManagedServiceIdentityID: to.Ptr(int32(1)),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: false,
 				result: "",
 			},
 		},
@@ -651,15 +675,39 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			name: "AppServiceScanner Managed Identity None",
 			fields: fields{
 				rule: "func-014",
-				target: &armappservice.Site{
-					Identity: &armappservice.ManagedServiceIdentity{
-						Type: to.Ptr(armappservice.ManagedServiceIdentityTypeNone),
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								ManagedServiceIdentityID: nil,
+							},
+						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Managed Identity",
+			fields: fields{
+				rule: "func-014",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								ManagedServiceIdentityID: to.Ptr(int32(1)),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: false,
 				result: "",
 			},
 		},
@@ -901,15 +949,39 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 			name: "AppServiceScanner Managed Identity None",
 			fields: fields{
 				rule: "logics-014",
-				target: &armappservice.Site{
-					Identity: &armappservice.ManagedServiceIdentity{
-						Type: to.Ptr(armappservice.ManagedServiceIdentityTypeNone),
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								ManagedServiceIdentityID: nil,
+							},
+						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AppServiceScanner Managed Identity",
+			fields: fields{
+				rule: "logics-014",
+				target: &armappservice.Site{},
+				scanContext: &scanners.ScanContext{
+					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
+						SiteConfigResource: armappservice.SiteConfigResource{
+							Properties: &armappservice.SiteConfig{
+								ManagedServiceIdentityID: to.Ptr(int32(1)),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				broken: false,
 				result: "",
 			},
 		},
