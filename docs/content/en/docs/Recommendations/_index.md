@@ -6,7 +6,7 @@ weight: 3
 
 Azure Quick Review checks the following recommendations for Azure resources. The recommendations are categorized based on their impact and category:
 
-#  | Category | Impact | Recommendation | More Info
+\#  | Category | Impact | Recommendation | More Info
 ---|---|---|---|---
 1 | Monitoring and Alerting | Low | Azure Databricks should have diagnostic settings enabled | [Learn](https://learn.microsoft.com/en-us/azure/databricks/administration-guide/account-settings/audit-log-delivery)
 2 | High Availability | High | Azure Databricks should have a SLA | [Learn](https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services)
