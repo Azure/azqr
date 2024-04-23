@@ -59,11 +59,48 @@ func TestVPNGatewayScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &VPNGatewayScanner{}
+			rules := s.GetVPNGatewayRules()
+			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
+			got := want{
+				broken: b,
+				result: w,
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("VPNGatewayScanner Rule.Eval() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
+	type fields struct {
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
+	}
+	type want struct {
+		broken bool
+		result string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   want
+	}{
 		{
 			name: "VPNGatewayScanner SLA 99.9%",
 			fields: fields{
-				rule:        "vpng-004",
-				target:      &armnetwork.VPNGateway{},
+				rule: "vpng-004",
+				target: &armnetwork.VirtualNetworkGateway{
+					Properties: &armnetwork.VirtualNetworkGatewayPropertiesFormat{
+						SKU: &armnetwork.VirtualNetworkGatewaySKU{
+							Tier: to.Ptr(armnetwork.VirtualNetworkGatewaySKUTierBasic),
+						}},
+				},
 				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
@@ -75,7 +112,7 @@ func TestVPNGatewayScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &VPNGatewayScanner{}
-			rules := s.GetRules()
+			rules := s.GetVirtualNetworkGatewayRules()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

@@ -10,15 +10,20 @@ import (
 
 // VPNGatewayScanner - Scanner for VPN Gateway
 type VPNGatewayScanner struct {
-	config *scanners.ScannerConfig
-	client *armnetwork.VPNGatewaysClient
+	config        *scanners.ScannerConfig
+	vpnClient     *armnetwork.VPNGatewaysClient
+	networkClient *armnetwork.VirtualNetworkGatewaysClient
 }
 
 // Init - Initializes the VPN Gateway
 func (c *VPNGatewayScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
-	c.client, err = armnetwork.NewVPNGatewaysClient(config.SubscriptionID, config.Cred, config.ClientOptions)
+	c.vpnClient, err = armnetwork.NewVPNGatewaysClient(config.SubscriptionID, config.Cred, config.ClientOptions)
+	if err != nil {
+		return err
+	}
+	c.networkClient, err = armnetwork.NewVirtualNetworkGatewaysClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	return err
 }
 
@@ -26,16 +31,17 @@ func (c *VPNGatewayScanner) Init(config *scanners.ScannerConfig) error {
 func (c *VPNGatewayScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
 	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "VPN Gateway")
 
-	vpns, err := c.list(resourceGroupName)
+	vpns, err := c.listVPNGateways(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
 	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
+	vpnRules := c.GetVPNGatewayRules()
+	gatewayRules := c.GetVirtualNetworkGatewayRules()
 	results := []scanners.AzureServiceResult{}
 
 	for _, w := range vpns {
-		rr := engine.EvaluateRules(rules, w, scanContext)
+		rr := engine.EvaluateRules(vpnRules, w, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
 			SubscriptionID: c.config.SubscriptionID,
@@ -46,11 +52,29 @@ func (c *VPNGatewayScanner) Scan(resourceGroupName string, scanContext *scanners
 			Rules:          rr,
 		})
 	}
+
+	gateways, err := c.listVirtualNetworkGateways(resourceGroupName)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, g := range gateways {
+		rr := engine.EvaluateRules(gatewayRules, g, scanContext)
+
+		results = append(results, scanners.AzureServiceResult{
+			SubscriptionID: c.config.SubscriptionID,
+			ResourceGroup:  resourceGroupName,
+			ServiceName:    *g.Name,
+			Type:           *g.Type,
+			Location:       *g.Location,
+			Rules:          rr,
+		})
+	}
 	return results, nil
 }
 
-func (c *VPNGatewayScanner) list(resourceGroupName string) ([]*armnetwork.VPNGateway, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *VPNGatewayScanner) listVPNGateways(resourceGroupName string) ([]*armnetwork.VPNGateway, error) {
+	pager := c.vpnClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
 	vpns := make([]*armnetwork.VPNGateway, 0)
 	for pager.More() {
@@ -61,4 +85,18 @@ func (c *VPNGatewayScanner) list(resourceGroupName string) ([]*armnetwork.VPNGat
 		vpns = append(vpns, resp.Value...)
 	}
 	return vpns, nil
+}
+
+func (c *VPNGatewayScanner) listVirtualNetworkGateways(resourceGroupName string) ([]*armnetwork.VirtualNetworkGateway, error) {
+	pager := c.networkClient.NewListPager(resourceGroupName, nil)
+
+	gateways := make([]*armnetwork.VirtualNetworkGateway, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
+		}
+		gateways = append(gateways, resp.Value...)
+	}
+	return gateways, nil
 }
