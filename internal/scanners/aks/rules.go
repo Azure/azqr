@@ -151,7 +151,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return true, ""
 			},
-			Url: "https://learn.microsoft.com/azure/aks/managed-aad#disable-local-accounts",
+			Url: "https://learn.microsoft.com/en-us/azure/aks/manage-local-accounts-managed-azure-ad#disable-local-accounts",
 		},
 		"aks-010": {
 			Id:             "aks-010",

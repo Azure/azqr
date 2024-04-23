@@ -49,7 +49,7 @@ Azure Quick Review checks the following recommendations for Azure resources. The
 39 | Governance | Low | AKS Name should comply with naming conventions | [Learn](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations)
 40 | Security | Medium | AKS should integrate authentication with AAD (Managed) | [Learn](https://learn.microsoft.com/en-us/azure/aks/managed-azure-ad)
 41 | Security | Medium | AKS should be RBAC enabled. | [Learn](https://learn.microsoft.com/azure/aks/manage-azure-rbac)
-42 | Security | Medium | AKS should have local accounts disabled | [Learn](https://learn.microsoft.com/azure/aks/managed-aad#disable-local-accounts)
+42 | Security | Medium | AKS should have local accounts disabled | [Learn](https://learn.microsoft.com/en-us/azure/aks/manage-local-accounts-managed-azure-ad#disable-local-accounts)
 43 | Security | Medium | AKS should have httpApplicationRouting disabled | [Learn](https://learn.microsoft.com/azure/aks/http-application-routing)
 44 | Monitoring and Alerting | High | AKS should have Container Insights enabled | [Learn](https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview)
 45 | Security | High | AKS should have outbound type set to user defined routing | [Learn](https://learn.microsoft.com/azure/aks/limit-egress-traffic)
