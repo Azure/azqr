@@ -28,24 +28,6 @@ func TestVirtualMachineScaleSetScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "VirtualMachineScaleSetScanner DiagnosticSettings",
-			fields: fields{
-				rule: "vmss-001",
-				target: &armcompute.VirtualMachineScaleSet{
-					ID: to.Ptr("test"),
-				},
-				scanContext: &scanners.ScanContext{
-					DiagnosticsSettings: map[string]bool{
-						"test": true,
-					},
-				},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "VirtualMachineScaleSetScanner Availability Zones",
 			fields: fields{
 				rule:        "vmss-002",

@@ -13,18 +13,6 @@ import (
 // GetRules - Returns the rules for the VirtualMachineScaleSetScanner
 func (a *VirtualMachineScaleSetScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"vmss-001": {
-			Id:             "vmss-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Virtual Machine Scale Set should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				service := target.(*armcompute.VirtualMachineScaleSet)
-				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
-				return !ok, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-monitor/agents/diagnostics-extension-windows-install",
-		},
 		"vmss-002": {
 			Id:             "vmss-002",
 			Category:       scanners.RulesCategoryHighAvailability,
