@@ -13,18 +13,6 @@ import (
 // GetRules - Returns the rules for the VirtualMachineScanner
 func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"vm-001": {
-			Id:             "vm-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Virtual Machine should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				service := target.(*armcompute.VirtualMachine)
-				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
-				return !ok, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-monitor/agents/diagnostics-extension-windows-install",
-		},
 		"vm-002": {
 			Id:             "vm-002",
 			Category:       scanners.RulesCategoryHighAvailability,

@@ -28,24 +28,6 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "VirtualMachineScanner DiagnosticSettings",
-			fields: fields{
-				rule: "vm-001",
-				target: &armcompute.VirtualMachine{
-					ID: to.Ptr("test"),
-				},
-				scanContext: &scanners.ScanContext{
-					DiagnosticsSettings: map[string]bool{
-						"test": true,
-					},
-				},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "VirtualMachineScanner Availability Zones",
 			fields: fields{
 				rule:        "vm-002",
