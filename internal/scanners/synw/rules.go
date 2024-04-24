@@ -87,7 +87,7 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]scanners.AzureR
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsynapse.Workspace)
-				return *c.Properties.ManagedVirtualNetwork != "default", ""
+				return c.Properties.ManagedVirtualNetwork == nil || strings.ToLower(*c.Properties.ManagedVirtualNetwork) != "default", ""
 			},
 			Url: "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
 		},

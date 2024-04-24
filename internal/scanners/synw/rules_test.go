@@ -92,7 +92,7 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 			},
 		},
 		{
-			name: "SynapseWorkspaceScanner Security Profile",
+			name: "SynapseWorkspaceScanner ManagedVirtualNetwork default",
 			fields: fields{
 				rule: "synw-006",
 				target: &armsynapse.Workspace{
@@ -105,6 +105,23 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 			},
 			want: want{
 				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "SynapseWorkspaceScanner ManagedVirtualNetwork null",
+			fields: fields{
+				rule: "synw-006",
+				target: &armsynapse.Workspace{
+					Name: to.Ptr("synw-test"),
+					Properties: &armsynapse.WorkspaceProperties{
+						ManagedVirtualNetwork: nil,
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
 				result: "",
 			},
 		},
