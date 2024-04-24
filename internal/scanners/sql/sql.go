@@ -12,9 +12,10 @@ import (
 
 // SQLScanner - Scanner for SQL
 type SQLScanner struct {
-	config             *scanners.ScannerConfig
-	sqlClient          *armsql.ServersClient
-	sqlDatabasedClient *armsql.DatabasesClient
+	config               *scanners.ScannerConfig
+	sqlClient            *armsql.ServersClient
+	sqlDatabasedClient   *armsql.DatabasesClient
+	sqlElasticPoolClient *armsql.ElasticPoolsClient
 }
 
 // Init - Initializes the SQLScanner
@@ -26,6 +27,10 @@ func (c *SQLScanner) Init(config *scanners.ScannerConfig) error {
 		return err
 	}
 	c.sqlDatabasedClient, err = armsql.NewDatabasesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
+	if err != nil {
+		return err
+	}
+	c.sqlElasticPoolClient, err = armsql.NewElasticPoolsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
 	if err != nil {
 		return err
 	}
@@ -43,6 +48,7 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 	engine := scanners.RuleEngine{}
 	rules := c.getServerRules()
 	databaseRules := c.getDatabaseRules()
+	poolRules := c.getPoolRules()
 	results := []scanners.AzureServiceResult{}
 
 	for _, sql := range sql {
@@ -56,6 +62,23 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 			Location:       *sql.Location,
 			Rules:          rr,
 		})
+
+		pools, err := c.listPools(resourceGroupName, *sql.Name)
+		if err != nil {
+			return nil, err
+		}
+		for _, pool := range pools {
+			rr := engine.EvaluateRules(poolRules, pool, scanContext)
+
+			results = append(results, scanners.AzureServiceResult{
+				SubscriptionID: c.config.SubscriptionID,
+				ResourceGroup:  resourceGroupName,
+				ServiceName:    *pool.Name,
+				Type:           *pool.Type,
+				Location:       *pool.Location,
+				Rules:          rr,
+			})
+		}
 
 		databases, err := c.listDatabases(resourceGroupName, *sql.Name)
 		if err != nil {
@@ -108,4 +131,18 @@ func (c *SQLScanner) listDatabases(resourceGroupName, serverName string) ([]*arm
 		databases = append(databases, resp.Value...)
 	}
 	return databases, nil
+}
+
+func (c *SQLScanner) listPools(resourceGroupName, serverName string) ([]*armsql.ElasticPool, error) {
+	pager := c.sqlElasticPoolClient.NewListByServerPager(resourceGroupName, serverName, nil)
+
+	pools := make([]*armsql.ElasticPool, 0)
+	for pager.More() {
+		resp, err := pager.NextPage(c.config.Ctx)
+		if err != nil {
+			return nil, err
+		}
+		pools = append(pools, resp.Value...)
+	}
+	return pools, nil
 }
