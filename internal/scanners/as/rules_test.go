@@ -78,7 +78,7 @@ func TestAnalysisServicesScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "DatabricksScanner CAF",
+			name: "AnalysisServicesScanner CAF",
 			fields: fields{
 				rule: "as-004",
 				target: &armanalysisservices.Server{

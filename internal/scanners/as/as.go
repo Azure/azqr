@@ -8,7 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/analysisservices/armanalysisservices"
 )
 
-// AnalysisServicesScanner - Scanner for Analytics Services
+// AnalysisServicesScanner - Scanner for Analysis Services
 type AnalysisServicesScanner struct {
 	config *scanners.ScannerConfig
 	client *armanalysisservices.ServersClient
@@ -24,7 +24,7 @@ func (c *AnalysisServicesScanner) Init(config *scanners.ScannerConfig) error {
 
 // Scan - Scans all Analytics Services in a Resource Group
 func (c *AnalysisServicesScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Analytics Services")
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Analysis Services")
 
 	workspaces, err := c.listWorkspaces(resourceGroupName)
 	if err != nil {

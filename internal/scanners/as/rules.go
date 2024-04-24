@@ -16,7 +16,7 @@ func (a *AnalysisServicesScanner) GetRules() map[string]scanners.AzureRule {
 		"as-001": {
 			Id:             "as-001",
 			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Azure Analytics Service should have diagnostic settings enabled",
+			Recommendation: "Azure Analysis Service should have diagnostic settings enabled",
 			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armanalysisservices.Server)
@@ -28,7 +28,7 @@ func (a *AnalysisServicesScanner) GetRules() map[string]scanners.AzureRule {
 		"as-002": {
 			Id:             "as-002",
 			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure Analytics Service should have a SLA",
+			Recommendation: "Azure Analysis Service should have a SLA",
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armanalysisservices.Server)
@@ -44,7 +44,7 @@ func (a *AnalysisServicesScanner) GetRules() map[string]scanners.AzureRule {
 		"as-003": {
 			Id:             "as-003",
 			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure Databricks SKU",
+			Recommendation: "Azure Analysis SKU",
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armanalysisservices.Server)
@@ -55,7 +55,7 @@ func (a *AnalysisServicesScanner) GetRules() map[string]scanners.AzureRule {
 		"as-004": {
 			Id:             "as-004",
 			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Azure Analytics Service Name should comply with naming conventions",
+			Recommendation: "Azure Analysis Service Name should comply with naming conventions",
 			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armanalysisservices.Server)
@@ -67,7 +67,7 @@ func (a *AnalysisServicesScanner) GetRules() map[string]scanners.AzureRule {
 		"as-005": {
 			Id:             "as-005",
 			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Azure Analytics Service should have tags",
+			Recommendation: "Azure Analysis Service should have tags",
 			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armanalysisservices.Server)

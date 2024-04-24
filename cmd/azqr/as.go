@@ -15,8 +15,8 @@ func init() {
 
 var asCmd = &cobra.Command{
 	Use:   "as",
-	Short: "Scan Azure Analytics Service",
-	Long:  "Scan Azure Analytics Service",
+	Short: "Scan Azure Analysis Service",
+	Long:  "Scan Azure Analysis Service",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{

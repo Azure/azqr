@@ -63,7 +63,7 @@ To learn more about the recommendations used by **Azure Quick Review (azqr)**, y
 
 **Azure Quick Review (azqr)** currently supports the following Azure services:
 
-* Azure Analytics Service
+* Azure Analysis Service
 * Azure API Management
 * Azure App Configuration
 * Azure App Services
