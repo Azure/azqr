@@ -16,6 +16,9 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 	for k, v := range a.getDatabaseRules() {
 		result[k] = v
 	}
+	for k, v := range a.getPoolRules() {
+		result[k] = v
+	}
 	return result
 }
 
@@ -140,6 +143,45 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Database)
+				return len(c.Tags) == 0, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		},
+	}
+}
+
+func (a *SQLScanner) getPoolRules() map[string]scanners.AzureRule {
+	return map[string]scanners.AzureRule{
+		"sqlep-001": {
+			Id:             "sqlep-001",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "SQL Elastic Pool SKU",
+			Impact:         scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				i := target.(*armsql.ElasticPool)
+				return false, string(*i.SKU.Name)
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/azure-sql/database/elastic-pool-overview?view=azuresql",
+		},
+		"sqlep-002": {
+			Id:             "sqlep-002",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "SQL Elastic Pool Name should comply with naming conventions",
+			Impact:         scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armsql.ElasticPool)
+				caf := strings.HasPrefix(*c.Name, "sqlep")
+				return !caf, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		},
+		"sqlep-003": {
+			Id:             "sqlep-003",
+			Category:       scanners.RulesCategoryGovernance,
+			Recommendation: "SQL Elastic Pool should have tags",
+			Impact:         scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armsql.ElasticPool)
 				return len(c.Tags) == 0, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",

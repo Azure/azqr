@@ -222,3 +222,65 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 		})
 	}
 }
+
+func TestSQLScanner_PoolRules(t *testing.T) {
+	type fields struct {
+		rule        string
+		target      interface{}
+		scanContext *scanners.ScanContext
+	}
+	type want struct {
+		broken bool
+		result string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   want
+	}{
+		{
+			name: "SQLScanner SKU",
+			fields: fields{
+				rule: "sqlep-001",
+				target: &armsql.ElasticPool{
+					SKU: &armsql.SKU{
+						Name: to.Ptr("GP_Gen5_2"),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "GP_Gen5_2",
+			},
+		},
+		{
+			name: "SQLScanner CAF",
+			fields: fields{
+				rule: "sqlep-002",
+				target: &armsql.ElasticPool{
+					Name: to.Ptr("sqlep-test"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &SQLScanner{}
+			rules := s.getPoolRules()
+			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
+			got := want{
+				broken: b,
+				result: w,
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SQLScanner Rule.Eval() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -94,6 +94,8 @@ To learn more about the recommendations used by **Azure Quick Review (azqr)**, y
 * Azure Logic Apps
 * Azure Service Bus
 * Azure SignalR Service
+* Azure SQL Server
+* Azure SQL Elastic Pool
 * Azure SQL Database
 * Azure Storage Account
 * Azure Synapse Analytics Workspace
