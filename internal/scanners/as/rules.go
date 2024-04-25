@@ -44,13 +44,13 @@ func (a *AnalysisServicesScanner) GetRules() map[string]scanners.AzureRule {
 		"as-003": {
 			Id:             "as-003",
 			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure Analysis SKU",
+			Recommendation: "Azure Analysis Service SKU",
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armanalysisservices.Server)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/databricks/",
+			Url: "https://azure.microsoft.com/en-us/pricing/details/analysis-services/",
 		},
 		"as-004": {
 			Id:             "as-004",
