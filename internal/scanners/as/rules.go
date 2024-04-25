@@ -34,7 +34,7 @@ func (a *AnalysisServicesScanner) GetRules() map[string]scanners.AzureRule {
 				i := target.(*armanalysisservices.Server)
 				sku := *i.SKU.Tier
 				sla := "None"
-				if sku != armanalysisservices.SKUTierBasic {
+				if sku != armanalysisservices.SKUTierDevelopment {
 					sla = "99.9%"
 				}
 				return sla == "None", sla
