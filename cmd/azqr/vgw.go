@@ -5,22 +5,22 @@ package azqr
 
 import (
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azqr/internal/scanners/vpng"
+	"github.com/Azure/azqr/internal/scanners/vgw"
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	scanCmd.AddCommand(vpngCmd)
+	scanCmd.AddCommand(vgwCmd)
 }
 
-var vpngCmd = &cobra.Command{
-	Use:   "vpng",
-	Short: "Scan Azure VPN Gateway",
-	Long:  "Scan Azure VPN Gateway",
+var vgwCmd = &cobra.Command{
+	Use:   "vgw",
+	Short: "Scan Virtual Network Gateway",
+	Long:  "Scan Virtual Network Gateway",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []scanners.IAzureScanner{
-			&vpng.VPNGatewayScanner{},
+			&vgw.VirtualNetworkGatewayScanner{},
 		}
 
 		scan(cmd, serviceScanners)
