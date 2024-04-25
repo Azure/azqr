@@ -47,8 +47,7 @@ jobs:
           
       - name: Create rules.txt file
         run: |
-          echo "\\" > ./docs/static/rules.txt
-          go run ./cmd/main.go rules >> ./docs/static/rules.txt
+          { echo -n '\'; go run ./cmd/main.go rules; } > ./docs/static/rules.txt
 
       - name: Setup Node
         uses: actions/setup-node@v3
