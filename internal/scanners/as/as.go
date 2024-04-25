@@ -22,7 +22,7 @@ func (c *AnalysisServicesScanner) Init(config *scanners.ScannerConfig) error {
 	return err
 }
 
-// Scan - Scans all Analytics Services in a Resource Group
+// Scan - Scans all Analysis Services in a Resource Group
 func (c *AnalysisServicesScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
 	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Analysis Services")
 
