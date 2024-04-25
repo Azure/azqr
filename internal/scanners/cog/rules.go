@@ -65,8 +65,36 @@ func (a *CognitiveScanner) GetRules() map[string]scanners.AzureRule {
 			Impact:         scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcognitiveservices.Account)
-				caf := strings.HasPrefix(*c.Name, "cog")
-				return !caf, ""
+				switch strings.ToLower(*c.Kind) {
+				case "openai":
+					return !strings.HasPrefix(*c.Name, "oai"), ""
+				case "computervision":
+					return !strings.HasPrefix(*c.Name, "cv"), ""
+				case "contentmoderator":
+					return !strings.HasPrefix(*c.Name, "cm"), ""
+				case "contentsafety":
+					return !strings.HasPrefix(*c.Name, "cs"), ""
+				case "customvision.prediction":
+					return !strings.HasPrefix(*c.Name, "cstv"), ""
+				case "customvision.training":
+					return !strings.HasPrefix(*c.Name, "cstvt"), ""
+				case "formrecognizer":
+					return !strings.HasPrefix(*c.Name, "di"), ""
+				case "face":
+					return !strings.HasPrefix(*c.Name, "face"), ""
+				case "healthinsights":
+					return !strings.HasPrefix(*c.Name, "hi"), ""
+				case "immersivereader":
+					return !strings.HasPrefix(*c.Name, "ir"), ""
+				case "textanalytics":
+					return !strings.HasPrefix(*c.Name, "lang"), ""
+				case "speechservices":
+					return !strings.HasPrefix(*c.Name, "spch"), ""
+				case "texttranslation":
+					return !strings.HasPrefix(*c.Name, "trsl"), ""
+				default:
+					return !strings.HasPrefix(*c.Name, "cog"), ""
+				}
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
