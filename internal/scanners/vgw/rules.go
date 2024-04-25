@@ -68,10 +68,10 @@ func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[strin
 				g := target.(*armnetwork.VirtualNetworkGateway)
 				sku := string(*g.Properties.SKU.Tier)
 				sla := "99.9%"
-				if sku != "Basic" {
+				if sku != string(armnetwork.VirtualNetworkGatewaySKUTierBasic) {
 					sla = "99.95%"
 				}
-				return sla == "99.9%", sla
+				return false, sla
 			},
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
