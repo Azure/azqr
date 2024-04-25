@@ -12,7 +12,7 @@ import (
 
 // GetRules - Returns the rules for the VPNGatewayScanner
 func (a *VPNGatewayScanner) GetRules() map[string]scanners.AzureRule {
-	result := a.GetVirtualNetworkGatewayRules()
+	result := a.GetVPNGatewayRules()
 	for k, v := range a.GetVirtualNetworkGatewayRules() {
 		result[k] = v
 	}
