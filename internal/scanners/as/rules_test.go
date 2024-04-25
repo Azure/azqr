@@ -4,9 +4,10 @@
 package as
 
 import (
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/analysisservices/armanalysisservices"
 	"reflect"
 	"testing"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/analysisservices/armanalysisservices"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
@@ -46,7 +47,7 @@ func TestAnalysisServicesScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AnalysisServicesScanner SLA",
+			name: "AnalysisServicesScanner SLA Basic Tier",
 			fields: fields{
 				rule: "as-002",
 				target: &armanalysisservices.Server{
@@ -57,12 +58,28 @@ func TestAnalysisServicesScanner_Rules(t *testing.T) {
 				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
+				broken: false,
+				result: "99.9%",
+			},
+		},
+		{
+			name: "AnalysisServicesScanner SLA Development Tier",
+			fields: fields{
+				rule: "as-002",
+				target: &armanalysisservices.Server{
+					SKU: &armanalysisservices.ResourceSKU{
+						Tier: to.Ptr(armanalysisservices.SKUTierDevelopment),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
 				broken: true,
 				result: "None",
 			},
 		},
 		{
-			name: "AnalysisServicesScanner SLA",
+			name: "AnalysisServicesScanner SLA Standard Tier",
 			fields: fields{
 				rule: "as-002",
 				target: &armanalysisservices.Server{
