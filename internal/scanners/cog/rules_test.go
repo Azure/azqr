@@ -94,11 +94,207 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
+			name: "CognitiveScanner OpenAi CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("oai-test"),
+					Kind: to.Ptr("OpenAi"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner ContentModerator CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("cm-test"),
+					Kind: to.Ptr("ContentModerator"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner ContentSafety CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("cs-test"),
+					Kind: to.Ptr("ContentSafety"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner CustomVision.Prediction CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("cstv-test"),
+					Kind: to.Ptr("CustomVision.Prediction"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner CustomVision.Training CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("cstvt-test"),
+					Kind: to.Ptr("CustomVision.Training"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner FormRecognizer CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("di-test"),
+					Kind: to.Ptr("FormRecognizer"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner Face CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("face-test"),
+					Kind: to.Ptr("Face"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner HealthInsights CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("hi-test"),
+					Kind: to.Ptr("HealthInsights"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner ImmersiveReader CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("ir-test"),
+					Kind: to.Ptr("ImmersiveReader"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner TextAnalytics CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("lang-test"),
+					Kind: to.Ptr("TextAnalytics"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner SpeechServices CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("spch-test"),
+					Kind: to.Ptr("SpeechServices"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner TextTranslation CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("trsl-test"),
+					Kind: to.Ptr("TextTranslation"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "CognitiveScanner ComputerVision CAF",
+			fields: fields{
+				rule: "cog-006",
+				target: &armcognitiveservices.Account{
+					Name: to.Ptr("cv-test"),
+					Kind: to.Ptr("ComputerVision"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
 			name: "CognitiveScanner CAF",
 			fields: fields{
 				rule: "cog-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("cog-test"),
+					Kind: to.Ptr("cog"),
 				},
 				scanContext: &scanners.ScanContext{},
 			},
