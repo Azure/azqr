@@ -75,7 +75,7 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
-				broken: true,
+				broken: false,
 				result: "99.9%",
 			},
 		},
