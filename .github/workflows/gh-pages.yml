@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'internal/scanners/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -32,11 +33,23 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HUGO_VERSION: 0.119.0
+      GOVER: '1.21'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
+      - name: Set up Go ${{ env.GOVER }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GOVER }}
+          
+      - name: Create rules.txt file
+        run: |
+          echo "\" > ./docs/static/rules.txt
+          go run .\cmd\main.go rules >> ./docs/static/rules.txt
+        working-directory: ./docs
 
       - name: Setup Node
         uses: actions/setup-node@v3
