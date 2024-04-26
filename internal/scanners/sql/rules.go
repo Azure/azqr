@@ -24,17 +24,6 @@ func (a *SQLScanner) GetRules() map[string]scanners.AzureRule {
 
 func (a *SQLScanner) getServerRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
-		"sql-001": {
-			Id:             "sql-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "SQL should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				service := target.(*armsql.Server)
-				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
-				return !ok, ""
-			},
-		},
 		"sql-004": {
 			Id:             "sql-004",
 			Category:       scanners.RulesCategorySecurity,
@@ -85,6 +74,17 @@ func (a *SQLScanner) getServerRules() map[string]scanners.AzureRule {
 
 func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzureRule {
 	return map[string]scanners.AzureRule{
+		"sqldb-001": {
+			Id:             "sqldb-001",
+			Category:       scanners.RulesCategoryMonitoringAndAlerting,
+			Recommendation: "SQL Database should have diagnostic settings enabled",
+			Impact:         scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				service := target.(*armsql.Database)
+				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
+				return !ok, ""
+			},
+		},
 		"sqldb-002": {
 			Id:             "sqldb-002",
 			Category:       scanners.RulesCategoryHighAvailability,
