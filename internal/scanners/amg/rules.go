@@ -34,10 +34,10 @@ func (a *ManagedGrafanaScanner) GetRules() map[string]scanners.AzureRule {
 				c := target.(*armdashboard.ManagedGrafana)
 				sku := ""
 				if c.SKU != nil && c.SKU.Name != nil {
-					sku = string(*c.SKU.Name)
+					sku = strings.ToLower(*c.SKU.Name)
 				}
 				sla := "None"
-				if !strings.Contains(sku, "Standard") {
+				if strings.Contains(sku, "standard") {
 					sla = "99.9%"
 				}
 				return sla == "None", sla
@@ -62,7 +62,7 @@ func (a *ManagedGrafanaScanner) GetRules() map[string]scanners.AzureRule {
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
-				return string(*c.Properties.PublicNetworkAccess) == "Enabled", ""
+				return *c.Properties.PublicNetworkAccess == armdashboard.PublicNetworkAccessEnabled, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
 		},

@@ -28,23 +28,102 @@ func TestManagedGrafanaScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "ManagedGrafanaScanner SLA",
+			name: "ManagedGrafanaScanner availability zones enabled",
 			fields: fields{
-				rule:        "synsp-002",
-				target:      &armdashboard.ManagedGrafana{},
+				rule: "amg-005",
+				target: &armdashboard.ManagedGrafana{
+					Properties: &armdashboard.ManagedGrafanaProperties{
+						ZoneRedundancy: to.Ptr(armdashboard.ZoneRedundancyEnabled),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		}, {
+			name: "ManagedGrafanaScanner availability zones enabled",
+			fields: fields{
+				rule: "amg-005",
+				target: &armdashboard.ManagedGrafana{
+					Properties: &armdashboard.ManagedGrafanaProperties{
+						ZoneRedundancy: to.Ptr(armdashboard.ZoneRedundancyDisabled),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		}, {
+			name: "ManagedGrafanaScanner SLA Standard",
+			fields: fields{
+				rule: "amg-002",
+				target: &armdashboard.ManagedGrafana{
+					SKU: &armdashboard.ResourceSKU{
+						Name: to.Ptr("Standard"),
+					},
+				},
 				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "99.9%",
 			},
+		}, {
+			name: "ManagedGrafanaScanner SLA Basic",
+			fields: fields{
+				rule: "amg-002",
+				target: &armdashboard.ManagedGrafana{
+					SKU: &armdashboard.ResourceSKU{
+						Name: to.Ptr("Basic"),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "None",
+			},
 		},
 		{
 			name: "ManagedGrafanaScanner CAF",
 			fields: fields{
-				rule: "synsp-001",
+				rule: "amg-001",
 				target: &armdashboard.ManagedGrafana{
-					Name: to.Ptr("synsp-test"),
+					Name: to.Ptr("amg-test"),
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		}, {
+			name: "ManagedGrafanaScanner Public network enabled",
+			fields: fields{
+				rule: "amg-004",
+				target: &armdashboard.ManagedGrafana{
+					Properties: &armdashboard.ManagedGrafanaProperties{
+						PublicNetworkAccess: to.Ptr(armdashboard.PublicNetworkAccessEnabled),
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		}, {
+			name: "ManagedGrafanaScanner Public network disabled",
+			fields: fields{
+				rule: "amg-004",
+				target: &armdashboard.ManagedGrafana{
+					Properties: &armdashboard.ManagedGrafanaProperties{
+						PublicNetworkAccess: to.Ptr(armdashboard.PublicNetworkAccessDisabled),
+					},
 				},
 				scanContext: &scanners.ScanContext{},
 			},
