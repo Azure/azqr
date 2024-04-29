@@ -88,6 +88,7 @@ To learn more about the recommendations used by **Azure Quick Review (azqr)**, y
 * Azure Kubernetes Service
 * Azure Load Balancer
 * Azure Logic Apps
+* Azure Managed Grafana
 * Azure Service Bus
 * Azure SignalR Service
 * Azure SQL Server
