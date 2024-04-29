@@ -68,10 +68,8 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 		{
 			name: "SynapseWorkspaceScanner SLA",
 			fields: fields{
-				rule: "synw-003",
-				target: &armsynapse.Workspace{
-					Name: to.Ptr("synw-test"),
-				},
+				rule:        "synw-003",
+				target:      &armsynapse.Workspace{},
 				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
