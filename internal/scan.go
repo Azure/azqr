@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Azure/azqr/internal/scanners/vgw"
 	"sync"
 	"time"
 
@@ -61,6 +60,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/st"
 	"github.com/Azure/azqr/internal/scanners/synw"
 	"github.com/Azure/azqr/internal/scanners/traf"
+	"github.com/Azure/azqr/internal/scanners/vgw"
 	"github.com/Azure/azqr/internal/scanners/vm"
 	"github.com/Azure/azqr/internal/scanners/vmss"
 	"github.com/Azure/azqr/internal/scanners/vnet"
