@@ -73,7 +73,7 @@ func (a *ManagedGrafanaScanner) GetRules() map[string]scanners.AzureRule {
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
-				return *c.Properties.ZoneRedundancy) == armdashboard.ZoneRedundancyDisabled, ""
+				return *c.Properties.ZoneRedundancy == armdashboard.ZoneRedundancyDisabled, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/managed-grafana/high-availability",
 		},
