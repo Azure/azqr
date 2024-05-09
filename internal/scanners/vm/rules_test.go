@@ -28,7 +28,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "VirtualMachineScanner Availability Zones",
+			name: "VirtualMachineScanner No Availability Zones",
 			fields: fields{
 				rule:        "vm-002",
 				target:      &armcompute.VirtualMachine{},
@@ -36,6 +36,20 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 			},
 			want: want{
 				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "VirtualMachineScanner Availability Zones",
+			fields: fields{
+				rule:        "vm-002",
+				target:      &armcompute.VirtualMachine{
+					Zones: []*string{to.Ptr("1")},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
 				result: "",
 			},
 		},
