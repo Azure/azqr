@@ -20,7 +20,7 @@ func (a *VirtualMachineScanner) GetRules() map[string]scanners.AzureRule {
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				v := target.(*armcompute.VirtualMachine)
-				hasZones := v.Zones != nil && len(v.Zones) > 1
+				hasZones := v.Zones != nil && len(v.Zones) >= 1
 				return !hasZones, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/virtual-machines/availability#availability-zones",
