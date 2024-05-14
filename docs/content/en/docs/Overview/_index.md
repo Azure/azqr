@@ -101,6 +101,7 @@ To learn more about the recommendations used by **Azure Quick Review (azqr)**, y
 * Azure Synapse Dedicated SQL Pool
 * Azure Traffic Manager
 * Azure Virtual Machine
+* Azure Virtual Machine Scale Set
 * Azure Virtual Network
 * Azure Virtual WAN
 * Azure VPN Gateway
