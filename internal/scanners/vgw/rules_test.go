@@ -96,6 +96,40 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 				result: "99.95%",
 			},
 		},
+		{
+			name: "VirtualNetworkGatewayScanner without AZ",
+			fields: fields{
+				rule: "vgw-005",
+				target: &armnetwork.VirtualNetworkGateway{
+					Properties: &armnetwork.VirtualNetworkGatewayPropertiesFormat{
+						SKU: &armnetwork.VirtualNetworkGatewaySKU{
+							Name: to.Ptr(armnetwork.VirtualNetworkGatewaySKUNameBasic),
+						}},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "VirtualNetworkGatewayScanner with AZ",
+			fields: fields{
+				rule: "vgw-005",
+				target: &armnetwork.VirtualNetworkGateway{
+					Properties: &armnetwork.VirtualNetworkGatewayPropertiesFormat{
+						SKU: &armnetwork.VirtualNetworkGatewaySKU{
+							Name: to.Ptr(armnetwork.VirtualNetworkGatewaySKUNameErGw1AZ),
+						}},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

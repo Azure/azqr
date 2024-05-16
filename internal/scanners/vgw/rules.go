@@ -75,5 +75,17 @@ func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[strin
 			},
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
+		"vgw-005": {
+			Id:             "vgw-005",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "Storage should have availability zones enabled",
+			Impact:         scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				g := target.(*armnetwork.VirtualNetworkGateway)
+				sku := string(*g.Properties.SKU.Name)
+				return !strings.HasSuffix(strings.ToLower(sku), "az"), ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/vpn-gateway/create-zone-redundant-vnet-gateway",
+		},
 	}
 }
