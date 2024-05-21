@@ -38,12 +38,13 @@ func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *scanners
 		rr := engine.EvaluateRules(rules, servicebus, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *servicebus.Name,
-			Type:           *servicebus.Type,
-			Location:       *servicebus.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *servicebus.Name,
+			Type:             *servicebus.Type,
+			Location:         *servicebus.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil

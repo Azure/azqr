@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 	"github.com/Azure/azqr/internal/to"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"gopkg.in/yaml.v3"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -79,6 +81,7 @@ type ScanParams struct {
 	Debug                   bool
 	ServiceScanners         []scanners.IAzureScanner
 	ForceAzureCliCredential bool
+	ExclusionsFile          string
 }
 
 func Scan(params *ScanParams) {
@@ -92,6 +95,7 @@ func Scan(params *ScanParams) {
 	mask := params.Mask
 	debug := params.Debug
 	forceAzureCliCredential := params.ForceAzureCliCredential
+	exclusionsFile := params.ExclusionsFile
 
 	// Default level for this example is info, unless debug flag is present
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
@@ -112,6 +116,19 @@ func Scan(params *ScanParams) {
 			current_time.Hour(), current_time.Minute(), current_time.Second())
 
 		outputFile = fmt.Sprintf("%s_%s", "azqr_report", outputFileStamp)
+	}
+
+	exclusions := scanners.Filters{}
+	if exclusionsFile != "" {
+		data, err := os.ReadFile(exclusionsFile)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("failed reading data from file: %s", exclusionsFile)
+		}
+
+		err = yaml.Unmarshal([]byte(data), &exclusions)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("failed parsing yaml from file: %s", exclusionsFile)
+		}
 	}
 
 	var cred azcore.TokenCredential
@@ -140,16 +157,14 @@ func Scan(params *ScanParams) {
 		},
 	}
 
-	subscriptions := []string{}
-	if subscriptionID != "" {
-		subscriptions = append(subscriptions, subscriptionID)
-	} else {
-		subs, err := listSubscriptions(ctx, cred, clientOptions)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to list subscriptions")
-		}
-		for _, s := range subs {
-			subscriptions = append(subscriptions, *s.SubscriptionID)
+	subscriptions := map[string]string{}
+	subs, err := listSubscriptions(ctx, cred, clientOptions)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to list subscriptions")
+	}
+	for _, s := range subs {
+		if subscriptionID == "" || subscriptionID == *s.SubscriptionID {
+			subscriptions[*s.SubscriptionID] = *s.DisplayName
 		}
 	}
 
@@ -170,7 +185,12 @@ func Scan(params *ScanParams) {
 	advisorScanner := scanners.AdvisorScanner{}
 	costScanner := scanners.CostScanner{}
 
-	for _, s := range subscriptions {
+	for s, sn := range subscriptions {
+		if exclusions.Azqr.Exclude.IsSubscriptionExcluded(s) {
+			log.Info().Msgf("Skipping subscriptions/...%s", s[29:])
+			continue
+		}
+
 		resourceGroups := []string{}
 		if resourceGroupName != "" {
 			exists, err := checkExistenceResourceGroup(ctx, s, resourceGroupName, cred, clientOptions)
@@ -181,6 +201,12 @@ func Scan(params *ScanParams) {
 			if !exists {
 				log.Fatal().Msgf("Resource Group %s does not exist", resourceGroupName)
 			}
+
+			if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", s, resourceGroupName)) {
+				log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", s[29:], resourceGroupName)
+				continue
+			}
+
 			resourceGroups = append(resourceGroups, resourceGroupName)
 		} else {
 			rgs, err := listResourceGroup(ctx, s, cred, clientOptions)
@@ -188,15 +214,20 @@ func Scan(params *ScanParams) {
 				log.Fatal().Err(err).Msg("Failed to list Resource Groups")
 			}
 			for _, rg := range rgs {
+				if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", s, *rg.Name)) {
+					log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", s[29:], *rg.Name)
+					continue
+				}
 				resourceGroups = append(resourceGroups, *rg.Name)
 			}
 		}
 
 		config := &scanners.ScannerConfig{
-			Ctx:            ctx,
-			SubscriptionID: s,
-			Cred:           cred,
-			ClientOptions:  clientOptions,
+			Ctx:              ctx,
+			SubscriptionID:   s,
+			SubscriptionName: sn,
+			Cred:             cred,
+			ClientOptions:    clientOptions,
 		}
 
 		err = peScanner.Init(config)
@@ -239,6 +270,7 @@ func Scan(params *ScanParams) {
 		}
 
 		scanContext := scanners.ScanContext{
+			Exclusions:          exclusions.Azqr.Exclude,
 			PrivateEndpoints:    peResults,
 			DiagnosticsSettings: diagResults,
 			PublicIPs:           pips,
@@ -276,7 +308,12 @@ func Scan(params *ScanParams) {
 
 			for i := 0; i < len(params.ServiceScanners); i++ {
 				res := <-ch
-				ruleResults = append(ruleResults, res...)
+				for _, r := range res {
+					if exclusions.Azqr.Exclude.IsServiceExcluded(r.ResourceID()) {
+						continue
+					}
+					ruleResults = append(ruleResults, r)
+				}
 			}
 		}
 

@@ -38,12 +38,13 @@ func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *scanners.S
 		rr := engine.EvaluateRules(rules, vault, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *vault.Name,
-			Type:           *vault.Type,
-			Location:       *vault.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *vault.Name,
+			Type:             *vault.Type,
+			Location:         *vault.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil

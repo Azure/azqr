@@ -38,12 +38,13 @@ func (c *RedisScanner) Scan(resourceGroupName string, scanContext *scanners.Scan
 		rr := engine.EvaluateRules(rules, redis, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *redis.Name,
-			Type:           *redis.Type,
-			Location:       *redis.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *redis.Name,
+			Type:             *redis.Type,
+			Location:         *redis.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil

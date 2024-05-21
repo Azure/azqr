@@ -54,12 +54,13 @@ func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *sc
 		rr := engine.EvaluateRules(rules, w, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: a.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			Location:       *w.Location,
-			Type:           *w.Type,
-			ServiceName:    *w.Name,
-			Rules:          rr,
+			SubscriptionID:   a.config.SubscriptionID,
+			SubscriptionName: a.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			Location:         *w.Location,
+			Type:             *w.Type,
+			ServiceName:      *w.Name,
+			Rules:            rr,
 		})
 
 		sqlPools, err := a.listSqlPools(resourceGroupName, *w.Name)
@@ -72,12 +73,13 @@ func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *sc
 			rr := engine.EvaluateRules(sqlPoolRules, s, scanContext)
 
 			result = scanners.AzureServiceResult{
-				SubscriptionID: a.config.SubscriptionID,
-				ResourceGroup:  resourceGroupName,
-				ServiceName:    *s.Name,
-				Type:           *s.Type,
-				Location:       *w.Location,
-				Rules:          rr,
+				SubscriptionID:   a.config.SubscriptionID,
+				SubscriptionName: a.config.SubscriptionName,
+				ResourceGroup:    resourceGroupName,
+				ServiceName:      *s.Name,
+				Type:             *s.Type,
+				Location:         *w.Location,
+				Rules:            rr,
 			}
 			results = append(results, result)
 		}
@@ -92,12 +94,13 @@ func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *sc
 			rr := engine.EvaluateRules(sparkPoolRules, s, scanContext)
 
 			result = scanners.AzureServiceResult{
-				SubscriptionID: a.config.SubscriptionID,
-				ResourceGroup:  resourceGroupName,
-				ServiceName:    *s.Name,
-				Type:           *s.Type,
-				Location:       *w.Location,
-				Rules:          rr,
+				SubscriptionID:   a.config.SubscriptionID,
+				SubscriptionName: a.config.SubscriptionName,
+				ResourceGroup:    resourceGroupName,
+				ServiceName:      *s.Name,
+				Type:             *s.Type,
+				Location:         *w.Location,
+				Rules:            rr,
 			}
 			results = append(results, result)
 		}

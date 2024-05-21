@@ -39,6 +39,7 @@ func (c *CosmosDBScanner) Scan(resourceGroupName string, scanContext *scanners.S
 
 		results = append(results, scanners.AzureServiceResult{
 			SubscriptionID: c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:  resourceGroupName,
 			ServiceName:    *database.Name,
 			Type:           *database.Type,

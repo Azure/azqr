@@ -19,7 +19,7 @@ type ReportData struct {
 }
 
 func (rd *ReportData) ServicesTable() [][]string {
-	headers := []string{"Subscription", "Resource Group", "Location", "Type", "Service Name", "Compliant", "Impact", "Category", "Recommendation", "Result", "Learn"}
+	headers := []string{"Subscription", "Subscription Name", "Resource Group", "Location", "Type", "Service Name", "Compliant", "Impact", "Category", "Recommendation", "Result", "Learn", "RId"}
 
 	rbroken := [][]string{}
 	rok := [][]string{}
@@ -27,6 +27,7 @@ func (rd *ReportData) ServicesTable() [][]string {
 		for _, r := range d.Rules {
 			row := []string{
 				scanners.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+				d.SubscriptionName,
 				d.ResourceGroup,
 				scanners.ParseLocation(d.Location),
 				d.Type,
@@ -37,6 +38,7 @@ func (rd *ReportData) ServicesTable() [][]string {
 				r.Recommendation,
 				r.Result,
 				r.Learn,
+				r.Id,
 			}
 			if r.NotCompliant {
 				rbroken = append([][]string{row}, rbroken...)
@@ -52,7 +54,7 @@ func (rd *ReportData) ServicesTable() [][]string {
 }
 
 func (rd *ReportData) CostTable() [][]string {
-	headers := []string{"From", "To", "Subscription", "ServiceName", "Value", "Currency"}
+	headers := []string{"From", "To", "Subscription", "Subscription Name", "ServiceName", "Value", "Currency"}
 
 	rows := [][]string{}
 	for _, r := range rd.CostData.Items {
@@ -60,6 +62,7 @@ func (rd *ReportData) CostTable() [][]string {
 			rd.CostData.From.Format("2006-01-02"),
 			rd.CostData.To.Format("2006-01-02"),
 			scanners.MaskSubscriptionID(r.SubscriptionID, rd.Mask),
+			r.SubscriptionName,
 			r.ServiceName,
 			r.Value,
 			r.Currency,
@@ -72,11 +75,12 @@ func (rd *ReportData) CostTable() [][]string {
 }
 
 func (rd *ReportData) DefenderTable() [][]string {
-	headers := []string{"Subscription", "Name", "Tier", "Deprecated"}
+	headers := []string{"Subscription", "Subscription Name", "Name", "Tier", "Deprecated"}
 	rows := [][]string{}
 	for _, d := range rd.DefenderData {
 		row := []string{
 			scanners.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			d.SubscriptionName,
 			d.Name,
 			d.Tier,
 			fmt.Sprintf("%t", d.Deprecated),
@@ -89,11 +93,12 @@ func (rd *ReportData) DefenderTable() [][]string {
 }
 
 func (rd *ReportData) AdvisorTable() [][]string {
-	headers := []string{"Subscription", "Name", "Type", "Category", "Description", "PotentialBenefits", "Risk", "LearnMoreLink"}
+	headers := []string{"Subscription", "Subscription Name", "Name", "Type", "Category", "Description", "PotentialBenefits", "Risk", "LearnMoreLink"}
 	rows := [][]string{}
 	for _, d := range rd.AdvisorData {
 		row := []string{
 			scanners.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			d.SubscriptionName,
 			d.Name,
 			d.Type,
 			d.Category,

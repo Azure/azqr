@@ -38,12 +38,13 @@ func (c *DatabricksScanner) Scan(resourceGroupName string, scanContext *scanners
 		rr := engine.EvaluateRules(rules, ws, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *ws.Name,
-			Type:           *ws.Type,
-			Location:       *ws.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *ws.Name,
+			Type:             *ws.Type,
+			Location:         *ws.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil

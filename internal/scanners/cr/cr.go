@@ -39,6 +39,7 @@ func (c *ContainerRegistryScanner) Scan(resourceGroupName string, scanContext *s
 
 		results = append(results, scanners.AzureServiceResult{
 			SubscriptionID: c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:  resourceGroupName,
 			ServiceName:    *registry.Name,
 			Type:           *registry.Type,

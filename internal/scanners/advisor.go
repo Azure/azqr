@@ -9,7 +9,7 @@ import (
 
 // AdvisorResult - Advisor result
 type AdvisorResult struct {
-	SubscriptionID, Name, Type, Category, Description, PotentialBenefits, Risk, LearnMoreLink string
+	SubscriptionID, SubscriptionName, Name, Type, Category, Description, PotentialBenefits, Risk, LearnMoreLink string
 }
 
 // AdvisorScanner - Advisor scanner
@@ -47,7 +47,8 @@ func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
 	returnRecommendations := make([]AdvisorResult, 0)
 	for _, recommendation := range recommendations {
 		ar := AdvisorResult{
-			SubscriptionID: s.config.SubscriptionID,
+			SubscriptionID:   s.config.SubscriptionID,
+			SubscriptionName: s.config.SubscriptionName,
 		}
 		if recommendation.Properties.ImpactedValue != nil {
 			ar.Name = *recommendation.Properties.ImpactedValue

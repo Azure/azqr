@@ -38,12 +38,13 @@ func (c *CognitiveScanner) Scan(resourceGroupName string, scanContext *scanners.
 		rr := engine.EvaluateRules(rules, eventHub, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *eventHub.Name,
-			Type:           *eventHub.Type,
-			Location:       *eventHub.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *eventHub.Name,
+			Type:             *eventHub.Type,
+			Location:         *eventHub.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil

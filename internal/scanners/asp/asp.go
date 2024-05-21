@@ -51,15 +51,16 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 		rr := engine.EvaluateRules(rules, p, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: a.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *p.Name,
-			Type:           *p.Type,
-			Location:       *p.Location,
-			Rules:          rr,
+			SubscriptionID:   a.config.SubscriptionID,
+			SubscriptionName: a.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *p.Name,
+			Type:             *p.Type,
+			Location:         *p.Location,
+			Rules:            rr,
 		})
 
-		sites, err := a.listSites(resourceGroupName, *p.Name)   
+		sites, err := a.listSites(resourceGroupName, *p.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +69,7 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 			config, err := a.sitesClient.GetConfiguration(a.config.Ctx, resourceGroupName, *s.Name, nil)
 			if err != nil {
 				return nil, err
-			}                                                     
+			}
 			scanContext.SiteConfig = &config
 
 			var result scanners.AzureServiceResult
@@ -79,33 +80,36 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 				rr := engine.EvaluateRules(functionRules, s, scanContext)
 
 				result = scanners.AzureServiceResult{
-					SubscriptionID: a.config.SubscriptionID,
-					ResourceGroup:  resourceGroupName,
-					ServiceName:    *s.Name,
-					Type:           *s.Type,
-					Location:       *p.Location,
-					Rules:          rr,
+					SubscriptionID:   a.config.SubscriptionID,
+					SubscriptionName: a.config.SubscriptionName,
+					ResourceGroup:    resourceGroupName,
+					ServiceName:      *s.Name,
+					Type:             *s.Type,
+					Location:         *p.Location,
+					Rules:            rr,
 				}
 			case "functionapp,workflowapp":
 				rr := engine.EvaluateRules(logicRules, s, scanContext)
 
 				result = scanners.AzureServiceResult{
-					SubscriptionID: a.config.SubscriptionID,
-					ResourceGroup:  resourceGroupName,
-					ServiceName:    *s.Name,
-					Type:           *s.Type,
-					Location:       *p.Location,
-					Rules:          rr,
+					SubscriptionID:   a.config.SubscriptionID,
+					SubscriptionName: a.config.SubscriptionName,
+					ResourceGroup:    resourceGroupName,
+					ServiceName:      *s.Name,
+					Type:             *s.Type,
+					Location:         *p.Location,
+					Rules:            rr,
 				}
 			default:
 				rr := engine.EvaluateRules(appRules, s, scanContext)
 				result = scanners.AzureServiceResult{
-					SubscriptionID: a.config.SubscriptionID,
-					ResourceGroup:  resourceGroupName,
-					ServiceName:    *s.Name,
-					Type:           *s.Type,
-					Location:       *p.Location,
-					Rules:          rr,
+					SubscriptionID:   a.config.SubscriptionID,
+					SubscriptionName: a.config.SubscriptionName,
+					ResourceGroup:    resourceGroupName,
+					ServiceName:      *s.Name,
+					Type:             *s.Type,
+					Location:         *p.Location,
+					Rules:            rr,
 				}
 			}
 

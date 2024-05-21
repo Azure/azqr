@@ -38,12 +38,13 @@ func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *scann
 		rr := engine.EvaluateRules(rules, postgre, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *postgre.Name,
-			Type:           *postgre.Type,
-			Location:       *postgre.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			ResourceGroup:    resourceGroupName,
+			SubscriptionName: c.config.SubscriptionName,
+			ServiceName:      *postgre.Name,
+			Type:             *postgre.Type,
+			Location:         *postgre.Location,
+			Rules:            rr,
 		})
 	}
 

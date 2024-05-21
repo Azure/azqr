@@ -14,7 +14,7 @@ import (
 
 // DefenderResult - Defender result
 type DefenderResult struct {
-	SubscriptionID, Name, Tier string
+	SubscriptionID, SubscriptionName, Name, Tier string
 	Deprecated                 bool
 }
 
@@ -57,10 +57,11 @@ func (s *DefenderScanner) ListConfiguration() ([]DefenderResult, error) {
 				deprecated = *v.Properties.Deprecated
 			}
 			result := DefenderResult{
-				SubscriptionID: s.config.SubscriptionID,
-				Name:           *v.Name,
-				Tier:           string(*v.Properties.PricingTier),
-				Deprecated:     deprecated,
+				SubscriptionID:   s.config.SubscriptionID,
+				SubscriptionName: s.config.SubscriptionName,
+				Name:             *v.Name,
+				Tier:             string(*v.Properties.PricingTier),
+				Deprecated:       deprecated,
 			}
 
 			results = append(results, result)

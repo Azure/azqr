@@ -49,12 +49,13 @@ func (c *StorageScanner) Scan(resourceGroupName string, scanContext *scanners.Sc
 		rr := engine.EvaluateRules(rules, storage, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *storage.Name,
-			Type:           *storage.Type,
-			Location:       *storage.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *storage.Name,
+			Type:             *storage.Type,
+			Location:         *storage.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil
