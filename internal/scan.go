@@ -118,7 +118,16 @@ func Scan(params *ScanParams) {
 		outputFile = fmt.Sprintf("%s_%s", "azqr_report", outputFileStamp)
 	}
 
-	exclusions := scanners.Filters{}
+	exclusions := scanners.Filters{
+		Azqr: &scanners.AzqrFilter{
+			Exclude: &scanners.Exclude{
+				Subscriptions:  []string{},
+				ResourceGroups: []string{},
+				Services:       []string{},
+			},
+		},
+	}
+
 	if exclusionsFile != "" {
 		data, err := os.ReadFile(exclusionsFile)
 		if err != nil {

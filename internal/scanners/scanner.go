@@ -18,9 +18,11 @@ import (
 
 type (
 	Filters struct {
-		Azqr struct {
-			Exclude *Exclude `yaml:"exclude"`
-		} `yaml:"azqr"`
+		Azqr *AzqrFilter `yaml:"azqr"`
+	}
+
+	AzqrFilter struct {
+		Exclude *Exclude `yaml:"exclude"`
 	}
 
 	// Exclude - Struct for Exclude
