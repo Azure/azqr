@@ -38,12 +38,13 @@ func (c *VirtualNetworkScanner) Scan(resourceGroupName string, scanContext *scan
 		rr := engine.EvaluateRules(rules, w, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *w.Name,
-			Type:           *w.Type,
-			Location:       *w.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *w.Name,
+			Type:             *w.Type,
+			Location:         *w.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil

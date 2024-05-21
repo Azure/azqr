@@ -45,3 +45,28 @@ For information on available commands and help run:
 ```bash
 ./azqr -h
 ```
+
+## Excluding Recommendations and more
+
+To prevent Azure Quick Review from scanning specific subscriptions, resource groups, services or recommendations, create a `yaml` file with the following format: 
+
+```yaml
+azqr:
+  exclude:
+    subscriptions:
+      - <subscription_id> # format: <subscription_id>
+    resourceGroups:
+      - <resource_group_resource_id> # format: /subscriptions/<subscription_id>/resourceGroups/<resource_group_name>
+    services:
+      - <service_resource_id> # format: /subscriptions/<subscription_id>/resourceGroups/<resource_group_name>/providers/<service_provider>/<service_name>
+    recommendations:
+      - <recommendation_id> # format: <recommendation_id>
+```
+
+Then run the scan with the `--exclude` flag:
+
+```bash
+./azqr scan --exclude <path_to_yaml_file>
+```
+
+> Check the [rules](https://azure.github.io/azqr/docs/recommendations/) to get the recommendation ids.

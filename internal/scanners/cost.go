@@ -18,7 +18,7 @@ type CostResult struct {
 
 // CostResultItem - Cost result ite,
 type CostResultItem struct {
-	SubscriptionID, ServiceName, Value, Currency string
+	SubscriptionID, SubscriptionName, ServiceName, Value, Currency string
 }
 
 // CostScanner - Cost scanner
@@ -84,10 +84,11 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 
 	for _, v := range resp.Properties.Rows {
 		result.Items = append(result.Items, &CostResultItem{
-			SubscriptionID: s.config.SubscriptionID,
-			ServiceName:    fmt.Sprintf("%v", v[1]),
-			Value:          fmt.Sprintf("%v", v[0]),
-			Currency:       fmt.Sprintf("%v", v[2]),
+			SubscriptionID:   s.config.SubscriptionID,
+			SubscriptionName: s.config.SubscriptionName,
+			ServiceName:      fmt.Sprintf("%v", v[1]),
+			Value:            fmt.Sprintf("%v", v[0]),
+			Currency:         fmt.Sprintf("%v", v[2]),
 		})
 	}
 	return &result, nil

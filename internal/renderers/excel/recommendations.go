@@ -20,7 +20,7 @@ func renderRecommendations(f *excelize.File, data *renderers.ReportData) {
 
 		renderedRules := map[string]bool{}
 
-		headers := []string{"Category", "Impact", "Recommendation", "Learn"}
+		headers := []string{"Category", "Impact", "Recommendation", "Learn", "RId"}
 		rows := [][]string{}
 		for _, result := range data.MainData {
 			for _, rr := range result.Rules {
@@ -31,6 +31,7 @@ func renderRecommendations(f *excelize.File, data *renderers.ReportData) {
 						"Impact":         string(rr.Impact),
 						"Recommendation": rr.Recommendation,
 						"Learn":          rr.Learn,
+						"RId":            rr.Id,
 					}
 					renderedRules[rr.Id] = true
 					rows = append(rows, mapToRow(headers, rulesToRender)...)

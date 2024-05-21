@@ -38,12 +38,13 @@ func (c *SignalRScanner) Scan(resourceGroupName string, scanContext *scanners.Sc
 		rr := engine.EvaluateRules(rules, signalr, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *signalr.Name,
-			Type:           *signalr.Type,
-			Location:       *signalr.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *signalr.Name,
+			Type:             *signalr.Type,
+			Location:         *signalr.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil

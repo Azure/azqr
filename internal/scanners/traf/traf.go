@@ -39,6 +39,7 @@ func (c *TrafficManagerScanner) Scan(resourceGroupName string, scanContext *scan
 
 		results = append(results, scanners.AzureServiceResult{
 			SubscriptionID: c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:  resourceGroupName,
 			ServiceName:    *w.Name,
 			Type:           *w.Type,

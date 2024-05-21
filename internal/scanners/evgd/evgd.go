@@ -38,12 +38,13 @@ func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *scanners.
 		rr := engine.EvaluateRules(rules, d, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: a.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *d.Name,
-			Type:           *d.Type,
-			Location:       *d.Location,
-			Rules:          rr,
+			SubscriptionID:   a.config.SubscriptionID,
+			SubscriptionName: a.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *d.Name,
+			Type:             *d.Type,
+			Location:         *d.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil

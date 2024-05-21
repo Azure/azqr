@@ -39,12 +39,13 @@ func (a *AKSScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 		rr := engine.EvaluateRules(rules, c, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: a.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			Location:       *c.Location,
-			Type:           *c.Type,
-			ServiceName:    *c.Name,
-			Rules:          rr,
+			SubscriptionID:   a.config.SubscriptionID,
+			SubscriptionName: a.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			Location:         *c.Location,
+			Type:             *c.Type,
+			ServiceName:      *c.Name,
+			Rules:            rr,
 		})
 	}
 

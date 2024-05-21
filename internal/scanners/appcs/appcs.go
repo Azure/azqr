@@ -39,6 +39,7 @@ func (a *AppConfigurationScanner) Scan(resourceGroupName string, scanContext *sc
 
 		results = append(results, scanners.AzureServiceResult{
 			SubscriptionID: a.config.SubscriptionID,
+			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:  resourceGroupName,
 			ServiceName:    *app.Name,
 			Type:           *app.Type,

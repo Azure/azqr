@@ -38,12 +38,13 @@ func (a *AppInsightsScanner) Scan(resourceGroupName string, scanContext *scanner
 		rr := engine.EvaluateRules(rules, g, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: a.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			Location:       *g.Location,
-			Type:           *g.Type,
-			ServiceName:    *g.Name,
-			Rules:          rr,
+			SubscriptionID:   a.config.SubscriptionID,
+			SubscriptionName: a.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			Location:         *g.Location,
+			Type:             *g.Type,
+			ServiceName:      *g.Name,
+			Rules:            rr,
 		})
 	}
 	return results, nil

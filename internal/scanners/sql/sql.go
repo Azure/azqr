@@ -71,12 +71,13 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 			rr := engine.EvaluateRules(poolRules, pool, scanContext)
 
 			results = append(results, scanners.AzureServiceResult{
-				SubscriptionID: c.config.SubscriptionID,
-				ResourceGroup:  resourceGroupName,
-				ServiceName:    *pool.Name,
-				Type:           *pool.Type,
-				Location:       *pool.Location,
-				Rules:          rr,
+				SubscriptionID:   c.config.SubscriptionID,
+				SubscriptionName: c.config.SubscriptionName,
+				ResourceGroup:    resourceGroupName,
+				ServiceName:      *pool.Name,
+				Type:             *pool.Type,
+				Location:         *pool.Location,
+				Rules:            rr,
 			})
 		}
 
@@ -92,12 +93,13 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 			rr := engine.EvaluateRules(databaseRules, database, scanContext)
 
 			results = append(results, scanners.AzureServiceResult{
-				SubscriptionID: c.config.SubscriptionID,
-				ResourceGroup:  resourceGroupName,
-				ServiceName:    *database.Name,
-				Type:           *database.Type,
-				Location:       *database.Location,
-				Rules:          rr,
+				SubscriptionID:   c.config.SubscriptionID,
+				SubscriptionName: c.config.SubscriptionName,
+				ResourceGroup:    resourceGroupName,
+				ServiceName:      *database.Name,
+				Type:             *database.Type,
+				Location:         *database.Location,
+				Rules:            rr,
 			})
 		}
 	}

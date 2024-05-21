@@ -47,12 +47,13 @@ func (c *MariaScanner) Scan(resourceGroupName string, scanContext *scanners.Scan
 		rr := engine.EvaluateRules(rules, server, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *server.Name,
-			Type:           *server.Type,
-			Location:       *server.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *server.Name,
+			Type:             *server.Type,
+			Location:         *server.Location,
+			Rules:            rr,
 		})
 
 		databases, err := c.listDatabases(resourceGroupName, *server.Name)

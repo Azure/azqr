@@ -38,12 +38,13 @@ func (c *PostgreScanner) Scan(resourceGroupName string, scanContext *scanners.Sc
 		rr := engine.EvaluateRules(rules, postgre, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *postgre.Name,
-			Type:           *postgre.Type,
-			Location:       *postgre.Location,
-			Rules:          rr,
+			SubscriptionID:   c.config.SubscriptionID,
+			SubscriptionName: c.config.SubscriptionName,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *postgre.Name,
+			Type:             *postgre.Type,
+			Location:         *postgre.Location,
+			Rules:            rr,
 		})
 	}
 

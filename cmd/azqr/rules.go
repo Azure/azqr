@@ -24,8 +24,8 @@ var rulesCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := internal.GetScanners()
 
-		fmt.Println("#  | Category | Impact | Recommendation | More Info")
-		fmt.Println("---|---|---|---|---")
+		fmt.Println("#  | Id | Category | Impact | Recommendation | More Info")
+		fmt.Println("---|---|---|---|---|---")
 
 		i := 0
 		for _, scanner := range serviceScanners {
@@ -45,7 +45,7 @@ var rulesCmd = &cobra.Command{
 			for _, k := range keys {
 				rule := rules[k]
 				i++
-				fmt.Printf("%s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), rule.Category, rule.Impact, rule.Recommendation, rule.Url)
+				fmt.Printf("%s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), rule.Id, rule.Category, rule.Impact, rule.Recommendation, rule.Url)
 				fmt.Println()
 			}
 		}

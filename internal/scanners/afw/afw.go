@@ -39,6 +39,7 @@ func (a *FirewallScanner) Scan(resourceGroupName string, scanContext *scanners.S
 
 		results = append(results, scanners.AzureServiceResult{
 			SubscriptionID: a.config.SubscriptionID,
+			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:  resourceGroupName,
 			Location:       *g.Location,
 			Type:           *g.Type,

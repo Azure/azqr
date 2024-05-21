@@ -17,16 +17,36 @@ import (
 )
 
 type (
+	Filters struct {
+		Azqr struct {
+			Exclude *Exclude `yaml:"exclude"`
+		} `yaml:"azqr"`
+	}
+
+	// Exclude - Struct for Exclude
+	Exclude struct {
+		Subscriptions   []string `yaml:"subscriptions,flow"`
+		ResourceGroups  []string `yaml:"resourceGroups,flow"`
+		Services        []string `yaml:"services,flow"`
+		Recommendations []string `yaml:"recommendations,flow"`
+		subscriptions   map[string]bool
+		resourceGroups  map[string]bool
+		services        map[string]bool
+		recommendations map[string]bool
+	}
+
 	// ScannerConfig - Struct for Scanner Config
 	ScannerConfig struct {
-		Ctx            context.Context
-		Cred           azcore.TokenCredential
-		SubscriptionID string
-		ClientOptions  *arm.ClientOptions
+		Ctx              context.Context
+		Cred             azcore.TokenCredential
+		ClientOptions    *arm.ClientOptions
+		SubscriptionID   string
+		SubscriptionName string
 	}
 
 	// ScanContext - Struct for Scanner Context
 	ScanContext struct {
+		Exclusions            *Exclude
 		PrivateEndpoints      map[string]bool
 		DiagnosticsSettings   map[string]bool
 		PublicIPs             map[string]*armnetwork.PublicIPAddress
@@ -43,12 +63,13 @@ type (
 
 	// AzureServiceResult - Struct for all Azure Service Results
 	AzureServiceResult struct {
-		SubscriptionID string
-		ResourceGroup  string
-		Location       string
-		Type           string
-		ServiceName    string
-		Rules          map[string]AzureRuleResult
+		SubscriptionID   string
+		SubscriptionName string
+		ResourceGroup    string
+		Location         string
+		Type             string
+		ServiceName      string
+		Rules            map[string]AzureRuleResult
 	}
 
 	AzureRule struct {
@@ -73,6 +94,62 @@ type (
 	RuleEngine struct{}
 )
 
+func (r *AzureServiceResult) ResourceID() string {
+	return strings.ToLower(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/%s/%s", r.SubscriptionID, r.ResourceGroup, r.Type, r.ServiceName))
+}
+
+func (e *Exclude) IsSubscriptionExcluded(subscriptionID string) bool {
+	if e.subscriptions == nil {
+		e.subscriptions = make(map[string]bool)
+		for _, id := range e.Subscriptions {
+			e.subscriptions[strings.ToLower(id)] = true
+		}
+	}
+
+	_, ok := e.subscriptions[strings.ToLower(subscriptionID)]
+
+	return ok
+}
+
+func (e *Exclude) IsResourceGroupExcluded(resourceGroupID string) bool {
+	if e.resourceGroups == nil {
+		e.resourceGroups = make(map[string]bool)
+		for _, id := range e.ResourceGroups {
+			e.resourceGroups[strings.ToLower(id)] = true
+		}
+	}
+
+	_, ok := e.resourceGroups[strings.ToLower(resourceGroupID)]
+
+	return ok
+}
+
+func (e *Exclude) IsServiceExcluded(serviceID string) bool {
+	if e.services == nil {
+		e.services = make(map[string]bool)
+		for _, id := range e.Services {
+			e.services[strings.ToLower(id)] = true
+		}
+	}
+
+	_, ok := e.services[strings.ToLower(serviceID)]
+
+	return ok
+}
+
+func (e *Exclude) IsRecommendationExcluded(recommendationID string) bool {
+	if e.recommendations == nil {
+		e.recommendations = make(map[string]bool)
+		for _, id := range e.Recommendations {
+			e.recommendations[strings.ToLower(id)] = true
+		}
+	}
+
+	_, ok := e.recommendations[strings.ToLower(recommendationID)]
+
+	return ok
+}
+
 func (e *RuleEngine) EvaluateRule(rule AzureRule, target interface{}, scanContext *ScanContext) AzureRuleResult {
 	broken, result := rule.Eval(target, scanContext)
 
@@ -91,6 +168,9 @@ func (e *RuleEngine) EvaluateRules(rules map[string]AzureRule, target interface{
 	results := map[string]AzureRuleResult{}
 
 	for k, rule := range rules {
+		if scanContext.Exclusions.IsRecommendationExcluded(rule.Id) {
+			continue
+		}
 		results[k] = e.EvaluateRule(rule, target, scanContext)
 	}
 

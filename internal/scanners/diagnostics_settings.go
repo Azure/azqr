@@ -11,7 +11,6 @@ import (
 	"sync"
 
 	"github.com/Azure/azqr/internal/graph"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
@@ -43,7 +42,7 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 	res := map[string]bool{}
 
 	LogSubscriptionScan(d.config.SubscriptionID, "Resource Ids")
-	
+
 	result := d.graphQuery.Query(d.config.Ctx, "resources | project id | order by id asc", []*string{&d.config.SubscriptionID})
 
 	if result == nil || result.Data == nil {
@@ -68,7 +67,7 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 	}()
 
 	LogSubscriptionScan(d.config.SubscriptionID, "Diagnostic Settings")
-	
+
 	// Split resources into batches of 20 items.
 	batch := 20
 	for i := 0; i < len(resources); i += batch {
@@ -78,7 +77,7 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 		}
 		go func(r []string) {
 			defer wg.Done()
-			resp, err := d.restCall(d.config.Ctx, r, d.config.Cred, d.config.ClientOptions)
+			resp, err := d.restCall(d.config.Ctx, r)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to get diagnostic settings")
 			}
@@ -107,7 +106,7 @@ const (
 	moduleVersion = "v1.1.1"
 )
 
-func (d *DiagnosticSettingsScanner) restCall(ctx context.Context, resourceIds []string, credential azcore.TokenCredential, options *arm.ClientOptions) (*ArmBatchResponse, error) {
+func (d *DiagnosticSettingsScanner) restCall(ctx context.Context, resourceIds []string) (*ArmBatchResponse, error) {
 	req, err := runtime.NewRequest(ctx, http.MethodPost, runtime.JoinPaths(d.client.Endpoint(), "batch"))
 	if err != nil {
 		return nil, err
