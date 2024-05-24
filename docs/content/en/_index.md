@@ -22,7 +22,7 @@ title: Azure Quick Review
 
 {{% blocks/section color="dark" type="row" %}}
 
-{{% blocks/feature icon="fa-solid fa-file-lines" title="Read the Docs!" url="https://azure.github.io/azqr/" %}}
+{{% blocks/feature icon="fa-solid fa-file-lines" title="Read the Docs!" url="https://azure.github.io/azqr/docs" %}}
 Learn how to use Azure Quick Review (azqr)
 {{% /blocks/feature %}}
 
