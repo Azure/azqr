@@ -214,4 +214,5 @@ const (
 	RulesCategoryDisasterRecovery      RulesCategory = "Disaster Recovery"
 	RulesCategorySecurity              RulesCategory = "Security"
 	RulesCategoryGovernance            RulesCategory = "Governance"
+	RulesCategoryOtherBestPractices    RulesCategory = "Other Best Practices"
 )

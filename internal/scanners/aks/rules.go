@@ -169,12 +169,13 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 		"aks-011": {
 			Id:             "aks-011",
 			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "AKS should have Container Insights enabled",
+			Recommendation: "AKS should have Monitoring enabled",
 			Impact:         scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
-				p, exists := c.Properties.AddonProfiles["omsagent"]
-				broken := !exists || !*p.Enabled
+				m := c.Properties.AzureMonitorProfile != nil && c.Properties.AzureMonitorProfile.Metrics != nil && c.Properties.AzureMonitorProfile.Metrics.Enabled != nil && *c.Properties.AzureMonitorProfile.Metrics.Enabled
+				i, exists := c.Properties.AddonProfiles["omsagent"]
+				broken := !exists || !*i.Enabled || !m
 				return broken, ""
 			},
 			Url: "https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview",
@@ -251,6 +252,72 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				return defaultMaxSurge, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-at-scale#cluster-upgrade-considerations-and-best-practices",
+		},
+		"aks-017": {
+			Id:             "aks-017",
+			Category:       scanners.RulesCategoryOtherBestPractices,
+			Recommendation: "AKS: Enable GitOps when using DevOps frameworks",
+			Impact:         scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				g, exists := c.Properties.AddonProfiles["gitops"]
+				broken := !exists || !*g.Enabled
+				return broken, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/architecture/guide/aks/aks-cicd-github-actions-and-gitops",
+		},
+		"aks-018": {
+			Id:             "aks-018",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "AKS: Configure system nodepool count",
+			Impact:         scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				for _, profile := range c.Properties.AgentPoolProfiles {
+					if profile.Mode != nil && *profile.Mode == armcontainerservice.AgentPoolModeSystem && (profile.MinCount == nil || *profile.MinCount < 2) {
+						return true, ""
+					}
+				}
+				return false, ""
+			},
+			Url: "https://learn.microsoft.com/azure/aks/use-system-pools?tabs=azure-cli",
+		},
+		"aks-019": {
+			Id:             "aks-019",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "AKS: Configure user nodepool count",
+			Impact:         scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				for _, profile := range c.Properties.AgentPoolProfiles {
+					if profile.Mode != nil && *profile.Mode == armcontainerservice.AgentPoolModeUser && (profile.MinCount == nil || *profile.MinCount < 2) {
+						return true, ""
+					}
+				}
+				return false, ""
+			},
+			Url: "https://learn.microsoft.com/azure/well-architected/service-guides/azure-kubernetes-service#design-checklist",
+		},
+		"aks-020": {
+			Id:             "aks-020",
+			Category:       scanners.RulesCategoryHighAvailability,
+			Recommendation: "AKS: system node pool should have taint: CriticalAddonsOnly=true:NoSchedule",
+			Impact:         scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+				c := target.(*armcontainerservice.ManagedCluster)
+				for _, profile := range c.Properties.AgentPoolProfiles {
+					if profile.Mode != nil && *profile.Mode == armcontainerservice.AgentPoolModeSystem {
+						for _, taint := range profile.NodeTaints {
+							if strings.Contains(*taint, "CriticalAddonsOnly=true:NoSchedule") {
+								return false, ""
+							}
+						}
+						break
+					}
+				}
+				return true, ""
+			},
+			Url: "https://learn.microsoft.com/en-us/azure/aks/use-system-pools?tabs=azure-cli#system-and-user-node-pools",
 		},
 	}
 }
