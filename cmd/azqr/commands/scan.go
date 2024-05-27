@@ -21,6 +21,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("json", "", false, "Create JSON report files")
 	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create CSV report files")
 	scanCmd.PersistentFlags().BoolP("stdout", "", false, "Create CSV report files")
+	scanCmd.PersistentFlags().BoolP("word", "w", false, "Create word report")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default)")
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
@@ -51,6 +52,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	cost, _ := cmd.Flags().GetBool("costs")
 	xlsx, _ := cmd.Flags().GetBool("xslx")
 	csv, _ := cmd.Flags().GetBool("csv")
+	word, _ := cmd.Flags().GetBool("word")
 	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
@@ -74,6 +76,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		Json:                   json,
 		Mask:                   mask,
 		Stdout:                 stdout,
+		Word:                   word,
 		Debug:                  debug,
 		ScannerKeys:            scannerKeys,
 		Filters:                filters,

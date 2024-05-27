@@ -15,6 +15,7 @@ import (
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
+	"github.com/Azure/azqr/internal/renderers/word"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/throttling"
 	"github.com/rs/zerolog"
@@ -110,6 +111,7 @@ type (
 		Csv                    bool
 		Json                   bool
 		Stdout                 bool
+		Word                   bool
 		Debug                  bool
 		ScannerKeys            []string
 		Filters                *models.Filters
@@ -137,6 +139,7 @@ func NewScanParams() *ScanParams {
 		Mask:                   true,
 		Csv:                    false,
 		Json:                   false,
+		Word:                   false,
 		Debug:                  false,
 		ScannerKeys:            []string{},
 		Filters:                models.NewFilters(),
@@ -380,6 +383,11 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	if params.Xlsx {
 		// render excel report
 		excel.CreateExcelReport(&reportData)
+	}
+
+	// render word report
+	if params.Word {
+		word.CreateWordReport(&reportData)
 	}
 
 	// render json report
