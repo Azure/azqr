@@ -20,6 +20,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("xslx", "", true, "Create Excel report (default)")
 	scanCmd.PersistentFlags().BoolP("json", "", false, "Create JSON report files")
 	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create CSV report files")
+	scanCmd.PersistentFlags().BoolP("word", "w", false, "Create word report")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default)")
 	scanCmd.PersistentFlags().BoolP("azure-cli-credential", "f", false, "Force the use of Azure CLI Credential")
@@ -51,6 +52,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	cost, _ := cmd.Flags().GetBool("costs")
 	xlsx, _ := cmd.Flags().GetBool("xslx")
 	csv, _ := cmd.Flags().GetBool("csv")
+	word, _ := cmd.Flags().GetBool("word")
 	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
@@ -72,6 +74,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		Cost:                    cost,
 		Csv:                     csv,
 		Json:                    json,
+		Word:                    word,
 		Mask:                    mask,
 		Debug:                   debug,
 		ScannerKeys:             scannerKeys,
