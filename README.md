@@ -119,7 +119,7 @@ To learn more about the recommendations used by **Azure Quick Review (azqr)**, y
 
 ## Usage
 
-### Install on Linux or Azure Cloud Shell
+### Install on Linux or Azure Cloud Shell (Bash)
 
 ```bash
 latest_azqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-)
