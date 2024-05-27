@@ -327,11 +327,16 @@ func TestAKSScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AKSScanner omsAgent enabled",
+			name: "AKSScanner Monitoring enabled",
 			fields: fields{
 				rule: "aks-011",
 				target: &armcontainerservice.ManagedCluster{
 					Properties: &armcontainerservice.ManagedClusterProperties{
+						AzureMonitorProfile: &armcontainerservice.ManagedClusterAzureMonitorProfile{
+							Metrics: &armcontainerservice.ManagedClusterAzureMonitorProfileMetrics{
+								Enabled: to.Ptr(true),
+							},
+						},
 						AddonProfiles: map[string]*armcontainerservice.ManagedClusterAddonProfile{
 							"omsagent": {
 								Enabled: to.Ptr(true),
@@ -347,7 +352,7 @@ func TestAKSScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AKSScanner omsAgent disabled",
+			name: "AKSScanner Monitoring disabled",
 			fields: fields{
 				rule: "aks-011",
 				target: &armcontainerservice.ManagedCluster{
@@ -574,6 +579,182 @@ func TestAKSScanner_Rules(t *testing.T) {
 					Properties: &armcontainerservice.ManagedClusterProperties{
 						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
 							{},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AKSScanner GitOps disabled",
+			fields: fields{
+				rule: "aks-017",
+				target: &armcontainerservice.ManagedCluster{
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						AddonProfiles: map[string]*armcontainerservice.ManagedClusterAddonProfile{
+							"gitops": {
+								Enabled: to.Ptr(false),
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AKSScanner GitOps enabled",
+			fields: fields{
+				rule: "aks-017",
+				target: &armcontainerservice.ManagedCluster{
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						AddonProfiles: map[string]*armcontainerservice.ManagedClusterAddonProfile{
+							"gitops": {
+								Enabled: to.Ptr(true),
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AKSScanner Configure system nodepool count < 2",
+			fields: fields{
+				rule: "aks-018",
+				target: &armcontainerservice.ManagedCluster{
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
+							{
+								Mode: to.Ptr(armcontainerservice.AgentPoolModeSystem),
+								MinCount: to.Ptr(int32(1)),
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AKSScanner Configure system nodepool count == 2",
+			fields: fields{
+				rule: "aks-018",
+				target: &armcontainerservice.ManagedCluster{
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
+							{
+								Mode: to.Ptr(armcontainerservice.AgentPoolModeSystem),
+								MinCount: to.Ptr(int32(2)),
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AKSScanner Configure user node pool count < 2",
+			fields: fields{
+				rule: "aks-019",
+				target: &armcontainerservice.ManagedCluster{
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
+							{
+								Mode: to.Ptr(armcontainerservice.AgentPoolModeSystem),
+								MinCount: to.Ptr(int32(2)),
+							},
+							{
+								Mode:     to.Ptr(armcontainerservice.AgentPoolModeUser),
+								MinCount: to.Ptr(int32(1)),
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "",
+			},
+		},
+		{
+			name: "AKSScanner Configure user node pool count == 2",
+			fields: fields{
+				rule: "aks-019",
+				target: &armcontainerservice.ManagedCluster{
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
+							{
+								Mode: to.Ptr(armcontainerservice.AgentPoolModeSystem),
+								MinCount: to.Ptr(int32(2)),
+							},
+							{
+								Mode:     to.Ptr(armcontainerservice.AgentPoolModeUser),
+								MinCount: to.Ptr(int32(2)),
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AKSScanner system node pool tainted",
+			fields: fields{
+				rule: "aks-020",
+				target: &armcontainerservice.ManagedCluster{
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
+							{
+								Mode: to.Ptr(armcontainerservice.AgentPoolModeSystem),
+								NodeTaints: []*string{
+									to.Ptr("CriticalAddonsOnly=true:NoSchedule"),
+								},
+							},
+						},
+					},
+				},
+				scanContext: &scanners.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "",
+			},
+		},
+		{
+			name: "AKSScanner system node pool not tainted",
+			fields: fields{
+				rule: "aks-020",
+				target: &armcontainerservice.ManagedCluster{
+					Properties: &armcontainerservice.ManagedClusterProperties{
+						AgentPoolProfiles: []*armcontainerservice.ManagedClusterAgentPoolProfile{
+							{
+								Mode:       to.Ptr(armcontainerservice.AgentPoolModeSystem),
+								NodeTaints: []*string{},
+							},
 						},
 					},
 				},
