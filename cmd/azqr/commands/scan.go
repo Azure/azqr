@@ -17,7 +17,8 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status (default)")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations (default)")
 	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs (default)")
-	scanCmd.PersistentFlags().BoolP("json", "", false, "Create json file")
+	scanCmd.PersistentFlags().BoolP("json", "", false, "Create json files")
+	scanCmd.PersistentFlags().BoolP("word", "w", false, "Create word report")
 	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create csv files")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default)")
@@ -49,6 +50,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
 	csv, _ := cmd.Flags().GetBool("csv")
+	word, _ := cmd.Flags().GetBool("word")
 	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
@@ -69,6 +71,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		Cost:                    cost,
 		Csv:                     csv,
 		Json:                    json,
+		Word:                    word,
 		Mask:                    mask,
 		Debug:                   debug,
 		ScannerKeys:             scannerKeys,
