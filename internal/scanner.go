@@ -15,6 +15,7 @@ import (
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
+	"github.com/Azure/azqr/internal/renderers/word"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -322,6 +323,9 @@ func (sc Scanner) Scan(params *ScanParams) {
 
 	// render excel report
 	excel.CreateExcelReport(&reportData)
+
+	// render word report
+	word.CreateWordReport(&reportData)
 
 	// render json report
 	if params.Json {
