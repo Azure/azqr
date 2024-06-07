@@ -12,7 +12,7 @@ import (
 )
 
 func renderServices(f *excelize.File, data *renderers.ReportData) {
-	if len(data.MainData) > 0 {
+	if len(data.AzqrData) > 0 {
 		_, err := f.NewSheet("Services")
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to create Services sheet")

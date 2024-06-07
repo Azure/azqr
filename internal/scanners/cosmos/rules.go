@@ -10,14 +10,15 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
 
-// GetRules - Returns the rules for the CosmosDBScanner
-func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+// GetRecommendations - Returns the rules for the CosmosDBScanner
+func (a *CosmosDBScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"cosmos-001": {
-			Id:             "cosmos-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "CosmosDB should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "cosmos-001",
+			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
+			Category:         scanners.CategoryMonitoringAndAlerting,
+			Recommendation:   "CosmosDB should have diagnostic settings enabled",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcosmos.DatabaseAccountGetResults)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
@@ -26,10 +27,11 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
 		},
 		"cosmos-002": {
-			Id:             "cosmos-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "CosmosDB should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "cosmos-002",
+			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "CosmosDB should have availability zones enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				availabilityZones := false
@@ -51,10 +53,11 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability",
 		},
 		"cosmos-003": {
-			Id:             "cosmos-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "CosmosDB should have a SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "cosmos-003",
+			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "CosmosDB should have a SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				sla := "99.99%"
@@ -79,10 +82,11 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability#slas",
 		},
 		"cosmos-004": {
-			Id:             "cosmos-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "CosmosDB should have private endpoints enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "cosmos-004",
+			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "CosmosDB should have private endpoints enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -91,10 +95,11 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-configure-private-endpoints",
 		},
 		"cosmos-005": {
-			Id:             "cosmos-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "CosmosDB SKU",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "cosmos-005",
+			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "CosmosDB SKU",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				return false, string(*i.Properties.DatabaseAccountOfferType)
@@ -102,10 +107,11 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://azure.microsoft.com/en-us/pricing/details/cosmos-db/autoscale-provisioned/",
 		},
 		"cosmos-006": {
-			Id:             "cosmos-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "CosmosDB Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "cosmos-006",
+			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "CosmosDB Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcosmos.DatabaseAccountGetResults)
 				caf := strings.HasPrefix(*c.Name, "cosmos")
@@ -114,10 +120,11 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"cosmos-007": {
-			Id:             "cosmos-007",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "CosmosDB should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "cosmos-007",
+			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "CosmosDB should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcosmos.DatabaseAccountGetResults)
 				return len(c.Tags) == 0, ""
@@ -125,10 +132,11 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"cosmos-008": {
-			Id:             "cosmos-008",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "CosmosDB should have local authentication disabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "cosmos-008",
+			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "CosmosDB should have local authentication disabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcosmos.DatabaseAccountGetResults)
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
@@ -137,10 +145,11 @@ func (a *CosmosDBScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-setup-rbac#disable-local-auth",
 		},
 		"cosmos-009": {
-			Id:             "cosmos-009",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "CosmosDB: disable write operations on metadata resources (databases, containers, throughput) via account keys",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "cosmos-009",
+			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "CosmosDB: disable write operations on metadata resources (databases, containers, throughput) via account keys",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcosmos.DatabaseAccountGetResults)
 				disabled := c.Properties.DisableKeyBasedMetadataWriteAccess != nil && *c.Properties.DisableKeyBasedMetadataWriteAccess

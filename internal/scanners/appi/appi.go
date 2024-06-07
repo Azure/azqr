@@ -23,28 +23,28 @@ func (a *AppInsightsScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Application Insights in a Resource Group
-func (a *AppInsightsScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Application Insights")
+func (a *AppInsightsScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	gateways, err := a.list(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, g := range gateways {
-		rr := engine.EvaluateRules(rules, g, scanContext)
+		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,11 @@ func (a *AppInsightsScanner) list(resourceGroupName string) ([]*armapplicationin
 		services = append(services, resp.Value...)
 	}
 	return services, nil
+}
+
+func (a *AppInsightsScanner) ResourceTypes() []string {
+	return []string{
+		"Microsoft.Insights/components",
+		"Microsoft.Insights/activityLogAlerts",
+	}
 }

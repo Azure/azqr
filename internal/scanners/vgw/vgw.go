@@ -23,28 +23,28 @@ func (c *VirtualNetworkGatewayScanner) Init(config *scanners.ScannerConfig) erro
 }
 
 // Scan - Scans all VirtualNetwork in a Resource Group
-func (c *VirtualNetworkGatewayScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "VPN Gateway")
+func (c *VirtualNetworkGatewayScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	vpns, err := c.listVirtualNetworkGateways(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetVirtualNetworkGatewayRules()
-	results := []scanners.AzureServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, w := range vpns {
-		rr := engine.EvaluateRules(rules, w, scanContext)
+		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (c *VirtualNetworkGatewayScanner) listVirtualNetworkGateways(resourceGroupN
 		vpns = append(vpns, resp.Value...)
 	}
 	return vpns, nil
+}
+
+func (a *VirtualNetworkGatewayScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Network/virtualNetworkGateways"}
 }

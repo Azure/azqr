@@ -11,18 +11,19 @@ import (
 )
 
 // GetRules - Returns the rules for the VirtualNetworkGatewayScanner
-func (a *VirtualNetworkGatewayScanner) GetRules() map[string]scanners.AzureRule {
+func (a *VirtualNetworkGatewayScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
 	return a.GetVirtualNetworkGatewayRules()
 }
 
 // GetVirtualNetworkGatewayRules - Returns the rules for the VirtualNetworkGatewayScanner
-func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"vgw-001": {
-			Id:             "vgw-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Virtual Network Gateway should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "vgw-001",
+			ResourceType:     "Microsoft.Network/virtualNetworkGateways",
+			Category:         scanners.CategoryMonitoringAndAlerting,
+			Recommendation:   "Virtual Network Gateway should have diagnostic settings enabled",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armnetwork.VirtualNetworkGateway)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
@@ -31,10 +32,11 @@ func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[strin
 			Url: "https://learn.microsoft.com/en-us/azure/vpn-gateway/monitor-vpn-gateway",
 		},
 		"vgw-002": {
-			Id:             "vgw-002",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Virtual Network Gateway Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "vgw-002",
+			ResourceType:     "Microsoft.Network/virtualNetworkGateways",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Virtual Network Gateway Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualNetworkGateway)
 				switch *c.Properties.GatewayType {
@@ -49,10 +51,11 @@ func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[strin
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"vgw-003": {
-			Id:             "vgw-003",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Virtual Network Gateway should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "vgw-003",
+			ResourceType:     "Microsoft.Network/virtualNetworkGateways",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Virtual Network Gateway should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualNetworkGateway)
 				return len(c.Tags) == 0, ""
@@ -60,10 +63,11 @@ func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[strin
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"vgw-004": {
-			Id:             "vgw-004",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Virtual Network Gateway should have a SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "vgw-004",
+			ResourceType:     "Microsoft.Network/virtualNetworkGateways",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Virtual Network Gateway should have a SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.VirtualNetworkGateway)
 				sku := string(*g.Properties.SKU.Tier)
@@ -76,10 +80,11 @@ func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[strin
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"vgw-005": {
-			Id:             "vgw-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Storage should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "vgw-005",
+			ResourceType:     "Microsoft.Network/virtualNetworkGateways",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Storage should have availability zones enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.VirtualNetworkGateway)
 				sku := string(*g.Properties.SKU.Name)

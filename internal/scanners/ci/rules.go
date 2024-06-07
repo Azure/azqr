@@ -11,13 +11,14 @@ import (
 )
 
 // GetRules - Returns the rules for the ContainerInstanceScanner
-func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+func (a *ContainerInstanceScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"ci-002": {
-			Id:             "ci-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "ContainerInstance should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "ci-002",
+			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "ContainerInstance should have availability zones enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				zones := len(i.Zones) > 0
@@ -26,20 +27,22 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/container-instances/availability-zones",
 		},
 		"ci-003": {
-			Id:             "ci-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "ContainerInstance should have a SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "ci-003",
+			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "ContainerInstance should have a SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/container-instances/v1_0/index.html",
 		},
 		"ci-004": {
-			Id:             "ci-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "ContainerInstance should use private IP addresses",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "ci-004",
+			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "ContainerInstance should use private IP addresses",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				pe := false
@@ -50,10 +53,11 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 			},
 		},
 		"ci-005": {
-			Id:             "ci-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "ContainerInstance SKU",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "ci-005",
+			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "ContainerInstance SKU",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				return false, string(*i.Properties.SKU)
@@ -61,10 +65,11 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://azure.microsoft.com/en-us/pricing/details/container-instances/",
 		},
 		"ci-006": {
-			Id:             "ci-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "ContainerInstance Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "ci-006",
+			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "ContainerInstance Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerinstance.ContainerGroup)
 				caf := strings.HasPrefix(*c.Name, "ci")
@@ -73,10 +78,11 @@ func (a *ContainerInstanceScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"ci-007": {
-			Id:             "ci-007",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "ContainerInstance should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "ci-007",
+			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "ContainerInstance should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerinstance.ContainerGroup)
 				return len(c.Tags) == 0, ""

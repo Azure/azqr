@@ -23,28 +23,28 @@ func (c *ContainerRegistryScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Container Registries in a Resource Group
-func (c *ContainerRegistryScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Container Registries")
+func (c *ContainerRegistryScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	regsitries, err := c.listRegistries(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, registry := range regsitries {
-		rr := engine.EvaluateRules(rules, registry, scanContext)
+		rr := engine.EvaluateRecommendations(rules, registry, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
+		results = append(results, scanners.AzqrServiceResult{
+			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *registry.Name,
-			Type:           *registry.Type,
-			Location:       *registry.Location,
-			Rules:          rr,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *registry.Name,
+			Type:             *registry.Type,
+			Location:         *registry.Location,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (c *ContainerRegistryScanner) listRegistries(resourceGroupName string) ([]*
 		registries = append(registries, resp.Value...)
 	}
 	return registries, nil
+}
+
+func (a *ContainerRegistryScanner) ResourceTypes() []string {
+	return []string{"Microsoft.ContainerRegistry/registries"}
 }

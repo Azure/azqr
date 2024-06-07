@@ -10,14 +10,15 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
-// GetRules - Returns the rules for the StorageScanner
-func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+// GetRecommendations - Returns the rules for the StorageScanner
+func (a *StorageScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"st-001": {
-			Id:             "st-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Storage should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "st-001",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategoryMonitoringAndAlerting,
+			Recommendation:   "Storage should have diagnostic settings enabled",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armstorage.Account)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
@@ -26,10 +27,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
 		},
 		"st-002": {
-			Id:             "st-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Storage should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "st-002",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Storage should have availability zones enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				sku := string(*i.SKU.Name)
@@ -42,10 +44,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/EN-US/azure/reliability/migrate-storage",
 		},
 		"st-003": {
-			Id:             "st-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Storage should have a SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "st-003",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Storage should have a SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				tier := ""
@@ -68,10 +71,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://www.azure.cn/en-us/support/sla/storage/",
 		},
 		"st-004": {
-			Id:             "st-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Storage should have private endpoints enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "st-004",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Storage should have private endpoints enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -80,10 +84,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/storage/common/storage-private-endpoints",
 		},
 		"st-005": {
-			Id:             "st-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Storage SKU",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "st-005",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Storage SKU",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				return false, string(*i.SKU.Name)
@@ -91,10 +96,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/rest/api/storagerp/srp_sku_types",
 		},
 		"st-006": {
-			Id:             "st-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Storage Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "st-006",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Storage Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				caf := strings.HasPrefix(*c.Name, "st")
@@ -103,10 +109,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"st-007": {
-			Id:             "st-007",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Storage Account should use HTTPS only",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "st-007",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Storage Account should use HTTPS only",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				h := *c.Properties.EnableHTTPSTrafficOnly
@@ -115,10 +122,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer",
 		},
 		"st-008": {
-			Id:             "st-008",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Storage Account should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "st-008",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Storage Account should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				return len(c.Tags) == 0, ""
@@ -126,10 +134,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"st-009": {
-			Id:             "st-009",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Storage Account should enforce TLS >= 1.2",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "st-009",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Storage Account should enforce TLS >= 1.2",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				return c.Properties.MinimumTLSVersion == nil || *c.Properties.MinimumTLSVersion != armstorage.MinimumTLSVersionTLS12, ""
@@ -137,10 +146,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal",
 		},
 		"st-010": {
-			Id:             "st-010",
-			Category:       scanners.RulesCategoryDisasterRecovery,
-			Recommendation: "Storage Account should have inmutable storage versioning enabled",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "st-010",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategoryDisasterRecovery,
+			Recommendation:   "Storage Account should have inmutable storage versioning enabled",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				return c.Properties.ImmutableStorageWithVersioning == nil || c.Properties.ImmutableStorageWithVersioning.Enabled == nil || !*c.Properties.ImmutableStorageWithVersioning.Enabled, ""
@@ -148,10 +158,11 @@ func (a *StorageScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
 		},
 		"st-011": {
-			Id:             "st-011",
-			Category:       scanners.RulesCategoryDisasterRecovery,
-			Recommendation: "Storage Account should have soft delete enabled",
-			Impact:         scanners.ImpactMedium,
+			RecommendationID: "st-011",
+			ResourceType:     "Microsoft.Storage/storageAccounts",
+			Category:         scanners.CategoryDisasterRecovery,
+			Recommendation:   "Storage Account should have soft delete enabled",
+			Impact:           scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				broken := false
 				broken = scanContext.BlobServiceProperties != nil && (scanContext.BlobServiceProperties.BlobServiceProperties.BlobServiceProperties.ContainerDeleteRetentionPolicy == nil ||

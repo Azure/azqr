@@ -33,31 +33,31 @@ func (a *AppServiceScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all App Service Plans in a Resource Group
-func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "App Service Plan")
+func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	plan, err := a.listPlans(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := a.getPlanRules()
 	appRules := a.getAppRules()
 	functionRules := a.getFunctionRules()
 	logicRules := a.getLogicRules()
-	results := []scanners.AzureServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, p := range plan {
-		rr := engine.EvaluateRules(rules, p, scanContext)
+		rr := engine.EvaluateRecommendations(rules, p, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			ServiceName:      *p.Name,
 			Type:             *p.Type,
 			Location:         *p.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 
 		sites, err := a.listSites(resourceGroupName, *p.Name)
@@ -72,44 +72,44 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *scanners
 			}
 			scanContext.SiteConfig = &config
 
-			var result scanners.AzureServiceResult
+			var result scanners.AzqrServiceResult
 			// https://learn.microsoft.com/en-us/azure/azure-functions/functions-app-settings
 			kind := strings.ToLower(*s.Kind)
 			switch kind {
 			case "functionapp,linux", "functionapp":
-				rr := engine.EvaluateRules(functionRules, s, scanContext)
+				rr := engine.EvaluateRecommendations(functionRules, s, scanContext)
 
-				result = scanners.AzureServiceResult{
+				result = scanners.AzqrServiceResult{
 					SubscriptionID:   a.config.SubscriptionID,
 					SubscriptionName: a.config.SubscriptionName,
 					ResourceGroup:    resourceGroupName,
 					ServiceName:      *s.Name,
 					Type:             *s.Type,
 					Location:         *p.Location,
-					Rules:            rr,
+					Recommendations:  rr,
 				}
 			case "functionapp,workflowapp":
-				rr := engine.EvaluateRules(logicRules, s, scanContext)
+				rr := engine.EvaluateRecommendations(logicRules, s, scanContext)
 
-				result = scanners.AzureServiceResult{
+				result = scanners.AzqrServiceResult{
 					SubscriptionID:   a.config.SubscriptionID,
 					SubscriptionName: a.config.SubscriptionName,
 					ResourceGroup:    resourceGroupName,
 					ServiceName:      *s.Name,
 					Type:             *s.Type,
 					Location:         *p.Location,
-					Rules:            rr,
+					Recommendations:  rr,
 				}
 			default:
-				rr := engine.EvaluateRules(appRules, s, scanContext)
-				result = scanners.AzureServiceResult{
+				rr := engine.EvaluateRecommendations(appRules, s, scanContext)
+				result = scanners.AzqrServiceResult{
 					SubscriptionID:   a.config.SubscriptionID,
 					SubscriptionName: a.config.SubscriptionName,
 					ResourceGroup:    resourceGroupName,
 					ServiceName:      *s.Name,
 					Type:             *s.Type,
 					Location:         *p.Location,
-					Rules:            rr,
+					Recommendations:  rr,
 				}
 			}
 
@@ -145,4 +145,11 @@ func (a *AppServiceScanner) listSites(resourceGroupName string, plan string) ([]
 		results = append(results, resp.Value...)
 	}
 	return results, nil
+}
+
+func (a *AppServiceScanner) ResourceTypes() []string {
+	return []string{
+		"Microsoft.Web/serverFarms",
+		"Microsoft.Web/sites",
+	}
 }

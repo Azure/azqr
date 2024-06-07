@@ -36,31 +36,31 @@ func (a *SynapseWorkspaceScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Synapse Workspaces in a Resource Group
-func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Synapse Analytics Workspace")
+func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	workspaces, err := a.listWorkspaces(resourceGroupName)
 	if err != nil {
 
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := a.getWorkspaceRules()
 	sqlPoolRules := a.getSqlPoolRules()
 	sparkPoolRules := a.getSparkPoolRules()
-	results := []scanners.AzureServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, w := range workspaces {
-		rr := engine.EvaluateRules(rules, w, scanContext)
+		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			Location:         *w.Location,
 			Type:             *w.Type,
 			ServiceName:      *w.Name,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 
 		sqlPools, err := a.listSqlPools(resourceGroupName, *w.Name)
@@ -69,17 +69,17 @@ func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *sc
 		}
 
 		for _, s := range sqlPools {
-			var result scanners.AzureServiceResult
-			rr := engine.EvaluateRules(sqlPoolRules, s, scanContext)
+			var result scanners.AzqrServiceResult
+			rr := engine.EvaluateRecommendations(sqlPoolRules, s, scanContext)
 
-			result = scanners.AzureServiceResult{
+			result = scanners.AzqrServiceResult{
 				SubscriptionID:   a.config.SubscriptionID,
 				SubscriptionName: a.config.SubscriptionName,
 				ResourceGroup:    resourceGroupName,
 				ServiceName:      *s.Name,
 				Type:             *s.Type,
 				Location:         *w.Location,
-				Rules:            rr,
+				Recommendations:  rr,
 			}
 			results = append(results, result)
 		}
@@ -90,17 +90,17 @@ func (a *SynapseWorkspaceScanner) Scan(resourceGroupName string, scanContext *sc
 		}
 
 		for _, s := range sparkPools {
-			var result scanners.AzureServiceResult
-			rr := engine.EvaluateRules(sparkPoolRules, s, scanContext)
+			var result scanners.AzqrServiceResult
+			rr := engine.EvaluateRecommendations(sparkPoolRules, s, scanContext)
 
-			result = scanners.AzureServiceResult{
+			result = scanners.AzqrServiceResult{
 				SubscriptionID:   a.config.SubscriptionID,
 				SubscriptionName: a.config.SubscriptionName,
 				ResourceGroup:    resourceGroupName,
 				ServiceName:      *s.Name,
 				Type:             *s.Type,
 				Location:         *w.Location,
-				Rules:            rr,
+				Recommendations:  rr,
 			}
 			results = append(results, result)
 		}
@@ -146,4 +146,12 @@ func (a *SynapseWorkspaceScanner) listSparkPools(resourceGroupName string, works
 		results = append(results, resp.Value...)
 	}
 	return results, nil
+}
+
+func (a *SynapseWorkspaceScanner) ResourceTypes() []string {
+	return []string{
+		"Microsoft.Synapse/workspaces",
+		"Microsoft.Synapse workspaces/bigDataPools",
+		"Microsoft.Synapse/workspaces/sqlPools",
+	}
 }

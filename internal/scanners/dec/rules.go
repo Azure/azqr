@@ -11,13 +11,14 @@ import (
 )
 
 // GetRules - Returns the rules for the DataExplorerScanner
-func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+func (a *DataExplorerScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"dec-001": {
-			Id:             "dec-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Azure Data Explorer should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "dec-001",
+			ResourceType:     "Microsoft.Kusto/clusters",
+			Category:         scanners.CategoryMonitoringAndAlerting,
+			Recommendation:   "Azure Data Explorer should have diagnostic settings enabled",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armkusto.Cluster)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
@@ -26,10 +27,11 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
 		},
 		"dec-002": {
-			Id:             "dec-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure Data Explorer SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "dec-002",
+			ResourceType:     "Microsoft.Kusto/clusters",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Azure Data Explorer SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				sla := "99.9%"
@@ -42,10 +44,11 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"dec-003": {
-			Id:             "dec-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure Data Explorer Production Cluster should not use Dev SKU",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "dec-003",
+			ResourceType:     "Microsoft.Kusto/clusters",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Azure Data Explorer Production Cluster should not use Dev SKU",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				broken := false
@@ -58,10 +61,11 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku",
 		},
 		"dec-004": {
-			Id:             "dec-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Azure Data Explorer should have private endpoints enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "dec-004",
+			ResourceType:     "Microsoft.Kusto/clusters",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Azure Data Explorer should have private endpoints enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armkusto.Cluster)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -70,10 +74,11 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
 		},
 		"dec-006": {
-			Id:             "dec-004",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Azure Data Explorer Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "dec-004",
+			ResourceType:     "Microsoft.Kusto/clusters",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Azure Data Explorer Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				caf := strings.HasPrefix(*c.Name, "dec")
@@ -82,10 +87,11 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"dec-007": {
-			Id:             "dec-005",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Azure Data Explorer should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "dec-005",
+			ResourceType:     "Microsoft.Kusto/clusters",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Azure Data Explorer should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				return c.Tags == nil || len(c.Tags) == 0, ""
@@ -93,10 +99,11 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"dec-008": {
-			Id:             "dec-008",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Azure Data Explorer should use Disk Encryption",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "dec-008",
+			ResourceType:     "Microsoft.Kusto/clusters",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Azure Data Explorer should use Disk Encryption",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				return c.Properties.EnableDiskEncryption == nil || !*c.Properties.EnableDiskEncryption, ""
@@ -104,10 +111,11 @@ func (a *DataExplorerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/cluster-encryption-overview",
 		},
 		"dec-009": {
-			Id:             "dec-009",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Azure Data Explorer should use Managed Identities",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "dec-009",
+			ResourceType:     "Microsoft.Kusto/clusters",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Azure Data Explorer should use Managed Identities",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armkusto.IdentityTypeNone, ""

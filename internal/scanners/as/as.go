@@ -23,28 +23,28 @@ func (c *AnalysisServicesScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Analysis Services in a Resource Group
-func (c *AnalysisServicesScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Analysis Services")
+func (c *AnalysisServicesScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	workspaces, err := c.listWorkspaces(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, ws := range workspaces {
-		rr := engine.EvaluateRules(rules, ws, scanContext)
+		rr := engine.EvaluateRecommendations(rules, ws, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			ServiceName:      *ws.Name,
 			Type:             *ws.Type,
 			Location:         *ws.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (c *AnalysisServicesScanner) listWorkspaces(resourceGroupName string) ([]*a
 		registries = append(registries, resp.Value...)
 	}
 	return registries, nil
+}
+
+func (a *AnalysisServicesScanner) ResourceTypes() []string {
+	return []string{"Microsoft.AnalysisServices/servers"}
 }

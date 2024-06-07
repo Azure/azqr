@@ -12,52 +12,35 @@ import (
 )
 
 func renderRecommendations(f *excelize.File, data *renderers.ReportData) {
-	if len(data.MainData) > 0 {
-		err := f.SetSheetName("Sheet1", "Recommendations")
+	sheetName := "Recommendations"
+	if len(data.Recomendations) > 0 {
+		err := f.SetSheetName("Sheet1", sheetName)
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create Recommendations sheet")
+			log.Fatal().Err(err).Msgf("Failed to create %s sheet", sheetName)
 		}
 
-		renderedRules := map[string]bool{}
+		records := data.RecommendationsTable()
+		headers := records[0]
+		records = records[1:]
 
-		headers := []string{"Category", "Impact", "Recommendation", "Learn", "RId"}
-		rows := [][]string{}
-		for _, result := range data.MainData {
-			for _, rr := range result.Rules {
-				_, exists := renderedRules[rr.Id]
-				if !exists && rr.NotCompliant {
-					rulesToRender := map[string]string{
-						"Category":       string(rr.Category),
-						"Impact":         string(rr.Impact),
-						"Recommendation": rr.Recommendation,
-						"Learn":          rr.Learn,
-						"RId":            rr.Id,
-					}
-					renderedRules[rr.Id] = true
-					rows = append(rows, mapToRow(headers, rulesToRender)...)
-				}
-			}
-		}
-
-		createFirstRow(f, "Recommendations", headers)
+		createFirstRow(f, sheetName, headers)
 
 		currentRow := 4
-		for _, row := range rows {
+		for _, row := range records {
 			currentRow += 1
 			cell, err := excelize.CoordinatesToCellName(1, currentRow)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to get cell")
 			}
-			err = f.SetSheetRow("Recommendations", cell, &row)
+			err = f.SetSheetRow(sheetName, cell, &row)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to set row")
 			}
-
-			setHyperLink(f, "Recommendations", 6, currentRow)
+			// setHyperLink(f, sheetName, 12, currentRow)
 		}
 
-		configureSheet(f, "Recommendations", headers, currentRow)
+		configureSheet(f, sheetName, headers, currentRow)
 	} else {
-		log.Info().Msg("Skipping Recommendations. No data to render")
+		log.Info().Msgf("Skipping %s. No data to render", sheetName)
 	}
 }

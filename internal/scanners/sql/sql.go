@@ -38,29 +38,29 @@ func (c *SQLScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all SQL in a Resource Group
-func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "SQL")
+func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	sql, err := c.listSQL(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.getServerRules()
 	databaseRules := c.getDatabaseRules()
 	poolRules := c.getPoolRules()
-	results := []scanners.AzureServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, sql := range sql {
-		rr := engine.EvaluateRules(rules, sql, scanContext)
+		rr := engine.EvaluateRecommendations(rules, sql, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *sql.Name,
-			Type:           *sql.Type,
-			Location:       *sql.Location,
-			Rules:          rr,
+		results = append(results, scanners.AzqrServiceResult{
+			SubscriptionID:  c.config.SubscriptionID,
+			ResourceGroup:   resourceGroupName,
+			ServiceName:     *sql.Name,
+			Type:            *sql.Type,
+			Location:        *sql.Location,
+			Recommendations: rr,
 		})
 
 		pools, err := c.listPools(resourceGroupName, *sql.Name)
@@ -68,16 +68,16 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 			return nil, err
 		}
 		for _, pool := range pools {
-			rr := engine.EvaluateRules(poolRules, pool, scanContext)
+			rr := engine.EvaluateRecommendations(poolRules, pool, scanContext)
 
-			results = append(results, scanners.AzureServiceResult{
+			results = append(results, scanners.AzqrServiceResult{
 				SubscriptionID:   c.config.SubscriptionID,
 				SubscriptionName: c.config.SubscriptionName,
 				ResourceGroup:    resourceGroupName,
 				ServiceName:      *pool.Name,
 				Type:             *pool.Type,
 				Location:         *pool.Location,
-				Rules:            rr,
+				Recommendations:  rr,
 			})
 		}
 
@@ -90,16 +90,16 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanCo
 				continue
 			}
 
-			rr := engine.EvaluateRules(databaseRules, database, scanContext)
+			rr := engine.EvaluateRecommendations(databaseRules, database, scanContext)
 
-			results = append(results, scanners.AzureServiceResult{
+			results = append(results, scanners.AzqrServiceResult{
 				SubscriptionID:   c.config.SubscriptionID,
 				SubscriptionName: c.config.SubscriptionName,
 				ResourceGroup:    resourceGroupName,
 				ServiceName:      *database.Name,
 				Type:             *database.Type,
 				Location:         *database.Location,
-				Rules:            rr,
+				Recommendations:  rr,
 			})
 		}
 	}
@@ -147,4 +147,12 @@ func (c *SQLScanner) listPools(resourceGroupName, serverName string) ([]*armsql.
 		pools = append(pools, resp.Value...)
 	}
 	return pools, nil
+}
+
+func (a *SQLScanner) ResourceTypes() []string {
+	return []string{
+		"Microsoft.Sql/servers",
+		"Microsoft.Sql/servers/databases",
+		"Microsoft.Sql/servers/elasticPools",
+	}
 }

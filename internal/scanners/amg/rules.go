@@ -10,14 +10,15 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard"
 )
 
-// GetRules - Returns the rules for the ManagedGrafanaScanner
-func (a *ManagedGrafanaScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+// GetRecommendations - Returns the rules for the ManagedGrafanaScanner
+func (a *ManagedGrafanaScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"amg-001": {
-			Id:             "amg-001",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Azure Managed Grafana name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "amg-001",
+			ResourceType:     "Microsoft.Dashboard/managedGrafana",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Azure Managed Grafana name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				caf := strings.HasPrefix(*c.Name, "amg")
@@ -26,10 +27,11 @@ func (a *ManagedGrafanaScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"amg-002": {
-			Id:             "amg-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure Managed Grafana SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "amg-002",
+			ResourceType:     "Microsoft.Dashboard/managedGrafana",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Azure Managed Grafana SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				sku := ""
@@ -45,10 +47,11 @@ func (a *ManagedGrafanaScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"amg-003": {
-			Id:             "amg-003",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Azure Managed Grafana should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "amg-003",
+			ResourceType:     "Microsoft.Dashboard/managedGrafana",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Azure Managed Grafana should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				return len(c.Tags) == 0, ""
@@ -56,10 +59,11 @@ func (a *ManagedGrafanaScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"amg-004": {
-			Id:             "amg-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Azure Managed Grafana should disable public network access",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "amg-004",
+			ResourceType:     "Microsoft.Dashboard/managedGrafana",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Azure Managed Grafana should disable public network access",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				return *c.Properties.PublicNetworkAccess == armdashboard.PublicNetworkAccessEnabled, ""
@@ -67,10 +71,11 @@ func (a *ManagedGrafanaScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
 		},
 		"amg-005": {
-			Id:             "amg-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure Managed Grafana should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "amg-005",
+			ResourceType:     "Microsoft.Dashboard/managedGrafana",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Azure Managed Grafana should have availability zones enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				return *c.Properties.ZoneRedundancy == armdashboard.ZoneRedundancyDisabled, ""

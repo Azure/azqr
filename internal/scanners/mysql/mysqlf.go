@@ -23,34 +23,34 @@ func (c *MySQLFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all MySQL in a Resource Group
-func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "MySQL Flexible")
+func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
-	flexibles, err := c.listFlexiblePostgre(resourceGroupName)
+	flexibles, err := c.list(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, postgre := range flexibles {
-		rr := engine.EvaluateRules(rules, postgre, scanContext)
+		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			ResourceGroup:    resourceGroupName,
 			SubscriptionName: c.config.SubscriptionName,
 			ServiceName:      *postgre.Name,
 			Type:             *postgre.Type,
 			Location:         *postgre.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 
 	return results, nil
 }
-func (c *MySQLFlexibleScanner) listFlexiblePostgre(resourceGroupName string) ([]*armmysqlflexibleservers.Server, error) {
+func (c *MySQLFlexibleScanner) list(resourceGroupName string) ([]*armmysqlflexibleservers.Server, error) {
 	pager := c.flexibleClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
 	servers := make([]*armmysqlflexibleservers.Server, 0)
@@ -62,4 +62,8 @@ func (c *MySQLFlexibleScanner) listFlexiblePostgre(resourceGroupName string) ([]
 		servers = append(servers, resp.Value...)
 	}
 	return servers, nil
+}
+
+func (a *MySQLFlexibleScanner) ResourceTypes() []string {
+	return []string{"Microsoft.DBforMySQL/flexibleServers"}
 }

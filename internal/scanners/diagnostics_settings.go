@@ -69,9 +69,9 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 	LogSubscriptionScan(d.config.SubscriptionID, "Diagnostic Settings")
 
 	// Split resources into batches of 20 items.
-	batch := 20
-	for i := 0; i < len(resources); i += batch {
-		j := i + batch
+	batchSize := 20
+	for i := 0; i < len(resources); i += batchSize {
+		j := i + batchSize
 		if j > len(resources) {
 			j = len(resources)
 		}

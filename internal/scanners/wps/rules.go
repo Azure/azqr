@@ -10,14 +10,15 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
 )
 
-// GetRules - Returns the rules for the WebPubSubScanner
-func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+// GetRecommendations - Returns the rules for the WebPubSubScanner
+func (a *WebPubSubScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"wps-001": {
-			Id:             "wps-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Web Pub Sub should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "wps-001",
+			ResourceType:     "Microsoft.SignalRService/webPubSub",
+			Category:         scanners.CategoryMonitoringAndAlerting,
+			Recommendation:   "Web Pub Sub should have diagnostic settings enabled",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armwebpubsub.ResourceInfo)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
@@ -26,10 +27,11 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
 		},
 		"wps-002": {
-			Id:             "wps-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Web Pub Sub should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "wps-002",
+			ResourceType:     "Microsoft.SignalRService/webPubSub",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Web Pub Sub should have availability zones enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				sku := string(*i.SKU.Name)
@@ -42,10 +44,11 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
 		},
 		"wps-003": {
-			Id:             "wps-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Web Pub Sub should have a SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "wps-003",
+			ResourceType:     "Microsoft.SignalRService/webPubSub",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Web Pub Sub should have a SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				sku := string(*i.SKU.Name)
@@ -59,10 +62,11 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://azure.microsoft.com/en-gb/support/legal/sla/web-pubsub/",
 		},
 		"wps-004": {
-			Id:             "wps-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Web Pub Sub should have private endpoints enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "wps-004",
+			ResourceType:     "Microsoft.SignalRService/webPubSub",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Web Pub Sub should have private endpoints enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
@@ -71,10 +75,11 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
 		},
 		"wps-005": {
-			Id:             "wps-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Web Pub Sub SKU",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "wps-005",
+			ResourceType:     "Microsoft.SignalRService/webPubSub",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Web Pub Sub SKU",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				return false, string(*i.SKU.Name)
@@ -82,10 +87,11 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://azure.microsoft.com/en-us/pricing/details/web-pubsub/",
 		},
 		"wps-006": {
-			Id:             "wps-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Web Pub Sub Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "wps-006",
+			ResourceType:     "Microsoft.SignalRService/webPubSub",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Web Pub Sub Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armwebpubsub.ResourceInfo)
 				caf := strings.HasPrefix(*c.Name, "wps")
@@ -94,10 +100,11 @@ func (a *WebPubSubScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"wps-007": {
-			Id:             "wps-007",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Web Pub Sub should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "wps-007",
+			ResourceType:     "Microsoft.SignalRService/webPubSub",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Web Pub Sub should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armwebpubsub.ResourceInfo)
 				return len(c.Tags) == 0, ""

@@ -23,28 +23,28 @@ func (a *APIManagementScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan -Scans all API Management Services in a Resource Group
-func (a *APIManagementScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "APIM")
+func (a *APIManagementScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	services, err := a.listServices(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, s := range services {
-		rr := engine.EvaluateRules(rules, s, scanContext)
+		rr := engine.EvaluateRecommendations(rules, s, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: a.config.SubscriptionID,
+		results = append(results, scanners.AzqrServiceResult{
+			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *s.Name,
-			Type:           *s.Type,
-			Location:       *s.Location,
-			Rules:          rr,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *s.Name,
+			Type:             *s.Type,
+			Location:         *s.Location,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (a *APIManagementScanner) listServices(resourceGroupName string) ([]*armapi
 		services = append(services, resp.Value...)
 	}
 	return services, nil
+}
+
+func (a *APIManagementScanner) ResourceTypes() []string {
+	return []string{"Microsoft.ApiManagement/service"}
 }

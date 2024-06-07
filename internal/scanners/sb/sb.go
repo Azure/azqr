@@ -23,28 +23,28 @@ func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Service Bus in a Resource Group
-func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Service Bus")
+func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	servicebus, err := c.listServiceBus(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, servicebus := range servicebus {
-		rr := engine.EvaluateRules(rules, servicebus, scanContext)
+		rr := engine.EvaluateRecommendations(rules, servicebus, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			ServiceName:      *servicebus.Name,
 			Type:             *servicebus.Type,
 			Location:         *servicebus.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (c *ServiceBusScanner) listServiceBus(resourceGroupName string) ([]*armserv
 		namespaces = append(namespaces, resp.Value...)
 	}
 	return namespaces, nil
+}
+
+func (a *ServiceBusScanner) ResourceTypes() []string {
+	return []string{"Microsoft.ServiceBus/namespaces"}
 }

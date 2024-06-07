@@ -23,28 +23,28 @@ func (a *ApplicationGatewayScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Application Gateways in a Resource Group
-func (a *ApplicationGatewayScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Application Gateway")
+func (a *ApplicationGatewayScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	gateways, err := a.listGateways(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, g := range gateways {
-		rr := engine.EvaluateRules(rules, g, scanContext)
+		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			ServiceName:      *g.Name,
 			Type:             *g.Type,
 			Location:         *g.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -61,4 +61,8 @@ func (a *ApplicationGatewayScanner) listGateways(resourceGroupName string) ([]*a
 		results = append(results, resp.Value...)
 	}
 	return results, nil
+}
+
+func (a *ApplicationGatewayScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Network/applicationGateways"}
 }

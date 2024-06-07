@@ -17,6 +17,12 @@ func CreateCsvReport(data *renderers.ReportData) {
 	records := data.ServicesTable()
 	writeData(records, data.OutputFileName, "services")
 
+	records = data.RecommendationsTable()
+	writeData(records, data.OutputFileName, "recommendations")
+
+	records = data.ImpactedTable()
+	writeData(records, data.OutputFileName, "impacted")
+
 	records = data.DefenderTable()
 	writeData(records, data.OutputFileName, "defender")
 

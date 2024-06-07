@@ -12,13 +12,14 @@ import (
 )
 
 // GetRules - Returns the rules for the TrafficManagerScanner
-func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+func (a *TrafficManagerScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"traf-001": {
-			Id:             "traf-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Traffic Manager should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "traf-001",
+			ResourceType:     "Microsoft.Network/trafficManagerProfiles",
+			Category:         scanners.CategoryMonitoringAndAlerting,
+			Recommendation:   "Traffic Manager should have diagnostic settings enabled",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armtrafficmanager.Profile)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
@@ -27,30 +28,33 @@ func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-diagnostic-logs",
 		},
 		"traf-002": {
-			Id:             "traf-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Traffic Manager should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "traf-002",
+			ResourceType:     "Microsoft.Network/trafficManagerProfiles",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Traffic Manager should have availability zones enabled",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/architecture/high-availability/reference-architecture-traffic-manager-application-gateway",
 		},
 		"traf-003": {
-			Id:             "traf-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Traffic Manager should have a SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "traf-003",
+			ResourceType:     "Microsoft.Network/trafficManagerProfiles",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Traffic Manager should have a SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/traffic-manager/",
 		},
 		"traf-006": {
-			Id:             "traf-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Traffic Manager Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "traf-006",
+			ResourceType:     "Microsoft.Network/trafficManagerProfiles",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Traffic Manager Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armtrafficmanager.Profile)
 				caf := strings.HasPrefix(*c.Name, "traf")
@@ -59,10 +63,11 @@ func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"traf-007": {
-			Id:             "traf-007",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Traffic Manager should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "traf-007",
+			ResourceType:     "Microsoft.Network/trafficManagerProfiles",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Traffic Manager should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armtrafficmanager.Profile)
 				return len(c.Tags) == 0, ""
@@ -70,10 +75,11 @@ func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"traf-008": {
-			Id:             "traf-008",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Traffic Manager should use at least 2 endpoints",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "traf-008",
+			ResourceType:     "Microsoft.Network/trafficManagerProfiles",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Traffic Manager should use at least 2 endpoints",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armtrafficmanager.Profile)
 				endpoints := 0
@@ -87,10 +93,11 @@ func (a *TrafficManagerScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-endpoint-types",
 		},
 		"traf-009": {
-			Id:             "traf-009",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Traffic Manager: HTTP endpoints should be monitored using HTTPS",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "traf-009",
+			ResourceType:     "Microsoft.Network/trafficManagerProfiles",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Traffic Manager: HTTP endpoints should be monitored using HTTPS",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armtrafficmanager.Profile)
 				httpMonitor := *c.Properties.MonitorConfig.Port == int64(80) || *c.Properties.MonitorConfig.Port == int64(443)

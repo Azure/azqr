@@ -10,14 +10,15 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
 )
 
-// GetRules - Returns the rules for the ApplicationGatewayScanner
-func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+// GetRecommendations - Returns the rules for the ApplicationGatewayScanner
+func (a *ApplicationGatewayScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"agw-001": {
-			Id:             "agw-001",
-			Category:       scanners.RulesCategoryScalability,
-			Recommendation: "Application Gateway: Ensure autoscaling is used with a minimum of 2 instances",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "agw-001",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategoryScalability,
+			Recommendation:   "Application Gateway: Ensure autoscaling is used with a minimum of 2 instances",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				autoscale := g.Properties.AutoscaleConfiguration != nil && g.Properties.AutoscaleConfiguration.MinCapacity != nil && *g.Properties.AutoscaleConfiguration.MinCapacity >= 2
@@ -26,10 +27,11 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-autoscaling-zone-redundant",
 		},
 		"agw-002": {
-			Id:             "agw-002",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Application Gateway: Secure all incoming connections with SSL",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "agw-002",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Application Gateway: Secure all incoming connections with SSL",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				sslPort := false
@@ -47,10 +49,11 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/well-architected/services/networking/azure-application-gateway#security",
 		},
 		"agw-003": {
-			Id:             "agw-003",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Application Gateway: Enable WAF policies",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "agw-003",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Application Gateway: Enable WAF policies",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				waf := g.Properties.WebApplicationFirewallConfiguration != nil && g.Properties.WebApplicationFirewallConfiguration.Enabled != nil && *g.Properties.WebApplicationFirewallConfiguration.Enabled
@@ -59,10 +62,11 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/features#web-application-firewall",
 		},
 		"agw-004": {
-			Id:             "agw-004",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Application Gateway: Use Application GW V2 instead of V1",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "agw-004",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Application Gateway: Use Application GW V2 instead of V1",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				v2 := g.Properties.SKU != nil && g.Properties.SKU.Name != nil && strings.Contains(string(*g.Properties.SKU.Name), "_v2")
@@ -71,10 +75,11 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://azure.microsoft.com/en-us/updates/application-gateway-v1-will-be-retired-on-28-april-2026-transition-to-application-gateway-v2/",
 		},
 		"agw-005": {
-			Id:             "agw-005",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Application Gateway: Monitor and Log the configurations and traffic",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "agw-005",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategoryMonitoringAndAlerting,
+			Recommendation:   "Application Gateway: Monitor and Log the configurations and traffic",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armnetwork.ApplicationGateway)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
@@ -83,10 +88,11 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
 		},
 		"agw-007": {
-			Id:             "agw-007",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Application Gateway should have availability zones enabled",
-			Impact:         scanners.ImpactMedium,
+			RecommendationID: "agw-007",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Application Gateway should have availability zones enabled",
+			Impact:           scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				zones := g.Zones != nil && len(g.Zones) > 1
@@ -95,10 +101,11 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-autoscaling-zone-redundant",
 		},
 		"agw-008": {
-			Id:             "agw-008",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Application Gateway: Plan for backend maintenance by using connection draining",
-			Impact:         scanners.ImpactMedium,
+			RecommendationID: "agw-008",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Application Gateway: Plan for backend maintenance by using connection draining",
+			Impact:           scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 
@@ -119,20 +126,22 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/features#connection-draining",
 		},
 		"agw-103": {
-			Id:             "agw-103",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Application Gateway SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "agw-103",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Application Gateway SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/application-gateway/",
 		},
 		"agw-104": {
-			Id:             "agw-104",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Application Gateway SKU",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "agw-104",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Application Gateway SKU",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				return false, string(*g.Properties.SKU.Name)
@@ -140,10 +149,11 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/understanding-pricing",
 		},
 		"agw-105": {
-			Id:             "agw-105",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Application Gateway Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "agw-105",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Application Gateway Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				caf := strings.HasPrefix(*g.Name, "agw")
@@ -152,10 +162,11 @@ func (a *ApplicationGatewayScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"agw-106": {
-			Id:             "agw-106",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Application Gateway should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "agw-106",
+			ResourceType:     "Microsoft.Network/applicationGateways",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Application Gateway should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.ApplicationGateway)
 				return len(c.Tags) == 0, ""

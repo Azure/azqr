@@ -23,28 +23,28 @@ func (a *CosmosDBScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all CosmosDB Databases in a Resource Group
-func (c *CosmosDBScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "CosmosDB")
+func (c *CosmosDBScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	databases, err := c.listDatabases(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, database := range databases {
-		rr := engine.EvaluateRules(rules, database, scanContext)
+		rr := engine.EvaluateRecommendations(rules, database, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
+		results = append(results, scanners.AzqrServiceResult{
+			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *database.Name,
-			Type:           *database.Type,
-			Location:       *database.Location,
-			Rules:          rr,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *database.Name,
+			Type:             *database.Type,
+			Location:         *database.Location,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (c *CosmosDBScanner) listDatabases(resourceGroupName string) ([]*armcosmos.
 		domains = append(domains, resp.Value...)
 	}
 	return domains, nil
+}
+
+func (a *CosmosDBScanner) ResourceTypes() []string {
+	return []string{"Microsoft.DocumentDB/databaseAccounts"}
 }

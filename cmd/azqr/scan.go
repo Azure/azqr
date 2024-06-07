@@ -16,12 +16,13 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations")
 	scanCmd.PersistentFlags().BoolP("costs", "c", false, "Scan Azure Costs")
-	scanCmd.PersistentFlags().BoolP("excel", "x", false, "Create excel report")
+	scanCmd.PersistentFlags().BoolP("excel", "x", true, "Create excel report")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
 	scanCmd.PersistentFlags().BoolP("azure-cli-credential", "f", false, "Force the use of Azure CLI Credential")
 	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
-	scanCmd.PersistentFlags().StringP("exclusions", "e", "", "Exclusions file (YAML format)")
+	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
+	scanCmd.PersistentFlags().BoolP("azqr", "", true, "Scan Azure Quick Review Recommendations (default)")
 
 	rootCmd.AddCommand(scanCmd)
 }
@@ -48,7 +49,8 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
 	forceAzureCliCredential, _ := cmd.Flags().GetBool("azure-cli-credential")
-	exclusionFile, _ := cmd.Flags().GetString("exclusions")
+	filtersFile, _ := cmd.Flags().GetString("filters")
+	azqr, _ := cmd.Flags().GetBool("azqr")
 
 	params := internal.ScanParams{
 		SubscriptionID:          subscriptionID,
@@ -62,7 +64,8 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		Debug:                   debug,
 		ServiceScanners:         serviceScanners,
 		ForceAzureCliCredential: forceAzureCliCredential,
-		ExclusionsFile:          exclusionFile,
+		FilterFile:              filtersFile,
+		UseAzqrRecommendations:  azqr,
 	}
 
 	internal.Scan(&params)

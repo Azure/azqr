@@ -11,13 +11,14 @@ import (
 )
 
 // GetRules - Returns the rules for the FrontDoorScanner
-func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+func (a *FrontDoorScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"afd-001": {
-			Id:             "afd-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Azure FrontDoor should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "afd-001",
+			ResourceType:     "Microsoft.Cdn/profiles",
+			Category:         scanners.CategoryMonitoringAndAlerting,
+			Recommendation:   "Azure FrontDoor should have diagnostic settings enabled",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcdn.Profile)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
@@ -26,20 +27,22 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
 		},
 		"afd-003": {
-			Id:             "afd-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure FrontDoor SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "afd-003",
+			ResourceType:     "Microsoft.Cdn/profiles",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Azure FrontDoor SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/cdn/",
 		},
 		"afd-005": {
-			Id:             "afd-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure FrontDoor SKU",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "afd-005",
+			ResourceType:     "Microsoft.Cdn/profiles",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Azure FrontDoor SKU",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcdn.Profile)
 				return false, string(*c.SKU.Name)
@@ -47,10 +50,11 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/tier-comparison",
 		},
 		"afd-006": {
-			Id:             "afd-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Azure FrontDoor Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "afd-006",
+			ResourceType:     "Microsoft.Cdn/profiles",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Azure FrontDoor Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcdn.Profile)
 				caf := strings.HasPrefix(*c.Name, "afd")
@@ -59,10 +63,11 @@ func (a *FrontDoorScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"afd-007": {
-			Id:             "afd-007",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Azure FrontDoor should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "afd-007",
+			ResourceType:     "Microsoft.Cdn/profiles",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Azure FrontDoor should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcdn.Profile)
 				return len(c.Tags) == 0, ""

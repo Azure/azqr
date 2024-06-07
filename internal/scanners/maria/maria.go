@@ -31,29 +31,29 @@ func (c *MariaScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all MariaDB servers in a Resource Group
-func (c *MariaScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "MariaDB")
+func (c *MariaScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	servers, err := c.listServers(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
+	engine := scanners.RecommendationEngine{}
+	rules := c.GetRecommendations()
 	databaseRules := c.GetDatabaseRules()
-	results := []scanners.AzureServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, server := range servers {
-		rr := engine.EvaluateRules(rules, server, scanContext)
+		rr := engine.EvaluateRecommendations(rules, server, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			ServiceName:      *server.Name,
 			Type:             *server.Type,
 			Location:         *server.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 
 		databases, err := c.listDatabases(resourceGroupName, *server.Name)
@@ -61,14 +61,14 @@ func (c *MariaScanner) Scan(resourceGroupName string, scanContext *scanners.Scan
 			return nil, err
 		}
 		for _, database := range databases {
-			rr := engine.EvaluateRules(databaseRules, database, scanContext)
+			rr := engine.EvaluateRecommendations(databaseRules, database, scanContext)
 
-			results = append(results, scanners.AzureServiceResult{
-				SubscriptionID: c.config.SubscriptionID,
-				ResourceGroup:  resourceGroupName,
-				ServiceName:    *database.Name,
-				Type:           *database.Type,
-				Rules:          rr,
+			results = append(results, scanners.AzqrServiceResult{
+				SubscriptionID:  c.config.SubscriptionID,
+				ResourceGroup:   resourceGroupName,
+				ServiceName:     *database.Name,
+				Type:            *database.Type,
+				Recommendations: rr,
 			})
 		}
 	}
@@ -102,4 +102,11 @@ func (c *MariaScanner) listDatabases(resourceGroupName, serverName string) ([]*a
 		databases = append(databases, resp.Value...)
 	}
 	return databases, nil
+}
+
+func (a *MariaScanner) ResourceTypes() []string {
+	return []string{
+		"Microsoft.DBforMariaDB/servers",
+		"Microsoft.DBforMariaDB/servers/databases",
+	}
 }

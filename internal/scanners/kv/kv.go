@@ -23,28 +23,28 @@ func (c *KeyVaultScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Key Vaults in a Resource Group
-func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Key Vault")
+func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	vaults, err := c.listVaults(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, vault := range vaults {
-		rr := engine.EvaluateRules(rules, vault, scanContext)
+		rr := engine.EvaluateRecommendations(rules, vault, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			ServiceName:      *vault.Name,
 			Type:             *vault.Type,
 			Location:         *vault.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (c *KeyVaultScanner) listVaults(resourceGroupName string) ([]*armkeyvault.V
 		vaults = append(vaults, resp.Value...)
 	}
 	return vaults, nil
+}
+
+func (a *KeyVaultScanner) ResourceTypes() []string {
+	return []string{"Microsoft.KeyVault/vaults"}
 }

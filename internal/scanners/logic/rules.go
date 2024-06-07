@@ -10,14 +10,15 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/logic/armlogic"
 )
 
-// GetRules - Returns the rules for the LogicAppScanner
-func (a *LogicAppScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+// GetRecommendations - Returns the rules for the LogicAppScanner
+func (a *LogicAppScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"logic-001": {
-			Id:             "logic-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Logic App should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "logic-001",
+			ResourceType:     "Microsoft.Logic/workflows",
+			Category:         scanners.CategoryMonitoringAndAlerting,
+			Recommendation:   "Logic App should have diagnostic settings enabled",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armlogic.Workflow)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
@@ -26,20 +27,22 @@ func (a *LogicAppScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
 		},
 		"logic-003": {
-			Id:             "logic-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Logic App should have a SLA",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "logic-003",
+			ResourceType:     "Microsoft.Logic/workflows",
+			Category:         scanners.CategoryHighAvailability,
+			Recommendation:   "Logic App should have a SLA",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
 		"logic-004": {
-			Id:             "logic-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Logic App should limit access to Http Triggers",
-			Impact:         scanners.ImpactHigh,
+			RecommendationID: "logic-004",
+			ResourceType:     "Microsoft.Logic/workflows",
+			Category:         scanners.CategorySecurity,
+			Recommendation:   "Logic App should limit access to Http Triggers",
+			Impact:           scanners.ImpactHigh,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armlogic.Workflow)
 				http := false
@@ -66,10 +69,11 @@ func (a *LogicAppScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-securing-a-logic-app?tabs=azure-portal#restrict-access-by-ip-address-range",
 		},
 		"logic-006": {
-			Id:             "logic-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Logic App Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "logic-006",
+			ResourceType:     "Microsoft.Logic/workflows",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Logic App Name should comply with naming conventions",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armlogic.Workflow)
 
@@ -79,10 +83,11 @@ func (a *LogicAppScanner) GetRules() map[string]scanners.AzureRule {
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"logic-007": {
-			Id:             "logic-007",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Logic App should have tags",
-			Impact:         scanners.ImpactLow,
+			RecommendationID: "logic-007",
+			ResourceType:     "Microsoft.Logic/workflows",
+			Category:         scanners.CategoryGovernance,
+			Recommendation:   "Logic App should have tags",
+			Impact:           scanners.ImpactLow,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armlogic.Workflow)
 				return len(c.Tags) == 0, ""

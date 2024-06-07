@@ -23,28 +23,28 @@ func (a *ContainerAppsEnvironmentScanner) Init(config *scanners.ScannerConfig) e
 }
 
 // Scan - Scans all Container Apps in a Resource Group
-func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Container Apps Environment")
+func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	apps, err := a.listApps(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, app := range apps {
-		rr := engine.EvaluateRules(rules, app, scanContext)
+		rr := engine.EvaluateRecommendations(rules, app, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			ServiceName:      *app.Name,
 			Type:             *app.Type,
 			Location:         *app.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -61,4 +61,8 @@ func (a *ContainerAppsEnvironmentScanner) listApps(resourceGroupName string) ([]
 		apps = append(apps, resp.Value...)
 	}
 	return apps, nil
+}
+
+func (a *ContainerAppsEnvironmentScanner) ResourceTypes() []string {
+	return []string{"Microsoft.App/managedenvironments"}
 }

@@ -23,28 +23,28 @@ func (a *DataExplorerScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Data Explorers in a Resource Group
-func (a *DataExplorerScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "DataExplorer")
+func (a *DataExplorerScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	kustoclusters, err := a.listClusters(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, g := range kustoclusters {
-		rr := engine.EvaluateRules(rules, g, scanContext)
+		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (a *DataExplorerScanner) listClusters(resourceGroupName string) ([]*armkust
 		kustoclusters = append(kustoclusters, resp.Value...)
 	}
 	return kustoclusters, nil
+}
+
+func (a *DataExplorerScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Kusto/clusters"}
 }

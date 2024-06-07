@@ -42,8 +42,8 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 		{
 			name: "VirtualMachineScanner Availability Zones",
 			fields: fields{
-				rule:        "vm-002",
-				target:      &armcompute.VirtualMachine{
+				rule: "vm-002",
+				target: &armcompute.VirtualMachine{
 					Zones: []*string{to.Ptr("1")},
 				},
 				scanContext: &scanners.ScanContext{},
@@ -155,7 +155,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &VirtualMachineScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

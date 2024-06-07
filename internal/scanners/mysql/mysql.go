@@ -23,28 +23,28 @@ func (c *MySQLScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all MySQL in a Resource Group
-func (c *MySQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "MySQL")
+func (c *MySQLScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	postgre, err := c.listMySQL(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := scanners.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []scanners.AzqrServiceResult{}
 
 	for _, postgre := range postgre {
-		rr := engine.EvaluateRules(rules, postgre, scanContext)
+		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
 			ServiceName:      *postgre.Name,
 			Type:             *postgre.Type,
 			Location:         *postgre.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 
@@ -63,4 +63,8 @@ func (c *MySQLScanner) listMySQL(resourceGroupName string) ([]*armmysql.Server, 
 		servers = append(servers, resp.Value...)
 	}
 	return servers, nil
+}
+
+func (a *MySQLScanner) ResourceTypes() []string {
+	return []string{"Microsoft.DBforMySQL/servers"}
 }

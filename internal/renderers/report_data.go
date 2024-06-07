@@ -5,17 +5,21 @@ package renderers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/google/uuid"
 )
 
 type ReportData struct {
 	OutputFileName string
 	Mask           bool
-	MainData       []scanners.AzureServiceResult
+	AzqrData       []scanners.AzqrServiceResult
+	AprlData       []scanners.AprlResult
 	DefenderData   []scanners.DefenderResult
 	AdvisorData    []scanners.AdvisorResult
 	CostData       *scanners.CostResult
+	Recomendations map[string]map[string]scanners.AprlRecommendation
 }
 
 func (rd *ReportData) ServicesTable() [][]string {
@@ -23,8 +27,8 @@ func (rd *ReportData) ServicesTable() [][]string {
 
 	rbroken := [][]string{}
 	rok := [][]string{}
-	for _, d := range rd.MainData {
-		for _, r := range d.Rules {
+	for _, d := range rd.AzqrData {
+		for _, r := range d.Recommendations {
 			row := []string{
 				scanners.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 				d.SubscriptionName,
@@ -38,7 +42,7 @@ func (rd *ReportData) ServicesTable() [][]string {
 				r.Recommendation,
 				r.Result,
 				r.Learn,
-				r.Id,
+				r.RecommendationID,
 			}
 			if r.NotCompliant {
 				rbroken = append([][]string{row}, rbroken...)
@@ -49,6 +53,66 @@ func (rd *ReportData) ServicesTable() [][]string {
 	}
 
 	rows := append(rbroken, rok...)
+	rows = append([][]string{headers}, rows...)
+	return rows
+}
+
+func (rd *ReportData) ImpactedTable() [][]string {
+	headers := []string{"Validated Using", "Source", "Category", "Impact", "Resource Type", "Recommendation", "Recommendation Id", "Subscription Id", "Subscription Name", "Resource Group", "Name", "Id", "Param1", "Param2", "Param3", "Param4", "Param5", "Learn"}
+
+	rows := [][]string{}
+	for _, r := range rd.AprlData {
+		row := []string{
+			"Azure Resource Graph",
+			r.Source,
+			string(r.Category),
+			string(r.Impact),
+			r.ResourceType,
+			r.Recommendation,
+			r.RecommendationID,
+			scanners.MaskSubscriptionID(r.SubscriptionID, rd.Mask),
+			r.SubscriptionName,
+			r.ResourceGroup,
+			r.Name,
+			scanners.MaskSubscriptionIDInResourceID(r.ResourceID, rd.Mask),
+			r.Param1,
+			r.Param2,
+			r.Param3,
+			r.Param4,
+			r.Param5,
+			r.Learn,
+		}
+		rows = append(rows, row)
+	}
+
+	for _, d := range rd.AzqrData {
+		for _, r := range d.Recommendations {
+			if r.NotCompliant {
+				row := []string{
+					"Golang SDK",
+					"AZQR",
+					string(r.Category),
+					string(r.Impact),
+					d.Type,
+					r.Recommendation,
+					r.RecommendationID,
+					scanners.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+					d.SubscriptionName,
+					d.ResourceGroup,
+					d.ServiceName,
+					scanners.MaskSubscriptionIDInResourceID(d.ResourceID(), rd.Mask),
+					r.Result,
+					"",
+					"",
+					"",
+					"",
+					r.Learn,
+				}
+				rows = append(rows, row)
+			}
+		}
+	}
+
 	rows = append([][]string{headers}, rows...)
 	return rows
 }
@@ -108,6 +172,69 @@ func (rd *ReportData) AdvisorTable() [][]string {
 			d.LearnMoreLink,
 		}
 		rows = append(rows, row)
+	}
+
+	rows = append([][]string{headers}, rows...)
+	return rows
+}
+
+func (rd *ReportData) RecommendationsTable() [][]string {
+	counter := map[string]int{}
+	for _, rt := range rd.Recomendations {
+		for _, r := range rt {
+			counter[r.RecommendationID] = 0
+		}
+	}
+
+	for _, r := range rd.AprlData {
+		counter[r.RecommendationID]++
+	}
+
+	for _, d := range rd.AzqrData {
+		for _, r := range d.Recommendations {
+			if r.NotCompliant {
+				counter[r.RecommendationID]++
+			}
+		}
+	}
+
+	headers := []string{"Implemented", "Number of Impacted Resources", "Azure Service / Well-Architected", "Recommendation Source",
+		"Azure Service Category / Well-Architected Area", "Azure Service / Well-Architected Topic", "Resiliency Category", "Recommendation",
+		"Impact", "Best Practices Guidance", "Read More", "Recommendation Id"}
+	rows := [][]string{}
+	for t, rt := range rd.Recomendations {
+		for _, r := range rt {
+			implemented := counter[r.RecommendationID] == 0
+			source := "APRL"
+			_, err := uuid.Parse(r.RecommendationID)
+			if err != nil {
+				source = "AZQR"
+			}
+
+			categoryPart := ""
+			servicePart := ""
+			typeParts := strings.Split(t, "/")
+			categoryPart = typeParts[0]
+			if len(typeParts) > 1 {
+				servicePart = typeParts[1]
+			}
+
+			row := []string{
+				fmt.Sprintf("%t", implemented),
+				fmt.Sprint(counter[r.RecommendationID]),
+				"Azure Service",
+				source,
+				categoryPart,
+				servicePart,
+				string(r.Category),
+				r.Recommendation,
+				string(r.Impact),
+				r.LongDescription,
+				r.LearnMoreLink[0].Url,
+				r.RecommendationID,
+			}
+			rows = append(rows, row)
+		}
 	}
 
 	rows = append([][]string{headers}, rows...)
