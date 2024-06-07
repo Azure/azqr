@@ -38,13 +38,13 @@ func (c *CosmosDBScanner) Scan(resourceGroupName string, scanContext *scanners.S
 		rr := engine.EvaluateRules(rules, database, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
+			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *database.Name,
-			Type:           *database.Type,
-			Location:       *database.Location,
-			Rules:          rr,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *database.Name,
+			Type:             *database.Type,
+			Location:         *database.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (c *CosmosDBScanner) listDatabases(resourceGroupName string) ([]*armcosmos.
 		domains = append(domains, resp.Value...)
 	}
 	return domains, nil
+}
+
+func (a *CosmosDBScanner) ResourceType() []string {
+	return []string{"Microsoft.DocumentDB/databaseAccounts"}
 }

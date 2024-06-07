@@ -147,3 +147,7 @@ func (a *SynapseWorkspaceScanner) listSparkPools(resourceGroupName string, works
 	}
 	return results, nil
 }
+
+func (a *SynapseWorkspaceScanner) ResourceType() []string {
+	return []string{"Microsoft.Synapse/workspaces"}
+}

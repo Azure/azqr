@@ -63,3 +63,7 @@ func (c *VirtualWanScanner) list(resourceGroupName string) ([]*armnetwork.Virtua
 	}
 	return vwans, nil
 }
+
+func (a *VirtualWanScanner) ResourceType() []string {
+	return []string{"Microsoft.Network/virtualWans"}
+}

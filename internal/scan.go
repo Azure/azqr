@@ -7,10 +7,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"sync"
 	"time"
 
+	"github.com/Azure/azqr/internal/filters"
+	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
@@ -18,7 +19,6 @@ import (
 	"github.com/Azure/azqr/internal/to"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -27,46 +27,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
-
-	"github.com/Azure/azqr/internal/scanners/adf"
-	"github.com/Azure/azqr/internal/scanners/afd"
-	"github.com/Azure/azqr/internal/scanners/afw"
-	"github.com/Azure/azqr/internal/scanners/agw"
-	"github.com/Azure/azqr/internal/scanners/aks"
-	"github.com/Azure/azqr/internal/scanners/amg"
-	"github.com/Azure/azqr/internal/scanners/apim"
-	"github.com/Azure/azqr/internal/scanners/appcs"
-	"github.com/Azure/azqr/internal/scanners/appi"
-	"github.com/Azure/azqr/internal/scanners/as"
-	"github.com/Azure/azqr/internal/scanners/asp"
-	"github.com/Azure/azqr/internal/scanners/ca"
-	"github.com/Azure/azqr/internal/scanners/cae"
-	"github.com/Azure/azqr/internal/scanners/ci"
-	"github.com/Azure/azqr/internal/scanners/cog"
-	"github.com/Azure/azqr/internal/scanners/cosmos"
-	"github.com/Azure/azqr/internal/scanners/cr"
-	"github.com/Azure/azqr/internal/scanners/dbw"
-	"github.com/Azure/azqr/internal/scanners/dec"
-	"github.com/Azure/azqr/internal/scanners/evgd"
-	"github.com/Azure/azqr/internal/scanners/evh"
-	"github.com/Azure/azqr/internal/scanners/kv"
-	"github.com/Azure/azqr/internal/scanners/lb"
-	"github.com/Azure/azqr/internal/scanners/logic"
-	"github.com/Azure/azqr/internal/scanners/maria"
-	"github.com/Azure/azqr/internal/scanners/mysql"
-	"github.com/Azure/azqr/internal/scanners/psql"
-	"github.com/Azure/azqr/internal/scanners/redis"
-	"github.com/Azure/azqr/internal/scanners/sb"
-	"github.com/Azure/azqr/internal/scanners/sigr"
-	"github.com/Azure/azqr/internal/scanners/sql"
-	"github.com/Azure/azqr/internal/scanners/st"
-	"github.com/Azure/azqr/internal/scanners/synw"
-	"github.com/Azure/azqr/internal/scanners/traf"
-	"github.com/Azure/azqr/internal/scanners/vgw"
-	"github.com/Azure/azqr/internal/scanners/vm"
-	"github.com/Azure/azqr/internal/scanners/vmss"
-	"github.com/Azure/azqr/internal/scanners/vnet"
-	"github.com/Azure/azqr/internal/scanners/wps"
 )
 
 type ScanParams struct {
@@ -82,79 +42,35 @@ type ScanParams struct {
 	ServiceScanners         []scanners.IAzureScanner
 	ForceAzureCliCredential bool
 	ExclusionsFile          string
+	UseAzqrRecommendations  bool
+	UseAprlRecommendations  bool
 }
 
 func Scan(params *ScanParams) {
-	subscriptionID := params.SubscriptionID
-	resourceGroupName := params.ResourceGroup
-	outputFileName := params.OutputName
-	defender := params.Defender
-	advisor := params.Advisor
-	cost := params.Cost
-	createXlsx := params.Xlsx
-	mask := params.Mask
-	debug := params.Debug
-	forceAzureCliCredential := params.ForceAzureCliCredential
-	exclusionsFile := params.ExclusionsFile
-
 	// Default level for this example is info, unless debug flag is present
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if debug {
+	if params.Debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		log.Debug().Msg("Debug logging enabled")
 	}
 
-	if subscriptionID == "" && resourceGroupName != "" {
+	// validate input
+	if params.SubscriptionID == "" && params.ResourceGroup != "" {
 		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
 	}
 
-	outputFile := outputFileName
-	if outputFile == "" {
-		current_time := time.Now()
-		outputFileStamp := fmt.Sprintf("%d_%02d_%02d_T%02d%02d%02d",
-			current_time.Year(), current_time.Month(), current_time.Day(),
-			current_time.Hour(), current_time.Minute(), current_time.Second())
+	// generate output file name
+	outputFile := generateOutputFileName(params.OutputName)
 
-		outputFile = fmt.Sprintf("%s_%s", "azqr_report", outputFileStamp)
-	}
+	// load exclusions
+	exclusions := filters.LoadFilters(params.ExclusionsFile)
 
-	exclusions := scanners.Filters{
-		Azqr: &scanners.AzqrFilter{
-			Exclude: &scanners.Exclude{
-				Subscriptions:  []string{},
-				ResourceGroups: []string{},
-				Services:       []string{},
-			},
-		},
-	}
-
-	if exclusionsFile != "" {
-		data, err := os.ReadFile(exclusionsFile)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("failed reading data from file: %s", exclusionsFile)
-		}
-
-		err = yaml.Unmarshal([]byte(data), &exclusions)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("failed parsing yaml from file: %s", exclusionsFile)
-		}
-	}
-
-	var cred azcore.TokenCredential
-	var err error
-	if !forceAzureCliCredential {
-		cred, err = azidentity.NewDefaultAzureCredential(nil)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get Azure credentials")
-		}
-	} else {
-		cred, err = azidentity.NewAzureCLICredential(nil)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get Azure CLI credentials")
-		}
-	}
+	// create Azure credentials
+	cred := newAzureCredential(params.ForceAzureCliCredential)
 
 	ctx := context.Background()
+
+	graph := graph.NewGraphQuery(cred)
 
 	clientOptions := &arm.ClientOptions{
 		ClientOptions: policy.ClientOptions{
@@ -166,117 +82,56 @@ func Scan(params *ScanParams) {
 		},
 	}
 
-	subscriptions := map[string]string{}
-	subs, err := listSubscriptions(ctx, cred, clientOptions)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to list subscriptions")
-	}
-	for _, s := range subs {
-		if subscriptionID == "" || subscriptionID == *s.SubscriptionID {
-			subscriptions[*s.SubscriptionID] = *s.DisplayName
-		}
-	}
-
-	var ruleResults []scanners.AzureServiceResult
-	var defenderResults []scanners.DefenderResult
-	var advisorResults []scanners.AdvisorResult
-	costResult := &scanners.CostResult{
-		Items: []*scanners.CostResultItem{},
-	}
+	// list subscriptions
+	subscriptions := listSubscriptions(ctx, cred, params.SubscriptionID, exclusions, clientOptions)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	// initialize scanners
 	defenderScanner := scanners.DefenderScanner{}
-	peScanner := scanners.PrivateEndpointScanner{}
 	pipScanner := scanners.PublicIPScanner{}
+	peScanner := scanners.PrivateEndpointScanner{}
 	diagnosticsScanner := scanners.DiagnosticSettingsScanner{}
 	advisorScanner := scanners.AdvisorScanner{}
 	costScanner := scanners.CostScanner{}
 
-	for s, sn := range subscriptions {
-		if exclusions.Azqr.Exclude.IsSubscriptionExcluded(s) {
-			log.Info().Msgf("Skipping subscriptions/...%s", s[29:])
-			continue
-		}
+	// build report data
+	reportData := renderers.ReportData{
+		OutputFileName: outputFile,
+		Mask:           params.Mask,
+		Recomendations: map[string]map[string]scanners.AzureAprlRecommendation{},
+		AzqrData:       []scanners.AzureServiceResult{},
+		AprlData:       []scanners.AzureServiceGraphRuleResult{},
+		DefenderData:   []scanners.DefenderResult{},
+		AdvisorData:    []scanners.AdvisorResult{},
+		CostData: &scanners.CostResult{
+			Items: []*scanners.CostResultItem{},
+		},
+	}
 
-		resourceGroups := []string{}
-		if resourceGroupName != "" {
-			exists, err := checkExistenceResourceGroup(ctx, s, resourceGroupName, cred, clientOptions)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to check existence of Resource Group")
-			}
+	// get APRL recommendations
+	aprl := GetAprlRecommendations()
 
-			if !exists {
-				log.Fatal().Msgf("Resource Group %s does not exist", resourceGroupName)
-			}
-
-			if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", s, resourceGroupName)) {
-				log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", s[29:], resourceGroupName)
-				continue
-			}
-
-			resourceGroups = append(resourceGroups, resourceGroupName)
-		} else {
-			rgs, err := listResourceGroup(ctx, s, cred, clientOptions)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to list Resource Groups")
-			}
-			for _, rg := range rgs {
-				if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", s, *rg.Name)) {
-					log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", s[29:], *rg.Name)
-					continue
-				}
-				resourceGroups = append(resourceGroups, *rg.Name)
-			}
-		}
+	for sid, sn := range subscriptions {
+		resourceGroups := listResourceGroups(ctx, cred, params.ResourceGroup, sid, exclusions, clientOptions)
 
 		config := &scanners.ScannerConfig{
 			Ctx:              ctx,
-			SubscriptionID:   s,
+			SubscriptionID:   sid,
 			SubscriptionName: sn,
 			Cred:             cred,
 			ClientOptions:    clientOptions,
 		}
 
-		err = peScanner.Init(config)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to initialize Private Endpoint Scanner")
-		}
-		peResults, err := peScanner.ListResourcesWithPrivateEndpoints()
-		if err != nil {
-			if shouldSkipError(err) {
-				peResults = map[string]bool{}
-			} else {
-				log.Fatal().Err(err).Msg("Failed to list resources with Private Endpoints")
-			}
-		}
+		// scan private endpoints
+		peResults := scanPrivateEndpoints(config, &peScanner)
 
-		err = diagnosticsScanner.Init(config)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to initialize Diagnostic Settings Scanner")
-		}
-		diagResults, err := diagnosticsScanner.ListResourcesWithDiagnosticSettings()
-		if err != nil {
-			if shouldSkipError(err) {
-				diagResults = map[string]bool{}
-			} else {
-				log.Fatal().Err(err).Msg("Failed to list resources with Diagnostic Settings")
-			}
-		}
+		// scan diagnostic settings
+		diagResults := scanDiagnosticSettings(config, &diagnosticsScanner)
 
-		err = pipScanner.Init(config)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to initialize Diagnostic Settings Scanner")
-		}
-		pips, err := pipScanner.ListPublicIPs()
-		if err != nil {
-			if shouldSkipError(err) {
-				pips = map[string]*armnetwork.PublicIPAddress{}
-			} else {
-				log.Fatal().Err(err).Msg("Failed to list Public IPs")
-			}
-		}
+		// scan public IPs
+		pips := scanPublicIPs(config, &pipScanner)
 
 		scanContext := scanners.ScanContext{
 			Exclusions:          exclusions.Azqr.Exclude,
@@ -285,109 +140,127 @@ func Scan(params *ScanParams) {
 			PublicIPs:           pips,
 		}
 
+		var wg sync.WaitGroup
+		ch := make(chan []scanners.AzureServiceGraphRuleResult, 5)
+		wg.Add(len(params.ServiceScanners))
+
+		go func() {
+			wg.Wait()
+			close(ch)
+		}()
+
 		for _, a := range params.ServiceScanners {
 			err := a.Init(config)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to initialize scanner")
 			}
-		}
 
-		for _, r := range resourceGroups {
-			var wg sync.WaitGroup
-			ch := make(chan []scanners.AzureServiceResult, 5)
-			wg.Add(len(params.ServiceScanners))
+			if params.UseAzqrRecommendations {
+				for i, r := range a.GetRules() {
+					for _, t := range a.ResourceType() {
+						if reportData.Recomendations[t] == nil {
+							reportData.Recomendations[t] = map[string]scanners.AzureAprlRecommendation{}
+						}
 
-			go func() {
-				wg.Wait()
-				close(ch)
-			}()
+						reportData.Recomendations[t][i] = r.ToAzureAprlRecommendation(t)
+					}
+				}
+			}
 
-			for _, s := range params.ServiceScanners {
-				go func(r string, s scanners.IAzureScanner) {
-					defer wg.Done()
+			go func(s scanners.IAzureScanner) {
+				defer wg.Done()
 
-					res, err := retry(3, 10*time.Millisecond, s, r, &scanContext)
+				for _, t := range s.ResourceType() {
+					scanners.LogSubscriptionScan(sid, t)
+					rules := scanners.GetGraphRules(t, aprl)
+
+					for i, r := range rules {
+						if reportData.Recomendations[t] == nil {
+							reportData.Recomendations[t] = map[string]scanners.AzureAprlRecommendation{}
+						}
+						reportData.Recomendations[t][i] = r
+					}
+
+					res, err := graphScan(graph, rules, config)
 					if err != nil {
 						cancel()
 						log.Fatal().Err(err).Msg("Failed to scan")
 					}
 					ch <- res
-				}(r, s)
-			}
+				}
+			}(a)
+		}
 
-			for i := 0; i < len(params.ServiceScanners); i++ {
-				res := <-ch
-				for _, r := range res {
-					if exclusions.Azqr.Exclude.IsServiceExcluded(r.ResourceID()) {
-						continue
+		for i := 0; i < len(params.ServiceScanners); i++ {
+			res := <-ch
+			for _, r := range res {
+				if exclusions.Azqr.Exclude.IsServiceExcluded(r.ResourceID) {
+					continue
+				}
+				reportData.AprlData = append(reportData.AprlData, r)
+			}
+		}
+
+		if params.UseAzqrRecommendations {
+			for _, r := range resourceGroups {
+				var wg sync.WaitGroup
+				ch := make(chan []scanners.AzureServiceResult, 5)
+				wg.Add(len(params.ServiceScanners))
+
+				go func() {
+					wg.Wait()
+					close(ch)
+				}()
+
+				for _, s := range params.ServiceScanners {
+					err := s.Init(config)
+					if err != nil {
+						log.Fatal().Err(err).Msg("Failed to initialize scanner")
 					}
-					ruleResults = append(ruleResults, r)
+
+					go func(r string, s scanners.IAzureScanner) {
+						defer wg.Done()
+
+						res, err := retry(3, 10*time.Millisecond, s, r, &scanContext)
+						if err != nil {
+							cancel()
+							log.Fatal().Err(err).Msg("Failed to scan")
+						}
+						ch <- res
+					}(r, s)
+				}
+
+				for i := 0; i < len(params.ServiceScanners); i++ {
+					res := <-ch
+					for _, r := range res {
+						if exclusions.Azqr.Exclude.IsServiceExcluded(r.ResourceID()) {
+							continue
+						}
+						reportData.AzqrData = append(reportData.AzqrData, r)
+					}
 				}
 			}
 		}
 
-		if defender {
-			err = defenderScanner.Init(config)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to initialize Defender Scanner")
-			}
+		// scan defender
+		reportData.DefenderData = append(reportData.DefenderData, scanDefender(params.Defender, config, &defenderScanner)...)
 
-			res, err := defenderScanner.ListConfiguration()
-			if err != nil {
-				if shouldSkipError(err) {
-					res = []scanners.DefenderResult{}
-				} else {
-					log.Fatal().Err(err).Msg("Failed to list Defender configuration")
-				}
-			}
-			defenderResults = append(defenderResults, res...)
-		}
+		// scan advisor
+		reportData.AdvisorData = append(reportData.AdvisorData, scanAdvisor(params.Advisor, config, &advisorScanner)...)
 
-		if advisor {
-			err = advisorScanner.Init(config)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to initialize Advisor Scanner")
-			}
-
-			rec, err := advisorScanner.ListRecommendations()
-			if err != nil {
-				if shouldSkipError(err) {
-					rec = []scanners.AdvisorResult{}
-				} else {
-					log.Fatal().Err(err).Msg("Failed to list Advisor recommendations")
-				}
-			}
-			advisorResults = append(advisorResults, rec...)
-		}
-
-		if cost {
-			err = costScanner.Init(config)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to initialize Cost Scanner")
-			}
-			costs, err := costScanner.QueryCosts()
-			if err != nil && !shouldSkipError(err) {
-				log.Fatal().Err(err).Msg("Failed to query costs")
-			}
-			costResult.From = costs.From
-			costResult.To = costs.To
-			costResult.Items = append(costResult.Items, costs.Items...)
-		}
+		// scan costs
+		costs := scanCosts(params.Cost, config, &costScanner)
+		reportData.CostData.From = costs.From
+		reportData.CostData.To = costs.To
+		reportData.CostData.Items = append(reportData.CostData.Items, costs.Items...)
 	}
 
-	reportData := renderers.ReportData{
-		OutputFileName: outputFile,
-		Mask:           mask,
-		MainData:       ruleResults,
-		DefenderData:   defenderResults,
-		AdvisorData:    advisorResults,
-		CostData:       costResult,
-	}
-
-	if createXlsx {
+	// render excel report
+	if params.Xlsx {
 		excel.CreateExcelReport(&reportData)
 	}
 
+	// render csv reports
 	csv.CreateCsvReport(&reportData)
 
 	log.Info().Msg("Scan completed.")
@@ -452,10 +325,44 @@ func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.T
 	return resourceGroups, nil
 }
 
-func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, options *arm.ClientOptions) ([]*armsubscription.Subscription, error) {
+func listResourceGroups(ctx context.Context, cred azcore.TokenCredential, resourceGroup string, subscriptionID string, exclusions *filters.Filters, options *arm.ClientOptions) []string {
+	resourceGroups := []string{}
+	if resourceGroup != "" {
+		exists, err := checkExistenceResourceGroup(ctx, subscriptionID, resourceGroup, cred, options)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to check existence of Resource Group")
+		}
+
+		if !exists {
+			log.Fatal().Msgf("Resource Group %s does not exist", resourceGroup)
+		}
+
+		if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", subscriptionID, resourceGroup)) {
+			log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", subscriptionID[29:], resourceGroup)
+			return resourceGroups
+		}
+
+		resourceGroups = append(resourceGroups, resourceGroup)
+	} else {
+		rgs, err := listResourceGroup(ctx, subscriptionID, cred, options)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to list Resource Groups")
+		}
+		for _, rg := range rgs {
+			if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", subscriptionID, *rg.Name)) {
+				log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", subscriptionID[29:], *rg.Name)
+				continue
+			}
+			resourceGroups = append(resourceGroups, *rg.Name)
+		}
+	}
+	return resourceGroups
+}
+
+func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, exclusions *filters.Filters, options *arm.ClientOptions) map[string]string {
 	client, err := armsubscription.NewSubscriptionsClient(cred, options)
 	if err != nil {
-		return nil, err
+		log.Fatal().Err(err).Msg("Failed to create subscriptions client")
 	}
 
 	resultPager := client.NewListPager(nil)
@@ -464,7 +371,7 @@ func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, options
 	for resultPager.More() {
 		pageResp, err := resultPager.NextPage(ctx)
 		if err != nil {
-			return nil, err
+			log.Fatal().Err(err).Msg("Failed to list subscriptions")
 		}
 
 		for _, s := range pageResp.Value {
@@ -474,7 +381,21 @@ func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, options
 			}
 		}
 	}
-	return subscriptions, nil
+
+	result := map[string]string{}
+	for _, s := range subscriptions {
+		// if subscriptionID is empty, return all subscriptions. Otherwise, return only the specified subscription
+		sid := *s.SubscriptionID
+		if subscriptionID == "" || subscriptionID == sid {
+			if exclusions.Azqr.Exclude.IsSubscriptionExcluded(sid) {
+				log.Info().Msgf("Skipping subscriptions/...%s", sid[29:])
+				continue
+			}
+			result[*s.SubscriptionID] = *s.DisplayName
+		}
+	}
+
+	return result
 }
 
 func shouldSkipError(err error) bool {
@@ -489,48 +410,216 @@ func shouldSkipError(err error) bool {
 	return false
 }
 
-func GetScanners() []scanners.IAzureScanner {
-	return []scanners.IAzureScanner{
-		&dbw.DatabricksScanner{},
-		&adf.DataFactoryScanner{},
-		&afd.FrontDoorScanner{},
-		&afw.FirewallScanner{},
-		&agw.ApplicationGatewayScanner{},
-		&aks.AKSScanner{},
-		&amg.ManagedGrafanaScanner{},
-		&apim.APIManagementScanner{},
-		&appcs.AppConfigurationScanner{},
-		&appi.AppInsightsScanner{},
-		&as.AnalysisServicesScanner{},
-		&cae.ContainerAppsEnvironmentScanner{},
-		&ca.ContainerAppsScanner{},
-		&ci.ContainerInstanceScanner{},
-		&cog.CognitiveScanner{},
-		&cosmos.CosmosDBScanner{},
-		&cr.ContainerRegistryScanner{},
-		&dec.DataExplorerScanner{},
-		&evgd.EventGridScanner{},
-		&evh.EventHubScanner{},
-		&kv.KeyVaultScanner{},
-		&lb.LoadBalancerScanner{},
-		&logic.LogicAppScanner{},
-		&maria.MariaScanner{},
-		&mysql.MySQLFlexibleScanner{},
-		&mysql.MySQLScanner{},
-		&asp.AppServiceScanner{},
-		&psql.PostgreFlexibleScanner{},
-		&psql.PostgreScanner{},
-		&redis.RedisScanner{},
-		&sb.ServiceBusScanner{},
-		&sigr.SignalRScanner{},
-		&sql.SQLScanner{},
-		&synw.SynapseWorkspaceScanner{},
-		&traf.TrafficManagerScanner{},
-		&st.StorageScanner{},
-		&vm.VirtualMachineScanner{},
-		&vmss.VirtualMachineScaleSetScanner{},
-		&vnet.VirtualNetworkScanner{},
-		&vgw.VirtualNetworkGatewayScanner{},
-		&wps.WebPubSubScanner{},
+func graphScan(graphClient *graph.GraphQuery, rules map[string]scanners.AzureAprlRecommendation, config *scanners.ScannerConfig) ([]scanners.AzureServiceGraphRuleResult, error) {
+	// scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "AKS")
+	results := []scanners.AzureServiceGraphRuleResult{}
+
+	for _, rule := range rules {
+		if rule.GraphQuery != "" {
+			result := graphClient.Query(config.Ctx, rule.GraphQuery, []*string{&config.SubscriptionID})
+			if result.Data != nil {
+				for _, row := range result.Data {
+					m := row.(map[string]interface{})
+
+					tags := ""
+					// if m["tags"] != nil {
+					// 	tags = m["tags"].(string)
+					// }
+
+					param1 := ""
+					if m["param1"] != nil {
+						param1 = m["param1"].(string)
+					}
+
+					param2 := ""
+					if m["param2"] != nil {
+						param2 = m["param2"].(string)
+					}
+
+					param3 := ""
+					if m["param3"] != nil {
+						param3 = m["param3"].(string)
+					}
+
+					param4 := ""
+					if m["param4"] != nil {
+						param4 = m["param4"].(string)
+					}
+
+					param5 := ""
+					if m["param5"] != nil {
+						param5 = m["param5"].(string)
+					}
+
+					log.Debug().Msg(rule.GraphQuery)
+
+					results = append(results, scanners.AzureServiceGraphRuleResult{
+						RecommendationID:    rule.RecommendationID,
+						Category:            scanners.RulesCategory(rule.Category),
+						Recommendation:      rule.Recommendation,
+						ResourceType:        rule.ResourceType,
+						LongDescription:     rule.LongDescription,
+						PotentialBenefits:   rule.PotentialBenefits,
+						Impact:              scanners.ImpactType(rule.Impact),
+						Name:                m["name"].(string),
+						ResourceID:          m["id"].(string),
+						SubscriptionID:      scanners.GetSubsctiptionFromResourceID(m["id"].(string)),
+						SubscriptionName:    config.SubscriptionName,
+						ResourceGroup:       scanners.GetResourceGroupFromResourceID(m["id"].(string)),
+						Tags:                tags,
+						Param1:              param1,
+						Param2:              param2,
+						Param3:              param3,
+						Param4:              param4,
+						Param5:              param5,
+						Learn:               rule.LearnMoreLink[0].Url,
+						AutomationAvailable: rule.AutomationAvailable,
+						Source:              "APRL",
+					})
+				}
+			}
+		}
 	}
+
+	return results, nil
+}
+
+func newAzureCredential(forceAzureCliCredential bool) azcore.TokenCredential {
+	var cred azcore.TokenCredential
+	var err error
+	if !forceAzureCliCredential {
+		cred, err = azidentity.NewDefaultAzureCredential(nil)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get Azure credentials")
+		}
+	} else {
+		cred, err = azidentity.NewAzureCLICredential(nil)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get Azure CLI credentials")
+		}
+	}
+	return cred
+}
+
+func generateOutputFileName(outputName string) string {
+	outputFile := outputName
+	if outputFile == "" {
+		current_time := time.Now()
+		outputFileStamp := fmt.Sprintf("%d_%02d_%02d_T%02d%02d%02d",
+			current_time.Year(), current_time.Month(), current_time.Day(),
+			current_time.Hour(), current_time.Minute(), current_time.Second())
+
+		outputFile = fmt.Sprintf("%s_%s", "azqr_report", outputFileStamp)
+	}
+	return outputFile
+}
+
+func scanCosts(scan bool, config *scanners.ScannerConfig, costScanner *scanners.CostScanner) *scanners.CostResult {
+	costResult := &scanners.CostResult{
+		Items: []*scanners.CostResultItem{},
+	}
+	if scan {
+		err := costScanner.Init(config)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to initialize Cost Scanner")
+		}
+		costs, err := costScanner.QueryCosts()
+		if err != nil && !shouldSkipError(err) {
+			log.Fatal().Err(err).Msg("Failed to query costs")
+		}
+		costResult.From = costs.From
+		costResult.To = costs.To
+		costResult.Items = append(costResult.Items, costs.Items...)
+	}
+	return costResult
+}
+
+func scanDefender(scan bool, config *scanners.ScannerConfig, defenderScanner *scanners.DefenderScanner) []scanners.DefenderResult {
+	defenderResults := []scanners.DefenderResult{}
+	if scan {
+		err := defenderScanner.Init(config)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to initialize Defender Scanner")
+		}
+
+		res, err := defenderScanner.ListConfiguration()
+		if err != nil {
+			if shouldSkipError(err) {
+				res = []scanners.DefenderResult{}
+			} else {
+				log.Fatal().Err(err).Msg("Failed to list Defender configuration")
+			}
+		}
+		defenderResults = append(defenderResults, res...)
+	}
+	return defenderResults
+}
+
+func scanAdvisor(scan bool, config *scanners.ScannerConfig, advisorScanner *scanners.AdvisorScanner) []scanners.AdvisorResult {
+	advisorResults := []scanners.AdvisorResult{}
+	if scan {
+		err := advisorScanner.Init(config)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to initialize Advisor Scanner")
+		}
+
+		rec, err := advisorScanner.ListRecommendations()
+		if err != nil {
+			if shouldSkipError(err) {
+				rec = []scanners.AdvisorResult{}
+			} else {
+				log.Fatal().Err(err).Msg("Failed to list Advisor recommendations")
+			}
+		}
+		advisorResults = append(advisorResults, rec...)
+	}
+	return advisorResults
+}
+
+func scanPrivateEndpoints(config *scanners.ScannerConfig, peScanner *scanners.PrivateEndpointScanner) map[string]bool {
+	err := peScanner.Init(config)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize Private Endpoint Scanner")
+	}
+	peResults, err := peScanner.ListResourcesWithPrivateEndpoints()
+	if err != nil {
+		if shouldSkipError(err) {
+			peResults = map[string]bool{}
+		} else {
+			log.Fatal().Err(err).Msg("Failed to list resources with Private Endpoints")
+		}
+	}
+	return peResults
+}
+
+func scanPublicIPs(config *scanners.ScannerConfig, pipScanner *scanners.PublicIPScanner) map[string]*armnetwork.PublicIPAddress {
+	err := pipScanner.Init(config)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize Diagnostic Settings Scanner")
+	}
+	pips, err := pipScanner.ListPublicIPs()
+	if err != nil {
+		if shouldSkipError(err) {
+			pips = map[string]*armnetwork.PublicIPAddress{}
+		} else {
+			log.Fatal().Err(err).Msg("Failed to list Public IPs")
+		}
+	}
+	return pips
+}
+
+func scanDiagnosticSettings(config *scanners.ScannerConfig, diagnosticsScanner *scanners.DiagnosticSettingsScanner) map[string]bool {
+	err := diagnosticsScanner.Init(config)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize Diagnostic Settings Scanner")
+	}
+	diagResults, err := diagnosticsScanner.ListResourcesWithDiagnosticSettings()
+	if err != nil {
+		if shouldSkipError(err) {
+			diagResults = map[string]bool{}
+		} else {
+			log.Fatal().Err(err).Msg("Failed to list resources with Diagnostic Settings")
+		}
+	}
+	return diagResults
 }

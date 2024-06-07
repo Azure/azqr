@@ -63,3 +63,7 @@ func (c *DatabricksScanner) listWorkspaces(resourceGroupName string) ([]*armdata
 	}
 	return registries, nil
 }
+
+func (a *DatabricksScanner) ResourceType() []string {
+	return []string{"Microsoft.Databricks/workspaces"}
+}

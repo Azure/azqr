@@ -62,3 +62,7 @@ func (c *ContainerInstanceScanner) listInstances(resourceGroupName string) ([]*a
 	}
 	return apps, nil
 }
+
+func (a *ContainerInstanceScanner) ResourceType() []string {
+	return []string{"Microsoft.ContainerInstance/containerGroups"}
+}

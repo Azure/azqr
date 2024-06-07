@@ -50,6 +50,7 @@ func (c *PostgreFlexibleScanner) Scan(resourceGroupName string, scanContext *sca
 
 	return results, nil
 }
+
 func (c *PostgreFlexibleScanner) listFlexiblePostgre(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error) {
 	pager := c.flexibleClient.NewListByResourceGroupPager(resourceGroupName, nil)
 
@@ -62,4 +63,8 @@ func (c *PostgreFlexibleScanner) listFlexiblePostgre(resourceGroupName string) (
 		servers = append(servers, resp.Value...)
 	}
 	return servers, nil
+}
+
+func (a *PostgreFlexibleScanner) ResourceType() []string {
+	return []string{"Microsoft.DBforPostgreSQL/flexibleServers"}
 }

@@ -62,3 +62,7 @@ func (a *ApplicationGatewayScanner) listGateways(resourceGroupName string) ([]*a
 	}
 	return results, nil
 }
+
+func (a *ApplicationGatewayScanner) ResourceType() []string {
+	return []string{"Microsoft.Network/applicationGateways"}
+}

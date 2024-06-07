@@ -103,3 +103,7 @@ func (c *MariaScanner) listDatabases(resourceGroupName, serverName string) ([]*a
 	}
 	return databases, nil
 }
+
+func (a *MariaScanner) ResourceType() []string {
+	return []string{"Microsoft.DBforMariaDB/servers"}
+}

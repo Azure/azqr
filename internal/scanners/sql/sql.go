@@ -148,3 +148,7 @@ func (c *SQLScanner) listPools(resourceGroupName, serverName string) ([]*armsql.
 	}
 	return pools, nil
 }
+
+func (a *SQLScanner) ResourceType() []string {
+	return []string{"Microsoft.Sql/servers"}
+}

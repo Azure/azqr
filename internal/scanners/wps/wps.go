@@ -63,3 +63,7 @@ func (c *WebPubSubScanner) listWebPubSub(resourceGroupName string) ([]*armwebpub
 	}
 	return WebPubSubs, nil
 }
+
+func (c *WebPubSubScanner) ResourceType() []string {
+	return []string{"Microsoft.SignalRService/webPubSub"}
+}

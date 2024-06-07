@@ -63,3 +63,7 @@ func (c *MySQLFlexibleScanner) listFlexiblePostgre(resourceGroupName string) ([]
 	}
 	return servers, nil
 }
+
+func (a *MySQLFlexibleScanner) ResourceType() []string {
+	return []string{"Microsoft.DBforMySQL/flexibleServers"}
+}

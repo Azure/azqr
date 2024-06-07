@@ -38,13 +38,13 @@ func (c *TrafficManagerScanner) Scan(resourceGroupName string, scanContext *scan
 		rr := engine.EvaluateRules(rules, w, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
+			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *w.Name,
-			Type:           *w.Type,
-			Location:       *w.Location,
-			Rules:          rr,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *w.Name,
+			Type:             *w.Type,
+			Location:         *w.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (c *TrafficManagerScanner) list(resourceGroupName string) ([]*armtrafficman
 		vnets = append(vnets, resp.Value...)
 	}
 	return vnets, nil
+}
+
+func (a *TrafficManagerScanner) ResourceType() []string {
+	return []string{"Microsoft.Network/trafficManagerProfiles"}
 }

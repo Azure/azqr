@@ -38,13 +38,13 @@ func (a *FirewallScanner) Scan(resourceGroupName string, scanContext *scanners.S
 		rr := engine.EvaluateRules(rules, g, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: a.config.SubscriptionID,
+			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:  resourceGroupName,
-			Location:       *g.Location,
-			Type:           *g.Type,
-			ServiceName:    *g.Name,
-			Rules:          rr,
+			ResourceGroup:    resourceGroupName,
+			Location:         *g.Location,
+			Type:             *g.Type,
+			ServiceName:      *g.Name,
+			Rules:            rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (a *FirewallScanner) list(resourceGroupName string) ([]*armnetwork.AzureFir
 		services = append(services, resp.Value...)
 	}
 	return services, nil
+}
+
+func (a *FirewallScanner) ResourceType() []string {
+	return []string{"Microsoft.Network/azureFirewalls"}
 }

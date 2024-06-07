@@ -38,13 +38,13 @@ func (a *APIManagementScanner) Scan(resourceGroupName string, scanContext *scann
 		rr := engine.EvaluateRules(rules, s, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: a.config.SubscriptionID,
+			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *s.Name,
-			Type:           *s.Type,
-			Location:       *s.Location,
-			Rules:          rr,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *s.Name,
+			Type:             *s.Type,
+			Location:         *s.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (a *APIManagementScanner) listServices(resourceGroupName string) ([]*armapi
 		services = append(services, resp.Value...)
 	}
 	return services, nil
+}
+
+func (a *APIManagementScanner) ResourceType() []string {
+	return []string{"Microsoft.ApiManagement/service"}
 }

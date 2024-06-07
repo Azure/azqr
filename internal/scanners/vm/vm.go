@@ -63,3 +63,7 @@ func (c *VirtualMachineScanner) list(resourceGroupName string) ([]*armcompute.Vi
 	}
 	return vms, nil
 }
+
+func (a *VirtualMachineScanner) ResourceType() []string {
+	return []string{"Microsoft.Compute/virtualMachines"}
+}

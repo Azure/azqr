@@ -64,3 +64,7 @@ func (a *ManagedGrafanaScanner) listWorkspaces(resourceGroupName string) ([]*arm
 
 	return workspaces, nil
 }
+
+func (a *ManagedGrafanaScanner) ResourceType() []string {
+	return []string{"Microsoft.Dashboard/grafana"}
+}

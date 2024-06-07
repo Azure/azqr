@@ -62,3 +62,7 @@ func (a *ContainerAppsScanner) listApps(resourceGroupName string) ([]*armappcont
 	}
 	return apps, nil
 }
+
+func (a *ContainerAppsScanner) ResourceType() []string {
+	return []string{"Microsoft.App/containerApps"}
+}

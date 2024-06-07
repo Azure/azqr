@@ -63,3 +63,7 @@ func (a *DataExplorerScanner) listClusters(resourceGroupName string) ([]*armkust
 	}
 	return kustoclusters, nil
 }
+
+func (a *DataExplorerScanner) ResourceType() []string {
+	return []string{"Microsoft.Kusto/clusters"}
+}

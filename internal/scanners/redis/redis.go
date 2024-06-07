@@ -63,3 +63,7 @@ func (c *RedisScanner) listRedis(resourceGroupName string) ([]*armredis.Resource
 	}
 	return redis, nil
 }
+
+func (a *RedisScanner) ResourceType() []string {
+	return []string{"Microsoft.Cache/Redis"}
+}

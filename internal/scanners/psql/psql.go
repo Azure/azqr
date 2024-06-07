@@ -64,3 +64,7 @@ func (c *PostgreScanner) listPostgre(resourceGroupName string) ([]*armpostgresql
 	}
 	return servers, nil
 }
+
+func (a *PostgreScanner) ResourceType() []string {
+	return []string{"Microsoft.DBforPostgreSQL/servers"}
+}

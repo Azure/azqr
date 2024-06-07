@@ -63,3 +63,7 @@ func (c *VirtualNetworkScanner) list(resourceGroupName string) ([]*armnetwork.Vi
 	}
 	return vnets, nil
 }
+
+func (a *VirtualNetworkScanner) ResourceType() []string {
+	return []string{"Microsoft.Network/virtualNetworks"}
+}

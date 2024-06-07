@@ -63,3 +63,7 @@ func (c *LoadBalancerScanner) list(resourceGroupName string) ([]*armnetwork.Load
 	}
 	return lbs, nil
 }
+
+func (a *LoadBalancerScanner) ResourceType() []string {
+	return []string{"Microsoft.Network/loadBalancers"}
+}

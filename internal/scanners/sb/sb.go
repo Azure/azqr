@@ -63,3 +63,7 @@ func (c *ServiceBusScanner) listServiceBus(resourceGroupName string) ([]*armserv
 	}
 	return namespaces, nil
 }
+
+func (a *ServiceBusScanner) ResourceType() []string {
+	return []string{"Microsoft.ServiceBus/namespaces"}
+}

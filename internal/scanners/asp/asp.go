@@ -146,3 +146,10 @@ func (a *AppServiceScanner) listSites(resourceGroupName string, plan string) ([]
 	}
 	return results, nil
 }
+
+func (a *AppServiceScanner) ResourceType() []string {
+	return []string{
+		"Microsoft.Web/serverFarms",
+		"Microsoft.Web/sites",
+	}
+}

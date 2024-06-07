@@ -63,3 +63,7 @@ func (c *VirtualNetworkGatewayScanner) listVirtualNetworkGateways(resourceGroupN
 	}
 	return vpns, nil
 }
+
+func (a *VirtualNetworkGatewayScanner) ResourceType() []string {
+	return []string{"Microsoft.Network/virtualNetworkGateways"}
+}

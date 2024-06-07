@@ -63,3 +63,7 @@ func (c *SignalRScanner) listSignalR(resourceGroupName string) ([]*armsignalr.Re
 	}
 	return signalrs, nil
 }
+
+func (a *SignalRScanner) ResourceType() []string {
+	return []string{"Microsoft.SignalRService/SignalR"}
+}

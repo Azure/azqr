@@ -63,3 +63,7 @@ func (a *FrontDoorScanner) list(resourceGroupName string) ([]*armcdn.Profile, er
 	}
 	return services, nil
 }
+
+func (a *FrontDoorScanner) ResourceType() []string {
+	return []string{"Microsoft.Cdn/profiles"}
+}

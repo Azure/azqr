@@ -74,3 +74,7 @@ func (c *StorageScanner) listStorage(resourceGroupName string) ([]*armstorage.Ac
 	}
 	return staccounts, nil
 }
+
+func (a *StorageScanner) ResourceType() []string {
+	return []string{"Microsoft.Storage/storageAccounts"}
+}

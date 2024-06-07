@@ -63,3 +63,7 @@ func (a *EventGridScanner) listDomain(resourceGroupName string) ([]*armeventgrid
 	}
 	return domains, nil
 }
+
+func (a *EventGridScanner) ResourceType() []string {
+	return []string{"Microsoft.EventGrid/domains"}
+}

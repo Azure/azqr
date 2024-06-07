@@ -62,3 +62,7 @@ func (a *ContainerAppsEnvironmentScanner) listApps(resourceGroupName string) ([]
 	}
 	return apps, nil
 }
+
+func (a *ContainerAppsEnvironmentScanner) ResourceType() []string {
+	return []string{"Microsoft.App/managedenvironments"}
+}

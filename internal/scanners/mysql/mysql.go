@@ -64,3 +64,7 @@ func (c *MySQLScanner) listMySQL(resourceGroupName string) ([]*armmysql.Server, 
 	}
 	return servers, nil
 }
+
+func (a *MySQLScanner) ResourceType() []string {
+	return []string{"Microsoft.DBforMySQL/servers"}
+}

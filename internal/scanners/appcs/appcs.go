@@ -38,13 +38,13 @@ func (a *AppConfigurationScanner) Scan(resourceGroupName string, scanContext *sc
 		rr := engine.EvaluateRules(rules, app, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: a.config.SubscriptionID,
+			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *app.Name,
-			Type:           *app.Type,
-			Location:       *app.Location,
-			Rules:          rr,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *app.Name,
+			Type:             *app.Type,
+			Location:         *app.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil
@@ -61,4 +61,8 @@ func (a *AppConfigurationScanner) list(resourceGroupName string) ([]*armappconfi
 		apps = append(apps, resp.Value...)
 	}
 	return apps, nil
+}
+
+func (a *AppConfigurationScanner) ResourceType() []string {
+	return []string{"Microsoft.AppConfiguration/configurationStores"}
 }

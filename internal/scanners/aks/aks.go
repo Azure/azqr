@@ -65,3 +65,8 @@ func (a *AKSScanner) listClusters(resourceGroupName string) ([]*armcontainerserv
 	}
 	return clusters, nil
 }
+
+// GetRules - Returns the rules for the AKSScanner
+func (a *AKSScanner) ResourceType() []string {
+	return []string{"Microsoft.ContainerService/managedClusters"}
+}

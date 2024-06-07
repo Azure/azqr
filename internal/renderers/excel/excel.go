@@ -8,8 +8,8 @@ import (
 	_ "image/png"
 	"unicode/utf8"
 
-	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/embeded"
+	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
@@ -25,6 +25,7 @@ func CreateExcelReport(data *renderers.ReportData) {
 	}()
 
 	renderRecommendations(f, data)
+	renderImpactedResources(f, data)
 	renderServices(f, data)
 	renderDefender(f, data)
 	renderAdvisor(f, data)

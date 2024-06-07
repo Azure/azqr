@@ -38,13 +38,13 @@ func (c *ContainerRegistryScanner) Scan(resourceGroupName string, scanContext *s
 		rr := engine.EvaluateRules(rules, registry, scanContext)
 
 		results = append(results, scanners.AzureServiceResult{
-			SubscriptionID: c.config.SubscriptionID,
+			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:  resourceGroupName,
-			ServiceName:    *registry.Name,
-			Type:           *registry.Type,
-			Location:       *registry.Location,
-			Rules:          rr,
+			ResourceGroup:    resourceGroupName,
+			ServiceName:      *registry.Name,
+			Type:             *registry.Type,
+			Location:         *registry.Location,
+			Rules:            rr,
 		})
 	}
 	return results, nil
@@ -62,4 +62,8 @@ func (c *ContainerRegistryScanner) listRegistries(resourceGroupName string) ([]*
 		registries = append(registries, resp.Value...)
 	}
 	return registries, nil
+}
+
+func (a *ContainerRegistryScanner) ResourceType() []string {
+	return []string{"Microsoft.ContainerRegistry/registries"}
 }

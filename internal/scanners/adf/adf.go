@@ -63,3 +63,7 @@ func (a *DataFactoryScanner) listFactories(resourceGroupName string) ([]*armdata
 	}
 	return factories, nil
 }
+
+func (a *DataFactoryScanner) ResourceType() []string {
+	return []string{"Microsoft.DataFactory/factories"}
+}

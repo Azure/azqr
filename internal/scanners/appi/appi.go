@@ -63,3 +63,7 @@ func (a *AppInsightsScanner) list(resourceGroupName string) ([]*armapplicationin
 	}
 	return services, nil
 }
+
+func (a *AppInsightsScanner) ResourceType() []string {
+	return []string{"Microsoft.Insights/components"}
+}

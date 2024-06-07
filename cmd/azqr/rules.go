@@ -6,6 +6,7 @@ package azqr
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/Azure/azqr/internal"
 	"github.com/Azure/azqr/internal/scanners"
@@ -23,9 +24,10 @@ var rulesCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := internal.GetScanners()
+		aprl := internal.GetAprlRecommendations()
 
-		fmt.Println("#  | Id | Category | Impact | Recommendation | More Info")
-		fmt.Println("---|---|---|---|---|---")
+		fmt.Println("#  | Resource Type | Id | Category | Impact | Recommendation | Learn")
+		fmt.Println("---|---|---|---|---|---|---")
 
 		i := 0
 		for _, scanner := range serviceScanners {
@@ -42,11 +44,19 @@ var rulesCmd = &cobra.Command{
 			}
 			sort.Strings(keys)
 
-			for _, k := range keys {
-				rule := rules[k]
-				i++
-				fmt.Printf("%s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), rule.Id, rule.Category, rule.Impact, rule.Recommendation, rule.Url)
-				fmt.Println()
+			for _, t := range scanner.ResourceType() {
+				for _, k := range keys {
+					rule := rules[k]
+					i++
+					fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), rule.Id, t, rule.Category, rule.Impact, rule.Recommendation, rule.Url)
+					fmt.Println()
+				}
+
+				for _, r := range aprl[strings.ToLower(t)] {
+					i++
+					fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, t, r.Category, r.Impact, r.Recommendation, r.LearnMoreLink[0].Url)
+					fmt.Println()
+				}
 			}
 		}
 	},

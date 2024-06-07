@@ -63,3 +63,7 @@ func (c *EventHubScanner) listEventHubs(resourceGroupName string) ([]*armeventhu
 	}
 	return namespaces, nil
 }
+
+func (a *EventHubScanner) ResourceType() []string {
+	return []string{"Microsoft.EventHub/namespaces"}
+}

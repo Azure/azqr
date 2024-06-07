@@ -63,3 +63,7 @@ func (c *KeyVaultScanner) listVaults(resourceGroupName string) ([]*armkeyvault.V
 	}
 	return vaults, nil
 }
+
+func (a *KeyVaultScanner) ResourceType() []string {
+	return []string{"Microsoft.KeyVault/vaults"}
+}

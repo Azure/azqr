@@ -63,3 +63,7 @@ func (c *LogicAppScanner) list(resourceGroupName string) ([]*armlogic.Workflow, 
 	}
 	return logicApps, nil
 }
+
+func (a *LogicAppScanner) ResourceType() []string {
+	return []string{"Microsoft.Logic/workflows"}
+}

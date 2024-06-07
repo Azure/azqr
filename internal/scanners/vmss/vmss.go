@@ -63,3 +63,7 @@ func (c *VirtualMachineScaleSetScanner) list(resourceGroupName string) ([]*armco
 	}
 	return vmss, nil
 }
+
+func (a *VirtualMachineScaleSetScanner) ResourceType() []string {
+	return []string{"Microsoft.Compute/virtualMachineScaleSets"}
+}

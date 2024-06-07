@@ -63,3 +63,7 @@ func (c *AnalysisServicesScanner) listWorkspaces(resourceGroupName string) ([]*a
 	}
 	return registries, nil
 }
+
+func (a *AnalysisServicesScanner) ResourceType() []string {
+	return []string{"Microsoft.AnalysisServices/servers"}
+}

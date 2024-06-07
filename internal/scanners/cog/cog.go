@@ -63,3 +63,7 @@ func (c *CognitiveScanner) listEventHubs(resourceGroupName string) ([]*armcognit
 	}
 	return namespaces, nil
 }
+
+func (a *CognitiveScanner) ResourceType() []string {
+	return []string{"Microsoft.CognitiveServices/accounts"}
+}
