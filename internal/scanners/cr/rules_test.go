@@ -46,22 +46,6 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerRegistryScanner Availability Zones",
-			fields: fields{
-				rule: "cr-002",
-				target: &armcontainerregistry.Registry{
-					Properties: &armcontainerregistry.RegistryProperties{
-						ZoneRedundancy: to.Ptr(armcontainerregistry.ZoneRedundancyEnabled),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "ContainerRegistryScanner SLA",
 			fields: fields{
 				rule:        "cr-003",
@@ -115,36 +99,6 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				rule: "cr-006",
 				target: &armcontainerregistry.Registry{
 					Name: to.Ptr("cr-test"),
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "ContainerRegistryScanner AnonymousPullEnabled not present",
-			fields: fields{
-				rule: "cr-007",
-				target: &armcontainerregistry.Registry{
-					Properties: &armcontainerregistry.RegistryProperties{},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "ContainerRegistryScanner AnonymousPull Disabled",
-			fields: fields{
-				rule: "cr-007",
-				target: &armcontainerregistry.Registry{
-					Properties: &armcontainerregistry.RegistryProperties{
-						AnonymousPullEnabled: to.Ptr(false),
-					},
 				},
 				scanContext: &scanners.ScanContext{},
 			},

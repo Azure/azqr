@@ -26,20 +26,6 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
 		},
-		"sb-002": {
-			RecommendationID: "sb-002",
-			ResourceType:     "Microsoft.ServiceBus/namespaces",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Service Bus should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armservicebus.SBNamespace)
-				sku := string(*i.SKU.Name)
-				zones := strings.Contains(sku, "Premium") && i.Properties.ZoneRedundant != nil && *i.Properties.ZoneRedundant
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-outages-disasters#availability-zones",
-		},
 		"sb-003": {
 			RecommendationID: "sb-003",
 			ResourceType:     "Microsoft.ServiceBus/namespaces",

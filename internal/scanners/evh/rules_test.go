@@ -46,22 +46,6 @@ func TestEventHubScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "EventHubScanner Availability Zones",
-			fields: fields{
-				rule: "evh-002",
-				target: &armeventhub.EHNamespace{
-					Properties: &armeventhub.EHNamespaceProperties{
-						ZoneRedundant: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "EventHubScanner SLA 99.95%",
 			fields: fields{
 				rule: "evh-003",

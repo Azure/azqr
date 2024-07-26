@@ -131,19 +131,6 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]scanners.AzqrRe
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
 		},
-		"psqlf-002": {
-			RecommendationID: "psqlf-002",
-			ResourceType:     "Microsoft.DBforPostgreSQL/flexibleServers",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "PostgreSQL should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armpostgresqlflexibleservers.Server)
-				zones := *i.Properties.HighAvailability.Mode == armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview#architecture-and-high-availability",
-		},
 		"psqlf-003": {
 			RecommendationID: "psqlf-003",
 			ResourceType:     "Microsoft.DBforPostgreSQL/flexibleServers",

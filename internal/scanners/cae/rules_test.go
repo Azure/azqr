@@ -46,22 +46,6 @@ func TestContainerAppsEnvironmentScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerAppsEnvironmentScanner Availability Zones",
-			fields: fields{
-				rule: "cae-002",
-				target: &armappcontainers.ManagedEnvironment{
-					Properties: &armappcontainers.ManagedEnvironmentProperties{
-						ZoneRedundant: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "ContainerAppsEnvironmentScanner SLA",
 			fields: fields{
 				rule:        "cae-003",

@@ -82,61 +82,7 @@ func TestTrafficManagerScanner_Rules(t *testing.T) {
 				broken: false,
 				result: "",
 			},
-		},
-		{
-			name: "TrafficManagerScanner use at least 2 endpoints",
-			fields: fields{
-				rule: "traf-008",
-				target: &armtrafficmanager.Profile{
-					Properties: &armtrafficmanager.ProfileProperties{
-						Endpoints: []*armtrafficmanager.Endpoint{
-							{
-								Properties: &armtrafficmanager.EndpointProperties{
-									EndpointStatus: to.Ptr(armtrafficmanager.EndpointStatusEnabled),
-								},
-							},
-							{
-								Properties: &armtrafficmanager.EndpointProperties{
-									EndpointStatus: to.Ptr(armtrafficmanager.EndpointStatusEnabled),
-								},
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "TrafficManagerScanner use at least 2 endpoints with 1 disabled",
-			fields: fields{
-				rule: "traf-008",
-				target: &armtrafficmanager.Profile{
-					Properties: &armtrafficmanager.ProfileProperties{
-						Endpoints: []*armtrafficmanager.Endpoint{
-							{
-								Properties: &armtrafficmanager.EndpointProperties{
-									EndpointStatus: to.Ptr(armtrafficmanager.EndpointStatusEnabled),
-								},
-							},
-							{
-								Properties: &armtrafficmanager.EndpointProperties{
-									EndpointStatus: to.Ptr(armtrafficmanager.EndpointStatusDisabled),
-								},
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
+		},	
 		{
 			name: "TrafficManagerScanner HTTP endpoints should be monitored using HTTPS",
 			fields: fields{

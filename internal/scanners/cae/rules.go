@@ -26,19 +26,6 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]scanne
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-apps/log-options#diagnostic-settings",
 		},
-		"cae-002": {
-			RecommendationID: "cae-002",
-			ResourceType:     "Microsoft.App/managedenvironments",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Container Apps Environment should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				app := target.(*armappcontainers.ManagedEnvironment)
-				zones := *app.Properties.ZoneRedundant
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-apps/disaster-recovery?tabs=bash#set-up-zone-redundancy-in-your-container-apps-environment",
-		},
 		"cae-003": {
 			RecommendationID: "cae-003",
 			ResourceType:     "Microsoft.App/managedenvironments",

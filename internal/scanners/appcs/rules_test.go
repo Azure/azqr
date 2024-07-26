@@ -143,22 +143,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
-		{
-			name: "AppConfigurationScanner Purge Protection",
-			fields: fields{
-				rule: "appcs-009",
-				target: &armappconfiguration.ConfigurationStore{
-					Properties: &armappconfiguration.ConfigurationStoreProperties{
-						EnablePurgeProtection: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

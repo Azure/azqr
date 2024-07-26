@@ -46,18 +46,6 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "VirtualNetworkScanner Availability Zones",
-			fields: fields{
-				rule:        "vnet-002",
-				target:      &armnetwork.VirtualNetwork{},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "VirtualNetworkScanner CAF",
 			fields: fields{
 				rule: "vnet-006",
@@ -68,52 +56,6 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 			},
 			want: want{
 				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "VirtualNetworkScanner VNET with NSGs",
-			fields: fields{
-				rule: "vnet-008",
-				target: &armnetwork.VirtualNetwork{
-					Properties: &armnetwork.VirtualNetworkPropertiesFormat{
-						Subnets: []*armnetwork.Subnet{
-							{
-								Name: to.Ptr("subnet1"),
-								Properties: &armnetwork.SubnetPropertiesFormat{
-									NetworkSecurityGroup: &armnetwork.SecurityGroup{
-										ID: to.Ptr("nsg"),
-									},
-								},
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "VirtualNetworkScanner VNET without NSGs",
-			fields: fields{
-				rule: "vnet-008",
-				target: &armnetwork.VirtualNetwork{
-					Properties: &armnetwork.VirtualNetworkPropertiesFormat{
-						Subnets: []*armnetwork.Subnet{
-							{
-								Name:       to.Ptr("subnet1"),
-								Properties: &armnetwork.SubnetPropertiesFormat{},
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
 				result: "",
 			},
 		},

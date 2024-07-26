@@ -46,21 +46,6 @@ func TestFirewallScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "FirewallScanner AvailabilityZones",
-			fields: fields{
-				rule: "afw-002",
-				target: &armnetwork.AzureFirewall{
-					ID:    to.Ptr("test"),
-					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "FirewallScanner SLA 99.95%",
 			fields: fields{
 				rule:        "afw-003",

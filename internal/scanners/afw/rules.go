@@ -25,19 +25,6 @@ func (a *FirewallScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 			},
 			Url: "https://docs.microsoft.com/en-us/azure/firewall/logs-and-metrics",
 		},
-		"afw-002": {
-			RecommendationID: "afw-002",
-			ResourceType:     "Microsoft.Network/azureFirewalls",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Azure Firewall should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				g := target.(*armnetwork.AzureFirewall)
-				zones := len(g.Zones) > 1
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/firewall/features#availability-zones",
-		},
 		"afw-003": {
 			RecommendationID: "afw-003",
 			ResourceType:     "Microsoft.Network/azureFirewalls",

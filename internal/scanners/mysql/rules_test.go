@@ -171,24 +171,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "MySQLFlexibleScanner AvailabilityZones",
-			fields: fields{
-				rule: "mysqlf-002",
-				target: &armmysqlflexibleservers.Server{
-					Properties: &armmysqlflexibleservers.ServerProperties{
-						HighAvailability: &armmysqlflexibleservers.HighAvailability{
-							Mode: to.Ptr(armmysqlflexibleservers.HighAvailabilityModeZoneRedundant),
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "MySQLFlexibleScanner SLA 99.9%",
 			fields: fields{
 				rule: "mysqlf-003",

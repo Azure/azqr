@@ -26,19 +26,6 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]scanners.Azqr
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
 		},
-		"cr-002": {
-			RecommendationID: "cr-002",
-			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "ContainerRegistry should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armcontainerregistry.Registry)
-				zones := *i.Properties.ZoneRedundancy == armcontainerregistry.ZoneRedundancyEnabled
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-registry/zone-redundancy",
-		},
 		"cr-003": {
 			RecommendationID: "cr-003",
 			ResourceType:     "Microsoft.ContainerRegistry/registries",
@@ -87,19 +74,6 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]scanners.Azqr
 				return !caf, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		},
-		"cr-007": {
-			RecommendationID: "cr-007",
-			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         scanners.CategorySecurity,
-			Recommendation:   "ContainerRegistry should have anonymous pull access disabled",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerregistry.Registry)
-				apull := c.Properties.AnonymousPullEnabled != nil && *c.Properties.AnonymousPullEnabled
-				return apull, ""
-			},
-			Url: "https://learn.microsoft.com/azure/container-registry/anonymous-pull-access#configure-anonymous-pull-access",
 		},
 		"cr-008": {
 			RecommendationID: "cr-008",

@@ -118,19 +118,6 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]scanners.AzqrReco
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
 		},
-		"mysqlf-002": {
-			RecommendationID: "mysqlf-002",
-			ResourceType:     "Microsoft.DBforMySQL/flexibleServers",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Azure Database for MySQL - Flexible Server should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armmysqlflexibleservers.Server)
-				zones := *i.Properties.HighAvailability.Mode == armmysqlflexibleservers.HighAvailabilityModeZoneRedundant
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-configure-high-availability-cli",
-		},
 		"mysqlf-003": {
 			RecommendationID: "mysqlf-003",
 			ResourceType:     "Microsoft.DBforMySQL/flexibleServers",

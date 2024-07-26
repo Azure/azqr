@@ -27,19 +27,6 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
 		},
-		"apim-002": {
-			RecommendationID: "apim-002",
-			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "APIM should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				a := target.(*armapimanagement.ServiceResource)
-				zones := len(a.Zones) > 0
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/reliability/migrate-api-mgt",
-		},
 		"apim-003": {
 			RecommendationID: "apim-003",
 			ResourceType:     "Microsoft.ApiManagement/service",
@@ -210,18 +197,6 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 				return false, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/api-management/configure-custom-domain?tabs=custom",
-		},
-		"apim-012": {
-			RecommendationID: "apim-012",
-			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "APIM: Migrate instance hosted on the stv1 platform to stv2",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armapimanagement.ServiceResource)
-				return *c.Properties.PlatformVersion == armapimanagement.PlatformVersionStv1, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/migrate-stv1-to-stv2?tabs=portal",
 		},
 	}
 }

@@ -39,19 +39,6 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzqrRecommendatio
 				return !ok, ""
 			},
 		},
-		"asp-002": {
-			RecommendationID: "asp-002",
-			ResourceType:     "Microsoft.Web/serverfarms",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Plan should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armappservice.Plan)
-				zones := *i.Properties.ZoneRedundant
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/reliability/migrate-app-service",
-		},
 		"asp-003": {
 			RecommendationID: "asp-003",
 			ResourceType:     "Microsoft.Web/serverfarms",
@@ -425,6 +412,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 	return map[string]scanners.AzqrRecommendation{
 		"logics-001": {
 			RecommendationID: "logics-001",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Logic App should have diagnostic settings enabled",
 			Impact:           scanners.ImpactLow,
@@ -437,6 +425,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-004": {
 			RecommendationID: "logics-004",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategorySecurity,
 			Recommendation:   "Logic App should have private endpoints enabled",
 			Impact:           scanners.ImpactHigh,
@@ -449,6 +438,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-006": {
 			RecommendationID: "logics-006",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Logic App Name should comply with naming conventions",
 			Impact:           scanners.ImpactLow,
@@ -461,6 +451,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-007": {
 			RecommendationID: "logics-007",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategorySecurity,
 			Recommendation:   "Logic App should use HTTPS only",
 			Impact:           scanners.ImpactHigh,
@@ -473,6 +464,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-008": {
 			RecommendationID: "logics-008",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Logic App should have tags",
 			Impact:           scanners.ImpactLow,
@@ -484,6 +476,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-009": {
 			RecommendationID: "logics-009",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategorySecurity,
 			Recommendation:   "Logic App should use VNET integration",
 			Impact:           scanners.ImpactMedium,
@@ -495,6 +488,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-010": {
 			RecommendationID: "logics-010",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategorySecurity,
 			Recommendation:   "Logic App should have VNET Route all enabled for VNET integration",
 			Impact:           scanners.ImpactMedium,
@@ -506,6 +500,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-011": {
 			RecommendationID: "logics-011",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategorySecurity,
 			Recommendation:   "Logic App should use TLS 1.2",
 			Impact:           scanners.ImpactMedium,
@@ -517,6 +512,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-012": {
 			RecommendationID: "logics-012",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategorySecurity,
 			Recommendation:   "Logic App remote debugging should be disabled",
 			Impact:           scanners.ImpactMedium,
@@ -528,6 +524,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-013": {
 			RecommendationID: "logics-013",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategoryHighAvailability,
 			Recommendation:   "Logic App should avoid using Client Affinity",
 			Impact:           scanners.ImpactMedium,
@@ -539,6 +536,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		},
 		"logics-014": {
 			RecommendationID: "logics-014",
+			ResourceType:     "Microsoft.Web/sites",
 			Category:         scanners.CategorySecurity,
 			Recommendation:   "Logic App should use Managed Identities",
 			Impact:           scanners.ImpactMedium,

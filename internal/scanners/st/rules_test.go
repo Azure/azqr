@@ -46,22 +46,6 @@ func TestStorageScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "StorageScanner Availability Zones",
-			fields: fields{
-				rule: "st-002",
-				target: &armstorage.Account{
-					SKU: &armstorage.SKU{
-						Name: to.Ptr(armstorage.SKUNamePremiumZRS),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "StorageScanner SLA 99.9%",
 			fields: fields{
 				rule: "st-003",
@@ -78,26 +62,6 @@ func TestStorageScanner_Rules(t *testing.T) {
 			want: want{
 				broken: false,
 				result: "99.9%",
-			},
-		},
-		{
-			name: "StorageScanner Private Endpoint",
-			fields: fields{
-				rule: "st-004",
-				target: &armstorage.Account{
-					Properties: &armstorage.AccountProperties{
-						PrivateEndpointConnections: []*armstorage.PrivateEndpointConnection{
-							{
-								ID: to.Ptr("test"),
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
 			},
 		},
 		{

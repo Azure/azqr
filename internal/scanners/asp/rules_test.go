@@ -46,22 +46,6 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AppServiceScanner Availability Zones",
-			fields: fields{
-				rule: "asp-002",
-				target: &armappservice.Plan{
-					Properties: &armappservice.PlanProperties{
-						ZoneRedundant: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "AppServiceScanner SLA None",
 			fields: fields{
 				rule: "asp-003",

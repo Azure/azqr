@@ -26,17 +26,6 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]scanners.AzqrRec
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
 		},
-		"vnet-002": {
-			RecommendationID: "vnet-002",
-			ResourceType:     "Microsoft.Network/virtualNetworks",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Virtual Network should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				return false, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview#virtual-networks-and-availability-zones",
-		},
 		"vnet-006": {
 			RecommendationID: "vnet-006",
 			ResourceType:     "Microsoft.Network/virtualNetworks",
@@ -61,27 +50,6 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]scanners.AzqrRec
 				return len(c.Tags) == 0, ""
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		},
-		"vnet-008": {
-			RecommendationID: "vnet-008",
-			ResourceType:     "Microsoft.Network/virtualNetworks",
-			Category:         scanners.CategorySecurity,
-			Recommendation:   "Virtual Network: All Subnets should have a Network Security Group associated",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armnetwork.VirtualNetwork)
-				broken := false
-				for _, subnet := range c.Properties.Subnets {
-					if !ignoreVirtualNetwork(subnet) && (subnet.Properties.NetworkSecurityGroup == nil ||
-						(subnet.Properties.NetworkSecurityGroup != nil && subnet.Properties.NetworkSecurityGroup.ID == nil) ||
-						(subnet.Properties.NetworkSecurityGroup != nil && subnet.Properties.NetworkSecurityGroup.ID != nil && *subnet.Properties.NetworkSecurityGroup.ID == "")) {
-						broken = true
-						break
-					}
-				}
-				return broken, ""
-			},
-			Url: "https://learn.microsoft.com/azure/virtual-network/concepts-and-best-practices",
 		},
 		"vnet-009": {
 			RecommendationID: "vnet-009",

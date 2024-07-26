@@ -26,19 +26,6 @@ func (a *RedisScanner) GetRecommendations() map[string]scanners.AzqrRecommendati
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-monitor-diagnostic-settings",
 		},
-		"redis-002": {
-			RecommendationID: "redis-002",
-			ResourceType:     "Microsoft.Cache/Redis",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Redis should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armredis.ResourceInfo)
-				zones := len(i.Zones) > 0
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-high-availability",
-		},
 		"redis-003": {
 			RecommendationID: "redis-003",
 			ResourceType:     "Microsoft.Cache/Redis",
@@ -49,19 +36,6 @@ func (a *RedisScanner) GetRecommendations() map[string]scanners.AzqrRecommendati
 				return false, "99.9%"
 			},
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-		},
-		"redis-004": {
-			RecommendationID: "redis-004",
-			ResourceType:     "Microsoft.Cache/Redis",
-			Category:         scanners.CategorySecurity,
-			Recommendation:   "Redis should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armredis.ResourceInfo)
-				pe := len(i.Properties.PrivateEndpointConnections) > 0
-				return !pe, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-private-link",
 		},
 		"redis-005": {
 			RecommendationID: "redis-005",

@@ -90,21 +90,6 @@ func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzqrRecommendation {
 				return !ok, ""
 			},
 		},
-		"sqldb-002": {
-			RecommendationID: "sqldb-002",
-			ResourceType:     "Microsoft.Sql/servers/databases",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "SQL Database should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armsql.Database)
-				zones := false
-				if i.Properties.ZoneRedundant != nil {
-					zones = *i.Properties.ZoneRedundant
-				}
-				return !zones, ""
-			},
-		},
 		"sqldb-003": {
 			RecommendationID: "sqldb-003",
 			ResourceType:     "Microsoft.Sql/servers/databases",

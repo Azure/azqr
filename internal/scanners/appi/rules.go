@@ -49,18 +49,5 @@ func (a *AppInsightsScanner) GetRecommendations() map[string]scanners.AzqrRecomm
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
-		"appi-004": {
-			RecommendationID: "appi-004",
-			ResourceType:     "Microsoft.Insights/components",
-			Category:         scanners.CategoryScalability,
-			Recommendation:   "Azure Application Insights should store data in a Log Analytics Workspace",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armapplicationinsights.Component)
-
-				return c.Properties.WorkspaceResourceID == nil, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-monitor/app/create-workspace-resource",
-		},
 	}
 }

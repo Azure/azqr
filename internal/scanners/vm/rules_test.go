@@ -28,32 +28,6 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "VirtualMachineScanner No Availability Zones",
-			fields: fields{
-				rule:        "vm-002",
-				target:      &armcompute.VirtualMachine{},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
-			name: "VirtualMachineScanner Availability Zones",
-			fields: fields{
-				rule: "vm-002",
-				target: &armcompute.VirtualMachine{
-					Zones: []*string{to.Ptr("1")},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "VirtualMachineScanner SLA 99.9%",
 			fields: fields{
 				rule: "vm-003",
@@ -90,64 +64,6 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 			},
 			want: want{
 				broken: true,
-				result: "",
-			},
-		},
-		{
-			name: "VirtualMachineScanner No Managed Disks",
-			fields: fields{
-				rule: "vm-008",
-				target: &armcompute.VirtualMachine{
-					Properties: &armcompute.VirtualMachineProperties{
-						StorageProfile: &armcompute.StorageProfile{
-							OSDisk: &armcompute.OSDisk{},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
-			name: "VirtualMachineScanner With Managed Disks",
-			fields: fields{
-				rule: "vm-008",
-				target: &armcompute.VirtualMachine{
-					Properties: &armcompute.VirtualMachineProperties{
-						StorageProfile: &armcompute.StorageProfile{
-							OSDisk: &armcompute.OSDisk{
-								ManagedDisk: &armcompute.ManagedDiskParameters{},
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "VirtualMachineScanner With Data Disks",
-			fields: fields{
-				rule: "vm-009",
-				target: &armcompute.VirtualMachine{
-					Properties: &armcompute.VirtualMachineProperties{
-						StorageProfile: &armcompute.StorageProfile{
-							DataDisks: []*armcompute.DataDisk{
-								{},
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
 				result: "",
 			},
 		},

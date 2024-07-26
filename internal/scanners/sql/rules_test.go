@@ -128,22 +128,6 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 			},
 		},
 		{
-			name: "SQLScanner Availability Zones",
-			fields: fields{
-				rule: "sqldb-002",
-				target: &armsql.Database{
-					Properties: &armsql.DatabaseProperties{
-						ZoneRedundant: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "SQLScanner SLA 99.995%",
 			fields: fields{
 				rule: "sqldb-003",

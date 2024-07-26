@@ -46,22 +46,6 @@ func TestSignalRScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "SignalRScanner Availability Zones",
-			fields: fields{
-				rule: "sigr-002",
-				target: &armsignalr.ResourceInfo{
-					SKU: &armsignalr.ResourceSKU{
-						Name: to.Ptr("Premium"),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "SignalRScanner SLA",
 			fields: fields{
 				rule:        "sigr-003",

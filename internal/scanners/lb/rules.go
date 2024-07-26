@@ -26,32 +26,6 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]scanners.AzqrRecom
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
 		},
-		"lb-002": {
-			RecommendationID: "lb-002",
-			ResourceType:     "Microsoft.Network/loadBalancers",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Load Balancer should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armnetwork.LoadBalancer)
-				broken := false
-				for _, ipc := range i.Properties.FrontendIPConfigurations {
-					if ipc.Properties.PrivateIPAddress != nil && (ipc.Zones == nil || len(ipc.Zones) <= 1) {
-						broken = true
-						break
-					} else if ipc.Properties.PublicIPAddress != nil {
-						pip, ok := scanContext.PublicIPs[*ipc.Properties.PublicIPAddress.ID]
-						if ok && (pip.Zones == nil || len(pip.Zones) <= 1) {
-							broken = true
-							break
-						}
-					}
-				}
-
-				return broken, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-availability-zones#zone-redundant",
-		},
 		"lb-003": {
 			RecommendationID: "lb-003",
 			ResourceType:     "Microsoft.Network/loadBalancers",

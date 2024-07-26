@@ -74,24 +74,6 @@ func (a *TrafficManagerScanner) GetRecommendations() map[string]scanners.AzqrRec
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
-		"traf-008": {
-			RecommendationID: "traf-008",
-			ResourceType:     "Microsoft.Network/trafficManagerProfiles",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Traffic Manager should use at least 2 endpoints",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armtrafficmanager.Profile)
-				endpoints := 0
-				for _, endpoint := range c.Properties.Endpoints {
-					if *endpoint.Properties.EndpointStatus == armtrafficmanager.EndpointStatusEnabled {
-						endpoints++
-					}
-				}
-				return endpoints < 2, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-endpoint-types",
-		},
 		"traf-009": {
 			RecommendationID: "traf-009",
 			ResourceType:     "Microsoft.Network/trafficManagerProfiles",

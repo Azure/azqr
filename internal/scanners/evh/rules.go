@@ -26,19 +26,6 @@ func (a *EventHubScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
 		},
-		"evh-002": {
-			RecommendationID: "evh-002",
-			ResourceType:     "Microsoft.EventHub/namespaces",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Event Hub Namespace should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armeventhub.EHNamespace)
-				zones := *i.Properties.ZoneRedundant
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-premium-overview#high-availability-with-availability-zones",
-		},
 		"evh-003": {
 			RecommendationID: "evh-003",
 			ResourceType:     "Microsoft.EventHub/namespaces",

@@ -65,20 +65,6 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 				result: "",
 			},
 		},
-		{
-			name: "AppInsightsScanner WorkspaceId",
-			fields: fields{
-				rule: "appi-004",
-				target: &armapplicationinsights.Component{
-					Properties: &armapplicationinsights.ComponentProperties{},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

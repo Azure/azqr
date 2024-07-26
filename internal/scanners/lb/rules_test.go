@@ -46,36 +46,6 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "LoadBalancerScanner Availability Zones",
-			fields: fields{
-				rule: "lb-002",
-				target: &armnetwork.LoadBalancer{
-					SKU: &armnetwork.LoadBalancerSKU{
-						Name: to.Ptr(armnetwork.LoadBalancerSKUNameStandard),
-					},
-					Properties: &armnetwork.LoadBalancerPropertiesFormat{
-						FrontendIPConfigurations: []*armnetwork.FrontendIPConfiguration{
-							{
-								Properties: &armnetwork.FrontendIPConfigurationPropertiesFormat{
-									PrivateIPAddress: to.Ptr("127.0.0.1"),
-								},
-								Zones: []*string{
-									to.Ptr("1"),
-									to.Ptr("2"),
-									to.Ptr("3"),
-								},
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "LoadBalancerScanner SLA 99.99%",
 			fields: fields{
 				rule: "lb-003",

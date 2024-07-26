@@ -13,19 +13,6 @@ import (
 // GetRecommendations - Returns the rules for the VirtualMachineScaleSetScanner
 func (a *VirtualMachineScaleSetScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
 	return map[string]scanners.AzqrRecommendation{
-		"vmss-002": {
-			RecommendationID: "vmss-002",
-			ResourceType:     "Microsoft.Compute/virtualMachineScaleSets",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Virtual Machine should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				v := target.(*armcompute.VirtualMachineScaleSet)
-				hasZones := v.Zones != nil && len(v.Zones) > 1
-				return !hasZones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/virtual-machines/availability#availability-zones",
-		},
 		"vmss-003": {
 			RecommendationID: "vmss-003",
 			ResourceType:     "Microsoft.Compute/virtualMachineScaleSets",

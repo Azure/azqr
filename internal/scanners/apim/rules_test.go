@@ -47,34 +47,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AKSScanner AvailabilityZones",
-			fields: fields{
-				rule: "apim-002",
-				target: &armapimanagement.ServiceResource{
-					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "AKSScanner no AvailabilityZones",
-			fields: fields{
-				rule: "apim-002",
-				target: &armapimanagement.ServiceResource{
-					Zones: []*string{},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
 			name: "APIManagementScanner SLA Free SKU",
 			fields: fields{
 				rule: "apim-003",
@@ -315,38 +287,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 								},
 							},
 						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "APIManagementScanner stv1",
-			fields: fields{
-				rule: "apim-012",
-				target: &armapimanagement.ServiceResource{
-					Properties: &armapimanagement.ServiceProperties{
-						PlatformVersion: to.Ptr(armapimanagement.PlatformVersionStv1),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
-			name: "APIManagementScanner stv2",
-			fields: fields{
-				rule: "apim-012",
-				target: &armapimanagement.ServiceResource{
-					Properties: &armapimanagement.ServiceProperties{
-						PlatformVersion: to.Ptr(armapimanagement.PlatformVersionStv2),
 					},
 				},
 				scanContext: &scanners.ScanContext{},

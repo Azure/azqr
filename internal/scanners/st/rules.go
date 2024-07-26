@@ -26,23 +26,6 @@ func (a *StorageScanner) GetRecommendations() map[string]scanners.AzqrRecommenda
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
 		},
-		"st-002": {
-			RecommendationID: "st-002",
-			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "Storage should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armstorage.Account)
-				sku := string(*i.SKU.Name)
-				zones := false
-				if strings.Contains(sku, "ZRS") {
-					zones = true
-				}
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/EN-US/azure/reliability/migrate-storage",
-		},
 		"st-003": {
 			RecommendationID: "st-003",
 			ResourceType:     "Microsoft.Storage/storageAccounts",
@@ -69,19 +52,6 @@ func (a *StorageScanner) GetRecommendations() map[string]scanners.AzqrRecommenda
 				return false, sla
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/storage/",
-		},
-		"st-004": {
-			RecommendationID: "st-004",
-			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         scanners.CategorySecurity,
-			Recommendation:   "Storage should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armstorage.Account)
-				pe := len(i.Properties.PrivateEndpointConnections) > 0
-				return !pe, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/storage/common/storage-private-endpoints",
 		},
 		"st-005": {
 			RecommendationID: "st-005",

@@ -58,26 +58,6 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "KeyVaultScanner Private Endpoint",
-			fields: fields{
-				rule: "kv-004",
-				target: &armkeyvault.Vault{
-					Properties: &armkeyvault.VaultProperties{
-						PrivateEndpointConnections: []*armkeyvault.PrivateEndpointConnectionItem{
-							{
-								ID: to.Ptr("test"),
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "KeyVaultScanner SKU",
 			fields: fields{
 				rule: "kv-005",
@@ -101,38 +81,6 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				rule: "kv-006",
 				target: &armkeyvault.Vault{
 					Name: to.Ptr("kv-test"),
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "KeyVaultScanner soft delete enabled",
-			fields: fields{
-				rule: "kv-008",
-				target: &armkeyvault.Vault{
-					Properties: &armkeyvault.VaultProperties{
-						EnableSoftDelete: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "KeyVaultScanner purge protection enabled",
-			fields: fields{
-				rule: "kv-009",
-				target: &armkeyvault.Vault{
-					Properties: &armkeyvault.VaultProperties{
-						EnablePurgeProtection: to.Ptr(true),
-					},
 				},
 				scanContext: &scanners.ScanContext{},
 			},

@@ -46,20 +46,6 @@ func TestRedisScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "RedisScanner Availability Zones",
-			fields: fields{
-				rule: "redis-002",
-				target: &armredis.ResourceInfo{
-					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "RedisScanner SLA",
 			fields: fields{
 				rule:        "redis-003",
@@ -69,26 +55,6 @@ func TestRedisScanner_Rules(t *testing.T) {
 			want: want{
 				broken: false,
 				result: "99.9%",
-			},
-		},
-		{
-			name: "RedisScanner Private Endpoint",
-			fields: fields{
-				rule: "redis-004",
-				target: &armredis.ResourceInfo{
-					Properties: &armredis.Properties{
-						PrivateEndpointConnections: []*armredis.PrivateEndpointConnection{
-							{
-								ID: to.Ptr("test"),
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
 			},
 		},
 		{

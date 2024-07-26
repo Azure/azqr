@@ -28,18 +28,6 @@ func TestVirtualMachineScaleSetScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "VirtualMachineScaleSetScanner Availability Zones",
-			fields: fields{
-				rule:        "vmss-002",
-				target:      &armcompute.VirtualMachineScaleSet{},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
 			name: "VirtualMachineScaleSetScanner SLA 99.95%",
 			fields: fields{
 				rule: "vmss-003",

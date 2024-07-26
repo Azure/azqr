@@ -46,21 +46,6 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ApplicationGatewayScanner AvailabilityZones",
-			fields: fields{
-				rule: "agw-007",
-				target: &armnetwork.ApplicationGateway{
-					ID:    to.Ptr("test"),
-					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "ApplicationGatewayScanner SLA",
 			fields: fields{
 				rule:        "agw-103",

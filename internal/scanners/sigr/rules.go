@@ -26,23 +26,6 @@ func (a *SignalRScanner) GetRecommendations() map[string]scanners.AzqrRecommenda
 			},
 			Url: "https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-howto-diagnostic-logs",
 		},
-		"sigr-002": {
-			RecommendationID: "sigr-002",
-			ResourceType:     "Microsoft.SignalRService/SignalR",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "SignalR should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armsignalr.ResourceInfo)
-				sku := string(*i.SKU.Name)
-				zones := false
-				if strings.Contains(sku, "Premium") {
-					zones = true
-				}
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-signalr/availability-zones",
-		},
 		"sigr-003": {
 			RecommendationID: "sigr-003",
 			ResourceType:     "Microsoft.SignalRService/SignalR",

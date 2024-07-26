@@ -46,25 +46,6 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ServiceBusScanner Availability Zones",
-			fields: fields{
-				rule: "sb-002",
-				target: &armservicebus.SBNamespace{
-					SKU: &armservicebus.SBSKU{
-						Name: to.Ptr(armservicebus.SKUNamePremium),
-					},
-					Properties: &armservicebus.SBNamespaceProperties{
-						ZoneRedundant: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "ServiceBusScanner SLA 99.9%",
 			fields: fields{
 				rule: "sb-003",

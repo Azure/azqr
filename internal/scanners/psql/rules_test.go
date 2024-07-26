@@ -191,24 +191,6 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "PostgreFlexibleScanner AvailabilityZones",
-			fields: fields{
-				rule: "psqlf-002",
-				target: &armpostgresqlflexibleservers.Server{
-					Properties: &armpostgresqlflexibleservers.ServerProperties{
-						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode: to.Ptr(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "PostgreFlexibleScanner SLA 99.9%",
 			fields: fields{
 				rule: "psqlf-003",
