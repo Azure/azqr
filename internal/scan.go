@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"sync"
 	"time"
 
@@ -105,18 +106,23 @@ func Scan(params *ScanParams) {
 		CostData: &scanners.CostResult{
 			Items: []*scanners.CostResultItem{},
 		},
+		ResourceTypeCount: []scanners.ResourceTypeCount{},
 	}
+
+	getAllResources(ctx, cred, subscriptions)
+
+	reportData.ResourceTypeCount = getCountPerResourceType(ctx, cred, subscriptions)
 
 	reportData.Recomendations, reportData.AprlData = aprlScan(ctx, cred, params, filters, subscriptions)
 
 	if params.UseAzqrRecommendations {
 		for _, s := range params.ServiceScanners {
 			for i, r := range s.GetRecommendations() {
-				if reportData.Recomendations[r.ResourceType] == nil {
-					reportData.Recomendations[r.ResourceType] = map[string]scanners.AprlRecommendation{}
+				if reportData.Recomendations[strings.ToLower(r.ResourceType)] == nil {
+					reportData.Recomendations[strings.ToLower(r.ResourceType)] = map[string]scanners.AprlRecommendation{}
 				}
 
-				reportData.Recomendations[r.ResourceType][i] = r.ToAzureAprlRecommendation()
+				reportData.Recomendations[strings.ToLower(r.ResourceType)][i] = r.ToAzureAprlRecommendation()
 			}
 		}
 	}
@@ -232,10 +238,10 @@ func aprlScan(ctx context.Context, cred azcore.TokenCredential, params *ScanPara
 			}
 
 			for i, r := range gr {
-				if recommendations[t] == nil {
-					recommendations[t] = map[string]scanners.AprlRecommendation{}
+				if recommendations[strings.ToLower(t)] == nil {
+					recommendations[strings.ToLower(t)] = map[string]scanners.AprlRecommendation{}
 				}
-				recommendations[t][i] = r
+				recommendations[strings.ToLower(t)][i] = r
 			}
 		}
 	}
@@ -660,4 +666,53 @@ func scanDiagnosticSettings(config *scanners.ScannerConfig, diagnosticsScanner *
 		}
 	}
 	return diagResults
+}
+
+func getAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string) []scanners.Resource {
+	graphClient := graph.NewGraphQuery(cred)
+	query := "resources | project id, resourceGroup, subscriptionId, name, type, location"
+	log.Debug().Msg(query)
+	subs := make([]*string, 0, len(subscriptions))
+	for s := range subscriptions {
+		subs = append(subs, &s)
+	}
+	result := graphClient.Query(ctx, query, subs)
+	resources := make([]scanners.Resource, result.Count)
+	if result.Data != nil {
+		for i, row := range result.Data {
+			m := row.(map[string]interface{})
+			resources[i] = scanners.Resource{
+				ID:             m["id"].(string),
+				ResourceGroup:  m["resourceGroup"].(string),
+				SubscriptionID: m["subscriptionId"].(string),
+				Name:           m["name"].(string),
+				Type:           m["type"].(string),
+				Location:       m["location"].(string),
+			}
+		}
+	}
+	return resources
+}
+
+func getCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string) []scanners.ResourceTypeCount {
+	graphClient := graph.NewGraphQuery(cred)
+	query := "resources | summarize count() by subscriptionId, type | order by subscriptionId, type"
+	log.Debug().Msg(query)
+	subs := make([]*string, 0, len(subscriptions))
+	for s := range subscriptions {
+		subs = append(subs, &s)
+	}
+	result := graphClient.Query(ctx, query, subs)
+	resources := make([]scanners.ResourceTypeCount, result.Count)
+	if result.Data != nil {
+		for i, row := range result.Data {
+			m := row.(map[string]interface{})
+			resources[i] = scanners.ResourceTypeCount{
+				Subscription: subscriptions[m["subscriptionId"].(string)],
+				ResourceType: m["type"].(string),
+				Count:        m["count_"].(float64),
+			}
+		}
+	}
+	return resources
 }

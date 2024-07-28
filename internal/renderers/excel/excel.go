@@ -26,6 +26,7 @@ func CreateExcelReport(data *renderers.ReportData) {
 
 	renderRecommendations(f, data)
 	renderImpactedResources(f, data)
+	renderResourceTypes(f, data)
 	renderServices(f, data)
 	renderDefender(f, data)
 	renderAdvisor(f, data)

@@ -45,6 +45,21 @@ type (
 		ResourceTypes() []string
 	}
 
+	Resource struct {
+		ID             string
+		ResourceGroup  string
+		SubscriptionID string
+		Name           string
+		Type           string
+		Location       string
+	}
+
+	ResourceTypeCount struct {
+		Subscription string  `json:"Subscription"`
+		ResourceType string  `json:"Resource Type"`
+		Count        float64 `json:"Number of Resources"`
+	}
+
 	// AzqrServiceResult - Struct for all Azure Service Results
 	AzqrServiceResult struct {
 		SubscriptionID   string

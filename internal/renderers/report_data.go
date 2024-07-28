@@ -6,21 +6,53 @@ package renderers
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/google/uuid"
 )
 
-type ReportData struct {
-	OutputFileName string
-	Mask           bool
-	AzqrData       []scanners.AzqrServiceResult
-	AprlData       []scanners.AprlResult
-	DefenderData   []scanners.DefenderResult
-	AdvisorData    []scanners.AdvisorResult
-	CostData       *scanners.CostResult
-	Recomendations map[string]map[string]scanners.AprlRecommendation
-}
+type (
+	ReportData struct {
+		OutputFileName    string
+		Mask              bool
+		AzqrData          []scanners.AzqrServiceResult
+		AprlData          []scanners.AprlResult
+		DefenderData      []scanners.DefenderResult
+		AdvisorData       []scanners.AdvisorResult
+		CostData          *scanners.CostResult
+		Recomendations    map[string]map[string]scanners.AprlRecommendation
+		ResourceTypeCount []scanners.ResourceTypeCount
+	}
+
+	ResourceResult struct {
+		ValidationAction string `json:"validationAction"`
+		RecommendationId string `json:"recommendationId"`
+		Name             string `json:"name"`
+		Id               string `json:"id"`
+		Param1           string `json:"param1"`
+		Param2           string `json:"param2"`
+		Param3           string `json:"param3"`
+		Param4           string `json:"param4"`
+		Param5           string `json:"param5"`
+		CheckName        string `json:"checkName"`
+		Selector         string `json:"selector"`
+	}
+
+	RetirementResult struct {
+		Subscription    string    `json:"Subscription"`
+		TrackingId      string    `json:"TrackingId"`
+		Status          string    `json:"Status"`
+		LastUpdateTime  time.Time `json:"LastUpdateTime"`
+		Endtime         time.Time `json:"Endtime"`
+		Level           string    `json:"Level"`
+		Title           string    `json:"Title"`
+		Summary         string    `json:"Summary"`
+		Header          string    `json:"Header"`
+		ImpactedService string    `json:"ImpactedService"`
+		Description     string    `json:"Description"`
+	}
+)
 
 func (rd *ReportData) ServicesTable() [][]string {
 	headers := []string{"Subscription", "Subscription Name", "Resource Group", "Location", "Type", "Service Name", "Compliant", "Impact", "Category", "Recommendation", "Result", "Learn", "RId"}
@@ -239,4 +271,29 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 
 	rows = append([][]string{headers}, rows...)
 	return rows
+}
+
+func (rd *ReportData) ResourceTypesTable() [][]string {
+	headers := []string{"Subscription", "Resource Type", "Number of Resources", "Available in APRL?", "Custom1", "Custom2", "Custom3"}
+	rows := [][]string{}
+	for _, r := range rd.ResourceTypeCount {
+		row := []string{
+			r.Subscription,
+			r.ResourceType,
+			fmt.Sprint(r.Count),
+			fmt.Sprintf("%t", rd.isAvailableInAPRL(r.ResourceType)),
+			"",
+			"",
+			"",
+		}
+		rows = append(rows, row)
+	}
+
+	rows = append([][]string{headers}, rows...)
+	return rows
+}
+
+func (rd *ReportData) isAvailableInAPRL(resourceType string) bool {
+	_, available := rd.Recomendations[strings.ToLower(resourceType)]
+	return available
 }
