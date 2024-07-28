@@ -44,17 +44,17 @@ var rulesCmd = &cobra.Command{
 			}
 			sort.Strings(keys)
 
-			for _, t := range scanner.ResourceTypes() {
-				for _, k := range keys {
-					r := recommendations[k]
-					i++
-					fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, t, r.Category, r.Impact, r.Recommendation, r.Url)
-					fmt.Println()
-				}
+			for _, k := range keys {
+				r := recommendations[k]
+				i++
+				fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.Url)
+				fmt.Println()
+			}
 
+			for _, t := range scanner.ResourceTypes() {
 				for _, r := range aprl[strings.ToLower(t)] {
 					i++
-					fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, t, r.Category, r.Impact, r.Recommendation, r.LearnMoreLink[0].Url)
+					fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.LearnMoreLink[0].Url)
 					fmt.Println()
 				}
 			}
