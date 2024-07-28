@@ -62,16 +62,6 @@ func autofit(f *excelize.File, sheetName string) error {
 	return nil
 }
 
-func mapToRow(headers []string, m map[string]string) [][]string {
-	v := make([]string, 0, len(m))
-
-	for _, k := range headers {
-		v = append(v, m[k])
-	}
-
-	return [][]string{v}
-}
-
 func createFirstRow(f *excelize.File, sheet string, headers []string) {
 	currentRow := 4
 	cell, err := excelize.CoordinatesToCellName(1, currentRow)

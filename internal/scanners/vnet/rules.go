@@ -68,12 +68,3 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]scanners.AzqrRec
 		},
 	}
 }
-
-func ignoreVirtualNetwork(subnet *armnetwork.Subnet) bool {
-	switch strings.ToLower(*subnet.Name) {
-	case "gatewaysubnet", "azurefirewallsubnet", "azurefirewallmanagementsubnet", "routeserversubnet":
-		return true
-	default:
-		return false
-	}
-}
