@@ -122,7 +122,7 @@ func (rd *ReportData) ImpactedTable() [][]string {
 		for _, r := range d.Recommendations {
 			if r.NotCompliant {
 				row := []string{
-					"Golang SDK",
+					"Azure Resource Manager",
 					"AZQR",
 					string(r.Category),
 					string(r.Impact),
