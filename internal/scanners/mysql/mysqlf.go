@@ -4,18 +4,18 @@
 package mysql
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 )
 
 // MySQLFlexibleScanner - Scanner for PostgreSQL
 type MySQLFlexibleScanner struct {
-	config         *scanners.ScannerConfig
+	config         *azqr.ScannerConfig
 	flexibleClient *armmysqlflexibleservers.ServersClient
 }
 
 // Init - Initializes the MySQLFlexibleScanner
-func (c *MySQLFlexibleScanner) Init(config *scanners.ScannerConfig) error {
+func (c *MySQLFlexibleScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.flexibleClient, err = armmysqlflexibleservers.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (c *MySQLFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all MySQL in a Resource Group
-func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	flexibles, err := c.list(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, postgre := range flexibles {
 		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			ResourceGroup:    resourceGroupName,
 			SubscriptionName: c.config.SubscriptionName,

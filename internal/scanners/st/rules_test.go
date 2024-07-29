@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
@@ -16,7 +16,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				target: &armstorage.Account{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -57,7 +57,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 						AccessTier: to.Ptr(armstorage.AccessTierHot),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -73,7 +73,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armstorage.SKUNamePremiumZRS),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -87,7 +87,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				target: &armstorage.Account{
 					Name: to.Ptr("sttest"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -103,7 +103,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 						EnableHTTPSTrafficOnly: to.Ptr(true),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -119,7 +119,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 						MinimumTLSVersion: to.Ptr(armstorage.MinimumTLSVersionTLS12),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -137,7 +137,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -155,7 +155,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -169,7 +169,7 @@ func TestStorageScanner_Rules(t *testing.T) {
 				target: &armstorage.Account{
 					Properties: &armstorage.AccountProperties{},
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					BlobServiceProperties: &armstorage.BlobServicesClientGetServicePropertiesResponse{
 						BlobServiceProperties: armstorage.BlobServiceProperties{
 							BlobServiceProperties: &armstorage.BlobServicePropertiesProperties{

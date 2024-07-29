@@ -6,20 +6,20 @@ package amg
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard"
 )
 
 // GetRecommendations - Returns the rules for the ManagedGrafanaScanner
-func (a *ManagedGrafanaScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *ManagedGrafanaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"amg-001": {
 			RecommendationID: "amg-001",
 			ResourceType:     "Microsoft.Dashboard/managedGrafana",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Azure Managed Grafana name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				caf := strings.HasPrefix(*c.Name, "amg")
 				return !caf, ""
@@ -29,10 +29,10 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]scanners.AzqrRec
 		"amg-002": {
 			RecommendationID: "amg-002",
 			ResourceType:     "Microsoft.Dashboard/managedGrafana",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Azure Managed Grafana SLA",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				sku := ""
 				if c.SKU != nil && c.SKU.Name != nil {
@@ -49,10 +49,10 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]scanners.AzqrRec
 		"amg-003": {
 			RecommendationID: "amg-003",
 			ResourceType:     "Microsoft.Dashboard/managedGrafana",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Azure Managed Grafana should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				return len(c.Tags) == 0, ""
 			},
@@ -61,10 +61,10 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]scanners.AzqrRec
 		"amg-004": {
 			RecommendationID: "amg-004",
 			ResourceType:     "Microsoft.Dashboard/managedGrafana",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Azure Managed Grafana should disable public network access",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				return *c.Properties.PublicNetworkAccess == armdashboard.PublicNetworkAccessEnabled, ""
 			},
@@ -73,10 +73,10 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]scanners.AzqrRec
 		"amg-005": {
 			RecommendationID: "amg-005",
 			ResourceType:     "Microsoft.Dashboard/managedGrafana",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Azure Managed Grafana should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				return *c.Properties.ZoneRedundancy == armdashboard.ZoneRedundancyDisabled, ""
 			},

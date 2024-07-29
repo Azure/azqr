@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto"
 )
@@ -16,7 +16,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				target: &armkusto.Cluster{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -54,7 +54,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -70,7 +70,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armkusto.AzureSKUNameStandardD11V2),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -86,7 +86,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -106,7 +106,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -120,7 +120,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				target: &armkusto.Cluster{
 					Name: to.Ptr("dec-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -136,7 +136,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 						EnableDiskEncryption: to.Ptr(false),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -152,7 +152,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 						EnableDiskEncryption: nil,
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -168,7 +168,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 						Type: to.Ptr(armkusto.IdentityTypeNone),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,

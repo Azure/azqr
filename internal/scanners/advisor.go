@@ -4,7 +4,9 @@
 package scanners
 
 import (
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/advisor/armadvisor"
+	"github.com/rs/zerolog/log"
 )
 
 // AdvisorResult - Advisor result
@@ -14,12 +16,12 @@ type AdvisorResult struct {
 
 // AdvisorScanner - Advisor scanner
 type AdvisorScanner struct {
-	config *ScannerConfig
+	config *azqr.ScannerConfig
 	client *armadvisor.RecommendationsClient
 }
 
 // Init - Initializes the Advisor Scanner
-func (s *AdvisorScanner) Init(config *ScannerConfig) error {
+func (s *AdvisorScanner) Init(config *azqr.ScannerConfig) error {
 	s.config = config
 	var err error
 	s.client, err = armadvisor.NewRecommendationsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -31,7 +33,7 @@ func (s *AdvisorScanner) Init(config *ScannerConfig) error {
 
 // ListRecommendations - Lists Azure Advisor recommendations.
 func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
-	LogSubscriptionScan(s.config.SubscriptionID, "Advisor Recommendations")
+	azqr.LogSubscriptionScan(s.config.SubscriptionID, "Advisor Recommendations")
 
 	pager := s.client.NewListPager(&armadvisor.RecommendationsClientListOptions{})
 
@@ -75,4 +77,25 @@ func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
 	}
 
 	return returnRecommendations, nil
+}
+
+func (s *AdvisorScanner) Scan(scan bool, config *azqr.ScannerConfig) []AdvisorResult {
+	advisorResults := []AdvisorResult{}
+	if scan {
+		err := s.Init(config)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to initialize Advisor Scanner")
+		}
+
+		rec, err := s.ListRecommendations()
+		if err != nil {
+			if azqr.ShouldSkipError(err) {
+				rec = []AdvisorResult{}
+			} else {
+				log.Fatal().Err(err).Msg("Failed to list Advisor recommendations")
+			}
+		}
+		advisorResults = append(advisorResults, rec...)
+	}
+	return advisorResults
 }

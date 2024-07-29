@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
@@ -17,7 +17,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,7 +35,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -59,7 +59,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -79,7 +79,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -99,7 +99,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -119,7 +119,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -135,7 +135,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armapimanagement.SKUTypeDeveloper),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -149,7 +149,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					Name: to.Ptr("apim-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -165,7 +165,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						Type: to.Ptr(armapimanagement.ApimIdentityTypeNone),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -188,7 +188,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -204,7 +204,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						CustomProperties: nil,
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -229,7 +229,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -245,7 +245,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						CustomProperties: nil,
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -267,7 +267,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -289,7 +289,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

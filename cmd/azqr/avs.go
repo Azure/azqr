@@ -4,7 +4,7 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners/avs"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +19,7 @@ var avsCmd = &cobra.Command{
 	Long:  "Scan Azure VMware Solution",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := []scanners.IAzureScanner{
+		serviceScanners := []azqr.IAzureScanner{
 			&avs.AVSScanner{},
 		}
 

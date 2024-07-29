@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/google/uuid"
 )
@@ -16,13 +17,13 @@ type (
 	ReportData struct {
 		OutputFileName    string
 		Mask              bool
-		AzqrData          []scanners.AzqrServiceResult
-		AprlData          []scanners.AprlResult
+		AzqrData          []azqr.AzqrServiceResult
+		AprlData          []azqr.AprlResult
 		DefenderData      []scanners.DefenderResult
 		AdvisorData       []scanners.AdvisorResult
 		CostData          *scanners.CostResult
-		Recomendations    map[string]map[string]scanners.AprlRecommendation
-		ResourceTypeCount []scanners.ResourceTypeCount
+		Recomendations    map[string]map[string]azqr.AprlRecommendation
+		ResourceTypeCount []azqr.ResourceTypeCount
 	}
 
 	ResourceResult struct {
@@ -62,10 +63,10 @@ func (rd *ReportData) ServicesTable() [][]string {
 	for _, d := range rd.AzqrData {
 		for _, r := range d.Recommendations {
 			row := []string{
-				scanners.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+				azqr.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 				d.SubscriptionName,
 				d.ResourceGroup,
-				scanners.ParseLocation(d.Location),
+				azqr.ParseLocation(d.Location),
 				d.Type,
 				d.ServiceName,
 				fmt.Sprintf("%t", !r.NotCompliant),
@@ -102,11 +103,11 @@ func (rd *ReportData) ImpactedTable() [][]string {
 			r.ResourceType,
 			r.Recommendation,
 			r.RecommendationID,
-			scanners.MaskSubscriptionID(r.SubscriptionID, rd.Mask),
+			azqr.MaskSubscriptionID(r.SubscriptionID, rd.Mask),
 			r.SubscriptionName,
 			r.ResourceGroup,
 			r.Name,
-			scanners.MaskSubscriptionIDInResourceID(r.ResourceID, rd.Mask),
+			azqr.MaskSubscriptionIDInResourceID(r.ResourceID, rd.Mask),
 			r.Param1,
 			r.Param2,
 			r.Param3,
@@ -128,11 +129,11 @@ func (rd *ReportData) ImpactedTable() [][]string {
 					d.Type,
 					r.Recommendation,
 					r.RecommendationID,
-					scanners.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+					azqr.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 					d.SubscriptionName,
 					d.ResourceGroup,
 					d.ServiceName,
-					scanners.MaskSubscriptionIDInResourceID(d.ResourceID(), rd.Mask),
+					azqr.MaskSubscriptionIDInResourceID(d.ResourceID(), rd.Mask),
 					r.Result,
 					"",
 					"",
@@ -157,7 +158,7 @@ func (rd *ReportData) CostTable() [][]string {
 		row := []string{
 			rd.CostData.From.Format("2006-01-02"),
 			rd.CostData.To.Format("2006-01-02"),
-			scanners.MaskSubscriptionID(r.SubscriptionID, rd.Mask),
+			azqr.MaskSubscriptionID(r.SubscriptionID, rd.Mask),
 			r.SubscriptionName,
 			r.ServiceName,
 			r.Value,
@@ -175,7 +176,7 @@ func (rd *ReportData) DefenderTable() [][]string {
 	rows := [][]string{}
 	for _, d := range rd.DefenderData {
 		row := []string{
-			scanners.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			azqr.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 			d.SubscriptionName,
 			d.Name,
 			d.Tier,
@@ -193,7 +194,7 @@ func (rd *ReportData) AdvisorTable() [][]string {
 	rows := [][]string{}
 	for _, d := range rd.AdvisorData {
 		row := []string{
-			scanners.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			azqr.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 			d.SubscriptionName,
 			d.Name,
 			d.Type,

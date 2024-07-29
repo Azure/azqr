@@ -4,18 +4,18 @@
 package afd
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
 )
 
 // FrontDoorScanner - Scanner for Front Door
 type FrontDoorScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armcdn.ProfilesClient
 }
 
 // Init - Initializes the FrontDoor Scanner
-func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
+func (a *FrontDoorScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armcdn.NewProfilesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,21 +23,21 @@ func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Front Doors in a Resource Group
-func (a *FrontDoorScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *FrontDoorScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	gateways, err := a.list(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, g := range gateways {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

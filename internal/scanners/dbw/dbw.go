@@ -4,18 +4,18 @@
 package dbw
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
 
 // DatabricksScanner - Scanner for Azure Databricks
 type DatabricksScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armdatabricks.WorkspacesClient
 }
 
 // Init - Initializes the DatabricksScanner
-func (c *DatabricksScanner) Init(config *scanners.ScannerConfig) error {
+func (c *DatabricksScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armdatabricks.NewWorkspacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (c *DatabricksScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Azure Databricks in a Resource Group
-func (c *DatabricksScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *DatabricksScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	workspaces, err := c.listWorkspaces(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, ws := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, ws, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

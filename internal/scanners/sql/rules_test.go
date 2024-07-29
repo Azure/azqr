@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 )
@@ -16,7 +16,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -40,7 +40,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -54,7 +54,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 				target: &armsql.Server{
 					Name: to.Ptr("sql-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +70,7 @@ func TestSQLScanner_Rules(t *testing.T) {
 						MinimalTLSVersion: to.Ptr("1.2"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -98,7 +98,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -116,7 +116,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				target: &armsql.Database{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -139,7 +139,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 						Tier: to.Ptr("Premium"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -153,7 +153,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				target: &armsql.Database{
 					Properties: &armsql.DatabaseProperties{},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -169,7 +169,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 						Name: to.Ptr("P3"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -183,7 +183,7 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 				target: &armsql.Database{
 					Name: to.Ptr("sqldb-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -211,7 +211,7 @@ func TestSQLScanner_PoolRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -231,7 +231,7 @@ func TestSQLScanner_PoolRules(t *testing.T) {
 						Name: to.Ptr("GP_Gen5_2"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -245,7 +245,7 @@ func TestSQLScanner_PoolRules(t *testing.T) {
 				target: &armsql.ElasticPool{
 					Name: to.Ptr("sqlep-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

@@ -4,18 +4,18 @@
 package cae
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
 // ContainerAppsEnvironmentScanner - Scanner for Container Apps
 type ContainerAppsEnvironmentScanner struct {
-	config     *scanners.ScannerConfig
+	config     *azqr.ScannerConfig
 	appsClient *armappcontainers.ManagedEnvironmentsClient
 }
 
 // Init - Initializes the ContainerAppsEnvironmentScanner
-func (a *ContainerAppsEnvironmentScanner) Init(config *scanners.ScannerConfig) error {
+func (a *ContainerAppsEnvironmentScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.appsClient, err = armappcontainers.NewManagedEnvironmentsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (a *ContainerAppsEnvironmentScanner) Init(config *scanners.ScannerConfig) e
 }
 
 // Scan - Scans all Container Apps in a Resource Group
-func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	apps, err := a.listApps(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, app := range apps {
 		rr := engine.EvaluateRecommendations(rules, app, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

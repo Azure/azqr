@@ -4,18 +4,18 @@
 package ci
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
 )
 
 // ContainerInstanceScanner - Scanner for Container Instances
 type ContainerInstanceScanner struct {
-	config          *scanners.ScannerConfig
+	config          *azqr.ScannerConfig
 	instancesClient *armcontainerinstance.ContainerGroupsClient
 }
 
 // Init - Initializes the ContainerInstanceScanner
-func (c *ContainerInstanceScanner) Init(config *scanners.ScannerConfig) error {
+func (c *ContainerInstanceScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.instancesClient, err = armcontainerinstance.NewContainerGroupsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (c *ContainerInstanceScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Container Instances in a Resource Group
-func (c *ContainerInstanceScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *ContainerInstanceScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	instances, err := c.listInstances(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, instance := range instances {
 		rr := engine.EvaluateRecommendations(rules, instance, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

@@ -4,18 +4,18 @@
 package adf
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
 )
 
 // DataFactoryScanner - Scanner for Data Factory
 type DataFactoryScanner struct {
-	config          *scanners.ScannerConfig
+	config          *azqr.ScannerConfig
 	factoriesClient *armdatafactory.FactoriesClient
 }
 
 // Init - Initializes the DataFactory Scanner
-func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
+func (a *DataFactoryScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.factoriesClient, err = armdatafactory.NewFactoriesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,21 +23,21 @@ func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Data Factories in a Resource Group
-func (a *DataFactoryScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *DataFactoryScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	factories, err := a.listFactories(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, g := range factories {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

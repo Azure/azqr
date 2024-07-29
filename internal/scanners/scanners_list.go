@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package internal
+package scanners
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners/aa"
 	"github.com/Azure/azqr/internal/scanners/adf"
 	"github.com/Azure/azqr/internal/scanners/afd"
@@ -70,8 +70,8 @@ import (
 )
 
 // GetScanners returns a list of all scanners
-func GetScanners() []scanners.IAzureScanner {
-	return []scanners.IAzureScanner{
+func GetScanners() []azqr.IAzureScanner {
+	return []azqr.IAzureScanner{
 		&aa.AutomationAccountScanner{},
 		&dbw.DatabricksScanner{},
 		&adf.DataFactoryScanner{},

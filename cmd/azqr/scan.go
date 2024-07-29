@@ -5,6 +5,7 @@ package azqr
 
 import (
 	"github.com/Azure/azqr/internal"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners"
 
 	"github.com/spf13/cobra"
@@ -33,12 +34,12 @@ var scanCmd = &cobra.Command{
 	Long:  "Scan Azure Resources",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := internal.GetScanners()
+		serviceScanners := scanners.GetScanners()
 		scan(cmd, serviceScanners)
 	},
 }
 
-func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
+func scan(cmd *cobra.Command, serviceScanners []azqr.IAzureScanner) {
 	subscriptionID, _ := cmd.Flags().GetString("subscription-id")
 	resourceGroupName, _ := cmd.Flags().GetString("resource-group")
 	outputFileName, _ := cmd.Flags().GetString("output-name")

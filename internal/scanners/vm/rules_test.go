@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 )
@@ -16,7 +16,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 				target: &armcompute.VirtualMachine{
 					Properties: &armcompute.VirtualMachineProperties{},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -48,7 +48,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 				target: &armcompute.VirtualMachine{
 					Name: to.Ptr("vm-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -60,7 +60,7 @@ func TestVirtualMachineScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "vm-007",
 				target:      &armcompute.VirtualMachine{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,

@@ -4,18 +4,18 @@
 package as
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/analysisservices/armanalysisservices"
 )
 
 // AnalysisServicesScanner - Scanner for Analysis Services
 type AnalysisServicesScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armanalysisservices.ServersClient
 }
 
 // Init - Initializes the AnalysisServicesScanner
-func (c *AnalysisServicesScanner) Init(config *scanners.ScannerConfig) error {
+func (c *AnalysisServicesScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armanalysisservices.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (c *AnalysisServicesScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Analysis Services in a Resource Group
-func (c *AnalysisServicesScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *AnalysisServicesScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	workspaces, err := c.listWorkspaces(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, ws := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, ws, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

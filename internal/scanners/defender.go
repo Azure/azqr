@@ -7,26 +7,26 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/rs/zerolog/log"
-
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity"
+	"github.com/rs/zerolog/log"
 )
 
 // DefenderResult - Defender result
 type DefenderResult struct {
 	SubscriptionID, SubscriptionName, Name, Tier string
-	Deprecated                 bool
+	Deprecated                                   bool
 }
 
 // DefenderScanner - Defender scanner
 type DefenderScanner struct {
-	config       *ScannerConfig
+	config       *azqr.ScannerConfig
 	client       *armsecurity.PricingsClient
 	defenderFunc func() ([]DefenderResult, error)
 }
 
 // Init - Initializes the Defender Scanner
-func (s *DefenderScanner) Init(config *ScannerConfig) error {
+func (s *DefenderScanner) Init(config *azqr.ScannerConfig) error {
 	s.config = config
 	var err error
 	s.client, err = armsecurity.NewPricingsClient(config.Cred, config.ClientOptions)
@@ -38,7 +38,7 @@ func (s *DefenderScanner) Init(config *ScannerConfig) error {
 
 // ListConfiguration - Lists Microsoft Defender for Cloud pricing configurations in the subscription.
 func (s *DefenderScanner) ListConfiguration() ([]DefenderResult, error) {
-	LogSubscriptionScan(s.config.SubscriptionID, "Defender Status")
+	azqr.LogSubscriptionScan(s.config.SubscriptionID, "Defender Status")
 	if s.defenderFunc == nil {
 		resp, err := s.client.List(s.config.Ctx, fmt.Sprintf("subscriptions/%s", s.config.SubscriptionID), nil)
 		if err != nil {
@@ -70,4 +70,25 @@ func (s *DefenderScanner) ListConfiguration() ([]DefenderResult, error) {
 	}
 
 	return s.defenderFunc()
+}
+
+func (s *DefenderScanner) Scan(scan bool, config *azqr.ScannerConfig) []DefenderResult {
+	defenderResults := []DefenderResult{}
+	if scan {
+		err := s.Init(config)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to initialize Defender Scanner")
+		}
+
+		res, err := s.ListConfiguration()
+		if err != nil {
+			if azqr.ShouldSkipError(err) {
+				res = []DefenderResult{}
+			} else {
+				log.Fatal().Err(err).Msg("Failed to list Defender configuration")
+			}
+		}
+		defenderResults = append(defenderResults, res...)
+	}
+	return defenderResults
 }

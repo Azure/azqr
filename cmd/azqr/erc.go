@@ -4,7 +4,7 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners/erc"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +19,7 @@ var ercCmd = &cobra.Command{
 	Long:  "Scan Express Route Circuits",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := []scanners.IAzureScanner{
+		serviceScanners := []azqr.IAzureScanner{
 			&erc.ExpressRouteScanner{},
 		}
 

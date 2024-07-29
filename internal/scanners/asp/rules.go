@@ -6,12 +6,12 @@ package asp
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 )
 
 // GetRecommendations - Returns the rules for the AppServiceScanner
-func (a *AppServiceScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+func (a *AppServiceScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 	result := a.getPlanRules()
 	for k, v := range a.getAppRules() {
 		result[k] = v
@@ -25,15 +25,15 @@ func (a *AppServiceScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 	return result
 }
 
-func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *AppServiceScanner) getPlanRules() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"asp-001": {
 			RecommendationID: "asp-001",
 			ResourceType:     "Microsoft.Web/serverfarms",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         azqr.CategoryMonitoringAndAlerting,
 			Recommendation:   "Plan should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armappservice.Plan)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -42,10 +42,10 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzqrRecommendatio
 		"asp-003": {
 			RecommendationID: "asp-003",
 			ResourceType:     "Microsoft.Web/serverfarms",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Plan should have a SLA",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armappservice.Plan)
 				sku := string(*i.SKU.Tier)
 				sla := "None"
@@ -59,10 +59,10 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzqrRecommendatio
 		"asp-005": {
 			RecommendationID: "asp-005",
 			ResourceType:     "Microsoft.Web/serverfarms",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Plan SKU",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armappservice.Plan)
 				return false, string(*i.SKU.Name)
 			},
@@ -71,10 +71,10 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzqrRecommendatio
 		"asp-006": {
 			RecommendationID: "asp-006",
 			ResourceType:     "Microsoft.Web/serverfarms",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Plan Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Plan)
 				caf := strings.HasPrefix(*c.Name, "asp")
 				return !caf, ""
@@ -84,10 +84,10 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzqrRecommendatio
 		"asp-007": {
 			RecommendationID: "asp-007",
 			ResourceType:     "Microsoft.Web/serverfarms",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Plan should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Plan)
 				return len(c.Tags) == 0, ""
 			},
@@ -96,15 +96,15 @@ func (a *AppServiceScanner) getPlanRules() map[string]scanners.AzqrRecommendatio
 	}
 }
 
-func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"app-001": {
 			RecommendationID: "app-001",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         azqr.CategoryMonitoringAndAlerting,
 			Recommendation:   "App Service should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armappservice.Site)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -114,10 +114,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-004": {
 			RecommendationID: "app-004",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "App Service should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armappservice.Site)
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
@@ -127,10 +127,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-006": {
 			RecommendationID: "app-006",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "App Service Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				caf := strings.HasPrefix(*c.Name, "app")
 				return !caf, ""
@@ -140,10 +140,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-007": {
 			RecommendationID: "app-007",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "App Service should use HTTPS only",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				h := *c.Properties.HTTPSOnly
 				return !h, ""
@@ -153,10 +153,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-008": {
 			RecommendationID: "app-008",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "App Service should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return len(c.Tags) == 0, ""
 			},
@@ -165,10 +165,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-009": {
 			RecommendationID: "app-009",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "App Service should use VNET integration",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Properties.VirtualNetworkSubnetID == nil || len(*c.Properties.VirtualNetworkSubnetID) == 0, ""
 			},
@@ -177,10 +177,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-010": {
 			RecommendationID: "app-010",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "App Service should have VNET Route all enabled for VNET integration",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Properties.VnetRouteAllEnabled == nil || !*c.Properties.VnetRouteAllEnabled, ""
 			},
@@ -189,10 +189,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-011": {
 			RecommendationID: "app-011",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "App Service should use TLS 1.2",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				broken := scanContext.SiteConfig.Properties.MinTLSVersion == nil || *scanContext.SiteConfig.Properties.MinTLSVersion != armappservice.SupportedTLSVersionsOne2
 				return broken, ""
 			},
@@ -201,10 +201,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-012": {
 			RecommendationID: "app-012",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "App Service remote debugging should be disabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				broken := scanContext.SiteConfig.Properties.RemoteDebuggingEnabled == nil || *scanContext.SiteConfig.Properties.RemoteDebuggingEnabled
 				return broken, ""
 			},
@@ -213,10 +213,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-013": {
 			RecommendationID: "app-013",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "App Service should not allow insecure FTP",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				broken := scanContext.SiteConfig.Properties.FtpsState == nil || *scanContext.SiteConfig.Properties.FtpsState == armappservice.FtpsStateAllAllowed
 				return broken, ""
 			},
@@ -225,10 +225,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-014": {
 			RecommendationID: "app-014",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryScalability,
+			Category:         azqr.CategoryScalability,
 			Recommendation:   "App Service should have Always On enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				broken := scanContext.SiteConfig.Properties.AlwaysOn == nil || !*scanContext.SiteConfig.Properties.AlwaysOn
 				return broken, ""
 			},
@@ -237,10 +237,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-015": {
 			RecommendationID: "app-015",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "App Service should avoid using Client Affinity",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Properties.ClientAffinityEnabled != nil && *c.Properties.ClientAffinityEnabled, ""
 			},
@@ -249,10 +249,10 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 		"app-016": {
 			RecommendationID: "app-016",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "App Service should use Managed Identities",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				// c := target.(*armappservice.Site)
 				// c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappservice.ManagedServiceIdentityTypeNone
 				// not working because SDK set's Identity to nil even when configured.
@@ -264,15 +264,15 @@ func (a *AppServiceScanner) getAppRules() map[string]scanners.AzqrRecommendation
 	}
 }
 
-func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"func-001": {
 			RecommendationID: "func-001",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         azqr.CategoryMonitoringAndAlerting,
 			Recommendation:   "Function should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armappservice.Site)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -282,10 +282,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-004": {
 			RecommendationID: "func-004",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Function should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armappservice.Site)
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
@@ -295,10 +295,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-006": {
 			RecommendationID: "func-006",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Function Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				caf := strings.HasPrefix(*c.Name, "func")
 				return !caf, ""
@@ -308,10 +308,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-007": {
 			RecommendationID: "func-007",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Function should use HTTPS only",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				h := c.Properties.HTTPSOnly != nil && *c.Properties.HTTPSOnly
 				return !h, ""
@@ -321,10 +321,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-008": {
 			RecommendationID: "func-008",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Function should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return len(c.Tags) == 0, ""
 			},
@@ -333,10 +333,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-009": {
 			RecommendationID: "func-009",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Function should use VNET integration",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Properties.VirtualNetworkSubnetID == nil || len(*c.Properties.VirtualNetworkSubnetID) == 0, ""
 			},
@@ -345,10 +345,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-010": {
 			RecommendationID: "func-010",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Function should have VNET Route all enabled for VNET integration",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Properties.VnetRouteAllEnabled == nil || !*c.Properties.VnetRouteAllEnabled, ""
 			},
@@ -357,10 +357,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-011": {
 			RecommendationID: "func-011",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Function should use TLS 1.2",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				broken := scanContext.SiteConfig.Properties.MinTLSVersion == nil || *scanContext.SiteConfig.Properties.MinTLSVersion != armappservice.SupportedTLSVersionsOne2
 				return broken, ""
 			},
@@ -369,10 +369,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-012": {
 			RecommendationID: "func-012",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Function remote debugging should be disabled",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				broken := scanContext.SiteConfig.Properties.RemoteDebuggingEnabled == nil || *scanContext.SiteConfig.Properties.RemoteDebuggingEnabled
 				return broken, ""
 			},
@@ -381,10 +381,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-013": {
 			RecommendationID: "func-013",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Function should avoid using Client Affinity",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Properties.ClientAffinityEnabled != nil && *c.Properties.ClientAffinityEnabled, ""
 			},
@@ -393,10 +393,10 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 		"func-014": {
 			RecommendationID: "func-014",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Function should use Managed Identities",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				// c := target.(*armappservice.Site)
 				// c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappservice.ManagedServiceIdentityTypeNone
 				// not working because SDK set's Identity to nil even when configured.
@@ -408,15 +408,15 @@ func (a *AppServiceScanner) getFunctionRules() map[string]scanners.AzqrRecommend
 	}
 }
 
-func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"logics-001": {
 			RecommendationID: "logics-001",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         azqr.CategoryMonitoringAndAlerting,
 			Recommendation:   "Logic App should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armappservice.Site)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -426,10 +426,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-004": {
 			RecommendationID: "logics-004",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Logic App should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armappservice.Site)
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
@@ -439,10 +439,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-006": {
 			RecommendationID: "logics-006",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Logic App Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				caf := strings.HasPrefix(*c.Name, "logic")
 				return !caf, ""
@@ -452,10 +452,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-007": {
 			RecommendationID: "logics-007",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Logic App should use HTTPS only",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				h := c.Properties.HTTPSOnly != nil && *c.Properties.HTTPSOnly
 				return !h, ""
@@ -465,10 +465,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-008": {
 			RecommendationID: "logics-008",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Logic App should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return len(c.Tags) == 0, ""
 			},
@@ -477,10 +477,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-009": {
 			RecommendationID: "logics-009",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Logic App should use VNET integration",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Properties.VirtualNetworkSubnetID == nil || len(*c.Properties.VirtualNetworkSubnetID) == 0, ""
 			},
@@ -489,10 +489,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-010": {
 			RecommendationID: "logics-010",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Logic App should have VNET Route all enabled for VNET integration",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Properties.VnetRouteAllEnabled == nil || !*c.Properties.VnetRouteAllEnabled, ""
 			},
@@ -501,10 +501,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-011": {
 			RecommendationID: "logics-011",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Logic App should use TLS 1.2",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				broken := scanContext.SiteConfig.Properties.MinTLSVersion == nil || *scanContext.SiteConfig.Properties.MinTLSVersion != armappservice.SupportedTLSVersionsOne2
 				return broken, ""
 			},
@@ -513,10 +513,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-012": {
 			RecommendationID: "logics-012",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Logic App remote debugging should be disabled",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				broken := scanContext.SiteConfig.Properties.RemoteDebuggingEnabled == nil || *scanContext.SiteConfig.Properties.RemoteDebuggingEnabled
 				return broken, ""
 			},
@@ -525,10 +525,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-013": {
 			RecommendationID: "logics-013",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Logic App should avoid using Client Affinity",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armappservice.Site)
 				return c.Properties.ClientAffinityEnabled != nil && *c.Properties.ClientAffinityEnabled, ""
 			},
@@ -537,10 +537,10 @@ func (a *AppServiceScanner) getLogicRules() map[string]scanners.AzqrRecommendati
 		"logics-014": {
 			RecommendationID: "logics-014",
 			ResourceType:     "Microsoft.Web/sites",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Logic App should use Managed Identities",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				// c := target.(*armappservice.Site)
 				// c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappservice.ManagedServiceIdentityTypeNone
 				// not working because SDK set's Identity to nil even when configured.

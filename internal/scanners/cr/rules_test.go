@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
@@ -16,7 +16,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				target: &armcontainerregistry.Registry{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "cr-003",
 				target:      &armcontainerregistry.Registry{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +70,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -86,7 +86,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armcontainerregistry.SKUNameStandard),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -100,7 +100,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				target: &armcontainerregistry.Registry{
 					Name: to.Ptr("cr-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -114,7 +114,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -130,7 +130,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						AdminUserEnabled: to.Ptr(false),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -144,7 +144,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 				target: &armcontainerregistry.Registry{
 					Properties: &armcontainerregistry.RegistryProperties{},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -164,7 +164,7 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,

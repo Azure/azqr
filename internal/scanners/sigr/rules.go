@@ -6,20 +6,20 @@ package sigr
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
 // GetRules - Returns the rules for the SignalRScanner
-func (a *SignalRScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *SignalRScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"sigr-001": {
 			RecommendationID: "sigr-001",
 			ResourceType:     "Microsoft.SignalRService/SignalR",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         azqr.CategoryMonitoringAndAlerting,
 			Recommendation:   "SignalR should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armsignalr.ResourceInfo)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,10 +29,10 @@ func (a *SignalRScanner) GetRecommendations() map[string]scanners.AzqrRecommenda
 		"sigr-003": {
 			RecommendationID: "sigr-003",
 			ResourceType:     "Microsoft.SignalRService/SignalR",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "SignalR should have a SLA",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/signalr-service/",
@@ -40,10 +40,10 @@ func (a *SignalRScanner) GetRecommendations() map[string]scanners.AzqrRecommenda
 		"sigr-004": {
 			RecommendationID: "sigr-004",
 			ResourceType:     "Microsoft.SignalRService/SignalR",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "SignalR should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armsignalr.ResourceInfo)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -53,10 +53,10 @@ func (a *SignalRScanner) GetRecommendations() map[string]scanners.AzqrRecommenda
 		"sigr-005": {
 			RecommendationID: "sigr-005",
 			ResourceType:     "Microsoft.SignalRService/SignalR",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "SignalR SKU",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armsignalr.ResourceInfo)
 				return false, string(*i.SKU.Name)
 			},
@@ -65,10 +65,10 @@ func (a *SignalRScanner) GetRecommendations() map[string]scanners.AzqrRecommenda
 		"sigr-006": {
 			RecommendationID: "sigr-006",
 			ResourceType:     "Microsoft.SignalRService/SignalR",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "SignalR Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armsignalr.ResourceInfo)
 				caf := strings.HasPrefix(*c.Name, "sigr")
 				return !caf, ""
@@ -78,10 +78,10 @@ func (a *SignalRScanner) GetRecommendations() map[string]scanners.AzqrRecommenda
 		"sigr-007": {
 			RecommendationID: "sigr-007",
 			ResourceType:     "Microsoft.SignalRService/SignalR",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "SignalR should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armsignalr.ResourceInfo)
 				return len(c.Tags) == 0, ""
 			},

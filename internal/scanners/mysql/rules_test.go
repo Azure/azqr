@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
@@ -17,7 +17,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,7 +35,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 				target: &armmysql.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -51,7 +51,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "mysql-003",
 				target:      &armmysql.Server{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -71,7 +71,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -87,7 +87,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 						Name: to.Ptr("GPGen58"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -101,7 +101,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 				target: &armmysql.Server{
 					Name: to.Ptr("mysql-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -113,7 +113,7 @@ func TestMySQLScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "mysql-007",
 				target:      &armmysql.Server{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -141,7 +141,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -159,7 +159,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -177,7 +177,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Properties: &armmysqlflexibleservers.ServerProperties{},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -197,7 +197,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.Ptr("1"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -217,7 +217,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.Ptr("1"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -235,7 +235,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -251,7 +251,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 						Name: to.Ptr("StandardD4sv3"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -265,7 +265,7 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 				target: &armmysqlflexibleservers.Server{
 					Name: to.Ptr("mysql-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

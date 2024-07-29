@@ -4,18 +4,18 @@
 package kv
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
 
 // KeyVaultScanner - Scanner for Key Vaults
 type KeyVaultScanner struct {
-	config       *scanners.ScannerConfig
+	config       *azqr.ScannerConfig
 	vaultsClient *armkeyvault.VaultsClient
 }
 
 // Init - Initializes the KeyVaultScanner
-func (c *KeyVaultScanner) Init(config *scanners.ScannerConfig) error {
+func (c *KeyVaultScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.vaultsClient, err = armkeyvault.NewVaultsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (c *KeyVaultScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Key Vaults in a Resource Group
-func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	vaults, err := c.listVaults(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, vault := range vaults {
 		rr := engine.EvaluateRecommendations(rules, vault, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

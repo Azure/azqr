@@ -6,20 +6,20 @@ package agw
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
 )
 
 // GetRecommendations - Returns the rules for the ApplicationGatewayScanner
-func (a *ApplicationGatewayScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *ApplicationGatewayScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"agw-005": {
 			RecommendationID: "agw-005",
 			ResourceType:     "Microsoft.Network/applicationGateways",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         azqr.CategoryMonitoringAndAlerting,
 			Recommendation:   "Application Gateway: Monitor and Log the configurations and traffic",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armnetwork.ApplicationGateway)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,10 +29,10 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]scanners.Azq
 		"agw-103": {
 			RecommendationID: "agw-103",
 			ResourceType:     "Microsoft.Network/applicationGateways",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Application Gateway SLA",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
 			Url: "https://www.azure.cn/en-us/support/sla/application-gateway/",
@@ -40,10 +40,10 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]scanners.Azq
 		"agw-104": {
 			RecommendationID: "agw-104",
 			ResourceType:     "Microsoft.Network/applicationGateways",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Application Gateway SKU",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				return false, string(*g.Properties.SKU.Name)
 			},
@@ -52,10 +52,10 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]scanners.Azq
 		"agw-105": {
 			RecommendationID: "agw-105",
 			ResourceType:     "Microsoft.Network/applicationGateways",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Application Gateway Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				g := target.(*armnetwork.ApplicationGateway)
 				caf := strings.HasPrefix(*g.Name, "agw")
 				return !caf, ""
@@ -65,10 +65,10 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]scanners.Azq
 		"agw-106": {
 			RecommendationID: "agw-106",
 			ResourceType:     "Microsoft.Network/applicationGateways",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Application Gateway should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armnetwork.ApplicationGateway)
 				return len(c.Tags) == 0, ""
 			},

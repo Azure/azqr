@@ -6,20 +6,20 @@ package vm
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 )
 
 // GetRecommendations - Returns the rules for the VirtualMachineScanner
-func (a *VirtualMachineScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *VirtualMachineScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"vm-003": {
 			RecommendationID: "vm-003",
 			ResourceType:     "Microsoft.Compute/virtualMachines",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Virtual Machine should have a SLA",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				v := target.(*armcompute.VirtualMachine)
 				sla := "99.9%"
 				hasScaleSet := v.Properties.VirtualMachineScaleSet != nil && v.Properties.VirtualMachineScaleSet.ID != nil
@@ -37,10 +37,10 @@ func (a *VirtualMachineScanner) GetRecommendations() map[string]scanners.AzqrRec
 		"vm-006": {
 			RecommendationID: "vm-006",
 			ResourceType:     "Microsoft.Compute/virtualMachines",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Virtual Machine Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcompute.VirtualMachine)
 				caf := strings.HasPrefix(*c.Name, "vm")
 				return !caf, ""
@@ -50,10 +50,10 @@ func (a *VirtualMachineScanner) GetRecommendations() map[string]scanners.AzqrRec
 		"vm-007": {
 			RecommendationID: "vm-007",
 			ResourceType:     "Microsoft.Compute/virtualMachines",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Virtual Machine should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcompute.VirtualMachine)
 				return len(c.Tags) == 0, ""
 			},

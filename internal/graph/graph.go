@@ -78,7 +78,7 @@ func (q *GraphQuery) retry(ctx context.Context, attempts int, sleep time.Duratio
 		}
 
 		// if shouldSkipError(err) {
-		// 	return []scanners.AzureServiceResult{}, nil
+		// 	return []azqr.AzureServiceResult{}, nil
 		// }
 
 		errAsString := err.Error()

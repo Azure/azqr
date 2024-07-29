@@ -4,18 +4,18 @@
 package evgd
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
 )
 
 // EventGridScanner - Scanner for EventGrid Domains
 type EventGridScanner struct {
-	config        *scanners.ScannerConfig
+	config        *azqr.ScannerConfig
 	domainsClient *armeventgrid.DomainsClient
 }
 
 // Init - Initializes the EventGridScanner
-func (a *EventGridScanner) Init(config *scanners.ScannerConfig) error {
+func (a *EventGridScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.domainsClient, err = armeventgrid.NewDomainsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (a *EventGridScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all EventGrid Domains in a Resource Group
-func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	domains, err := a.listDomain(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, d := range domains {
 		rr := engine.EvaluateRecommendations(rules, d, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

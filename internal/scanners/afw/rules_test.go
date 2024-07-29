@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
 )
@@ -16,7 +16,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "afw-003",
 				target:      &armnetwork.AzureFirewall{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -64,7 +64,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -82,7 +82,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -96,7 +96,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					Name: to.Ptr("afw-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

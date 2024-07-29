@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
@@ -16,7 +16,7 @@ func TestContainerAppsEnvironmentScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestContainerAppsEnvironmentScanner_Rules(t *testing.T) {
 				target: &armappcontainers.ManagedEnvironment{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestContainerAppsEnvironmentScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "cae-003",
 				target:      &armappcontainers.ManagedEnvironment{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -66,7 +66,7 @@ func TestContainerAppsEnvironmentScanner_Rules(t *testing.T) {
 						VnetConfiguration: nil,
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -84,7 +84,7 @@ func TestContainerAppsEnvironmentScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -98,7 +98,7 @@ func TestContainerAppsEnvironmentScanner_Rules(t *testing.T) {
 				target: &armappcontainers.ManagedEnvironment{
 					Name: to.Ptr("cae-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

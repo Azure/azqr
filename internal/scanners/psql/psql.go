@@ -4,18 +4,18 @@
 package psql
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 )
 
 // PostgreScanner - Scanner for PostgreSQL
 type PostgreScanner struct {
-	config        *scanners.ScannerConfig
+	config        *azqr.ScannerConfig
 	postgreClient *armpostgresql.ServersClient
 }
 
 // Init - Initializes the PostgreScanner
-func (c *PostgreScanner) Init(config *scanners.ScannerConfig) error {
+func (c *PostgreScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.postgreClient, err = armpostgresql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (c *PostgreScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all PostgreSQL in a Resource Group
-func (c *PostgreScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *PostgreScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	postgre, err := c.listPostgre(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, postgre := range postgre {
 		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

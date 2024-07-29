@@ -4,18 +4,18 @@
 package aks
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
 // AKSScanner - Scanner for AKS Clusters
 type AKSScanner struct {
-	config         *scanners.ScannerConfig
+	config         *azqr.ScannerConfig
 	clustersClient *armcontainerservice.ManagedClustersClient
 }
 
 // Init - Initializes the AKSScanner
-func (a *AKSScanner) Init(config *scanners.ScannerConfig) error {
+func (a *AKSScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.clustersClient, err = armcontainerservice.NewManagedClustersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,22 +23,22 @@ func (a *AKSScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all AKS Clusters in a Resource Group
-func (a *AKSScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *AKSScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	clusters, err := a.listClusters(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, c := range clusters {
 
 		rr := engine.EvaluateRecommendations(rules, c, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

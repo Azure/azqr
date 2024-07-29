@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
@@ -16,7 +16,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				target: &armeventhub.EHNamespace{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -54,7 +54,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armeventhub.SKUNameStandard),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +70,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armeventhub.SKUNamePremium),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -90,7 +90,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -106,7 +106,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armeventhub.SKUNamePremium),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -120,7 +120,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				target: &armeventhub.EHNamespace{
 					Name: to.Ptr("evh-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -136,7 +136,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 						DisableLocalAuth: to.Ptr(true),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
@@ -19,13 +20,13 @@ import (
 
 // DiagnosticSettingsScanner - scanner for diagnostic settings
 type DiagnosticSettingsScanner struct {
-	config     *ScannerConfig
+	config     *azqr.ScannerConfig
 	client     *arm.Client
 	graphQuery *graph.GraphQuery
 }
 
 // Init - Initializes the DiagnosticSettingsScanner
-func (d *DiagnosticSettingsScanner) Init(config *ScannerConfig) error {
+func (d *DiagnosticSettingsScanner) Init(config *azqr.ScannerConfig) error {
 	d.config = config
 	client, err := arm.NewClient(moduleName+".DiagnosticSettingsBatch", moduleVersion, d.config.Cred, d.config.ClientOptions)
 	if err != nil {
@@ -41,7 +42,7 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 	resources := []string{}
 	res := map[string]bool{}
 
-	LogSubscriptionScan(d.config.SubscriptionID, "Resource Ids")
+	azqr.LogSubscriptionScan(d.config.SubscriptionID, "Resource Ids")
 
 	result := d.graphQuery.Query(d.config.Ctx, "resources | project id | order by id asc", []*string{&d.config.SubscriptionID})
 
@@ -66,7 +67,7 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings() (map[s
 		close(ch)
 	}()
 
-	LogSubscriptionScan(d.config.SubscriptionID, "Diagnostic Settings")
+	azqr.LogSubscriptionScan(d.config.SubscriptionID, "Diagnostic Settings")
 
 	// Split resources into batches of 20 items.
 	batchSize := 20
@@ -173,3 +174,19 @@ type (
 		Content armmonitor.DiagnosticSettingsResourceCollection `json:"content"`
 	}
 )
+
+func (d *DiagnosticSettingsScanner) Scan(config *azqr.ScannerConfig) map[string]bool {
+	err := d.Init(config)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize Diagnostic Settings Scanner")
+	}
+	diagResults, err := d.ListResourcesWithDiagnosticSettings()
+	if err != nil {
+		if azqr.ShouldSkipError(err) {
+			diagResults = map[string]bool{}
+		} else {
+			log.Fatal().Err(err).Msg("Failed to list resources with Diagnostic Settings")
+		}
+	}
+	return diagResults
+}

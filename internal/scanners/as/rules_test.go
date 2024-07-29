@@ -9,7 +9,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/analysisservices/armanalysisservices"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 )
 
@@ -17,7 +17,7 @@ func TestAnalysisServicesScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,7 +35,7 @@ func TestAnalysisServicesScanner_Rules(t *testing.T) {
 				target: &armanalysisservices.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -55,7 +55,7 @@ func TestAnalysisServicesScanner_Rules(t *testing.T) {
 						Tier: to.Ptr(armanalysisservices.SKUTierBasic),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -71,7 +71,7 @@ func TestAnalysisServicesScanner_Rules(t *testing.T) {
 						Tier: to.Ptr(armanalysisservices.SKUTierDevelopment),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -87,7 +87,7 @@ func TestAnalysisServicesScanner_Rules(t *testing.T) {
 						Tier: to.Ptr(armanalysisservices.SKUTierStandard),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -101,7 +101,7 @@ func TestAnalysisServicesScanner_Rules(t *testing.T) {
 				target: &armanalysisservices.Server{
 					Name: to.Ptr("as-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb"
 )
@@ -16,7 +16,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 				target: &armmariadb.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -58,7 +58,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -72,7 +72,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 				target: &armmariadb.Server{
 					Name: to.Ptr("maria-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -84,7 +84,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "maria-004",
 				target:      &armmariadb.Server{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -99,7 +99,7 @@ func TestMariaScanner_Rules(t *testing.T) {
 						MinimalTLSVersion: to.Ptr(armmariadb.MinimalTLSVersionEnumTLS12),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -127,7 +127,7 @@ func TestMariaScanner_DatabaseRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -145,7 +145,7 @@ func TestMariaScanner_DatabaseRules(t *testing.T) {
 				target: &armmariadb.Database{
 					Name: to.Ptr("mariadb-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

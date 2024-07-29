@@ -4,18 +4,18 @@
 package sb
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
 
 // ServiceBusScanner - Scanner for Service Bus
 type ServiceBusScanner struct {
-	config           *scanners.ScannerConfig
+	config           *azqr.ScannerConfig
 	servicebusClient *armservicebus.NamespacesClient
 }
 
 // Init - Initializes the ServiceBusScanner
-func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
+func (a *ServiceBusScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.servicebusClient, err = armservicebus.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Service Bus in a Resource Group
-func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	servicebus, err := c.listServiceBus(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, servicebus := range servicebus {
 		rr := engine.EvaluateRecommendations(rules, servicebus, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

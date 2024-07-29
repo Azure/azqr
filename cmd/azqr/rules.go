@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
 )
@@ -23,7 +24,7 @@ var rulesCmd = &cobra.Command{
 	Long:  "Print all recommendations as markdown table",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := internal.GetScanners()
+		serviceScanners := scanners.GetScanners()
 		aprl := internal.GetAprlRecommendations()
 
 		fmt.Println("#  | Id | Resource Type | Category | Impact | Recommendation | Learn")
@@ -33,7 +34,7 @@ var rulesCmd = &cobra.Command{
 		for _, scanner := range serviceScanners {
 			rm := scanner.GetRecommendations()
 
-			recommendations := map[string]scanners.AzqrRecommendation{}
+			recommendations := map[string]azqr.AzqrRecommendation{}
 			for _, r := range rm {
 				recommendations[r.RecommendationID] = r
 			}

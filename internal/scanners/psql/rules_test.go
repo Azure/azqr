@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
@@ -17,7 +17,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,7 +35,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				target: &armpostgresql.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -51,7 +51,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "psql-003",
 				target:      &armpostgresql.Server{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -71,7 +71,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -87,7 +87,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						Name: to.Ptr("GPGen58"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -101,7 +101,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				target: &armpostgresql.Server{
 					Name: to.Ptr("psql-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -117,7 +117,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						SSLEnforcement: to.Ptr(armpostgresql.SSLEnforcementEnumEnabled),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -133,7 +133,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						MinimalTLSVersion: to.Ptr(armpostgresql.MinimalTLSVersionEnumTLS12),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -161,7 +161,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -179,7 +179,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -197,7 +197,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -217,7 +217,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.Ptr("1"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -237,7 +237,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.Ptr("1"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -255,7 +255,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -271,7 +271,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						Name: to.Ptr("StandardD4sv3"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -285,7 +285,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Name: to.Ptr("psql-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

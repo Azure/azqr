@@ -4,18 +4,18 @@
 package lb
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
 )
 
 // LoadBalancerScanner - Scanner for Loadbalancer
 type LoadBalancerScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armnetwork.LoadBalancersClient
 }
 
 // Init - Initializes the LoadBalancerScanner
-func (c *LoadBalancerScanner) Init(config *scanners.ScannerConfig) error {
+func (c *LoadBalancerScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armnetwork.NewLoadBalancersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (c *LoadBalancerScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Loadbalancer in a Resource Group
-func (c *LoadBalancerScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *LoadBalancerScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	lbs, err := c.list(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, w := range lbs {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

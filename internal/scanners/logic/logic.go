@@ -4,18 +4,18 @@
 package logic
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/logic/armlogic"
 )
 
 // LogicAppScanner - Scanner for LogicApp
 type LogicAppScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armlogic.WorkflowsClient
 }
 
 // Init - Initializes the LogicAppScanner
-func (c *LogicAppScanner) Init(config *scanners.ScannerConfig) error {
+func (c *LogicAppScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armlogic.NewWorkflowsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,21 +23,21 @@ func (c *LogicAppScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all LogicApps in a Resource Group
-func (c *LogicAppScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *LogicAppScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	vnets, err := c.list(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, w := range vnets {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

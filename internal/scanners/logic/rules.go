@@ -6,20 +6,20 @@ package logic
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/logic/armlogic"
 )
 
 // GetRecommendations - Returns the rules for the LogicAppScanner
-func (a *LogicAppScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *LogicAppScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"logic-001": {
 			RecommendationID: "logic-001",
 			ResourceType:     "Microsoft.Logic/workflows",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         azqr.CategoryMonitoringAndAlerting,
 			Recommendation:   "Logic App should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armlogic.Workflow)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,10 +29,10 @@ func (a *LogicAppScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"logic-003": {
 			RecommendationID: "logic-003",
 			ResourceType:     "Microsoft.Logic/workflows",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Logic App should have a SLA",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
@@ -40,10 +40,10 @@ func (a *LogicAppScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"logic-004": {
 			RecommendationID: "logic-004",
 			ResourceType:     "Microsoft.Logic/workflows",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Logic App should limit access to Http Triggers",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armlogic.Workflow)
 				http := false
 				if service.Properties.Definition != nil {
@@ -71,10 +71,10 @@ func (a *LogicAppScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"logic-006": {
 			RecommendationID: "logic-006",
 			ResourceType:     "Microsoft.Logic/workflows",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Logic App Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armlogic.Workflow)
 
 				caf := strings.HasPrefix(*c.Name, "logic")
@@ -85,10 +85,10 @@ func (a *LogicAppScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"logic-007": {
 			RecommendationID: "logic-007",
 			ResourceType:     "Microsoft.Logic/workflows",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Logic App should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armlogic.Workflow)
 				return len(c.Tags) == 0, ""
 			},

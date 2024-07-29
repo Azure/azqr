@@ -6,20 +6,20 @@ package adf
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
 )
 
 // GetRecommendations - Returns the rules for the DataFactoryScanner
-func (a *DataFactoryScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *DataFactoryScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"adf-001": {
 			RecommendationID: "adf-001",
 			ResourceType:     "Microsoft.DataFactory/factories",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         azqr.CategoryMonitoringAndAlerting,
 			Recommendation:   "Azure Data Factory should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armdatafactory.Factory)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,10 +29,10 @@ func (a *DataFactoryScanner) GetRecommendations() map[string]scanners.AzqrRecomm
 		"adf-002": {
 			RecommendationID: "adf-002",
 			ResourceType:     "Microsoft.DataFactory/factories",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Azure Data Factory should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armdatafactory.Factory)
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
@@ -41,10 +41,10 @@ func (a *DataFactoryScanner) GetRecommendations() map[string]scanners.AzqrRecomm
 		"adf-003": {
 			RecommendationID: "adf-003",
 			ResourceType:     "Microsoft.DataFactory/factories",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Azure Data Factory SLA",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -52,10 +52,10 @@ func (a *DataFactoryScanner) GetRecommendations() map[string]scanners.AzqrRecomm
 		"adf-004": {
 			RecommendationID: "adf-004",
 			ResourceType:     "Microsoft.DataFactory/factories",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Azure Data Factory Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdatafactory.Factory)
 				caf := strings.HasPrefix(*c.Name, "adf")
 				return !caf, ""
@@ -65,10 +65,10 @@ func (a *DataFactoryScanner) GetRecommendations() map[string]scanners.AzqrRecomm
 		"adf-005": {
 			RecommendationID: "adf-005",
 			ResourceType:     "Microsoft.DataFactory/factories",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Azure Data Factory should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdatafactory.Factory)
 				return len(c.Tags) == 0, ""
 			},

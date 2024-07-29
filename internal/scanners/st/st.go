@@ -4,19 +4,19 @@
 package st
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
 // StorageScanner - Scanner for Storage
 type StorageScanner struct {
-	config             *scanners.ScannerConfig
+	config             *azqr.ScannerConfig
 	storageClient      *armstorage.AccountsClient
 	blobServicesClient *armstorage.BlobServicesClient
 }
 
 // Init - Initializes the StorageScanner
-func (c *StorageScanner) Init(config *scanners.ScannerConfig) error {
+func (c *StorageScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.storageClient, err = armstorage.NewAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -28,16 +28,16 @@ func (c *StorageScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Storage in a Resource Group
-func (c *StorageScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *StorageScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
 
 	storage, err := c.listStorage(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, storage := range storage {
 		scanContext.BlobServiceProperties = nil
@@ -48,7 +48,7 @@ func (c *StorageScanner) Scan(resourceGroupName string, scanContext *scanners.Sc
 
 		rr := engine.EvaluateRecommendations(rules, storage, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

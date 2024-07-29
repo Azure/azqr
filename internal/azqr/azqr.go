@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package scanners
+package azqr
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -18,6 +19,7 @@ import (
 )
 
 type (
+
 	// ScannerConfig - Struct for Scanner Config
 	ScannerConfig struct {
 		Ctx              context.Context
@@ -43,21 +45,6 @@ type (
 		GetRecommendations() map[string]AzqrRecommendation
 		Scan(resourceGroupName string, scanContext *ScanContext) ([]AzqrServiceResult, error)
 		ResourceTypes() []string
-	}
-
-	Resource struct {
-		ID             string
-		ResourceGroup  string
-		SubscriptionID string
-		Name           string
-		Type           string
-		Location       string
-	}
-
-	ResourceTypeCount struct {
-		Subscription string  `json:"Subscription"`
-		ResourceType string  `json:"Resource Type"`
-		Count        float64 `json:"Number of Resources"`
 	}
 
 	// AzqrServiceResult - Struct for all Azure Service Results
@@ -90,6 +77,21 @@ type (
 		Learn            string
 		Result           string
 		NotCompliant     bool
+	}
+
+	Resource struct {
+		ID             string
+		ResourceGroup  string
+		SubscriptionID string
+		Name           string
+		Type           string
+		Location       string
+	}
+
+	ResourceTypeCount struct {
+		Subscription string  `json:"Subscription"`
+		ResourceType string  `json:"Resource Type"`
+		Count        float64 `json:"Number of Resources"`
 	}
 
 	AprlRecommendation struct {
@@ -138,13 +140,62 @@ type (
 	}
 
 	RecommendationEngine struct{}
+
+	RecommendationImpact   string
+	RecommendationCategory string
 )
 
-func (r *AzqrServiceResult) ResourceID() string {
-	return strings.ToLower(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/%s/%s", r.SubscriptionID, r.ResourceGroup, r.Type, r.ServiceName))
+const (
+	ImpactHigh   RecommendationImpact = "High"
+	ImpactMedium RecommendationImpact = "Medium"
+	ImpactLow    RecommendationImpact = "Low"
+
+	CategoryHighAvailability      RecommendationCategory = "High Availability"
+	CategoryMonitoringAndAlerting RecommendationCategory = "Monitoring and Alerting"
+	CategoryScalability           RecommendationCategory = "Scalability"
+	CategoryDisasterRecovery      RecommendationCategory = "Disaster Recovery"
+	CategorySecurity              RecommendationCategory = "Security"
+	CategoryGovernance            RecommendationCategory = "Governance"
+	CategoryOtherBestPractices    RecommendationCategory = "Other Best Practices"
+)
+
+func (r *AzqrRecommendation) ToAzureAprlRecommendation() AprlRecommendation {
+	return AprlRecommendation{
+		RecommendationID:    r.RecommendationID,
+		Recommendation:      r.Recommendation,
+		Category:            string(r.Category),
+		Impact:              string(r.Impact),
+		ResourceType:        r.ResourceType,
+		MetadataState:       "",
+		LongDescription:     r.Recommendation,
+		PotentialBenefits:   "",
+		PgVerified:          false,
+		PublishedToLearn:    false,
+		PublishedToAdvisor:  false,
+		AutomationAvailable: "",
+		Tags:                "",
+		GraphQuery:          "",
+		LearnMoreLink: []struct {
+			Name string "yaml:\"name\""
+			Url  string "yaml:\"url\""
+		}{{Name: "Learn More", Url: r.Url}},
+	}
 }
 
-func (e *RecommendationEngine) EvaluateRecommendation(rule AzqrRecommendation, target interface{}, scanContext *ScanContext) AzqrResult {
+func (e *RecommendationEngine) EvaluateRecommendations(rules map[string]AzqrRecommendation, target interface{}, scanContext *ScanContext) map[string]AzqrResult {
+	results := map[string]AzqrResult{}
+
+	for k, rule := range rules {
+		if scanContext.Exclusions.IsRecommendationExcluded(rule.RecommendationID) {
+			continue
+		}
+		results[k] = e.evaluateRecommendation(rule, target, scanContext)
+	}
+
+	return results
+}
+
+func (e *RecommendationEngine) evaluateRecommendation(rule AzqrRecommendation, target interface{}, scanContext *ScanContext) AzqrResult {
 	broken, result := rule.Eval(target, scanContext)
 
 	return AzqrResult{
@@ -158,17 +209,8 @@ func (e *RecommendationEngine) EvaluateRecommendation(rule AzqrRecommendation, t
 	}
 }
 
-func (e *RecommendationEngine) EvaluateRecommendations(rules map[string]AzqrRecommendation, target interface{}, scanContext *ScanContext) map[string]AzqrResult {
-	results := map[string]AzqrResult{}
-
-	for k, rule := range rules {
-		if scanContext.Exclusions.IsRecommendationExcluded(rule.RecommendationID) {
-			continue
-		}
-		results[k] = e.EvaluateRecommendation(rule, target, scanContext)
-	}
-
-	return results
+func (r *AzqrServiceResult) ResourceID() string {
+	return strings.ToLower(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/%s/%s", r.SubscriptionID, r.ResourceGroup, r.Type, r.ServiceName))
 }
 
 func ParseLocation(location string) string {
@@ -207,23 +249,6 @@ func LogResourceTypeScan(serviceType string) {
 	log.Info().Msgf("Scanning subscriptions for %s", serviceType)
 }
 
-type RecommendationImpact string
-type RecommendationCategory string
-
-const (
-	ImpactHigh   RecommendationImpact = "High"
-	ImpactMedium RecommendationImpact = "Medium"
-	ImpactLow    RecommendationImpact = "Low"
-
-	CategoryHighAvailability      RecommendationCategory = "High Availability"
-	CategoryMonitoringAndAlerting RecommendationCategory = "Monitoring and Alerting"
-	CategoryScalability           RecommendationCategory = "Scalability"
-	CategoryDisasterRecovery      RecommendationCategory = "Disaster Recovery"
-	CategorySecurity              RecommendationCategory = "Security"
-	CategoryGovernance            RecommendationCategory = "Governance"
-	CategoryOtherBestPractices    RecommendationCategory = "Other Best Practices"
-)
-
 // GetGraphRules - Get Graph Rules for a service type
 func GetGraphRules(service string, aprl map[string]map[string]AprlRecommendation) map[string]AprlRecommendation {
 	r := map[string]AprlRecommendation{}
@@ -256,25 +281,14 @@ func GetResourceGroupFromResourceID(resourceID string) string {
 	return parts[4]
 }
 
-func (r *AzqrRecommendation) ToAzureAprlRecommendation() AprlRecommendation {
-	return AprlRecommendation{
-		RecommendationID:    r.RecommendationID,
-		Recommendation:      r.Recommendation,
-		Category:            string(r.Category),
-		Impact:              string(r.Impact),
-		ResourceType:        r.ResourceType,
-		MetadataState:       "",
-		LongDescription:     r.Recommendation,
-		PotentialBenefits:   "",
-		PgVerified:          false,
-		PublishedToLearn:    false,
-		PublishedToAdvisor:  false,
-		AutomationAvailable: "",
-		Tags:                "",
-		GraphQuery:          "",
-		LearnMoreLink: []struct {
-			Name string "yaml:\"name\""
-			Url  string "yaml:\"url\""
-		}{{Name: "Learn More", Url: r.Url}},
+func ShouldSkipError(err error) bool {
+	var respErr *azcore.ResponseError
+	if errors.As(err, &respErr) {
+		switch respErr.ErrorCode {
+		case "MissingRegistrationForResourceProvider", "MissingSubscriptionRegistration", "DisallowedOperation":
+			log.Warn().Msgf("Subscription failed with code: %s. Skipping Scan...", respErr.ErrorCode)
+			return true
+		}
 	}
+	return false
 }

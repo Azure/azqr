@@ -4,18 +4,18 @@
 package amg
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard"
 )
 
 // ManagedGrafanaScanner - Scanner for Managed Grafana
 type ManagedGrafanaScanner struct {
-	config        *scanners.ScannerConfig
+	config        *azqr.ScannerConfig
 	grafanaClient *armdashboard.GrafanaClient
 }
 
 // Init - Initializes the ManagedGrafanaScanner Scanner
-func (a *ManagedGrafanaScanner) Init(config *scanners.ScannerConfig) error {
+func (a *ManagedGrafanaScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.grafanaClient, _ = armdashboard.NewGrafanaClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,21 +23,21 @@ func (a *ManagedGrafanaScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Managed Grafana in a Resource Group
-func (a *ManagedGrafanaScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *ManagedGrafanaScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
 
 	workspaces, err := a.listWorkspaces(resourceGroupName)
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := azqr.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []azqr.AzqrServiceResult{}
 
 	for _, g := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

@@ -6,21 +6,21 @@ package dbw
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
 
 // GetRecommendations - Returns the rules for the DatabricksScanner
-func (a *DatabricksScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *DatabricksScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"dbw-001": {
 			RecommendationID: "dbw-001",
 			ResourceType:     "Microsoft.Databricks/workspaces",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         azqr.CategoryMonitoringAndAlerting,
 			Recommendation:   "Azure Databricks should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armdatabricks.Workspace)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -30,10 +30,10 @@ func (a *DatabricksScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"dbw-003": {
 			RecommendationID: "dbw-003",
 			ResourceType:     "Microsoft.Databricks/workspaces",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Azure Databricks should have a SLA",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
 			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -41,10 +41,10 @@ func (a *DatabricksScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"dbw-004": {
 			RecommendationID: "dbw-004",
 			ResourceType:     "Microsoft.Databricks/workspaces",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Azure Databricks should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armdatabricks.Workspace)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -54,10 +54,10 @@ func (a *DatabricksScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"dbw-005": {
 			RecommendationID: "dbw-005",
 			ResourceType:     "Microsoft.Databricks/workspaces",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         azqr.CategoryHighAvailability,
 			Recommendation:   "Azure Databricks SKU",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armdatabricks.Workspace)
 				return false, string(*i.SKU.Name)
 			},
@@ -66,10 +66,10 @@ func (a *DatabricksScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"dbw-006": {
 			RecommendationID: "dbw-006",
 			ResourceType:     "Microsoft.Databricks/workspaces",
-			Category:         scanners.CategoryGovernance,
+			Category:         azqr.CategoryGovernance,
 			Recommendation:   "Azure Databricks Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdatabricks.Workspace)
 				caf := strings.HasPrefix(*c.Name, "dbw")
 				return !caf, ""
@@ -79,10 +79,10 @@ func (a *DatabricksScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"dbw-007": {
 			RecommendationID: "dbw-007",
 			ResourceType:     "Microsoft.Databricks/workspaces",
-			Category:         scanners.CategorySecurity,
+			Category:         azqr.CategorySecurity,
 			Recommendation:   "Azure Databricks should have the Public IP disabled",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdatabricks.Workspace)
 				broken := c.Properties.Parameters.EnableNoPublicIP != nil && c.Properties.Parameters.EnableNoPublicIP.Value == to.Ptr(true)
 				return broken, ""
