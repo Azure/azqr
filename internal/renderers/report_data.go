@@ -40,6 +40,14 @@ type (
 		Selector         string `json:"selector"`
 	}
 
+	ResourceResults struct {
+		Resource []ResourceResult `json:"Resource"`
+	}
+
+	ResourceTypeCountResults struct {
+		ResourceType []azqr.ResourceTypeCount `json:"ResourceType"`
+	}
+
 	RetirementResult struct {
 		Subscription    string    `json:"Subscription"`
 		TrackingId      string    `json:"TrackingId"`
@@ -282,7 +290,7 @@ func (rd *ReportData) ResourceTypesTable() [][]string {
 			r.Subscription,
 			r.ResourceType,
 			fmt.Sprint(r.Count),
-			fmt.Sprintf("%t", rd.isAvailableInAPRL(r.ResourceType)),
+			r.AvailableInAPRL,
 			"",
 			"",
 			"",
@@ -292,9 +300,4 @@ func (rd *ReportData) ResourceTypesTable() [][]string {
 
 	rows = append([][]string{headers}, rows...)
 	return rows
-}
-
-func (rd *ReportData) isAvailableInAPRL(resourceType string) bool {
-	_, available := rd.Recomendations[strings.ToLower(resourceType)]
-	return available
 }

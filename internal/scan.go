@@ -15,6 +15,7 @@ import (
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
+	"github.com/Azure/azqr/internal/renderers/json"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/rs/zerolog"
@@ -36,7 +37,7 @@ type ScanParams struct {
 	Advisor                 bool
 	Cost                    bool
 	Mask                    bool
-	Xlsx                    bool
+	Csv                     bool
 	Debug                   bool
 	ServiceScanners         []azqr.IAzureScanner
 	ForceAzureCliCredential bool
@@ -107,8 +108,6 @@ func Scan(params *ScanParams) {
 		},
 		ResourceTypeCount: []azqr.ResourceTypeCount{},
 	}
-
-	reportData.ResourceTypeCount = getCountPerResourceType(ctx, cred, subscriptions)
 
 	// get the APRL scan results
 	reportData.Recomendations, reportData.AprlData = AprlScan(ctx, cred, params, filters, subscriptions)
@@ -212,13 +211,18 @@ func Scan(params *ScanParams) {
 		reportData.CostData.Items = append(reportData.CostData.Items, costs.Items...)
 	}
 
-	// render excel report
-	if params.Xlsx {
-		excel.CreateExcelReport(&reportData)
-	}
+	reportData.ResourceTypeCount = getCountPerResourceType(ctx, cred, subscriptions, reportData.Recomendations)
 
 	// render csv reports
-	csv.CreateCsvReport(&reportData)
+	if params.Csv {
+		csv.CreateCsvReport(&reportData)
+	}
+
+	// render excel report
+	excel.CreateExcelReport(&reportData)
+
+	// render json report
+	json.CreateJsonReport(&reportData)
 
 	log.Info().Msg("Scan completed.")
 }

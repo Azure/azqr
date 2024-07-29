@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"strings"
 
 	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/graph"
@@ -35,7 +36,7 @@ import (
 // 	return resources
 // }
 
-func getCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string) []azqr.ResourceTypeCount {
+func getCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]azqr.AprlRecommendation) []azqr.ResourceTypeCount {
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | summarize count() by subscriptionId, type | order by subscriptionId, type"
 	log.Debug().Msg(query)
@@ -49,11 +50,24 @@ func getCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, s
 		for i, row := range result.Data {
 			m := row.(map[string]interface{})
 			resources[i] = azqr.ResourceTypeCount{
-				Subscription: subscriptions[m["subscriptionId"].(string)],
-				ResourceType: m["type"].(string),
-				Count:        m["count_"].(float64),
+				Subscription:    subscriptions[m["subscriptionId"].(string)],
+				ResourceType:    m["type"].(string),
+				Count:           m["count_"].(float64),
+				AvailableInAPRL: isAvailableInAPRL(m["type"].(string), recommendations),
+				Custom1:         "",
+				Custom2:         "",
+				Custom3:         "",
 			}
 		}
 	}
 	return resources
+}
+
+func isAvailableInAPRL(resourceType string, recommendations map[string]map[string]azqr.AprlRecommendation) string {
+	_, available := recommendations[strings.ToLower(resourceType)]
+	if available {
+		return "Yes"
+	} else {
+		return "No"
+	}
 }
