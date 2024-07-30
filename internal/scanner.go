@@ -270,7 +270,7 @@ func (sc Scanner) generateOutputFileName(outputName string) string {
 			current_time.Year(), current_time.Month(), current_time.Day(),
 			current_time.Hour(), current_time.Minute(), current_time.Second())
 
-		outputFile = fmt.Sprintf("%s_%s", "azqr_report", outputFileStamp)
+		outputFile = fmt.Sprintf("%s_%s", "azqr_action_plan", outputFileStamp)
 	}
 	return outputFile
 }
