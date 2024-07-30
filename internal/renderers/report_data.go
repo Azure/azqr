@@ -71,10 +71,10 @@ func (rd *ReportData) ServicesTable() [][]string {
 	for _, d := range rd.AzqrData {
 		for _, r := range d.Recommendations {
 			row := []string{
-				azqr.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+				MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 				d.SubscriptionName,
 				d.ResourceGroup,
-				azqr.ParseLocation(d.Location),
+				rd.parseLocation(d.Location),
 				d.Type,
 				d.ServiceName,
 				fmt.Sprintf("%t", !r.NotCompliant),
@@ -111,11 +111,11 @@ func (rd *ReportData) ImpactedTable() [][]string {
 			r.ResourceType,
 			r.Recommendation,
 			r.RecommendationID,
-			azqr.MaskSubscriptionID(r.SubscriptionID, rd.Mask),
+			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
 			r.SubscriptionName,
 			r.ResourceGroup,
 			r.Name,
-			azqr.MaskSubscriptionIDInResourceID(r.ResourceID, rd.Mask),
+			MaskSubscriptionIDInResourceID(r.ResourceID, rd.Mask),
 			r.Param1,
 			r.Param2,
 			r.Param3,
@@ -137,11 +137,11 @@ func (rd *ReportData) ImpactedTable() [][]string {
 					d.Type,
 					r.Recommendation,
 					r.RecommendationID,
-					azqr.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+					MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 					d.SubscriptionName,
 					d.ResourceGroup,
 					d.ServiceName,
-					azqr.MaskSubscriptionIDInResourceID(d.ResourceID(), rd.Mask),
+					MaskSubscriptionIDInResourceID(d.ResourceID(), rd.Mask),
 					r.Result,
 					"",
 					"",
@@ -166,7 +166,7 @@ func (rd *ReportData) CostTable() [][]string {
 		row := []string{
 			rd.CostData.From.Format("2006-01-02"),
 			rd.CostData.To.Format("2006-01-02"),
-			azqr.MaskSubscriptionID(r.SubscriptionID, rd.Mask),
+			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
 			r.SubscriptionName,
 			r.ServiceName,
 			r.Value,
@@ -184,7 +184,7 @@ func (rd *ReportData) DefenderTable() [][]string {
 	rows := [][]string{}
 	for _, d := range rd.DefenderData {
 		row := []string{
-			azqr.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 			d.SubscriptionName,
 			d.Name,
 			d.Tier,
@@ -202,7 +202,7 @@ func (rd *ReportData) AdvisorTable() [][]string {
 	rows := [][]string{}
 	for _, d := range rd.AdvisorData {
 		row := []string{
-			azqr.MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 			d.SubscriptionName,
 			d.Name,
 			d.Type,
@@ -302,6 +302,10 @@ func (rd *ReportData) ResourceTypesTable() [][]string {
 	return rows
 }
 
+func (rd *ReportData) parseLocation(location string) string {
+	return strings.ToLower(strings.ReplaceAll(location, " ", ""))
+}
+
 func NewReportData(outputFile string, mask bool) ReportData {
 	return ReportData{
 		OutputFileName: outputFile,
@@ -317,3 +321,24 @@ func NewReportData(outputFile string, mask bool) ReportData {
 		ResourceTypeCount: []azqr.ResourceTypeCount{},
 	}
 }
+
+func MaskSubscriptionID(subscriptionID string, mask bool) string {
+	if !mask {
+		return subscriptionID
+	}
+
+	// Show only last 7 chars of the subscription ID
+	return fmt.Sprintf("xxxxxxxx-xxxx-xxxx-xxxx-xxxxx%s", subscriptionID[29:])
+}
+
+func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
+	if !mask {
+		return resourceID
+	}
+
+	parts := strings.Split(resourceID, "/")
+	parts[2] = MaskSubscriptionID(parts[2], mask)
+
+	return strings.Join(parts, "/")
+}
+

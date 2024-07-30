@@ -214,30 +214,6 @@ func (r *AzqrServiceResult) ResourceID() string {
 	return strings.ToLower(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/%s/%s", r.SubscriptionID, r.ResourceGroup, r.Type, r.ServiceName))
 }
 
-func ParseLocation(location string) string {
-	return strings.ToLower(strings.ReplaceAll(location, " ", ""))
-}
-
-func MaskSubscriptionID(subscriptionID string, mask bool) string {
-	if !mask {
-		return subscriptionID
-	}
-
-	// Show only last 7 chars of the subscription ID
-	return fmt.Sprintf("xxxxxxxx-xxxx-xxxx-xxxx-xxxxx%s", subscriptionID[29:])
-}
-
-func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
-	if !mask {
-		return resourceID
-	}
-
-	parts := strings.Split(resourceID, "/")
-	parts[2] = MaskSubscriptionID(parts[2], mask)
-
-	return strings.Join(parts, "/")
-}
-
 func LogResourceGroupScan(subscriptionID string, resourceGroupName string, serviceTypeOrName string) {
 	log.Info().Msgf("Scanning subscriptions/...%s/resourceGroups/%s for %s", subscriptionID[29:], resourceGroupName, serviceTypeOrName)
 }
