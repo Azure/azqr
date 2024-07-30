@@ -49,7 +49,7 @@ var rulesCmd = &cobra.Command{
 			for _, k := range keys {
 				r := recommendations[k]
 				i++
-				fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.Url)
+				fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.LearnMoreUrl)
 				fmt.Println()
 			}
 

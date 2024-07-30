@@ -25,7 +25,7 @@ func (a *DatabricksScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/account-settings/audit-log-delivery",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/account-settings/audit-log-delivery",
 		},
 		"dbw-003": {
 			RecommendationID: "dbw-003",
@@ -36,7 +36,7 @@ func (a *DatabricksScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"dbw-004": {
 			RecommendationID: "dbw-004",
@@ -49,7 +49,7 @@ func (a *DatabricksScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/cloud-configurations/azure/private-link",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/cloud-configurations/azure/private-link",
 		},
 		"dbw-005": {
 			RecommendationID: "dbw-005",
@@ -61,7 +61,7 @@ func (a *DatabricksScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				i := target.(*armdatabricks.Workspace)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/databricks/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/databricks/",
 		},
 		"dbw-006": {
 			RecommendationID: "dbw-006",
@@ -74,7 +74,7 @@ func (a *DatabricksScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				caf := strings.HasPrefix(*c.Name, "dbw")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"dbw-007": {
 			RecommendationID: "dbw-007",
@@ -87,7 +87,7 @@ func (a *DatabricksScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				broken := c.Properties.Parameters.EnableNoPublicIP != nil && c.Properties.Parameters.EnableNoPublicIP.Value == to.Ptr(true)
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/databricks/security/network/secure-cluster-connectivity",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/databricks/security/network/secure-cluster-connectivity",
 		},
 	}
 }

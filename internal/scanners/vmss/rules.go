@@ -28,7 +28,7 @@ func (a *VirtualMachineScaleSetScanner) GetRecommendations() map[string]azqr.Azq
 				}
 				return false, sla
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
 		"vmss-004": {
 			RecommendationID: "vmss-004",
@@ -41,7 +41,7 @@ func (a *VirtualMachineScaleSetScanner) GetRecommendations() map[string]azqr.Azq
 				caf := strings.HasPrefix(*c.Name, "vmss")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"vmss-005": {
 			RecommendationID: "vmss-005",
@@ -53,7 +53,7 @@ func (a *VirtualMachineScaleSetScanner) GetRecommendations() map[string]azqr.Azq
 				c := target.(*armcompute.VirtualMachineScaleSet)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

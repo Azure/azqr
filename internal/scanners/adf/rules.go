@@ -24,7 +24,7 @@ func (a *DataFactoryScanner) GetRecommendations() map[string]azqr.AzqrRecommenda
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
 		},
 		"adf-002": {
 			RecommendationID: "adf-002",
@@ -47,7 +47,7 @@ func (a *DataFactoryScanner) GetRecommendations() map[string]azqr.AzqrRecommenda
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"adf-004": {
 			RecommendationID: "adf-004",
@@ -60,7 +60,7 @@ func (a *DataFactoryScanner) GetRecommendations() map[string]azqr.AzqrRecommenda
 				caf := strings.HasPrefix(*c.Name, "adf")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"adf-005": {
 			RecommendationID: "adf-005",
@@ -72,7 +72,7 @@ func (a *DataFactoryScanner) GetRecommendations() map[string]azqr.AzqrRecommenda
 				c := target.(*armdatafactory.Factory)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

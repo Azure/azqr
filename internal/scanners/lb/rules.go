@@ -24,7 +24,7 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
 		},
 		"lb-003": {
 			RecommendationID: "lb-003",
@@ -41,7 +41,7 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				}
 				return sla == "None", sla
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
 		},
 		"lb-005": {
 			RecommendationID: "lb-005",
@@ -54,7 +54,7 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				sku := *i.SKU.Name
 				return sku != armnetwork.LoadBalancerSKUNameStandard, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
 		},
 		"lb-006": {
 			RecommendationID: "lb-006",
@@ -83,7 +83,7 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				caf := (strings.HasPrefix(*c.Name, "lbi") && hasPrivateIP) || (strings.HasPrefix(*c.Name, "lbe") && hasPublicIP)
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"lb-007": {
 			RecommendationID: "lb-007",
@@ -95,7 +95,7 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				c := target.(*armnetwork.LoadBalancer)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

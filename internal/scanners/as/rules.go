@@ -25,7 +25,7 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/analysis-services/analysis-services-logging",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/analysis-services/analysis-services-logging",
 		},
 		"as-002": {
 			RecommendationID: "as-002",
@@ -42,7 +42,7 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				}
 				return sla == "None", sla
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"as-003": {
 			RecommendationID: "as-003",
@@ -54,7 +54,7 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				i := target.(*armanalysisservices.Server)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/analysis-services/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/analysis-services/",
 		},
 		"as-004": {
 			RecommendationID: "as-004",
@@ -67,7 +67,7 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				caf := strings.HasPrefix(*c.Name, "as")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"as-005": {
 			RecommendationID: "as-005",
@@ -79,7 +79,7 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				c := target.(*armanalysisservices.Server)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

@@ -54,7 +54,7 @@ func (a *AppServiceScanner) getPlanRules() map[string]azqr.AzqrRecommendation {
 				}
 				return sla == "None", sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/app-service/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/app-service/",
 		},
 		"asp-005": {
 			RecommendationID: "asp-005",
@@ -66,7 +66,7 @@ func (a *AppServiceScanner) getPlanRules() map[string]azqr.AzqrRecommendation {
 				i := target.(*armappservice.Plan)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
 		},
 		"asp-006": {
 			RecommendationID: "asp-006",
@@ -79,7 +79,7 @@ func (a *AppServiceScanner) getPlanRules() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "asp")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"asp-007": {
 			RecommendationID: "asp-007",
@@ -91,7 +91,7 @@ func (a *AppServiceScanner) getPlanRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armappservice.Plan)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }
@@ -109,7 +109,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
 		},
 		"app-004": {
 			RecommendationID: "app-004",
@@ -122,7 +122,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/networking/private-endpoint",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/networking/private-endpoint",
 		},
 		"app-006": {
 			RecommendationID: "app-006",
@@ -135,7 +135,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "app")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"app-007": {
 			RecommendationID: "app-007",
@@ -148,7 +148,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				h := *c.Properties.HTTPSOnly
 				return !h, ""
 			},
-			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
 		},
 		"app-008": {
 			RecommendationID: "app-008",
@@ -160,7 +160,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armappservice.Site)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"app-009": {
 			RecommendationID: "app-009",
@@ -172,7 +172,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armappservice.Site)
 				return c.Properties.VirtualNetworkSubnetID == nil || len(*c.Properties.VirtualNetworkSubnetID) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
 		},
 		"app-010": {
 			RecommendationID: "app-010",
@@ -184,7 +184,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armappservice.Site)
 				return c.Properties.VnetRouteAllEnabled == nil || !*c.Properties.VnetRouteAllEnabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
 		},
 		"app-011": {
 			RecommendationID: "app-011",
@@ -196,7 +196,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				broken := scanContext.SiteConfig.Properties.MinTLSVersion == nil || *scanContext.SiteConfig.Properties.MinTLSVersion != armappservice.SupportedTLSVersionsOne2
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-tls",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-tls",
 		},
 		"app-012": {
 			RecommendationID: "app-012",
@@ -208,7 +208,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				broken := scanContext.SiteConfig.Properties.RemoteDebuggingEnabled == nil || *scanContext.SiteConfig.Properties.RemoteDebuggingEnabled
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
 		},
 		"app-013": {
 			RecommendationID: "app-013",
@@ -220,7 +220,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				broken := scanContext.SiteConfig.Properties.FtpsState == nil || *scanContext.SiteConfig.Properties.FtpsState == armappservice.FtpsStateAllAllowed
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/deploy-ftp?tabs=portal",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/deploy-ftp?tabs=portal",
 		},
 		"app-014": {
 			RecommendationID: "app-014",
@@ -232,7 +232,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				broken := scanContext.SiteConfig.Properties.AlwaysOn == nil || !*scanContext.SiteConfig.Properties.AlwaysOn
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/configure-common?tabs=portal",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/configure-common?tabs=portal",
 		},
 		"app-015": {
 			RecommendationID: "app-015",
@@ -244,7 +244,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armappservice.Site)
 				return c.Properties.ClientAffinityEnabled != nil && *c.Properties.ClientAffinityEnabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
 		},
 		"app-016": {
 			RecommendationID: "app-016",
@@ -259,7 +259,7 @@ func (a *AppServiceScanner) getAppRules() map[string]azqr.AzqrRecommendation {
 				ok := scanContext.SiteConfig.Properties.ManagedServiceIdentityID != nil || scanContext.SiteConfig.Properties.XManagedServiceIdentityID != nil
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
 		},
 	}
 }
@@ -277,7 +277,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-monitor-log-analytics?tabs=csharp",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-monitor-log-analytics?tabs=csharp",
 		},
 		"func-004": {
 			RecommendationID: "func-004",
@@ -290,7 +290,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-vnet",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-vnet",
 		},
 		"func-006": {
 			RecommendationID: "func-006",
@@ -303,7 +303,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				caf := strings.HasPrefix(*c.Name, "func")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"func-007": {
 			RecommendationID: "func-007",
@@ -316,7 +316,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				h := c.Properties.HTTPSOnly != nil && *c.Properties.HTTPSOnly
 				return !h, ""
 			},
-			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
 		},
 		"func-008": {
 			RecommendationID: "func-008",
@@ -328,7 +328,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				c := target.(*armappservice.Site)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"func-009": {
 			RecommendationID: "func-009",
@@ -340,7 +340,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				c := target.(*armappservice.Site)
 				return c.Properties.VirtualNetworkSubnetID == nil || len(*c.Properties.VirtualNetworkSubnetID) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
 		},
 		"func-010": {
 			RecommendationID: "func-010",
@@ -352,7 +352,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				c := target.(*armappservice.Site)
 				return c.Properties.VnetRouteAllEnabled == nil || !*c.Properties.VnetRouteAllEnabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
 		},
 		"func-011": {
 			RecommendationID: "func-011",
@@ -364,7 +364,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				broken := scanContext.SiteConfig.Properties.MinTLSVersion == nil || *scanContext.SiteConfig.Properties.MinTLSVersion != armappservice.SupportedTLSVersionsOne2
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-tls",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-tls",
 		},
 		"func-012": {
 			RecommendationID: "func-012",
@@ -376,7 +376,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				broken := scanContext.SiteConfig.Properties.RemoteDebuggingEnabled == nil || *scanContext.SiteConfig.Properties.RemoteDebuggingEnabled
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
 		},
 		"func-013": {
 			RecommendationID: "func-013",
@@ -388,7 +388,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				c := target.(*armappservice.Site)
 				return c.Properties.ClientAffinityEnabled != nil && *c.Properties.ClientAffinityEnabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
 		},
 		"func-014": {
 			RecommendationID: "func-014",
@@ -403,7 +403,7 @@ func (a *AppServiceScanner) getFunctionRules() map[string]azqr.AzqrRecommendatio
 				ok := scanContext.SiteConfig.Properties.ManagedServiceIdentityID != nil || scanContext.SiteConfig.Properties.XManagedServiceIdentityID != nil
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
 		},
 	}
 }
@@ -421,7 +421,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
 		},
 		"logics-004": {
 			RecommendationID: "logics-004",
@@ -434,7 +434,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				_, pe := scanContext.PrivateEndpoints[*i.ID]
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/logic-apps/secure-single-tenant-workflow-virtual-network-private-endpoint",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/logic-apps/secure-single-tenant-workflow-virtual-network-private-endpoint",
 		},
 		"logics-006": {
 			RecommendationID: "logics-006",
@@ -447,7 +447,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "logic")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"logics-007": {
 			RecommendationID: "logics-007",
@@ -460,7 +460,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				h := c.Properties.HTTPSOnly != nil && *c.Properties.HTTPSOnly
 				return !h, ""
 			},
-			Url: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
 		},
 		"logics-008": {
 			RecommendationID: "logics-008",
@@ -472,7 +472,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armappservice.Site)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"logics-009": {
 			RecommendationID: "logics-009",
@@ -484,7 +484,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armappservice.Site)
 				return c.Properties.VirtualNetworkSubnetID == nil || len(*c.Properties.VirtualNetworkSubnetID) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
 		},
 		"logics-010": {
 			RecommendationID: "logics-010",
@@ -496,7 +496,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armappservice.Site)
 				return c.Properties.VnetRouteAllEnabled == nil || !*c.Properties.VnetRouteAllEnabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
 		},
 		"logics-011": {
 			RecommendationID: "logics-011",
@@ -508,7 +508,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				broken := scanContext.SiteConfig.Properties.MinTLSVersion == nil || *scanContext.SiteConfig.Properties.MinTLSVersion != armappservice.SupportedTLSVersionsOne2
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-tls",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-tls",
 		},
 		"logics-012": {
 			RecommendationID: "logics-012",
@@ -520,7 +520,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				broken := scanContext.SiteConfig.Properties.RemoteDebuggingEnabled == nil || *scanContext.SiteConfig.Properties.RemoteDebuggingEnabled
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
 		},
 		"logics-013": {
 			RecommendationID: "logics-013",
@@ -532,7 +532,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armappservice.Site)
 				return c.Properties.ClientAffinityEnabled != nil && *c.Properties.ClientAffinityEnabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
 		},
 		"logics-014": {
 			RecommendationID: "logics-014",
@@ -547,7 +547,7 @@ func (a *AppServiceScanner) getLogicRules() map[string]azqr.AzqrRecommendation {
 				ok := scanContext.SiteConfig.Properties.ManagedServiceIdentityID != nil || scanContext.SiteConfig.Properties.XManagedServiceIdentityID != nil
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
 		},
 	}
 }

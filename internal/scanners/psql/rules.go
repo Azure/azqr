@@ -25,7 +25,7 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-server-logs#resource-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-server-logs#resource-logs",
 		},
 		"psql-003": {
 			RecommendationID: "psql-003",
@@ -36,7 +36,7 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/postgresql/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/postgresql/",
 		},
 		"psql-004": {
 			RecommendationID: "psql-004",
@@ -49,7 +49,7 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-data-access-and-security-private-link",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-data-access-and-security-private-link",
 		},
 		"psql-005": {
 			RecommendationID: "psql-005",
@@ -61,7 +61,7 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				i := target.(*armpostgresql.Server)
 				return false, *i.SKU.Name
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-pricing-tiers",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-pricing-tiers",
 		},
 		"psql-006": {
 			RecommendationID: "psql-006",
@@ -74,7 +74,7 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				caf := strings.HasPrefix(*c.Name, "psql")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"psql-007": {
 			RecommendationID: "psql-007",
@@ -86,7 +86,7 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				c := target.(*armpostgresql.Server)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"psql-008": {
 			RecommendationID: "psql-008",
@@ -98,7 +98,7 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				c := target.(*armpostgresql.Server)
 				return c.Properties.SSLEnforcement == nil || *c.Properties.SSLEnforcement == armpostgresql.SSLEnforcementEnumDisabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-ssl-connection-security#enforcing-tls-connections",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-ssl-connection-security#enforcing-tls-connections",
 		},
 		"psql-009": {
 			RecommendationID: "psql-009",
@@ -110,7 +110,7 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				c := target.(*armpostgresql.Server)
 				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != armpostgresql.MinimalTLSVersionEnumTLS12, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/how-to-tls-configurations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/how-to-tls-configurations",
 		},
 	}
 }
@@ -129,7 +129,7 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
 		},
 		"psqlf-003": {
 			RecommendationID: "psqlf-003",
@@ -149,7 +149,7 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 				}
 				return false, sla
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server",
 		},
 		"psqlf-004": {
 			RecommendationID: "psqlf-004",
@@ -162,7 +162,7 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 				pe := *i.Properties.Network.PublicNetworkAccess == armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking#private-access-vnet-integration",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking#private-access-vnet-integration",
 		},
 		"psqlf-005": {
 			RecommendationID: "psqlf-005",
@@ -174,7 +174,7 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 				i := target.(*armpostgresqlflexibleservers.Server)
 				return false, *i.SKU.Name
 			},
-			Url: "https://azure.microsoft.com/en-gb/pricing/details/postgresql/flexible-server/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-gb/pricing/details/postgresql/flexible-server/",
 		},
 		"psqlf-006": {
 			RecommendationID: "psqlf-006",
@@ -187,7 +187,7 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 				caf := strings.HasPrefix(*c.Name, "psql")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"psqlf-007": {
 			RecommendationID: "psqlf-007",
@@ -199,7 +199,7 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 				c := target.(*armpostgresqlflexibleservers.Server)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

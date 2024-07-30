@@ -24,7 +24,7 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
 		},
 		"cog-003": {
 			RecommendationID: "cog-003",
@@ -35,7 +35,7 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
 		"cog-004": {
 			RecommendationID: "cog-004",
@@ -48,7 +48,7 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-virtual-networks",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-virtual-networks",
 		},
 		"cog-005": {
 			RecommendationID: "cog-005",
@@ -60,7 +60,7 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				i := target.(*armcognitiveservices.Account)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts?pivots=deployment-language-bicep#sku",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts?pivots=deployment-language-bicep#sku",
 		},
 		"cog-006": {
 			RecommendationID: "cog-006",
@@ -101,7 +101,7 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 					return !strings.HasPrefix(*c.Name, "cog"), ""
 				}
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"cog-007": {
 			RecommendationID: "cog-007",
@@ -113,7 +113,7 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				c := target.(*armcognitiveservices.Account)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"cog-008": {
 			RecommendationID: "cog-008",
@@ -126,7 +126,7 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/ai-services/policy-reference#azure-ai-services",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/ai-services/policy-reference#azure-ai-services",
 		},
 	}
 }

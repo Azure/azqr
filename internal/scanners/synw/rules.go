@@ -34,7 +34,7 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]azqr.AzqrRecomm
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
 		},
 		"synw-002": {
 			RecommendationID: "synw-002",
@@ -47,7 +47,7 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]azqr.AzqrRecomm
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-private-endpoints",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-private-endpoints",
 		},
 		"synw-003": {
 			RecommendationID: "synw-003",
@@ -58,7 +58,7 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]azqr.AzqrRecomm
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"synw-004": {
 			RecommendationID: "synw-004",
@@ -71,7 +71,7 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]azqr.AzqrRecomm
 				caf := strings.HasPrefix(*c.Name, "synw")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"synw-005": {
 			RecommendationID: "synw-005",
@@ -83,7 +83,7 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]azqr.AzqrRecomm
 				c := target.(*armsynapse.Workspace)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"synw-006": {
 			RecommendationID: "synw-006",
@@ -95,7 +95,7 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]azqr.AzqrRecomm
 				c := target.(*armsynapse.Workspace)
 				return c.Properties.ManagedVirtualNetwork == nil || strings.ToLower(*c.Properties.ManagedVirtualNetwork) != "default", ""
 			},
-			Url: "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
 		},
 		"synw-007": {
 			RecommendationID: "synw-007",
@@ -107,7 +107,7 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]azqr.AzqrRecomm
 				c := target.(*armsynapse.Workspace)
 				return string(*c.Properties.PublicNetworkAccess) == "Enabled", ""
 			},
-			Url: "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
 		},
 	}
 }
@@ -125,7 +125,7 @@ func (a *SynapseWorkspaceScanner) getSparkPoolRules() map[string]azqr.AzqrRecomm
 				caf := strings.HasPrefix(*c.Name, "synsp")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"synsp-002": {
 			RecommendationID: "synsp-002",
@@ -136,7 +136,7 @@ func (a *SynapseWorkspaceScanner) getSparkPoolRules() map[string]azqr.AzqrRecomm
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"synsp-003": {
 			RecommendationID: "synsp-003",
@@ -148,7 +148,7 @@ func (a *SynapseWorkspaceScanner) getSparkPoolRules() map[string]azqr.AzqrRecomm
 				c := target.(*armsynapse.BigDataPoolResourceInfo)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }
@@ -166,7 +166,7 @@ func (a *SynapseWorkspaceScanner) getSqlPoolRules() map[string]azqr.AzqrRecommen
 				caf := strings.HasPrefix(*c.Name, "syndp")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"syndp-002": {
 			RecommendationID: "syndp-002",
@@ -177,7 +177,7 @@ func (a *SynapseWorkspaceScanner) getSqlPoolRules() map[string]azqr.AzqrRecommen
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"syndp-003": {
 			RecommendationID: "syndp-003",
@@ -189,7 +189,7 @@ func (a *SynapseWorkspaceScanner) getSqlPoolRules() map[string]azqr.AzqrRecommen
 				c := target.(*armsynapse.SQLPool)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

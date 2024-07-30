@@ -25,7 +25,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
 		},
 		"aks-003": {
 			RecommendationID: "aks-003",
@@ -57,7 +57,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				}
 				return sla == "None", sla
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers#uptime-sla-terms-and-conditions",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers#uptime-sla-terms-and-conditions",
 		},
 		"aks-004": {
 			RecommendationID: "aks-004",
@@ -70,7 +70,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				pe := c.Properties.APIServerAccessProfile != nil && c.Properties.APIServerAccessProfile.EnablePrivateCluster != nil && *c.Properties.APIServerAccessProfile.EnablePrivateCluster
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
 		},
 		"aks-006": {
 			RecommendationID: "aks-006",
@@ -83,7 +83,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "aks")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"aks-007": {
 			RecommendationID: "aks-007",
@@ -96,7 +96,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				aad := c.Properties.AADProfile != nil && c.Properties.AADProfile.Managed != nil && *c.Properties.AADProfile.Managed
 				return !aad, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/managed-azure-ad",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/managed-azure-ad",
 		},
 		"aks-008": {
 			RecommendationID: "aks-008",
@@ -109,7 +109,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				rbac := *c.Properties.EnableRBAC
 				return !rbac, ""
 			},
-			Url: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
 		},
 		"aks-010": {
 			RecommendationID: "aks-010",
@@ -123,7 +123,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				broken := exists && *p.Enabled
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/azure/aks/http-application-routing",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/aks/http-application-routing",
 		},
 		"aks-012": {
 			RecommendationID: "aks-012",
@@ -136,7 +136,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				broken := c.Properties.NetworkProfile.OutboundType == nil || *c.Properties.NetworkProfile.OutboundType != armcontainerservice.OutboundTypeUserDefinedRouting
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
 		},
 		"aks-015": {
 			RecommendationID: "aks-015",
@@ -148,7 +148,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				c := target.(*armcontainerservice.ManagedCluster)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"aks-016": {
 			RecommendationID: "aks-016",
@@ -167,7 +167,7 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				}
 				return defaultMaxSurge, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-at-scale#cluster-upgrade-considerations-and-best-practices",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-at-scale#cluster-upgrade-considerations-and-best-practices",
 		},
 	}
 }

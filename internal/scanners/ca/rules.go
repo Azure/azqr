@@ -22,7 +22,7 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url: "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
 		},
 		"ca-006": {
 			RecommendationID: "ca-006",
@@ -35,7 +35,7 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				caf := strings.HasPrefix(*c.Name, "ca")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"ca-007": {
 			RecommendationID: "ca-007",
@@ -47,7 +47,7 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				c := target.(*armappcontainers.ContainerApp)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"ca-008": {
 			RecommendationID: "ca-008",
@@ -62,7 +62,7 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				}
 				return false, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-apps/ingress-how-to?pivots=azure-cli",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-apps/ingress-how-to?pivots=azure-cli",
 		},
 		"ca-009": {
 			RecommendationID: "ca-009",
@@ -74,7 +74,7 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				c := target.(*armappcontainers.ContainerApp)
 				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappcontainers.ManagedServiceIdentityTypeNone, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cdotnet",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cdotnet",
 		},
 		"ca-010": {
 			RecommendationID: "ca-010",
@@ -95,7 +95,7 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-apps/storage-mounts?pivots=azure-cli",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-apps/storage-mounts?pivots=azure-cli",
 		},
 		"ca-011": {
 			RecommendationID: "ca-011",
@@ -111,7 +111,7 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 					c.Properties.Configuration.Ingress.StickySessions.Affinity != nil &&
 					*c.Properties.Configuration.Ingress.StickySessions.Affinity == armappcontainers.AffinitySticky, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-apps/sticky-sessions?pivots=azure-portal",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-apps/sticky-sessions?pivots=azure-portal",
 		},
 	}
 }

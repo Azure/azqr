@@ -25,7 +25,7 @@ func (a *TrafficManagerScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-diagnostic-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-diagnostic-logs",
 		},
 		"traf-002": {
 			RecommendationID: "traf-002",
@@ -36,7 +36,7 @@ func (a *TrafficManagerScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/architecture/high-availability/reference-architecture-traffic-manager-application-gateway",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/architecture/high-availability/reference-architecture-traffic-manager-application-gateway",
 		},
 		"traf-003": {
 			RecommendationID: "traf-003",
@@ -47,7 +47,7 @@ func (a *TrafficManagerScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/traffic-manager/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/traffic-manager/",
 		},
 		"traf-006": {
 			RecommendationID: "traf-006",
@@ -60,7 +60,7 @@ func (a *TrafficManagerScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				caf := strings.HasPrefix(*c.Name, "traf")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"traf-007": {
 			RecommendationID: "traf-007",
@@ -72,7 +72,7 @@ func (a *TrafficManagerScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				c := target.(*armtrafficmanager.Profile)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"traf-009": {
 			RecommendationID: "traf-009",
@@ -85,7 +85,7 @@ func (a *TrafficManagerScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				httpMonitor := *c.Properties.MonitorConfig.Port == int64(80) || *c.Properties.MonitorConfig.Port == int64(443)
 				return httpMonitor && c.Properties.MonitorConfig.Protocol != to.Ptr(armtrafficmanager.MonitorProtocolHTTPS), ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-monitoring",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-monitoring",
 		},
 	}
 }

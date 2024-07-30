@@ -24,7 +24,7 @@ func (a *SignalRScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-howto-diagnostic-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-howto-diagnostic-logs",
 		},
 		"sigr-003": {
 			RecommendationID: "sigr-003",
@@ -35,7 +35,7 @@ func (a *SignalRScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/signalr-service/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/signalr-service/",
 		},
 		"sigr-004": {
 			RecommendationID: "sigr-004",
@@ -48,7 +48,7 @@ func (a *SignalRScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-signalr/howto-private-endpoints",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-signalr/howto-private-endpoints",
 		},
 		"sigr-005": {
 			RecommendationID: "sigr-005",
@@ -60,7 +60,7 @@ func (a *SignalRScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				i := target.(*armsignalr.ResourceInfo)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/signalr-service/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/signalr-service/",
 		},
 		"sigr-006": {
 			RecommendationID: "sigr-006",
@@ -73,7 +73,7 @@ func (a *SignalRScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				caf := strings.HasPrefix(*c.Name, "sigr")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sigr-007": {
 			RecommendationID: "sigr-007",
@@ -85,7 +85,7 @@ func (a *SignalRScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				c := target.(*armsignalr.ResourceInfo)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

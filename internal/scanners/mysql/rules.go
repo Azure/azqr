@@ -25,7 +25,7 @@ func (a *MySQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-monitoring#server-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-monitoring#server-logs",
 		},
 		"mysql-003": {
 			RecommendationID: "mysql-003",
@@ -36,7 +36,7 @@ func (a *MySQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/mysql/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/mysql/",
 		},
 		"mysql-004": {
 			RecommendationID: "mysql-004",
@@ -49,7 +49,7 @@ func (a *MySQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-data-access-security-private-link",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-data-access-security-private-link",
 		},
 		"mysql-005": {
 			RecommendationID: "mysql-005",
@@ -61,7 +61,7 @@ func (a *MySQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				i := target.(*armmysql.Server)
 				return false, *i.SKU.Name
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-pricing-tiers",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-pricing-tiers",
 		},
 		"mysql-006": {
 			RecommendationID: "mysql-006",
@@ -74,7 +74,7 @@ func (a *MySQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "mysql")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"mysql-007": {
 			RecommendationID: "mysql-007",
@@ -85,7 +85,7 @@ func (a *MySQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return true, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/single-server/whats-happening-to-mysql-single-server",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/single-server/whats-happening-to-mysql-single-server",
 		},
 		"mysql-008": {
 			RecommendationID: "mysql-008",
@@ -97,7 +97,7 @@ func (a *MySQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				c := target.(*armmysql.Server)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }
@@ -116,7 +116,7 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
 		},
 		"mysqlf-003": {
 			RecommendationID: "mysqlf-003",
@@ -136,7 +136,7 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				}
 				return false, sla
 			},
-			Url: "hhttps://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			LearnMoreUrl: "hhttps://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
 		"mysqlf-004": {
 			RecommendationID: "mysqlf-004",
@@ -149,7 +149,7 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				pe := *i.Properties.Network.PublicNetworkAccess == armmysqlflexibleservers.EnableStatusEnumDisabled
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli",
 		},
 		"mysqlf-005": {
 			RecommendationID: "mysqlf-005",
@@ -161,7 +161,7 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				i := target.(*armmysqlflexibleservers.Server)
 				return false, *i.SKU.Name
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/concepts-service-tiers-storage",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/concepts-service-tiers-storage",
 		},
 		"mysqlf-006": {
 			RecommendationID: "mysqlf-006",
@@ -174,7 +174,7 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				caf := strings.HasPrefix(*c.Name, "mysql")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"mysqlf-007": {
 			RecommendationID: "mysqlf-007",
@@ -186,7 +186,7 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				c := target.(*armmysqlflexibleservers.Server)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

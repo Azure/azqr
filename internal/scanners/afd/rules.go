@@ -24,7 +24,7 @@ func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
 		},
 		"afd-003": {
 			RecommendationID: "afd-003",
@@ -35,7 +35,7 @@ func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/cdn/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/cdn/",
 		},
 		"afd-005": {
 			RecommendationID: "afd-005",
@@ -47,7 +47,7 @@ func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				c := target.(*armcdn.Profile)
 				return false, string(*c.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/tier-comparison",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/tier-comparison",
 		},
 		"afd-006": {
 			RecommendationID: "afd-006",
@@ -60,7 +60,7 @@ func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				caf := strings.HasPrefix(*c.Name, "afd")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"afd-007": {
 			RecommendationID: "afd-007",
@@ -72,7 +72,7 @@ func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				c := target.(*armcdn.Profile)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

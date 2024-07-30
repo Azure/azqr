@@ -24,7 +24,7 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
 		},
 		"appcs-003": {
 			RecommendationID: "appcs-003",
@@ -42,7 +42,7 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]azqr.AzqrRecom
 
 				return sla == "None", sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/app-configuration/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/app-configuration/",
 		},
 		"appcs-004": {
 			RecommendationID: "appcs-004",
@@ -55,7 +55,7 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
 		},
 		"appcs-005": {
 			RecommendationID: "appcs-005",
@@ -68,7 +68,7 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				sku := string(*a.SKU.Name)
 				return false, sku
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/app-configuration/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/app-configuration/",
 		},
 		"appcs-006": {
 			RecommendationID: "appcs-006",
@@ -81,7 +81,7 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				caf := strings.HasPrefix(*c.Name, "appcs")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"appcs-007": {
 			RecommendationID: "appcs-007",
@@ -93,7 +93,7 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				c := target.(*armappconfiguration.ConfigurationStore)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"appcs-008": {
 			RecommendationID: "appcs-008",
@@ -106,7 +106,7 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]azqr.AzqrRecom
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/howto-disable-access-key-authentication?tabs=portal#disable-access-key-authentication",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/howto-disable-access-key-authentication?tabs=portal#disable-access-key-authentication",
 		},
 	}
 }

@@ -24,7 +24,7 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
 		},
 		"cr-003": {
 			RecommendationID: "cr-003",
@@ -35,7 +35,7 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/container-registry/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/container-registry/",
 		},
 		"cr-004": {
 			RecommendationID: "cr-004",
@@ -48,7 +48,7 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link",
 		},
 		"cr-005": {
 			RecommendationID: "cr-005",
@@ -60,7 +60,7 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 				i := target.(*armcontainerregistry.Registry)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-skus",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-skus",
 		},
 		"cr-006": {
 			RecommendationID: "cr-006",
@@ -73,7 +73,7 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 				caf := strings.HasPrefix(*c.Name, "cr")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"cr-008": {
 			RecommendationID: "cr-008",
@@ -86,7 +86,7 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 				admin := c.Properties.AdminUserEnabled != nil && *c.Properties.AdminUserEnabled
 				return admin, ""
 			},
-			Url: "https://learn.microsoft.com/azure/container-registry/container-registry-authentication-managed-identity",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/container-registry/container-registry-authentication-managed-identity",
 		},
 		"cr-009": {
 			RecommendationID: "cr-009",
@@ -98,7 +98,7 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 				c := target.(*armcontainerregistry.Registry)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"cr-010": {
 			RecommendationID: "cr-010",
@@ -113,7 +113,7 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 					c.Properties.Policies.RetentionPolicy.Status == nil ||
 					*c.Properties.Policies.RetentionPolicy.Status == armcontainerregistry.PolicyStatusDisabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-retention-policy",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-retention-policy",
 		},
 	}
 }

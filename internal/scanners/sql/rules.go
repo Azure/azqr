@@ -47,7 +47,7 @@ func (a *SQLScanner) getServerRules() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "sql")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sql-007": {
 			RecommendationID: "sql-007",
@@ -59,7 +59,7 @@ func (a *SQLScanner) getServerRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armsql.Server)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"sql-008": {
 			RecommendationID: "sql-008",
@@ -71,7 +71,7 @@ func (a *SQLScanner) getServerRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armsql.Server)
 				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != "1.2", ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-sql/database/connectivity-settings?view=azuresql&tabs=azure-portal#minimal-tls-version",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-sql/database/connectivity-settings?view=azuresql&tabs=azure-portal#minimal-tls-version",
 		},
 	}
 }
@@ -115,7 +115,7 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 				i := target.(*armsql.Database)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
+			LearnMoreUrl: "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
 		},
 		"sqldb-006": {
 			RecommendationID: "sqldb-006",
@@ -128,7 +128,7 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 				caf := *c.Name == "master" || strings.HasPrefix(*c.Name, "sqldb")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sqldb-007": {
 			RecommendationID: "sqldb-007",
@@ -140,7 +140,7 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armsql.Database)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }
@@ -157,7 +157,7 @@ func (a *SQLScanner) getPoolRules() map[string]azqr.AzqrRecommendation {
 				i := target.(*armsql.ElasticPool)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-sql/database/elastic-pool-overview?view=azuresql",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-sql/database/elastic-pool-overview?view=azuresql",
 		},
 		"sqlep-002": {
 			RecommendationID: "sqlep-002",
@@ -170,7 +170,7 @@ func (a *SQLScanner) getPoolRules() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "sqlep")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sqlep-003": {
 			RecommendationID: "sqlep-003",
@@ -182,7 +182,7 @@ func (a *SQLScanner) getPoolRules() map[string]azqr.AzqrRecommendation {
 				c := target.(*armsql.ElasticPool)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

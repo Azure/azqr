@@ -24,7 +24,7 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
 		},
 		"vnet-006": {
 			RecommendationID: "vnet-006",
@@ -37,7 +37,7 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				caf := strings.HasPrefix(*c.Name, "vnet")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"vnet-007": {
 			RecommendationID: "vnet-007",
@@ -49,7 +49,7 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				c := target.(*armnetwork.VirtualNetwork)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"vnet-009": {
 			RecommendationID: "vnet-009",
@@ -64,7 +64,7 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				}
 				return len(c.Properties.DhcpOptions.DNSServers) < 2, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances?tabs=redhat#specify-dns-servers",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances?tabs=redhat#specify-dns-servers",
 		},
 	}
 }

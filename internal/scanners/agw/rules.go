@@ -24,7 +24,7 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]azqr.AzqrRec
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
 		},
 		"agw-103": {
 			RecommendationID: "agw-103",
@@ -35,7 +35,7 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]azqr.AzqrRec
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/application-gateway/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/application-gateway/",
 		},
 		"agw-104": {
 			RecommendationID: "agw-104",
@@ -47,7 +47,7 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]azqr.AzqrRec
 				g := target.(*armnetwork.ApplicationGateway)
 				return false, string(*g.Properties.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/application-gateway/understanding-pricing",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/application-gateway/understanding-pricing",
 		},
 		"agw-105": {
 			RecommendationID: "agw-105",
@@ -60,7 +60,7 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]azqr.AzqrRec
 				caf := strings.HasPrefix(*g.Name, "agw")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"agw-106": {
 			RecommendationID: "agw-106",
@@ -72,7 +72,7 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]azqr.AzqrRec
 				c := target.(*armnetwork.ApplicationGateway)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

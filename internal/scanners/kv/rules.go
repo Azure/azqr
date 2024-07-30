@@ -24,7 +24,7 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
 		},
 		"kv-003": {
 			RecommendationID: "kv-003",
@@ -35,7 +35,7 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/key-vault/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/key-vault/",
 		},
 		"kv-005": {
 			RecommendationID: "kv-005",
@@ -47,7 +47,7 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				i := target.(*armkeyvault.Vault)
 				return false, string(*i.Properties.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/key-vault/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/key-vault/",
 		},
 		"kv-006": {
 			RecommendationID: "kv-006",
@@ -60,7 +60,7 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				caf := strings.HasPrefix(*c.Name, "kv")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"kv-007": {
 			RecommendationID: "kv-007",
@@ -72,7 +72,7 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				c := target.(*armkeyvault.Vault)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

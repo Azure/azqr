@@ -25,7 +25,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
 		},
 		"apim-003": {
 			RecommendationID: "apim-003",
@@ -45,7 +45,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 
 				return sla == "None", sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/api-management/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/api-management/",
 		},
 		"apim-004": {
 			RecommendationID: "apim-004",
@@ -58,7 +58,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
 		},
 		"apim-005": {
 			RecommendationID: "apim-005",
@@ -71,7 +71,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				sku := string(*a.SKU.Name)
 				return strings.Contains(sku, "Developer"), sku
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-features",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-features",
 		},
 		"apim-006": {
 			RecommendationID: "apim-006",
@@ -84,7 +84,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				caf := strings.HasPrefix(*c.Name, "apim")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"apim-007": {
 			RecommendationID: "apim-007",
@@ -96,7 +96,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				c := target.(*armapimanagement.ServiceResource)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"apim-008": {
 			RecommendationID: "apim-008",
@@ -108,7 +108,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				c := target.(*armapimanagement.ServiceResource)
 				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armapimanagement.ApimIdentityTypeNone, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-managed-service-identity",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-managed-service-identity",
 		},
 		"apim-009": {
 			RecommendationID: "apim-009",
@@ -140,7 +140,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 
 				return false, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
 		},
 		"apim-010": {
 			RecommendationID: "apim-010",
@@ -174,7 +174,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 
 				return false, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
 		},
 		"apim-011": {
 			RecommendationID: "apim-011",
@@ -196,7 +196,7 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				}
 				return false, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/configure-custom-domain?tabs=custom",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/configure-custom-domain?tabs=custom",
 		},
 	}
 }

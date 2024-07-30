@@ -24,7 +24,7 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/virtual-wan/monitor-virtual-wan",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/virtual-wan/monitor-virtual-wan",
 		},
 		"vwa-002": {
 			RecommendationID: "vwa-002",
@@ -35,7 +35,7 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-are-availability-zones-and-resiliency-handled-in-virtual-wan",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-are-availability-zones-and-resiliency-handled-in-virtual-wan",
 		},
 		"vwa-003": {
 			RecommendationID: "vwa-003",
@@ -46,7 +46,7 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-is-virtual-wan-sla-calculated",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-is-virtual-wan-sla-calculated",
 		},
 		"vwa-005": {
 			RecommendationID: "vwa-005",
@@ -58,7 +58,7 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				i := target.(*armnetwork.VirtualWAN)
 				return false, string(*i.Properties.Type)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-about#basicstandard",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-about#basicstandard",
 		},
 		"vwa-006": {
 			RecommendationID: "vwa-006",
@@ -71,7 +71,7 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				caf := strings.HasPrefix(*c.Name, "vwa")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"vwa-007": {
 			RecommendationID: "vwa-007",
@@ -83,7 +83,7 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				c := target.(*armnetwork.VirtualWAN)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

@@ -24,7 +24,7 @@ func (a *EventHubScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
 		},
 		"evh-003": {
 			RecommendationID: "evh-003",
@@ -41,7 +41,7 @@ func (a *EventHubScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				}
 				return false, sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/event-hubs/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/event-hubs/",
 		},
 		"evh-004": {
 			RecommendationID: "evh-004",
@@ -54,7 +54,7 @@ func (a *EventHubScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/network-security",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/network-security",
 		},
 		"evh-005": {
 			RecommendationID: "evh-005",
@@ -66,7 +66,7 @@ func (a *EventHubScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				i := target.(*armeventhub.EHNamespace)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/compare-tiers",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/compare-tiers",
 		},
 		"evh-006": {
 			RecommendationID: "evh-006",
@@ -79,7 +79,7 @@ func (a *EventHubScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				caf := strings.HasPrefix(*c.Name, "evh")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"evh-007": {
 			RecommendationID: "evh-007",
@@ -91,7 +91,7 @@ func (a *EventHubScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				c := target.(*armeventhub.EHNamespace)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"evh-008": {
 			RecommendationID: "evh-008",
@@ -104,7 +104,7 @@ func (a *EventHubScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-hubs/authorize-access-event-hubs#shared-access-signatures",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/authorize-access-event-hubs#shared-access-signatures",
 		},
 	}
 }

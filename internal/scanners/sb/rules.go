@@ -24,7 +24,7 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
 		},
 		"sb-003": {
 			RecommendationID: "sb-003",
@@ -41,7 +41,7 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				}
 				return false, sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/service-bus/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/service-bus/",
 		},
 		"sb-004": {
 			RecommendationID: "sb-004",
@@ -54,7 +54,7 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/network-security",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/network-security",
 		},
 		"sb-005": {
 			RecommendationID: "sb-005",
@@ -66,7 +66,7 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				i := target.(*armservicebus.SBNamespace)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/service-bus/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/service-bus/",
 		},
 		"sb-006": {
 			RecommendationID: "sb-006",
@@ -79,7 +79,7 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				caf := strings.HasPrefix(*c.Name, "sb")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sb-007": {
 			RecommendationID: "sb-007",
@@ -91,7 +91,7 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				c := target.(*armservicebus.SBNamespace)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"sb-008": {
 			RecommendationID: "sb-008",
@@ -104,7 +104,7 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas",
 		},
 	}
 }

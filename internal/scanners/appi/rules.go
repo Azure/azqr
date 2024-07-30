@@ -22,7 +22,7 @@ func (a *AppInsightsScanner) GetRecommendations() map[string]azqr.AzqrRecommenda
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/application-insights/index.html",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/application-insights/index.html",
 		},
 		"appi-002": {
 			RecommendationID: "appi-002",
@@ -35,7 +35,7 @@ func (a *AppInsightsScanner) GetRecommendations() map[string]azqr.AzqrRecommenda
 				caf := strings.HasPrefix(*c.Name, "appi")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"appi-003": {
 			RecommendationID: "appi-003",
@@ -47,7 +47,7 @@ func (a *AppInsightsScanner) GetRecommendations() map[string]azqr.AzqrRecommenda
 				c := target.(*armapplicationinsights.Component)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

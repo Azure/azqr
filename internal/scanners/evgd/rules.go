@@ -24,7 +24,7 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
 		},
 		"evgd-003": {
 			RecommendationID: "evgd-003",
@@ -35,7 +35,7 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/event-grid/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/event-grid/",
 		},
 		"evgd-004": {
 			RecommendationID: "evgd-004",
@@ -48,7 +48,7 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-grid/configure-private-endpoints",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-grid/configure-private-endpoints",
 		},
 		"evgd-005": {
 			RecommendationID: "evgd-005",
@@ -59,7 +59,7 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "None"
 			},
-			Url: "https://azure.microsoft.com/en-gb/pricing/details/event-grid/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-gb/pricing/details/event-grid/",
 		},
 		"evgd-006": {
 			RecommendationID: "evgd-006",
@@ -72,7 +72,7 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				caf := strings.HasPrefix(*c.Name, "evgd")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"evgd-007": {
 			RecommendationID: "evgd-007",
@@ -84,7 +84,7 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				c := target.(*armeventgrid.Domain)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"evgd-008": {
 			RecommendationID: "evgd-008",
@@ -97,7 +97,7 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/event-grid/authenticate-with-access-keys-shared-access-signatures",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-grid/authenticate-with-access-keys-shared-access-signatures",
 		},
 	}
 }

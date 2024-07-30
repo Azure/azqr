@@ -24,7 +24,7 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-apps/log-options#diagnostic-settings",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-apps/log-options#diagnostic-settings",
 		},
 		"cae-003": {
 			RecommendationID: "cae-003",
@@ -35,7 +35,7 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
-			Url: "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
 		},
 		"cae-004": {
 			RecommendationID: "cae-004",
@@ -48,7 +48,7 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 				pe := app.Properties.VnetConfiguration != nil && *app.Properties.VnetConfiguration.Internal
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-apps/vnet-custom-internal?tabs=bash&pivots=azure-portal",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-apps/vnet-custom-internal?tabs=bash&pivots=azure-portal",
 		},
 		"cae-006": {
 			RecommendationID: "cae-006",
@@ -61,7 +61,7 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 				caf := strings.HasPrefix(*c.Name, "cae")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"cae-007": {
 			RecommendationID: "cae-007",
@@ -73,7 +73,7 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 				c := target.(*armappcontainers.ManagedEnvironment)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

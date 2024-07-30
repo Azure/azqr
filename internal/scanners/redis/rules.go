@@ -24,7 +24,7 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-monitor-diagnostic-settings",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-monitor-diagnostic-settings",
 		},
 		"redis-003": {
 			RecommendationID: "redis-003",
@@ -35,7 +35,7 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
 		"redis-005": {
 			RecommendationID: "redis-005",
@@ -47,7 +47,7 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				i := target.(*armredis.ResourceInfo)
 				return false, string(*i.Properties.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-gb/pricing/details/cache/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-gb/pricing/details/cache/",
 		},
 		"redis-006": {
 			RecommendationID: "redis-006",
@@ -60,7 +60,7 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "redis")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"redis-007": {
 			RecommendationID: "redis-007",
@@ -72,7 +72,7 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				c := target.(*armredis.ResourceInfo)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"redis-008": {
 			RecommendationID: "redis-008",
@@ -84,7 +84,7 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				c := target.(*armredis.ResourceInfo)
 				return c.Properties.EnableNonSSLPort != nil && *c.Properties.EnableNonSSLPort, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-configure#access-ports",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-configure#access-ports",
 		},
 		"redis-009": {
 			RecommendationID: "redis-009",
@@ -96,7 +96,7 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				c := target.(*armredis.ResourceInfo)
 				return c.Properties.MinimumTLSVersion == nil || *c.Properties.MinimumTLSVersion != armredis.TLSVersionOne2, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-remove-tls-10-11",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-remove-tls-10-11",
 		},
 	}
 }

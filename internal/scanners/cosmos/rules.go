@@ -24,7 +24,7 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
 		},
 		"cosmos-002": {
 			RecommendationID: "cosmos-002",
@@ -50,7 +50,7 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability",
 		},
 		"cosmos-003": {
 			RecommendationID: "cosmos-003",
@@ -79,7 +79,7 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				}
 				return false, sla
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability#slas",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability#slas",
 		},
 		"cosmos-004": {
 			RecommendationID: "cosmos-004",
@@ -92,7 +92,7 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-configure-private-endpoints",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-configure-private-endpoints",
 		},
 		"cosmos-005": {
 			RecommendationID: "cosmos-005",
@@ -104,7 +104,7 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				return false, string(*i.Properties.DatabaseAccountOfferType)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/cosmos-db/autoscale-provisioned/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/cosmos-db/autoscale-provisioned/",
 		},
 		"cosmos-006": {
 			RecommendationID: "cosmos-006",
@@ -117,7 +117,7 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				caf := strings.HasPrefix(*c.Name, "cosmos")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"cosmos-007": {
 			RecommendationID: "cosmos-007",
@@ -129,7 +129,7 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				c := target.(*armcosmos.DatabaseAccountGetResults)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"cosmos-008": {
 			RecommendationID: "cosmos-008",
@@ -142,7 +142,7 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-setup-rbac#disable-local-auth",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-setup-rbac#disable-local-auth",
 		},
 		"cosmos-009": {
 			RecommendationID: "cosmos-009",
@@ -155,7 +155,7 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 				disabled := c.Properties.DisableKeyBasedMetadataWriteAccess != nil && *c.Properties.DisableKeyBasedMetadataWriteAccess
 				return !disabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cosmos-db/role-based-access-control#set-via-arm-template",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/role-based-access-control#set-via-arm-template",
 		},
 	}
 }

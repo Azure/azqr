@@ -24,7 +24,7 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
 		},
 		"wps-002": {
 			RecommendationID: "wps-002",
@@ -41,7 +41,7 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				}
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
 		},
 		"wps-003": {
 			RecommendationID: "wps-003",
@@ -59,7 +59,7 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 
 				return sla == "None", sla
 			},
-			Url: "https://azure.microsoft.com/en-gb/support/legal/sla/web-pubsub/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-gb/support/legal/sla/web-pubsub/",
 		},
 		"wps-004": {
 			RecommendationID: "wps-004",
@@ -72,7 +72,7 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
 		},
 		"wps-005": {
 			RecommendationID: "wps-005",
@@ -84,7 +84,7 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				i := target.(*armwebpubsub.ResourceInfo)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/web-pubsub/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/web-pubsub/",
 		},
 		"wps-006": {
 			RecommendationID: "wps-006",
@@ -97,7 +97,7 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				caf := strings.HasPrefix(*c.Name, "wps")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"wps-007": {
 			RecommendationID: "wps-007",
@@ -109,7 +109,7 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 				c := target.(*armwebpubsub.ResourceInfo)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

@@ -24,7 +24,7 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				caf := strings.HasPrefix(*c.Name, "amg")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"amg-002": {
 			RecommendationID: "amg-002",
@@ -44,7 +44,7 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				}
 				return sla == "None", sla
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"amg-003": {
 			RecommendationID: "amg-003",
@@ -56,7 +56,7 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				c := target.(*armdashboard.ManagedGrafana)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"amg-004": {
 			RecommendationID: "amg-004",
@@ -68,7 +68,7 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				c := target.(*armdashboard.ManagedGrafana)
 				return *c.Properties.PublicNetworkAccess == armdashboard.PublicNetworkAccessEnabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
 		},
 		"amg-005": {
 			RecommendationID: "amg-005",
@@ -80,7 +80,7 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 				c := target.(*armdashboard.ManagedGrafana)
 				return *c.Properties.ZoneRedundancy == armdashboard.ZoneRedundancyDisabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/managed-grafana/high-availability",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/managed-grafana/high-availability",
 		},
 	}
 }

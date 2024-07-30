@@ -24,7 +24,7 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 				zones := len(i.Zones) > 0
 				return !zones, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/container-instances/availability-zones",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-instances/availability-zones",
 		},
 		"ci-003": {
 			RecommendationID: "ci-003",
@@ -35,7 +35,7 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/container-instances/v1_0/index.html",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/container-instances/v1_0/index.html",
 		},
 		"ci-004": {
 			RecommendationID: "ci-004",
@@ -62,7 +62,7 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 				i := target.(*armcontainerinstance.ContainerGroup)
 				return false, string(*i.Properties.SKU)
 			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/container-instances/",
+			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/container-instances/",
 		},
 		"ci-006": {
 			RecommendationID: "ci-006",
@@ -75,7 +75,7 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 				caf := strings.HasPrefix(*c.Name, "ci")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"ci-007": {
 			RecommendationID: "ci-007",
@@ -87,7 +87,7 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 				c := target.(*armcontainerinstance.ContainerGroup)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 	}
 }

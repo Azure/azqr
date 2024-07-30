@@ -61,10 +61,10 @@ type (
 	AzqrRecommendation struct {
 		RecommendationID string
 		ResourceType     string
-		Category         RecommendationCategory
 		Recommendation   string
+		Category         RecommendationCategory
 		Impact           RecommendationImpact
-		Url              string
+		LearnMoreUrl     string
 		Eval             func(target interface{}, scanContext *ScanContext) (bool, string)
 	}
 
@@ -74,18 +74,18 @@ type (
 		Category         RecommendationCategory
 		Recommendation   string
 		Impact           RecommendationImpact
-		Learn            string
+		LearnMoreUrl     string
 		Result           string
 		NotCompliant     bool
 	}
 
 	Resource struct {
 		ID             string
-		ResourceGroup  string
 		SubscriptionID string
-		Name           string
+		ResourceGroup  string
 		Type           string
 		Location       string
+		Name           string
 	}
 
 	ResourceTypeCount struct {
@@ -182,7 +182,7 @@ func (r *AzqrRecommendation) ToAzureAprlRecommendation() AprlRecommendation {
 		LearnMoreLink: []struct {
 			Name string "yaml:\"name\""
 			Url  string "yaml:\"url\""
-		}{{Name: "Learn More", Url: r.Url}},
+		}{{Name: "Learn More", Url: r.LearnMoreUrl}},
 	}
 }
 
@@ -204,7 +204,7 @@ func (e *RecommendationEngine) evaluateRecommendation(rule AzqrRecommendation, t
 		Category:         rule.Category,
 		Recommendation:   rule.Recommendation,
 		Impact:           rule.Impact,
-		Learn:            rule.Url,
+		LearnMoreUrl:     rule.LearnMoreUrl,
 		Result:           result,
 		NotCompliant:     broken,
 	}

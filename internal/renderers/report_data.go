@@ -82,7 +82,7 @@ func (rd *ReportData) ServicesTable() [][]string {
 				string(r.Category),
 				r.Recommendation,
 				r.Result,
-				r.Learn,
+				r.LearnMoreUrl,
 				r.RecommendationID,
 			}
 			if r.NotCompliant {
@@ -147,7 +147,7 @@ func (rd *ReportData) ImpactedTable() [][]string {
 					"",
 					"",
 					"",
-					r.Learn,
+					r.LearnMoreUrl,
 				}
 				rows = append(rows, row)
 			}

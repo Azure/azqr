@@ -48,7 +48,7 @@ func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "maria")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"maria-004": {
 			RecommendationID: "maria-004",
@@ -70,7 +70,7 @@ func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				c := target.(*armmariadb.Server)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"maria-006": {
 			RecommendationID: "maria-006",
@@ -82,7 +82,7 @@ func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 				c := target.(*armmariadb.Server)
 				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != armmariadb.MinimalTLSVersionEnumTLS12, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/mariadb/howto-tls-configurations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mariadb/howto-tls-configurations",
 		},
 	}
 }
@@ -101,7 +101,7 @@ func (a *MariaScanner) GetDatabaseRules() map[string]azqr.AzqrRecommendation {
 				caf := strings.HasPrefix(*c.Name, "mariadb")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 	}
 }

@@ -24,7 +24,7 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
 		},
 		"st-003": {
 			RecommendationID: "st-003",
@@ -51,7 +51,7 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				}
 				return false, sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/storage/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/storage/",
 		},
 		"st-005": {
 			RecommendationID: "st-005",
@@ -63,7 +63,7 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				i := target.(*armstorage.Account)
 				return false, string(*i.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/rest/api/storagerp/srp_sku_types",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/rest/api/storagerp/srp_sku_types",
 		},
 		"st-006": {
 			RecommendationID: "st-006",
@@ -76,7 +76,7 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				caf := strings.HasPrefix(*c.Name, "st")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"st-007": {
 			RecommendationID: "st-007",
@@ -89,7 +89,7 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				h := *c.Properties.EnableHTTPSTrafficOnly
 				return !h, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer",
 		},
 		"st-008": {
 			RecommendationID: "st-008",
@@ -101,7 +101,7 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				c := target.(*armstorage.Account)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"st-009": {
 			RecommendationID: "st-009",
@@ -113,7 +113,7 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				c := target.(*armstorage.Account)
 				return c.Properties.MinimumTLSVersion == nil || *c.Properties.MinimumTLSVersion != armstorage.MinimumTLSVersionTLS12, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal",
 		},
 		"st-010": {
 			RecommendationID: "st-010",
@@ -125,7 +125,7 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 				c := target.(*armstorage.Account)
 				return c.Properties.ImmutableStorageWithVersioning == nil || c.Properties.ImmutableStorageWithVersioning.Enabled == nil || !*c.Properties.ImmutableStorageWithVersioning.Enabled, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
 		},
 		"st-011": {
 			RecommendationID: "st-011",
@@ -141,7 +141,7 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
 		},
 	}
 }

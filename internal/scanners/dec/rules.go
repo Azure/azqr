@@ -24,7 +24,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
 		},
 		"dec-002": {
 			RecommendationID: "dec-002",
@@ -41,7 +41,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 
 				return sla == "None", sla
 			},
-			Url: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
 		"dec-003": {
 			RecommendationID: "dec-003",
@@ -58,7 +58,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				}
 				return broken, string(*c.SKU.Name)
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku",
 		},
 		"dec-004": {
 			RecommendationID: "dec-004",
@@ -71,7 +71,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
 		},
 		"dec-006": {
 			RecommendationID: "dec-004",
@@ -84,7 +84,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				caf := strings.HasPrefix(*c.Name, "dec")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"dec-007": {
 			RecommendationID: "dec-005",
@@ -96,7 +96,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				c := target.(*armkusto.Cluster)
 				return c.Tags == nil || len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"dec-008": {
 			RecommendationID: "dec-008",
@@ -108,7 +108,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				c := target.(*armkusto.Cluster)
 				return c.Properties.EnableDiskEncryption == nil || !*c.Properties.EnableDiskEncryption, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/cluster-encryption-overview",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/data-explorer/cluster-encryption-overview",
 		},
 		"dec-009": {
 			RecommendationID: "dec-009",
@@ -120,7 +120,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 				c := target.(*armkusto.Cluster)
 				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armkusto.IdentityTypeNone, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/data-explorer/configure-managed-identities-cluster?tabs=portal",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/data-explorer/configure-managed-identities-cluster?tabs=portal",
 		},
 	}
 }
