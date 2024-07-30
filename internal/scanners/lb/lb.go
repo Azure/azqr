@@ -5,7 +5,7 @@ package lb
 
 import (
 	"github.com/Azure/azqr/internal/azqr"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // LoadBalancerScanner - Scanner for Loadbalancer
@@ -23,10 +23,10 @@ func (c *LoadBalancerScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Loadbalancer in a Resource Group
-func (c *LoadBalancerScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *LoadBalancerScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	lbs, err := c.list(resourceGroupName)
+	lbs, err := c.list()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *LoadBalancerScanner) Scan(resourceGroupName string, scanContext *azqr.S
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
@@ -50,8 +50,8 @@ func (c *LoadBalancerScanner) Scan(resourceGroupName string, scanContext *azqr.S
 	return results, nil
 }
 
-func (c *LoadBalancerScanner) list(resourceGroupName string) ([]*armnetwork.LoadBalancer, error) {
-	pager := c.client.NewListPager(resourceGroupName, nil)
+func (c *LoadBalancerScanner) list() ([]*armnetwork.LoadBalancer, error) {
+	pager := c.client.NewListAllPager(nil)
 
 	lbs := make([]*armnetwork.LoadBalancer, 0)
 	for pager.More() {

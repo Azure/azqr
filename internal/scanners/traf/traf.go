@@ -23,10 +23,10 @@ func (c *TrafficManagerScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all TrafficManager in a Resource Group
-func (c *TrafficManagerScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *TrafficManagerScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	vnets, err := c.list(resourceGroupName)
+	vnets, err := c.list()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *TrafficManagerScanner) Scan(resourceGroupName string, scanContext *azqr
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
@@ -50,8 +50,8 @@ func (c *TrafficManagerScanner) Scan(resourceGroupName string, scanContext *azqr
 	return results, nil
 }
 
-func (c *TrafficManagerScanner) list(resourceGroupName string) ([]*armtrafficmanager.Profile, error) {
-	pager := c.client.NewProfilesClient().NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *TrafficManagerScanner) list() ([]*armtrafficmanager.Profile, error) {
+	pager := c.client.NewProfilesClient().NewListBySubscriptionPager(nil)
 
 	vnets := make([]*armtrafficmanager.Profile, 0)
 	for pager.More() {

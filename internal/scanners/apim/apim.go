@@ -23,10 +23,10 @@ func (a *APIManagementScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan -Scans all API Management Services in a Resource Group
-func (a *APIManagementScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *APIManagementScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	services, err := a.listServices(resourceGroupName)
+	services, err := a.listServices()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *APIManagementScanner) Scan(resourceGroupName string, scanContext *azqr.
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*s.ID),
 			ServiceName:      *s.Name,
 			Type:             *s.Type,
 			Location:         *s.Location,
@@ -50,8 +50,8 @@ func (a *APIManagementScanner) Scan(resourceGroupName string, scanContext *azqr.
 	return results, nil
 }
 
-func (a *APIManagementScanner) listServices(resourceGroupName string) ([]*armapimanagement.ServiceResource, error) {
-	pager := a.serviceClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *APIManagementScanner) listServices() ([]*armapimanagement.ServiceResource, error) {
+	pager := a.serviceClient.NewListPager(nil)
 
 	services := make([]*armapimanagement.ServiceResource, 0)
 	for pager.More() {

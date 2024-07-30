@@ -19,8 +19,8 @@ func (a *PublicIPScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Public IP in a Resource Group
-func (a *PublicIPScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *PublicIPScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 	return []azqr.AzqrServiceResult{}, nil
 }
 

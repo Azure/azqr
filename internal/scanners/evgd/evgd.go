@@ -23,10 +23,10 @@ func (a *EventGridScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all EventGrid Domains in a Resource Group
-func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *EventGridScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	domains, err := a.listDomain(resourceGroupName)
+	domains, err := a.listDomain()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *azqr.Scan
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*d.ID),
 			ServiceName:      *d.Name,
 			Type:             *d.Type,
 			Location:         *d.Location,
@@ -50,8 +50,8 @@ func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *azqr.Scan
 	return results, nil
 }
 
-func (a *EventGridScanner) listDomain(resourceGroupName string) ([]*armeventgrid.Domain, error) {
-	pager := a.domainsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *EventGridScanner) listDomain() ([]*armeventgrid.Domain, error) {
+	pager := a.domainsClient.NewListBySubscriptionPager(nil)
 
 	domains := make([]*armeventgrid.Domain, 0)
 	for pager.More() {

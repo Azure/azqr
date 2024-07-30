@@ -23,10 +23,10 @@ func (a *ContainerAppsEnvironmentScanner) Init(config *azqr.ScannerConfig) error
 }
 
 // Scan - Scans all Container Apps in a Resource Group
-func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *ContainerAppsEnvironmentScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	apps, err := a.listApps(resourceGroupName)
+	apps, err := a.listApps()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanCon
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*app.ID),
 			ServiceName:      *app.Name,
 			Type:             *app.Type,
 			Location:         *app.Location,
@@ -50,8 +50,8 @@ func (a *ContainerAppsEnvironmentScanner) Scan(resourceGroupName string, scanCon
 	return results, nil
 }
 
-func (a *ContainerAppsEnvironmentScanner) listApps(resourceGroupName string) ([]*armappcontainers.ManagedEnvironment, error) {
-	pager := a.appsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *ContainerAppsEnvironmentScanner) listApps() ([]*armappcontainers.ManagedEnvironment, error) {
+	pager := a.appsClient.NewListBySubscriptionPager(nil)
 	apps := make([]*armappcontainers.ManagedEnvironment, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(a.config.Ctx)

@@ -23,10 +23,10 @@ func (a *ServiceBusScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Service Bus in a Resource Group
-func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *ServiceBusScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	servicebus, err := c.listServiceBus(resourceGroupName)
+	servicebus, err := c.listServiceBus()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *azqr.Sca
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*servicebus.ID),
 			ServiceName:      *servicebus.Name,
 			Type:             *servicebus.Type,
 			Location:         *servicebus.Location,
@@ -50,8 +50,8 @@ func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *azqr.Sca
 	return results, nil
 }
 
-func (c *ServiceBusScanner) listServiceBus(resourceGroupName string) ([]*armservicebus.SBNamespace, error) {
-	pager := c.servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *ServiceBusScanner) listServiceBus() ([]*armservicebus.SBNamespace, error) {
+	pager := c.servicebusClient.NewListPager(nil)
 
 	namespaces := make([]*armservicebus.SBNamespace, 0)
 	for pager.More() {

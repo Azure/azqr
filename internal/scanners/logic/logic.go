@@ -23,10 +23,10 @@ func (c *LogicAppScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all LogicApps in a Resource Group
-func (c *LogicAppScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *LogicAppScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	vnets, err := c.list(resourceGroupName)
+	vnets, err := c.list()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *LogicAppScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
@@ -50,8 +50,8 @@ func (c *LogicAppScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 	return results, nil
 }
 
-func (c *LogicAppScanner) list(resourceGroupName string) ([]*armlogic.Workflow, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *LogicAppScanner) list() ([]*armlogic.Workflow, error) {
+	pager := c.client.NewListBySubscriptionPager(nil)
 
 	logicApps := make([]*armlogic.Workflow, 0)
 	for pager.More() {

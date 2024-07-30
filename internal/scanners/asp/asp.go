@@ -33,10 +33,10 @@ func (a *AppServiceScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all App Service Plans in a Resource Group
-func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *AppServiceScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	plan, err := a.listPlans(resourceGroupName)
+	plan, err := a.listPlans()
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +49,8 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *azqr.Sca
 
 	for _, p := range plan {
 		rr := engine.EvaluateRecommendations(rules, p, scanContext)
+
+		resourceGroupName := azqr.GetResourceGroupFromResourceID(*p.ID)
 
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
@@ -120,8 +122,8 @@ func (a *AppServiceScanner) Scan(resourceGroupName string, scanContext *azqr.Sca
 	return results, nil
 }
 
-func (a *AppServiceScanner) listPlans(resourceGroupName string) ([]*armappservice.Plan, error) {
-	pager := a.plansClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *AppServiceScanner) listPlans() ([]*armappservice.Plan, error) {
+	pager := a.plansClient.NewListPager(nil)
 	results := []*armappservice.Plan{}
 	for pager.More() {
 		resp, err := pager.NextPage(a.config.Ctx)

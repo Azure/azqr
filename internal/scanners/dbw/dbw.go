@@ -23,10 +23,10 @@ func (c *DatabricksScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Azure Databricks in a Resource Group
-func (c *DatabricksScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *DatabricksScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	workspaces, err := c.listWorkspaces(resourceGroupName)
+	workspaces, err := c.listWorkspaces()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *DatabricksScanner) Scan(resourceGroupName string, scanContext *azqr.Sca
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*ws.ID),
 			ServiceName:      *ws.Name,
 			Type:             *ws.Type,
 			Location:         *ws.Location,
@@ -50,8 +50,8 @@ func (c *DatabricksScanner) Scan(resourceGroupName string, scanContext *azqr.Sca
 	return results, nil
 }
 
-func (c *DatabricksScanner) listWorkspaces(resourceGroupName string) ([]*armdatabricks.Workspace, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *DatabricksScanner) listWorkspaces() ([]*armdatabricks.Workspace, error) {
+	pager := c.client.NewListBySubscriptionPager(nil)
 
 	registries := make([]*armdatabricks.Workspace, 0)
 	for pager.More() {

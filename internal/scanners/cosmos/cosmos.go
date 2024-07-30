@@ -23,10 +23,10 @@ func (a *CosmosDBScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all CosmosDB Databases in a Resource Group
-func (c *CosmosDBScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *CosmosDBScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	databases, err := c.listDatabases(resourceGroupName)
+	databases, err := c.listDatabases()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *CosmosDBScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*database.ID),
 			ServiceName:      *database.Name,
 			Type:             *database.Type,
 			Location:         *database.Location,
@@ -50,8 +50,8 @@ func (c *CosmosDBScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 	return results, nil
 }
 
-func (c *CosmosDBScanner) listDatabases(resourceGroupName string) ([]*armcosmos.DatabaseAccountGetResults, error) {
-	pager := c.databasesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *CosmosDBScanner) listDatabases() ([]*armcosmos.DatabaseAccountGetResults, error) {
+	pager := c.databasesClient.NewListPager(nil)
 
 	domains := make([]*armcosmos.DatabaseAccountGetResults, 0)
 	for pager.More() {

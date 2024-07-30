@@ -19,8 +19,8 @@ func (a *LogAnalyticsScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Log Analytics workspace in a Resource Group
-func (a *LogAnalyticsScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *LogAnalyticsScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 	return []azqr.AzqrServiceResult{}, nil
 }
 

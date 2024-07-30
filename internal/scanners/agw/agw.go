@@ -5,7 +5,7 @@ package agw
 
 import (
 	"github.com/Azure/azqr/internal/azqr"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // ApplicationGatewayScanner - Scanner for Application Gateways
@@ -23,10 +23,10 @@ func (a *ApplicationGatewayScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Application Gateways in a Resource Group
-func (a *ApplicationGatewayScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *ApplicationGatewayScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	gateways, err := a.listGateways(resourceGroupName)
+	gateways, err := a.listGateways()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *ApplicationGatewayScanner) Scan(resourceGroupName string, scanContext *
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			ServiceName:      *g.Name,
 			Type:             *g.Type,
 			Location:         *g.Location,
@@ -50,8 +50,8 @@ func (a *ApplicationGatewayScanner) Scan(resourceGroupName string, scanContext *
 	return results, nil
 }
 
-func (a *ApplicationGatewayScanner) listGateways(resourceGroupName string) ([]*armnetwork.ApplicationGateway, error) {
-	pager := a.gatewaysClient.NewListPager(resourceGroupName, nil)
+func (a *ApplicationGatewayScanner) listGateways() ([]*armnetwork.ApplicationGateway, error) {
+	pager := a.gatewaysClient.NewListAllPager(nil)
 	results := []*armnetwork.ApplicationGateway{}
 	for pager.More() {
 		resp, err := pager.NextPage(a.config.Ctx)

@@ -5,7 +5,7 @@ package vwan
 
 import (
 	"github.com/Azure/azqr/internal/azqr"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // VirtualWanScanner - Scanner for VirtualWanScanner
@@ -23,10 +23,10 @@ func (c *VirtualWanScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all VirtualWan in a Resource Group
-func (c *VirtualWanScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *VirtualWanScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	vwans, err := c.list(resourceGroupName)
+	vwans, err := c.list()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *VirtualWanScanner) Scan(resourceGroupName string, scanContext *azqr.Sca
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
@@ -50,8 +50,8 @@ func (c *VirtualWanScanner) Scan(resourceGroupName string, scanContext *azqr.Sca
 	return results, nil
 }
 
-func (c *VirtualWanScanner) list(resourceGroupName string) ([]*armnetwork.VirtualWAN, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *VirtualWanScanner) list() ([]*armnetwork.VirtualWAN, error) {
+	pager := c.client.NewListPager(nil)
 
 	vwans := make([]*armnetwork.VirtualWAN, 0)
 	for pager.More() {

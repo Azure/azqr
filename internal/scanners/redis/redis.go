@@ -23,10 +23,10 @@ func (c *RedisScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Redis in a Resource Group
-func (c *RedisScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *RedisScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	redis, err := c.listRedis(resourceGroupName)
+	redis, err := c.listRedis()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *RedisScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCont
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*redis.ID),
 			ServiceName:      *redis.Name,
 			Type:             *redis.Type,
 			Location:         *redis.Location,
@@ -50,8 +50,8 @@ func (c *RedisScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCont
 	return results, nil
 }
 
-func (c *RedisScanner) listRedis(resourceGroupName string) ([]*armredis.ResourceInfo, error) {
-	pager := c.redisClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *RedisScanner) listRedis() ([]*armredis.ResourceInfo, error) {
+	pager := c.redisClient.NewListBySubscriptionPager(nil)
 
 	redis := make([]*armredis.ResourceInfo, 0)
 	for pager.More() {

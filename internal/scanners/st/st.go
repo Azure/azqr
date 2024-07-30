@@ -28,10 +28,10 @@ func (c *StorageScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Storage in a Resource Group
-func (c *StorageScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *StorageScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	storage, err := c.listStorage(resourceGroupName)
+	storage, err := c.listStorage()
 	if err != nil {
 		return nil, err
 	}
@@ -40,6 +40,8 @@ func (c *StorageScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCo
 	results := []azqr.AzqrServiceResult{}
 
 	for _, storage := range storage {
+		resourceGroupName := azqr.GetResourceGroupFromResourceID(*storage.ID)
+
 		scanContext.BlobServiceProperties = nil
 		blobServicesProperties, err := c.blobServicesClient.GetServiceProperties(c.config.Ctx, resourceGroupName, *storage.Name, nil)
 		if err == nil {
@@ -61,8 +63,8 @@ func (c *StorageScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCo
 	return results, nil
 }
 
-func (c *StorageScanner) listStorage(resourceGroupName string) ([]*armstorage.Account, error) {
-	pager := c.storageClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *StorageScanner) listStorage() ([]*armstorage.Account, error) {
+	pager := c.storageClient.NewListPager(nil)
 
 	staccounts := make([]*armstorage.Account, 0)
 	for pager.More() {

@@ -23,10 +23,10 @@ func (a *DataExplorerScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Data Explorers in a Resource Group
-func (a *DataExplorerScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *DataExplorerScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	kustoclusters, err := a.listClusters(resourceGroupName)
+	kustoclusters, err := a.listClusters()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *DataExplorerScanner) Scan(resourceGroupName string, scanContext *azqr.S
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
@@ -50,8 +50,8 @@ func (a *DataExplorerScanner) Scan(resourceGroupName string, scanContext *azqr.S
 	return results, nil
 }
 
-func (a *DataExplorerScanner) listClusters(resourceGroupName string) ([]*armkusto.Cluster, error) {
-	pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *DataExplorerScanner) listClusters() ([]*armkusto.Cluster, error) {
+	pager := a.client.NewListPager(nil)
 
 	kustoclusters := make([]*armkusto.Cluster, 0)
 	for pager.More() {

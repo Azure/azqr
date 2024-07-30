@@ -19,8 +19,8 @@ func (a *AutomationAccountScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Automation Accounts in a Resource Group
-func (a *AutomationAccountScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *AutomationAccountScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 	return []azqr.AzqrServiceResult{}, nil
 }
 

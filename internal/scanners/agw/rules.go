@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal/azqr"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // GetRecommendations - Returns the rules for the ApplicationGatewayScanner

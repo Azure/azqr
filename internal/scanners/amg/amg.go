@@ -23,10 +23,10 @@ func (a *ManagedGrafanaScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Managed Grafana in a Resource Group
-func (a *ManagedGrafanaScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *ManagedGrafanaScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	workspaces, err := a.listWorkspaces(resourceGroupName)
+	workspaces, err := a.listWorkspaces()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *ManagedGrafanaScanner) Scan(resourceGroupName string, scanContext *azqr
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
@@ -50,8 +50,8 @@ func (a *ManagedGrafanaScanner) Scan(resourceGroupName string, scanContext *azqr
 	return results, nil
 }
 
-func (a *ManagedGrafanaScanner) listWorkspaces(resourceGroupName string) ([]*armdashboard.ManagedGrafana, error) {
-	pager := a.grafanaClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *ManagedGrafanaScanner) listWorkspaces() ([]*armdashboard.ManagedGrafana, error) {
+	pager := a.grafanaClient.NewListPager(nil)
 
 	workspaces := make([]*armdashboard.ManagedGrafana, 0)
 	for pager.More() {

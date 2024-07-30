@@ -23,10 +23,10 @@ func (c *PostgreScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all PostgreSQL in a Resource Group
-func (c *PostgreScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *PostgreScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	postgre, err := c.listPostgre(resourceGroupName)
+	postgre, err := c.listPostgre()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *PostgreScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCo
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*postgre.ID),
 			ServiceName:      *postgre.Name,
 			Type:             *postgre.Type,
 			Location:         *postgre.Location,
@@ -51,8 +51,8 @@ func (c *PostgreScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCo
 	return results, nil
 }
 
-func (c *PostgreScanner) listPostgre(resourceGroupName string) ([]*armpostgresql.Server, error) {
-	pager := c.postgreClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *PostgreScanner) listPostgre() ([]*armpostgresql.Server, error) {
+	pager := c.postgreClient.NewListPager(nil)
 
 	servers := make([]*armpostgresql.Server, 0)
 	for pager.More() {

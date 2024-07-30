@@ -23,10 +23,10 @@ func (a *DataFactoryScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Data Factories in a Resource Group
-func (a *DataFactoryScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *DataFactoryScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	factories, err := a.listFactories(resourceGroupName)
+	factories, err := a.listFactories()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *DataFactoryScanner) Scan(resourceGroupName string, scanContext *azqr.Sc
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
@@ -50,8 +50,8 @@ func (a *DataFactoryScanner) Scan(resourceGroupName string, scanContext *azqr.Sc
 	return results, nil
 }
 
-func (a *DataFactoryScanner) listFactories(resourceGroupName string) ([]*armdatafactory.Factory, error) {
-	pager := a.factoriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *DataFactoryScanner) listFactories() ([]*armdatafactory.Factory, error) {
+	pager := a.factoriesClient.NewListPager(nil)
 
 	factories := make([]*armdatafactory.Factory, 0)
 	for pager.More() {

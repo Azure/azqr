@@ -9,7 +9,7 @@ import (
 
 	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func TestApplicationGatewayScanner_Rules(t *testing.T) {

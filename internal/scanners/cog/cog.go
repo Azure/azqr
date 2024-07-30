@@ -23,10 +23,10 @@ func (a *CognitiveScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Cognitive Services Accounts in a Resource Group
-func (c *CognitiveScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *CognitiveScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	eventHubs, err := c.listEventHubs(resourceGroupName)
+	eventHubs, err := c.listEventHubs()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *CognitiveScanner) Scan(resourceGroupName string, scanContext *azqr.Scan
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*eventHub.ID),
 			ServiceName:      *eventHub.Name,
 			Type:             *eventHub.Type,
 			Location:         *eventHub.Location,
@@ -50,8 +50,8 @@ func (c *CognitiveScanner) Scan(resourceGroupName string, scanContext *azqr.Scan
 	return results, nil
 }
 
-func (c *CognitiveScanner) listEventHubs(resourceGroupName string) ([]*armcognitiveservices.Account, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *CognitiveScanner) listEventHubs() ([]*armcognitiveservices.Account, error) {
+	pager := c.client.NewListPager(nil)
 
 	namespaces := make([]*armcognitiveservices.Account, 0)
 	for pager.More() {

@@ -19,8 +19,8 @@ func (a *RecoveryServiceScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Recovery Service in a Resource Group
-func (a *RecoveryServiceScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *RecoveryServiceScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 	return []azqr.AzqrServiceResult{}, nil
 }
 

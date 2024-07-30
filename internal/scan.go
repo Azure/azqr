@@ -25,7 +25,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
 )
 
@@ -136,9 +135,6 @@ func Scan(params *ScanParams) {
 		}
 
 		if params.UseAzqrRecommendations {
-			// list resource groups
-			resourceGroups := listResourceGroups(ctx, cred, params.ResourceGroup, sid, filters, clientOptions)
-
 			// scan private endpoints
 			peResults := peScanner.Scan(config)
 
@@ -157,43 +153,41 @@ func Scan(params *ScanParams) {
 			}
 
 			// scan each resource group
-			for _, r := range resourceGroups {
-				var wg sync.WaitGroup
-				ch := make(chan []azqr.AzqrServiceResult, 5)
-				wg.Add(len(params.ServiceScanners))
+			var wg sync.WaitGroup
+			ch := make(chan []azqr.AzqrServiceResult, 5)
+			wg.Add(len(params.ServiceScanners))
 
-				go func() {
-					wg.Wait()
-					close(ch)
-				}()
+			go func() {
+				wg.Wait()
+				close(ch)
+			}()
 
-				for _, s := range params.ServiceScanners {
-					err := s.Init(config)
-					if err != nil {
-						log.Fatal().Err(err).Msg("Failed to initialize scanner")
-					}
-
-					go func(r string, s azqr.IAzureScanner) {
-						defer wg.Done()
-
-						res, err := retry(3, 10*time.Millisecond, s, r, &scanContext)
-						if err != nil {
-							cancel()
-							log.Fatal().Err(err).Msg("Failed to scan")
-						}
-						ch <- res
-					}(r, s)
+			for _, s := range params.ServiceScanners {
+				err := s.Init(config)
+				if err != nil {
+					log.Fatal().Err(err).Msg("Failed to initialize scanner")
 				}
 
-				for i := 0; i < len(params.ServiceScanners); i++ {
-					res := <-ch
-					for _, r := range res {
-						// check if the resource is excluded
-						if filters.Azqr.Exclude.IsServiceExcluded(r.ResourceID()) {
-							continue
-						}
-						reportData.AzqrData = append(reportData.AzqrData, r)
+				go func(s azqr.IAzureScanner) {
+					defer wg.Done()
+
+					res, err := retry(3, 10*time.Millisecond, s, &scanContext)
+					if err != nil {
+						cancel()
+						log.Fatal().Err(err).Msg("Failed to scan")
 					}
+					ch <- res
+				}(s)
+			}
+
+			for i := 0; i < len(params.ServiceScanners); i++ {
+				res := <-ch
+				for _, r := range res {
+					// check if the resource is excluded
+					if filters.Azqr.Exclude.IsServiceExcluded(r.ResourceID()) {
+						continue
+					}
+					reportData.AzqrData = append(reportData.AzqrData, r)
 				}
 			}
 		}
@@ -228,10 +222,10 @@ func Scan(params *ScanParams) {
 }
 
 // retry retries the Azure scanner Scan, a number of times with an increasing delay between retries
-func retry(attempts int, sleep time.Duration, a azqr.IAzureScanner, r string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+func retry(attempts int, sleep time.Duration, a azqr.IAzureScanner, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
 	var err error
 	for i := 0; ; i++ {
-		res, err := a.Scan(r, scanContext)
+		res, err := a.Scan(scanContext)
 		if err == nil {
 			return res, nil
 		}
@@ -253,72 +247,6 @@ func retry(attempts int, sleep time.Duration, a azqr.IAzureScanner, r string, sc
 		sleep *= 2
 	}
 	return nil, err
-}
-
-func checkExistenceResourceGroup(ctx context.Context, subscriptionID string, resourceGroupName string, cred azcore.TokenCredential, options *arm.ClientOptions) (bool, error) {
-	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, options)
-	if err != nil {
-		return false, err
-	}
-
-	boolResp, err := resourceGroupClient.CheckExistence(ctx, resourceGroupName, nil)
-	if err != nil {
-		return false, err
-	}
-	return boolResp.Success, nil
-}
-
-func listResourceGroup(ctx context.Context, subscriptionID string, cred azcore.TokenCredential, options *arm.ClientOptions) ([]*armresources.ResourceGroup, error) {
-	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, options)
-	if err != nil {
-		return nil, err
-	}
-
-	resultPager := resourceGroupClient.NewListPager(nil)
-
-	resourceGroups := make([]*armresources.ResourceGroup, 0)
-	for resultPager.More() {
-		pageResp, err := resultPager.NextPage(ctx)
-		if err != nil {
-			return nil, err
-		}
-		resourceGroups = append(resourceGroups, pageResp.ResourceGroupListResult.Value...)
-	}
-	return resourceGroups, nil
-}
-
-func listResourceGroups(ctx context.Context, cred azcore.TokenCredential, resourceGroup string, subscriptionID string, exclusions *filters.Filters, options *arm.ClientOptions) []string {
-	resourceGroups := []string{}
-	if resourceGroup != "" {
-		exists, err := checkExistenceResourceGroup(ctx, subscriptionID, resourceGroup, cred, options)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to check existence of Resource Group")
-		}
-
-		if !exists {
-			log.Fatal().Msgf("Resource Group %s does not exist", resourceGroup)
-		}
-
-		if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", subscriptionID, resourceGroup)) {
-			log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", subscriptionID[29:], resourceGroup)
-			return resourceGroups
-		}
-
-		resourceGroups = append(resourceGroups, resourceGroup)
-	} else {
-		rgs, err := listResourceGroup(ctx, subscriptionID, cred, options)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to list Resource Groups")
-		}
-		for _, rg := range rgs {
-			if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", subscriptionID, *rg.Name)) {
-				log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", subscriptionID[29:], *rg.Name)
-				continue
-			}
-			resourceGroups = append(resourceGroups, *rg.Name)
-		}
-	}
-	return resourceGroups
 }
 
 func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, filters *filters.Filters, options *arm.ClientOptions) map[string]string {

@@ -23,10 +23,10 @@ func (a *EventHubScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Event Hubs in a Resource Group
-func (c *EventHubScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *EventHubScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	eventHubs, err := c.listEventHubs(resourceGroupName)
+	eventHubs, err := c.listEventHubs()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *EventHubScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*eventHub.ID),
 			ServiceName:      *eventHub.Name,
 			Type:             *eventHub.Type,
 			Location:         *eventHub.Location,
@@ -50,8 +50,8 @@ func (c *EventHubScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 	return results, nil
 }
 
-func (c *EventHubScanner) listEventHubs(resourceGroupName string) ([]*armeventhub.EHNamespace, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *EventHubScanner) listEventHubs() ([]*armeventhub.EHNamespace, error) {
+	pager := c.client.NewListPager(nil)
 
 	namespaces := make([]*armeventhub.EHNamespace, 0)
 	for pager.More() {

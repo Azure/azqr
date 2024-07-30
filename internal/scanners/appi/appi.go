@@ -23,10 +23,10 @@ func (a *AppInsightsScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Application Insights in a Resource Group
-func (a *AppInsightsScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *AppInsightsScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	gateways, err := a.list(resourceGroupName)
+	gateways, err := a.list()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *AppInsightsScanner) Scan(resourceGroupName string, scanContext *azqr.Sc
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
@@ -50,8 +50,8 @@ func (a *AppInsightsScanner) Scan(resourceGroupName string, scanContext *azqr.Sc
 	return results, nil
 }
 
-func (a *AppInsightsScanner) list(resourceGroupName string) ([]*armapplicationinsights.Component, error) {
-	pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *AppInsightsScanner) list() ([]*armapplicationinsights.Component, error) {
+	pager := a.client.NewListPager(nil)
 
 	services := make([]*armapplicationinsights.Component, 0)
 	for pager.More() {

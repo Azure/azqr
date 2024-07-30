@@ -23,10 +23,10 @@ func (a *FrontDoorScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Front Doors in a Resource Group
-func (a *FrontDoorScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *FrontDoorScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	gateways, err := a.list(resourceGroupName)
+	gateways, err := a.list()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *FrontDoorScanner) Scan(resourceGroupName string, scanContext *azqr.Scan
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
@@ -50,8 +50,8 @@ func (a *FrontDoorScanner) Scan(resourceGroupName string, scanContext *azqr.Scan
 	return results, nil
 }
 
-func (a *FrontDoorScanner) list(resourceGroupName string) ([]*armcdn.Profile, error) {
-	pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *FrontDoorScanner) list() ([]*armcdn.Profile, error) {
+	pager := a.client.NewListPager(nil)
 
 	services := make([]*armcdn.Profile, 0)
 	for pager.More() {

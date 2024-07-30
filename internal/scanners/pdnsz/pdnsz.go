@@ -19,8 +19,8 @@ func (a *PrivateDNSZoneScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Private DNS Zone in a Resource Group
-func (a *PrivateDNSZoneScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *PrivateDNSZoneScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 	return []azqr.AzqrServiceResult{}, nil
 }
 

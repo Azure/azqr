@@ -23,10 +23,10 @@ func (c *MySQLFlexibleScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all MySQL in a Resource Group
-func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *MySQLFlexibleScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	flexibles, err := c.list(resourceGroupName)
+	flexibles, err := c.list()
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *azqr.
 
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*postgre.ID),
 			SubscriptionName: c.config.SubscriptionName,
 			ServiceName:      *postgre.Name,
 			Type:             *postgre.Type,
@@ -50,8 +50,8 @@ func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *azqr.
 
 	return results, nil
 }
-func (c *MySQLFlexibleScanner) list(resourceGroupName string) ([]*armmysqlflexibleservers.Server, error) {
-	pager := c.flexibleClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *MySQLFlexibleScanner) list() ([]*armmysqlflexibleservers.Server, error) {
+	pager := c.flexibleClient.NewListPager(nil)
 
 	servers := make([]*armmysqlflexibleservers.Server, 0)
 	for pager.More() {

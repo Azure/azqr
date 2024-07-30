@@ -23,10 +23,10 @@ func (c *WebPubSubScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all WebPubSub in a Resource Group
-func (c *WebPubSubScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *WebPubSubScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	WebPubSub, err := c.listWebPubSub(resourceGroupName)
+	WebPubSub, err := c.listWebPubSub()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *WebPubSubScanner) Scan(resourceGroupName string, scanContext *azqr.Scan
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
@@ -50,8 +50,8 @@ func (c *WebPubSubScanner) Scan(resourceGroupName string, scanContext *azqr.Scan
 	return results, nil
 }
 
-func (c *WebPubSubScanner) listWebPubSub(resourceGroupName string) ([]*armwebpubsub.ResourceInfo, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *WebPubSubScanner) listWebPubSub() ([]*armwebpubsub.ResourceInfo, error) {
+	pager := c.client.NewListBySubscriptionPager(nil)
 
 	WebPubSubs := make([]*armwebpubsub.ResourceInfo, 0)
 	for pager.More() {

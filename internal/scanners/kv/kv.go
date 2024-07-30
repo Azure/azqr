@@ -23,10 +23,10 @@ func (c *KeyVaultScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Key Vaults in a Resource Group
-func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *KeyVaultScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	vaults, err := c.listVaults(resourceGroupName)
+	vaults, err := c.listVaults()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*vault.ID),
 			ServiceName:      *vault.Name,
 			Type:             *vault.Type,
 			Location:         *vault.Location,
@@ -50,8 +50,8 @@ func (c *KeyVaultScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 	return results, nil
 }
 
-func (c *KeyVaultScanner) listVaults(resourceGroupName string) ([]*armkeyvault.Vault, error) {
-	pager := c.vaultsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *KeyVaultScanner) listVaults() ([]*armkeyvault.Vault, error) {
+	pager := c.vaultsClient.NewListBySubscriptionPager(nil)
 
 	vaults := make([]*armkeyvault.Vault, 0)
 	for pager.More() {

@@ -23,10 +23,10 @@ func (c *AnalysisServicesScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Analysis Services in a Resource Group
-func (c *AnalysisServicesScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *AnalysisServicesScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	workspaces, err := c.listWorkspaces(resourceGroupName)
+	workspaces, err := c.listWorkspaces()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *AnalysisServicesScanner) Scan(resourceGroupName string, scanContext *az
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*ws.ID),
 			ServiceName:      *ws.Name,
 			Type:             *ws.Type,
 			Location:         *ws.Location,
@@ -50,8 +50,8 @@ func (c *AnalysisServicesScanner) Scan(resourceGroupName string, scanContext *az
 	return results, nil
 }
 
-func (c *AnalysisServicesScanner) listWorkspaces(resourceGroupName string) ([]*armanalysisservices.Server, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *AnalysisServicesScanner) listWorkspaces() ([]*armanalysisservices.Server, error) {
+	pager := c.client.NewListPager(nil)
 
 	registries := make([]*armanalysisservices.Server, 0)
 	for pager.More() {

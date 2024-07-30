@@ -23,10 +23,10 @@ func (c *SignalRScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all SignalR in a Resource Group
-func (c *SignalRScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *SignalRScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	signalr, err := c.listSignalR(resourceGroupName)
+	signalr, err := c.listSignalR()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *SignalRScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCo
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*signalr.ID),
 			ServiceName:      *signalr.Name,
 			Type:             *signalr.Type,
 			Location:         *signalr.Location,
@@ -50,8 +50,8 @@ func (c *SignalRScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCo
 	return results, nil
 }
 
-func (c *SignalRScanner) listSignalR(resourceGroupName string) ([]*armsignalr.ResourceInfo, error) {
-	pager := c.signalrClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *SignalRScanner) listSignalR() ([]*armsignalr.ResourceInfo, error) {
+	pager := c.signalrClient.NewListBySubscriptionPager(nil)
 
 	signalrs := make([]*armsignalr.ResourceInfo, 0)
 	for pager.More() {

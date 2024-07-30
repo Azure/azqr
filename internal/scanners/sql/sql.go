@@ -38,10 +38,10 @@ func (c *SQLScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all SQL in a Resource Group
-func (c *SQLScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *SQLScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	sql, err := c.listSQL(resourceGroupName)
+	sql, err := c.listSQL()
 	if err != nil {
 		return nil, err
 	}
@@ -53,6 +53,8 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContex
 
 	for _, sql := range sql {
 		rr := engine.EvaluateRecommendations(rules, sql, scanContext)
+
+		resourceGroupName := azqr.GetResourceGroupFromResourceID(*sql.ID)
 
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:  c.config.SubscriptionID,
@@ -107,8 +109,8 @@ func (c *SQLScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContex
 	return results, nil
 }
 
-func (c *SQLScanner) listSQL(resourceGroupName string) ([]*armsql.Server, error) {
-	pager := c.sqlClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *SQLScanner) listSQL() ([]*armsql.Server, error) {
+	pager := c.sqlClient.NewListPager(nil)
 
 	servers := make([]*armsql.Server, 0)
 	for pager.More() {

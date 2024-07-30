@@ -23,10 +23,10 @@ func (c *ContainerRegistryScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Container Registries in a Resource Group
-func (c *ContainerRegistryScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *ContainerRegistryScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	regsitries, err := c.listRegistries(resourceGroupName)
+	regsitries, err := c.listRegistries()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *ContainerRegistryScanner) Scan(resourceGroupName string, scanContext *a
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*registry.ID),
 			ServiceName:      *registry.Name,
 			Type:             *registry.Type,
 			Location:         *registry.Location,
@@ -50,8 +50,8 @@ func (c *ContainerRegistryScanner) Scan(resourceGroupName string, scanContext *a
 	return results, nil
 }
 
-func (c *ContainerRegistryScanner) listRegistries(resourceGroupName string) ([]*armcontainerregistry.Registry, error) {
-	pager := c.registriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *ContainerRegistryScanner) listRegistries() ([]*armcontainerregistry.Registry, error) {
+	pager := c.registriesClient.NewListPager(nil)
 
 	registries := make([]*armcontainerregistry.Registry, 0)
 	for pager.More() {

@@ -5,7 +5,7 @@ package afw
 
 import (
 	"github.com/Azure/azqr/internal/azqr"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // FirewallScanner - Scanner for Azure Firewall
@@ -23,10 +23,10 @@ func (a *FirewallScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Azure Firewall in a Resource Group
-func (a *FirewallScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *FirewallScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	gateways, err := a.list(resourceGroupName)
+	gateways, err := a.list()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (a *FirewallScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
@@ -50,8 +50,8 @@ func (a *FirewallScanner) Scan(resourceGroupName string, scanContext *azqr.ScanC
 	return results, nil
 }
 
-func (a *FirewallScanner) list(resourceGroupName string) ([]*armnetwork.AzureFirewall, error) {
-	pager := a.client.NewListPager(resourceGroupName, nil)
+func (a *FirewallScanner) list() ([]*armnetwork.AzureFirewall, error) {
+	pager := a.client.NewListAllPager(nil)
 
 	services := make([]*armnetwork.AzureFirewall, 0)
 	for pager.More() {

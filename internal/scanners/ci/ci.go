@@ -23,10 +23,10 @@ func (c *ContainerInstanceScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Container Instances in a Resource Group
-func (c *ContainerInstanceScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *ContainerInstanceScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	instances, err := c.listInstances(resourceGroupName)
+	instances, err := c.listInstances()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *ContainerInstanceScanner) Scan(resourceGroupName string, scanContext *a
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*instance.ID),
 			ServiceName:      *instance.Name,
 			Type:             *instance.Type,
 			Location:         *instance.Location,
@@ -50,8 +50,8 @@ func (c *ContainerInstanceScanner) Scan(resourceGroupName string, scanContext *a
 	return results, nil
 }
 
-func (c *ContainerInstanceScanner) listInstances(resourceGroupName string) ([]*armcontainerinstance.ContainerGroup, error) {
-	pager := c.instancesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *ContainerInstanceScanner) listInstances() ([]*armcontainerinstance.ContainerGroup, error) {
+	pager := c.instancesClient.NewListPager(nil)
 	apps := make([]*armcontainerinstance.ContainerGroup, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(c.config.Ctx)

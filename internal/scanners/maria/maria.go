@@ -31,10 +31,10 @@ func (c *MariaScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all MariaDB servers in a Resource Group
-func (c *MariaScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *MariaScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	servers, err := c.listServers(resourceGroupName)
+	servers, err := c.listServers()
 	if err != nil {
 		return nil, err
 	}
@@ -45,6 +45,8 @@ func (c *MariaScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCont
 
 	for _, server := range servers {
 		rr := engine.EvaluateRecommendations(rules, server, scanContext)
+
+		resourceGroupName := azqr.GetResourceGroupFromResourceID(*server.ID)
 
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
@@ -76,8 +78,8 @@ func (c *MariaScanner) Scan(resourceGroupName string, scanContext *azqr.ScanCont
 	return results, nil
 }
 
-func (c *MariaScanner) listServers(resourceGroupName string) ([]*armmariadb.Server, error) {
-	pager := c.serverClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *MariaScanner) listServers() ([]*armmariadb.Server, error) {
+	pager := c.serverClient.NewListPager(nil)
 
 	servers := make([]*armmariadb.Server, 0)
 	for pager.More() {

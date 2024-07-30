@@ -23,10 +23,10 @@ func (c *VirtualMachineScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Virtual Machines in a Resource Group
-func (c *VirtualMachineScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, c.ResourceTypes()[0])
+func (c *VirtualMachineScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	vwans, err := c.list(resourceGroupName)
+	vwans, err := c.list()
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (c *VirtualMachineScanner) Scan(resourceGroupName string, scanContext *azqr
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
@@ -50,8 +50,8 @@ func (c *VirtualMachineScanner) Scan(resourceGroupName string, scanContext *azqr
 	return results, nil
 }
 
-func (c *VirtualMachineScanner) list(resourceGroupName string) ([]*armcompute.VirtualMachine, error) {
-	pager := c.client.NewListPager(resourceGroupName, nil)
+func (c *VirtualMachineScanner) list() ([]*armcompute.VirtualMachine, error) {
+	pager := c.client.NewListAllPager(nil)
 
 	vms := make([]*armcompute.VirtualMachine, 0)
 	for pager.More() {

@@ -23,10 +23,10 @@ func (a *AKSScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all AKS Clusters in a Resource Group
-func (a *AKSScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, a.ResourceTypes()[0])
+func (a *AKSScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	clusters, err := a.listClusters(resourceGroupName)
+	clusters, err := a.listClusters()
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (a *AKSScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContex
 		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*c.ID),
 			Location:         *c.Location,
 			Type:             *c.Type,
 			ServiceName:      *c.Name,
@@ -52,8 +52,8 @@ func (a *AKSScanner) Scan(resourceGroupName string, scanContext *azqr.ScanContex
 	return results, nil
 }
 
-func (a *AKSScanner) listClusters(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error) {
-	pager := a.clustersClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *AKSScanner) listClusters() ([]*armcontainerservice.ManagedCluster, error) {
+	pager := a.clustersClient.NewListPager(nil)
 
 	clusters := make([]*armcontainerservice.ManagedCluster, 0)
 	for pager.More() {
