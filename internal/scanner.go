@@ -16,7 +16,6 @@ import (
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -24,7 +23,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
 )
 
 type (
@@ -86,7 +84,8 @@ func (sc Scanner) Scan(params *ScanParams) {
 	}
 
 	// list subscriptions. Key is subscription ID, value is subscription name
-	subscriptions := sc.listSubscriptions(ctx, cred, params.SubscriptionID, filters, clientOptions)
+	subscriptionScanner := scanners.SubcriptionScanner{}
+	subscriptions := subscriptionScanner.ListSubscriptions(ctx, cred, params.SubscriptionID, filters, clientOptions)
 
 	// initialize scanners
 	defenderScanner := scanners.DefenderScanner{}
@@ -201,18 +200,19 @@ func (sc Scanner) Scan(params *ScanParams) {
 		reportData.CostData.Items = append(reportData.CostData.Items, costs.Items...)
 	}
 
-	reportData.ResourceTypeCount = getCountPerResourceType(ctx, cred, subscriptions, reportData.Recomendations)
-
-	// render csv reports
-	if params.Csv {
-		csv.CreateCsvReport(&reportData)
-	}
+	resourceScanner := scanners.ResourceScanner{}
+	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, reportData.Recomendations)
 
 	// render excel report
 	excel.CreateExcelReport(&reportData)
 
 	// render json report
 	json.CreateJsonReport(&reportData)
+
+	// render csv reports
+	if params.Csv {
+		csv.CreateCsvReport(&reportData)
+	}
 
 	log.Info().Msg("Scan completed.")
 }
@@ -243,45 +243,6 @@ func (sc Scanner) retry(attempts int, sleep time.Duration, a azqr.IAzureScanner,
 		sleep *= 2
 	}
 	return nil, err
-}
-
-func (sc Scanner) listSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, filters *azqr.Filters, options *arm.ClientOptions) map[string]string {
-	client, err := armsubscription.NewSubscriptionsClient(cred, options)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create subscriptions client")
-	}
-
-	resultPager := client.NewListPager(nil)
-
-	subscriptions := make([]*armsubscription.Subscription, 0)
-	for resultPager.More() {
-		pageResp, err := resultPager.NextPage(ctx)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to list subscriptions")
-		}
-
-		for _, s := range pageResp.Value {
-			if s.State != to.Ptr(armsubscription.SubscriptionStateDisabled) &&
-				s.State != to.Ptr(armsubscription.SubscriptionStateDeleted) {
-				subscriptions = append(subscriptions, s)
-			}
-		}
-	}
-
-	result := map[string]string{}
-	for _, s := range subscriptions {
-		// if subscriptionID is empty, return filtered subscriptions. Otherwise, return only the specified subscription
-		sid := *s.SubscriptionID
-		if subscriptionID == "" || subscriptionID == sid {
-			if filters.Azqr.Exclude.IsSubscriptionExcluded(sid) {
-				log.Info().Msgf("Skipping subscriptions/...%s", sid[29:])
-				continue
-			}
-			result[*s.SubscriptionID] = *s.DisplayName
-		}
-	}
-
-	return result
 }
 
 func (sc Scanner) newAzureCredential(forceAzureCliCredential bool) azcore.TokenCredential {
