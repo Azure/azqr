@@ -110,7 +110,7 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 	for _, s := range serviceScanners {
 		for _, t := range s.ResourceTypes() {
 			azqr.LogResourceTypeScan(t)
-			gr := getGraphRules(t, filters, aprl)
+			gr := sc.getGraphRules(t, filters, aprl)
 			for _, r := range gr {
 				rules = append(rules, r)
 			}
@@ -262,7 +262,7 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 	return results, nil
 }
 
-func getGraphRules(service string, filters *azqr.Filters, aprl map[string]map[string]azqr.AprlRecommendation) map[string]azqr.AprlRecommendation {
+func (sc AprlScanner) getGraphRules(service string, filters *azqr.Filters, aprl map[string]map[string]azqr.AprlRecommendation) map[string]azqr.AprlRecommendation {
 	r := map[string]azqr.AprlRecommendation{}
 	if i, ok := aprl[strings.ToLower(service)]; ok {
 		for _, recommendation := range i {
