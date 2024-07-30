@@ -301,3 +301,19 @@ func (rd *ReportData) ResourceTypesTable() [][]string {
 	rows = append([][]string{headers}, rows...)
 	return rows
 }
+
+func NewReportData(outputFile string, mask bool) ReportData {
+	return ReportData{
+		OutputFileName: outputFile,
+		Mask:           mask,
+		Recomendations: map[string]map[string]azqr.AprlRecommendation{},
+		AzqrData:       []azqr.AzqrServiceResult{},
+		AprlData:       []azqr.AprlResult{},
+		DefenderData:   []scanners.DefenderResult{},
+		AdvisorData:    []scanners.AdvisorResult{},
+		CostData: &scanners.CostResult{
+			Items: []*scanners.CostResultItem{},
+		},
+		ResourceTypeCount: []azqr.ResourceTypeCount{},
+	}
+}

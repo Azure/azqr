@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/Azure/azqr/internal/azqr"
-	"github.com/Azure/azqr/internal/filters"
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
@@ -28,24 +27,28 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription"
 )
 
-type ScanParams struct {
-	SubscriptionID          string
-	ResourceGroup           string
-	OutputName              string
-	Defender                bool
-	Advisor                 bool
-	Cost                    bool
-	Mask                    bool
-	Csv                     bool
-	Debug                   bool
-	ServiceScanners         []azqr.IAzureScanner
-	ForceAzureCliCredential bool
-	FilterFile              string
-	UseAzqrRecommendations  bool
-	UseAprlRecommendations  bool
-}
+type (
+	ScanParams struct {
+		SubscriptionID          string
+		ResourceGroup           string
+		OutputName              string
+		Defender                bool
+		Advisor                 bool
+		Cost                    bool
+		Mask                    bool
+		Csv                     bool
+		Debug                   bool
+		ServiceScanners         []azqr.IAzureScanner
+		ForceAzureCliCredential bool
+		FilterFile              string
+		UseAzqrRecommendations  bool
+		UseAprlRecommendations  bool
+	}
 
-func Scan(params *ScanParams) {
+	Scanner struct{}
+)
+
+func (sc Scanner) Scan(params *ScanParams) {
 	// Default level for this example is info, unless debug flag is present
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if params.Debug {
@@ -59,13 +62,13 @@ func Scan(params *ScanParams) {
 	}
 
 	// generate output file name
-	outputFile := generateOutputFileName(params.OutputName)
+	outputFile := sc.generateOutputFileName(params.OutputName)
 
 	// load filters
-	filters := filters.LoadFilters(params.FilterFile)
+	filters := azqr.LoadFilters(params.FilterFile)
 
 	// create Azure credentials
-	cred := newAzureCredential(params.ForceAzureCliCredential)
+	cred := sc.newAzureCredential(params.ForceAzureCliCredential)
 
 	// create a cancelable context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -83,7 +86,7 @@ func Scan(params *ScanParams) {
 	}
 
 	// list subscriptions. Key is subscription ID, value is subscription name
-	subscriptions := listSubscriptions(ctx, cred, params.SubscriptionID, filters, clientOptions)
+	subscriptions := sc.listSubscriptions(ctx, cred, params.SubscriptionID, filters, clientOptions)
 
 	// initialize scanners
 	defenderScanner := scanners.DefenderScanner{}
@@ -94,27 +97,20 @@ func Scan(params *ScanParams) {
 	costScanner := scanners.CostScanner{}
 
 	// initialize report data
-	reportData := renderers.ReportData{
-		OutputFileName: outputFile,
-		Mask:           params.Mask,
-		Recomendations: map[string]map[string]azqr.AprlRecommendation{},
-		AzqrData:       []azqr.AzqrServiceResult{},
-		AprlData:       []azqr.AprlResult{},
-		DefenderData:   []scanners.DefenderResult{},
-		AdvisorData:    []scanners.AdvisorResult{},
-		CostData: &scanners.CostResult{
-			Items: []*scanners.CostResultItem{},
-		},
-		ResourceTypeCount: []azqr.ResourceTypeCount{},
-	}
+	reportData := renderers.NewReportData(outputFile, params.Mask)
 
 	// get the APRL scan results
-	reportData.Recomendations, reportData.AprlData = AprlScan(ctx, cred, params, filters, subscriptions)
+	aprlScanner := AprlScanner{}
+	reportData.Recomendations, reportData.AprlData = aprlScanner.Scan(ctx, cred, params.ServiceScanners, filters, subscriptions)
 
 	// For each service scanner, get the recommendations list
 	if params.UseAzqrRecommendations {
 		for _, s := range params.ServiceScanners {
 			for i, r := range s.GetRecommendations() {
+				if filters.Azqr.Exclude.IsRecommendationExcluded(r.RecommendationID) {
+					continue
+				}
+
 				if reportData.Recomendations[strings.ToLower(r.ResourceType)] == nil {
 					reportData.Recomendations[strings.ToLower(r.ResourceType)] = map[string]azqr.AprlRecommendation{}
 				}
@@ -146,7 +142,7 @@ func Scan(params *ScanParams) {
 
 			// initialize scan context
 			scanContext := azqr.ScanContext{
-				Exclusions:          filters.Azqr.Exclude,
+				Filters:             filters,
 				PrivateEndpoints:    peResults,
 				DiagnosticsSettings: diagResults,
 				PublicIPs:           pips,
@@ -171,7 +167,7 @@ func Scan(params *ScanParams) {
 				go func(s azqr.IAzureScanner) {
 					defer wg.Done()
 
-					res, err := retry(3, 10*time.Millisecond, s, &scanContext)
+					res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
 					if err != nil {
 						cancel()
 						log.Fatal().Err(err).Msg("Failed to scan")
@@ -222,7 +218,7 @@ func Scan(params *ScanParams) {
 }
 
 // retry retries the Azure scanner Scan, a number of times with an increasing delay between retries
-func retry(attempts int, sleep time.Duration, a azqr.IAzureScanner, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+func (sc Scanner) retry(attempts int, sleep time.Duration, a azqr.IAzureScanner, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
 	var err error
 	for i := 0; ; i++ {
 		res, err := a.Scan(scanContext)
@@ -249,7 +245,7 @@ func retry(attempts int, sleep time.Duration, a azqr.IAzureScanner, scanContext 
 	return nil, err
 }
 
-func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, filters *filters.Filters, options *arm.ClientOptions) map[string]string {
+func (sc Scanner) listSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, filters *azqr.Filters, options *arm.ClientOptions) map[string]string {
 	client, err := armsubscription.NewSubscriptionsClient(cred, options)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create subscriptions client")
@@ -274,7 +270,7 @@ func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscri
 
 	result := map[string]string{}
 	for _, s := range subscriptions {
-		// if subscriptionID is empty, return all subscriptions. Otherwise, return only the specified subscription
+		// if subscriptionID is empty, return filtered subscriptions. Otherwise, return only the specified subscription
 		sid := *s.SubscriptionID
 		if subscriptionID == "" || subscriptionID == sid {
 			if filters.Azqr.Exclude.IsSubscriptionExcluded(sid) {
@@ -288,7 +284,7 @@ func listSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscri
 	return result
 }
 
-func newAzureCredential(forceAzureCliCredential bool) azcore.TokenCredential {
+func (sc Scanner) newAzureCredential(forceAzureCliCredential bool) azcore.TokenCredential {
 	var cred azcore.TokenCredential
 	var err error
 	if !forceAzureCliCredential {
@@ -305,7 +301,7 @@ func newAzureCredential(forceAzureCliCredential bool) azcore.TokenCredential {
 	return cred
 }
 
-func generateOutputFileName(outputName string) string {
+func (sc Scanner) generateOutputFileName(outputName string) string {
 	outputFile := outputName
 	if outputFile == "" {
 		current_time := time.Now()

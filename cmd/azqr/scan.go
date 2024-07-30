@@ -69,5 +69,6 @@ func scan(cmd *cobra.Command, serviceScanners []azqr.IAzureScanner) {
 		UseAzqrRecommendations:  azqr,
 	}
 
-	internal.Scan(&params)
+	scanner := internal.Scanner{}
+	scanner.Scan(&params)
 }

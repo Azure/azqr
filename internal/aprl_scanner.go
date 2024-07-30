@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/Azure/azqr/internal/azqr"
-	"github.com/Azure/azqr/internal/filters"
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
@@ -26,8 +25,12 @@ import (
 //go:embed aprl/azure-specialized-workloads/**/kql/*.kql
 var embededFiles embed.FS
 
+type (
+	AprlScanner struct{}
+)
+
 // GetAprlRecommendations returns a map with all APRL recommendations
-func GetAprlRecommendations() map[string]map[string]azqr.AprlRecommendation {
+func (sc AprlScanner) GetAprlRecommendations() map[string]map[string]azqr.AprlRecommendation {
 	r := map[string]map[string]azqr.AprlRecommendation{}
 
 	fsys, err := fs.Sub(embededFiles, "aprl/azure-resources")
@@ -95,19 +98,19 @@ func GetAprlRecommendations() map[string]map[string]azqr.AprlRecommendation {
 }
 
 // AprlScan scans Azure resources using Azure Proactive Resiliency Library v2 (APRL)
-func AprlScan(ctx context.Context, cred azcore.TokenCredential, params *ScanParams, filters *filters.Filters, subscriptions map[string]string) (map[string]map[string]azqr.AprlRecommendation, []azqr.AprlResult) {
+func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, serviceScanners []azqr.IAzureScanner, filters *azqr.Filters, subscriptions map[string]string) (map[string]map[string]azqr.AprlRecommendation, []azqr.AprlResult) {
 	recommendations := map[string]map[string]azqr.AprlRecommendation{}
 	results := []azqr.AprlResult{}
 	rules := []azqr.AprlRecommendation{}
 	graph := graph.NewGraphQuery(cred)
 
 	// get APRL recommendations
-	aprl := GetAprlRecommendations()
+	aprl := sc.GetAprlRecommendations()
 
-	for _, s := range params.ServiceScanners {
+	for _, s := range serviceScanners {
 		for _, t := range s.ResourceTypes() {
 			azqr.LogResourceTypeScan(t)
-			gr := azqr.GetGraphRules(t, aprl)
+			gr := getGraphRules(t, filters, aprl)
 			for _, r := range gr {
 				rules = append(rules, r)
 			}
@@ -148,7 +151,7 @@ func AprlScan(ctx context.Context, cred azcore.TokenCredential, params *ScanPara
 				s := time.Duration(b * 7)
 				time.Sleep(s * time.Second)
 			}
-			res, err := graphScan(ctx, graph, r, subscriptions)
+			res, err := sc.graphScan(ctx, graph, r, subscriptions)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to scan")
 			}
@@ -171,7 +174,7 @@ func AprlScan(ctx context.Context, cred azcore.TokenCredential, params *ScanPara
 	return recommendations, results
 }
 
-func graphScan(ctx context.Context, graphClient *graph.GraphQuery, rules []azqr.AprlRecommendation, subscriptions map[string]string) ([]azqr.AprlResult, error) {
+func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQuery, rules []azqr.AprlRecommendation, subscriptions map[string]string) ([]azqr.AprlResult, error) {
 	results := []azqr.AprlResult{}
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
@@ -257,4 +260,21 @@ func graphScan(ctx context.Context, graphClient *graph.GraphQuery, rules []azqr.
 	}
 
 	return results, nil
+}
+
+func getGraphRules(service string, filters *azqr.Filters, aprl map[string]map[string]azqr.AprlRecommendation) map[string]azqr.AprlRecommendation {
+	r := map[string]azqr.AprlRecommendation{}
+	if i, ok := aprl[strings.ToLower(service)]; ok {
+		for _, recommendation := range i {
+			if filters.Azqr.Exclude.IsRecommendationExcluded(recommendation.RecommendationID) ||
+				strings.Contains(recommendation.GraphQuery, "cannot-be-validated-with-arg") ||
+				strings.Contains(recommendation.GraphQuery, "under-development") ||
+				strings.Contains(recommendation.GraphQuery, "under development") {
+				continue
+			}
+
+			r[recommendation.RecommendationID] = recommendation
+		}
+	}
+	return r
 }

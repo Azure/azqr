@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-package filters
+package azqr
 
 import (
 	"os"
 	"strings"
-	"gopkg.in/yaml.v3"
+
 	"github.com/rs/zerolog/log"
+	"gopkg.in/yaml.v3"
 )
 
 type (
@@ -44,20 +45,7 @@ func (e *Exclude) IsSubscriptionExcluded(subscriptionID string) bool {
 	return ok
 }
 
-func (e *Exclude) IsResourceGroupExcluded(resourceGroupID string) bool {
-	if e.resourceGroups == nil {
-		e.resourceGroups = make(map[string]bool)
-		for _, id := range e.ResourceGroups {
-			e.resourceGroups[strings.ToLower(id)] = true
-		}
-	}
-
-	_, ok := e.resourceGroups[strings.ToLower(resourceGroupID)]
-
-	return ok
-}
-
-func (e *Exclude) IsServiceExcluded(serviceID string) bool {
+func (e *Exclude) IsServiceExcluded(resourceID string) bool {
 	if e.services == nil {
 		e.services = make(map[string]bool)
 		for _, id := range e.Services {
@@ -65,7 +53,12 @@ func (e *Exclude) IsServiceExcluded(serviceID string) bool {
 		}
 	}
 
-	_, ok := e.services[strings.ToLower(serviceID)]
+	_, ok := e.services[strings.ToLower(resourceID)]
+
+	if !ok {
+		rgID := GetResourceGroupIDFromResourceID(resourceID)
+		ok = e.isResourceGroupExcluded(rgID)
+	}
 
 	return ok
 }
@@ -83,7 +76,7 @@ func (e *Exclude) IsRecommendationExcluded(recommendationID string) bool {
 	return ok
 }
 
-func LoadFilters(filterFile string) (*Filters) {
+func LoadFilters(filterFile string) *Filters {
 	filters := &Filters{
 		Azqr: &AzqrFilter{
 			Exclude: &Exclude{
@@ -107,4 +100,17 @@ func LoadFilters(filterFile string) (*Filters) {
 	}
 
 	return filters
+}
+
+func (e *Exclude) isResourceGroupExcluded(resourceGroupID string) bool {
+	if e.resourceGroups == nil {
+		e.resourceGroups = make(map[string]bool)
+		for _, id := range e.ResourceGroups {
+			e.resourceGroups[strings.ToLower(id)] = true
+		}
+	}
+
+	_, ok := e.resourceGroups[strings.ToLower(resourceGroupID)]
+
+	return ok
 }
