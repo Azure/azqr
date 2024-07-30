@@ -181,79 +181,71 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 		subs = append(subs, &s)
 	}
 
-	batchSize := 300
-	for i := 0; i < len(subs); i += batchSize {
-		j := i + batchSize
-		if j > len(subs) {
-			j = len(subs)
-		}
+	for _, rule := range rules {
+		if rule.GraphQuery != "" {
+			result := graphClient.Query(ctx, rule.GraphQuery, subs)
+			if result.Data != nil {
+				for _, row := range result.Data {
+					m := row.(map[string]interface{})
 
-		for _, rule := range rules {
-			if rule.GraphQuery != "" {
-				result := graphClient.Query(ctx, rule.GraphQuery, subs[i:j])
-				if result.Data != nil {
-					for _, row := range result.Data {
-						m := row.(map[string]interface{})
+					tags := ""
+					// if m["tags"] != nil {
+					// 	tags = m["tags"].(string)
+					// }
 
-						tags := ""
-						// if m["tags"] != nil {
-						// 	tags = m["tags"].(string)
-						// }
-
-						param1 := ""
-						if m["param1"] != nil {
-							param1 = m["param1"].(string)
-						}
-
-						param2 := ""
-						if m["param2"] != nil {
-							param2 = m["param2"].(string)
-						}
-
-						param3 := ""
-						if m["param3"] != nil {
-							param3 = m["param3"].(string)
-						}
-
-						param4 := ""
-						if m["param4"] != nil {
-							param4 = m["param4"].(string)
-						}
-
-						param5 := ""
-						if m["param5"] != nil {
-							param5 = m["param5"].(string)
-						}
-
-						log.Debug().Msg(rule.GraphQuery)
-
-						subscription := azqr.GetSubsctiptionFromResourceID(m["id"].(string))
-						subscriptionName := subscriptions[subscription]
-
-						results = append(results, azqr.AprlResult{
-							RecommendationID:    rule.RecommendationID,
-							Category:            azqr.RecommendationCategory(rule.Category),
-							Recommendation:      rule.Recommendation,
-							ResourceType:        rule.ResourceType,
-							LongDescription:     rule.LongDescription,
-							PotentialBenefits:   rule.PotentialBenefits,
-							Impact:              azqr.RecommendationImpact(rule.Impact),
-							Name:                m["name"].(string),
-							ResourceID:          m["id"].(string),
-							SubscriptionID:      subscription,
-							SubscriptionName:    subscriptionName,
-							ResourceGroup:       azqr.GetResourceGroupFromResourceID(m["id"].(string)),
-							Tags:                tags,
-							Param1:              param1,
-							Param2:              param2,
-							Param3:              param3,
-							Param4:              param4,
-							Param5:              param5,
-							Learn:               rule.LearnMoreLink[0].Url,
-							AutomationAvailable: rule.AutomationAvailable,
-							Source:              "APRL",
-						})
+					param1 := ""
+					if m["param1"] != nil {
+						param1 = m["param1"].(string)
 					}
+
+					param2 := ""
+					if m["param2"] != nil {
+						param2 = m["param2"].(string)
+					}
+
+					param3 := ""
+					if m["param3"] != nil {
+						param3 = m["param3"].(string)
+					}
+
+					param4 := ""
+					if m["param4"] != nil {
+						param4 = m["param4"].(string)
+					}
+
+					param5 := ""
+					if m["param5"] != nil {
+						param5 = m["param5"].(string)
+					}
+
+					log.Debug().Msg(rule.GraphQuery)
+
+					subscription := azqr.GetSubsctiptionFromResourceID(m["id"].(string))
+					subscriptionName := subscriptions[subscription]
+
+					results = append(results, azqr.AprlResult{
+						RecommendationID:    rule.RecommendationID,
+						Category:            azqr.RecommendationCategory(rule.Category),
+						Recommendation:      rule.Recommendation,
+						ResourceType:        rule.ResourceType,
+						LongDescription:     rule.LongDescription,
+						PotentialBenefits:   rule.PotentialBenefits,
+						Impact:              azqr.RecommendationImpact(rule.Impact),
+						Name:                m["name"].(string),
+						ResourceID:          m["id"].(string),
+						SubscriptionID:      subscription,
+						SubscriptionName:    subscriptionName,
+						ResourceGroup:       azqr.GetResourceGroupFromResourceID(m["id"].(string)),
+						Tags:                tags,
+						Param1:              param1,
+						Param2:              param2,
+						Param3:              param3,
+						Param4:              param4,
+						Param5:              param5,
+						Learn:               rule.LearnMoreLink[0].Url,
+						AutomationAvailable: rule.AutomationAvailable,
+						Source:              "APRL",
+					})
 				}
 			}
 		}

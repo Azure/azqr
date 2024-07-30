@@ -36,7 +36,7 @@ import (
 // 	return resources
 // }
 
-type ResourceScanner struct {}
+type ResourceScanner struct{}
 
 func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]azqr.AprlRecommendation) []azqr.ResourceTypeCount {
 	graphClient := graph.NewGraphQuery(cred)
@@ -47,7 +47,7 @@ func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azco
 		subs = append(subs, &s)
 	}
 	result := graphClient.Query(ctx, query, subs)
-	resources := make([]azqr.ResourceTypeCount, result.Count)
+	resources := make([]azqr.ResourceTypeCount, len(result.Data))
 	if result.Data != nil {
 		for i, row := range result.Data {
 			m := row.(map[string]interface{})
