@@ -46,7 +46,7 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 	timeframeType := armcostmanagement.TimeframeTypeCustom
 	etype := armcostmanagement.ExportTypeActualCost
 	toTime := time.Now().UTC()
-	fromTime := time.Date(toTime.Year(), toTime.Month(), 1, 0, 0, 0, 0, time.UTC)
+	fromTime := time.Date(toTime.Year(), toTime.Month()-3, 1, 0, 0, 0, 0, time.UTC)
 	sum := armcostmanagement.FunctionTypeSum
 	dimension := armcostmanagement.QueryColumnTypeDimension
 	qd := armcostmanagement.QueryDefinition{
