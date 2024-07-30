@@ -12,7 +12,7 @@ import (
 )
 
 func renderImpactedResources(f *excelize.File, data *renderers.ReportData) {
-	sheetName := "Impacted Resources"
+	sheetName := "ImpactedResources"
 	if len(data.AprlData) > 0 {
 		_, err := f.NewSheet(sheetName)
 		if err != nil {
