@@ -57,19 +57,6 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]azqr.AzqrRecom
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
 		},
-		"appcs-005": {
-			RecommendationID: "appcs-005",
-			ResourceType:     "Microsoft.AppConfiguration/configurationStores",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "AppConfiguration SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				a := target.(*armappconfiguration.ConfigurationStore)
-				sku := string(*a.SKU.Name)
-				return false, sku
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/app-configuration/",
-		},
 		"appcs-006": {
 			RecommendationID: "appcs-006",
 			ResourceType:     "Microsoft.AppConfiguration/configurationStores",

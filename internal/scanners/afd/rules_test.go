@@ -58,22 +58,6 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "FrontDoorScanner SKU",
-			fields: fields{
-				rule: "afd-005",
-				target: &armcdn.Profile{
-					SKU: &armcdn.SKU{
-						Name: to.Ptr(armcdn.SKUNameStandardMicrosoft),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard_Microsoft",
-			},
-		},
-		{
 			name: "FrontDoorScanner CAF",
 			fields: fields{
 				rule: "afd-006",

@@ -56,18 +56,6 @@ func (a *AppServiceScanner) getPlanRules() map[string]azqr.AzqrRecommendation {
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/app-service/",
 		},
-		"asp-005": {
-			RecommendationID: "asp-005",
-			ResourceType:     "Microsoft.Web/serverfarms",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Plan SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armappservice.Plan)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
-		},
 		"asp-006": {
 			RecommendationID: "asp-006",
 			ResourceType:     "Microsoft.Web/serverfarms",

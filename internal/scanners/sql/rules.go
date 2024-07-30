@@ -105,18 +105,6 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 				return false, sla
 			},
 		},
-		"sqldb-005": {
-			RecommendationID: "sqldb-005",
-			ResourceType:     "Microsoft.Sql/servers/databases",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "SQL Database SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armsql.Database)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://docs.microsoft.com/en-us/azure/azure-sql/database/service-tiers-vcore?tabs=azure-portal",
-		},
 		"sqldb-006": {
 			RecommendationID: "sqldb-006",
 			ResourceType:     "Microsoft.Sql/servers/databases",
@@ -147,18 +135,6 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 
 func (a *SQLScanner) getPoolRules() map[string]azqr.AzqrRecommendation {
 	return map[string]azqr.AzqrRecommendation{
-		"sqlep-001": {
-			RecommendationID: "sqlep-001",
-			ResourceType:     "Microsoft.Sql/servers/elasticPools",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "SQL Elastic Pool SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armsql.ElasticPool)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-sql/database/elastic-pool-overview?view=azuresql",
-		},
 		"sqlep-002": {
 			RecommendationID: "sqlep-002",
 			ResourceType:     "Microsoft.Sql/servers/elasticPools",

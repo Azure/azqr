@@ -62,22 +62,6 @@ func TestLoadBalancerScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "LoadBalancerScanner SKU",
-			fields: fields{
-				rule: "lb-005",
-				target: &armnetwork.LoadBalancer{
-					SKU: &armnetwork.LoadBalancerSKU{
-						Name: to.Ptr(armnetwork.LoadBalancerSKUNameStandard),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
-			},
-		},
-		{
 			name: "LoadBalancerScanner CAF Internal Load Balancer",
 			fields: fields{
 				rule: "lb-006",

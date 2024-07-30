@@ -98,22 +98,6 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ServiceBusScanner SKU",
-			fields: fields{
-				rule: "sb-005",
-				target: &armservicebus.SBNamespace{
-					SKU: &armservicebus.SBSKU{
-						Name: to.Ptr(armservicebus.SKUNamePremium),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium",
-			},
-		},
-		{
 			name: "ServiceBusScanner CAF",
 			fields: fields{
 				rule: "sb-006",

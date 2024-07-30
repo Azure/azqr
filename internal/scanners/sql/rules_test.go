@@ -161,22 +161,6 @@ func TestSQLScanner_DatabaseRules(t *testing.T) {
 			},
 		},
 		{
-			name: "SQLScanner SKU",
-			fields: fields{
-				rule: "sqldb-005",
-				target: &armsql.Database{
-					SKU: &armsql.SKU{
-						Name: to.Ptr("P3"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "P3",
-			},
-		},
-		{
 			name: "SQLScanner CAF",
 			fields: fields{
 				rule: "sqldb-006",
@@ -222,22 +206,6 @@ func TestSQLScanner_PoolRules(t *testing.T) {
 		fields fields
 		want   want
 	}{
-		{
-			name: "SQLScanner SKU",
-			fields: fields{
-				rule: "sqlep-001",
-				target: &armsql.ElasticPool{
-					SKU: &armsql.SKU{
-						Name: to.Ptr("GP_Gen5_2"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "GP_Gen5_2",
-			},
-		},
 		{
 			name: "SQLScanner CAF",
 			fields: fields{

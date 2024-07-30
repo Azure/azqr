@@ -58,24 +58,6 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ApplicationGatewayScanner SKU",
-			fields: fields{
-				rule: "agw-104",
-				target: &armnetwork.ApplicationGateway{
-					Properties: &armnetwork.ApplicationGatewayPropertiesFormat{
-						SKU: &armnetwork.ApplicationGatewaySKU{
-							Name: to.Ptr(armnetwork.ApplicationGatewaySKUNameStandardV2),
-						},
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard_v2",
-			},
-		},
-		{
 			name: "ApplicationGatewayScanner CAF",
 			fields: fields{
 				rule: "agw-105",

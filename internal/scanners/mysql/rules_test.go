@@ -79,22 +79,6 @@ func TestMySQLScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "MySQLScanner SKU",
-			fields: fields{
-				rule: "mysql-005",
-				target: &armmysql.Server{
-					SKU: &armmysql.SKU{
-						Name: to.Ptr("GPGen58"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "GPGen58",
-			},
-		},
-		{
 			name: "MySQLScanner CAF",
 			fields: fields{
 				rule: "mysql-006",
@@ -240,22 +224,6 @@ func TestMySQLFlexibleScanner_Rules(t *testing.T) {
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "MySQLFlexibleScanner SKU",
-			fields: fields{
-				rule: "mysqlf-005",
-				target: &armmysqlflexibleservers.Server{
-					SKU: &armmysqlflexibleservers.SKU{
-						Name: to.Ptr("StandardD4sv3"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "StandardD4sv3",
 			},
 		},
 		{

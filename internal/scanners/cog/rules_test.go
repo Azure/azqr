@@ -78,22 +78,6 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner SKU",
-			fields: fields{
-				rule: "cog-005",
-				target: &armcognitiveservices.Account{
-					SKU: &armcognitiveservices.SKU{
-						Name: to.Ptr("test"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "test",
-			},
-		},
-		{
 			name: "CognitiveScanner OpenAi CAF",
 			fields: fields{
 				rule: "cog-006",

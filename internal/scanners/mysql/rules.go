@@ -51,18 +51,6 @@ func (a *MySQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-data-access-security-private-link",
 		},
-		"mysql-005": {
-			RecommendationID: "mysql-005",
-			ResourceType:     "Microsoft.DBforMySQL/servers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Database for MySQL - Single Server SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armmysql.Server)
-				return false, *i.SKU.Name
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-pricing-tiers",
-		},
 		"mysql-006": {
 			RecommendationID: "mysql-006",
 			ResourceType:     "Microsoft.DBforMySQL/servers",
@@ -150,18 +138,6 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 				return !pe, ""
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli",
-		},
-		"mysqlf-005": {
-			RecommendationID: "mysqlf-005",
-			ResourceType:     "Microsoft.DBforMySQL/flexibleServers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Database for MySQL - Flexible Server SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armmysqlflexibleservers.Server)
-				return false, *i.SKU.Name
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/concepts-service-tiers-storage",
 		},
 		"mysqlf-006": {
 			RecommendationID: "mysqlf-006",

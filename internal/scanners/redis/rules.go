@@ -37,18 +37,6 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
-		"redis-005": {
-			RecommendationID: "redis-005",
-			ResourceType:     "Microsoft.Cache/Redis",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Redis SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armredis.ResourceInfo)
-				return false, string(*i.Properties.SKU.Name)
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-gb/pricing/details/cache/",
-		},
 		"redis-006": {
 			RecommendationID: "redis-006",
 			ResourceType:     "Microsoft.Cache/Redis",

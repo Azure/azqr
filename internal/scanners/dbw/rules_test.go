@@ -78,22 +78,6 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "DatabricksScanner SKU",
-			fields: fields{
-				rule: "dbw-005",
-				target: &armdatabricks.Workspace{
-					SKU: &armdatabricks.SKU{
-						Name: to.Ptr("Standard"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
-			},
-		},
-		{
 			name: "DatabricksScanner CAF",
 			fields: fields{
 				rule: "dbw-006",

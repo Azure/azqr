@@ -27,9 +27,9 @@ func CreateExcelReport(data *renderers.ReportData) {
 	lastRow := renderRecommendations(f, data)
 	renderImpactedResources(f, data)
 	renderResourceTypes(f, data)
-	renderServices(f, data)
-	renderDefender(f, data)
+	renderResources(f, data)
 	renderAdvisor(f, data)
+	renderDefender(f, data)
 	renderCosts(f, data)
 	renderRecommendationsPivotTables(f, lastRow)
 

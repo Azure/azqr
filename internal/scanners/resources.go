@@ -10,35 +10,68 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// func getAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string) []azqr.Resource {
-// 	graphClient := graph.NewGraphQuery(cred)
-// 	query := "resources | project id, resourceGroup, subscriptionId, name, type, location"
-// 	log.Debug().Msg(query)
-// 	subs := make([]*string, 0, len(subscriptions))
-// 	for s := range subscriptions {
-// 		subs = append(subs, &s)
-// 	}
-// 	result := graphClient.Query(ctx, query, subs)
-// 	resources := make([]azqr.Resource, result.Count)
-// 	if result.Data != nil {
-// 		for i, row := range result.Data {
-// 			m := row.(map[string]interface{})
-// 			resources[i] = azqr.Resource{
-// 				ID:             m["id"].(string),
-// 				ResourceGroup:  m["resourceGroup"].(string),
-// 				SubscriptionID: m["subscriptionId"].(string),
-// 				Name:           m["name"].(string),
-// 				Type:           m["type"].(string),
-// 				Location:       m["location"].(string),
-// 			}
-// 		}
-// 	}
-// 	return resources
-// }
-
 type ResourceScanner struct{}
 
+func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string) []*azqr.Resource {
+	azqr.LogResourceTypeScan("All Resources")
+
+	graphClient := graph.NewGraphQuery(cred)
+	query := "resources | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind"
+	log.Debug().Msg(query)
+	subs := make([]*string, 0, len(subscriptions))
+	for s := range subscriptions {
+		subs = append(subs, &s)
+	}
+	result := graphClient.Query(ctx, query, subs)
+	resources := make([]*azqr.Resource, len(result.Data))
+	if result.Data != nil {
+		for i, row := range result.Data {
+			m := row.(map[string]interface{})
+
+			skuName := ""
+			if m["sku_name"] != nil {
+				skuName = m["sku_name"].(string)
+			}
+
+			skuTier := ""
+			if m["sku_tier"] != nil {
+				skuTier = m["sku_tier"].(string)
+			}
+
+			kind := ""
+			if m["kind"] != nil {
+				kind = m["kind"].(string)
+			}
+
+			resourceGroup := ""
+			if m["resourceGroup"] != nil {
+				resourceGroup = m["resourceGroup"].(string)
+			}
+
+			location := ""
+			if m["location"] != nil {
+				location = m["location"].(string)
+			}
+
+			resources[i] = &azqr.Resource{
+				ID:             m["id"].(string),
+				SubscriptionID: m["subscriptionId"].(string),
+				ResourceGroup:  resourceGroup,
+				Location:       location,
+				Type:           m["type"].(string),
+				Name:           m["name"].(string),
+				SkuName:        skuName,
+				SkuTier:        skuTier,
+				Kind:           kind,
+			}
+		}
+	}
+	return resources
+}
+
 func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]azqr.AprlRecommendation) []azqr.ResourceTypeCount {
+	azqr.LogResourceTypeScan("Resource Count per Subscription and Type")
+
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | summarize count() by subscriptionId, type | order by subscriptionId, type"
 	log.Debug().Msg(query)

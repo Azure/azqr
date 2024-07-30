@@ -37,18 +37,6 @@ func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/cdn/",
 		},
-		"afd-005": {
-			RecommendationID: "afd-005",
-			ResourceType:     "Microsoft.Cdn/profiles",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure FrontDoor SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				c := target.(*armcdn.Profile)
-				return false, string(*c.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/tier-comparison",
-		},
 		"afd-006": {
 			RecommendationID: "afd-006",
 			ResourceType:     "Microsoft.Cdn/profiles",

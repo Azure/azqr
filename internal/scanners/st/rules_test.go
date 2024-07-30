@@ -65,22 +65,6 @@ func TestStorageScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "StorageScanner SKU",
-			fields: fields{
-				rule: "st-005",
-				target: &armstorage.Account{
-					SKU: &armstorage.SKU{
-						Name: to.Ptr(armstorage.SKUNamePremiumZRS),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium_ZRS",
-			},
-		},
-		{
 			name: "StorageScanner CAF",
 			fields: fields{
 				rule: "st-006",

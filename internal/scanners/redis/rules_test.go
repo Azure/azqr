@@ -58,24 +58,6 @@ func TestRedisScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "RedisScanner SKU",
-			fields: fields{
-				rule: "redis-005",
-				target: &armredis.ResourceInfo{
-					Properties: &armredis.Properties{
-						SKU: &armredis.SKU{
-							Name: to.Ptr(armredis.SKUNamePremium),
-						},
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium",
-			},
-		},
-		{
 			name: "RedisScanner CAF",
 			fields: fields{
 				rule: "redis-006",

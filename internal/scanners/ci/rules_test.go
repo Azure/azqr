@@ -106,22 +106,6 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerInstanceScanner SKU",
-			fields: fields{
-				rule: "ci-005",
-				target: &armcontainerinstance.ContainerGroup{
-					Properties: &armcontainerinstance.ContainerGroupProperties{
-						SKU: to.Ptr(armcontainerinstance.ContainerGroupSKUStandard),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
-			},
-		},
-		{
 			name: "ContainerInstanceScanner CAF",
 			fields: fields{
 				rule: "ci-006",

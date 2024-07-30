@@ -59,24 +59,26 @@ type (
 	}
 
 	AzqrRecommendation struct {
-		RecommendationID string
-		ResourceType     string
-		Recommendation   string
-		Category         RecommendationCategory
-		Impact           RecommendationImpact
-		LearnMoreUrl     string
-		Eval             func(target interface{}, scanContext *ScanContext) (bool, string)
+		RecommendationID   string
+		ResourceType       string
+		Recommendation     string
+		Category           RecommendationCategory
+		Impact             RecommendationImpact
+		RecommendationType RecommendationType
+		LearnMoreUrl       string
+		Eval               func(target interface{}, scanContext *ScanContext) (bool, string)
 	}
 
 	AzqrResult struct {
-		RecommendationID string
-		ResourceType     string
-		Category         RecommendationCategory
-		Recommendation   string
-		Impact           RecommendationImpact
-		LearnMoreUrl     string
-		Result           string
-		NotCompliant     bool
+		RecommendationID   string
+		ResourceType       string
+		Recommendation     string
+		Category           RecommendationCategory
+		Impact             RecommendationImpact
+		RecommendationType RecommendationType
+		LearnMoreUrl       string
+		NotCompliant       bool
+		Result             string
 	}
 
 	Resource struct {
@@ -86,6 +88,10 @@ type (
 		Type           string
 		Location       string
 		Name           string
+		SkuName        string
+		SkuTier        string
+		Kind           string
+		SLA            string
 	}
 
 	ResourceTypeCount struct {
@@ -147,6 +153,7 @@ type (
 
 	RecommendationImpact   string
 	RecommendationCategory string
+	RecommendationType     string
 )
 
 const (
@@ -161,6 +168,9 @@ const (
 	CategorySecurity              RecommendationCategory = "Security"
 	CategoryGovernance            RecommendationCategory = "Governance"
 	CategoryOtherBestPractices    RecommendationCategory = "Other Best Practices"
+
+	TypeRecommendation RecommendationType = ""
+	TypeSLA            RecommendationType = "SLA"
 )
 
 func (r *AzqrRecommendation) ToAzureAprlRecommendation() AprlRecommendation {

@@ -56,18 +56,6 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/network-security",
 		},
-		"sb-005": {
-			RecommendationID: "sb-005",
-			ResourceType:     "Microsoft.ServiceBus/namespaces",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Service Bus SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armservicebus.SBNamespace)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/service-bus/",
-		},
 		"sb-006": {
 			RecommendationID: "sb-006",
 			ResourceType:     "Microsoft.ServiceBus/namespaces",

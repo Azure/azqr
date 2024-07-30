@@ -114,22 +114,6 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "WebPubSubScanner SKU",
-			fields: fields{
-				rule: "wps-005",
-				target: &armwebpubsub.ResourceInfo{
-					SKU: &armwebpubsub.ResourceSKU{
-						Name: to.Ptr("Premium"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium",
-			},
-		},
-		{
 			name: "WebPubSubScanner CAF",
 			fields: fields{
 				rule: "wps-006",

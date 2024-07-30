@@ -44,18 +44,6 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]azqr.AzqrRecom
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
-		"as-003": {
-			RecommendationID: "as-003",
-			ResourceType:     "Microsoft.AnalysisServices/servers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Analysis Service SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armanalysisservices.Server)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/analysis-services/",
-		},
 		"as-004": {
 			RecommendationID: "as-004",
 			ResourceType:     "Microsoft.AnalysisServices/servers",

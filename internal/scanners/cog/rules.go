@@ -50,18 +50,6 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-virtual-networks",
 		},
-		"cog-005": {
-			RecommendationID: "cog-005",
-			ResourceType:     "Microsoft.CognitiveServices/accounts",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Cognitive Service Account SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armcognitiveservices.Account)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/templates/microsoft.cognitiveservices/accounts?pivots=deployment-language-bicep#sku",
-		},
 		"cog-006": {
 			RecommendationID: "cog-006",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",

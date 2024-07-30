@@ -78,22 +78,6 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AppServiceScanner SKU",
-			fields: fields{
-				rule: "asp-005",
-				target: &armappservice.Plan{
-					SKU: &armappservice.SKUDescription{
-						Name: to.Ptr("EP1"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "EP1",
-			},
-		},
-		{
 			name: "AppServiceScanner CAF",
 			fields: fields{
 				rule: "asp-006",

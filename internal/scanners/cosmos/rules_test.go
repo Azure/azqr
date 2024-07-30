@@ -146,22 +146,6 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CosmosDBScanner SKU",
-			fields: fields{
-				rule: "cosmos-005",
-				target: &armcosmos.DatabaseAccountGetResults{
-					Properties: &armcosmos.DatabaseAccountGetProperties{
-						DatabaseAccountOfferType: to.Ptr("Standard"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
-			},
-		},
-		{
 			name: "CosmosDBScanner CAF",
 			fields: fields{
 				rule: "cosmos-006",

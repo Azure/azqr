@@ -43,19 +43,6 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
 		},
-		"lb-005": {
-			RecommendationID: "lb-005",
-			ResourceType:     "Microsoft.Network/loadBalancers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Load Balancer SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armnetwork.LoadBalancer)
-				sku := *i.SKU.Name
-				return sku != armnetwork.LoadBalancerSKUNameStandard, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
-		},
 		"lb-006": {
 			RecommendationID: "lb-006",
 			ResourceType:     "Microsoft.Network/loadBalancers",

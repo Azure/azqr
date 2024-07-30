@@ -47,7 +47,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "APIManagementScanner SLA Free SKU",
+			name: "APIManagementScanner SLA Developer SKU",
 			fields: fields{
 				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
@@ -124,22 +124,6 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "APIManagementScanner SKU",
-			fields: fields{
-				rule: "apim-005",
-				target: &armapimanagement.ServiceResource{
-					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: to.Ptr(armapimanagement.SKUTypeDeveloper),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "Developer",
 			},
 		},
 		{

@@ -74,18 +74,6 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
 		},
-		"wps-005": {
-			RecommendationID: "wps-005",
-			ResourceType:     "Microsoft.SignalRService/webPubSub",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Web Pub Sub SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armwebpubsub.ResourceInfo)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/web-pubsub/",
-		},
 		"wps-006": {
 			RecommendationID: "wps-006",
 			ResourceType:     "Microsoft.SignalRService/webPubSub",

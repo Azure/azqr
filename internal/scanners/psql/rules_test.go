@@ -79,22 +79,6 @@ func TestPostgreScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "PostgreScanner SKU",
-			fields: fields{
-				rule: "psql-005",
-				target: &armpostgresql.Server{
-					SKU: &armpostgresql.SKU{
-						Name: to.Ptr("GPGen58"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "GPGen58",
-			},
-		},
-		{
 			name: "PostgreScanner CAF",
 			fields: fields{
 				rule: "psql-006",
@@ -260,22 +244,6 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "PostgreFlexibleScanner SKU",
-			fields: fields{
-				rule: "psqlf-005",
-				target: &armpostgresqlflexibleservers.Server{
-					SKU: &armpostgresqlflexibleservers.SKU{
-						Name: to.Ptr("StandardD4sv3"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "StandardD4sv3",
 			},
 		},
 		{

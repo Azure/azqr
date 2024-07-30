@@ -51,18 +51,6 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-data-access-and-security-private-link",
 		},
-		"psql-005": {
-			RecommendationID: "psql-005",
-			ResourceType:     "Microsoft.DBforPostgreSQL/servers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "PostgreSQL SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armpostgresql.Server)
-				return false, *i.SKU.Name
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-pricing-tiers",
-		},
 		"psql-006": {
 			RecommendationID: "psql-006",
 			ResourceType:     "Microsoft.DBforPostgreSQL/servers",
@@ -163,18 +151,6 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 				return !pe, ""
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking#private-access-vnet-integration",
-		},
-		"psqlf-005": {
-			RecommendationID: "psqlf-005",
-			ResourceType:     "Microsoft.DBforPostgreSQL/flexibleServers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "PostgreSQL SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armpostgresqlflexibleservers.Server)
-				return false, *i.SKU.Name
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-gb/pricing/details/postgresql/flexible-server/",
 		},
 		"psqlf-006": {
 			RecommendationID: "psqlf-006",

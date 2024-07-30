@@ -50,18 +50,6 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link",
 		},
-		"cr-005": {
-			RecommendationID: "cr-005",
-			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "ContainerRegistry SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armcontainerregistry.Registry)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-skus",
-		},
 		"cr-006": {
 			RecommendationID: "cr-006",
 			ResourceType:     "Microsoft.ContainerRegistry/registries",

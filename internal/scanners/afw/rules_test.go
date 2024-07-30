@@ -72,24 +72,6 @@ func TestFirewallScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "FirewallScanner SKU",
-			fields: fields{
-				rule: "afw-005",
-				target: &armnetwork.AzureFirewall{
-					Properties: &armnetwork.AzureFirewallPropertiesFormat{
-						SKU: &armnetwork.AzureFirewallSKU{
-							Name: to.Ptr(armnetwork.AzureFirewallSKUNameAZFWVnet),
-						},
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "AZFW_VNet",
-			},
-		},
-		{
 			name: "FirewallScanner CAF",
 			fields: fields{
 				rule: "afw-006",

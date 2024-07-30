@@ -52,18 +52,6 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 				return !pe, ""
 			},
 		},
-		"ci-005": {
-			RecommendationID: "ci-005",
-			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "ContainerInstance SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armcontainerinstance.ContainerGroup)
-				return false, string(*i.Properties.SKU)
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/container-instances/",
-		},
 		"ci-006": {
 			RecommendationID: "ci-006",
 			ResourceType:     "Microsoft.ContainerInstance/containerGroups",

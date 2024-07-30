@@ -37,18 +37,6 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]azqr.AzqrRec
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/application-gateway/",
 		},
-		"agw-104": {
-			RecommendationID: "agw-104",
-			ResourceType:     "Microsoft.Network/applicationGateways",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Application Gateway SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				g := target.(*armnetwork.ApplicationGateway)
-				return false, string(*g.Properties.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/application-gateway/understanding-pricing",
-		},
 		"agw-105": {
 			RecommendationID: "agw-105",
 			ResourceType:     "Microsoft.Network/applicationGateways",

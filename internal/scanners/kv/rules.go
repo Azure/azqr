@@ -37,18 +37,6 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/key-vault/",
 		},
-		"kv-005": {
-			RecommendationID: "kv-005",
-			ResourceType:     "Microsoft.KeyVault/vaults",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Key Vault SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armkeyvault.Vault)
-				return false, string(*i.Properties.SKU.Name)
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/key-vault/",
-		},
 		"kv-006": {
 			RecommendationID: "kv-006",
 			ResourceType:     "Microsoft.KeyVault/vaults",

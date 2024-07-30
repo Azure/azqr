@@ -23,6 +23,7 @@ type (
 		AdvisorData       []scanners.AdvisorResult
 		CostData          *scanners.CostResult
 		Recomendations    map[string]map[string]azqr.AprlRecommendation
+		Resources         []*azqr.Resource
 		ResourceTypeCount []azqr.ResourceTypeCount
 	}
 
@@ -63,37 +64,26 @@ type (
 	}
 )
 
-func (rd *ReportData) ServicesTable() [][]string {
-	headers := []string{"Subscription", "Subscription Name", "Resource Group", "Location", "Type", "Service Name", "Compliant", "Impact", "Category", "Recommendation", "Result", "Learn", "RId"}
+func (rd *ReportData) ResourcesTable() [][]string {
+	headers := []string{"Subscription ID", "Resource Group", "Location", "Type", "Name", "Sku Name", "Sku Tier", "Kind", "SLA", "Resource ID"}
 
-	rbroken := [][]string{}
-	rok := [][]string{}
-	for _, d := range rd.AzqrData {
-		for _, r := range d.Recommendations {
-			row := []string{
-				MaskSubscriptionID(d.SubscriptionID, rd.Mask),
-				d.SubscriptionName,
-				d.ResourceGroup,
-				rd.parseLocation(d.Location),
-				d.Type,
-				d.ServiceName,
-				fmt.Sprintf("%t", !r.NotCompliant),
-				string(r.Impact),
-				string(r.Category),
-				r.Recommendation,
-				r.Result,
-				r.LearnMoreUrl,
-				r.RecommendationID,
-			}
-			if r.NotCompliant {
-				rbroken = append([][]string{row}, rbroken...)
-			} else {
-				rok = append([][]string{row}, rok...)
-			}
+	rows := [][]string{}
+	for _, r := range rd.Resources {
+		row := []string{
+			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
+			r.ResourceGroup,
+			r.Location,
+			r.Type,
+			r.Name,
+			r.SkuName,
+			r.SkuTier,
+			r.Kind,
+			"",
+			r.ID,
 		}
+		rows = append(rows, row)
 	}
 
-	rows := append(rbroken, rok...)
 	rows = append([][]string{headers}, rows...)
 	return rows
 }
@@ -198,7 +188,7 @@ func (rd *ReportData) DefenderTable() [][]string {
 }
 
 func (rd *ReportData) AdvisorTable() [][]string {
-	headers := []string{"Subscription", "Subscription Name", "Type", "Name", "Category", "Impact", "Description", "ResourceID",  "RecommendationID"}
+	headers := []string{"Subscription", "Subscription Name", "Type", "Name", "Category", "Impact", "Description", "ResourceID", "RecommendationID"}
 	rows := [][]string{}
 	for _, d := range rd.AdvisorData {
 		row := []string{
@@ -300,10 +290,6 @@ func (rd *ReportData) ResourceTypesTable() [][]string {
 
 	rows = append([][]string{headers}, rows...)
 	return rows
-}
-
-func (rd *ReportData) parseLocation(location string) string {
-	return strings.ToLower(strings.ReplaceAll(location, " ", ""))
 }
 
 func NewReportData(outputFile string, mask bool) ReportData {

@@ -98,22 +98,6 @@ func TestEventHubScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "EventHubScanner SKU",
-			fields: fields{
-				rule: "evh-005",
-				target: &armeventhub.EHNamespace{
-					SKU: &armeventhub.SKU{
-						Name: to.Ptr(armeventhub.SKUNamePremium),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium",
-			},
-		},
-		{
 			name: "EventHubScanner CAF",
 			fields: fields{
 				rule: "evh-006",

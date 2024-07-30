@@ -98,22 +98,6 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AppConfigurationScanner SKU",
-			fields: fields{
-				rule: "appcs-005",
-				target: &armappconfiguration.ConfigurationStore{
-					SKU: &armappconfiguration.SKU{
-						Name: to.Ptr("Standard"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
-			},
-		},
-		{
 			name: "AppConfigurationScanner CAF",
 			fields: fields{
 				rule: "appcs-006",

@@ -42,18 +42,6 @@ func (a *FirewallScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
-		"afw-005": {
-			RecommendationID: "afw-005",
-			ResourceType:     "Microsoft.Network/azureFirewalls",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Firewall SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				c := target.(*armnetwork.AzureFirewall)
-				return false, string(*c.Properties.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/firewall/choose-firewall-sku",
-		},
 		"afw-006": {
 			RecommendationID: "afw-006",
 			ResourceType:     "Microsoft.Network/azureFirewalls",

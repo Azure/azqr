@@ -58,24 +58,6 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "KeyVaultScanner SKU",
-			fields: fields{
-				rule: "kv-005",
-				target: &armkeyvault.Vault{
-					Properties: &armkeyvault.VaultProperties{
-						SKU: &armkeyvault.SKU{
-							Name: to.Ptr(armkeyvault.SKUNameStandard),
-						},
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "standard",
-			},
-		},
-		{
 			name: "KeyVaultScanner CAF",
 			fields: fields{
 				rule: "kv-006",

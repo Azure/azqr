@@ -51,18 +51,6 @@ func (a *DatabricksScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/cloud-configurations/azure/private-link",
 		},
-		"dbw-005": {
-			RecommendationID: "dbw-005",
-			ResourceType:     "Microsoft.Databricks/workspaces",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Databricks SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armdatabricks.Workspace)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/databricks/",
-		},
 		"dbw-006": {
 			RecommendationID: "dbw-006",
 			ResourceType:     "Microsoft.Databricks/workspaces",

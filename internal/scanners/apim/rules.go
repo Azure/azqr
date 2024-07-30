@@ -60,19 +60,6 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
 		},
-		"apim-005": {
-			RecommendationID: "apim-005",
-			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure APIM SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				a := target.(*armapimanagement.ServiceResource)
-				sku := string(*a.SKU.Name)
-				return strings.Contains(sku, "Developer"), sku
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-features",
-		},
 		"apim-006": {
 			RecommendationID: "apim-006",
 			ResourceType:     "Microsoft.ApiManagement/service",

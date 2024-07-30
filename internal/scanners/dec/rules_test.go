@@ -78,22 +78,6 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "DataExplorerScanner SKU",
-			fields: fields{
-				rule: "dec-003",
-				target: &armkusto.Cluster{
-					SKU: &armkusto.AzureSKU{
-						Name: to.Ptr(armkusto.AzureSKUNameDevNoSLAStandardD11V2),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "Dev(No SLA)_Standard_D11_v2",
-			},
-		},
-		{
 			name: "DataExplorerScanner Private Endpoint",
 			fields: fields{
 				rule: "dec-008",

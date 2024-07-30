@@ -56,18 +56,6 @@ func (a *EventHubScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/network-security",
 		},
-		"evh-005": {
-			RecommendationID: "evh-005",
-			ResourceType:     "Microsoft.EventHub/namespaces",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Event Hub Namespace SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armeventhub.EHNamespace)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/compare-tiers",
-		},
 		"evh-006": {
 			RecommendationID: "evh-006",
 			ResourceType:     "Microsoft.EventHub/namespaces",

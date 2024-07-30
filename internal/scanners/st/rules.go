@@ -53,18 +53,6 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/storage/",
 		},
-		"st-005": {
-			RecommendationID: "st-005",
-			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Storage SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armstorage.Account)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/rest/api/storagerp/srp_sku_types",
-		},
 		"st-006": {
 			RecommendationID: "st-006",
 			ResourceType:     "Microsoft.Storage/storageAccounts",

@@ -94,18 +94,6 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-configure-private-endpoints",
 		},
-		"cosmos-005": {
-			RecommendationID: "cosmos-005",
-			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "CosmosDB SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armcosmos.DatabaseAccountGetResults)
-				return false, string(*i.Properties.DatabaseAccountOfferType)
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/cosmos-db/autoscale-provisioned/",
-		},
 		"cosmos-006": {
 			RecommendationID: "cosmos-006",
 			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",

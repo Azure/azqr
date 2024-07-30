@@ -50,18 +50,6 @@ func (a *SignalRScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-signalr/howto-private-endpoints",
 		},
-		"sigr-005": {
-			RecommendationID: "sigr-005",
-			ResourceType:     "Microsoft.SignalRService/SignalR",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "SignalR SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				i := target.(*armsignalr.ResourceInfo)
-				return false, string(*i.SKU.Name)
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-us/pricing/details/signalr-service/",
-		},
 		"sigr-006": {
 			RecommendationID: "sigr-006",
 			ResourceType:     "Microsoft.SignalRService/SignalR",

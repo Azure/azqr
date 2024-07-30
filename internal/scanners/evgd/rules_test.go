@@ -78,18 +78,6 @@ func TestEventGridScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "EventGridScanner SKU",
-			fields: fields{
-				rule:        "evgd-005",
-				target:      &armeventgrid.Domain{},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "None",
-			},
-		},
-		{
 			name: "EventGridScanner CAF",
 			fields: fields{
 				rule: "evgd-006",

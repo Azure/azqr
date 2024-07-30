@@ -78,22 +78,6 @@ func TestSignalRScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "SignalRScanner SKU",
-			fields: fields{
-				rule: "sigr-005",
-				target: &armsignalr.ResourceInfo{
-					SKU: &armsignalr.ResourceSKU{
-						Name: to.Ptr("Premium"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium",
-			},
-		},
-		{
 			name: "SignalRScanner CAF",
 			fields: fields{
 				rule: "sigr-006",

@@ -70,22 +70,6 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "VirtualWanScanner SKU",
-			fields: fields{
-				rule: "vwa-005",
-				target: &armnetwork.VirtualWAN{
-					Properties: &armnetwork.VirtualWanProperties{
-						Type: to.Ptr("Standard"),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
-			},
-		},
-		{
 			name: "VirtualWanScanner CAF",
 			fields: fields{
 				rule: "vwa-006",

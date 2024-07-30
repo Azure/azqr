@@ -202,6 +202,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 
 	resourceScanner := scanners.ResourceScanner{}
 	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, reportData.Recomendations)
+	reportData.Resources = resourceScanner.GetAllResources(ctx, cred, subscriptions)
 
 	// render excel report
 	excel.CreateExcelReport(&reportData)

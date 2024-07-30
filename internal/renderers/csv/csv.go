@@ -14,14 +14,17 @@ import (
 )
 
 func CreateCsvReport(data *renderers.ReportData) {
-	records := data.ServicesTable()
-	writeData(records, data.OutputFileName, "services")
-
-	records = data.RecommendationsTable()
+	records := data.RecommendationsTable()
 	writeData(records, data.OutputFileName, "recommendations")
 
 	records = data.ImpactedTable()
 	writeData(records, data.OutputFileName, "impacted")
+
+	records = data.ResourceTypesTable()
+	writeData(records, data.OutputFileName, "resourceType")
+
+	records = data.ResourcesTable()
+	writeData(records, data.OutputFileName, "inventory")
 
 	records = data.DefenderTable()
 	writeData(records, data.OutputFileName, "defender")

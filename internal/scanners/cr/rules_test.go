@@ -78,22 +78,6 @@ func TestContainerRegistryScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "ContainerRegistryScanner SKU",
-			fields: fields{
-				rule: "cr-005",
-				target: &armcontainerregistry.Registry{
-					SKU: &armcontainerregistry.SKU{
-						Name: to.Ptr(armcontainerregistry.SKUNameStandard),
-					},
-				},
-				scanContext: &azqr.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
-			},
-		},
-		{
 			name: "ContainerRegistryScanner CAF",
 			fields: fields{
 				rule: "cr-006",

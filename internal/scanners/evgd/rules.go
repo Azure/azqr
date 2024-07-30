@@ -50,17 +50,6 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-grid/configure-private-endpoints",
 		},
-		"evgd-005": {
-			RecommendationID: "evgd-005",
-			ResourceType:     "Microsoft.EventGrid/domains",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Event Grid Domain SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				return false, "None"
-			},
-			LearnMoreUrl: "https://azure.microsoft.com/en-gb/pricing/details/event-grid/",
-		},
 		"evgd-006": {
 			RecommendationID: "evgd-006",
 			ResourceType:     "Microsoft.EventGrid/domains",
