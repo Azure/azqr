@@ -198,19 +198,19 @@ func (rd *ReportData) DefenderTable() [][]string {
 }
 
 func (rd *ReportData) AdvisorTable() [][]string {
-	headers := []string{"Subscription", "Subscription Name", "Name", "Type", "Category", "Description", "PotentialBenefits", "Risk", "LearnMoreLink"}
+	headers := []string{"Subscription", "Subscription Name", "Type", "Name", "Category", "Impact", "Description", "ResourceID",  "RecommendationID"}
 	rows := [][]string{}
 	for _, d := range rd.AdvisorData {
 		row := []string{
 			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 			d.SubscriptionName,
-			d.Name,
 			d.Type,
+			d.Name,
 			d.Category,
+			d.Impact,
 			d.Description,
-			d.PotentialBenefits,
-			d.Risk,
-			d.LearnMoreLink,
+			d.ResourceID,
+			d.RecommendationID,
 		}
 		rows = append(rows, row)
 	}
@@ -341,4 +341,3 @@ func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
 
 	return strings.Join(parts, "/")
 }
-

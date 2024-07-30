@@ -11,7 +11,7 @@ import (
 
 // AdvisorResult - Advisor result
 type AdvisorResult struct {
-	SubscriptionID, SubscriptionName, Name, Type, Category, Description, PotentialBenefits, Risk, LearnMoreLink string
+	RecommendationID, SubscriptionID, SubscriptionName, Type, Name, ResourceID, Category, Impact, Description string
 }
 
 // AdvisorScanner - Advisor scanner
@@ -52,27 +52,29 @@ func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
 			SubscriptionID:   s.config.SubscriptionID,
 			SubscriptionName: s.config.SubscriptionName,
 		}
+
 		if recommendation.Properties.ImpactedValue != nil {
 			ar.Name = *recommendation.Properties.ImpactedValue
-		}
-		if recommendation.Properties.Category != nil {
-			ar.Category = string(*recommendation.Properties.Category)
-		}
-		if recommendation.Properties.ShortDescription != nil && recommendation.Properties.ShortDescription.Problem != nil {
-			ar.Description = *recommendation.Properties.ShortDescription.Problem
 		}
 		if recommendation.Properties.ImpactedField != nil {
 			ar.Type = *recommendation.Properties.ImpactedField
 		}
-		if recommendation.Properties.PotentialBenefits != nil {
-			ar.PotentialBenefits = *recommendation.Properties.PotentialBenefits
+		if recommendation.Properties.ResourceMetadata != nil && recommendation.Properties.ResourceMetadata.ResourceID != nil {
+			ar.ResourceID = *recommendation.Properties.ResourceMetadata.ResourceID
 		}
-		if recommendation.Properties.Risk != nil {
-			ar.Risk = string(*recommendation.Properties.Risk)
+		if recommendation.Properties.Category != nil {
+			ar.Category = string(*recommendation.Properties.Category)
 		}
-		if recommendation.Properties.LearnMoreLink != nil {
-			ar.LearnMoreLink = *recommendation.Properties.LearnMoreLink
+		if recommendation.Properties.Impact != nil {
+			ar.Category = string(*recommendation.Properties.Impact)
 		}
+		if recommendation.Properties.ShortDescription != nil && recommendation.Properties.ShortDescription.Problem != nil {
+			ar.Description = *recommendation.Properties.ShortDescription.Problem
+		}
+		if recommendation.Properties.RecommendationTypeID != nil {
+			ar.RecommendationID = *recommendation.Properties.RecommendationTypeID
+		}
+
 		returnRecommendations = append(returnRecommendations, ar)
 	}
 
