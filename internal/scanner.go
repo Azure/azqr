@@ -94,6 +94,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 	diagnosticsScanner := scanners.DiagnosticSettingsScanner{}
 	advisorScanner := scanners.AdvisorScanner{}
 	costScanner := scanners.CostScanner{}
+	diagResults := map[string]bool{}
 
 	// initialize report data
 	reportData := renderers.NewReportData(outputFile, params.Mask)
@@ -101,6 +102,9 @@ func (sc Scanner) Scan(params *ScanParams) {
 	// get the APRL scan results
 	aprlScanner := AprlScanner{}
 	reportData.Recomendations, reportData.AprlData = aprlScanner.Scan(ctx, cred, params.ServiceScanners, filters, subscriptions)
+
+	resourceScanner := scanners.ResourceScanner{}
+	reportData.Resources = resourceScanner.GetAllResources(ctx, cred, subscriptions)
 
 	// For each service scanner, get the recommendations list
 	if params.UseAzqrRecommendations {
@@ -117,6 +121,13 @@ func (sc Scanner) Scan(params *ScanParams) {
 				reportData.Recomendations[strings.ToLower(r.ResourceType)][i] = r.ToAzureAprlRecommendation()
 			}
 		}
+
+		// scan diagnostic settings
+		err := diagnosticsScanner.Init(ctx, cred, clientOptions)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to initialize diagnostic settings scanner")
+		}
+		diagResults = diagnosticsScanner.Scan(reportData.ResourceIDs())
 	}
 
 	// scan each subscription with AZQR scanners
@@ -132,9 +143,6 @@ func (sc Scanner) Scan(params *ScanParams) {
 		if params.UseAzqrRecommendations {
 			// scan private endpoints
 			peResults := peScanner.Scan(config)
-
-			// scan diagnostic settings
-			diagResults := diagnosticsScanner.Scan(config)
 
 			// scan public IPs
 			pips := pipScanner.Scan(config)
@@ -200,9 +208,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 		reportData.CostData.Items = append(reportData.CostData.Items, costs.Items...)
 	}
 
-	resourceScanner := scanners.ResourceScanner{}
 	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, reportData.Recomendations)
-	reportData.Resources = resourceScanner.GetAllResources(ctx, cred, subscriptions)
 
 	// render excel report
 	excel.CreateExcelReport(&reportData)

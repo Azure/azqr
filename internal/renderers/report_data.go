@@ -292,6 +292,15 @@ func (rd *ReportData) ResourceTypesTable() [][]string {
 	return rows
 }
 
+func (rd *ReportData) ResourceIDs() []*string {
+	ids := []*string{}
+	for _, r := range rd.Resources {
+		ids = append(ids, &r.ID)
+	}
+
+	return ids
+}
+
 func NewReportData(outputFile string, mask bool) ReportData {
 	return ReportData{
 		OutputFileName: outputFile,
