@@ -249,53 +249,6 @@ func ShouldSkipError(err error) bool {
 	return false
 }
 
-// func ListResourceGroups(ctx context.Context, cred azcore.TokenCredential, resourceGroup string, subscriptionID string, exclusions *filters.Filters, options *arm.ClientOptions) []string {
-// 	resourceGroups := []string{}
-// 	if resourceGroup != "" {
-// 		exists, err := checkExistenceResourceGroup(ctx, subscriptionID, resourceGroup, cred, options)
-// 		if err != nil {
-// 			log.Fatal().Err(err).Msg("Failed to check existence of Resource Group")
-// 		}
-
-// 		if !exists {
-// 			log.Fatal().Msgf("Resource Group %s does not exist", resourceGroup)
-// 		}
-
-// 		if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", subscriptionID, resourceGroup)) {
-// 			log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", subscriptionID[29:], resourceGroup)
-// 			return resourceGroups
-// 		}
-
-// 		resourceGroups = append(resourceGroups, resourceGroup)
-// 	} else {
-// 		rgs, err := ListResourceGroup(ctx, cred, subscriptionID, options)
-// 		if err != nil {
-// 			log.Fatal().Err(err).Msg("Failed to list Resource Groups")
-// 		}
-// 		for _, rg := range rgs {
-// 			if exclusions.Azqr.Exclude.IsResourceGroupExcluded(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", subscriptionID, *rg.Name)) {
-// 				log.Info().Msgf("Skipping subscriptions/...%s/resourceGroups/%s", subscriptionID[29:], *rg.Name)
-// 				continue
-// 			}
-// 			resourceGroups = append(resourceGroups, *rg.Name)
-// 		}
-// 	}
-// 	return resourceGroups
-// }
-
-// func checkExistenceResourceGroup(ctx context.Context, subscriptionID string, resourceGroupName string, cred azcore.TokenCredential, options *arm.ClientOptions) (bool, error) {
-// 	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, options)
-// 	if err != nil {
-// 		return false, err
-// 	}
-
-// 	boolResp, err := resourceGroupClient.CheckExistence(ctx, resourceGroupName, nil)
-// 	if err != nil {
-// 		return false, err
-// 	}
-// 	return boolResp.Success, nil
-// }
-
 func ListResourceGroup(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, options *arm.ClientOptions) ([]*armresources.ResourceGroup, error) {
 	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, options)
 	if err != nil {

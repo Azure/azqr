@@ -12,7 +12,7 @@ import (
 
 type ResourceScanner struct{}
 
-func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string) []*azqr.Resource {
+func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *azqr.Filters) []*azqr.Resource {
 	azqr.LogResourceTypeScan("All Resources")
 
 	graphClient := graph.NewGraphQuery(cred)
@@ -23,10 +23,14 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 		subs = append(subs, &s)
 	}
 	result := graphClient.Query(ctx, query, subs)
-	resources := make([]*azqr.Resource, len(result.Data))
+	resources := []*azqr.Resource{}
 	if result.Data != nil {
-		for i, row := range result.Data {
+		for _, row := range result.Data {
 			m := row.(map[string]interface{})
+
+			if filters.Azqr.IsServiceExcluded(m["id"].(string)) {
+				continue
+			}
 
 			skuName := ""
 			if m["sku_name"] != nil {
@@ -53,17 +57,18 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 				location = m["location"].(string)
 			}
 
-			resources[i] = &azqr.Resource{
-				ID:             m["id"].(string),
-				SubscriptionID: m["subscriptionId"].(string),
-				ResourceGroup:  resourceGroup,
-				Location:       location,
-				Type:           m["type"].(string),
-				Name:           m["name"].(string),
-				SkuName:        skuName,
-				SkuTier:        skuTier,
-				Kind:           kind,
-			}
+			resources = append(
+				resources,
+				&azqr.Resource{
+					ID:             m["id"].(string),
+					SubscriptionID: m["subscriptionId"].(string),
+					ResourceGroup:  resourceGroup,
+					Location:       location,
+					Type:           m["type"].(string),
+					Name:           m["name"].(string),
+					SkuName:        skuName,
+					SkuTier:        skuTier,
+					Kind:           kind})
 		}
 	}
 	return resources

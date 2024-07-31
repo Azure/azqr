@@ -164,7 +164,7 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 	for i := 0; i < batches; i++ {
 		res := <-ch
 		for _, r := range res {
-			if filters.Azqr.Exclude.IsServiceExcluded(r.ResourceID) {
+			if filters.Azqr.IsServiceExcluded(r.ResourceID) {
 				continue
 			}
 			results = append(results, r)
@@ -258,7 +258,7 @@ func (sc AprlScanner) getGraphRules(service string, filters *azqr.Filters, aprl 
 	r := map[string]azqr.AprlRecommendation{}
 	if i, ok := aprl[strings.ToLower(service)]; ok {
 		for _, recommendation := range i {
-			if filters.Azqr.Exclude.IsRecommendationExcluded(recommendation.RecommendationID) ||
+			if filters.Azqr.IsRecommendationExcluded(recommendation.RecommendationID) ||
 				strings.Contains(recommendation.GraphQuery, "cannot-be-validated-with-arg") ||
 				strings.Contains(recommendation.GraphQuery, "under-development") ||
 				strings.Contains(recommendation.GraphQuery, "under development") {

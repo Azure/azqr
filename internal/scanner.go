@@ -54,16 +54,24 @@ func (sc Scanner) Scan(params *ScanParams) {
 		log.Debug().Msg("Debug logging enabled")
 	}
 
-	// validate input
-	if params.SubscriptionID == "" && params.ResourceGroup != "" {
-		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
-	}
-
 	// generate output file name
 	outputFile := sc.generateOutputFileName(params.OutputName)
 
 	// load filters
 	filters := azqr.LoadFilters(params.FilterFile)
+
+	// validate input
+	if params.SubscriptionID == "" && params.ResourceGroup != "" {
+		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
+	}
+
+	if params.SubscriptionID != "" {
+		filters.Azqr.AddSubscription(params.SubscriptionID)
+	}
+
+	if params.ResourceGroup != "" {
+		filters.Azqr.AddResourceGroup(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", params.SubscriptionID, params.ResourceGroup))
+	}
 
 	// create Azure credentials
 	cred := sc.newAzureCredential(params.ForceAzureCliCredential)
@@ -104,13 +112,13 @@ func (sc Scanner) Scan(params *ScanParams) {
 	reportData.Recomendations, reportData.AprlData = aprlScanner.Scan(ctx, cred, params.ServiceScanners, filters, subscriptions)
 
 	resourceScanner := scanners.ResourceScanner{}
-	reportData.Resources = resourceScanner.GetAllResources(ctx, cred, subscriptions)
+	reportData.Resources = resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)
 
 	// For each service scanner, get the recommendations list
 	if params.UseAzqrRecommendations {
 		for _, s := range params.ServiceScanners {
 			for i, r := range s.GetRecommendations() {
-				if filters.Azqr.Exclude.IsRecommendationExcluded(r.RecommendationID) {
+				if filters.Azqr.IsRecommendationExcluded(r.RecommendationID) {
 					continue
 				}
 
@@ -187,7 +195,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 				res := <-ch
 				for _, r := range res {
 					// check if the resource is excluded
-					if filters.Azqr.Exclude.IsServiceExcluded(r.ResourceID()) {
+					if filters.Azqr.IsServiceExcluded(r.ResourceID()) {
 						continue
 					}
 					reportData.AzqrData = append(reportData.AzqrData, r)

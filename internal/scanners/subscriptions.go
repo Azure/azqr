@@ -41,7 +41,7 @@ func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.
 		// if subscriptionID is empty, return filtered subscriptions. Otherwise, return only the specified subscription
 		sid := *s.SubscriptionID
 		if subscriptionID == "" || subscriptionID == sid {
-			if filters.Azqr.Exclude.IsSubscriptionExcluded(sid) {
+			if filters.Azqr.IsSubscriptionExcluded(sid) {
 				log.Info().Msgf("Skipping subscriptions/...%s", sid[29:])
 				continue
 			}

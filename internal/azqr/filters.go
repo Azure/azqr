@@ -16,70 +16,81 @@ type (
 	}
 
 	AzqrFilter struct {
-		Exclude *Exclude `yaml:"exclude"`
+		Include          *IncludeFilter `yaml:"include"`
+		Exclude          *ExcludeFilter `yaml:"exclude"`
+		iSubscriptions   map[string]bool
+		iResourceGroups  map[string]bool
+		xSubscriptions   map[string]bool
+		xResourceGroups  map[string]bool
+		xServices        map[string]bool
+		xRecommendations map[string]bool
 	}
 
-	// Exclude - Struct for Exclude
-	Exclude struct {
+	// ExcludeFilter - Struct for ExcludeFilter
+	ExcludeFilter struct {
 		Subscriptions   []string `yaml:"subscriptions,flow"`
 		ResourceGroups  []string `yaml:"resourceGroups,flow"`
 		Services        []string `yaml:"services,flow"`
 		Recommendations []string `yaml:"recommendations,flow"`
-		subscriptions   map[string]bool
-		resourceGroups  map[string]bool
-		services        map[string]bool
-		recommendations map[string]bool
+	}
+
+	// IncludeFilter - Struct for IncludeFilter
+	IncludeFilter struct {
+		Subscriptions  []string `yaml:"subscriptions,flow"`
+		ResourceGroups []string `yaml:"resourceGroups,flow"`
 	}
 )
 
-func (e *Exclude) IsSubscriptionExcluded(subscriptionID string) bool {
-	if e.subscriptions == nil {
-		e.subscriptions = make(map[string]bool)
-		for _, id := range e.Subscriptions {
-			e.subscriptions[strings.ToLower(id)] = true
-		}
+func (e *AzqrFilter) AddSubscription(subscriptionID string) {
+	if e.iSubscriptions == nil {
+		e.iSubscriptions = make(map[string]bool)
+	}
+	e.iSubscriptions[strings.ToLower(subscriptionID)] = true
+	e.Include.Subscriptions = append(e.Include.Subscriptions, subscriptionID)
+}
+
+func (e *AzqrFilter) AddResourceGroup(resourceGroupID string) {
+	if e.iResourceGroups == nil {
+		e.iResourceGroups = make(map[string]bool)
+	}
+	e.iResourceGroups[strings.ToLower(resourceGroupID)] = true
+	e.Include.ResourceGroups = append(e.Include.ResourceGroups, resourceGroupID)
+}
+
+func (e *AzqrFilter) IsSubscriptionExcluded(subscriptionID string) bool {
+	_, ok := e.iSubscriptions[strings.ToLower(subscriptionID)]
+	if ok {
+		return false
 	}
 
-	_, ok := e.subscriptions[strings.ToLower(subscriptionID)]
-
+	_, ok = e.xSubscriptions[strings.ToLower(subscriptionID)]
 	return ok
 }
 
-func (e *Exclude) IsServiceExcluded(resourceID string) bool {
-	if e.services == nil {
-		e.services = make(map[string]bool)
-		for _, id := range e.Services {
-			e.services[strings.ToLower(id)] = true
-		}
-	}
-
-	_, ok := e.services[strings.ToLower(resourceID)]
+func (e *AzqrFilter) IsServiceExcluded(resourceID string) bool {
+	rgID := GetResourceGroupIDFromResourceID(resourceID)
+	ok := e.isResourceGroupExcluded(rgID)
 
 	if !ok {
-		rgID := GetResourceGroupIDFromResourceID(resourceID)
-		ok = e.isResourceGroupExcluded(rgID)
+		_, ok = e.xServices[strings.ToLower(resourceID)]
 	}
 
 	return ok
 }
 
-func (e *Exclude) IsRecommendationExcluded(recommendationID string) bool {
-	if e.recommendations == nil {
-		e.recommendations = make(map[string]bool)
-		for _, id := range e.Recommendations {
-			e.recommendations[strings.ToLower(id)] = true
-		}
-	}
-
-	_, ok := e.recommendations[strings.ToLower(recommendationID)]
-
+func (e *AzqrFilter) IsRecommendationExcluded(recommendationID string) bool {
+	_, ok := e.xRecommendations[strings.ToLower(recommendationID)]
 	return ok
 }
 
 func LoadFilters(filterFile string) *Filters {
 	filters := &Filters{
 		Azqr: &AzqrFilter{
-			Exclude: &Exclude{
+			Include: &IncludeFilter{
+				Subscriptions:  []string{},
+				ResourceGroups: []string{},
+			},
+			Exclude: &ExcludeFilter{
 				Subscriptions:  []string{},
 				ResourceGroups: []string{},
 				Services:       []string{},
@@ -99,18 +110,42 @@ func LoadFilters(filterFile string) *Filters {
 		}
 	}
 
+	filters.Azqr.xResourceGroups = make(map[string]bool)
+	for _, id := range filters.Azqr.Exclude.ResourceGroups {
+		filters.Azqr.xResourceGroups[strings.ToLower(id)] = true
+	}
+
+	filters.Azqr.xSubscriptions = make(map[string]bool)
+	for _, id := range filters.Azqr.Exclude.Subscriptions {
+		filters.Azqr.xSubscriptions[strings.ToLower(id)] = true
+	}
+
+	filters.Azqr.xServices = make(map[string]bool)
+	for _, id := range filters.Azqr.Exclude.Services {
+		filters.Azqr.xServices[strings.ToLower(id)] = true
+	}
+
+	filters.Azqr.xRecommendations = make(map[string]bool)
+	for _, id := range filters.Azqr.Exclude.Recommendations {
+		filters.Azqr.xRecommendations[strings.ToLower(id)] = true
+	}
+
 	return filters
 }
 
-func (e *Exclude) isResourceGroupExcluded(resourceGroupID string) bool {
-	if e.resourceGroups == nil {
-		e.resourceGroups = make(map[string]bool)
-		for _, id := range e.ResourceGroups {
-			e.resourceGroups[strings.ToLower(id)] = true
-		}
+func (e *AzqrFilter) isResourceGroupExcluded(resourceGroupID string) bool {
+	// Check if the resource group is included
+	_, ok := e.iResourceGroups[strings.ToLower(resourceGroupID)]
+	if ok {
+		return false
 	}
 
-	_, ok := e.resourceGroups[strings.ToLower(resourceGroupID)]
+	// If not included, but there are included resource groups, then exclude it
+	if len(e.iResourceGroups) > 0 {
+		return true
+	}
 
+	// Check if the resource group is excluded
+	_, ok = e.xResourceGroups[strings.ToLower(resourceGroupID)]
 	return ok
 }
