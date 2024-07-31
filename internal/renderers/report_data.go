@@ -69,6 +69,22 @@ func (rd *ReportData) ResourcesTable() [][]string {
 
 	rows := [][]string{}
 	for _, r := range rd.Resources {
+		sla := ""
+		
+		for _, a := range rd.AzqrData {
+			if strings.EqualFold(strings.ToLower(a.ResourceID()), strings.ToLower(r.ID)) {
+				for _, rc := range a.Recommendations {
+					if rc.RecommendationType == azqr.TypeSLA {
+						sla = rc.Result
+						break
+					}
+				}
+				if sla != "" {
+					break
+				}
+			}
+		}
+
 		row := []string{
 			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
 			r.ResourceGroup,
@@ -78,7 +94,7 @@ func (rd *ReportData) ResourcesTable() [][]string {
 			r.SkuName,
 			r.SkuTier,
 			r.Kind,
-			"",
+			sla,
 			r.ID,
 		}
 		rows = append(rows, row)

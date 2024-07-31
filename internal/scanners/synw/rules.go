@@ -50,11 +50,12 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]azqr.AzqrRecomm
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-private-endpoints",
 		},
 		"synw-003": {
-			RecommendationID: "synw-003",
-			ResourceType:     "Microsoft.Synapse/workspaces",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Synapse Workspace SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "synw-003",
+			ResourceType:       "Microsoft.Synapse/workspaces",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Synapse Workspace SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
@@ -128,11 +129,12 @@ func (a *SynapseWorkspaceScanner) getSparkPoolRules() map[string]azqr.AzqrRecomm
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"synsp-002": {
-			RecommendationID: "synsp-002",
-			ResourceType:     "Microsoft.Synapse workspaces/bigDataPools",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Synapse Spark Pool SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "synsp-002",
+			ResourceType:       "Microsoft.Synapse workspaces/bigDataPools",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Synapse Spark Pool SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
@@ -169,11 +171,12 @@ func (a *SynapseWorkspaceScanner) getSqlPoolRules() map[string]azqr.AzqrRecommen
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"syndp-002": {
-			RecommendationID: "syndp-002",
-			ResourceType:     "Microsoft.Synapse/workspaces/sqlPools",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Synapse Dedicated SQL Pool SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "syndp-002",
+			ResourceType:       "Microsoft.Synapse/workspaces/sqlPools",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Synapse Dedicated SQL Pool SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},

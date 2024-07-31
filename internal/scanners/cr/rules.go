@@ -27,11 +27,12 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
 		},
 		"cr-003": {
-			RecommendationID: "cr-003",
-			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "ContainerRegistry should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "cr-003",
+			ResourceType:       "Microsoft.ContainerRegistry/registries",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "ContainerRegistry should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},

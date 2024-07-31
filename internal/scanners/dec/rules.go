@@ -27,11 +27,12 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
 		},
 		"dec-002": {
-			RecommendationID: "dec-002",
-			ResourceType:     "Microsoft.Kusto/clusters",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Data Explorer SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "dec-002",
+			ResourceType:       "Microsoft.Kusto/clusters",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Data Explorer SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				sla := "99.9%"

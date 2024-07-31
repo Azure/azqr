@@ -26,11 +26,12 @@ func (a *FirewallScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			LearnMoreUrl: "https://docs.microsoft.com/en-us/azure/firewall/logs-and-metrics",
 		},
 		"afw-003": {
-			RecommendationID: "afw-003",
-			ResourceType:     "Microsoft.Network/azureFirewalls",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Firewall SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "afw-003",
+			ResourceType:       "Microsoft.Network/azureFirewalls",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Firewall SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				g := target.(*armnetwork.AzureFirewall)
 				sla := "99.95%"

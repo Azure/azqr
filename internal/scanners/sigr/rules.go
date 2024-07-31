@@ -27,11 +27,12 @@ func (a *SignalRScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-howto-diagnostic-logs",
 		},
 		"sigr-003": {
-			RecommendationID: "sigr-003",
-			ResourceType:     "Microsoft.SignalRService/SignalR",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "SignalR should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "sigr-003",
+			ResourceType:       "Microsoft.SignalRService/SignalR",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "SignalR should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},

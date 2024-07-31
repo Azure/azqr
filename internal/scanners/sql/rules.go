@@ -91,11 +91,12 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 			},
 		},
 		"sqldb-003": {
-			RecommendationID: "sqldb-003",
-			ResourceType:     "Microsoft.Sql/servers/databases",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "SQL Database should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "sqldb-003",
+			ResourceType:       "Microsoft.Sql/servers/databases",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "SQL Database should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armsql.Database)
 				sla := "99.99%"

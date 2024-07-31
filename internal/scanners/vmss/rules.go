@@ -14,11 +14,12 @@ import (
 func (a *VirtualMachineScaleSetScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 	return map[string]azqr.AzqrRecommendation{
 		"vmss-003": {
-			RecommendationID: "vmss-003",
-			ResourceType:     "Microsoft.Compute/virtualMachineScaleSets",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Virtual Machine should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "vmss-003",
+			ResourceType:       "Microsoft.Compute/virtualMachineScaleSets",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Virtual Machine should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				v := target.(*armcompute.VirtualMachineScaleSet)
 				sla := "99.95%"

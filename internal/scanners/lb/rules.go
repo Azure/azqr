@@ -27,11 +27,12 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
 		},
 		"lb-003": {
-			RecommendationID: "lb-003",
-			ResourceType:     "Microsoft.Network/loadBalancers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Load Balancer should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "lb-003",
+			ResourceType:       "Microsoft.Network/loadBalancers",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Load Balancer should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armnetwork.LoadBalancer)
 				sla := "99.99%"

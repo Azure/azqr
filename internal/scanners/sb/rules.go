@@ -27,11 +27,12 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
 		},
 		"sb-003": {
-			RecommendationID: "sb-003",
-			ResourceType:     "Microsoft.ServiceBus/namespaces",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Service Bus should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "sb-003",
+			ResourceType:       "Microsoft.ServiceBus/namespaces",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Service Bus should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armservicebus.SBNamespace)
 				sku := string(*i.SKU.Name)

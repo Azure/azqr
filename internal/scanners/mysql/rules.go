@@ -28,11 +28,12 @@ func (a *MySQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-monitoring#server-logs",
 		},
 		"mysql-003": {
-			RecommendationID: "mysql-003",
-			ResourceType:     "Microsoft.DBforMySQL/servers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Database for MySQL - Single Server should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "mysql-003",
+			ResourceType:       "Microsoft.DBforMySQL/servers",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Database for MySQL - Single Server should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
@@ -107,11 +108,12 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
 		},
 		"mysqlf-003": {
-			RecommendationID: "mysqlf-003",
-			ResourceType:     "Microsoft.DBforMySQL/flexibleServers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Database for MySQL - Flexible Server should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "mysqlf-003",
+			ResourceType:       "Microsoft.DBforMySQL/flexibleServers",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Database for MySQL - Flexible Server should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
 				sla := "99.9%"

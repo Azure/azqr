@@ -28,11 +28,12 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-server-logs#resource-logs",
 		},
 		"psql-003": {
-			RecommendationID: "psql-003",
-			ResourceType:     "Microsoft.DBforPostgreSQL/servers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "PostgreSQL should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "psql-003",
+			ResourceType:       "Microsoft.DBforPostgreSQL/servers",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "PostgreSQL should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
@@ -120,11 +121,12 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
 		},
 		"psqlf-003": {
-			RecommendationID: "psqlf-003",
-			ResourceType:     "Microsoft.DBforPostgreSQL/flexibleServers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "PostgreSQL should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "psqlf-003",
+			ResourceType:       "Microsoft.DBforPostgreSQL/flexibleServers",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "PostgreSQL should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armpostgresqlflexibleservers.Server)
 				sla := "99.9%"

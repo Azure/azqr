@@ -28,11 +28,12 @@ func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
 		},
 		"apim-003": {
-			RecommendationID: "apim-003",
-			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "APIM should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "apim-003",
+			ResourceType:       "Microsoft.ApiManagement/service",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "APIM should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				sku := string(*a.SKU.Name)

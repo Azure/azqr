@@ -14,11 +14,12 @@ import (
 func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 	return map[string]azqr.AzqrRecommendation{
 		"ca-003": {
-			RecommendationID: "ca-003",
-			ResourceType:     "Microsoft.App/containerApps",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "ContainerApp should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "ca-003",
+			ResourceType:       "Microsoft.App/containerApps",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "ContainerApp should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},

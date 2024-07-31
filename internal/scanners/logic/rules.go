@@ -27,11 +27,12 @@ func (a *LogicAppScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
 		},
 		"logic-003": {
-			RecommendationID: "logic-003",
-			ResourceType:     "Microsoft.Logic/workflows",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Logic App should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "logic-003",
+			ResourceType:       "Microsoft.Logic/workflows",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Logic App should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},

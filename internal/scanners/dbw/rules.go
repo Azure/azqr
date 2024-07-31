@@ -28,11 +28,12 @@ func (a *DatabricksScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/account-settings/audit-log-delivery",
 		},
 		"dbw-003": {
-			RecommendationID: "dbw-003",
-			ResourceType:     "Microsoft.Databricks/workspaces",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Databricks should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "dbw-003",
+			ResourceType:       "Microsoft.Databricks/workspaces",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Databricks should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},

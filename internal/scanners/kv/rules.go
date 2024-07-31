@@ -27,11 +27,12 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
 		},
 		"kv-003": {
-			RecommendationID: "kv-003",
-			ResourceType:     "Microsoft.KeyVault/vaults",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Key Vault should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "kv-003",
+			ResourceType:       "Microsoft.KeyVault/vaults",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Key Vault should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},

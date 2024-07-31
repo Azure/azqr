@@ -38,11 +38,12 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-are-availability-zones-and-resiliency-handled-in-virtual-wan",
 		},
 		"vwa-003": {
-			RecommendationID: "vwa-003",
-			ResourceType:     "Microsoft.Network/virtualWans",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Virtual WAN should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "vwa-003",
+			ResourceType:       "Microsoft.Network/virtualWans",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Virtual WAN should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},

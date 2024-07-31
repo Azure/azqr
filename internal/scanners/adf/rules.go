@@ -39,11 +39,12 @@ func (a *DataFactoryScanner) GetRecommendations() map[string]azqr.AzqrRecommenda
 			},
 		},
 		"adf-003": {
-			RecommendationID: "adf-003",
-			ResourceType:     "Microsoft.DataFactory/factories",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Data Factory SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "adf-003",
+			ResourceType:       "Microsoft.DataFactory/factories",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Data Factory SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},

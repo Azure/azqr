@@ -51,11 +51,12 @@ func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"maria-004": {
-			RecommendationID: "maria-004",
-			ResourceType:     "Microsoft.DBforMariaDB/servers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "MariaDB server should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "maria-004",
+			ResourceType:       "Microsoft.DBforMariaDB/servers",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "MariaDB server should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},

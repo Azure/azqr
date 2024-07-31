@@ -27,11 +27,12 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
 		},
 		"st-003": {
-			RecommendationID: "st-003",
-			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Storage should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "st-003",
+			ResourceType:       "Microsoft.Storage/storageAccounts",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Storage should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				tier := ""

@@ -39,11 +39,12 @@ func (a *TrafficManagerScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/architecture/high-availability/reference-architecture-traffic-manager-application-gateway",
 		},
 		"traf-003": {
-			RecommendationID: "traf-003",
-			ResourceType:     "Microsoft.Network/trafficManagerProfiles",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Traffic Manager should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "traf-003",
+			ResourceType:       "Microsoft.Network/trafficManagerProfiles",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Traffic Manager should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},

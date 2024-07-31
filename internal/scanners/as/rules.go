@@ -28,11 +28,12 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]azqr.AzqrRecom
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/analysis-services/analysis-services-logging",
 		},
 		"as-002": {
-			RecommendationID: "as-002",
-			ResourceType:     "Microsoft.AnalysisServices/servers",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Analysis Service should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "as-002",
+			ResourceType:       "Microsoft.AnalysisServices/servers",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Analysis Service should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armanalysisservices.Server)
 				sku := *i.SKU.Tier

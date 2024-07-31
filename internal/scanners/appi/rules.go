@@ -14,11 +14,12 @@ import (
 func (a *AppInsightsScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 	return map[string]azqr.AzqrRecommendation{
 		"appi-001": {
-			RecommendationID: "appi-001",
-			ResourceType:     "Microsoft.Insights/components",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Application Insights SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "appi-001",
+			ResourceType:       "Microsoft.Insights/components",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Application Insights SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},

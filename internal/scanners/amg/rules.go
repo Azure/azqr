@@ -27,11 +27,12 @@ func (a *ManagedGrafanaScanner) GetRecommendations() map[string]azqr.AzqrRecomme
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"amg-002": {
-			RecommendationID: "amg-002",
-			ResourceType:     "Microsoft.Dashboard/managedGrafana",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Azure Managed Grafana SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "amg-002",
+			ResourceType:       "Microsoft.Dashboard/managedGrafana",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Azure Managed Grafana SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armdashboard.ManagedGrafana)
 				sku := ""

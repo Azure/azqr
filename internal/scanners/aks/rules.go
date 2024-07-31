@@ -28,11 +28,12 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
 		},
 		"aks-003": {
-			RecommendationID: "aks-003",
-			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "AKS Cluster should have an SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "aks-003",
+			ResourceType:       "Microsoft.ContainerService/managedClusters",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "AKS Cluster should have an SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 

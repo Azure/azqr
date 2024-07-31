@@ -27,11 +27,12 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-monitor-diagnostic-settings",
 		},
 		"redis-003": {
-			RecommendationID: "redis-003",
-			ResourceType:     "Microsoft.Cache/Redis",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Redis should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "redis-003",
+			ResourceType:       "Microsoft.Cache/Redis",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Redis should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},

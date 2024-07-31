@@ -27,11 +27,12 @@ func (a *ApplicationGatewayScanner) GetRecommendations() map[string]azqr.AzqrRec
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
 		},
 		"agw-103": {
-			RecommendationID: "agw-103",
-			ResourceType:     "Microsoft.Network/applicationGateways",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Application Gateway SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "agw-103",
+			ResourceType:       "Microsoft.Network/applicationGateways",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Application Gateway SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},

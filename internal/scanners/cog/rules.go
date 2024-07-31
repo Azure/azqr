@@ -27,11 +27,12 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
 		},
 		"cog-003": {
-			RecommendationID: "cog-003",
-			ResourceType:     "Microsoft.CognitiveServices/accounts",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Cognitive Service Account should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "cog-003",
+			ResourceType:       "Microsoft.CognitiveServices/accounts",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Cognitive Service Account should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},

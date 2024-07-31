@@ -27,11 +27,12 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
 		},
 		"evgd-003": {
-			RecommendationID: "evgd-003",
-			ResourceType:     "Microsoft.EventGrid/domains",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Event Grid Domain should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "evgd-003",
+			ResourceType:       "Microsoft.EventGrid/domains",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Event Grid Domain should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},

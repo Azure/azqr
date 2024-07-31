@@ -44,11 +44,12 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
 		},
 		"wps-003": {
-			RecommendationID: "wps-003",
-			ResourceType:     "Microsoft.SignalRService/webPubSub",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Web Pub Sub should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "wps-003",
+			ResourceType:       "Microsoft.SignalRService/webPubSub",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Web Pub Sub should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				sku := string(*i.SKU.Name)

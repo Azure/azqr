@@ -27,11 +27,12 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-instances/availability-zones",
 		},
 		"ci-003": {
-			RecommendationID: "ci-003",
-			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "ContainerInstance should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "ci-003",
+			ResourceType:       "Microsoft.ContainerInstance/containerGroups",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "ContainerInstance should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},

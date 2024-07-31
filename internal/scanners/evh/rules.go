@@ -27,11 +27,12 @@ func (a *EventHubScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
 		},
 		"evh-003": {
-			RecommendationID: "evh-003",
-			ResourceType:     "Microsoft.EventHub/namespaces",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Event Hub Namespace should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "evh-003",
+			ResourceType:       "Microsoft.EventHub/namespaces",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Event Hub Namespace should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armeventhub.EHNamespace)
 				sku := string(*i.SKU.Name)

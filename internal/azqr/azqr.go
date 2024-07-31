@@ -210,13 +210,14 @@ func (e *RecommendationEngine) evaluateRecommendation(rule AzqrRecommendation, t
 	broken, result := rule.Eval(target, scanContext)
 
 	return AzqrResult{
-		RecommendationID: rule.RecommendationID,
-		Category:         rule.Category,
-		Recommendation:   rule.Recommendation,
-		Impact:           rule.Impact,
-		LearnMoreUrl:     rule.LearnMoreUrl,
-		Result:           result,
-		NotCompliant:     broken,
+		RecommendationID:   rule.RecommendationID,
+		Category:           rule.Category,
+		Recommendation:     rule.Recommendation,
+		RecommendationType: rule.RecommendationType,
+		Impact:             rule.Impact,
+		LearnMoreUrl:       rule.LearnMoreUrl,
+		Result:             result,
+		NotCompliant:       broken,
 	}
 }
 

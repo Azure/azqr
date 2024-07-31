@@ -40,11 +40,12 @@ func (a *AppServiceScanner) getPlanRules() map[string]azqr.AzqrRecommendation {
 			},
 		},
 		"asp-003": {
-			RecommendationID: "asp-003",
-			ResourceType:     "Microsoft.Web/serverfarms",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Plan should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "asp-003",
+			ResourceType:       "Microsoft.Web/serverfarms",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Plan should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armappservice.Plan)
 				sku := string(*i.SKU.Tier)

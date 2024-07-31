@@ -27,11 +27,12 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]azqr.AzqrRecom
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
 		},
 		"appcs-003": {
-			RecommendationID: "appcs-003",
-			ResourceType:     "Microsoft.AppConfiguration/configurationStores",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "AppConfiguration should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "appcs-003",
+			ResourceType:       "Microsoft.AppConfiguration/configurationStores",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "AppConfiguration should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				a := target.(*armappconfiguration.ConfigurationStore)
 				sku := strings.ToLower(*a.SKU.Name)

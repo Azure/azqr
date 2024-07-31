@@ -63,11 +63,12 @@ func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[strin
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"vgw-004": {
-			RecommendationID: "vgw-004",
-			ResourceType:     "Microsoft.Network/virtualNetworkGateways",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Virtual Network Gateway should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "vgw-004",
+			ResourceType:       "Microsoft.Network/virtualNetworkGateways",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Virtual Network Gateway should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				g := target.(*armnetwork.VirtualNetworkGateway)
 				sku := string(*g.Properties.SKU.Tier)

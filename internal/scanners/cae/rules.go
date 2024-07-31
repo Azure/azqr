@@ -27,11 +27,12 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/container-apps/log-options#diagnostic-settings",
 		},
 		"cae-003": {
-			RecommendationID: "cae-003",
-			ResourceType:     "Microsoft.App/managedenvironments",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "Container Apps Environment should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "cae-003",
+			ResourceType:       "Microsoft.App/managedenvironments",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Container Apps Environment should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},

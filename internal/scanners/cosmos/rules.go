@@ -53,11 +53,12 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability",
 		},
 		"cosmos-003": {
-			RecommendationID: "cosmos-003",
-			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
-			Category:         azqr.CategoryHighAvailability,
-			Recommendation:   "CosmosDB should have a SLA",
-			Impact:           azqr.ImpactHigh,
+			RecommendationID:   "cosmos-003",
+			ResourceType:       "Microsoft.DocumentDB/databaseAccounts",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "CosmosDB should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armcosmos.DatabaseAccountGetResults)
 				sla := "99.99%"
