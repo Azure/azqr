@@ -13,7 +13,7 @@ import (
 type ResourceScanner struct{}
 
 func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *azqr.Filters) []*azqr.Resource {
-	azqr.LogResourceTypeScan("All Resources")
+	azqr.LogResourceTypeScan("Resources")
 
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind"
