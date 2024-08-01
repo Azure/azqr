@@ -73,14 +73,32 @@ func createFirstRow(f *excelize.File, sheet string, headers []string) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to set row")
 	}
-	font := excelize.Font{Bold: true}
-	style, err := f.NewStyle(&excelize.Style{Font: &font})
+
+	style, err := f.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+		Fill: excelize.Fill{
+			Type:    "pattern",
+			Color:   []string{"#CAEDFB"},
+			Pattern: 1,
+		},
+	})
+
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create style")
 	}
-	err = f.SetRowStyle(sheet, 4, 4, style)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to set style")
+
+	for j := 1; j <= len(headers); j++ {
+		cell, err := excelize.CoordinatesToCellName(j, 4)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get cell")
+		}
+
+		err = f.SetCellStyle(sheet, cell, cell, style)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to set style")
+		}
 	}
 }
 
@@ -122,5 +140,36 @@ func configureSheet(f *excelize.File, sheet string, headers []string, currentRow
 
 	if err := f.AddPictureFromBytes(sheet, "A1", pic); err != nil {
 		log.Fatal().Err(err).Msg("Failed to add logo")
+	}
+
+	applyBlueStyle(f, sheet, currentRow, len(headers))
+}
+
+func applyBlueStyle(f *excelize.File, sheet string, lastRow int, columns int) {
+	style, err := f.NewStyle(&excelize.Style{
+		Fill: excelize.Fill{
+			Type:    "pattern",
+			Color:   []string{"#CAEDFB"},
+			Pattern: 1,
+		},
+	})
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create blue style")
+	}
+
+	for i := 5; i <= lastRow; i++ {
+		for j := 1; j <= columns; j++ {
+			cell, err := excelize.CoordinatesToCellName(j, i)
+			if err != nil {
+				log.Fatal().Err(err).Msg("Failed to get cell")
+			}
+
+			if i%2 == 0 {
+				err = f.SetCellStyle(sheet, cell, cell, style)
+				if err != nil {
+					log.Fatal().Err(err).Msg("Failed to set style")
+				}
+			}
+		}
 	}
 }
