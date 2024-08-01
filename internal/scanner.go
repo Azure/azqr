@@ -122,6 +122,10 @@ func (sc Scanner) Scan(params *ScanParams) {
 					continue
 				}
 
+				if r.RecommendationType != azqr.TypeRecommendation {
+					continue
+				}
+
 				if reportData.Recomendations[strings.ToLower(r.ResourceType)] == nil {
 					reportData.Recomendations[strings.ToLower(r.ResourceType)] = map[string]azqr.AprlRecommendation{}
 				}
