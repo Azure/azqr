@@ -35,6 +35,7 @@ type (
 		Cost                    bool
 		Mask                    bool
 		Csv                     bool
+		Json                    bool
 		Debug                   bool
 		ServiceScanners         []azqr.IAzureScanner
 		ForceAzureCliCredential bool
@@ -226,7 +227,9 @@ func (sc Scanner) Scan(params *ScanParams) {
 	excel.CreateExcelReport(&reportData)
 
 	// render json report
-	json.CreateJsonReport(&reportData)
+	if params.Json {
+		json.CreateJsonReport(&reportData)
+	}
 
 	// render csv reports
 	if params.Csv {

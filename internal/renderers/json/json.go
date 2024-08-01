@@ -69,25 +69,27 @@ func getResources(data *renderers.ReportData) []renderers.ResourceResult {
 		rows = append(rows, row)
 	}
 
-	for _, d := range data.AzqrData {
-		for _, r := range d.Recommendations {
-			if r.NotCompliant {
-				row := renderers.ResourceResult{
-					ValidationAction: "Azure Resource Manager",
-					RecommendationId: r.RecommendationID,
-					Name:             d.ServiceName,
-					Id:               d.ResourceID(),
-					Param1:           r.Result,
-					Param2:           "",
-					Param3:           "",
-					Param4:           "",
-					Param5:           "",
-					CheckName:        "",
-					Selector:         "AZQR",
-				}
-				rows = append(rows, row)
-			}
-		}
-	}
+	// Not sure if we can upload AZQR results
+	// for _, d := range data.AzqrData {
+	// 	for _, r := range d.Recommendations {
+	// 		if r.NotCompliant {
+	// 			row := renderers.ResourceResult{
+	// 				ValidationAction: "Azure Resource Manager",
+	// 				RecommendationId: r.RecommendationID,
+	// 				Name:             d.ServiceName,
+	// 				Id:               renderers.MaskSubscriptionIDInResourceID(d.ResourceID(), data.Mask),
+	// 				Param1:           r.Result,
+	// 				Param2:           "",
+	// 				Param3:           "",
+	// 				Param4:           "",
+	// 				Param5:           "",
+	// 				CheckName:        "",
+	// 				Selector:         "AZQR",
+	// 			}
+	// 			rows = append(rows, row)
+	// 		}
+	// 	}
+	// }
+	
 	return rows
 }

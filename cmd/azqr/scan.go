@@ -17,6 +17,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status (default)")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations (default)")
 	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs (default)")
+	scanCmd.PersistentFlags().BoolP("json", "", false, "Create josn file")
 	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create csv files")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default)")
@@ -47,6 +48,7 @@ func scan(cmd *cobra.Command, serviceScanners []azqr.IAzureScanner) {
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
 	csv, _ := cmd.Flags().GetBool("csv")
+	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
 	forceAzureCliCredential, _ := cmd.Flags().GetBool("azure-cli-credential")
@@ -61,6 +63,7 @@ func scan(cmd *cobra.Command, serviceScanners []azqr.IAzureScanner) {
 		Advisor:                 advisor,
 		Cost:                    cost,
 		Csv:                     csv,
+		Json:                    json,
 		Mask:                    mask,
 		Debug:                   debug,
 		ServiceScanners:         serviceScanners,
