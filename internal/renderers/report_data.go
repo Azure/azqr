@@ -249,7 +249,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 		"Azure Service Category / Well-Architected Area", "Azure Service / Well-Architected Topic", "Resiliency Category", "Recommendation",
 		"Impact", "Best Practices Guidance", "Read More", "Recommendation Id"}
 	rows := [][]string{}
-	for t, rt := range rd.Recomendations {
+	for _, rt := range rd.Recomendations {
 		for _, r := range rt {
 			implemented := counter[r.RecommendationID] == 0
 			source := "APRL"
@@ -260,7 +260,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 
 			categoryPart := ""
 			servicePart := ""
-			typeParts := strings.Split(t, "/")
+			typeParts := strings.Split(r.ResourceType, "/")
 			categoryPart = typeParts[0]
 			if len(typeParts) > 1 {
 				servicePart = typeParts[1]
