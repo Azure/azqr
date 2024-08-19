@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
@@ -16,7 +16,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 				target: &armdatabricks.Workspace{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "dbw-003",
 				target:      &armdatabricks.Workspace{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,27 +70,11 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "DatabricksScanner SKU",
-			fields: fields{
-				rule: "dbw-005",
-				target: &armdatabricks.Workspace{
-					SKU: &armdatabricks.SKU{
-						Name: to.Ptr("Standard"),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
 			},
 		},
 		{
@@ -100,7 +84,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 				target: &armdatabricks.Workspace{
 					Name: to.Ptr("dbw-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -120,7 +104,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -131,7 +115,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &DatabricksScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

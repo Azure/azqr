@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
@@ -17,7 +17,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,7 +35,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -47,35 +47,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AKSScanner AvailabilityZones",
-			fields: fields{
-				rule: "apim-002",
-				target: &armapimanagement.ServiceResource{
-					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "AKSScanner no AvailabilityZones",
-			fields: fields{
-				rule: "apim-002",
-				target: &armapimanagement.ServiceResource{
-					Zones: []*string{},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
-			name: "APIManagementScanner SLA Free SKU",
+			name: "APIManagementScanner SLA Developer SKU",
 			fields: fields{
 				rule: "apim-003",
 				target: &armapimanagement.ServiceResource{
@@ -87,7 +59,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -107,7 +79,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -127,7 +99,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						AdditionalLocations: []*armapimanagement.AdditionalLocation{},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -147,27 +119,11 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "APIManagementScanner SKU",
-			fields: fields{
-				rule: "apim-005",
-				target: &armapimanagement.ServiceResource{
-					SKU: &armapimanagement.ServiceSKUProperties{
-						Name: to.Ptr(armapimanagement.SKUTypeDeveloper),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "Developer",
 			},
 		},
 		{
@@ -177,7 +133,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 				target: &armapimanagement.ServiceResource{
 					Name: to.Ptr("apim-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -193,7 +149,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						Type: to.Ptr(armapimanagement.ApimIdentityTypeNone),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -216,7 +172,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -232,7 +188,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						CustomProperties: nil,
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -257,7 +213,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -273,7 +229,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						CustomProperties: nil,
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -295,7 +251,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -317,39 +273,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "APIManagementScanner stv1",
-			fields: fields{
-				rule: "apim-012",
-				target: &armapimanagement.ServiceResource{
-					Properties: &armapimanagement.ServiceProperties{
-						PlatformVersion: to.Ptr(armapimanagement.PlatformVersionStv1),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
-			name: "APIManagementScanner stv2",
-			fields: fields{
-				rule: "apim-012",
-				target: &armapimanagement.ServiceResource{
-					Properties: &armapimanagement.ServiceProperties{
-						PlatformVersion: to.Ptr(armapimanagement.PlatformVersionStv2),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -360,7 +284,7 @@ func TestAPIManagementScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &APIManagementScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

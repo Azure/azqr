@@ -7,16 +7,16 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func TestFirewallScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -46,26 +46,11 @@ func TestFirewallScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "FirewallScanner AvailabilityZones",
-			fields: fields{
-				rule: "afw-002",
-				target: &armnetwork.AzureFirewall{
-					ID:    to.Ptr("test"),
-					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "FirewallScanner SLA 99.95%",
 			fields: fields{
 				rule:        "afw-003",
 				target:      &armnetwork.AzureFirewall{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -79,29 +64,11 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "99.99%",
-			},
-		},
-		{
-			name: "FirewallScanner SKU",
-			fields: fields{
-				rule: "afw-005",
-				target: &armnetwork.AzureFirewall{
-					Properties: &armnetwork.AzureFirewallPropertiesFormat{
-						SKU: &armnetwork.AzureFirewallSKU{
-							Name: to.Ptr(armnetwork.AzureFirewallSKUNameAZFWVnet),
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "AZFW_VNet",
 			},
 		},
 		{
@@ -111,7 +78,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 				target: &armnetwork.AzureFirewall{
 					Name: to.Ptr("afw-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -122,7 +89,7 @@ func TestFirewallScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &FirewallScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

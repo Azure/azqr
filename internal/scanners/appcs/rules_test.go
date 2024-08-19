@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
 )
@@ -16,7 +16,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				target: &armappconfiguration.ConfigurationStore{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -54,7 +54,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 						Name: to.Ptr("free"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -70,7 +70,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 						Name: to.Ptr("Standard"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -90,27 +90,11 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "AppConfigurationScanner SKU",
-			fields: fields{
-				rule: "appcs-005",
-				target: &armappconfiguration.ConfigurationStore{
-					SKU: &armappconfiguration.SKU{
-						Name: to.Ptr("Standard"),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
 			},
 		},
 		{
@@ -120,7 +104,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 				target: &armappconfiguration.ConfigurationStore{
 					Name: to.Ptr("appcs-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -136,23 +120,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 						DisableLocalAuth: to.Ptr(true),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "AppConfigurationScanner Purge Protection",
-			fields: fields{
-				rule: "appcs-009",
-				target: &armappconfiguration.ConfigurationStore{
-					Properties: &armappconfiguration.ConfigurationStoreProperties{
-						EnablePurgeProtection: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -163,7 +131,7 @@ func TestAppConfigurationScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &AppConfigurationScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

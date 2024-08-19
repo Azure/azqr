@@ -8,8 +8,8 @@ import (
 	_ "image/png"
 	"unicode/utf8"
 
-	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/embeded"
+	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
@@ -24,11 +24,14 @@ func CreateExcelReport(data *renderers.ReportData) {
 		}
 	}()
 
-	renderRecommendations(f, data)
-	renderServices(f, data)
-	renderDefender(f, data)
+	lastRow := renderRecommendations(f, data)
+	renderImpactedResources(f, data)
+	renderResourceTypes(f, data)
+	renderResources(f, data)
 	renderAdvisor(f, data)
+	renderDefender(f, data)
 	renderCosts(f, data)
+	renderRecommendationsPivotTables(f, lastRow)
 
 	if err := f.SaveAs(filename); err != nil {
 		log.Fatal().Err(err).Msg("Failed to save Excel file")
@@ -60,16 +63,6 @@ func autofit(f *excelize.File, sheetName string) error {
 	return nil
 }
 
-func mapToRow(headers []string, m map[string]string) [][]string {
-	v := make([]string, 0, len(m))
-
-	for _, k := range headers {
-		v = append(v, m[k])
-	}
-
-	return [][]string{v}
-}
-
 func createFirstRow(f *excelize.File, sheet string, headers []string) {
 	currentRow := 4
 	cell, err := excelize.CoordinatesToCellName(1, currentRow)
@@ -80,14 +73,32 @@ func createFirstRow(f *excelize.File, sheet string, headers []string) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to set row")
 	}
-	font := excelize.Font{Bold: true}
-	style, err := f.NewStyle(&excelize.Style{Font: &font})
+
+	style, err := f.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+		Fill: excelize.Fill{
+			Type:    "pattern",
+			Color:   []string{"#CAEDFB"},
+			Pattern: 1,
+		},
+	})
+
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create style")
 	}
-	err = f.SetRowStyle(sheet, 4, 4, style)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to set style")
+
+	for j := 1; j <= len(headers); j++ {
+		cell, err := excelize.CoordinatesToCellName(j, 4)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get cell")
+		}
+
+		err = f.SetCellStyle(sheet, cell, cell, style)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to set style")
+		}
 	}
 }
 
@@ -129,5 +140,36 @@ func configureSheet(f *excelize.File, sheet string, headers []string, currentRow
 
 	if err := f.AddPictureFromBytes(sheet, "A1", pic); err != nil {
 		log.Fatal().Err(err).Msg("Failed to add logo")
+	}
+
+	applyBlueStyle(f, sheet, currentRow, len(headers))
+}
+
+func applyBlueStyle(f *excelize.File, sheet string, lastRow int, columns int) {
+	style, err := f.NewStyle(&excelize.Style{
+		Fill: excelize.Fill{
+			Type:    "pattern",
+			Color:   []string{"#CAEDFB"},
+			Pattern: 1,
+		},
+	})
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create blue style")
+	}
+
+	for i := 5; i <= lastRow; i++ {
+		for j := 1; j <= columns; j++ {
+			cell, err := excelize.CoordinatesToCellName(j, i)
+			if err != nil {
+				log.Fatal().Err(err).Msg("Failed to get cell")
+			}
+
+			if i%2 == 0 {
+				err = f.SetCellStyle(sheet, cell, cell, style)
+				if err != nil {
+					log.Fatal().Err(err).Msg("Failed to set style")
+				}
+			}
+		}
 	}
 }

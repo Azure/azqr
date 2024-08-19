@@ -4,18 +4,18 @@
 package lb
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // LoadBalancerScanner - Scanner for Loadbalancer
 type LoadBalancerScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armnetwork.LoadBalancersClient
 }
 
 // Init - Initializes the LoadBalancerScanner
-func (c *LoadBalancerScanner) Init(config *scanners.ScannerConfig) error {
+func (c *LoadBalancerScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armnetwork.NewLoadBalancersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (c *LoadBalancerScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Loadbalancer in a Resource Group
-func (c *LoadBalancerScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Load Balancer")
+func (c *LoadBalancerScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	lbs, err := c.list(resourceGroupName)
+	lbs, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, w := range lbs {
-		rr := engine.EvaluateRules(rules, w, scanContext)
+		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (c *LoadBalancerScanner) list(resourceGroupName string) ([]*armnetwork.LoadBalancer, error) {
-	pager := c.client.NewListPager(resourceGroupName, nil)
+func (c *LoadBalancerScanner) list() ([]*armnetwork.LoadBalancer, error) {
+	pager := c.client.NewListAllPager(nil)
 
 	lbs := make([]*armnetwork.LoadBalancer, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (c *LoadBalancerScanner) list(resourceGroupName string) ([]*armnetwork.Load
 		lbs = append(lbs, resp.Value...)
 	}
 	return lbs, nil
+}
+
+func (a *LoadBalancerScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Network/loadBalancers"}
 }

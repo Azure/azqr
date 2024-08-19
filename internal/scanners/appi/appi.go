@@ -4,18 +4,18 @@
 package appi
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights"
 )
 
 // AppInsightsScanner - Scanner for Front Door
 type AppInsightsScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armapplicationinsights.ComponentsClient
 }
 
 // Init - Initializes the Application Insights Scanner
-func (a *AppInsightsScanner) Init(config *scanners.ScannerConfig) error {
+func (a *AppInsightsScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armapplicationinsights.NewComponentsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,35 +23,35 @@ func (a *AppInsightsScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Application Insights in a Resource Group
-func (a *AppInsightsScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Application Insights")
+func (a *AppInsightsScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	gateways, err := a.list(resourceGroupName)
+	gateways, err := a.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, g := range gateways {
-		rr := engine.EvaluateRules(rules, g, scanContext)
+		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (a *AppInsightsScanner) list(resourceGroupName string) ([]*armapplicationinsights.Component, error) {
-	pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *AppInsightsScanner) list() ([]*armapplicationinsights.Component, error) {
+	pager := a.client.NewListPager(nil)
 
 	services := make([]*armapplicationinsights.Component, 0)
 	for pager.More() {
@@ -62,4 +62,11 @@ func (a *AppInsightsScanner) list(resourceGroupName string) ([]*armapplicationin
 		services = append(services, resp.Value...)
 	}
 	return services, nil
+}
+
+func (a *AppInsightsScanner) ResourceTypes() []string {
+	return []string{
+		"Microsoft.Insights/components",
+		"Microsoft.Insights/activityLogAlerts",
+	}
 }

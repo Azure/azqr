@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
 )
@@ -16,7 +16,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 				target: &armcontainerinstance.ContainerGroup{
 					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -46,7 +46,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "ci-003",
 				target:      &armcontainerinstance.ContainerGroup{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -62,7 +62,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 						IPAddress: nil,
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -80,7 +80,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -98,27 +98,11 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "ContainerInstanceScanner SKU",
-			fields: fields{
-				rule: "ci-005",
-				target: &armcontainerinstance.ContainerGroup{
-					Properties: &armcontainerinstance.ContainerGroupProperties{
-						SKU: to.Ptr(armcontainerinstance.ContainerGroupSKUStandard),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
 			},
 		},
 		{
@@ -128,7 +112,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 				target: &armcontainerinstance.ContainerGroup{
 					Name: to.Ptr("ci-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -139,7 +123,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &ContainerInstanceScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

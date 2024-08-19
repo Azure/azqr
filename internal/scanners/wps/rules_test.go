@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
 )
@@ -16,7 +16,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				target: &armwebpubsub.ResourceInfo{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -54,7 +54,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 						Name: to.Ptr("Premium"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +70,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 						Name: to.Ptr("Premium"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -86,7 +86,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 						Name: to.Ptr("Free"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -106,27 +106,11 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "WebPubSubScanner SKU",
-			fields: fields{
-				rule: "wps-005",
-				target: &armwebpubsub.ResourceInfo{
-					SKU: &armwebpubsub.ResourceSKU{
-						Name: to.Ptr("Premium"),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium",
 			},
 		},
 		{
@@ -136,7 +120,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				target: &armwebpubsub.ResourceInfo{
 					Name: to.Ptr("wps-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -147,7 +131,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &WebPubSubScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

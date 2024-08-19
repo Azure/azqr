@@ -5,6 +5,7 @@ package azqr
 
 import (
 	"github.com/Azure/azqr/internal"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners"
 
 	"github.com/spf13/cobra"
@@ -13,15 +14,17 @@ import (
 func init() {
 	scanCmd.PersistentFlags().StringP("subscription-id", "s", "", "Azure Subscription Id")
 	scanCmd.PersistentFlags().StringP("resource-group", "g", "", "Azure Resource Group (Use with --subscription-id)")
-	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status")
-	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations")
-	scanCmd.PersistentFlags().BoolP("costs", "c", false, "Scan Azure Costs")
-	scanCmd.PersistentFlags().BoolP("excel", "x", false, "Create excel report")
+	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status (default)")
+	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations (default)")
+	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs (default)")
+	scanCmd.PersistentFlags().BoolP("json", "", false, "Create josn file")
+	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create csv files")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
-	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report")
+	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default)")
 	scanCmd.PersistentFlags().BoolP("azure-cli-credential", "f", false, "Force the use of Azure CLI Credential")
 	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
-	scanCmd.PersistentFlags().StringP("exclusions", "e", "", "Exclusions file (YAML format)")
+	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
+	scanCmd.PersistentFlags().BoolP("azqr", "", true, "Scan Azure Quick Review Recommendations (default)")
 
 	rootCmd.AddCommand(scanCmd)
 }
@@ -32,23 +35,25 @@ var scanCmd = &cobra.Command{
 	Long:  "Scan Azure Resources",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := internal.GetScanners()
+		serviceScanners := scanners.GetScanners()
 		scan(cmd, serviceScanners)
 	},
 }
 
-func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
+func scan(cmd *cobra.Command, serviceScanners []azqr.IAzureScanner) {
 	subscriptionID, _ := cmd.Flags().GetString("subscription-id")
 	resourceGroupName, _ := cmd.Flags().GetString("resource-group")
 	outputFileName, _ := cmd.Flags().GetString("output-name")
 	defender, _ := cmd.Flags().GetBool("defender")
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
-	xlsx, _ := cmd.Flags().GetBool("excel")
+	csv, _ := cmd.Flags().GetBool("csv")
+	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
 	forceAzureCliCredential, _ := cmd.Flags().GetBool("azure-cli-credential")
-	exclusionFile, _ := cmd.Flags().GetString("exclusions")
+	filtersFile, _ := cmd.Flags().GetString("filters")
+	azqr, _ := cmd.Flags().GetBool("azqr")
 
 	params := internal.ScanParams{
 		SubscriptionID:          subscriptionID,
@@ -57,13 +62,16 @@ func scan(cmd *cobra.Command, serviceScanners []scanners.IAzureScanner) {
 		Defender:                defender,
 		Advisor:                 advisor,
 		Cost:                    cost,
-		Xlsx:                    xlsx,
+		Csv:                     csv,
+		Json:                    json,
 		Mask:                    mask,
 		Debug:                   debug,
 		ServiceScanners:         serviceScanners,
 		ForceAzureCliCredential: forceAzureCliCredential,
-		ExclusionsFile:          exclusionFile,
+		FilterFile:              filtersFile,
+		UseAzqrRecommendations:  azqr,
 	}
 
-	internal.Scan(&params)
+	scanner := internal.Scanner{}
+	scanner.Scan(&params)
 }

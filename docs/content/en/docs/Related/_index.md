@@ -8,7 +8,7 @@ weight: 6
 
 When some of our peers saw the assessments we were able to deliver with the early bits of **Azure Quick Review (azqr)**, they asked us to add more checks (rules) and change the output format from markdown to Excel.
 
-Also, many of our customers work in very restrictive environments. Therefore, the ability to run a self-contained binary, in any OS, that requires just read-only permissions was very important.
+Also, many of our customers work in very restrictive environments. Therefore, the ability to run a self-contained binary, in any OS, which requires read-only permissions was very important.
 
 Moving forward to 2023, based on great feedback from both peers and customers, we moved the original repo to the Azure organization, added support for more services, fixed some issues and even added a Power BI template.
 

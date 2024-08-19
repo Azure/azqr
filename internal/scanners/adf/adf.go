@@ -4,18 +4,18 @@
 package adf
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
 )
 
 // DataFactoryScanner - Scanner for Data Factory
 type DataFactoryScanner struct {
-	config          *scanners.ScannerConfig
+	config          *azqr.ScannerConfig
 	factoriesClient *armdatafactory.FactoriesClient
 }
 
 // Init - Initializes the DataFactory Scanner
-func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
+func (a *DataFactoryScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.factoriesClient, err = armdatafactory.NewFactoriesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,35 +23,35 @@ func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Data Factories in a Resource Group
-func (a *DataFactoryScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "DataFactory")
+func (a *DataFactoryScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	factories, err := a.listFactories(resourceGroupName)
+	factories, err := a.listFactories()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, g := range factories {
-		rr := engine.EvaluateRules(rules, g, scanContext)
+		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (a *DataFactoryScanner) listFactories(resourceGroupName string) ([]*armdatafactory.Factory, error) {
-	pager := a.factoriesClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *DataFactoryScanner) listFactories() ([]*armdatafactory.Factory, error) {
+	pager := a.factoriesClient.NewListPager(nil)
 
 	factories := make([]*armdatafactory.Factory, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (a *DataFactoryScanner) listFactories(resourceGroupName string) ([]*armdata
 		factories = append(factories, resp.Value...)
 	}
 	return factories, nil
+}
+
+func (a *DataFactoryScanner) ResourceTypes() []string {
+	return []string{"Microsoft.DataFactory/factories"}
 }

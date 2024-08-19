@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
 )
@@ -16,7 +16,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 				target: &armcdn.Profile{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,27 +50,11 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "afd-003",
 				target:      &armcdn.Profile{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "99.99%",
-			},
-		},
-		{
-			name: "FrontDoorScanner SKU",
-			fields: fields{
-				rule: "afd-005",
-				target: &armcdn.Profile{
-					SKU: &armcdn.SKU{
-						Name: to.Ptr(armcdn.SKUNameStandardMicrosoft),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard_Microsoft",
 			},
 		},
 		{
@@ -80,7 +64,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 				target: &armcdn.Profile{
 					Name: to.Ptr("afd-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -91,7 +75,7 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &FrontDoorScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

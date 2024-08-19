@@ -4,18 +4,18 @@
 package dec
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto"
 )
 
 // DataExplorerScanner - Scanner for Data Explorer
 type DataExplorerScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armkusto.ClustersClient
 }
 
 // Init - Initializes the FrontDoor Scanner
-func (a *DataExplorerScanner) Init(config *scanners.ScannerConfig) error {
+func (a *DataExplorerScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armkusto.NewClustersClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,35 +23,35 @@ func (a *DataExplorerScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Data Explorers in a Resource Group
-func (a *DataExplorerScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "DataExplorer")
+func (a *DataExplorerScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	kustoclusters, err := a.listClusters(resourceGroupName)
+	kustoclusters, err := a.listClusters()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, g := range kustoclusters {
-		rr := engine.EvaluateRules(rules, g, scanContext)
+		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (a *DataExplorerScanner) listClusters(resourceGroupName string) ([]*armkusto.Cluster, error) {
-	pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *DataExplorerScanner) listClusters() ([]*armkusto.Cluster, error) {
+	pager := a.client.NewListPager(nil)
 
 	kustoclusters := make([]*armkusto.Cluster, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (a *DataExplorerScanner) listClusters(resourceGroupName string) ([]*armkust
 		kustoclusters = append(kustoclusters, resp.Value...)
 	}
 	return kustoclusters, nil
+}
+
+func (a *DataExplorerScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Kusto/clusters"}
 }

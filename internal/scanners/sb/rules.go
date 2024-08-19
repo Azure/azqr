@@ -6,44 +6,34 @@ package sb
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
 
-// GetRules - Returns the rules for the ServiceBusScanner
-func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+// GetRecommendations - Returns the rules for the ServiceBusScanner
+func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"sb-001": {
-			Id:             "sb-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "Service Bus should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "sb-001",
+			ResourceType:     "Microsoft.ServiceBus/namespaces",
+			Category:         azqr.CategoryMonitoringAndAlerting,
+			Recommendation:   "Service Bus should have diagnostic settings enabled",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armservicebus.SBNamespace)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
-		},
-		"sb-002": {
-			Id:             "sb-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Service Bus should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armservicebus.SBNamespace)
-				sku := string(*i.SKU.Name)
-				zones := strings.Contains(sku, "Premium") && i.Properties.ZoneRedundant != nil && *i.Properties.ZoneRedundant
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-outages-disasters#availability-zones",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
 		},
 		"sb-003": {
-			Id:             "sb-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Service Bus should have a SLA",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID:   "sb-003",
+			ResourceType:       "Microsoft.ServiceBus/namespaces",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "Service Bus should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armservicebus.SBNamespace)
 				sku := string(*i.SKU.Name)
 				sla := "99.9%"
@@ -52,65 +42,58 @@ func (a *ServiceBusScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return false, sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/service-bus/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/service-bus/",
 		},
 		"sb-004": {
-			Id:             "sb-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Service Bus should have private endpoints enabled",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "sb-004",
+			ResourceType:     "Microsoft.ServiceBus/namespaces",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "Service Bus should have private endpoints enabled",
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				i := target.(*armservicebus.SBNamespace)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/network-security",
-		},
-		"sb-005": {
-			Id:             "sb-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Service Bus SKU",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armservicebus.SBNamespace)
-				return false, string(*i.SKU.Name)
-			},
-			Url: "https://azure.microsoft.com/en-us/pricing/details/service-bus/",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/network-security",
 		},
 		"sb-006": {
-			Id:             "sb-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Service Bus Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "sb-006",
+			ResourceType:     "Microsoft.ServiceBus/namespaces",
+			Category:         azqr.CategoryGovernance,
+			Recommendation:   "Service Bus Name should comply with naming conventions",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
 				caf := strings.HasPrefix(*c.Name, "sb")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"sb-007": {
-			Id:             "sb-007",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "Service Bus should have tags",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "sb-007",
+			ResourceType:     "Microsoft.ServiceBus/namespaces",
+			Category:         azqr.CategoryGovernance,
+			Recommendation:   "Service Bus should have tags",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"sb-008": {
-			Id:             "sb-008",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "Service Bus should have local authentication disabled",
-			Impact:         scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "sb-008",
+			ResourceType:     "Microsoft.ServiceBus/namespaces",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "Service Bus should have local authentication disabled",
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas",
 		},
 	}
 }

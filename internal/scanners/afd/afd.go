@@ -4,18 +4,18 @@
 package afd
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
 )
 
 // FrontDoorScanner - Scanner for Front Door
 type FrontDoorScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armcdn.ProfilesClient
 }
 
 // Init - Initializes the FrontDoor Scanner
-func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
+func (a *FrontDoorScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armcdn.NewProfilesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,35 +23,35 @@ func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Front Doors in a Resource Group
-func (a *FrontDoorScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "FrontDoor")
+func (a *FrontDoorScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	gateways, err := a.list(resourceGroupName)
+	gateways, err := a.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, g := range gateways {
-		rr := engine.EvaluateRules(rules, g, scanContext)
+		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (a *FrontDoorScanner) list(resourceGroupName string) ([]*armcdn.Profile, error) {
-	pager := a.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *FrontDoorScanner) list() ([]*armcdn.Profile, error) {
+	pager := a.client.NewListPager(nil)
 
 	services := make([]*armcdn.Profile, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (a *FrontDoorScanner) list(resourceGroupName string) ([]*armcdn.Profile, er
 		services = append(services, resp.Value...)
 	}
 	return services, nil
+}
+
+func (a *FrontDoorScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Cdn/profiles"}
 }

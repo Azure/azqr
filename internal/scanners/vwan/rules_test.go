@@ -7,16 +7,16 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func TestVirtualWanScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 				target: &armnetwork.VirtualWAN{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "vwa-002",
 				target:      &armnetwork.VirtualWAN{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -62,27 +62,11 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "vwa-003",
 				target:      &armnetwork.VirtualWAN{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "99.95%",
-			},
-		},
-		{
-			name: "VirtualWanScanner SKU",
-			fields: fields{
-				rule: "vwa-005",
-				target: &armnetwork.VirtualWAN{
-					Properties: &armnetwork.VirtualWanProperties{
-						Type: to.Ptr("Standard"),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Standard",
 			},
 		},
 		{
@@ -92,7 +76,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 				target: &armnetwork.VirtualWAN{
 					Name: to.Ptr("vwa-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -103,7 +87,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &VirtualWanScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

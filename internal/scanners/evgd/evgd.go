@@ -4,18 +4,18 @@
 package evgd
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
 )
 
 // EventGridScanner - Scanner for EventGrid Domains
 type EventGridScanner struct {
-	config        *scanners.ScannerConfig
+	config        *azqr.ScannerConfig
 	domainsClient *armeventgrid.DomainsClient
 }
 
 // Init - Initializes the EventGridScanner
-func (a *EventGridScanner) Init(config *scanners.ScannerConfig) error {
+func (a *EventGridScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.domainsClient, err = armeventgrid.NewDomainsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (a *EventGridScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all EventGrid Domains in a Resource Group
-func (a *EventGridScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "EventGrid")
+func (a *EventGridScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	domains, err := a.listDomain(resourceGroupName)
+	domains, err := a.listDomain()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, d := range domains {
-		rr := engine.EvaluateRules(rules, d, scanContext)
+		rr := engine.EvaluateRecommendations(rules, d, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*d.ID),
 			ServiceName:      *d.Name,
 			Type:             *d.Type,
 			Location:         *d.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (a *EventGridScanner) listDomain(resourceGroupName string) ([]*armeventgrid.Domain, error) {
-	pager := a.domainsClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *EventGridScanner) listDomain() ([]*armeventgrid.Domain, error) {
+	pager := a.domainsClient.NewListBySubscriptionPager(nil)
 
 	domains := make([]*armeventgrid.Domain, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (a *EventGridScanner) listDomain(resourceGroupName string) ([]*armeventgrid
 		domains = append(domains, resp.Value...)
 	}
 	return domains, nil
+}
+
+func (a *EventGridScanner) ResourceTypes() []string {
+	return []string{"Microsoft.EventGrid/domains"}
 }

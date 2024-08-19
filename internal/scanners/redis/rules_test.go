@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
@@ -16,7 +16,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				target: &armredis.ResourceInfo{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -46,67 +46,15 @@ func TestRedisScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "RedisScanner Availability Zones",
-			fields: fields{
-				rule: "redis-002",
-				target: &armredis.ResourceInfo{
-					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "RedisScanner SLA",
 			fields: fields{
 				rule:        "redis-003",
 				target:      &armredis.ResourceInfo{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "99.9%",
-			},
-		},
-		{
-			name: "RedisScanner Private Endpoint",
-			fields: fields{
-				rule: "redis-004",
-				target: &armredis.ResourceInfo{
-					Properties: &armredis.Properties{
-						PrivateEndpointConnections: []*armredis.PrivateEndpointConnection{
-							{
-								ID: to.Ptr("test"),
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "RedisScanner SKU",
-			fields: fields{
-				rule: "redis-005",
-				target: &armredis.ResourceInfo{
-					Properties: &armredis.Properties{
-						SKU: &armredis.SKU{
-							Name: to.Ptr(armredis.SKUNamePremium),
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium",
 			},
 		},
 		{
@@ -116,7 +64,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				target: &armredis.ResourceInfo{
 					Name: to.Ptr("redis-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -132,7 +80,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 						EnableNonSSLPort: to.Ptr(false),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -148,7 +96,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 						MinimumTLSVersion: to.Ptr(armredis.TLSVersionOne2),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -159,7 +107,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &RedisScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

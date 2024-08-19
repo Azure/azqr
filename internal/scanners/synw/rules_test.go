@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse"
 )
@@ -16,7 +16,7 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 				target: &armsynapse.Workspace{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -58,7 +58,7 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +70,7 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 			fields: fields{
 				rule:        "synw-003",
 				target:      &armsynapse.Workspace{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -84,7 +84,7 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 				target: &armsynapse.Workspace{
 					Name: to.Ptr("synw-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -101,7 +101,7 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 						ManagedVirtualNetwork: to.Ptr("default"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -118,7 +118,7 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 						ManagedVirtualNetwork: nil,
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -135,7 +135,7 @@ func TestSynapseWorkspaceScanner_WorkspaceRules(t *testing.T) {
 						PublicNetworkAccess: &armsynapse.PossibleWorkspacePublicNetworkAccessValues()[0],
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -163,7 +163,7 @@ func TestSynapseWorkspaceScanner_SparkPoolRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -179,7 +179,7 @@ func TestSynapseWorkspaceScanner_SparkPoolRules(t *testing.T) {
 			fields: fields{
 				rule:        "synsp-002",
 				target:      &armsynapse.Workspace{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -193,7 +193,7 @@ func TestSynapseWorkspaceScanner_SparkPoolRules(t *testing.T) {
 				target: &armsynapse.BigDataPoolResourceInfo{
 					Name: to.Ptr("synsp-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -221,7 +221,7 @@ func TestSynapseWorkspaceScanner_SqlPoolRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -237,7 +237,7 @@ func TestSynapseWorkspaceScanner_SqlPoolRules(t *testing.T) {
 			fields: fields{
 				rule:        "syndp-002",
 				target:      &armsynapse.Workspace{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -251,7 +251,7 @@ func TestSynapseWorkspaceScanner_SqlPoolRules(t *testing.T) {
 				target: &armsynapse.SQLPool{
 					Name: to.Ptr("syndp-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,

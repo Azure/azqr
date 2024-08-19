@@ -4,18 +4,18 @@
 package sb
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
 
 // ServiceBusScanner - Scanner for Service Bus
 type ServiceBusScanner struct {
-	config           *scanners.ScannerConfig
+	config           *azqr.ScannerConfig
 	servicebusClient *armservicebus.NamespacesClient
 }
 
 // Init - Initializes the ServiceBusScanner
-func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
+func (a *ServiceBusScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.servicebusClient, err = armservicebus.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Service Bus in a Resource Group
-func (c *ServiceBusScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Service Bus")
+func (c *ServiceBusScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	servicebus, err := c.listServiceBus(resourceGroupName)
+	servicebus, err := c.listServiceBus()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, servicebus := range servicebus {
-		rr := engine.EvaluateRules(rules, servicebus, scanContext)
+		rr := engine.EvaluateRecommendations(rules, servicebus, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*servicebus.ID),
 			ServiceName:      *servicebus.Name,
 			Type:             *servicebus.Type,
 			Location:         *servicebus.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (c *ServiceBusScanner) listServiceBus(resourceGroupName string) ([]*armservicebus.SBNamespace, error) {
-	pager := c.servicebusClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *ServiceBusScanner) listServiceBus() ([]*armservicebus.SBNamespace, error) {
+	pager := c.servicebusClient.NewListPager(nil)
 
 	namespaces := make([]*armservicebus.SBNamespace, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (c *ServiceBusScanner) listServiceBus(resourceGroupName string) ([]*armserv
 		namespaces = append(namespaces, resp.Value...)
 	}
 	return namespaces, nil
+}
+
+func (a *ServiceBusScanner) ResourceTypes() []string {
+	return []string{"Microsoft.ServiceBus/namespaces"}
 }

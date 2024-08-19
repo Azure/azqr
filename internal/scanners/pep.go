@@ -4,18 +4,20 @@
 package scanners
 
 import (
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
+	"github.com/rs/zerolog/log"
 )
 
 // PrivateEndpointScanner - Scanner for Private Endpoints
 type PrivateEndpointScanner struct {
-	config                 *ScannerConfig
+	config                 *azqr.ScannerConfig
 	client                 *armnetwork.PrivateEndpointsClient
 	hasPrivateEndpointFunc func() (map[string]bool, error)
 }
 
 // Init - Initializes the PrivateEndpointScanner
-func (s *PrivateEndpointScanner) Init(config *ScannerConfig) error {
+func (s *PrivateEndpointScanner) Init(config *azqr.ScannerConfig) error {
 	s.config = config
 	var err error
 	s.client, err = armnetwork.NewPrivateEndpointsClient(s.config.SubscriptionID, s.config.Cred, config.ClientOptions)
@@ -27,7 +29,7 @@ func (s *PrivateEndpointScanner) Init(config *ScannerConfig) error {
 
 // ListResourcesWithPrivateEndpoints - Lists all resources with private endpoints
 func (s *PrivateEndpointScanner) ListResourcesWithPrivateEndpoints() (map[string]bool, error) {
-	LogSubscriptionScan(s.config.SubscriptionID, "Private Endpoints")
+	azqr.LogSubscriptionScan(s.config.SubscriptionID, "Private Endpoints")
 
 	res := map[string]bool{}
 	if s.hasPrivateEndpointFunc == nil {
@@ -54,4 +56,20 @@ func (s *PrivateEndpointScanner) ListResourcesWithPrivateEndpoints() (map[string
 	}
 
 	return s.hasPrivateEndpointFunc()
+}
+
+func (s *PrivateEndpointScanner) Scan(config *azqr.ScannerConfig) map[string]bool {
+	err := s.Init(config)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize Private Endpoint Scanner")
+	}
+	peResults, err := s.ListResourcesWithPrivateEndpoints()
+	if err != nil {
+		if azqr.ShouldSkipError(err) {
+			peResults = map[string]bool{}
+		} else {
+			log.Fatal().Err(err).Msg("Failed to list resources with Private Endpoints")
+		}
+	}
+	return peResults
 }

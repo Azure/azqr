@@ -4,18 +4,18 @@
 package redis
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
 // RedisScanner - Scanner for Redis
 type RedisScanner struct {
-	config      *scanners.ScannerConfig
+	config      *azqr.ScannerConfig
 	redisClient *armredis.Client
 }
 
 // Init - Initializes the RedisScanner
-func (c *RedisScanner) Init(config *scanners.ScannerConfig) error {
+func (c *RedisScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (c *RedisScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Redis in a Resource Group
-func (c *RedisScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Redis")
+func (c *RedisScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	redis, err := c.listRedis(resourceGroupName)
+	redis, err := c.listRedis()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, redis := range redis {
-		rr := engine.EvaluateRules(rules, redis, scanContext)
+		rr := engine.EvaluateRecommendations(rules, redis, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*redis.ID),
 			ServiceName:      *redis.Name,
 			Type:             *redis.Type,
 			Location:         *redis.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (c *RedisScanner) listRedis(resourceGroupName string) ([]*armredis.ResourceInfo, error) {
-	pager := c.redisClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *RedisScanner) listRedis() ([]*armredis.ResourceInfo, error) {
+	pager := c.redisClient.NewListBySubscriptionPager(nil)
 
 	redis := make([]*armredis.ResourceInfo, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (c *RedisScanner) listRedis(resourceGroupName string) ([]*armredis.Resource
 		redis = append(redis, resp.Value...)
 	}
 	return redis, nil
+}
+
+func (a *RedisScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Cache/Redis"}
 }

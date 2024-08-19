@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
@@ -16,7 +16,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,30 +34,11 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				target: &armservicebus.SBNamespace{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
 				},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "ServiceBusScanner Availability Zones",
-			fields: fields{
-				rule: "sb-002",
-				target: &armservicebus.SBNamespace{
-					SKU: &armservicebus.SBSKU{
-						Name: to.Ptr(armservicebus.SKUNamePremium),
-					},
-					Properties: &armservicebus.SBNamespaceProperties{
-						ZoneRedundant: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -73,7 +54,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armservicebus.SKUNameStandard),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -89,7 +70,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armservicebus.SKUNamePremium),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -109,27 +90,11 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "ServiceBusScanner SKU",
-			fields: fields{
-				rule: "sb-005",
-				target: &armservicebus.SBNamespace{
-					SKU: &armservicebus.SBSKU{
-						Name: to.Ptr(armservicebus.SKUNamePremium),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium",
 			},
 		},
 		{
@@ -139,7 +104,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				target: &armservicebus.SBNamespace{
 					Name: to.Ptr("sb-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -155,7 +120,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						DisableLocalAuth: to.Ptr(true),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -166,7 +131,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &ServiceBusScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

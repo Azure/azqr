@@ -6,50 +6,35 @@ package aks
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
-// GetRules - Returns the rules for the AKSScanner
-func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+// GetRecommendations - Returns the rules for the AKSScanner
+func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"aks-001": {
-			Id:             "aks-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "AKS Cluster should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "aks-001",
+			ResourceType:     "Microsoft.ContainerService/managedClusters",
+			Category:         azqr.CategoryMonitoringAndAlerting,
+			Recommendation:   "AKS Cluster should have diagnostic settings enabled",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armcontainerservice.ManagedCluster)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
-		},
-		"aks-002": {
-			Id:             "aks-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "AKS Cluster should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				cluster := target.(*armcontainerservice.ManagedCluster)
-				zones := true
-				for _, profile := range cluster.Properties.AgentPoolProfiles {
-					if profile.AvailabilityZones == nil || (profile.AvailabilityZones != nil && len(profile.AvailabilityZones) <= 1) {
-						zones = false
-						break
-					}
-				}
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/availability-zones",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
 		},
 		"aks-003": {
-			Id:             "aks-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "AKS Cluster should have an SLA",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID:   "aks-003",
+			ResourceType:       "Microsoft.ContainerService/managedClusters",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "AKS Cluster should have an SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 
 				zones := true
@@ -73,174 +58,106 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return sla == "None", sla
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers#uptime-sla-terms-and-conditions",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers#uptime-sla-terms-and-conditions",
 		},
 		"aks-004": {
-			Id:             "aks-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "AKS Cluster should be private",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "aks-004",
+			ResourceType:     "Microsoft.ContainerService/managedClusters",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "AKS Cluster should be private",
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				pe := c.Properties.APIServerAccessProfile != nil && c.Properties.APIServerAccessProfile.EnablePrivateCluster != nil && *c.Properties.APIServerAccessProfile.EnablePrivateCluster
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
-		},
-		"aks-005": {
-			Id:             "aks-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "AKS Production Cluster should use Standard SKU",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				sku := "Free"
-				if c.SKU != nil && c.SKU.Tier != nil {
-					sku = string(*c.SKU.Tier)
-				}
-				return sku == "Free", sku
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
 		},
 		"aks-006": {
-			Id:             "aks-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "AKS Name should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "aks-006",
+			ResourceType:     "Microsoft.ContainerService/managedClusters",
+			Category:         azqr.CategoryGovernance,
+			Recommendation:   "AKS Name should comply with naming conventions",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				caf := strings.HasPrefix(*c.Name, "aks")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"aks-007": {
-			Id:             "aks-007",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "AKS should integrate authentication with AAD (Managed)",
-			Impact:         scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "aks-007",
+			ResourceType:     "Microsoft.ContainerService/managedClusters",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "AKS should integrate authentication with AAD (Managed)",
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				aad := c.Properties.AADProfile != nil && c.Properties.AADProfile.Managed != nil && *c.Properties.AADProfile.Managed
 				return !aad, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/managed-azure-ad",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/managed-azure-ad",
 		},
 		"aks-008": {
-			Id:             "aks-008",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "AKS should be RBAC enabled.",
-			Impact:         scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "aks-008",
+			ResourceType:     "Microsoft.ContainerService/managedClusters",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "AKS should be RBAC enabled.",
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				rbac := *c.Properties.EnableRBAC
 				return !rbac, ""
 			},
-			Url: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
-		},
-		"aks-009": {
-			Id:             "aks-009",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "AKS should have local accounts disabled",
-			Impact:         scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-
-				if c.Properties.DisableLocalAccounts != nil && *c.Properties.DisableLocalAccounts {
-					return false, ""
-				}
-				return true, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/manage-local-accounts-managed-azure-ad#disable-local-accounts",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
 		},
 		"aks-010": {
-			Id:             "aks-010",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "AKS should have httpApplicationRouting disabled",
-			Impact:         scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "aks-010",
+			ResourceType:     "Microsoft.ContainerService/managedClusters",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "AKS should have httpApplicationRouting disabled",
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				p, exists := c.Properties.AddonProfiles["httpApplicationRouting"]
 				broken := exists && *p.Enabled
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/azure/aks/http-application-routing",
-		},
-		"aks-011": {
-			Id:             "aks-011",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "AKS should have Monitoring enabled",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				m := c.Properties.AzureMonitorProfile != nil && c.Properties.AzureMonitorProfile.Metrics != nil && c.Properties.AzureMonitorProfile.Metrics.Enabled != nil && *c.Properties.AzureMonitorProfile.Metrics.Enabled
-				i, exists := c.Properties.AddonProfiles["omsagent"]
-				broken := !exists || !*i.Enabled || !m
-				return broken, ""
-			},
-			Url: "https://learn.microsoft.com/azure/azure-monitor/insights/container-insights-overview",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/aks/http-application-routing",
 		},
 		"aks-012": {
-			Id:             "aks-012",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "AKS should have outbound type set to user defined routing",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "aks-012",
+			ResourceType:     "Microsoft.ContainerService/managedClusters",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "AKS should have outbound type set to user defined routing",
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				broken := c.Properties.NetworkProfile.OutboundType == nil || *c.Properties.NetworkProfile.OutboundType != armcontainerservice.OutboundTypeUserDefinedRouting
 				return broken, ""
 			},
-			Url: "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
-		},
-		"aks-013": {
-			Id:             "aks-013",
-			Category:       scanners.RulesCategoryScalability,
-			Recommendation: "AKS should avoid using kubenet network plugin",
-			Impact:         scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				out := *c.Properties.NetworkProfile.NetworkPlugin == armcontainerservice.NetworkPluginKubenet
-				return out, ""
-			},
-			Url: "https://learn.microsoft.com/azure/aks/operator-best-practices-network",
-		},
-		"aks-014": {
-			Id:             "aks-014",
-			Category:       scanners.RulesCategoryScalability,
-			Recommendation: "AKS should have autoscaler enabled",
-			Impact:         scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				if c.Properties.AgentPoolProfiles != nil {
-					for _, p := range c.Properties.AgentPoolProfiles {
-						if p.EnableAutoScaling != nil {
-							return !*p.EnableAutoScaling, ""
-						} else {
-							return true, ""
-						}
-					}
-				}
-				return true, ""
-			},
-			Url: "https://learn.microsoft.com/azure/aks/concepts-scale",
+			LearnMoreUrl: "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
 		},
 		"aks-015": {
-			Id:             "aks-015",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "AKS should have tags",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "aks-015",
+			ResourceType:     "Microsoft.ContainerService/managedClusters",
+			Category:         azqr.CategoryGovernance,
+			Recommendation:   "AKS should have tags",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"aks-016": {
-			Id:             "aks-016",
-			Category:       scanners.RulesCategoryScalability,
-			Recommendation: "AKS Node Pools should have MaxSurge set",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "aks-016",
+			ResourceType:     "Microsoft.ContainerService/managedClusters",
+			Category:         azqr.CategoryScalability,
+			Recommendation:   "AKS Node Pools should have MaxSurge set",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				defaultMaxSurge := false
 				for _, profile := range c.Properties.AgentPoolProfiles {
@@ -251,73 +168,7 @@ func (a *AKSScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return defaultMaxSurge, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-at-scale#cluster-upgrade-considerations-and-best-practices",
-		},
-		"aks-017": {
-			Id:             "aks-017",
-			Category:       scanners.RulesCategoryOtherBestPractices,
-			Recommendation: "AKS: Enable GitOps when using DevOps frameworks",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				g, exists := c.Properties.AddonProfiles["gitops"]
-				broken := !exists || !*g.Enabled
-				return broken, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/architecture/guide/aks/aks-cicd-github-actions-and-gitops",
-		},
-		"aks-018": {
-			Id:             "aks-018",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "AKS: Configure system nodepool count",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				for _, profile := range c.Properties.AgentPoolProfiles {
-					if profile.Mode != nil && *profile.Mode == armcontainerservice.AgentPoolModeSystem && (profile.MinCount == nil || *profile.MinCount < 2) {
-						return true, ""
-					}
-				}
-				return false, ""
-			},
-			Url: "https://learn.microsoft.com/azure/aks/use-system-pools?tabs=azure-cli",
-		},
-		"aks-019": {
-			Id:             "aks-019",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "AKS: Configure user nodepool count",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				for _, profile := range c.Properties.AgentPoolProfiles {
-					if profile.Mode != nil && *profile.Mode == armcontainerservice.AgentPoolModeUser && (profile.MinCount == nil || *profile.MinCount < 2) {
-						return true, ""
-					}
-				}
-				return false, ""
-			},
-			Url: "https://learn.microsoft.com/azure/well-architected/service-guides/azure-kubernetes-service#design-checklist",
-		},
-		"aks-020": {
-			Id:             "aks-020",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "AKS: system node pool should have taint: CriticalAddonsOnly=true:NoSchedule",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				for _, profile := range c.Properties.AgentPoolProfiles {
-					if profile.Mode != nil && *profile.Mode == armcontainerservice.AgentPoolModeSystem {
-						for _, taint := range profile.NodeTaints {
-							if strings.Contains(*taint, "CriticalAddonsOnly=true:NoSchedule") {
-								return false, ""
-							}
-						}
-						break
-					}
-				}
-				return true, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/aks/use-system-pools?tabs=azure-cli#system-and-user-node-pools",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-at-scale#cluster-upgrade-considerations-and-best-practices",
 		},
 	}
 }

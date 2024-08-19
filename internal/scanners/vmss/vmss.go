@@ -4,18 +4,18 @@
 package vmss
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 )
 
 // VirtualMachineScaleSetScanner - Scanner for Virtual Machine Scale Sets
 type VirtualMachineScaleSetScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armcompute.VirtualMachineScaleSetsClient
 }
 
 // Init - Initializes the VirtualMachineScaleSetScanner
-func (c *VirtualMachineScaleSetScanner) Init(config *scanners.ScannerConfig) error {
+func (c *VirtualMachineScaleSetScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armcompute.NewVirtualMachineScaleSetsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (c *VirtualMachineScaleSetScanner) Init(config *scanners.ScannerConfig) err
 }
 
 // Scan - Scans all Virtual Machines Scale Sets in a Resource Group
-func (c *VirtualMachineScaleSetScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Virtual Machine Scale Set")
+func (c *VirtualMachineScaleSetScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	vmss, err := c.list(resourceGroupName)
+	vmss, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, w := range vmss {
-		rr := engine.EvaluateRules(rules, w, scanContext)
+		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (c *VirtualMachineScaleSetScanner) list(resourceGroupName string) ([]*armcompute.VirtualMachineScaleSet, error) {
-	pager := c.client.NewListPager(resourceGroupName, nil)
+func (c *VirtualMachineScaleSetScanner) list() ([]*armcompute.VirtualMachineScaleSet, error) {
+	pager := c.client.NewListAllPager(nil)
 
 	vmss := make([]*armcompute.VirtualMachineScaleSet, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (c *VirtualMachineScaleSetScanner) list(resourceGroupName string) ([]*armco
 		vmss = append(vmss, resp.Value...)
 	}
 	return vmss, nil
+}
+
+func (a *VirtualMachineScaleSetScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Compute/virtualMachineScaleSets"}
 }

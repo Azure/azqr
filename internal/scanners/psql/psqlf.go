@@ -4,18 +4,18 @@
 package psql
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
 )
 
 // PostgreFlexibleScanner - Scanner for PostgreSQL
 type PostgreFlexibleScanner struct {
-	config         *scanners.ScannerConfig
+	config         *azqr.ScannerConfig
 	flexibleClient *armpostgresqlflexibleservers.ServersClient
 }
 
 // Init - Initializes the PostgreFlexibleScanner
-func (c *PostgreFlexibleScanner) Init(config *scanners.ScannerConfig) error {
+func (c *PostgreFlexibleScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.flexibleClient, err = armpostgresqlflexibleservers.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,36 @@ func (c *PostgreFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all PostgreSQL in a Resource Group
-func (c *PostgreFlexibleScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "PostgreSQL Flexible")
+func (c *PostgreFlexibleScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	flexibles, err := c.listFlexiblePostgre(resourceGroupName)
+	flexibles, err := c.listFlexiblePostgre()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, postgre := range flexibles {
-		rr := engine.EvaluateRules(rules, postgre, scanContext)
+		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*postgre.ID),
 			ServiceName:      *postgre.Name,
 			Type:             *postgre.Type,
 			Location:         *postgre.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 
 	return results, nil
 }
-func (c *PostgreFlexibleScanner) listFlexiblePostgre(resourceGroupName string) ([]*armpostgresqlflexibleservers.Server, error) {
-	pager := c.flexibleClient.NewListByResourceGroupPager(resourceGroupName, nil)
+
+func (c *PostgreFlexibleScanner) listFlexiblePostgre() ([]*armpostgresqlflexibleservers.Server, error) {
+	pager := c.flexibleClient.NewListPager(nil)
 
 	servers := make([]*armpostgresqlflexibleservers.Server, 0)
 	for pager.More() {
@@ -62,4 +63,8 @@ func (c *PostgreFlexibleScanner) listFlexiblePostgre(resourceGroupName string) (
 		servers = append(servers, resp.Value...)
 	}
 	return servers, nil
+}
+
+func (a *PostgreFlexibleScanner) ResourceTypes() []string {
+	return []string{"Microsoft.DBforPostgreSQL/flexibleServers"}
 }

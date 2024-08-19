@@ -7,43 +7,34 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
 
 // GetRules - Returns the rules for the APIManagementScanner
-func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
-	return map[string]scanners.AzureRule{
+func (a *APIManagementScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+	return map[string]azqr.AzqrRecommendation{
 		"apim-001": {
-			Id:             "apim-001",
-			Category:       scanners.RulesCategoryMonitoringAndAlerting,
-			Recommendation: "APIM should have diagnostic settings enabled",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "apim-001",
+			ResourceType:     "Microsoft.ApiManagement/service",
+			Category:         azqr.CategoryMonitoringAndAlerting,
+			Recommendation:   "APIM should have diagnostic settings enabled",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				service := target.(*armapimanagement.ServiceResource)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
-		},
-		"apim-002": {
-			Id:             "apim-002",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "APIM should have availability zones enabled",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				a := target.(*armapimanagement.ServiceResource)
-				zones := len(a.Zones) > 0
-				return !zones, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/reliability/migrate-api-mgt",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
 		},
 		"apim-003": {
-			Id:             "apim-003",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "APIM should have a SLA",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID:   "apim-003",
+			ResourceType:       "Microsoft.ApiManagement/service",
+			Category:           azqr.CategoryHighAvailability,
+			Recommendation:     "APIM should have a SLA",
+			RecommendationType: azqr.TypeSLA,
+			Impact:             azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				sku := string(*a.SKU.Name)
 				sla := "99.95%"
@@ -55,72 +46,65 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 
 				return sla == "None", sla
 			},
-			Url: "https://www.azure.cn/en-us/support/sla/api-management/",
+			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/api-management/",
 		},
 		"apim-004": {
-			Id:             "apim-004",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "APIM should have private endpoints enabled",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "apim-004",
+			ResourceType:     "Microsoft.ApiManagement/service",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "APIM should have private endpoints enabled",
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
-		},
-		"apim-005": {
-			Id:             "apim-005",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "Azure APIM SKU",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				a := target.(*armapimanagement.ServiceResource)
-				sku := string(*a.SKU.Name)
-				return strings.Contains(sku, "Developer"), sku
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-features",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
 		},
 		"apim-006": {
-			Id:             "apim-006",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "APIM should comply with naming conventions",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "apim-006",
+			ResourceType:     "Microsoft.ApiManagement/service",
+			Category:         azqr.CategoryGovernance,
+			Recommendation:   "APIM should comply with naming conventions",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				caf := strings.HasPrefix(*c.Name, "apim")
 				return !caf, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
 		"apim-007": {
-			Id:             "apim-007",
-			Category:       scanners.RulesCategoryGovernance,
-			Recommendation: "APIM should have tags",
-			Impact:         scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "apim-007",
+			ResourceType:     "Microsoft.ApiManagement/service",
+			Category:         azqr.CategoryGovernance,
+			Recommendation:   "APIM should have tags",
+			Impact:           azqr.ImpactLow,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				return len(c.Tags) == 0, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
 		"apim-008": {
-			Id:             "apim-008",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "APIM should use Managed Identities",
-			Impact:         scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "apim-008",
+			ResourceType:     "Microsoft.ApiManagement/service",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "APIM should use Managed Identities",
+			Impact:           azqr.ImpactMedium,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armapimanagement.ApimIdentityTypeNone, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-managed-service-identity",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-managed-service-identity",
 		},
 		"apim-009": {
-			Id:             "apim-009",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "APIM should only accept a minimum of TLS 1.2",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "apim-009",
+			ResourceType:     "Microsoft.ApiManagement/service",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "APIM should only accept a minimum of TLS 1.2",
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				notAllowed := []string{
 					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10",
 					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11",
@@ -144,14 +128,15 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 
 				return false, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
 		},
 		"apim-010": {
-			Id:             "apim-010",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "APIM should should not accept weak or deprecated ciphers.",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "apim-010",
+			ResourceType:     "Microsoft.ApiManagement/service",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "APIM should should not accept weak or deprecated ciphers.",
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				notAllowed := []string{
 					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168",
 					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA",
@@ -177,14 +162,15 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 
 				return false, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
 		},
 		"apim-011": {
-			Id:             "apim-011",
-			Category:       scanners.RulesCategorySecurity,
-			Recommendation: "APIM: Renew expiring certificates",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationID: "apim-011",
+			ResourceType:     "Microsoft.ApiManagement/service",
+			Category:         azqr.CategorySecurity,
+			Recommendation:   "APIM: Renew expiring certificates",
+			Impact:           azqr.ImpactHigh,
+			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				if c.Properties.HostnameConfigurations != nil {
 					for _, v := range c.Properties.HostnameConfigurations {
@@ -198,18 +184,7 @@ func (a *APIManagementScanner) GetRules() map[string]scanners.AzureRule {
 				}
 				return false, ""
 			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/configure-custom-domain?tabs=custom",
-		},
-		"apim-012": {
-			Id:             "apim-012",
-			Category:       scanners.RulesCategoryHighAvailability,
-			Recommendation: "APIM: Migrate instance hosted on the stv1 platform to stv2",
-			Impact:         scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				c := target.(*armapimanagement.ServiceResource)
-				return *c.Properties.PlatformVersion == armapimanagement.PlatformVersionStv1, ""
-			},
-			Url: "https://learn.microsoft.com/en-us/azure/api-management/migrate-stv1-to-stv2?tabs=portal",
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/api-management/configure-custom-domain?tabs=custom",
 		},
 	}
 }

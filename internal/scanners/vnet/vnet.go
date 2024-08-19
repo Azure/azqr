@@ -4,18 +4,18 @@
 package vnet
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // VirtualNetworkScanner - Scanner for VirtualNetwork
 type VirtualNetworkScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armnetwork.VirtualNetworksClient
 }
 
 // Init - Initializes the VirtualNetwork
-func (c *VirtualNetworkScanner) Init(config *scanners.ScannerConfig) error {
+func (c *VirtualNetworkScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armnetwork.NewVirtualNetworksClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (c *VirtualNetworkScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all VirtualNetwork in a Resource Group
-func (c *VirtualNetworkScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Virtual Network")
+func (c *VirtualNetworkScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	vnets, err := c.list(resourceGroupName)
+	vnets, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, w := range vnets {
-		rr := engine.EvaluateRules(rules, w, scanContext)
+		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (c *VirtualNetworkScanner) list(resourceGroupName string) ([]*armnetwork.VirtualNetwork, error) {
-	pager := c.client.NewListPager(resourceGroupName, nil)
+func (c *VirtualNetworkScanner) list() ([]*armnetwork.VirtualNetwork, error) {
+	pager := c.client.NewListAllPager(nil)
 
 	vnets := make([]*armnetwork.VirtualNetwork, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (c *VirtualNetworkScanner) list(resourceGroupName string) ([]*armnetwork.Vi
 		vnets = append(vnets, resp.Value...)
 	}
 	return vnets, nil
+}
+
+func (a *VirtualNetworkScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Network/virtualNetworks"}
 }

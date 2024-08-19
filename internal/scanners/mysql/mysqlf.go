@@ -4,18 +4,18 @@
 package mysql
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 )
 
 // MySQLFlexibleScanner - Scanner for PostgreSQL
 type MySQLFlexibleScanner struct {
-	config         *scanners.ScannerConfig
+	config         *azqr.ScannerConfig
 	flexibleClient *armmysqlflexibleservers.ServersClient
 }
 
 // Init - Initializes the MySQLFlexibleScanner
-func (c *MySQLFlexibleScanner) Init(config *scanners.ScannerConfig) error {
+func (c *MySQLFlexibleScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.flexibleClient, err = armmysqlflexibleservers.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (c *MySQLFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all MySQL in a Resource Group
-func (c *MySQLFlexibleScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "MySQL Flexible")
+func (c *MySQLFlexibleScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	flexibles, err := c.listFlexiblePostgre(resourceGroupName)
+	flexibles, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, postgre := range flexibles {
-		rr := engine.EvaluateRules(rules, postgre, scanContext)
+		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*postgre.ID),
 			SubscriptionName: c.config.SubscriptionName,
 			ServiceName:      *postgre.Name,
 			Type:             *postgre.Type,
 			Location:         *postgre.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 
 	return results, nil
 }
-func (c *MySQLFlexibleScanner) listFlexiblePostgre(resourceGroupName string) ([]*armmysqlflexibleservers.Server, error) {
-	pager := c.flexibleClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *MySQLFlexibleScanner) list() ([]*armmysqlflexibleservers.Server, error) {
+	pager := c.flexibleClient.NewListPager(nil)
 
 	servers := make([]*armmysqlflexibleservers.Server, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (c *MySQLFlexibleScanner) listFlexiblePostgre(resourceGroupName string) ([]
 		servers = append(servers, resp.Value...)
 	}
 	return servers, nil
+}
+
+func (a *MySQLFlexibleScanner) ResourceTypes() []string {
+	return []string{"Microsoft.DBforMySQL/flexibleServers"}
 }

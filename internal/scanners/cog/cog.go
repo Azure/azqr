@@ -4,18 +4,18 @@
 package cog
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices"
 )
 
 // CognitiveScanner - Scanner for Cognitive Services Accounts
 type CognitiveScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armcognitiveservices.AccountsClient
 }
 
 // Init - Initializes the CognitiveScanner
-func (a *CognitiveScanner) Init(config *scanners.ScannerConfig) error {
+func (a *CognitiveScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armcognitiveservices.NewAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (a *CognitiveScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Cognitive Services Accounts in a Resource Group
-func (c *CognitiveScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "Cognitive Services")
+func (c *CognitiveScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	eventHubs, err := c.listEventHubs(resourceGroupName)
+	eventHubs, err := c.listEventHubs()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, eventHub := range eventHubs {
-		rr := engine.EvaluateRules(rules, eventHub, scanContext)
+		rr := engine.EvaluateRecommendations(rules, eventHub, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*eventHub.ID),
 			ServiceName:      *eventHub.Name,
 			Type:             *eventHub.Type,
 			Location:         *eventHub.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (c *CognitiveScanner) listEventHubs(resourceGroupName string) ([]*armcognitiveservices.Account, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *CognitiveScanner) listEventHubs() ([]*armcognitiveservices.Account, error) {
+	pager := c.client.NewListPager(nil)
 
 	namespaces := make([]*armcognitiveservices.Account, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (c *CognitiveScanner) listEventHubs(resourceGroupName string) ([]*armcognit
 		namespaces = append(namespaces, resp.Value...)
 	}
 	return namespaces, nil
+}
+
+func (a *CognitiveScanner) ResourceTypes() []string {
+	return []string{"Microsoft.CognitiveServices/accounts"}
 }

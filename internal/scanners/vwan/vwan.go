@@ -4,18 +4,18 @@
 package vwan
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // VirtualWanScanner - Scanner for VirtualWanScanner
 type VirtualWanScanner struct {
-	config *scanners.ScannerConfig
+	config *azqr.ScannerConfig
 	client *armnetwork.VirtualWansClient
 }
 
 // Init - Initializes the VirtualWanScanner
-func (c *VirtualWanScanner) Init(config *scanners.ScannerConfig) error {
+func (c *VirtualWanScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armnetwork.NewVirtualWansClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (c *VirtualWanScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all VirtualWan in a Resource Group
-func (c *VirtualWanScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "VWAN")
+func (c *VirtualWanScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	vwans, err := c.list(resourceGroupName)
+	vwans, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, w := range vwans {
-		rr := engine.EvaluateRules(rules, w, scanContext)
+		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (c *VirtualWanScanner) list(resourceGroupName string) ([]*armnetwork.VirtualWAN, error) {
-	pager := c.client.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *VirtualWanScanner) list() ([]*armnetwork.VirtualWAN, error) {
+	pager := c.client.NewListPager(nil)
 
 	vwans := make([]*armnetwork.VirtualWAN, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (c *VirtualWanScanner) list(resourceGroupName string) ([]*armnetwork.Virtua
 		vwans = append(vwans, resp.Value...)
 	}
 	return vwans, nil
+}
+
+func (a *VirtualWanScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Network/virtualWans"}
 }

@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
@@ -16,7 +16,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,27 +34,11 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				target: &armeventhub.EHNamespace{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
 				},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "EventHubScanner Availability Zones",
-			fields: fields{
-				rule: "evh-002",
-				target: &armeventhub.EHNamespace{
-					Properties: &armeventhub.EHNamespaceProperties{
-						ZoneRedundant: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +54,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armeventhub.SKUNameStandard),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -86,7 +70,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armeventhub.SKUNamePremium),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -106,27 +90,11 @@ func TestEventHubScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "EventHubScanner SKU",
-			fields: fields{
-				rule: "evh-005",
-				target: &armeventhub.EHNamespace{
-					SKU: &armeventhub.SKU{
-						Name: to.Ptr(armeventhub.SKUNamePremium),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "Premium",
 			},
 		},
 		{
@@ -136,7 +104,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 				target: &armeventhub.EHNamespace{
 					Name: to.Ptr("evh-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -152,7 +120,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 						DisableLocalAuth: to.Ptr(true),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -163,7 +131,7 @@ func TestEventHubScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &EventHubScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

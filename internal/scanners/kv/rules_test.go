@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
@@ -16,7 +16,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				target: &armkeyvault.Vault{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,49 +50,11 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "kv-003",
 				target:      &armkeyvault.Vault{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "99.99%",
-			},
-		},
-		{
-			name: "KeyVaultScanner Private Endpoint",
-			fields: fields{
-				rule: "kv-004",
-				target: &armkeyvault.Vault{
-					Properties: &armkeyvault.VaultProperties{
-						PrivateEndpointConnections: []*armkeyvault.PrivateEndpointConnectionItem{
-							{
-								ID: to.Ptr("test"),
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "KeyVaultScanner SKU",
-			fields: fields{
-				rule: "kv-005",
-				target: &armkeyvault.Vault{
-					Properties: &armkeyvault.VaultProperties{
-						SKU: &armkeyvault.SKU{
-							Name: to.Ptr(armkeyvault.SKUNameStandard),
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "standard",
 			},
 		},
 		{
@@ -102,39 +64,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				target: &armkeyvault.Vault{
 					Name: to.Ptr("kv-test"),
 				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "KeyVaultScanner soft delete enabled",
-			fields: fields{
-				rule: "kv-008",
-				target: &armkeyvault.Vault{
-					Properties: &armkeyvault.VaultProperties{
-						EnableSoftDelete: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "KeyVaultScanner purge protection enabled",
-			fields: fields{
-				rule: "kv-009",
-				target: &armkeyvault.Vault{
-					Properties: &armkeyvault.VaultProperties{
-						EnablePurgeProtection: to.Ptr(true),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -145,7 +75,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &KeyVaultScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

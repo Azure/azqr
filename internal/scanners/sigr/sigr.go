@@ -4,18 +4,18 @@
 package sigr
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
 // SignalRScanner - Scanner for SignalR
 type SignalRScanner struct {
-	config        *scanners.ScannerConfig
+	config        *azqr.ScannerConfig
 	signalrClient *armsignalr.Client
 }
 
 // Init - Initializes the SignalRScanner
-func (c *SignalRScanner) Init(config *scanners.ScannerConfig) error {
+func (c *SignalRScanner) Init(config *azqr.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.signalrClient, err = armsignalr.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,35 +23,35 @@ func (c *SignalRScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all SignalR in a Resource Group
-func (c *SignalRScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(c.config.SubscriptionID, resourceGroupName, "SignalR")
+func (c *SignalRScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
-	signalr, err := c.listSignalR(resourceGroupName)
+	signalr, err := c.listSignalR()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := c.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := c.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, signalr := range signalr {
-		rr := engine.EvaluateRules(rules, signalr, scanContext)
+		rr := engine.EvaluateRecommendations(rules, signalr, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*signalr.ID),
 			ServiceName:      *signalr.Name,
 			Type:             *signalr.Type,
 			Location:         *signalr.Location,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (c *SignalRScanner) listSignalR(resourceGroupName string) ([]*armsignalr.ResourceInfo, error) {
-	pager := c.signalrClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (c *SignalRScanner) listSignalR() ([]*armsignalr.ResourceInfo, error) {
+	pager := c.signalrClient.NewListBySubscriptionPager(nil)
 
 	signalrs := make([]*armsignalr.ResourceInfo, 0)
 	for pager.More() {
@@ -62,4 +62,8 @@ func (c *SignalRScanner) listSignalR(resourceGroupName string) ([]*armsignalr.Re
 		signalrs = append(signalrs, resp.Value...)
 	}
 	return signalrs, nil
+}
+
+func (a *SignalRScanner) ResourceTypes() []string {
+	return []string{"Microsoft.SignalRService/SignalR"}
 }

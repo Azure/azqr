@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
@@ -17,7 +17,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,7 +35,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				target: &armpostgresql.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -51,7 +51,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "psql-003",
 				target:      &armpostgresql.Server{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -71,27 +71,11 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "PostgreScanner SKU",
-			fields: fields{
-				rule: "psql-005",
-				target: &armpostgresql.Server{
-					SKU: &armpostgresql.SKU{
-						Name: to.Ptr("GPGen58"),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "GPGen58",
 			},
 		},
 		{
@@ -101,7 +85,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				target: &armpostgresql.Server{
 					Name: to.Ptr("psql-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -117,7 +101,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						SSLEnforcement: to.Ptr(armpostgresql.SSLEnforcementEnumEnabled),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -133,7 +117,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						MinimalTLSVersion: to.Ptr(armpostgresql.MinimalTLSVersionEnumTLS12),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -144,7 +128,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &PostgreScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
@@ -161,7 +145,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -179,29 +163,11 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
 				},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "PostgreFlexibleScanner AvailabilityZones",
-			fields: fields{
-				rule: "psqlf-002",
-				target: &armpostgresqlflexibleservers.Server{
-					Properties: &armpostgresqlflexibleservers.ServerProperties{
-						HighAvailability: &armpostgresqlflexibleservers.HighAvailability{
-							Mode: to.Ptr(armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant),
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -215,7 +181,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -235,7 +201,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.Ptr("1"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -255,7 +221,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.Ptr("1"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -273,27 +239,11 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
 				result: "",
-			},
-		},
-		{
-			name: "PostgreFlexibleScanner SKU",
-			fields: fields{
-				rule: "psqlf-005",
-				target: &armpostgresqlflexibleservers.Server{
-					SKU: &armpostgresqlflexibleservers.SKU{
-						Name: to.Ptr("StandardD4sv3"),
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "StandardD4sv3",
 			},
 		},
 		{
@@ -303,7 +253,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Name: to.Ptr("psql-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -314,7 +264,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &PostgreFlexibleScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

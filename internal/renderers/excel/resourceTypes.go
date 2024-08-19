@@ -11,18 +11,19 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func renderServices(f *excelize.File, data *renderers.ReportData) {
-	if len(data.MainData) > 0 {
-		_, err := f.NewSheet("Services")
+func renderResourceTypes(f *excelize.File, data *renderers.ReportData) {
+	sheetName := "ResourceTypes"
+	if len(data.ResourceTypeCount) > 0 {
+		_, err := f.NewSheet(sheetName)
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create Services sheet")
+			log.Fatal().Err(err).Msgf("Failed to create %s sheet", sheetName)
 		}
 
-		records := data.ServicesTable()
+		records := data.ResourceTypesTable()
 		headers := records[0]
 		records = records[1:]
 
-		createFirstRow(f, "Services", headers)
+		createFirstRow(f, sheetName, headers)
 
 		currentRow := 4
 		for _, row := range records {
@@ -31,15 +32,15 @@ func renderServices(f *excelize.File, data *renderers.ReportData) {
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to get cell")
 			}
-			err = f.SetSheetRow("Services", cell, &row)
+			err = f.SetSheetRow(sheetName, cell, &row)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to set row")
 			}
-			setHyperLink(f, "Services", 12, currentRow)
+			// setHyperLink(f, sheetName, 12, currentRow)
 		}
 
-		configureSheet(f, "Services", headers, currentRow)
+		configureSheet(f, sheetName, headers, currentRow)
 	} else {
-		log.Info().Msg("Skipping Services. No data to render")
+		log.Info().Msgf("Skipping %s. No data to render", sheetName)
 	}
 }

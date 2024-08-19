@@ -4,18 +4,18 @@
 package amg
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard"
 )
 
 // ManagedGrafanaScanner - Scanner for Managed Grafana
 type ManagedGrafanaScanner struct {
-	config        *scanners.ScannerConfig
+	config        *azqr.ScannerConfig
 	grafanaClient *armdashboard.GrafanaClient
 }
 
 // Init - Initializes the ManagedGrafanaScanner Scanner
-func (a *ManagedGrafanaScanner) Init(config *scanners.ScannerConfig) error {
+func (a *ManagedGrafanaScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.grafanaClient, _ = armdashboard.NewGrafanaClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,35 +23,35 @@ func (a *ManagedGrafanaScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Managed Grafana in a Resource Group
-func (a *ManagedGrafanaScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "Managed Grafana")
+func (a *ManagedGrafanaScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	workspaces, err := a.listWorkspaces(resourceGroupName)
+	workspaces, err := a.listWorkspaces()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, g := range workspaces {
-		rr := engine.EvaluateRules(rules, g, scanContext)
+		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 	return results, nil
 }
 
-func (a *ManagedGrafanaScanner) listWorkspaces(resourceGroupName string) ([]*armdashboard.ManagedGrafana, error) {
-	pager := a.grafanaClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *ManagedGrafanaScanner) listWorkspaces() ([]*armdashboard.ManagedGrafana, error) {
+	pager := a.grafanaClient.NewListPager(nil)
 
 	workspaces := make([]*armdashboard.ManagedGrafana, 0)
 	for pager.More() {
@@ -63,4 +63,8 @@ func (a *ManagedGrafanaScanner) listWorkspaces(resourceGroupName string) ([]*arm
 	}
 
 	return workspaces, nil
+}
+
+func (a *ManagedGrafanaScanner) ResourceTypes() []string {
+	return []string{"Microsoft.Dashboard/grafana"}
 }

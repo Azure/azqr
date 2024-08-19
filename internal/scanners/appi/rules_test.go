@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights"
 )
@@ -16,7 +16,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -32,7 +32,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "appi-001",
 				target:      &armapplicationinsights.Component{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -46,7 +46,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 				target: &armapplicationinsights.Component{
 					Name: to.Ptr("appi-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -58,21 +58,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "appi-003",
 				target:      &armapplicationinsights.Component{},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
-			name: "AppInsightsScanner WorkspaceId",
-			fields: fields{
-				rule: "appi-004",
-				target: &armapplicationinsights.Component{
-					Properties: &armapplicationinsights.ComponentProperties{},
-				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -83,7 +69,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &AppInsightsScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

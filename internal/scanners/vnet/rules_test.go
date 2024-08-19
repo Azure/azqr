@@ -7,16 +7,16 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v5"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func TestVirtualNetworkScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *azqr.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,23 +34,11 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 				target: &armnetwork.VirtualNetwork{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &azqr.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
 				},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "VirtualNetworkScanner Availability Zones",
-			fields: fields{
-				rule:        "vnet-002",
-				target:      &armnetwork.VirtualNetwork{},
-				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -64,56 +52,10 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 				target: &armnetwork.VirtualNetwork{
 					Name: to.Ptr("vnet-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "VirtualNetworkScanner VNET with NSGs",
-			fields: fields{
-				rule: "vnet-008",
-				target: &armnetwork.VirtualNetwork{
-					Properties: &armnetwork.VirtualNetworkPropertiesFormat{
-						Subnets: []*armnetwork.Subnet{
-							{
-								Name: to.Ptr("subnet1"),
-								Properties: &armnetwork.SubnetPropertiesFormat{
-									NetworkSecurityGroup: &armnetwork.SecurityGroup{
-										ID: to.Ptr("nsg"),
-									},
-								},
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "VirtualNetworkScanner VNET without NSGs",
-			fields: fields{
-				rule: "vnet-008",
-				target: &armnetwork.VirtualNetwork{
-					Properties: &armnetwork.VirtualNetworkPropertiesFormat{
-						Subnets: []*armnetwork.Subnet{
-							{
-								Name:       to.Ptr("subnet1"),
-								Properties: &armnetwork.SubnetPropertiesFormat{},
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: true,
 				result: "",
 			},
 		},
@@ -130,7 +72,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -144,7 +86,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 				target: &armnetwork.VirtualNetwork{
 					Properties: &armnetwork.VirtualNetworkPropertiesFormat{},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &azqr.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -155,7 +97,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &VirtualNetworkScanner{}
-			rules := s.GetRules()
+			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

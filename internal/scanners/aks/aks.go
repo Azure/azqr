@@ -4,18 +4,18 @@
 package aks
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
 // AKSScanner - Scanner for AKS Clusters
 type AKSScanner struct {
-	config         *scanners.ScannerConfig
+	config         *azqr.ScannerConfig
 	clustersClient *armcontainerservice.ManagedClustersClient
 }
 
 // Init - Initializes the AKSScanner
-func (a *AKSScanner) Init(config *scanners.ScannerConfig) error {
+func (a *AKSScanner) Init(config *azqr.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.clustersClient, err = armcontainerservice.NewManagedClustersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,37 +23,37 @@ func (a *AKSScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all AKS Clusters in a Resource Group
-func (a *AKSScanner) Scan(resourceGroupName string, scanContext *scanners.ScanContext) ([]scanners.AzureServiceResult, error) {
-	scanners.LogResourceGroupScan(a.config.SubscriptionID, resourceGroupName, "AKS")
+func (a *AKSScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
-	clusters, err := a.listClusters(resourceGroupName)
+	clusters, err := a.listClusters()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RuleEngine{}
-	rules := a.GetRules()
-	results := []scanners.AzureServiceResult{}
+	engine := azqr.RecommendationEngine{}
+	rules := a.GetRecommendations()
+	results := []azqr.AzqrServiceResult{}
 
 	for _, c := range clusters {
 
-		rr := engine.EvaluateRules(rules, c, scanContext)
+		rr := engine.EvaluateRecommendations(rules, c, scanContext)
 
-		results = append(results, scanners.AzureServiceResult{
+		results = append(results, azqr.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    resourceGroupName,
+			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*c.ID),
 			Location:         *c.Location,
 			Type:             *c.Type,
 			ServiceName:      *c.Name,
-			Rules:            rr,
+			Recommendations:  rr,
 		})
 	}
 
 	return results, nil
 }
 
-func (a *AKSScanner) listClusters(resourceGroupName string) ([]*armcontainerservice.ManagedCluster, error) {
-	pager := a.clustersClient.NewListByResourceGroupPager(resourceGroupName, nil)
+func (a *AKSScanner) listClusters() ([]*armcontainerservice.ManagedCluster, error) {
+	pager := a.clustersClient.NewListPager(nil)
 
 	clusters := make([]*armcontainerservice.ManagedCluster, 0)
 	for pager.More() {
@@ -64,4 +64,9 @@ func (a *AKSScanner) listClusters(resourceGroupName string) ([]*armcontainerserv
 		clusters = append(clusters, resp.Value...)
 	}
 	return clusters, nil
+}
+
+// GetRules - Returns the rules for the AKSScanner
+func (a *AKSScanner) ResourceTypes() []string {
+	return []string{"Microsoft.ContainerService/managedClusters"}
 }

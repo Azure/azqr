@@ -61,6 +61,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          submodules: 'recursive'
 
       - name: Set up Go ${{ env.GOVER }}
         uses: actions/setup-go@v4
@@ -74,7 +75,7 @@ jobs:
 
       - name: Setup MinVer
         run: |
-          dotnet tool install --global minver-cli --version 4.2.0
+          dotnet tool install --global minver-cli --version 4.3.0
 
       - name: golangci-lint
         if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
@@ -111,12 +112,12 @@ jobs:
 
       - name: Calculate Version
         run: |
-          echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 0.1 -d preview)" >> $GITHUB_ENV
+          echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 0.1 -p preview.0)" >> $GITHUB_ENV
         if: matrix.os != 'windows-latest'
 
       - name: Calculate Version Windows
         run: |
-          echo "MINVERVERSIONOVERRIDE=$(minver -t v. -m 0.1 -d preview)" >> $env:GITHUB_ENV
+          echo "MINVERVERSIONOVERRIDE=$(minver -t v. -m 0.1 -p preview.0)" >> $env:GITHUB_ENV
         if: matrix.os == 'windows-latest'
 
       - name: output folder variable linux & mac
@@ -176,7 +177,7 @@ jobs:
           release_name: ${{ env.MINVERVERSIONOVERRIDE }}
           body: ${{ env.AZQR_CHANGE_LOG }}
           draft: false
-          prerelease: false
+          prerelease: ${{ contains(env.MINVERVERSIONOVERRIDE, 'preview') }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -295,11 +296,11 @@ jobs:
 
       - name: Setup MinVer
         run: |
-          dotnet tool install --global minver-cli --version 4.2.0
+          dotnet tool install --global minver-cli --version 4.3.0
 
       - name: Calculate Version
         run: |
-          echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 0.1 -d preview)" >> $GITHUB_ENV
+          echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 0.1 -p preview.0)" >> $GITHUB_ENV
 
       - name: Trigger Bump Winget
         uses: peter-evans/repository-dispatch@v2

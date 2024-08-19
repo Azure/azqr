@@ -6,8 +6,10 @@ package azqr
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/Azure/azqr/internal"
+	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
 )
@@ -18,35 +20,45 @@ func init() {
 
 var rulesCmd = &cobra.Command{
 	Use:   "rules",
-	Short: "Print all azqr rules",
-	Long:  "Print all azqr rules as markdown table",
+	Short: "Print all recommendations",
+	Long:  "Print all recommendations as markdown table",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := internal.GetScanners()
+		serviceScanners := scanners.GetScanners()
+		aprlScanner := internal.AprlScanner{}
+		aprl := aprlScanner.GetAprlRecommendations()
 
-		fmt.Println("#  | Id | Category | Impact | Recommendation | More Info")
-		fmt.Println("---|---|---|---|---|---")
+		fmt.Println("#  | Id | Resource Type | Category | Impact | Recommendation | Learn")
+		fmt.Println("---|---|---|---|---|---|---")
 
 		i := 0
 		for _, scanner := range serviceScanners {
-			rulesMap := scanner.GetRules()
+			rm := scanner.GetRecommendations()
 
-			rules := map[string]scanners.AzureRule{}
-			for _, r := range rulesMap {
-				rules[r.Id] = r
+			recommendations := map[string]azqr.AzqrRecommendation{}
+			for _, r := range rm {
+				recommendations[r.RecommendationID] = r
 			}
 
-			keys := make([]string, 0, len(rules))
-			for k := range rules {
+			keys := make([]string, 0, len(recommendations))
+			for k := range recommendations {
 				keys = append(keys, k)
 			}
 			sort.Strings(keys)
 
 			for _, k := range keys {
-				rule := rules[k]
+				r := recommendations[k]
 				i++
-				fmt.Printf("%s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), rule.Id, rule.Category, rule.Impact, rule.Recommendation, rule.Url)
+				fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.LearnMoreUrl)
 				fmt.Println()
+			}
+
+			for _, t := range scanner.ResourceTypes() {
+				for _, r := range aprl[strings.ToLower(t)] {
+					i++
+					fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.LearnMoreLink[0].Url)
+					fmt.Println()
+				}
 			}
 		}
 	},
