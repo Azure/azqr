@@ -177,7 +177,7 @@ jobs:
           release_name: ${{ env.MINVERVERSIONOVERRIDE }}
           body: ${{ env.AZQR_CHANGE_LOG }}
           draft: false
-          prerelease: false
+          prerelease: ${{ contains(env.MINVERVERSIONOVERRIDE, 'preview') }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
