@@ -36,7 +36,7 @@ func renderImpactedResources(f *excelize.File, data *renderers.ReportData) {
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to set row")
 			}
-			setHyperLink(f, sheetName, 12, currentRow)
+			setHyperLink(f, sheetName, 18, currentRow)
 		}
 
 		configureSheet(f, sheetName, headers, currentRow)
