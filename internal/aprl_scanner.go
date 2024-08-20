@@ -6,6 +6,8 @@ package internal
 import (
 	"context"
 	"embed"
+	"encoding/json"
+	"fmt"
 	"io/fs"
 	"math"
 	"strings"
@@ -189,39 +191,42 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 					m := row.(map[string]interface{})
 
 					tags := ""
-					// if m["tags"] != nil {
-					// 	tags = m["tags"].(string)
-					// }
+					if m["tags"] != nil {
+						tags = convertInterfaceToString(m["tags"])
+					}
 
 					param1 := ""
 					if m["param1"] != nil {
-						param1 = m["param1"].(string)
+						param1 = convertInterfaceToString(m["param1"])
 					}
 
 					param2 := ""
 					if m["param2"] != nil {
-						param2 = m["param2"].(string)
+						param2 = convertInterfaceToString(m["param2"])
 					}
 
 					param3 := ""
 					if m["param3"] != nil {
-						param3 = m["param3"].(string)
+						param3 = convertInterfaceToString(m["param3"])
 					}
 
 					param4 := ""
 					if m["param4"] != nil {
-						param4 = m["param4"].(string)
+						param4 = convertInterfaceToString(m["param4"])
 					}
 
 					param5 := ""
 					if m["param5"] != nil {
-						param5 = m["param5"].(string)
+						param5 = convertInterfaceToString(m["param5"])
 					}
 
 					log.Debug().Msg(rule.GraphQuery)
 
 					subscription := azqr.GetSubsctiptionFromResourceID(m["id"].(string))
-					subscriptionName := subscriptions[subscription]
+					subscriptionName, ok := subscriptions[subscription]
+					if !ok {
+						subscriptionName = ""
+					}
 
 					results = append(results, azqr.AprlResult{
 						RecommendationID:    rule.RecommendationID,
@@ -269,4 +274,21 @@ func (sc AprlScanner) getGraphRules(service string, filters *azqr.Filters, aprl 
 		}
 	}
 	return r
+}
+
+func convertInterfaceToString(i interface{}) string {
+	switch v := i.(type) {
+	case string:
+		return v
+	case int:
+		return fmt.Sprintf("%d", v)
+	case bool:
+		return fmt.Sprintf("%t", v)
+	default:
+		jsonStr, err := json.Marshal(i)
+		if err != nil {
+			log.Fatal().Err(err).Msg("unssupported type in ARG query result")
+		}
+		return string(jsonStr)
+	}
 }
