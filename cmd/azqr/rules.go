@@ -55,6 +55,12 @@ var rulesCmd = &cobra.Command{
 
 			for _, t := range scanner.ResourceTypes() {
 				for _, r := range aprl[strings.ToLower(t)] {
+					if strings.Contains(r.GraphQuery, "cannot-be-validated-with-arg") ||
+						strings.Contains(r.GraphQuery, "under-development") ||
+						strings.Contains(r.GraphQuery, "under development") {
+						continue
+					}
+
 					i++
 					fmt.Printf("%s | %s | %s | %s | %s | %s | [Learn](%s)", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.LearnMoreLink[0].Url)
 					fmt.Println()
