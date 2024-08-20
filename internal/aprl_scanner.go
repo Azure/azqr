@@ -278,7 +278,7 @@ func convertInterfaceToString(i interface{}) string {
 	default:
 		jsonStr, err := json.Marshal(i)
 		if err != nil {
-			log.Fatal().Err(err).Msg("unssupported type in ARG query result")
+			log.Fatal().Err(err).Msg("unsupported type found in ARG query result")
 		}
 		return string(jsonStr)
 	}
