@@ -8,7 +8,6 @@ import (
 	"math"
 	"net/http"
 	"strings"
-	"sync"
 
 	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -41,14 +40,10 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 
 	batches := int(math.Ceil(float64(len(resources)) / 20))
 
-	var wg sync.WaitGroup
 	ch := make(chan map[string]bool, 5)
-	wg.Add(batches)
 
-	go func() {
-		wg.Wait()
-		close(ch)
-	}()
+	maxConcurrency := 200 // max number of concurrent requests
+	limiter := make(chan struct{}, maxConcurrency)
 
 	azqr.LogResourceTypeScan("Diagnostic Settings")
 
@@ -59,8 +54,9 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 		if j > len(resources) {
 			j = len(resources)
 		}
+		limiter <- struct{}{} // Acquire a token. Waits here for token releases from the limiter. 
 		go func(r []*string) {
-			defer wg.Done()
+			defer func() { <-limiter }() // Release the token
 			resp, err := d.restCall(d.ctx, r)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to get diagnostic settings")

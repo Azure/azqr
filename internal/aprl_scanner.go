@@ -11,7 +11,6 @@ import (
 	"io/fs"
 	"math"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Azure/azqr/internal/azqr"
@@ -128,14 +127,7 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 
 	batches := int(math.Ceil(float64(len(rules)) / 12))
 
-	var wg sync.WaitGroup
 	ch := make(chan []azqr.AprlResult, 12)
-	wg.Add(batches)
-
-	go func() {
-		wg.Wait()
-		close(ch)
-	}()
 
 	batchSzie := 12
 	batchNumber := 0
@@ -146,7 +138,6 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 		}
 
 		go func(r []azqr.AprlRecommendation, b int) {
-			defer wg.Done()
 			if b > 0 {
 				// Staggering queries to avoid throttling. Max 15 queries each 5 seconds.
 				// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries

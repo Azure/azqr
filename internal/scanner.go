@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Azure/azqr/internal/azqr"
@@ -169,14 +168,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 			}
 
 			// scan each resource group
-			var wg sync.WaitGroup
 			ch := make(chan []azqr.AzqrServiceResult, 5)
-			wg.Add(len(params.ServiceScanners))
-
-			go func() {
-				wg.Wait()
-				close(ch)
-			}()
 
 			for _, s := range params.ServiceScanners {
 				err := s.Init(config)
@@ -185,8 +177,6 @@ func (sc Scanner) Scan(params *ScanParams) {
 				}
 
 				go func(s azqr.IAzureScanner) {
-					defer wg.Done()
-
 					res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
 					if err != nil {
 						cancel()
