@@ -168,7 +168,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 			}
 
 			// scan each resource group
-			ch := make(chan []azqr.AzqrServiceResult, 5)
+			ch := make(chan []azqr.AzqrServiceResult, len(params.ServiceScanners))
 
 			for _, s := range params.ServiceScanners {
 				err := s.Init(config)

@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"math"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Azure/azqr/internal/azqr"
@@ -127,32 +128,34 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 
 	batches := int(math.Ceil(float64(len(rules)) / 12))
 
-	ch := make(chan []azqr.AprlResult, 12)
+	jobs := make(chan []azqr.AprlRecommendation, batches)
+	ch := make(chan []azqr.AprlResult, batches)
+	var wg sync.WaitGroup
 
-	batchSzie := 12
-	batchNumber := 0
-	for i := 0; i < len(rules); i += batchSzie {
-		j := i + batchSzie
+	// Start workers
+	numWorkers := 12 // Define the number of workers in the pool
+	for w := 0; w < numWorkers; w++ {
+		go sc.worker(ctx, graph, subscriptions, jobs, ch, &wg)
+	}
+	wg.Add(batches)
+
+	batchSize := 12
+	for i := 0; i < len(rules); i += batchSize {
+		j := i + batchSize
 		if j > len(rules) {
 			j = len(rules)
 		}
 
-		go func(r []azqr.AprlRecommendation, b int) {
-			if b > 0 {
-				// Staggering queries to avoid throttling. Max 15 queries each 5 seconds.
-				// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
-				s := time.Duration(b * 7)
-				time.Sleep(s * time.Second)
-			}
-			res, err := sc.graphScan(ctx, graph, r, subscriptions)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to scan")
-			}
-			ch <- res
-		}(rules[i:j], batchNumber)
+		jobs <- rules[i:j]
 
-		batchNumber++
+		// Staggering queries to avoid throttling. Max 15 queries each 5 seconds.
+		// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
+		time.Sleep(5 * time.Second)
 	}
+
+	// Wait for all workers to finish
+	close(jobs)
+	wg.Wait()
 
 	for i := 0; i < batches; i++ {
 		res := <-ch
@@ -165,6 +168,17 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 	}
 
 	return recommendations, results
+}
+
+func (sc *AprlScanner) worker(ctx context.Context, graph *graph.GraphQuery, subscriptions map[string]string, jobs <-chan []azqr.AprlRecommendation, results chan<- []azqr.AprlResult, wg *sync.WaitGroup) {
+	for r := range jobs {
+		res, err := sc.graphScan(ctx, graph, r, subscriptions)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to scan")
+		}
+		results <- res
+		wg.Done()
+	}
 }
 
 func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQuery, rules []azqr.AprlRecommendation, subscriptions map[string]string) ([]azqr.AprlResult, error) {

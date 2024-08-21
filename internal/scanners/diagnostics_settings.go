@@ -5,9 +5,11 @@ package scanners
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -38,14 +40,30 @@ func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenC
 func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resources []*string) (map[string]bool, error) {
 	res := map[string]bool{}
 
+	if len(resources) > 5000 {
+		log.Warn().Msg(fmt.Sprintf("%d resources detected. Scan will take longer than usual", len(resources)))
+	}
+
 	batches := int(math.Ceil(float64(len(resources)) / 20))
 
-	ch := make(chan map[string]bool, 5)
-
-	maxConcurrency := 200 // max number of concurrent requests
-	limiter := make(chan struct{}, maxConcurrency)
-
 	azqr.LogResourceTypeScan("Diagnostic Settings")
+
+	if batches == 0 {
+		return res, nil
+	}
+
+	log.Debug().Msgf("Number of diagnostic setting batches: %d", batches)
+	jobs := make(chan []*string, batches)
+	ch := make(chan map[string]bool, batches)
+	var wg sync.WaitGroup
+
+	// Start workers
+	// Based on: https://medium.com/insiderengineering/concurrent-http-requests-in-golang-best-practices-and-techniques-f667e5a19dea
+	numWorkers := 200 // Define the number of workers in the pool
+	for w := 0; w < numWorkers; w++ {
+		go d.worker(jobs, ch, &wg)
+	}
+	wg.Add(batches)
 
 	// Split resources into batches of 20 items.
 	batchSize := 20
@@ -54,23 +72,12 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 		if j > len(resources) {
 			j = len(resources)
 		}
-		limiter <- struct{}{} // Acquire a token. Waits here for token releases from the limiter. 
-		go func(r []*string) {
-			defer func() { <-limiter }() // Release the token
-			resp, err := d.restCall(d.ctx, r)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to get diagnostic settings")
-			}
-			asyncRes := map[string]bool{}
-			for _, response := range resp.Responses {
-				for _, diagnosticSetting := range response.Content.Value {
-					id := parseResourceId(diagnosticSetting.ID)
-					asyncRes[id] = true
-				}
-			}
-			ch <- asyncRes
-		}(resources[i:j])
+		jobs <- resources[i:j]
 	}
+
+	// Wait for all workers to finish
+	close(jobs)
+	wg.Wait()
 
 	for i := 0; i < batches; i++ {
 		for k, v := range <-ch {
@@ -79,6 +86,24 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 	}
 
 	return res, nil
+}
+
+func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<- map[string]bool, wg *sync.WaitGroup) {
+	for ids := range jobs {
+		resp, err := d.restCall(d.ctx, ids)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get diagnostic settings")
+		}
+		asyncRes := map[string]bool{}
+		for _, response := range resp.Responses {
+			for _, diagnosticSetting := range response.Content.Value {
+				id := parseResourceId(diagnosticSetting.ID)
+				asyncRes[id] = true
+			}
+		}
+		results <- asyncRes
+		wg.Done()
+	}
 }
 
 const (
@@ -102,6 +127,7 @@ func (d *DiagnosticSettingsScanner) restCall(ctx context.Context, resourceIds []
 
 	for _, resourceId := range resourceIds {
 		batch.Requests = append(batch.Requests, ArmBatchRequestItem{
+			Name:        *resourceId,
 			HttpMethod:  http.MethodGet,
 			RelativeUrl: *resourceId + "/providers/microsoft.insights/diagnosticSettings?api-version=2021-05-01-preview",
 		})
@@ -141,6 +167,7 @@ type (
 	}
 
 	ArmBatchRequestItem struct {
+		Name        string `json:"name"`
 		HttpMethod  string `json:"httpMethod"`
 		RelativeUrl string `json:"relativeUrl"`
 	}
