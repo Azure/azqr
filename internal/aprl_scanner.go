@@ -188,6 +188,7 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 		subs = append(subs, &s)
 	}
 
+	sentQueries := 0
 	for _, rule := range rules {
 		if rule.GraphQuery != "" {
 			result := graphClient.Query(ctx, rule.GraphQuery, subs)
@@ -257,6 +258,12 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 						Source:              "APRL",
 					})
 				}
+			}
+			sentQueries++
+			if sentQueries == 2 {
+				// Staggering queries to avoid throttling. Max 10 queries each 5 seconds.
+				// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
+				time.Sleep(1 * time.Second)
 			}
 		}
 	}

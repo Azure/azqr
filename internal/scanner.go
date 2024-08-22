@@ -139,6 +139,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to initialize diagnostic settings scanner")
 		}
+
 		diagResults = diagnosticsScanner.Scan(reportData.ResourceIDs())
 	}
 

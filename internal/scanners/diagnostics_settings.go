@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -59,7 +60,7 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 
 	// Start workers
 	// Based on: https://medium.com/insiderengineering/concurrent-http-requests-in-golang-best-practices-and-techniques-f667e5a19dea
-	numWorkers := 200 // Define the number of workers in the pool
+	numWorkers := 100 // Define the number of workers in the pool
 	for w := 0; w < numWorkers; w++ {
 		go d.worker(jobs, ch, &wg)
 	}
@@ -67,12 +68,23 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 
 	// Split resources into batches of 20 items.
 	batchSize := 20
+	batchCount := 0
 	for i := 0; i < len(resources); i += batchSize {
 		j := i + batchSize
 		if j > len(resources) {
 			j = len(resources)
 		}
 		jobs <- resources[i:j]
+
+		batchCount++
+		if batchCount == numWorkers {
+			log.Debug().Msgf("all %d workers are running. Sleeping for 4 seconds to avoid throttling", numWorkers)
+			batchCount = 0
+			// there are more batches to process
+			// Staggering queries to avoid throttling. Max 15 queries each 5 seconds.
+			// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
+			time.Sleep(4 * time.Second)
+		}
 	}
 
 	// Wait for all workers to finish
@@ -127,7 +139,6 @@ func (d *DiagnosticSettingsScanner) restCall(ctx context.Context, resourceIds []
 
 	for _, resourceId := range resourceIds {
 		batch.Requests = append(batch.Requests, ArmBatchRequestItem{
-			Name:        *resourceId,
 			HttpMethod:  http.MethodGet,
 			RelativeUrl: *resourceId + "/providers/microsoft.insights/diagnosticSettings?api-version=2021-05-01-preview",
 		})
@@ -167,7 +178,6 @@ type (
 	}
 
 	ArmBatchRequestItem struct {
-		Name        string `json:"name"`
 		HttpMethod  string `json:"httpMethod"`
 		RelativeUrl string `json:"relativeUrl"`
 	}
