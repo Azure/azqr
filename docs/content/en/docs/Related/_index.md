@@ -1,5 +1,5 @@
 ---
-title: Releated Projects
+title: Related Projects
 description: Azure Quick Review compared to APRL, Azure Review Checklists and PSRule.Rules.Azure
 weight: 6
 ---
