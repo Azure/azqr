@@ -145,7 +145,7 @@ jobs:
           go build -ldflags "-s -w -X 'github.com/Azure/azqr/cmd/azqr.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }} ./cmd/main.go
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
           path: ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }}
@@ -217,7 +217,7 @@ jobs:
           echo AZQR_ARTIFACT_NAME=${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }} >> $env:GITHUB_ENV
 
       - name: download artifacts - ${{ env.AZQR_ARTIFACT_NAME }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           name: ${{ env.AZQR_ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/
