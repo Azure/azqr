@@ -6,7 +6,6 @@ package excel
 import (
 	"fmt"
 	_ "image/png"
-	"unicode/utf8"
 
 	"github.com/Azure/azqr/internal/embeded"
 	"github.com/Azure/azqr/internal/renderers"
@@ -46,11 +45,15 @@ func autofit(f *excelize.File, sheetName string) error {
 	for idx, col := range cols {
 		largestWidth := 0
 		for _, rowCell := range col {
-			cellWidth := utf8.RuneCountInString(rowCell) + 1
+			cellWidth := len(rowCell) + 3
 			if cellWidth > largestWidth {
 				largestWidth = cellWidth
 			}
 		}
+		if largestWidth > 255 {
+			largestWidth = 120
+		}
+
 		name, err := excelize.ColumnNumberToName(idx + 1)
 		if err != nil {
 			return err
@@ -60,6 +63,7 @@ func autofit(f *excelize.File, sheetName string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -103,10 +107,10 @@ func createFirstRow(f *excelize.File, sheet string, headers []string) {
 }
 
 func setHyperLink(f *excelize.File, sheet string, col, currentRow int) {
-	display := "Learn"
-	tooltip := "Learn more..."
 	cell, _ := excelize.CoordinatesToCellName(col, currentRow)
 	link, _ := f.GetCellValue(sheet, cell)
+	display := link
+	tooltip := "Learn more..."
 	if link != "" {
 		_ = f.SetCellValue(sheet, cell, display)
 		_ = f.SetCellHyperLink(sheet, cell, link, "External", excelize.HyperlinkOpts{Display: &display, Tooltip: &tooltip})
@@ -146,11 +150,24 @@ func configureSheet(f *excelize.File, sheet string, headers []string, currentRow
 }
 
 func applyBlueStyle(f *excelize.File, sheet string, lastRow int, columns int) {
-	style, err := f.NewStyle(&excelize.Style{
+	blue, err := f.NewStyle(&excelize.Style{
 		Fill: excelize.Fill{
 			Type:    "pattern",
 			Color:   []string{"#CAEDFB"},
 			Pattern: 1,
+		},
+		Alignment: &excelize.Alignment{
+			Vertical: "top",
+			WrapText: true,
+		},
+	})
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create blue style")
+	}
+	white, err := f.NewStyle(&excelize.Style{
+		Alignment: &excelize.Alignment{
+			Vertical: "top",
+			WrapText: true,
 		},
 	})
 	if err != nil {
@@ -165,7 +182,12 @@ func applyBlueStyle(f *excelize.File, sheet string, lastRow int, columns int) {
 			}
 
 			if i%2 == 0 {
-				err = f.SetCellStyle(sheet, cell, cell, style)
+				err = f.SetCellStyle(sheet, cell, cell, blue)
+				if err != nil {
+					log.Fatal().Err(err).Msg("Failed to set style")
+				}
+			} else {
+				err = f.SetCellStyle(sheet, cell, cell, white)
 				if err != nil {
 					log.Fatal().Err(err).Msg("Failed to set style")
 				}
