@@ -12,18 +12,17 @@ import (
 )
 
 func renderAdvisor(f *excelize.File, data *renderers.ReportData) {
+	_, err := f.NewSheet("Advisor")
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create Advisor sheet")
+	}
+
+	records := data.AdvisorTable()
+	headers := records[0]
+	createFirstRow(f, "Advisor", headers)
+
 	if len(data.AdvisorData) > 0 {
-		_, err := f.NewSheet("Advisor")
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create Advisor sheet")
-		}
-
-		records := data.AdvisorTable()
-		headers := records[0]
 		records = records[1:]
-
-		createFirstRow(f, "Advisor", headers)
-
 		currentRow := 4
 		for _, row := range records {
 			currentRow += 1

@@ -12,18 +12,17 @@ import (
 )
 
 func renderDefender(f *excelize.File, data *renderers.ReportData) {
+	_, err := f.NewSheet("Defender")
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create Defender sheet")
+	}
+
+	records := data.DefenderTable()
+	headers := records[0]
+	createFirstRow(f, "Defender", headers)
+
 	if len(data.DefenderData) > 0 {
-		_, err := f.NewSheet("Defender")
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create Defender sheet")
-		}
-
-		records := data.DefenderTable()
-		headers := records[0]
 		records = records[1:]
-
-		createFirstRow(f, "Defender", headers)
-
 		currentRow := 4
 		for _, row := range records {
 			currentRow += 1
