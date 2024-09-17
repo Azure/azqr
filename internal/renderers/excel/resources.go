@@ -13,18 +13,17 @@ import (
 
 func renderResources(f *excelize.File, data *renderers.ReportData) {
 	sheetName := "Inventory"
+	_, err := f.NewSheet(sheetName)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create Inventory sheet")
+	}
+
+	records := data.ResourcesTable()
+	headers := records[0]
+	createFirstRow(f, sheetName, headers)
+
 	if len(data.Resources) > 0 {
-		_, err := f.NewSheet(sheetName)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create Inventory sheet")
-		}
-
-		records := data.ResourcesTable()
-		headers := records[0]
 		records = records[1:]
-
-		createFirstRow(f, sheetName, headers)
-
 		currentRow := 4
 		for _, row := range records {
 			currentRow += 1

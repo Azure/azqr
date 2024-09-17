@@ -12,18 +12,17 @@ import (
 )
 
 func renderCosts(f *excelize.File, data *renderers.ReportData) {
+	_, err := f.NewSheet("Costs")
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create Costs sheet")
+	}
+
+	records := data.CostTable()
+	headers := records[0]
+	createFirstRow(f, "Costs", headers)
+	
 	if data.CostData != nil && len(data.CostData.Items) > 0 {
-		_, err := f.NewSheet("Costs")
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create Costs sheet")
-		}
-
-		records := data.CostTable()
-		headers := records[0]
 		records = records[1:]
-
-		createFirstRow(f, "Costs", headers)
-
 		currentRow := 4
 		for _, row := range records {
 			currentRow += 1

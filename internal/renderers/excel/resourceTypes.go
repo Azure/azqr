@@ -13,17 +13,17 @@ import (
 
 func renderResourceTypes(f *excelize.File, data *renderers.ReportData) {
 	sheetName := "ResourceTypes"
+	_, err := f.NewSheet(sheetName)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to create %s sheet", sheetName)
+	}
+
+	records := data.ResourceTypesTable()
+	headers := records[0]
+	createFirstRow(f, sheetName, headers)
+
 	if len(data.ResourceTypeCount) > 0 {
-		_, err := f.NewSheet(sheetName)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to create %s sheet", sheetName)
-		}
-
-		records := data.ResourceTypesTable()
-		headers := records[0]
 		records = records[1:]
-
-		createFirstRow(f, sheetName, headers)
 
 		currentRow := 4
 		for _, row := range records {

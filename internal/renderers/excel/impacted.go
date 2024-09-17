@@ -13,18 +13,17 @@ import (
 
 func renderImpactedResources(f *excelize.File, data *renderers.ReportData) {
 	sheetName := "ImpactedResources"
+	_, err := f.NewSheet(sheetName)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create APRL sheet")
+	}
+
+	records := data.ImpactedTable()
+	headers := records[0]
+	createFirstRow(f, sheetName, headers)
+
 	if len(data.AprlData) > 0 {
-		_, err := f.NewSheet(sheetName)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to create APRL sheet")
-		}
-
-		records := data.ImpactedTable()
-		headers := records[0]
 		records = records[1:]
-
-		createFirstRow(f, sheetName, headers)
-
 		currentRow := 4
 		for _, row := range records {
 			currentRow += 1
