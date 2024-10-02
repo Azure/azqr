@@ -95,7 +95,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 			Impact:           azqr.ImpactLow,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
-				return c.Tags == nil || len(c.Tags) == 0, ""
+				return len(c.Tags) == 0, ""
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
