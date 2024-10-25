@@ -31,3 +31,5 @@ func (a *PrivateDNSZoneScanner) ResourceTypes() []string {
 func (a *PrivateDNSZoneScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 	return map[string]azqr.AzqrRecommendation{}
 }
+
+// TODO: version 6.1.0 of armentowrk does not allow listing per subscription yet.
