@@ -110,7 +110,7 @@ func GetScanners() []azqr.IAzureScanner {
 		&maria.MariaScanner{},
 		&mysql.MySQLFlexibleScanner{},
 		&mysql.MySQLScanner{},
-		&ng.NatGatewwayScanner{},
+		&ng.NatGatewayScanner{},
 		&netapp.NetAppScanner{},
 		&nsg.NSGScanner{},
 		&nw.NetworkWatcherScanner{},

@@ -22,7 +22,7 @@ func renderImpactedResources(f *excelize.File, data *renderers.ReportData) {
 	headers := records[0]
 	createFirstRow(f, sheetName, headers)
 
-	if len(data.AprlData) > 0 {
+	if len(records) > 0 {
 		records = records[1:]
 		currentRow := 4
 		for _, row := range records {

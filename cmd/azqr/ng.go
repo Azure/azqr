@@ -20,7 +20,7 @@ var ngCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		serviceScanners := []azqr.IAzureScanner{
-			&ng.NatGatewwayScanner{},
+			&ng.NatGatewayScanner{},
 		}
 
 		scan(cmd, serviceScanners)

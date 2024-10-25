@@ -70,7 +70,7 @@ func (rd *ReportData) ResourcesTable() [][]string {
 	rows := [][]string{}
 	for _, r := range rd.Resources {
 		sla := ""
-		
+
 		for _, a := range rd.AzqrData {
 			if strings.EqualFold(strings.ToLower(a.ResourceID()), strings.ToLower(r.ID)) {
 				for _, rc := range a.Recommendations {
@@ -334,6 +334,10 @@ func NewReportData(outputFile string, mask bool) ReportData {
 }
 
 func MaskSubscriptionID(subscriptionID string, mask bool) string {
+	if len(subscriptionID) < 36 {
+		return ""
+	}
+
 	if !mask {
 		return subscriptionID
 	}
@@ -343,6 +347,10 @@ func MaskSubscriptionID(subscriptionID string, mask bool) string {
 }
 
 func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
+	if !strings.HasPrefix(resourceID, "/subscriptions/") {
+		return ""
+	}
+
 	if !mask {
 		return resourceID
 	}
