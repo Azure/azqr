@@ -68,7 +68,7 @@ func (a *AppServiceScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServ
 		}
 
 		for _, s := range sites {
-			config, err := a.sitesClient.GetConfiguration(a.config.Ctx, resourceGroupName, *s.Name, nil)
+			config, err := a.sitesClient.GetConfiguration(a.config.Ctx, *s.Properties.ResourceGroup, *s.Name, nil)
 			if err != nil {
 				return nil, err
 			}
