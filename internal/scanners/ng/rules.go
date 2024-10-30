@@ -20,7 +20,7 @@ func (a *NatGatewayScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			Recommendation:   "NAT Gateway should have diagnostic settings enabled",
 			Impact:           azqr.ImpactLow,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				service := target.(*armnetwork.SecurityGroup)
+				service := target.(*armnetwork.NatGateway)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
 			},
@@ -45,7 +45,7 @@ func (a *NatGatewayScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			Recommendation:   "NAT Gateway Name should comply with naming conventions",
 			Impact:           azqr.ImpactLow,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				c := target.(*armnetwork.SecurityGroup)
+				c := target.(*armnetwork.NatGateway)
 				caf := strings.HasPrefix(*c.Name, "ng")
 				return !caf, ""
 			},
@@ -58,7 +58,7 @@ func (a *NatGatewayScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 			Recommendation:   "NAT Gateway should have tags",
 			Impact:           azqr.ImpactLow,
 			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
-				c := target.(*armnetwork.SecurityGroup)
+				c := target.(*armnetwork.NatGateway)
 				return len(c.Tags) == 0, ""
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
