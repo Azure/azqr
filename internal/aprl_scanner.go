@@ -196,36 +196,6 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 				for _, row := range result.Data {
 					m := row.(map[string]interface{})
 
-					tags := ""
-					if m["tags"] != nil {
-						tags = convertInterfaceToString(m["tags"])
-					}
-
-					param1 := ""
-					if m["param1"] != nil {
-						param1 = convertInterfaceToString(m["param1"])
-					}
-
-					param2 := ""
-					if m["param2"] != nil {
-						param2 = convertInterfaceToString(m["param2"])
-					}
-
-					param3 := ""
-					if m["param3"] != nil {
-						param3 = convertInterfaceToString(m["param3"])
-					}
-
-					param4 := ""
-					if m["param4"] != nil {
-						param4 = convertInterfaceToString(m["param4"])
-					}
-
-					param5 := ""
-					if m["param5"] != nil {
-						param5 = convertInterfaceToString(m["param5"])
-					}
-
 					log.Debug().Msg(rule.GraphQuery)
 
 					subscription := azqr.GetSubsctiptionFromResourceID(m["id"].(string))
@@ -242,17 +212,17 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 						LongDescription:     rule.LongDescription,
 						PotentialBenefits:   rule.PotentialBenefits,
 						Impact:              azqr.RecommendationImpact(rule.Impact),
-						Name:                m["name"].(string),
-						ResourceID:          m["id"].(string),
+						Name:                convertInterfaceToString(m["name"]),
+						ResourceID:          convertInterfaceToString(m["id"]),
 						SubscriptionID:      subscription,
 						SubscriptionName:    subscriptionName,
 						ResourceGroup:       azqr.GetResourceGroupFromResourceID(m["id"].(string)),
-						Tags:                tags,
-						Param1:              param1,
-						Param2:              param2,
-						Param3:              param3,
-						Param4:              param4,
-						Param5:              param5,
+						Tags:                convertInterfaceToString(m["tags"]),
+						Param1:              convertInterfaceToString(m["param1"]),
+						Param2:              convertInterfaceToString(m["param2"]),
+						Param3:              convertInterfaceToString(m["param3"]),
+						Param4:              convertInterfaceToString(m["param4"]),
+						Param5:              convertInterfaceToString(m["param5"]),
 						Learn:               rule.LearnMoreLink[0].Url,
 						AutomationAvailable: rule.AutomationAvailable,
 						Source:              "APRL",
@@ -289,6 +259,10 @@ func (sc AprlScanner) getGraphRules(service string, filters *azqr.Filters, aprl 
 }
 
 func convertInterfaceToString(i interface{}) string {
+	if i == nil {
+		return ""
+	}
+
 	switch v := i.(type) {
 	case string:
 		return v
