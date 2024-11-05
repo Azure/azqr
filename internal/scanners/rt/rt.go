@@ -43,7 +43,7 @@ func (c *RouteTableScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServ
 			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
-			Location:         *w.Location,
+			Location:         parseLocation(w.Location),
 			Recommendations:  rr,
 		})
 	}
@@ -68,3 +68,9 @@ func (a *RouteTableScanner) ResourceTypes() []string {
 	return []string{"Microsoft.Network/routeTables"}
 }
 
+func parseLocation(l *string) string {
+	if l == nil {
+		return ""
+	}
+	return *l
+}

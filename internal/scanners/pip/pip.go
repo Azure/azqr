@@ -42,7 +42,7 @@ func (c *PublicIPScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServic
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
-			Type:             *w.Type,
+			Type:             parseType(w.Type),
 			Location:         *w.Location,
 			Recommendations:  rr,
 		})
@@ -67,3 +67,12 @@ func (c *PublicIPScanner) list() ([]*armnetwork.PublicIPAddress, error) {
 func (a *PublicIPScanner) ResourceTypes() []string {
 	return []string{"Microsoft.Network/publicIPAddresses"}
 }
+
+
+func parseType(t *string) string {
+	if t == nil {
+		return "Microsoft.Network/publicIPAddresses"
+	}
+	return *t
+}
+
