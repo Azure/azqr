@@ -29,4 +29,10 @@ iwr https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-windows-la
 
 ## Install on Mac
 
-Download the latest release from [here](https://github.com/Azure/azqr/releases).
+Use `homebrew`:
+
+```console
+brew install azqr
+```
+
+or download the latest release from [here](https://github.com/Azure/azqr/releases).
