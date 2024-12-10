@@ -29,6 +29,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/cr"
 	"github.com/Azure/azqr/internal/scanners/dbw"
 	"github.com/Azure/azqr/internal/scanners/dec"
+	"github.com/Azure/azqr/internal/scanners/disk"
 	"github.com/Azure/azqr/internal/scanners/erc"
 	"github.com/Azure/azqr/internal/scanners/evgd"
 	"github.com/Azure/azqr/internal/scanners/evh"
@@ -95,6 +96,7 @@ func GetScanners() []azqr.IAzureScanner {
 		&cosmos.CosmosDBScanner{},
 		&cr.ContainerRegistryScanner{},
 		&dec.DataExplorerScanner{},
+		&disk.DiskScanner{},
 		&erc.ExpressRouteScanner{},
 		&evgd.EventGridScanner{},
 		&evh.EventHubScanner{},
