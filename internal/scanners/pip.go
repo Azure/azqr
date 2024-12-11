@@ -4,18 +4,19 @@
 package scanners
 
 import (
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 	"github.com/rs/zerolog/log"
 )
 
 // PublicIPScanner - Scanner for Public IPs
 type PublicIPScanner struct {
-	config *ScannerConfig
+	config *models.ScannerConfig
 	client *armnetwork.PublicIPAddressesClient
 }
 
 // Init - Initializes the PublicIPScanner
-func (s *PublicIPScanner) Init(config *ScannerConfig) error {
+func (s *PublicIPScanner) Init(config *models.ScannerConfig) error {
 	s.config = config
 	var err error
 	s.client, err = armnetwork.NewPublicIPAddressesClient(s.config.SubscriptionID, s.config.Cred, config.ClientOptions)
@@ -27,7 +28,7 @@ func (s *PublicIPScanner) Init(config *ScannerConfig) error {
 
 // ListPublicIPs - Lists all Public IPs
 func (s *PublicIPScanner) ListPublicIPs() (map[string]*armnetwork.PublicIPAddress, error) {
-	LogSubscriptionScan(s.config.SubscriptionID, "Public IPs")
+	models.LogSubscriptionScan(s.config.SubscriptionID, "Public IPs")
 
 	res := map[string]*armnetwork.PublicIPAddress{}
 	opt := armnetwork.PublicIPAddressesClientListAllOptions{}
@@ -48,14 +49,14 @@ func (s *PublicIPScanner) ListPublicIPs() (map[string]*armnetwork.PublicIPAddres
 	return res, nil
 }
 
-func (s *PublicIPScanner) Scan(config *ScannerConfig) map[string]*armnetwork.PublicIPAddress {
+func (s *PublicIPScanner) Scan(config *models.ScannerConfig) map[string]*armnetwork.PublicIPAddress {
 	err := s.Init(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize Diagnostic Settings Scanner")
 	}
 	pips, err := s.ListPublicIPs()
 	if err != nil {
-		if ShouldSkipError(err) {
+		if models.ShouldSkipError(err) {
 			pips = map[string]*armnetwork.PublicIPAddress{}
 		} else {
 			log.Fatal().Err(err).Msg("Failed to list Public IPs")

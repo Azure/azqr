@@ -4,22 +4,22 @@
 package amg
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard"
 )
 
 func init() {
-	scanners.ScannerList["amg"] = []scanners.IAzureScanner{&ManagedGrafanaScanner{}}
+	models.ScannerList["amg"] = []models.IAzureScanner{&ManagedGrafanaScanner{}}
 }
 
 // ManagedGrafanaScanner - Scanner for Managed Grafana
 type ManagedGrafanaScanner struct {
-	config        *scanners.ScannerConfig
+	config        *models.ScannerConfig
 	grafanaClient *armdashboard.GrafanaClient
 }
 
 // Init - Initializes the ManagedGrafanaScanner Scanner
-func (a *ManagedGrafanaScanner) Init(config *scanners.ScannerConfig) error {
+func (a *ManagedGrafanaScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.grafanaClient, _ = armdashboard.NewGrafanaClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *ManagedGrafanaScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Managed Grafana in a Resource Group
-func (a *ManagedGrafanaScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *ManagedGrafanaScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	workspaces, err := a.listWorkspaces()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, g := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*g.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,

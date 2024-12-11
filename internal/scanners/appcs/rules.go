@@ -6,20 +6,20 @@ package appcs
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
 )
 
 // GetRecommendations - Returns the rules for the AppConfigurationScanner
-func (a *AppConfigurationScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *AppConfigurationScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"appcs-001": {
 			RecommendationID: "appcs-001",
 			ResourceType:     "Microsoft.AppConfiguration/configurationStores",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "AppConfiguration should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armappconfiguration.ConfigurationStore)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]scanners.AzqrR
 		"appcs-003": {
 			RecommendationID:   "appcs-003",
 			ResourceType:       "Microsoft.AppConfiguration/configurationStores",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "AppConfiguration should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				a := target.(*armappconfiguration.ConfigurationStore)
 				sku := strings.ToLower(*a.SKU.Name)
 				sla := "None"
@@ -48,10 +48,10 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]scanners.AzqrR
 		"appcs-004": {
 			RecommendationID: "appcs-004",
 			ResourceType:     "Microsoft.AppConfiguration/configurationStores",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "AppConfiguration should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				a := target.(*armappconfiguration.ConfigurationStore)
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -61,10 +61,10 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]scanners.AzqrR
 		"appcs-006": {
 			RecommendationID: "appcs-006",
 			ResourceType:     "Microsoft.AppConfiguration/configurationStores",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "AppConfiguration Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armappconfiguration.ConfigurationStore)
 				caf := strings.HasPrefix(*c.Name, "appcs")
 				return !caf, ""
@@ -74,10 +74,10 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]scanners.AzqrR
 		"appcs-007": {
 			RecommendationID: "appcs-007",
 			ResourceType:     "Microsoft.AppConfiguration/configurationStores",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "AppConfiguration should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armappconfiguration.ConfigurationStore)
 				return len(c.Tags) == 0, ""
 			},
@@ -86,10 +86,10 @@ func (a *AppConfigurationScanner) GetRecommendations() map[string]scanners.AzqrR
 		"appcs-008": {
 			RecommendationID: "appcs-008",
 			ResourceType:     "Microsoft.AppConfiguration/configurationStores",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "AppConfiguration should have local authentication disabled",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactMedium,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armappconfiguration.ConfigurationStore)
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""

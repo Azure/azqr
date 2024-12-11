@@ -4,22 +4,22 @@
 package afd
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
 )
 
 func init() {
-	scanners.ScannerList["afd"] = []scanners.IAzureScanner{&FrontDoorScanner{}}
+	models.ScannerList["afd"] = []models.IAzureScanner{&FrontDoorScanner{}}
 }
 
 // FrontDoorScanner - Scanner for Front Door
 type FrontDoorScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armcdn.ProfilesClient
 }
 
 // Init - Initializes the FrontDoor Scanner
-func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
+func (a *FrontDoorScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armcdn.NewProfilesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *FrontDoorScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Front Doors in a Resource Group
-func (a *FrontDoorScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *FrontDoorScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	gateways, err := a.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, g := range gateways {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*g.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,

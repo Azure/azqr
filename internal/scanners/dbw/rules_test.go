@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
@@ -16,7 +16,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *models.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 				target: &armdatabricks.Workspace{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &models.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "dbw-003",
 				target:      &armdatabricks.Workspace{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +70,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -84,7 +84,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 				target: &armdatabricks.Workspace{
 					Name: to.Ptr("dbw-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -104,7 +104,7 @@ func TestDatabricksScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,

@@ -4,22 +4,22 @@
 package cosmos
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
 
 func init() {
-	scanners.ScannerList["cosmos"] = []scanners.IAzureScanner{&CosmosDBScanner{}}
+	models.ScannerList["cosmos"] = []models.IAzureScanner{&CosmosDBScanner{}}
 }
 
 // CosmosDBScanner - Scanner for CosmosDB Databases
 type CosmosDBScanner struct {
-	config          *scanners.ScannerConfig
+	config          *models.ScannerConfig
 	databasesClient *armcosmos.DatabaseAccountsClient
 }
 
 // Init - Initializes the CosmosDBScanner
-func (a *CosmosDBScanner) Init(config *scanners.ScannerConfig) error {
+func (a *CosmosDBScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.databasesClient, err = armcosmos.NewDatabaseAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *CosmosDBScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all CosmosDB Databases in a Resource Group
-func (c *CosmosDBScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *CosmosDBScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	databases, err := c.listDatabases()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, database := range databases {
 		rr := engine.EvaluateRecommendations(rules, database, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*database.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*database.ID),
 			ServiceName:      *database.Name,
 			Type:             *database.Type,
 			Location:         *database.Location,

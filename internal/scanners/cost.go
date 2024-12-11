@@ -6,30 +6,20 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement"
 	"github.com/rs/zerolog/log"
 )
 
-// CostResult - Cost result
-type CostResult struct {
-	From, To time.Time
-	Items    []*CostResultItem
-}
-
-// CostResultItem - Cost result ite,
-type CostResultItem struct {
-	SubscriptionID, SubscriptionName, ServiceName, Value, Currency string
-}
-
 // CostScanner - Cost scanner
 type CostScanner struct {
-	config *ScannerConfig
+	config *models.ScannerConfig
 	client *armcostmanagement.QueryClient
 }
 
 // Init - Initializes the Cost Scanner
-func (s *CostScanner) Init(config *ScannerConfig) error {
+func (s *CostScanner) Init(config *models.ScannerConfig) error {
 	s.config = config
 	var err error
 	s.client, err = armcostmanagement.NewQueryClient(config.Cred, config.ClientOptions)
@@ -40,8 +30,8 @@ func (s *CostScanner) Init(config *ScannerConfig) error {
 }
 
 // QueryCosts - Query Costs.
-func (s *CostScanner) QueryCosts() (*CostResult, error) {
-	LogSubscriptionScan(s.config.SubscriptionID, "Costs")
+func (s *CostScanner) QueryCosts() (*models.CostResult, error) {
+	models.LogSubscriptionScan(s.config.SubscriptionID, "Costs")
 	timeframeType := armcostmanagement.TimeframeTypeCustom
 	etype := armcostmanagement.ExportTypeActualCost
 	toTime := time.Now().UTC()
@@ -77,14 +67,14 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 		return nil, err
 	}
 
-	result := CostResult{
+	result := models.CostResult{
 		From:  fromTime,
 		To:    toTime,
-		Items: []*CostResultItem{},
+		Items: []*models.CostResultItem{},
 	}
 
 	for _, v := range resp.Properties.Rows {
-		result.Items = append(result.Items, &CostResultItem{
+		result.Items = append(result.Items, &models.CostResultItem{
 			SubscriptionID:   s.config.SubscriptionID,
 			SubscriptionName: s.config.SubscriptionName,
 			ServiceName:      fmt.Sprintf("%v", v[1]),
@@ -95,9 +85,9 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 	return &result, nil
 }
 
-func (s *CostScanner) Scan(scan bool, config *ScannerConfig) *CostResult {
-	costResult := &CostResult{
-		Items: []*CostResultItem{},
+func (s *CostScanner) Scan(scan bool, config *models.ScannerConfig) *models.CostResult {
+	costResult := &models.CostResult{
+		Items: []*models.CostResultItem{},
 	}
 	if scan {
 		err := s.Init(config)
@@ -105,7 +95,7 @@ func (s *CostScanner) Scan(scan bool, config *ScannerConfig) *CostResult {
 			log.Fatal().Err(err).Msg("Failed to initialize Cost Scanner")
 		}
 		costs, err := s.QueryCosts()
-		if err != nil && !ShouldSkipError(err) {
+		if err != nil && !models.ShouldSkipError(err) {
 			log.Fatal().Err(err).Msg("Failed to query costs")
 		}
 		costResult.From = costs.From

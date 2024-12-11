@@ -6,21 +6,21 @@ package log
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights/v2"
 )
 
 // GetRules - Returns the rules for the LogAnalyticsScanner
-func (a *LogAnalyticsScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *LogAnalyticsScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"log-003": {
 			RecommendationID:   "log-003",
 			ResourceType:       "Microsoft.OperationalInsights/workspaces",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Log Analytics Workspace SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -28,10 +28,10 @@ func (a *LogAnalyticsScanner) GetRecommendations() map[string]scanners.AzqrRecom
 		"log-006": {
 			RecommendationID: "log-006",
 			ResourceType:     "Microsoft.OperationalInsights/workspaces",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Log Analytics Workspace Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armoperationalinsights.Workspace)
 				caf := strings.HasPrefix(*c.Name, "log")
 				return !caf, ""
@@ -41,10 +41,10 @@ func (a *LogAnalyticsScanner) GetRecommendations() map[string]scanners.AzqrRecom
 		"log-007": {
 			RecommendationID: "log-007",
 			ResourceType:     "Microsoft.OperationalInsights/workspaces",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Log Analytics Workspace should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armoperationalinsights.Workspace)
 				return len(c.Tags) == 0, ""
 			},

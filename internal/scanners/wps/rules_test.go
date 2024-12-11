@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
 )
@@ -16,7 +16,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *models.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				target: &armwebpubsub.ResourceInfo{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &models.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -54,7 +54,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 						Name: to.Ptr("Premium"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +70,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 						Name: to.Ptr("Premium"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -86,7 +86,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 						Name: to.Ptr("Free"),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -106,7 +106,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -120,7 +120,7 @@ func TestWebPubSubScanner_Rules(t *testing.T) {
 				target: &armwebpubsub.ResourceInfo{
 					Name: to.Ptr("wps-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
