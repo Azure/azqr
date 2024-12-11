@@ -30,6 +30,14 @@ node_modules/
 package-lock.json
 .hugo_build.lock
 
+dist/
+
+# azqr build and runtime artifacts
+.azqr
+main
+main.exe
+azqr.exe
+
 # azqr outputs
 *.xlsx
 *.csv

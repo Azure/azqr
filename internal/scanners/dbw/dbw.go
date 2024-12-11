@@ -4,22 +4,22 @@
 package dbw
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
 
 func init() {
-	scanners.ScannerList["dbw"] = []scanners.IAzureScanner{&DatabricksScanner{}}
+	models.ScannerList["dbw"] = []models.IAzureScanner{&DatabricksScanner{}}
 }
 
 // DatabricksScanner - Scanner for Azure Databricks
 type DatabricksScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armdatabricks.WorkspacesClient
 }
 
 // Init - Initializes the DatabricksScanner
-func (c *DatabricksScanner) Init(config *scanners.ScannerConfig) error {
+func (c *DatabricksScanner) Init(config *models.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armdatabricks.NewWorkspacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (c *DatabricksScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Azure Databricks in a Resource Group
-func (c *DatabricksScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *DatabricksScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	workspaces, err := c.listWorkspaces()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, ws := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, ws, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*ws.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*ws.ID),
 			ServiceName:      *ws.Name,
 			Type:             *ws.Type,
 			Location:         *ws.Location,

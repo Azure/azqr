@@ -6,12 +6,12 @@ package synw
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse"
 )
 
 // GetRules - Returns the rules for the SynapseWorkspaceScanner
-func (a *SynapseWorkspaceScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+func (a *SynapseWorkspaceScanner) GetRecommendations() map[string]models.AzqrRecommendation {
 	result := a.getWorkspaceRules()
 	for k, v := range a.getSparkPoolRules() {
 		result[k] = v
@@ -21,15 +21,15 @@ func (a *SynapseWorkspaceScanner) GetRecommendations() map[string]scanners.AzqrR
 	}
 	return result
 }
-func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"synw-001": {
 			RecommendationID: "synw-001",
 			ResourceType:     "Microsoft.Synapse/workspaces",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Azure Synapse Workspace should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armsynapse.Workspace)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -39,10 +39,10 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]scanners.AzqrRe
 		"synw-002": {
 			RecommendationID: "synw-002",
 			ResourceType:     "Microsoft.Synapse/workspaces",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "Azure Synapse Workspace should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armsynapse.Workspace)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -52,11 +52,11 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]scanners.AzqrRe
 		"synw-003": {
 			RecommendationID:   "synw-003",
 			ResourceType:       "Microsoft.Synapse/workspaces",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Azure Synapse Workspace SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -64,10 +64,10 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]scanners.AzqrRe
 		"synw-004": {
 			RecommendationID: "synw-004",
 			ResourceType:     "Microsoft.Synapse/workspaces",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Synapse Workspace Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armsynapse.Workspace)
 				caf := strings.HasPrefix(*c.Name, "synw")
 				return !caf, ""
@@ -77,10 +77,10 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]scanners.AzqrRe
 		"synw-005": {
 			RecommendationID: "synw-005",
 			ResourceType:     "Microsoft.Synapse/workspaces",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Synapse Workspace should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armsynapse.Workspace)
 				return len(c.Tags) == 0, ""
 			},
@@ -89,10 +89,10 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]scanners.AzqrRe
 		"synw-006": {
 			RecommendationID: "synw-006",
 			ResourceType:     "Microsoft.Synapse/workspaces",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "Azure Synapse Workspace should establish network segmentation boundaries",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armsynapse.Workspace)
 				return c.Properties.ManagedVirtualNetwork == nil || strings.ToLower(*c.Properties.ManagedVirtualNetwork) != "default", ""
 			},
@@ -101,10 +101,10 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]scanners.AzqrRe
 		"synw-007": {
 			RecommendationID: "synw-007",
 			ResourceType:     "Microsoft.Synapse/workspaces",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "Azure Synapse Workspace should disable public network access",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armsynapse.Workspace)
 				return string(*c.Properties.PublicNetworkAccess) == "Enabled", ""
 			},
@@ -113,15 +113,15 @@ func (a *SynapseWorkspaceScanner) getWorkspaceRules() map[string]scanners.AzqrRe
 	}
 }
 
-func (a *SynapseWorkspaceScanner) getSparkPoolRules() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *SynapseWorkspaceScanner) getSparkPoolRules() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"synsp-001": {
 			RecommendationID: "synsp-001",
 			ResourceType:     "Microsoft.Synapse workspaces/bigDataPools",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Synapse Spark Pool Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armsynapse.BigDataPoolResourceInfo)
 				caf := strings.HasPrefix(*c.Name, "synsp")
 				return !caf, ""
@@ -131,11 +131,11 @@ func (a *SynapseWorkspaceScanner) getSparkPoolRules() map[string]scanners.AzqrRe
 		"synsp-002": {
 			RecommendationID:   "synsp-002",
 			ResourceType:       "Microsoft.Synapse workspaces/bigDataPools",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Azure Synapse Spark Pool SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -143,10 +143,10 @@ func (a *SynapseWorkspaceScanner) getSparkPoolRules() map[string]scanners.AzqrRe
 		"synsp-003": {
 			RecommendationID: "synsp-003",
 			ResourceType:     "Microsoft.Synapse workspaces/bigDataPools",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Synapse Spark Pool should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armsynapse.BigDataPoolResourceInfo)
 				return len(c.Tags) == 0, ""
 			},
@@ -155,15 +155,15 @@ func (a *SynapseWorkspaceScanner) getSparkPoolRules() map[string]scanners.AzqrRe
 	}
 }
 
-func (a *SynapseWorkspaceScanner) getSqlPoolRules() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *SynapseWorkspaceScanner) getSqlPoolRules() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"syndp-001": {
 			RecommendationID: "syndp-001",
 			ResourceType:     "Microsoft.Synapse/workspaces/sqlPools",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Synapse Dedicated SQL Pool Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armsynapse.SQLPool)
 				caf := strings.HasPrefix(*c.Name, "syndp")
 				return !caf, ""
@@ -173,11 +173,11 @@ func (a *SynapseWorkspaceScanner) getSqlPoolRules() map[string]scanners.AzqrReco
 		"syndp-002": {
 			RecommendationID:   "syndp-002",
 			ResourceType:       "Microsoft.Synapse/workspaces/sqlPools",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Azure Synapse Dedicated SQL Pool SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -185,10 +185,10 @@ func (a *SynapseWorkspaceScanner) getSqlPoolRules() map[string]scanners.AzqrReco
 		"syndp-003": {
 			RecommendationID: "syndp-003",
 			ResourceType:     "Microsoft.Synapse/workspaces/sqlPools",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Synapse Dedicated SQL Pool should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armsynapse.SQLPool)
 				return len(c.Tags) == 0, ""
 			},

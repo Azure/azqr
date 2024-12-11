@@ -6,20 +6,20 @@ package as
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/analysisservices/armanalysisservices"
 )
 
 // GetRules - Returns the rules for the AnalysisServicesScanner
-func (a *AnalysisServicesScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *AnalysisServicesScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"as-001": {
 			RecommendationID: "as-001",
 			ResourceType:     "Microsoft.AnalysisServices/servers",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Azure Analysis Service should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armanalysisservices.Server)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]scanners.AzqrR
 		"as-002": {
 			RecommendationID:   "as-002",
 			ResourceType:       "Microsoft.AnalysisServices/servers",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Azure Analysis Service should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armanalysisservices.Server)
 				sku := *i.SKU.Tier
 				sla := "None"
@@ -47,10 +47,10 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]scanners.AzqrR
 		"as-004": {
 			RecommendationID: "as-004",
 			ResourceType:     "Microsoft.AnalysisServices/servers",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Analysis Service Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armanalysisservices.Server)
 				caf := strings.HasPrefix(*c.Name, "as")
 				return !caf, ""
@@ -60,10 +60,10 @@ func (a *AnalysisServicesScanner) GetRecommendations() map[string]scanners.AzqrR
 		"as-005": {
 			RecommendationID: "as-005",
 			ResourceType:     "Microsoft.AnalysisServices/servers",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Analysis Service should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armanalysisservices.Server)
 				return len(c.Tags) == 0, ""
 			},

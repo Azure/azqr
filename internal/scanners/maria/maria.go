@@ -4,23 +4,23 @@
 package maria
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb"
 )
 
 func init() {
-	scanners.ScannerList["maria"] = []scanners.IAzureScanner{&MariaScanner{}}
+	models.ScannerList["maria"] = []models.IAzureScanner{&MariaScanner{}}
 }
 
 // MariaScanner - Scanner for MariaDB
 type MariaScanner struct {
-	config          *scanners.ScannerConfig
+	config          *models.ScannerConfig
 	serverClient    *armmariadb.ServersClient
 	databasesClient *armmariadb.DatabasesClient
 }
 
 // Init - Initializes the MariaScanner
-func (c *MariaScanner) Init(config *scanners.ScannerConfig) error {
+func (c *MariaScanner) Init(config *models.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.serverClient, err = armmariadb.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -35,24 +35,24 @@ func (c *MariaScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all MariaDB servers in a Resource Group
-func (c *MariaScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *MariaScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	servers, err := c.listServers()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
 	databaseRules := c.GetDatabaseRules()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, server := range servers {
 		rr := engine.EvaluateRecommendations(rules, server, scanContext)
 
-		resourceGroupName := scanners.GetResourceGroupFromResourceID(*server.ID)
+		resourceGroupName := models.GetResourceGroupFromResourceID(*server.ID)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
@@ -69,7 +69,7 @@ func (c *MariaScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrS
 		for _, database := range databases {
 			rr := engine.EvaluateRecommendations(databaseRules, database, scanContext)
 
-			results = append(results, scanners.AzqrServiceResult{
+			results = append(results, models.AzqrServiceResult{
 				SubscriptionID:  c.config.SubscriptionID,
 				ResourceGroup:   resourceGroupName,
 				ServiceName:     *database.Name,

@@ -4,23 +4,23 @@
 package vgw
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 	"github.com/rs/zerolog/log"
 )
 
 func init() {
-	scanners.ScannerList["vgw"] = []scanners.IAzureScanner{&VirtualNetworkGatewayScanner{}}
+	models.ScannerList["vgw"] = []models.IAzureScanner{&VirtualNetworkGatewayScanner{}}
 }
 
 // VirtualNetworkGatewayScanner - Scanner for VPN Gateway
 type VirtualNetworkGatewayScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armnetwork.VirtualNetworkGatewaysClient
 }
 
 // Init - Initializes the VPN Gateway
-func (c *VirtualNetworkGatewayScanner) Init(config *scanners.ScannerConfig) error {
+func (c *VirtualNetworkGatewayScanner) Init(config *models.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armnetwork.NewVirtualNetworkGatewaysClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -28,11 +28,11 @@ func (c *VirtualNetworkGatewayScanner) Init(config *scanners.ScannerConfig) erro
 }
 
 // Scan - Scans all VirtualNetwork in a Resource Group
-func (c *VirtualNetworkGatewayScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
-	results := []scanners.AzqrServiceResult{}
+func (c *VirtualNetworkGatewayScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+	results := []models.AzqrServiceResult{}
 
-	rgs, err := scanners.ListResourceGroup(c.config.Ctx, c.config.Cred, c.config.SubscriptionID, c.config.ClientOptions)
+	rgs, err := models.ListResourceGroup(c.config.Ctx, c.config.Cred, c.config.SubscriptionID, c.config.ClientOptions)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to check existence of Resource Group")
 	}
@@ -42,16 +42,16 @@ func (c *VirtualNetworkGatewayScanner) Scan(scanContext *scanners.ScanContext) (
 		if err != nil {
 			return nil, err
 		}
-		engine := scanners.RecommendationEngine{}
+		engine := models.RecommendationEngine{}
 		rules := c.GetVirtualNetworkGatewayRules()
 
 		for _, w := range vpns {
 			rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-			results = append(results, scanners.AzqrServiceResult{
+			results = append(results, models.AzqrServiceResult{
 				SubscriptionID:   c.config.SubscriptionID,
 				SubscriptionName: c.config.SubscriptionName,
-				ResourceGroup:    scanners.GetResourceGroupFromResourceID(*w.ID),
+				ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
 				ServiceName:      *w.Name,
 				Type:             *w.Type,
 				Location:         *w.Location,

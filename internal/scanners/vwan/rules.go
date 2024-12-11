@@ -6,20 +6,20 @@ package vwan
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // GetRecommendations - Returns the rules for the VirtualWanScanner
-func (a *VirtualWanScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *VirtualWanScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"vwa-001": {
 			RecommendationID: "vwa-001",
 			ResourceType:     "Microsoft.Network/virtualWans",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Virtual WAN should have diagnostic settings enabled",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactMedium,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armnetwork.VirtualWAN)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,10 +29,10 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"vwa-002": {
 			RecommendationID: "vwa-002",
 			ResourceType:     "Microsoft.Network/virtualWans",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         models.CategoryHighAvailability,
 			Recommendation:   "Virtual WAN should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return false, ""
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-are-availability-zones-and-resiliency-handled-in-virtual-wan",
@@ -40,11 +40,11 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"vwa-003": {
 			RecommendationID:   "vwa-003",
 			ResourceType:       "Microsoft.Network/virtualWans",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Virtual WAN should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-is-virtual-wan-sla-calculated",
@@ -52,10 +52,10 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"vwa-005": {
 			RecommendationID: "vwa-005",
 			ResourceType:     "Microsoft.Network/virtualWans",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         models.CategoryHighAvailability,
 			Recommendation:   "Virtual WAN Type",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armnetwork.VirtualWAN)
 				return false, string(*i.Properties.Type)
 			},
@@ -64,10 +64,10 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"vwa-006": {
 			RecommendationID: "vwa-006",
 			ResourceType:     "Microsoft.Network/virtualWans",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Virtual WAN Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualWAN)
 				caf := strings.HasPrefix(*c.Name, "vwa")
 				return !caf, ""
@@ -77,10 +77,10 @@ func (a *VirtualWanScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"vwa-007": {
 			RecommendationID: "vwa-007",
 			ResourceType:     "Microsoft.Network/virtualWans",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Virtual WAN should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualWAN)
 				return len(c.Tags) == 0, ""
 			},

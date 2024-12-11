@@ -6,20 +6,20 @@ package evh
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
 
 // GetRecommendations - Returns the rules for the EventHubScanner
-func (a *EventHubScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *EventHubScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"evh-001": {
 			RecommendationID: "evh-001",
 			ResourceType:     "Microsoft.EventHub/namespaces",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Event Hub Namespace should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armeventhub.EHNamespace)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *EventHubScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"evh-003": {
 			RecommendationID:   "evh-003",
 			ResourceType:       "Microsoft.EventHub/namespaces",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Event Hub Namespace should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armeventhub.EHNamespace)
 				sku := string(*i.SKU.Name)
 				sla := "99.95%"
@@ -47,10 +47,10 @@ func (a *EventHubScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"evh-004": {
 			RecommendationID: "evh-004",
 			ResourceType:     "Microsoft.EventHub/namespaces",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "Event Hub Namespace should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armeventhub.EHNamespace)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -60,10 +60,10 @@ func (a *EventHubScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"evh-006": {
 			RecommendationID: "evh-006",
 			ResourceType:     "Microsoft.EventHub/namespaces",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Event Hub Namespace Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armeventhub.EHNamespace)
 				caf := strings.HasPrefix(*c.Name, "evh")
 				return !caf, ""
@@ -73,10 +73,10 @@ func (a *EventHubScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"evh-007": {
 			RecommendationID: "evh-007",
 			ResourceType:     "Microsoft.EventHub/namespaces",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Event Hub should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armeventhub.EHNamespace)
 				return len(c.Tags) == 0, ""
 			},
@@ -85,10 +85,10 @@ func (a *EventHubScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"evh-008": {
 			RecommendationID: "evh-008",
 			ResourceType:     "Microsoft.EventHub/namespaces",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "Event Hub should have local authentication disabled",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactMedium,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armeventhub.EHNamespace)
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""

@@ -6,20 +6,20 @@ package vnet
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // GetRecommendations - Returns the rules for the VirtualNetworkScanner
-func (a *VirtualNetworkScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *VirtualNetworkScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"vnet-001": {
 			RecommendationID: "vnet-001",
 			ResourceType:     "Microsoft.Network/virtualNetworks",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Virtual Network should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armnetwork.VirtualNetwork)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,10 +29,10 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]scanners.AzqrRec
 		"vnet-006": {
 			RecommendationID: "vnet-006",
 			ResourceType:     "Microsoft.Network/virtualNetworks",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Virtual Network Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualNetwork)
 				caf := strings.HasPrefix(*c.Name, "vnet")
 				return !caf, ""
@@ -42,10 +42,10 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]scanners.AzqrRec
 		"vnet-007": {
 			RecommendationID: "vnet-007",
 			ResourceType:     "Microsoft.Network/virtualNetworks",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Virtual Network should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualNetwork)
 				return len(c.Tags) == 0, ""
 			},
@@ -54,10 +54,10 @@ func (a *VirtualNetworkScanner) GetRecommendations() map[string]scanners.AzqrRec
 		"vnet-009": {
 			RecommendationID: "vnet-009",
 			ResourceType:     "Microsoft.Network/virtualNetworks",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         models.CategoryHighAvailability,
 			Recommendation:   "Virtual Network should have at least two DNS servers assigned",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.VirtualNetwork)
 				if c.Properties.DhcpOptions == nil {
 					return false, ""

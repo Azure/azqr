@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
 )
@@ -16,7 +16,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *models.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				target: &armdatafactory.Factory{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &models.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -52,7 +52,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				target: &armdatafactory.Factory{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &models.ScanContext{
 					PrivateEndpoints: map[string]bool{
 						"test": true,
 					},
@@ -68,7 +68,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "adf-003",
 				target:      &armdatafactory.Factory{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -82,7 +82,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 				target: &armdatafactory.Factory{
 					Name: to.Ptr("adf-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,

@@ -6,20 +6,20 @@ package ng
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // GetRules - Returns the rules for the NatGatewayScanner
-func (a *NatGatewayScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *NatGatewayScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"ng-001": {
 			RecommendationID: "ng-001",
 			ResourceType:     "Microsoft.Network/natGateways",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "NAT Gateway should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armnetwork.NatGateway)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *NatGatewayScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"ng-003": {
 			RecommendationID:   "ng-003",
 			ResourceType:       "Microsoft.Network/natGateways",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "NAT Gateway SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -41,10 +41,10 @@ func (a *NatGatewayScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"ng-006": {
 			RecommendationID: "ng-006",
 			ResourceType:     "Microsoft.Network/natGateways",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "NAT Gateway Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.NatGateway)
 				caf := strings.HasPrefix(*c.Name, "ng")
 				return !caf, ""
@@ -54,10 +54,10 @@ func (a *NatGatewayScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 		"ng-007": {
 			RecommendationID: "ng-007",
 			ResourceType:     "Microsoft.Network/natGateways",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "NAT Gateway should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.NatGateway)
 				return len(c.Tags) == 0, ""
 			},

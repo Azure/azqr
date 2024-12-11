@@ -11,7 +11,7 @@ runKqlQuery() {
 }
 
 # Find all .kql files in the specified directory
-kqlFiles=$(find internal/azure-orphan-resources -type f -name "*.kql")
+kqlFiles=$(find internal/graph/azure-orphan-resources -type f -name "*.kql")
 
 # Loop through each .kql file
 for kqlFile in $kqlFiles; do

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Azure/azqr/internal/graph"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
@@ -21,6 +23,74 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+
+	_ "github.com/Azure/azqr/internal/scanners/aa"
+	_ "github.com/Azure/azqr/internal/scanners/adf"
+	_ "github.com/Azure/azqr/internal/scanners/afd"
+	_ "github.com/Azure/azqr/internal/scanners/afw"
+	_ "github.com/Azure/azqr/internal/scanners/agw"
+	_ "github.com/Azure/azqr/internal/scanners/aks"
+	_ "github.com/Azure/azqr/internal/scanners/amg"
+	_ "github.com/Azure/azqr/internal/scanners/apim"
+	_ "github.com/Azure/azqr/internal/scanners/appcs"
+	_ "github.com/Azure/azqr/internal/scanners/appi"
+	_ "github.com/Azure/azqr/internal/scanners/as"
+	_ "github.com/Azure/azqr/internal/scanners/asp"
+	_ "github.com/Azure/azqr/internal/scanners/avail"
+	_ "github.com/Azure/azqr/internal/scanners/avd"
+	_ "github.com/Azure/azqr/internal/scanners/avs"
+	_ "github.com/Azure/azqr/internal/scanners/ba"
+	_ "github.com/Azure/azqr/internal/scanners/ca"
+	_ "github.com/Azure/azqr/internal/scanners/cae"
+	_ "github.com/Azure/azqr/internal/scanners/ci"
+	_ "github.com/Azure/azqr/internal/scanners/cog"
+	_ "github.com/Azure/azqr/internal/scanners/conn"
+	_ "github.com/Azure/azqr/internal/scanners/cosmos"
+	_ "github.com/Azure/azqr/internal/scanners/cr"
+	_ "github.com/Azure/azqr/internal/scanners/dbw"
+	_ "github.com/Azure/azqr/internal/scanners/dec"
+	_ "github.com/Azure/azqr/internal/scanners/disk"
+	_ "github.com/Azure/azqr/internal/scanners/erc"
+	_ "github.com/Azure/azqr/internal/scanners/evgd"
+	_ "github.com/Azure/azqr/internal/scanners/evh"
+	_ "github.com/Azure/azqr/internal/scanners/fdfp"
+	_ "github.com/Azure/azqr/internal/scanners/gal"
+	_ "github.com/Azure/azqr/internal/scanners/hpc"
+	_ "github.com/Azure/azqr/internal/scanners/iot"
+	_ "github.com/Azure/azqr/internal/scanners/it"
+	_ "github.com/Azure/azqr/internal/scanners/kv"
+	_ "github.com/Azure/azqr/internal/scanners/lb"
+	_ "github.com/Azure/azqr/internal/scanners/log"
+	_ "github.com/Azure/azqr/internal/scanners/logic"
+	_ "github.com/Azure/azqr/internal/scanners/maria"
+	_ "github.com/Azure/azqr/internal/scanners/mysql"
+	_ "github.com/Azure/azqr/internal/scanners/netapp"
+	_ "github.com/Azure/azqr/internal/scanners/ng"
+	_ "github.com/Azure/azqr/internal/scanners/nic"
+	_ "github.com/Azure/azqr/internal/scanners/nsg"
+	_ "github.com/Azure/azqr/internal/scanners/nw"
+	_ "github.com/Azure/azqr/internal/scanners/pdnsz"
+	_ "github.com/Azure/azqr/internal/scanners/pep"
+	_ "github.com/Azure/azqr/internal/scanners/pip"
+	_ "github.com/Azure/azqr/internal/scanners/psql"
+	_ "github.com/Azure/azqr/internal/scanners/redis"
+	_ "github.com/Azure/azqr/internal/scanners/rg"
+	_ "github.com/Azure/azqr/internal/scanners/rsv"
+	_ "github.com/Azure/azqr/internal/scanners/rt"
+	_ "github.com/Azure/azqr/internal/scanners/sap"
+	_ "github.com/Azure/azqr/internal/scanners/sb"
+	_ "github.com/Azure/azqr/internal/scanners/sigr"
+	_ "github.com/Azure/azqr/internal/scanners/sql"
+	_ "github.com/Azure/azqr/internal/scanners/st"
+	_ "github.com/Azure/azqr/internal/scanners/synw"
+	_ "github.com/Azure/azqr/internal/scanners/traf"
+	_ "github.com/Azure/azqr/internal/scanners/vdpool"
+	_ "github.com/Azure/azqr/internal/scanners/vgw"
+	_ "github.com/Azure/azqr/internal/scanners/vm"
+	_ "github.com/Azure/azqr/internal/scanners/vmss"
+	_ "github.com/Azure/azqr/internal/scanners/vnet"
+	_ "github.com/Azure/azqr/internal/scanners/vwan"
+	_ "github.com/Azure/azqr/internal/scanners/wps"
 )
 
 type (
@@ -38,13 +108,33 @@ type (
 		Debug                   bool
 		ScannerKeys             []string
 		ForceAzureCliCredential bool
-		Filters                 *scanners.Filters
+		Filters                 *models.Filters
 		UseAzqrRecommendations  bool
 		UseAprlRecommendations  bool
 	}
 
 	Scanner struct{}
 )
+
+func NewScanParams() *ScanParams {
+	return &ScanParams{
+		SubscriptionID:          "",
+		ResourceGroup:           "",
+		OutputName:              "",
+		Defender:                true,
+		Advisor:                 true,
+		Cost:                    true,
+		Mask:                    true,
+		Csv:                     false,
+		Json:                    false,
+		Debug:                   false,
+		ScannerKeys:             []string{},
+		ForceAzureCliCredential: false,
+		Filters:                 models.NewFilters(),
+		UseAzqrRecommendations:  true,
+		UseAprlRecommendations:  true,
+	}
+}
 
 func (sc Scanner) Scan(params *ScanParams) {
 	// Default level for this example is info, unless debug flag is present
@@ -120,7 +210,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 	reportData := renderers.NewReportData(outputFile, params.Mask)
 
 	// get the APRL scan results
-	aprlScanner := NewAprlScanner(serviceScanners, filters, subscriptions)
+	aprlScanner := graph.NewAprlScanner(serviceScanners, filters, subscriptions)
 	reportData.Recommendations, reportData.Aprl = aprlScanner.Scan(ctx, cred)
 
 	resourceScanner := scanners.ResourceScanner{}
@@ -134,12 +224,12 @@ func (sc Scanner) Scan(params *ScanParams) {
 					continue
 				}
 
-				if r.RecommendationType != scanners.TypeRecommendation {
+				if r.RecommendationType != models.TypeRecommendation {
 					continue
 				}
 
 				if reportData.Recommendations[strings.ToLower(r.ResourceType)] == nil {
-					reportData.Recommendations[strings.ToLower(r.ResourceType)] = map[string]scanners.AprlRecommendation{}
+					reportData.Recommendations[strings.ToLower(r.ResourceType)] = map[string]models.AprlRecommendation{}
 				}
 
 				reportData.Recommendations[strings.ToLower(r.ResourceType)][i] = r.ToAzureAprlRecommendation()
@@ -157,7 +247,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 
 	// scan each subscription with AZQR scanners
 	for sid, sn := range subscriptions {
-		config := &scanners.ScannerConfig{
+		config := &models.ScannerConfig{
 			Ctx:              ctx,
 			SubscriptionID:   sid,
 			SubscriptionName: sn,
@@ -173,7 +263,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 			pips := pipScanner.Scan(config)
 
 			// initialize scan context
-			scanContext := scanners.ScanContext{
+			scanContext := models.ScanContext{
 				Filters:             filters,
 				PrivateEndpoints:    peResults,
 				DiagnosticsSettings: diagResults,
@@ -181,7 +271,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 			}
 
 			// scan each resource group
-			ch := make(chan []scanners.AzqrServiceResult, len(serviceScanners))
+			ch := make(chan []models.AzqrServiceResult, len(serviceScanners))
 
 			for _, s := range serviceScanners {
 				err := s.Init(config)
@@ -189,7 +279,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 					log.Fatal().Err(err).Msg("Failed to initialize scanner")
 				}
 
-				go func(s scanners.IAzureScanner) {
+				go func(s models.IAzureScanner) {
 					res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
 					if err != nil {
 						cancel()
@@ -247,7 +337,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 }
 
 // retry retries the Azure scanner Scan, a number of times with an increasing delay between retries
-func (sc Scanner) retry(attempts int, sleep time.Duration, a scanners.IAzureScanner, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+func (sc Scanner) retry(attempts int, sleep time.Duration, a models.IAzureScanner, scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
 	var err error
 	for i := 0; ; i++ {
 		res, err := a.Scan(scanContext)
@@ -255,8 +345,8 @@ func (sc Scanner) retry(attempts int, sleep time.Duration, a scanners.IAzureScan
 			return res, nil
 		}
 
-		if scanners.ShouldSkipError(err) {
-			return []scanners.AzqrServiceResult{}, nil
+		if models.ShouldSkipError(err) {
+			return []models.AzqrServiceResult{}, nil
 		}
 
 		errAsString := err.Error()

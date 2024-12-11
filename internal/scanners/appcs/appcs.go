@@ -4,22 +4,22 @@
 package appcs
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
 )
 
 func init() {
-	scanners.ScannerList["appcs"] = []scanners.IAzureScanner{&AppConfigurationScanner{}}
+	models.ScannerList["appcs"] = []models.IAzureScanner{&AppConfigurationScanner{}}
 }
 
 // AppConfigurationScanner - Scanner for Container Apps
 type AppConfigurationScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armappconfiguration.ConfigurationStoresClient
 }
 
 // Init - Initializes the AppConfigurationScanner
-func (a *AppConfigurationScanner) Init(config *scanners.ScannerConfig) error {
+func (a *AppConfigurationScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armappconfiguration.NewConfigurationStoresClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *AppConfigurationScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all App Configurations in a Resource Group
-func (a *AppConfigurationScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *AppConfigurationScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	apps, err := a.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, app := range apps {
 		rr := engine.EvaluateRecommendations(rules, app, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*app.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*app.ID),
 			ServiceName:      *app.Name,
 			Type:             *app.Type,
 			Location:         *app.Location,

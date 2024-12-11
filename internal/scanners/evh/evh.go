@@ -4,22 +4,22 @@
 package evh
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
 
 func init() {
-	scanners.ScannerList["evh"] = []scanners.IAzureScanner{&EventHubScanner{}}
+	models.ScannerList["evh"] = []models.IAzureScanner{&EventHubScanner{}}
 }
 
 // EventHubScanner - Scanner for Event Hubs
 type EventHubScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armeventhub.NamespacesClient
 }
 
 // Init - Initializes the EventHubScanner
-func (a *EventHubScanner) Init(config *scanners.ScannerConfig) error {
+func (a *EventHubScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armeventhub.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *EventHubScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Event Hubs in a Resource Group
-func (c *EventHubScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *EventHubScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	eventHubs, err := c.listEventHubs()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, eventHub := range eventHubs {
 		rr := engine.EvaluateRecommendations(rules, eventHub, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*eventHub.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*eventHub.ID),
 			ServiceName:      *eventHub.Name,
 			Type:             *eventHub.Type,
 			Location:         *eventHub.Location,

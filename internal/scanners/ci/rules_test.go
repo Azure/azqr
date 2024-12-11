@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
 )
@@ -16,7 +16,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *models.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 				target: &armcontainerinstance.ContainerGroup{
 					Zones: []*string{to.Ptr("1"), to.Ptr("2"), to.Ptr("3")},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -46,7 +46,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "ci-003",
 				target:      &armcontainerinstance.ContainerGroup{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -62,7 +62,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 						IPAddress: nil,
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -80,7 +80,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -98,7 +98,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -112,7 +112,7 @@ func TestContainerInstanceScanner_Rules(t *testing.T) {
 				target: &armcontainerinstance.ContainerGroup{
 					Name: to.Ptr("ci-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,

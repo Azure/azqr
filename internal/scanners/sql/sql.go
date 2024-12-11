@@ -6,24 +6,24 @@ package sql
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 )
 
 func init() {
-	scanners.ScannerList["sql"] = []scanners.IAzureScanner{&SQLScanner{}}
+	models.ScannerList["sql"] = []models.IAzureScanner{&SQLScanner{}}
 }
 
 // SQLScanner - Scanner for SQL
 type SQLScanner struct {
-	config               *scanners.ScannerConfig
+	config               *models.ScannerConfig
 	sqlClient            *armsql.ServersClient
 	sqlDatabasedClient   *armsql.DatabasesClient
 	sqlElasticPoolClient *armsql.ElasticPoolsClient
 }
 
 // Init - Initializes the SQLScanner
-func (c *SQLScanner) Init(config *scanners.ScannerConfig) error {
+func (c *SQLScanner) Init(config *models.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.sqlClient, err = armsql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -42,25 +42,25 @@ func (c *SQLScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all SQL in a Resource Group
-func (c *SQLScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *SQLScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	sql, err := c.listSQL()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.getServerRules()
 	databaseRules := c.getDatabaseRules()
 	poolRules := c.getPoolRules()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, sql := range sql {
 		rr := engine.EvaluateRecommendations(rules, sql, scanContext)
 
-		resourceGroupName := scanners.GetResourceGroupFromResourceID(*sql.ID)
+		resourceGroupName := models.GetResourceGroupFromResourceID(*sql.ID)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:  c.config.SubscriptionID,
 			ResourceGroup:   resourceGroupName,
 			ServiceName:     *sql.Name,
@@ -76,7 +76,7 @@ func (c *SQLScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrSer
 		for _, pool := range pools {
 			rr := engine.EvaluateRecommendations(poolRules, pool, scanContext)
 
-			results = append(results, scanners.AzqrServiceResult{
+			results = append(results, models.AzqrServiceResult{
 				SubscriptionID:   c.config.SubscriptionID,
 				SubscriptionName: c.config.SubscriptionName,
 				ResourceGroup:    resourceGroupName,
@@ -98,7 +98,7 @@ func (c *SQLScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrSer
 
 			rr := engine.EvaluateRecommendations(databaseRules, database, scanContext)
 
-			results = append(results, scanners.AzqrServiceResult{
+			results = append(results, models.AzqrServiceResult{
 				SubscriptionID:   c.config.SubscriptionID,
 				SubscriptionName: c.config.SubscriptionName,
 				ResourceGroup:    resourceGroupName,

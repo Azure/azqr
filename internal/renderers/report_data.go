@@ -7,27 +7,27 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 )
 
 type (
 	ReportData struct {
 		OutputFileName          string
 		Mask                    bool
-		Azqr                    []scanners.AzqrServiceResult
-		Aprl                    []scanners.AprlResult
-		Defender                []scanners.DefenderResult
-		DefenderRecommendations []scanners.DefenderRecommendation
-		Advisor                 []scanners.AdvisorResult
-		Cost                    *scanners.CostResult
-		Recommendations         map[string]map[string]scanners.AprlRecommendation
-		Resources               []*scanners.Resource
-		ExludedResources        []*scanners.Resource
-		ResourceTypeCount       []scanners.ResourceTypeCount
+		Azqr                    []models.AzqrServiceResult
+		Aprl                    []models.AprlResult
+		Defender                []models.DefenderResult
+		DefenderRecommendations []models.DefenderRecommendation
+		Advisor                 []models.AdvisorResult
+		Cost                    *models.CostResult
+		Recommendations         map[string]map[string]models.AprlRecommendation
+		Resources               []*models.Resource
+		ExludedResources        []*models.Resource
+		ResourceTypeCount       []models.ResourceTypeCount
 	}
 
 	ResourceTypeCountResults struct {
-		ResourceType []scanners.ResourceTypeCount `json:"ResourceType"`
+		ResourceType []models.ResourceTypeCount `json:"ResourceType"`
 	}
 )
 
@@ -274,16 +274,16 @@ func NewReportData(outputFile string, mask bool) ReportData {
 	return ReportData{
 		OutputFileName:          outputFile,
 		Mask:                    mask,
-		Recommendations:         map[string]map[string]scanners.AprlRecommendation{},
-		Azqr:                    []scanners.AzqrServiceResult{},
-		Aprl:                    []scanners.AprlResult{},
-		Defender:                []scanners.DefenderResult{},
-		DefenderRecommendations: []scanners.DefenderRecommendation{},
-		Advisor:                 []scanners.AdvisorResult{},
-		Cost: &scanners.CostResult{
-			Items: []*scanners.CostResultItem{},
+		Recommendations:         map[string]map[string]models.AprlRecommendation{},
+		Azqr:                    []models.AzqrServiceResult{},
+		Aprl:                    []models.AprlResult{},
+		Defender:                []models.DefenderResult{},
+		DefenderRecommendations: []models.DefenderRecommendation{},
+		Advisor:                 []models.AdvisorResult{},
+		Cost: &models.CostResult{
+			Items: []*models.CostResultItem{},
 		},
-		ResourceTypeCount: []scanners.ResourceTypeCount{},
+		ResourceTypeCount: []models.ResourceTypeCount{},
 	}
 }
 
@@ -315,7 +315,7 @@ func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
 	return strings.Join(parts, "/")
 }
 
-func (rd *ReportData) resourcesTable(resources []*scanners.Resource) [][]string {
+func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 	headers := []string{"Subscription Id", "Resource Group", "Location", "Resource Type", "Resource Name", "Sku Name", "Sku Tier", "Kind", "SLA", "Resource Id"}
 
 	rows := [][]string{}
@@ -325,7 +325,7 @@ func (rd *ReportData) resourcesTable(resources []*scanners.Resource) [][]string 
 		for _, a := range rd.Azqr {
 			if strings.EqualFold(strings.ToLower(a.ResourceID()), strings.ToLower(r.ID)) {
 				for _, rc := range a.Recommendations {
-					if rc.RecommendationType == scanners.TypeSLA {
+					if rc.RecommendationType == models.TypeSLA {
 						sla = rc.Result
 						break
 					}

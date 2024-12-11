@@ -6,20 +6,20 @@ package kv
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
 
 // GetRecommendations - Returns the rules for the KeyVaultScanner
-func (a *KeyVaultScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *KeyVaultScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"kv-001": {
 			RecommendationID: "kv-001",
 			ResourceType:     "Microsoft.KeyVault/vaults",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Key Vault should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armkeyvault.Vault)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"kv-003": {
 			RecommendationID:   "kv-003",
 			ResourceType:       "Microsoft.KeyVault/vaults",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Key Vault should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/key-vault/",
@@ -41,10 +41,10 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"kv-006": {
 			RecommendationID: "kv-006",
 			ResourceType:     "Microsoft.KeyVault/vaults",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Key Vault Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
 				caf := strings.HasPrefix(*c.Name, "kv")
 				return !caf, ""
@@ -54,10 +54,10 @@ func (a *KeyVaultScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 		"kv-007": {
 			RecommendationID: "kv-007",
 			ResourceType:     "Microsoft.KeyVault/vaults",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Key Vault should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armkeyvault.Vault)
 				return len(c.Tags) == 0, ""
 			},

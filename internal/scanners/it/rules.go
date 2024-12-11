@@ -6,20 +6,20 @@ package it
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/virtualmachineimagebuilder/armvirtualmachineimagebuilder/v2"
 )
 
 // GetRules - Returns the rules for the ImageTemplateScanner
-func (a *ImageTemplateScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *ImageTemplateScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"it-006": {
 			RecommendationID: "it-006",
 			ResourceType:     "Microsoft.VirtualMachineImages/imageTemplates",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Image Template Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armvirtualmachineimagebuilder.ImageTemplate)
 				caf := strings.HasPrefix(*c.Name, "it")
 				return !caf, ""
@@ -29,10 +29,10 @@ func (a *ImageTemplateScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"it-007": {
 			RecommendationID: "it-007",
 			ResourceType:     "Microsoft.VirtualMachineImages/imageTemplates",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Image Template should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armvirtualmachineimagebuilder.ImageTemplate)
 				return len(c.Tags) == 0, ""
 			},

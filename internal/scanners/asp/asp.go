@@ -6,23 +6,23 @@ package asp
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 )
 
 func init() {
-	scanners.ScannerList["asp"] = []scanners.IAzureScanner{&AppServiceScanner{}}
+	models.ScannerList["asp"] = []models.IAzureScanner{&AppServiceScanner{}}
 }
 
 // AppServiceScanner - Scanner for App Service Plans
 type AppServiceScanner struct {
-	config      *scanners.ScannerConfig
+	config      *models.ScannerConfig
 	plansClient *armappservice.PlansClient
 	sitesClient *armappservice.WebAppsClient
 }
 
 // Init - Initializes the AppServiceScanner
-func (a *AppServiceScanner) Init(config *scanners.ScannerConfig) error {
+func (a *AppServiceScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.plansClient, err = armappservice.NewPlansClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -37,26 +37,26 @@ func (a *AppServiceScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all App Service Plans in a Resource Group
-func (a *AppServiceScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *AppServiceScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	plan, err := a.listPlans()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := a.getPlanRules()
 	appRules := a.getAppRules()
 	functionRules := a.getFunctionRules()
 	logicRules := a.getLogicRules()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, p := range plan {
 		rr := engine.EvaluateRecommendations(rules, p, scanContext)
 
-		resourceGroupName := scanners.GetResourceGroupFromResourceID(*p.ID)
+		resourceGroupName := models.GetResourceGroupFromResourceID(*p.ID)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
@@ -78,14 +78,14 @@ func (a *AppServiceScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.
 			}
 			scanContext.SiteConfig = &config
 
-			var result scanners.AzqrServiceResult
+			var result models.AzqrServiceResult
 			// https://learn.microsoft.com/en-us/azure/azure-functions/functions-app-settings
 			kind := strings.ToLower(*s.Kind)
 			switch kind {
 			case "functionapp,linux", "functionapp":
 				rr := engine.EvaluateRecommendations(functionRules, s, scanContext)
 
-				result = scanners.AzqrServiceResult{
+				result = models.AzqrServiceResult{
 					SubscriptionID:   a.config.SubscriptionID,
 					SubscriptionName: a.config.SubscriptionName,
 					ResourceGroup:    resourceGroupName,
@@ -97,7 +97,7 @@ func (a *AppServiceScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.
 			case "functionapp,workflowapp":
 				rr := engine.EvaluateRecommendations(logicRules, s, scanContext)
 
-				result = scanners.AzqrServiceResult{
+				result = models.AzqrServiceResult{
 					SubscriptionID:   a.config.SubscriptionID,
 					SubscriptionName: a.config.SubscriptionName,
 					ResourceGroup:    resourceGroupName,
@@ -108,7 +108,7 @@ func (a *AppServiceScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.
 				}
 			default:
 				rr := engine.EvaluateRecommendations(appRules, s, scanContext)
-				result = scanners.AzqrServiceResult{
+				result = models.AzqrServiceResult{
 					SubscriptionID:   a.config.SubscriptionID,
 					SubscriptionName: a.config.SubscriptionName,
 					ResourceGroup:    resourceGroupName,
