@@ -4,22 +4,22 @@
 package sigr
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
 func init() {
-	scanners.ScannerList["sigr"] = []scanners.IAzureScanner{&SignalRScanner{}}
+	models.ScannerList["sigr"] = []models.IAzureScanner{&SignalRScanner{}}
 }
 
 // SignalRScanner - Scanner for SignalR
 type SignalRScanner struct {
-	config        *scanners.ScannerConfig
+	config        *models.ScannerConfig
 	signalrClient *armsignalr.Client
 }
 
 // Init - Initializes the SignalRScanner
-func (c *SignalRScanner) Init(config *scanners.ScannerConfig) error {
+func (c *SignalRScanner) Init(config *models.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.signalrClient, err = armsignalr.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (c *SignalRScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all SignalR in a Resource Group
-func (c *SignalRScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *SignalRScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	signalr, err := c.listSignalR()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, signalr := range signalr {
 		rr := engine.EvaluateRecommendations(rules, signalr, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*signalr.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*signalr.ID),
 			ServiceName:      *signalr.Name,
 			Type:             *signalr.Type,
 			Location:         *signalr.Location,

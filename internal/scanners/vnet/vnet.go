@@ -4,22 +4,22 @@
 package vnet
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	scanners.ScannerList["vnet"] = []scanners.IAzureScanner{&VirtualNetworkScanner{}}
+	models.ScannerList["vnet"] = []models.IAzureScanner{&VirtualNetworkScanner{}}
 }
 
 // VirtualNetworkScanner - Scanner for VirtualNetwork
 type VirtualNetworkScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armnetwork.VirtualNetworksClient
 }
 
 // Init - Initializes the VirtualNetwork
-func (c *VirtualNetworkScanner) Init(config *scanners.ScannerConfig) error {
+func (c *VirtualNetworkScanner) Init(config *models.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armnetwork.NewVirtualNetworksClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (c *VirtualNetworkScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all VirtualNetwork in a Resource Group
-func (c *VirtualNetworkScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *VirtualNetworkScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	vnets, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, w := range vnets {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*w.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,

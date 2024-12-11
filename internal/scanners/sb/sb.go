@@ -4,22 +4,22 @@
 package sb
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
 
 func init() {
-	scanners.ScannerList["sb"] = []scanners.IAzureScanner{&ServiceBusScanner{}}
+	models.ScannerList["sb"] = []models.IAzureScanner{&ServiceBusScanner{}}
 }
 
 // ServiceBusScanner - Scanner for Service Bus
 type ServiceBusScanner struct {
-	config           *scanners.ScannerConfig
+	config           *models.ScannerConfig
 	servicebusClient *armservicebus.NamespacesClient
 }
 
 // Init - Initializes the ServiceBusScanner
-func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
+func (a *ServiceBusScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.servicebusClient, err = armservicebus.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *ServiceBusScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Service Bus in a Resource Group
-func (c *ServiceBusScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *ServiceBusScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	servicebus, err := c.listServiceBus()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, servicebus := range servicebus {
 		rr := engine.EvaluateRecommendations(rules, servicebus, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*servicebus.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*servicebus.ID),
 			ServiceName:      *servicebus.Name,
 			Type:             *servicebus.Type,
 			Location:         *servicebus.Location,

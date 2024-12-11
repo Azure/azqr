@@ -4,23 +4,23 @@
 package st
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
 func init() {
-	scanners.ScannerList["st"] = []scanners.IAzureScanner{&StorageScanner{}}
+	models.ScannerList["st"] = []models.IAzureScanner{&StorageScanner{}}
 }
 
 // StorageScanner - Scanner for Storage
 type StorageScanner struct {
-	config             *scanners.ScannerConfig
+	config             *models.ScannerConfig
 	storageClient      *armstorage.AccountsClient
 	blobServicesClient *armstorage.BlobServicesClient
 }
 
 // Init - Initializes the StorageScanner
-func (c *StorageScanner) Init(config *scanners.ScannerConfig) error {
+func (c *StorageScanner) Init(config *models.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.storageClient, err = armstorage.NewAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -32,19 +32,19 @@ func (c *StorageScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Storage in a Resource Group
-func (c *StorageScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *StorageScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	storage, err := c.listStorage()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, storage := range storage {
-		resourceGroupName := scanners.GetResourceGroupFromResourceID(*storage.ID)
+		resourceGroupName := models.GetResourceGroupFromResourceID(*storage.ID)
 
 		scanContext.BlobServiceProperties = nil
 		blobServicesProperties, err := c.blobServicesClient.GetServiceProperties(c.config.Ctx, resourceGroupName, *storage.Name, nil)
@@ -54,7 +54,7 @@ func (c *StorageScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.Azq
 
 		rr := engine.EvaluateRecommendations(rules, storage, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

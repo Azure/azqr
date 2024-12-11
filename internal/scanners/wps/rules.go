@@ -6,20 +6,20 @@ package wps
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
 )
 
 // GetRecommendations - Returns the rules for the WebPubSubScanner
-func (a *WebPubSubScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *WebPubSubScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"wps-001": {
 			RecommendationID: "wps-001",
 			ResourceType:     "Microsoft.SignalRService/webPubSub",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Web Pub Sub should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armwebpubsub.ResourceInfo)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,10 +29,10 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]scanners.AzqrRecommen
 		"wps-002": {
 			RecommendationID: "wps-002",
 			ResourceType:     "Microsoft.SignalRService/webPubSub",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         models.CategoryHighAvailability,
 			Recommendation:   "Web Pub Sub should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				sku := string(*i.SKU.Name)
 				zones := strings.Contains(sku, "Premium")
@@ -43,11 +43,11 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]scanners.AzqrRecommen
 		"wps-003": {
 			RecommendationID:   "wps-003",
 			ResourceType:       "Microsoft.SignalRService/webPubSub",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Web Pub Sub should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				sku := string(*i.SKU.Name)
 				sla := "99.9%"
@@ -62,10 +62,10 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]scanners.AzqrRecommen
 		"wps-004": {
 			RecommendationID: "wps-004",
 			ResourceType:     "Microsoft.SignalRService/webPubSub",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "Web Pub Sub should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -75,10 +75,10 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]scanners.AzqrRecommen
 		"wps-006": {
 			RecommendationID: "wps-006",
 			ResourceType:     "Microsoft.SignalRService/webPubSub",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Web Pub Sub Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armwebpubsub.ResourceInfo)
 				caf := strings.HasPrefix(*c.Name, "wps")
 				return !caf, ""
@@ -88,10 +88,10 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]scanners.AzqrRecommen
 		"wps-007": {
 			RecommendationID: "wps-007",
 			ResourceType:     "Microsoft.SignalRService/webPubSub",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Web Pub Sub should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armwebpubsub.ResourceInfo)
 				return len(c.Tags) == 0, ""
 			},

@@ -4,22 +4,22 @@
 package rt
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	scanners.ScannerList["rt"] = []scanners.IAzureScanner{&RouteTableScanner{}}
+	models.ScannerList["rt"] = []models.IAzureScanner{&RouteTableScanner{}}
 }
 
 // RouteTableScanner - Scanner for Route Table
 type RouteTableScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armnetwork.RouteTablesClient
 }
 
 // Init - Initializes the Route Table Scanner
-func (a *RouteTableScanner) Init(config *scanners.ScannerConfig) error {
+func (a *RouteTableScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armnetwork.NewRouteTablesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *RouteTableScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Route Table in a Resource Group
-func (c *RouteTableScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *RouteTableScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	svcs, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, w := range svcs {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*w.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         parseLocation(w.Location),

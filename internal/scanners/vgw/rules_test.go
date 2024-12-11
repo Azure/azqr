@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
@@ -16,7 +16,7 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *models.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 				target: &armnetwork.VirtualNetworkGateway{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &models.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -55,7 +55,7 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 						GatewayType: to.Ptr(armnetwork.VirtualNetworkGatewayTypeVPN),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -72,7 +72,7 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 							Tier: to.Ptr(armnetwork.VirtualNetworkGatewaySKUTierBasic),
 						}},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -89,7 +89,7 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 							Tier: to.Ptr(armnetwork.VirtualNetworkGatewaySKUTierErGw1AZ),
 						}},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -106,7 +106,7 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 							Name: to.Ptr(armnetwork.VirtualNetworkGatewaySKUNameBasic),
 						}},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -123,7 +123,7 @@ func TestVirtualNetworkGatewayScanner_Rules(t *testing.T) {
 							Name: to.Ptr(armnetwork.VirtualNetworkGatewaySKUNameErGw1AZ),
 						}},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,

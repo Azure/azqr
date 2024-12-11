@@ -4,22 +4,22 @@
 package agw
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	scanners.ScannerList["agw"] = []scanners.IAzureScanner{&ApplicationGatewayScanner{}}
+	models.ScannerList["agw"] = []models.IAzureScanner{&ApplicationGatewayScanner{}}
 }
 
 // ApplicationGatewayScanner - Scanner for Application Gateways
 type ApplicationGatewayScanner struct {
-	config         *scanners.ScannerConfig
+	config         *models.ScannerConfig
 	gatewaysClient *armnetwork.ApplicationGatewaysClient
 }
 
 // Init - Initializes the ApplicationGatewayAnalyzer
-func (a *ApplicationGatewayScanner) Init(config *scanners.ScannerConfig) error {
+func (a *ApplicationGatewayScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.gatewaysClient, err = armnetwork.NewApplicationGatewaysClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *ApplicationGatewayScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Application Gateways in a Resource Group
-func (a *ApplicationGatewayScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *ApplicationGatewayScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	gateways, err := a.listGateways()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, g := range gateways {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*g.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
 			ServiceName:      *g.Name,
 			Type:             *g.Type,
 			Location:         *g.Location,

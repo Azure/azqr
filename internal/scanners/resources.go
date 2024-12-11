@@ -5,14 +5,15 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal/graph"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
 
 type ResourceScanner struct{}
 
-func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *Filters) ([]*Resource, []*Resource) {
-	LogResourceTypeScan("Resources")
+func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) ([]*models.Resource, []*models.Resource) {
+	models.LogResourceTypeScan("Resources")
 
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind"
@@ -22,8 +23,8 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 		subs = append(subs, &s)
 	}
 	result := graphClient.Query(ctx, query, subs)
-	resources := []*Resource{}
-	excludedResources := []*Resource{}
+	resources := []*models.Resource{}
+	excludedResources := []*models.Resource{}
 	if result.Data != nil {
 		for _, row := range result.Data {
 			m := row.(map[string]interface{})
@@ -56,7 +57,7 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 			if filters.Azqr.IsServiceExcluded(m["id"].(string)) {
 				excludedResources = append(
 					excludedResources,
-					&Resource{
+					&models.Resource{
 						ID:             m["id"].(string),
 						SubscriptionID: m["subscriptionId"].(string),
 						ResourceGroup:  resourceGroup,
@@ -72,7 +73,7 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 
 			resources = append(
 				resources,
-				&Resource{
+				&models.Resource{
 					ID:             m["id"].(string),
 					SubscriptionID: m["subscriptionId"].(string),
 					ResourceGroup:  resourceGroup,
@@ -87,8 +88,8 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 	return resources, excludedResources
 }
 
-func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]AprlRecommendation, filters *Filters) []ResourceTypeCount {
-	LogResourceTypeScan("Resource Count per Subscription and Type")
+func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]models.AprlRecommendation, filters *models.Filters) []models.ResourceTypeCount {
+	models.LogResourceTypeScan("Resource Count per Subscription and Type")
 
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | summarize count() by subscriptionId, type | order by subscriptionId, type"
@@ -98,7 +99,7 @@ func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azco
 		subs = append(subs, &s)
 	}
 	result := graphClient.Query(ctx, query, subs)
-	resources := []ResourceTypeCount{}
+	resources := []models.ResourceTypeCount{}
 	if result.Data != nil {
 		for _, row := range result.Data {
 			m := row.(map[string]interface{})
@@ -107,7 +108,7 @@ func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azco
 				continue
 			}
 
-			resources = append(resources, ResourceTypeCount{
+			resources = append(resources, models.ResourceTypeCount{
 				Subscription:    subscriptions[m["subscriptionId"].(string)],
 				ResourceType:    m["type"].(string),
 				Count:           m["count_"].(float64),
@@ -121,7 +122,7 @@ func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azco
 	return resources
 }
 
-func (sc ResourceScanner) isAvailableInAPRL(resourceType string, recommendations map[string]map[string]AprlRecommendation) string {
+func (sc ResourceScanner) isAvailableInAPRL(resourceType string, recommendations map[string]map[string]models.AprlRecommendation) string {
 	_, available := recommendations[strings.ToLower(resourceType)]
 	if available {
 		return "Yes"

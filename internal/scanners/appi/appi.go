@@ -4,22 +4,22 @@
 package appi
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights"
 )
 
 func init() {
-	scanners.ScannerList["appi"] = []scanners.IAzureScanner{&AppInsightsScanner{}}
+	models.ScannerList["appi"] = []models.IAzureScanner{&AppInsightsScanner{}}
 }
 
 // AppInsightsScanner - Scanner for Front Door
 type AppInsightsScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armapplicationinsights.ComponentsClient
 }
 
 // Init - Initializes the Application Insights Scanner
-func (a *AppInsightsScanner) Init(config *scanners.ScannerConfig) error {
+func (a *AppInsightsScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armapplicationinsights.NewComponentsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *AppInsightsScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Application Insights in a Resource Group
-func (a *AppInsightsScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *AppInsightsScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	gateways, err := a.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, g := range gateways {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*g.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,

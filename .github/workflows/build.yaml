@@ -142,12 +142,12 @@ jobs:
       - name: Run build and archive non windows binaries
         if: matrix.target_os != 'windows'
         run: |
-          CGO_ENABLED=0 GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -ldflags "-s -w -X 'github.com/Azure/azqr/cmd/azqr.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }} ./cmd/main.go
+          CGO_ENABLED=0 GOOS=${{ matrix.target_os }} GOARCH=${{ matrix.target_arch }} go build -ldflags "-s -w -X 'github.com/Azure/azqr/cmd/azqr/commands.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }} ./cmd/azqr/main.go
 
       - name: Run build and archive windows binaries
         if: matrix.target_os == 'windows'
         run: |
-          go build -ldflags "-s -w -X 'github.com/Azure/azqr/cmd/azqr.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }} ./cmd/main.go
+          go build -ldflags "-s -w -X 'github.com/Azure/azqr/cmd/azqr/commands.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }} ./cmd/azqr/main.go
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

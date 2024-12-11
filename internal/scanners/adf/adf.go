@@ -4,22 +4,22 @@
 package adf
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
 )
 
 func init() {
-	scanners.ScannerList["adf"] = []scanners.IAzureScanner{&DataFactoryScanner{}}
+	models.ScannerList["adf"] = []models.IAzureScanner{&DataFactoryScanner{}}
 }
 
 // DataFactoryScanner - Scanner for Data Factory
 type DataFactoryScanner struct {
-	config          *scanners.ScannerConfig
+	config          *models.ScannerConfig
 	factoriesClient *armdatafactory.FactoriesClient
 }
 
 // Init - Initializes the DataFactory Scanner
-func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
+func (a *DataFactoryScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.factoriesClient, err = armdatafactory.NewFactoriesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Data Factories in a Resource Group
-func (a *DataFactoryScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *DataFactoryScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	factories, err := a.listFactories()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, g := range factories {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*g.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,

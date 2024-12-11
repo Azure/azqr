@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
@@ -16,7 +16,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *models.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				target: &armredis.ResourceInfo{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &scanners.ScanContext{
+				scanContext: &models.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "redis-003",
 				target:      &armredis.ResourceInfo{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -64,7 +64,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 				target: &armredis.ResourceInfo{
 					Name: to.Ptr("redis-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -80,7 +80,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 						EnableNonSSLPort: to.Ptr(false),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -96,7 +96,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 						MinimumTLSVersion: to.Ptr(armredis.TLSVersionOne2),
 					},
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,

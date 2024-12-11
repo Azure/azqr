@@ -7,20 +7,20 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
 
 // GetRules - Returns the rules for the APIManagementScanner
-func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *APIManagementScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"apim-001": {
 			RecommendationID: "apim-001",
 			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "APIM should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armapimanagement.ServiceResource)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -30,11 +30,11 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"apim-003": {
 			RecommendationID:   "apim-003",
 			ResourceType:       "Microsoft.ApiManagement/service",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "APIM should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				sku := string(*a.SKU.Name)
 				sla := "99.95%"
@@ -51,10 +51,10 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"apim-004": {
 			RecommendationID: "apim-004",
 			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "APIM should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				a := target.(*armapimanagement.ServiceResource)
 				pe := len(a.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -64,10 +64,10 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"apim-006": {
 			RecommendationID: "apim-006",
 			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "APIM should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				caf := strings.HasPrefix(*c.Name, "apim")
 				return !caf, ""
@@ -77,10 +77,10 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"apim-007": {
 			RecommendationID: "apim-007",
 			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "APIM should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				return len(c.Tags) == 0, ""
 			},
@@ -89,10 +89,10 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"apim-008": {
 			RecommendationID: "apim-008",
 			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "APIM should use Managed Identities",
-			Impact:           scanners.ImpactMedium,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactMedium,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armapimanagement.ApimIdentityTypeNone, ""
 			},
@@ -101,10 +101,10 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"apim-009": {
 			RecommendationID: "apim-009",
 			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "APIM should only accept a minimum of TLS 1.2",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				notAllowed := []string{
 					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10",
 					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11",
@@ -133,10 +133,10 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"apim-010": {
 			RecommendationID: "apim-010",
 			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "APIM should should not accept weak or deprecated ciphers.",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				notAllowed := []string{
 					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168",
 					"Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA",
@@ -167,10 +167,10 @@ func (a *APIManagementScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"apim-011": {
 			RecommendationID: "apim-011",
 			ResourceType:     "Microsoft.ApiManagement/service",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "APIM: Renew expiring certificates",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armapimanagement.ServiceResource)
 				if c.Properties.HostnameConfigurations != nil {
 					for _, v := range c.Properties.HostnameConfigurations {

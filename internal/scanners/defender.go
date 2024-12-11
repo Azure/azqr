@@ -8,22 +8,18 @@ import (
 	"fmt"
 
 	"github.com/Azure/azqr/internal/graph"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
 
-// DefenderResult - Defender result
-type DefenderResult struct {
-	SubscriptionID, SubscriptionName, Name, Tier string
-}
-
 // DefenderScanner - Defender scanner
 type DefenderScanner struct{}
 
-func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *Filters) []DefenderResult {
-	LogResourceTypeScan("Defender Status")
-	resources := []DefenderResult{}
+func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []models.DefenderResult {
+	models.LogResourceTypeScan("Defender Status")
+	resources := []models.DefenderResult{}
 
 	if scan {
 		graphClient := graph.NewGraphQuery(cred)
@@ -43,7 +39,7 @@ func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.Token
 			subs = append(subs, &s)
 		}
 		result := graphClient.Query(ctx, query, subs)
-		resources = []DefenderResult{}
+		resources = []models.DefenderResult{}
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
@@ -52,7 +48,7 @@ func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.Token
 					continue
 				}
 
-				resources = append(resources, DefenderResult{
+				resources = append(resources, models.DefenderResult{
 					SubscriptionID:   to.String(m["SubscriptionId"]),
 					SubscriptionName: to.String(m["SubscriptionName"]),
 					Name:             to.String(m["Name"]),
@@ -64,9 +60,9 @@ func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.Token
 	return resources
 }
 
-func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *Filters) []DefenderRecommendation {
-	LogResourceTypeScan("Defender Recommendations")
-	resources := []DefenderRecommendation{}
+func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []models.DefenderRecommendation {
+	models.LogResourceTypeScan("Defender Recommendations")
+	resources := []models.DefenderRecommendation{}
 
 	if scan {
 		graphClient := graph.NewGraphQuery(cred)
@@ -108,7 +104,7 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 			subs = append(subs, &s)
 		}
 		result := graphClient.Query(ctx, query, subs)
-		resources = []DefenderRecommendation{}
+		resources = []models.DefenderRecommendation{}
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
@@ -117,7 +113,7 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 					continue
 				}
 
-				resources = append(resources, DefenderRecommendation{
+				resources = append(resources, models.DefenderRecommendation{
 					SubscriptionId:         to.String(m["SubscriptionId"]),
 					SubscriptionName:       to.String(m["SubscriptionName"]),
 					ResourceGroupName:      to.String(m["ResourceGroupName"]),

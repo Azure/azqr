@@ -4,22 +4,22 @@
 package log
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights/v2"
 )
 
 func init() {
-	scanners.ScannerList["log"] = []scanners.IAzureScanner{&LogAnalyticsScanner{}}
+	models.ScannerList["log"] = []models.IAzureScanner{&LogAnalyticsScanner{}}
 }
 
 // LogAnalyticsScanner - Scanner for Log Analytics workspace
 type LogAnalyticsScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armoperationalinsights.WorkspacesClient
 }
 
 // Init - Initializes the Log Analytics workspace Scanner
-func (a *LogAnalyticsScanner) Init(config *scanners.ScannerConfig) error {
+func (a *LogAnalyticsScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armoperationalinsights.NewWorkspacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *LogAnalyticsScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Log Analytics workspace in a Resource Group
-func (c *LogAnalyticsScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *LogAnalyticsScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	svcs, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, w := range svcs {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*w.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,

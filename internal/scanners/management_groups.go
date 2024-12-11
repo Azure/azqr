@@ -3,6 +3,7 @@ package scanners
 import (
 	"context"
 
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -13,7 +14,7 @@ import (
 
 type ManagementGroupsScanner struct{}
 
-func (sc ManagementGroupsScanner) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, groupID string, filters *Filters, options *arm.ClientOptions) map[string]string {
+func (sc ManagementGroupsScanner) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, groupID string, filters *models.Filters, options *arm.ClientOptions) map[string]string {
 	client, err := armmanagementgroups.NewClientFactory(cred, options)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create management groups client")

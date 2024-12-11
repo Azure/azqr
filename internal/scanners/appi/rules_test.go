@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights"
 )
@@ -16,7 +16,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *scanners.ScanContext
+		scanContext *models.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -32,7 +32,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "appi-001",
 				target:      &armapplicationinsights.Component{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -46,7 +46,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 				target: &armapplicationinsights.Component{
 					Name: to.Ptr("appi-test"),
 				},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -58,7 +58,7 @@ func TestAppInsightsScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "appi-003",
 				target:      &armapplicationinsights.Component{},
-				scanContext: &scanners.ScanContext{},
+				scanContext: &models.ScanContext{},
 			},
 			want: want{
 				broken: true,

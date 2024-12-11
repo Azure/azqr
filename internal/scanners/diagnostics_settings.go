@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
@@ -46,7 +47,7 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 
 	batches := int(math.Ceil(float64(len(resources)) / 20))
 
-	LogResourceTypeScan("Diagnostic Settings")
+	models.LogResourceTypeScan("Diagnostic Settings")
 
 	if batches == 0 {
 		return res, nil
@@ -193,7 +194,7 @@ type (
 func (d *DiagnosticSettingsScanner) Scan(resources []*string) map[string]bool {
 	diagResults, err := d.ListResourcesWithDiagnosticSettings(resources)
 	if err != nil {
-		if ShouldSkipError(err) {
+		if models.ShouldSkipError(err) {
 			diagResults = map[string]bool{}
 		} else {
 			log.Fatal().Err(err).Msg("Failed to list resources with Diagnostic Settings")

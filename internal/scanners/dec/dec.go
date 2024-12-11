@@ -4,22 +4,22 @@
 package dec
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto"
 )
 
 func init() {
-	scanners.ScannerList["dec"] = []scanners.IAzureScanner{&DataExplorerScanner{}}
+	models.ScannerList["dec"] = []models.IAzureScanner{&DataExplorerScanner{}}
 }
 
 // DataExplorerScanner - Scanner for Data Explorer
 type DataExplorerScanner struct {
-	config *scanners.ScannerConfig
+	config *models.ScannerConfig
 	client *armkusto.ClustersClient
 }
 
 // Init - Initializes the FrontDoor Scanner
-func (a *DataExplorerScanner) Init(config *scanners.ScannerConfig) error {
+func (a *DataExplorerScanner) Init(config *models.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armkusto.NewClustersClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -27,24 +27,24 @@ func (a *DataExplorerScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Data Explorers in a Resource Group
-func (a *DataExplorerScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *DataExplorerScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	kustoclusters, err := a.listClusters()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, g := range kustoclusters {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*g.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,

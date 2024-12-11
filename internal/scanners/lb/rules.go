@@ -6,20 +6,20 @@ package lb
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // GetRecommendations - Returns the rules for the LoadBalancerScanner
-func (a *LoadBalancerScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *LoadBalancerScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"lb-001": {
 			RecommendationID: "lb-001",
 			ResourceType:     "Microsoft.Network/loadBalancers",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Load Balancer should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armnetwork.LoadBalancer)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]scanners.AzqrRecom
 		"lb-003": {
 			RecommendationID:   "lb-003",
 			ResourceType:       "Microsoft.Network/loadBalancers",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Load Balancer should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armnetwork.LoadBalancer)
 				sla := "99.99%"
 				sku := *i.SKU.Name
@@ -47,10 +47,10 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]scanners.AzqrRecom
 		"lb-006": {
 			RecommendationID: "lb-006",
 			ResourceType:     "Microsoft.Network/loadBalancers",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Load Balancer Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.LoadBalancer)
 				hasPrivateIP := false
 				for _, ipc := range c.Properties.FrontendIPConfigurations {
@@ -76,10 +76,10 @@ func (a *LoadBalancerScanner) GetRecommendations() map[string]scanners.AzqrRecom
 		"lb-007": {
 			RecommendationID: "lb-007",
 			ResourceType:     "Microsoft.Network/loadBalancers",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Load Balancer should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.LoadBalancer)
 				return len(c.Tags) == 0, ""
 			},

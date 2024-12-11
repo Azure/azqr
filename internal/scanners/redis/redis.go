@@ -4,22 +4,22 @@
 package redis
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
 func init() {
-	scanners.ScannerList["redis"] = []scanners.IAzureScanner{&RedisScanner{}}
+	models.ScannerList["redis"] = []models.IAzureScanner{&RedisScanner{}}
 }
 
 // RedisScanner - Scanner for Redis
 type RedisScanner struct {
-	config      *scanners.ScannerConfig
+	config      *models.ScannerConfig
 	redisClient *armredis.Client
 }
 
 // Init - Initializes the RedisScanner
-func (c *RedisScanner) Init(config *scanners.ScannerConfig) error {
+func (c *RedisScanner) Init(config *models.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (c *RedisScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Redis in a Resource Group
-func (c *RedisScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *RedisScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	redis, err := c.listRedis()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, redis := range redis {
 		rr := engine.EvaluateRecommendations(rules, redis, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*redis.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*redis.ID),
 			ServiceName:      *redis.Name,
 			Type:             *redis.Type,
 			Location:         *redis.Location,

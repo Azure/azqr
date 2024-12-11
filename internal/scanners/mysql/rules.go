@@ -6,21 +6,21 @@ package mysql
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 )
 
 // GetRecommendations - Returns the rules for the MySQLScanner
-func (a *MySQLScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *MySQLScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"mysql-001": {
 			RecommendationID: "mysql-001",
 			ResourceType:     "Microsoft.DBforMySQL/servers",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Azure Database for MySQL - Single Server should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armmysql.Server)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -30,11 +30,11 @@ func (a *MySQLScanner) GetRecommendations() map[string]scanners.AzqrRecommendati
 		"mysql-003": {
 			RecommendationID:   "mysql-003",
 			ResourceType:       "Microsoft.DBforMySQL/servers",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Azure Database for MySQL - Single Server should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/mysql/",
@@ -42,10 +42,10 @@ func (a *MySQLScanner) GetRecommendations() map[string]scanners.AzqrRecommendati
 		"mysql-004": {
 			RecommendationID: "mysql-004",
 			ResourceType:     "Microsoft.DBforMySQL/servers",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "Azure Database for MySQL - Single Server should have private endpoints enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armmysql.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -55,10 +55,10 @@ func (a *MySQLScanner) GetRecommendations() map[string]scanners.AzqrRecommendati
 		"mysql-006": {
 			RecommendationID: "mysql-006",
 			ResourceType:     "Microsoft.DBforMySQL/servers",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Database for MySQL - Single Server Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armmysql.Server)
 				caf := strings.HasPrefix(*c.Name, "mysql")
 				return !caf, ""
@@ -68,10 +68,10 @@ func (a *MySQLScanner) GetRecommendations() map[string]scanners.AzqrRecommendati
 		"mysql-007": {
 			RecommendationID: "mysql-007",
 			ResourceType:     "Microsoft.DBforMySQL/servers",
-			Category:         scanners.CategoryHighAvailability,
+			Category:         models.CategoryHighAvailability,
 			Recommendation:   "Azure Database for MySQL - Single Server is on the retirement path",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				return true, ""
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/mysql/single-server/whats-happening-to-mysql-single-server",
@@ -79,10 +79,10 @@ func (a *MySQLScanner) GetRecommendations() map[string]scanners.AzqrRecommendati
 		"mysql-008": {
 			RecommendationID: "mysql-008",
 			ResourceType:     "Microsoft.DBforMySQL/servers",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Database for MySQL - Single Server should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armmysql.Server)
 				return len(c.Tags) == 0, ""
 			},
@@ -92,15 +92,15 @@ func (a *MySQLScanner) GetRecommendations() map[string]scanners.AzqrRecommendati
 }
 
 // GetRecommendations - Returns the rules for the MySQLFlexibleScanner
-func (a *MySQLFlexibleScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
-	return map[string]scanners.AzqrRecommendation{
+func (a *MySQLFlexibleScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+	return map[string]models.AzqrRecommendation{
 		"mysqlf-001": {
 			RecommendationID: "mysqlf-001",
 			ResourceType:     "Microsoft.DBforMySQL/flexibleServers",
-			Category:         scanners.CategoryMonitoringAndAlerting,
+			Category:         models.CategoryMonitoringAndAlerting,
 			Recommendation:   "Azure Database for MySQL - Flexible Server should have diagnostic settings enabled",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armmysqlflexibleservers.Server)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -110,11 +110,11 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"mysqlf-003": {
 			RecommendationID:   "mysqlf-003",
 			ResourceType:       "Microsoft.DBforMySQL/flexibleServers",
-			Category:           scanners.CategoryHighAvailability,
+			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Azure Database for MySQL - Flexible Server should have a SLA",
-			RecommendationType: scanners.TypeSLA,
-			Impact:             scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			RecommendationType: models.TypeSLA,
+			Impact:             models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
 				sla := "99.9%"
 				if i.Properties.HighAvailability != nil && *i.Properties.HighAvailability.Mode == armmysqlflexibleservers.HighAvailabilityModeZoneRedundant {
@@ -131,10 +131,10 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"mysqlf-004": {
 			RecommendationID: "mysqlf-004",
 			ResourceType:     "Microsoft.DBforMySQL/flexibleServers",
-			Category:         scanners.CategorySecurity,
+			Category:         models.CategorySecurity,
 			Recommendation:   "Azure Database for MySQL - Flexible Server should have private access enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactHigh,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armmysqlflexibleservers.Server)
 				pe := *i.Properties.Network.PublicNetworkAccess == armmysqlflexibleservers.EnableStatusEnumDisabled
 				return !pe, ""
@@ -144,10 +144,10 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"mysqlf-006": {
 			RecommendationID: "mysqlf-006",
 			ResourceType:     "Microsoft.DBforMySQL/flexibleServers",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Database for MySQL - Flexible Server Name should comply with naming conventions",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armmysqlflexibleservers.Server)
 				caf := strings.HasPrefix(*c.Name, "mysql")
 				return !caf, ""
@@ -157,10 +157,10 @@ func (a *MySQLFlexibleScanner) GetRecommendations() map[string]scanners.AzqrReco
 		"mysqlf-007": {
 			RecommendationID: "mysqlf-007",
 			ResourceType:     "Microsoft.DBforMySQL/flexibleServers",
-			Category:         scanners.CategoryGovernance,
+			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Database for MySQL - Flexible Server should have tags",
-			Impact:           scanners.ImpactLow,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
+			Impact:           models.ImpactLow,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armmysqlflexibleservers.Server)
 				return len(c.Tags) == 0, ""
 			},

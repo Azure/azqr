@@ -4,22 +4,22 @@
 package ci
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
 )
 
 func init() {
-	scanners.ScannerList["ci"] = []scanners.IAzureScanner{&ContainerInstanceScanner{}}
+	models.ScannerList["ci"] = []models.IAzureScanner{&ContainerInstanceScanner{}}
 }
 
 // ContainerInstanceScanner - Scanner for Container Instances
 type ContainerInstanceScanner struct {
-	config          *scanners.ScannerConfig
+	config          *models.ScannerConfig
 	instancesClient *armcontainerinstance.ContainerGroupsClient
 }
 
 // Init - Initializes the ContainerInstanceScanner
-func (c *ContainerInstanceScanner) Init(config *scanners.ScannerConfig) error {
+func (c *ContainerInstanceScanner) Init(config *models.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.instancesClient, err = armcontainerinstance.NewContainerGroupsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -27,24 +27,24 @@ func (c *ContainerInstanceScanner) Init(config *scanners.ScannerConfig) error {
 }
 
 // Scan - Scans all Container Instances in a Resource Group
-func (c *ContainerInstanceScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
-	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *ContainerInstanceScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	instances, err := c.listInstances()
 	if err != nil {
 		return nil, err
 	}
-	engine := scanners.RecommendationEngine{}
+	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []scanners.AzqrServiceResult{}
+	results := []models.AzqrServiceResult{}
 
 	for _, instance := range instances {
 		rr := engine.EvaluateRecommendations(rules, instance, scanContext)
 
-		results = append(results, scanners.AzqrServiceResult{
+		results = append(results, models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*instance.ID),
+			ResourceGroup:    models.GetResourceGroupFromResourceID(*instance.ID),
 			ServiceName:      *instance.Name,
 			Type:             *instance.Type,
 			Location:         *instance.Location,
