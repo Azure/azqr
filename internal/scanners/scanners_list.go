@@ -4,6 +4,8 @@
 package scanners
 
 import (
+	"sort"
+
 	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners/aa"
 	"github.com/Azure/azqr/internal/scanners/adf"
@@ -70,73 +72,94 @@ import (
 	"github.com/Azure/azqr/internal/scanners/wps"
 )
 
-// GetScanners returns a list of all scanners
+// ScannerList is a map of service abbreviation to scanner
+var ScannerList = map[string][]azqr.IAzureScanner{
+	"aa":     {&aa.AutomationAccountScanner{}},
+	"adf":    {&adf.DataFactoryScanner{}},
+	"afd":    {&afd.FrontDoorScanner{}},
+	"afw":    {&afw.FirewallScanner{}},
+	"agw":    {&agw.ApplicationGatewayScanner{}},
+	"aks":    {&aks.AKSScanner{}},
+	"amg":    {&amg.ManagedGrafanaScanner{}},
+	"apim":   {&apim.APIManagementScanner{}},
+	"appcs":  {&appcs.AppConfigurationScanner{}},
+	"appi":   {&appi.AppInsightsScanner{}},
+	"as":     {&as.AnalysisServicesScanner{}},
+	"asp":    {&asp.AppServiceScanner{}},
+	"avd":    {&avd.AzureVirtualDesktopScanner{}},
+	"avs":    {&avs.AVSScanner{}},
+	"ba":     {&ba.BatchAccountScanner{}},
+	"ca":     {&ca.ContainerAppsScanner{}},
+	"cae":    {&cae.ContainerAppsEnvironmentScanner{}},
+	"ci":     {&ci.ContainerInstanceScanner{}},
+	"cog":    {&cog.CognitiveScanner{}},
+	"con":    {&conn.ConnectionScanner{}},
+	"cosmos": {&cosmos.CosmosDBScanner{}},
+	"cr":     {&cr.ContainerRegistryScanner{}},
+	"dbw":    {&dbw.DatabricksScanner{}},
+	"dec":    {&dec.DataExplorerScanner{}},
+	"disk":   {&disk.DiskScanner{}},
+	"erc":    {&erc.ExpressRouteScanner{}},
+	"evgd":   {&evgd.EventGridScanner{}},
+	"evh":    {&evh.EventHubScanner{}},
+	"fdfp":   {&fdfp.FrontDoorWAFPolicyScanner{}},
+	"gal":    {&gal.GalleryScanner{}},
+	"hpc":    {&hpc.HighPerformanceComputingScanner{}},
+	"iot":    {&iot.IoTHubScanner{}},
+	"it":     {&it.ImageTemplateScanner{}},
+	"kv":     {&kv.KeyVaultScanner{}},
+	"lb":     {&lb.LoadBalancerScanner{}},
+	"log":    {&log.LogAnalyticsScanner{}},
+	"logic":  {&logic.LogicAppScanner{}},
+	"maria":  {&maria.MariaScanner{}},
+	"mysql":  {&mysql.MySQLFlexibleScanner{}, &mysql.MySQLScanner{}},
+	"netapp": {&netapp.NetAppScanner{}},
+	"ng":     {&ng.NatGatewayScanner{}},
+	"nsg":    {&nsg.NSGScanner{}},
+	"nw":     {&nw.NetworkWatcherScanner{}},
+	"pdnsz":  {&pdnsz.PrivateDNSZoneScanner{}},
+	"pep":    {&pep.PrivateEndpointScanner{}},
+	"pip":    {&pip.PublicIPScanner{}},
+	"psql":   {&psql.PostgreFlexibleScanner{}, &psql.PostgreScanner{}},
+	"redis":  {&redis.RedisScanner{}},
+	"rsv":    {&rsv.RecoveryServiceScanner{}},
+	"rt":     {&rt.RouteTableScanner{}},
+	"sap":    {&sap.SAPScanner{}},
+	"sb":     {&sb.ServiceBusScanner{}},
+	"sigr":   {&sigr.SignalRScanner{}},
+	"sql":    {&sql.SQLScanner{}},
+	"st":     {&st.StorageScanner{}},
+	"synw":   {&synw.SynapseWorkspaceScanner{}},
+	"traf":   {&traf.TrafficManagerScanner{}},
+	"vdpool": {&vdpool.VirtualDesktopScanner{}},
+	"vgw":    {&vgw.VirtualNetworkGatewayScanner{}},
+	"vm":     {&vm.VirtualMachineScanner{}},
+	"vmss":   {&vmss.VirtualMachineScaleSetScanner{}},
+	"vnet":   {&vnet.VirtualNetworkScanner{}},
+	"wps":    {&wps.WebPubSubScanner{}},
+}
+
+// GetScanners returns a list of all scanners in ScannerList
 func GetScanners() []azqr.IAzureScanner {
-	return []azqr.IAzureScanner{
-		&aa.AutomationAccountScanner{},
-		&dbw.DatabricksScanner{},
-		&adf.DataFactoryScanner{},
-		&afd.FrontDoorScanner{},
-		&afw.FirewallScanner{},
-		&agw.ApplicationGatewayScanner{},
-		&aks.AKSScanner{},
-		&amg.ManagedGrafanaScanner{},
-		&apim.APIManagementScanner{},
-		&appcs.AppConfigurationScanner{},
-		&appi.AppInsightsScanner{},
-		&as.AnalysisServicesScanner{},
-		&avs.AVSScanner{},
-		&avd.AzureVirtualDesktopScanner{},
-		&ba.BatchAccountScanner{},
-		&cae.ContainerAppsEnvironmentScanner{},
-		&ca.ContainerAppsScanner{},
-		&ci.ContainerInstanceScanner{},
-		&cog.CognitiveScanner{},
-		&conn.ConnectionScanner{},
-		&cosmos.CosmosDBScanner{},
-		&cr.ContainerRegistryScanner{},
-		&dec.DataExplorerScanner{},
-		&disk.DiskScanner{},
-		&erc.ExpressRouteScanner{},
-		&evgd.EventGridScanner{},
-		&evh.EventHubScanner{},
-		&fdfp.FrontDoorWAFPolicyScanner{},
-		&hpc.HighPerformanceComputingScanner{},
-		&it.ImageTemplateScanner{},
-		&iot.IoTHubScanner{},
-		&gal.GalleryScanner{},
-		&kv.KeyVaultScanner{},
-		&lb.LoadBalancerScanner{},
-		&log.LogAnalyticsScanner{},
-		&logic.LogicAppScanner{},
-		&maria.MariaScanner{},
-		&mysql.MySQLFlexibleScanner{},
-		&mysql.MySQLScanner{},
-		&ng.NatGatewayScanner{},
-		&netapp.NetAppScanner{},
-		&nsg.NSGScanner{},
-		&nw.NetworkWatcherScanner{},
-		&asp.AppServiceScanner{},
-		&pep.PrivateEndpointScanner{},
-		&pip.PublicIPScanner{},
-		&pdnsz.PrivateDNSZoneScanner{},
-		&psql.PostgreFlexibleScanner{},
-		&psql.PostgreScanner{},
-		&rt.RouteTableScanner{},
-		&rsv.RecoveryServiceScanner{},
-		&redis.RedisScanner{},
-		&sap.SAPScanner{},
-		&sb.ServiceBusScanner{},
-		&sigr.SignalRScanner{},
-		&sql.SQLScanner{},
-		&synw.SynapseWorkspaceScanner{},
-		&traf.TrafficManagerScanner{},
-		&st.StorageScanner{},
-		&vdpool.VirtualDesktopScanner{},
-		&vm.VirtualMachineScanner{},
-		&vmss.VirtualMachineScaleSetScanner{},
-		&vnet.VirtualNetworkScanner{},
-		&vgw.VirtualNetworkGatewayScanner{},
-		&wps.WebPubSubScanner{},
+	var scanners []azqr.IAzureScanner
+	keys := make([]string, 0, len(ScannerList))
+	for key := range ScannerList {
+		keys = append(keys, key)
 	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		scanners = append(scanners, ScannerList[key]...)
+	}
+	return scanners
+}
+
+// GetScannerByKeys returns a list of scanners for the given keys
+func GetScannerByKeys(keys []string) []azqr.IAzureScanner {
+	var scanners []azqr.IAzureScanner
+	for _, key := range keys {
+		if scannerList, exists := ScannerList[key]; exists {
+			scanners = append(scanners, scannerList...)
+		}
+	}
+	return scanners
 }

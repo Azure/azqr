@@ -58,6 +58,8 @@ azqr:
       - <subscription_id> # format: <subscription_id>
     resourceGroups:
       - <resource_group_resource_id> # format: /subscriptions/<subscription_id>/resourceGroups/<resource_group_name>
+    resourceTypes:
+      - <resource type abbreviation> # format: Abbreviation of the resource type. For example: "vm" for "Microsoft.Compute/virtualMachines"
   exclude:
     subscriptions:
       - <subscription_id> # format: <subscription_id>
