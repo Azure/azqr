@@ -4,8 +4,7 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
-	iot "github.com/Azure/azqr/internal/scanners/disk"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
 )
 
@@ -19,10 +18,6 @@ var diskCmd = &cobra.Command{
 	Long:  "Scan Disk",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := []azqr.IAzureScanner{
-			&iot.DiskScanner{},
-		}
-
-		scan(cmd, serviceScanners)
+		scan(cmd, scanners.ScannerList["disk"])
 	},
 }

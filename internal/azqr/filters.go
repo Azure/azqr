@@ -38,6 +38,7 @@ type (
 	IncludeFilter struct {
 		Subscriptions  []string `yaml:"subscriptions,flow"`
 		ResourceGroups []string `yaml:"resourceGroups,flow"`
+		ResourceTypes  []string `yaml:"resourceTypes,flow"`
 	}
 )
 
@@ -89,6 +90,7 @@ func LoadFilters(filterFile string) *Filters {
 			Include: &IncludeFilter{
 				Subscriptions:  []string{},
 				ResourceGroups: []string{},
+				ResourceTypes:  []string{},
 			},
 			Exclude: &ExcludeFilter{
 				Subscriptions:  []string{},

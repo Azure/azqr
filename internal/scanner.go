@@ -73,6 +73,11 @@ func (sc Scanner) Scan(params *ScanParams) {
 		filters.Azqr.AddResourceGroup(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", params.SubscriptionID, params.ResourceGroup))
 	}
 
+	serviceScanners := params.ServiceScanners
+	if len(params.ServiceScanners) > 1 && len(filters.Azqr.Include.ResourceTypes) > 0 {
+		serviceScanners = scanners.GetScannerByKeys(filters.Azqr.Include.ResourceTypes)
+	}
+
 	// create Azure credentials
 	cred := sc.newAzureCredential(params.ForceAzureCliCredential)
 
@@ -109,14 +114,14 @@ func (sc Scanner) Scan(params *ScanParams) {
 
 	// get the APRL scan results
 	aprlScanner := AprlScanner{}
-	reportData.Recomendations, reportData.AprlData = aprlScanner.Scan(ctx, cred, params.ServiceScanners, filters, subscriptions)
+	reportData.Recomendations, reportData.AprlData = aprlScanner.Scan(ctx, cred, serviceScanners, filters, subscriptions)
 
 	resourceScanner := scanners.ResourceScanner{}
 	reportData.Resources = resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)
 
 	// For each service scanner, get the recommendations list
 	if params.UseAzqrRecommendations {
-		for _, s := range params.ServiceScanners {
+		for _, s := range serviceScanners {
 			for i, r := range s.GetRecommendations() {
 				if filters.Azqr.IsRecommendationExcluded(r.RecommendationID) {
 					continue
@@ -169,9 +174,9 @@ func (sc Scanner) Scan(params *ScanParams) {
 			}
 
 			// scan each resource group
-			ch := make(chan []azqr.AzqrServiceResult, len(params.ServiceScanners))
+			ch := make(chan []azqr.AzqrServiceResult, len(serviceScanners))
 
-			for _, s := range params.ServiceScanners {
+			for _, s := range serviceScanners {
 				err := s.Init(config)
 				if err != nil {
 					log.Fatal().Err(err).Msg("Failed to initialize scanner")
@@ -187,7 +192,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 				}(s)
 			}
 
-			for i := 0; i < len(params.ServiceScanners); i++ {
+			for i := 0; i < len(serviceScanners); i++ {
 				res := <-ch
 				for _, r := range res {
 					// check if the resource is excluded
