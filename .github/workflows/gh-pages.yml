@@ -50,6 +50,10 @@ jobs:
         run: |
           { echo -n '\'; go run ./cmd/main.go rules; } > ./docs/static/rules.txt
 
+      - name: Create types.txt file
+        run: |
+          { echo -n '\'; go run ./cmd/main.go types; } > ./docs/static/types.txt
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:

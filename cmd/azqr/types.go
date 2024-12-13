@@ -5,7 +5,7 @@ package azqr
 
 import (
 	"fmt"
-	"slices"
+	"sort"
 
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
@@ -21,19 +21,20 @@ var typesCmd = &cobra.Command{
 	Long:  "Print all supported azure resource types",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := scanners.GetScanners()
-
-		strs := []string{}
-
-		for _, scanner := range serviceScanners {
-			strs = append(strs, scanner.ResourceTypes()...)
+		fmt.Println("Abbreviation  | Resource Type ")
+		fmt.Println("---|---")
+		keys := make([]string, 0, len(scanners.ScannerList))
+		for key := range scanners.ScannerList {
+			keys = append(keys, key)
 		}
-		slices.Sort(strs)
-		
-		for _, t := range strs {
-			fmt.Printf("* %s", t)
-			fmt.Println()
+		sort.Strings(keys)
+		for _, key := range keys {
+			for _, t := range scanners.ScannerList[key] {
+				for _, rt := range t.ResourceTypes() {
+					fmt.Printf("%s | %s", key, rt)
+					fmt.Println()
+				}
+			}
 		}
-
 	},
 }

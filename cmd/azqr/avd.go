@@ -4,8 +4,7 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
-	"github.com/Azure/azqr/internal/scanners/avd"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
 )
 
@@ -19,10 +18,6 @@ var avdCmd = &cobra.Command{
 	Long:  "Scan Azure Virtual Desktop",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := []azqr.IAzureScanner{
-			&avd.AzureVirtualDesktopScanner{},
-		}
-
-		scan(cmd, serviceScanners)
+		scan(cmd, scanners.ScannerList["avd"])
 	},
 }

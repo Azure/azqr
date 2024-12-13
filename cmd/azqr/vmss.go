@@ -4,8 +4,7 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
-	"github.com/Azure/azqr/internal/scanners/vmss"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
 )
 
@@ -19,10 +18,6 @@ var vmssCmd = &cobra.Command{
 	Long:  "Scan Virtual Machine Scale Set",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := []azqr.IAzureScanner{
-			&vmss.VirtualMachineScaleSetScanner{},
-		}
-
-		scan(cmd, serviceScanners)
+		scan(cmd, scanners.ScannerList["vmss"])
 	},
 }
