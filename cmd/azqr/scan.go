@@ -17,7 +17,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status (default)")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations (default)")
 	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs (default)")
-	scanCmd.PersistentFlags().BoolP("json", "", false, "Create josn file")
+	scanCmd.PersistentFlags().BoolP("json", "", false, "Create json file")
 	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create csv files")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default)")
