@@ -198,7 +198,13 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 
 					log.Debug().Msg(rule.GraphQuery)
 
-					subscription := azqr.GetSubsctiptionFromResourceID(m["id"].(string))
+					// Check if "id" is present in the map
+					if _, ok := m["id"]; !ok {
+						log.Warn().Msgf("Skipping result: 'id' field is missing in the response for recommendation: %s", rule.RecommendationID)
+						break
+					}
+
+					subscription := azqr.GetSubscriptionFromResourceID(m["id"].(string))
 					subscriptionName, ok := subscriptions[subscription]
 					if !ok {
 						subscriptionName = ""
@@ -273,7 +279,7 @@ func convertInterfaceToString(i interface{}) string {
 	default:
 		jsonStr, err := json.Marshal(i)
 		if err != nil {
-			log.Fatal().Err(err).Msg("unsupported type found in ARG query result")
+			log.Fatal().Err(err).Msg("Unsupported type found in ARG query result")
 		}
 		return string(jsonStr)
 	}

@@ -268,8 +268,8 @@ func ListResourceGroup(ctx context.Context, cred azcore.TokenCredential, subscri
 	return resourceGroups, nil
 }
 
-// GetSubsctiptionFromResourceID - Get Subscription ID from Resource ID
-func GetSubsctiptionFromResourceID(resourceID string) string {
+// GetSubscriptionFromResourceID - Get Subscription ID from Resource ID
+func GetSubscriptionFromResourceID(resourceID string) string {
 	parts := strings.Split(resourceID, "/")
 	if len(parts) < 3 {
 		return ""
