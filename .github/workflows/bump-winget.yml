@@ -9,6 +9,9 @@ on:
   repository_dispatch:
     types: [ bump-winget ]
 
+permissions:
+  contents: read
+
 jobs:
   winget-bump:
     name: Bump azqr winget
