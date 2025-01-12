@@ -1,0 +1,48 @@
+# GitHub Actions workflow for azqr
+
+name: azqr-pipeline
+
+on:
+  workflow_dispatch: # Trigger manually
+  schedule: # Trigger every Friday at midnight
+    - cron: "0 0 * * 5"
+  push:
+    branches:
+      - main # Trigger on push to main
+  pull_request:
+    branches:
+      - main # Trigger on pull request to main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Install azqr
+      - name: Install azqr
+        run: |
+          latestAzqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-) \
+          && wget https://github.com/Azure/azqr/releases/download/$latestAzqr/azqr-ubuntu-latest-amd64 -O /usr/local/bin/azqr \
+          && chmod +x /usr/local/bin/azqr
+
+      # Run azqr scan
+      - name: Run azqr scan
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          timestamp=$(date '+%Y%m%d%H%M%S')
+          echo "DATETIME=$timestamp" >> $GITHUB_ENV
+          azqr scan -o "${{ github.workspace }}/azqr_action_plan_$timestamp"
+
+      # Publish azqr action plan
+      - name: Publish azqr action plan
+        uses: actions/upload-artifact@v2
+        with:
+          name: azqr_result
+          path: ${{ github.workspace }}/azqr_action_plan_${{ env.DATETIME }}.xlsx
