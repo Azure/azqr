@@ -74,7 +74,7 @@ jobs:
 
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@9a141972ca62e4def3a31137a5a086ba5c58572a # v1.2.1
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
 
       - name: Build with Hugo
         run:  |
