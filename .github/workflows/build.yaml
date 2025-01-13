@@ -69,7 +69,7 @@ jobs:
           go-version: ${{ env.GOVER }}
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@ea9897a6e57642ca932850b656df2880bc7cd2a8 # v3.3.0
+        uses: actions/setup-dotnet@87b7050bc53ea08284295505d98d2aa94301e852 # v4.2.0
         with:
           dotnet-version: 6.0.x
 
@@ -290,7 +290,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@ea9897a6e57642ca932850b656df2880bc7cd2a8 # v3.3.0
+        uses: actions/setup-dotnet@87b7050bc53ea08284295505d98d2aa94301e852 # v4.2.0
         with:
           dotnet-version: 6.0.x
 
