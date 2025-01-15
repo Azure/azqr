@@ -79,7 +79,7 @@ jobs:
 
       - name: golangci-lint
         if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
-        uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # v3.7.0
+        uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 # v6.1.1
         with:
           version: ${{ env.GOLANGCILINT_VER }}
           skip-pkg-cache: true
