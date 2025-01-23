@@ -6,20 +6,20 @@ package nsg
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // GetRules - Returns the rules for the NSGScanner
-func (a *NSGScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *NSGScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"nsg-001": {
 			RecommendationID: "nsg-001",
 			ResourceType:     "Microsoft.Network/networkSecurityGroups",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "NSG should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armnetwork.SecurityGroup)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *NSGScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"nsg-003": {
 			RecommendationID:   "nsg-003",
 			ResourceType:       "Microsoft.Network/networkSecurityGroups",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "NSG SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -41,10 +41,10 @@ func (a *NSGScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"nsg-006": {
 			RecommendationID: "nsg-006",
 			ResourceType:     "Microsoft.Network/networkSecurityGroups",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "NSG Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.SecurityGroup)
 				caf := strings.HasPrefix(*c.Name, "nsg")
 				return !caf, ""
@@ -54,10 +54,10 @@ func (a *NSGScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"nsg-007": {
 			RecommendationID: "nsg-007",
 			ResourceType:     "Microsoft.Network/networkSecurityGroups",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "NSG should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.SecurityGroup)
 				return len(c.Tags) == 0, ""
 			},

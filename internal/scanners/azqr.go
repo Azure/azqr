@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package azqr
+package scanners
 
 import (
 	"context"
@@ -149,6 +149,21 @@ type (
 		Source              string
 	}
 
+	DefenderRecommendation struct {
+		SubscriptionId         string
+		SubscriptionName       string
+		ResourceGroupName      string
+		ResourceType           string
+		ResourceName           string
+		Category               string
+		RecommendationSeverity string
+		RecommendationName     string
+		ActionDescription      string
+		RemediationDescription string
+		AzPortalLink           string
+		ResourceId             string
+	}
+
 	RecommendationEngine struct{}
 
 	RecommendationImpact   string
@@ -294,4 +309,13 @@ func GetResourceGroupIDFromResourceID(resourceID string) string {
 	}
 
 	return strings.Join(parts[:5], "/")
+}
+
+// GetResourceNameFromResourceID - Get Resource Type from Resource ID
+func GetResourceTypeFromResourceID(resourceID string) string {
+	parts := strings.Split(resourceID, "/")
+	if len(parts) < 8 {
+		return ""
+	}
+	return fmt.Sprintf("%s/%s", parts[6], parts[7])
 }

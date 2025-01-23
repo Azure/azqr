@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
@@ -16,7 +16,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -32,7 +32,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "ca-003",
 				target:      &armappcontainers.ContainerApp{},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -46,7 +46,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 				target: &armappcontainers.ContainerApp{
 					Name: to.Ptr("ca-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -66,7 +66,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -82,7 +82,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						Type: to.Ptr(armappcontainers.ManagedServiceIdentityTypeNone),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -104,7 +104,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -126,7 +126,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -148,7 +148,7 @@ func TestContainerAppsScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,

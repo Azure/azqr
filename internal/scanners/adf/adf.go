@@ -4,18 +4,22 @@
 package adf
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
 )
 
+func init() {
+	scanners.ScannerList["adf"] = []scanners.IAzureScanner{&DataFactoryScanner{}}
+}
+
 // DataFactoryScanner - Scanner for Data Factory
 type DataFactoryScanner struct {
-	config          *azqr.ScannerConfig
+	config          *scanners.ScannerConfig
 	factoriesClient *armdatafactory.FactoriesClient
 }
 
 // Init - Initializes the DataFactory Scanner
-func (a *DataFactoryScanner) Init(config *azqr.ScannerConfig) error {
+func (a *DataFactoryScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.factoriesClient, err = armdatafactory.NewFactoriesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,24 +27,24 @@ func (a *DataFactoryScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Data Factories in a Resource Group
-func (a *DataFactoryScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *DataFactoryScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	factories, err := a.listFactories()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, g := range factories {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,

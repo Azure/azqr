@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
@@ -16,7 +16,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 				target: &armnetwork.VirtualWAN{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "vwa-002",
 				target:      &armnetwork.VirtualWAN{},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -62,7 +62,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "vwa-003",
 				target:      &armnetwork.VirtualWAN{},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -76,7 +76,7 @@ func TestVirtualWanScanner_Rules(t *testing.T) {
 				target: &armnetwork.VirtualWAN{
 					Name: to.Ptr("vwa-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,

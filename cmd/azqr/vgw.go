@@ -4,7 +4,6 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +17,6 @@ var vgwCmd = &cobra.Command{
 	Long:  "Scan Virtual Network Gateway",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		scan(cmd, scanners.ScannerList["vgw"])
+		scan(cmd, []string{"vgw"})
 	},
 }

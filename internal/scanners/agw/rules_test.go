@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
@@ -16,7 +16,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 				target: &armnetwork.ApplicationGateway{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "agw-103",
 				target:      &armnetwork.ApplicationGateway{},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -64,7 +64,7 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 				target: &armnetwork.ApplicationGateway{
 					Name: to.Ptr("agw-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,

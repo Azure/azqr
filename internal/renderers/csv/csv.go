@@ -29,11 +29,17 @@ func CreateCsvReport(data *renderers.ReportData) {
 	records = data.DefenderTable()
 	writeData(records, data.OutputFileName, "defender")
 
+	records = data.DefenderRecommendationsTable()
+	writeData(records, data.OutputFileName, "defenderRecommendations")
+
 	records = data.AdvisorTable()
 	writeData(records, data.OutputFileName, "advisor")
 
 	records = data.CostTable()
 	writeData(records, data.OutputFileName, "costs")
+
+	records = data.ExcludedResourcesTable()
+	writeData(records, data.OutputFileName, "outofscope")
 }
 
 func writeData(data [][]string, fileName, extension string) {

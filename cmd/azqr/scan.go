@@ -5,7 +5,6 @@ package azqr
 
 import (
 	"github.com/Azure/azqr/internal"
-	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners"
 
 	"github.com/spf13/cobra"
@@ -35,12 +34,12 @@ var scanCmd = &cobra.Command{
 	Long:  "Scan Azure Resources",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		serviceScanners := scanners.GetScanners()
-		scan(cmd, serviceScanners)
+		scannerKeys, _ := scanners.GetScanners()
+		scan(cmd, scannerKeys)
 	},
 }
 
-func scan(cmd *cobra.Command, serviceScanners []azqr.IAzureScanner) {
+func scan(cmd *cobra.Command, scannerKeys []string) {
 	subscriptionID, _ := cmd.Flags().GetString("subscription-id")
 	resourceGroupName, _ := cmd.Flags().GetString("resource-group")
 	outputFileName, _ := cmd.Flags().GetString("output-name")
@@ -53,7 +52,10 @@ func scan(cmd *cobra.Command, serviceScanners []azqr.IAzureScanner) {
 	debug, _ := cmd.Flags().GetBool("debug")
 	forceAzureCliCredential, _ := cmd.Flags().GetBool("azure-cli-credential")
 	filtersFile, _ := cmd.Flags().GetString("filters")
-	azqr, _ := cmd.Flags().GetBool("azqr")
+	useAzqr, _ := cmd.Flags().GetBool("azqr")
+
+	// load filters
+	filters := scanners.LoadFilters(filtersFile, scannerKeys)
 
 	params := internal.ScanParams{
 		SubscriptionID:          subscriptionID,
@@ -66,10 +68,10 @@ func scan(cmd *cobra.Command, serviceScanners []azqr.IAzureScanner) {
 		Json:                    json,
 		Mask:                    mask,
 		Debug:                   debug,
-		ServiceScanners:         serviceScanners,
+		ScannerKeys:             scannerKeys,
 		ForceAzureCliCredential: forceAzureCliCredential,
-		FilterFile:              filtersFile,
-		UseAzqrRecommendations:  azqr,
+		Filters:                 filters,
+		UseAzqrRecommendations:  useAzqr,
 	}
 
 	scanner := internal.Scanner{}

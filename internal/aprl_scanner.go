@@ -6,16 +6,15 @@ package internal
 import (
 	"context"
 	"embed"
-	"encoding/json"
-	"fmt"
 	"io/fs"
 	"math"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/graph"
+	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
@@ -32,8 +31,8 @@ type (
 )
 
 // GetAprlRecommendations returns a map with all APRL recommendations
-func (sc AprlScanner) GetAprlRecommendations() map[string]map[string]azqr.AprlRecommendation {
-	r := map[string]map[string]azqr.AprlRecommendation{}
+func (sc AprlScanner) GetAprlRecommendations() map[string]map[string]scanners.AprlRecommendation {
+	r := map[string]map[string]scanners.AprlRecommendation{}
 
 	fsys, err := fs.Sub(embededFiles, "aprl/azure-resources")
 	if err != nil {
@@ -70,7 +69,7 @@ func (sc AprlScanner) GetAprlRecommendations() map[string]map[string]azqr.AprlRe
 				return err
 			}
 
-			var recommendations []azqr.AprlRecommendation
+			var recommendations []scanners.AprlRecommendation
 			err = yaml.Unmarshal(content, &recommendations)
 			if err != nil {
 				return err
@@ -79,7 +78,7 @@ func (sc AprlScanner) GetAprlRecommendations() map[string]map[string]azqr.AprlRe
 			for _, recommendation := range recommendations {
 				t := strings.ToLower(recommendation.ResourceType)
 				if _, ok := r[t]; !ok {
-					r[t] = map[string]azqr.AprlRecommendation{}
+					r[t] = map[string]scanners.AprlRecommendation{}
 				}
 
 				if i, ok := q[recommendation.RecommendationID]; ok {
@@ -100,10 +99,10 @@ func (sc AprlScanner) GetAprlRecommendations() map[string]map[string]azqr.AprlRe
 }
 
 // AprlScan scans Azure resources using Azure Proactive Resiliency Library v2 (APRL)
-func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, serviceScanners []azqr.IAzureScanner, filters *azqr.Filters, subscriptions map[string]string) (map[string]map[string]azqr.AprlRecommendation, []azqr.AprlResult) {
-	recommendations := map[string]map[string]azqr.AprlRecommendation{}
-	results := []azqr.AprlResult{}
-	rules := []azqr.AprlRecommendation{}
+func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, serviceScanners []scanners.IAzureScanner, filters *scanners.Filters, subscriptions map[string]string) (map[string]map[string]scanners.AprlRecommendation, []scanners.AprlResult) {
+	recommendations := map[string]map[string]scanners.AprlRecommendation{}
+	results := []scanners.AprlResult{}
+	rules := []scanners.AprlRecommendation{}
 	graph := graph.NewGraphQuery(cred)
 
 	// get APRL recommendations
@@ -111,7 +110,7 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 
 	for _, s := range serviceScanners {
 		for _, t := range s.ResourceTypes() {
-			azqr.LogResourceTypeScan(t)
+			scanners.LogResourceTypeScan(t)
 			gr := sc.getGraphRules(t, filters, aprl)
 			for _, r := range gr {
 				rules = append(rules, r)
@@ -119,7 +118,7 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 
 			for i, r := range gr {
 				if recommendations[strings.ToLower(t)] == nil {
-					recommendations[strings.ToLower(t)] = map[string]azqr.AprlRecommendation{}
+					recommendations[strings.ToLower(t)] = map[string]scanners.AprlRecommendation{}
 				}
 				recommendations[strings.ToLower(t)][i] = r
 			}
@@ -128,8 +127,8 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 
 	batches := int(math.Ceil(float64(len(rules)) / 12))
 
-	jobs := make(chan []azqr.AprlRecommendation, batches)
-	ch := make(chan []azqr.AprlResult, batches)
+	jobs := make(chan []scanners.AprlRecommendation, batches)
+	ch := make(chan []scanners.AprlResult, batches)
 	var wg sync.WaitGroup
 
 	// Start workers
@@ -170,7 +169,7 @@ func (sc AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential, ser
 	return recommendations, results
 }
 
-func (sc *AprlScanner) worker(ctx context.Context, graph *graph.GraphQuery, subscriptions map[string]string, jobs <-chan []azqr.AprlRecommendation, results chan<- []azqr.AprlResult, wg *sync.WaitGroup) {
+func (sc *AprlScanner) worker(ctx context.Context, graph *graph.GraphQuery, subscriptions map[string]string, jobs <-chan []scanners.AprlRecommendation, results chan<- []scanners.AprlResult, wg *sync.WaitGroup) {
 	for r := range jobs {
 		res, err := sc.graphScan(ctx, graph, r, subscriptions)
 		if err != nil {
@@ -181,8 +180,8 @@ func (sc *AprlScanner) worker(ctx context.Context, graph *graph.GraphQuery, subs
 	}
 }
 
-func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQuery, rules []azqr.AprlRecommendation, subscriptions map[string]string) ([]azqr.AprlResult, error) {
-	results := []azqr.AprlResult{}
+func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQuery, rules []scanners.AprlRecommendation, subscriptions map[string]string) ([]scanners.AprlResult, error) {
+	results := []scanners.AprlResult{}
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
 		subs = append(subs, &s)
@@ -204,31 +203,31 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 						break
 					}
 
-					subscription := azqr.GetSubscriptionFromResourceID(m["id"].(string))
+					subscription := scanners.GetSubscriptionFromResourceID(m["id"].(string))
 					subscriptionName, ok := subscriptions[subscription]
 					if !ok {
 						subscriptionName = ""
 					}
 
-					results = append(results, azqr.AprlResult{
+					results = append(results, scanners.AprlResult{
 						RecommendationID:    rule.RecommendationID,
-						Category:            azqr.RecommendationCategory(rule.Category),
+						Category:            scanners.RecommendationCategory(rule.Category),
 						Recommendation:      rule.Recommendation,
 						ResourceType:        rule.ResourceType,
 						LongDescription:     rule.LongDescription,
 						PotentialBenefits:   rule.PotentialBenefits,
-						Impact:              azqr.RecommendationImpact(rule.Impact),
-						Name:                convertInterfaceToString(m["name"]),
-						ResourceID:          convertInterfaceToString(m["id"]),
+						Impact:              scanners.RecommendationImpact(rule.Impact),
+						Name:                to.String(m["name"]),
+						ResourceID:          to.String(m["id"]),
 						SubscriptionID:      subscription,
 						SubscriptionName:    subscriptionName,
-						ResourceGroup:       azqr.GetResourceGroupFromResourceID(m["id"].(string)),
-						Tags:                convertInterfaceToString(m["tags"]),
-						Param1:              convertInterfaceToString(m["param1"]),
-						Param2:              convertInterfaceToString(m["param2"]),
-						Param3:              convertInterfaceToString(m["param3"]),
-						Param4:              convertInterfaceToString(m["param4"]),
-						Param5:              convertInterfaceToString(m["param5"]),
+						ResourceGroup:       scanners.GetResourceGroupFromResourceID(m["id"].(string)),
+						Tags:                to.String(m["tags"]),
+						Param1:              to.String(m["param1"]),
+						Param2:              to.String(m["param2"]),
+						Param3:              to.String(m["param3"]),
+						Param4:              to.String(m["param4"]),
+						Param5:              to.String(m["param5"]),
 						Learn:               rule.LearnMoreLink[0].Url,
 						AutomationAvailable: rule.AutomationAvailable,
 						Source:              "APRL",
@@ -247,8 +246,8 @@ func (sc AprlScanner) graphScan(ctx context.Context, graphClient *graph.GraphQue
 	return results, nil
 }
 
-func (sc AprlScanner) getGraphRules(service string, filters *azqr.Filters, aprl map[string]map[string]azqr.AprlRecommendation) map[string]azqr.AprlRecommendation {
-	r := map[string]azqr.AprlRecommendation{}
+func (sc AprlScanner) getGraphRules(service string, filters *scanners.Filters, aprl map[string]map[string]scanners.AprlRecommendation) map[string]scanners.AprlRecommendation {
+	r := map[string]scanners.AprlRecommendation{}
 	if i, ok := aprl[strings.ToLower(service)]; ok {
 		for _, recommendation := range i {
 			if filters.Azqr.IsRecommendationExcluded(recommendation.RecommendationID) ||
@@ -262,25 +261,4 @@ func (sc AprlScanner) getGraphRules(service string, filters *azqr.Filters, aprl 
 		}
 	}
 	return r
-}
-
-func convertInterfaceToString(i interface{}) string {
-	if i == nil {
-		return ""
-	}
-
-	switch v := i.(type) {
-	case string:
-		return v
-	case int:
-		return fmt.Sprintf("%d", v)
-	case bool:
-		return fmt.Sprintf("%t", v)
-	default:
-		jsonStr, err := json.Marshal(i)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Unsupported type found in ARG query result")
-		}
-		return string(jsonStr)
-	}
 }

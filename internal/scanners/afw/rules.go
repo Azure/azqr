@@ -6,19 +6,19 @@ package afw
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
-func (a *FirewallScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *FirewallScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"afw-001": {
 			RecommendationID: "afw-001",
 			ResourceType:     "Microsoft.Network/azureFirewalls",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Azure Firewall should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armnetwork.AzureFirewall)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -28,11 +28,11 @@ func (a *FirewallScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 		"afw-003": {
 			RecommendationID:   "afw-003",
 			ResourceType:       "Microsoft.Network/azureFirewalls",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Azure Firewall SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				g := target.(*armnetwork.AzureFirewall)
 				sla := "99.95%"
 				if len(g.Zones) > 1 {
@@ -46,10 +46,10 @@ func (a *FirewallScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 		"afw-006": {
 			RecommendationID: "afw-006",
 			ResourceType:     "Microsoft.Network/azureFirewalls",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Azure Firewall Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.AzureFirewall)
 				caf := strings.HasPrefix(*c.Name, "afw")
 				return !caf, ""
@@ -59,10 +59,10 @@ func (a *FirewallScanner) GetRecommendations() map[string]azqr.AzqrRecommendatio
 		"afw-007": {
 			RecommendationID: "afw-007",
 			ResourceType:     "Microsoft.Network/azureFirewalls",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Azure Firewall should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.AzureFirewall)
 				return len(c.Tags) == 0, ""
 			},

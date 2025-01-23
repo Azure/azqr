@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
@@ -16,7 +16,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 				target: &armcosmos.DatabaseAccountGetResults{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -61,7 +61,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -75,7 +75,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 				target: &armcosmos.DatabaseAccountGetResults{
 					Properties: &armcosmos.DatabaseAccountGetProperties{},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -95,7 +95,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -118,7 +118,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -138,7 +138,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -152,7 +152,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 				target: &armcosmos.DatabaseAccountGetResults{
 					Name: to.Ptr("cosmos-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -168,7 +168,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 						DisableLocalAuth: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -184,7 +184,7 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 						DisableKeyBasedMetadataWriteAccess: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,

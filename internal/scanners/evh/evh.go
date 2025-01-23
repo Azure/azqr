@@ -4,18 +4,22 @@
 package evh
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
 
+func init() {
+	scanners.ScannerList["evh"] = []scanners.IAzureScanner{&EventHubScanner{}}
+}
+
 // EventHubScanner - Scanner for Event Hubs
 type EventHubScanner struct {
-	config *azqr.ScannerConfig
+	config *scanners.ScannerConfig
 	client *armeventhub.NamespacesClient
 }
 
 // Init - Initializes the EventHubScanner
-func (a *EventHubScanner) Init(config *azqr.ScannerConfig) error {
+func (a *EventHubScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armeventhub.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (a *EventHubScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Event Hubs in a Resource Group
-func (c *EventHubScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *EventHubScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	eventHubs, err := c.listEventHubs()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, eventHub := range eventHubs {
 		rr := engine.EvaluateRecommendations(rules, eventHub, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*eventHub.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*eventHub.ID),
 			ServiceName:      *eventHub.Name,
 			Type:             *eventHub.Type,
 			Location:         *eventHub.Location,

@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
@@ -16,7 +16,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				target: &armkeyvault.Vault{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "kv-003",
 				target:      &armkeyvault.Vault{},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -64,7 +64,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 				target: &armkeyvault.Vault{
 					Name: to.Ptr("kv-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,

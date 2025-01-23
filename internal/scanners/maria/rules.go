@@ -6,20 +6,20 @@ package maria
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb"
 )
 
 // GetRecommendations - Returns the rules for the MariaScanner
-func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *MariaScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"maria-001": {
 			RecommendationID: "maria-001",
 			ResourceType:     "Microsoft.DBforMariaDB/servers",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "MariaDB should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armmariadb.Server)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -28,10 +28,10 @@ func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"maria-002": {
 			RecommendationID: "maria-002",
 			ResourceType:     "Microsoft.DBforMariaDB/servers",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "MariaDB should have private endpoints enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armmariadb.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -40,10 +40,10 @@ func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"maria-003": {
 			RecommendationID: "maria-003",
 			ResourceType:     "Microsoft.DBforMariaDB/servers",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "MariaDB server Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmariadb.Server)
 				caf := strings.HasPrefix(*c.Name, "maria")
 				return !caf, ""
@@ -53,21 +53,21 @@ func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"maria-004": {
 			RecommendationID:   "maria-004",
 			ResourceType:       "Microsoft.DBforMariaDB/servers",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "MariaDB server should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 		},
 		"maria-005": {
 			RecommendationID: "maria-005",
 			ResourceType:     "Microsoft.DBforMariaDB/servers",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "MariaDB should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmariadb.Server)
 				return len(c.Tags) == 0, ""
 			},
@@ -76,10 +76,10 @@ func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"maria-006": {
 			RecommendationID: "maria-006",
 			ResourceType:     "Microsoft.DBforMariaDB/servers",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "MariaDB should enforce TLS >= 1.2",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmariadb.Server)
 				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != armmariadb.MinimalTLSVersionEnumTLS12, ""
 			},
@@ -89,15 +89,15 @@ func (a *MariaScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 }
 
 // GetRules - Returns the rules for the MariaScanner
-func (a *MariaScanner) GetDatabaseRules() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *MariaScanner) GetDatabaseRules() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"CAF": {
 			RecommendationID: "mariadb-001",
 			ResourceType:     "Microsoft.DBforMariaDB/servers/databases",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "MariaDB Database Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armmariadb.Database)
 				caf := strings.HasPrefix(*c.Name, "mariadb")
 				return !caf, ""

@@ -4,18 +4,22 @@
 package cae
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
+func init() {
+	scanners.ScannerList["cae"] = []scanners.IAzureScanner{&ContainerAppsEnvironmentScanner{}}
+}
+
 // ContainerAppsEnvironmentScanner - Scanner for Container Apps
 type ContainerAppsEnvironmentScanner struct {
-	config     *azqr.ScannerConfig
+	config     *scanners.ScannerConfig
 	appsClient *armappcontainers.ManagedEnvironmentsClient
 }
 
 // Init - Initializes the ContainerAppsEnvironmentScanner
-func (a *ContainerAppsEnvironmentScanner) Init(config *azqr.ScannerConfig) error {
+func (a *ContainerAppsEnvironmentScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.appsClient, err = armappcontainers.NewManagedEnvironmentsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (a *ContainerAppsEnvironmentScanner) Init(config *azqr.ScannerConfig) error
 }
 
 // Scan - Scans all Container Apps in a Resource Group
-func (a *ContainerAppsEnvironmentScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *ContainerAppsEnvironmentScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	apps, err := a.listApps()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, app := range apps {
 		rr := engine.EvaluateRecommendations(rules, app, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*app.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*app.ID),
 			ServiceName:      *app.Name,
 			Type:             *app.Type,
 			Location:         *app.Location,

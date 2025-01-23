@@ -28,6 +28,8 @@ func CreateExcelReport(data *renderers.ReportData) {
 	renderResourceTypes(f, data)
 	renderResources(f, data)
 	renderAdvisor(f, data)
+	renderDefenderRecommendations(f, data)
+	renderExcludedResources(f, data)
 	renderDefender(f, data)
 	renderCosts(f, data)
 	renderRecommendationsPivotTables(f, lastRow)

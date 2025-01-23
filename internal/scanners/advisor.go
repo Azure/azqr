@@ -4,7 +4,6 @@
 package scanners
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/advisor/armadvisor"
 	"github.com/rs/zerolog/log"
 )
@@ -16,12 +15,12 @@ type AdvisorResult struct {
 
 // AdvisorScanner - Advisor scanner
 type AdvisorScanner struct {
-	config *azqr.ScannerConfig
+	config *ScannerConfig
 	client *armadvisor.RecommendationsClient
 }
 
 // Init - Initializes the Advisor Scanner
-func (s *AdvisorScanner) Init(config *azqr.ScannerConfig) error {
+func (s *AdvisorScanner) Init(config *ScannerConfig) error {
 	s.config = config
 	var err error
 	s.client, err = armadvisor.NewRecommendationsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -32,8 +31,8 @@ func (s *AdvisorScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // ListRecommendations - Lists Azure Advisor recommendations.
-func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
-	azqr.LogSubscriptionScan(s.config.SubscriptionID, "Advisor Recommendations")
+func (s *AdvisorScanner) listRecommendations(filters *Filters) ([]AdvisorResult, error) {
+	LogSubscriptionScan(s.config.SubscriptionID, "Advisor Recommendations")
 
 	pager := s.client.NewListPager(&armadvisor.RecommendationsClientListOptions{})
 
@@ -58,9 +57,16 @@ func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
 		}
 		if recommendation.Properties.ImpactedField != nil {
 			ar.Type = *recommendation.Properties.ImpactedField
+
+			if filters.Azqr.IsResourceTypeExcluded(ar.Type) {
+				continue
+			}
 		}
 		if recommendation.Properties.ResourceMetadata != nil && recommendation.Properties.ResourceMetadata.ResourceID != nil {
 			ar.ResourceID = *recommendation.Properties.ResourceMetadata.ResourceID
+			if filters.Azqr.IsServiceExcluded(ar.ResourceID) {
+				continue
+			}
 		}
 		if recommendation.Properties.Category != nil {
 			ar.Category = string(*recommendation.Properties.Category)
@@ -81,7 +87,7 @@ func (s *AdvisorScanner) ListRecommendations() ([]AdvisorResult, error) {
 	return returnRecommendations, nil
 }
 
-func (s *AdvisorScanner) Scan(scan bool, config *azqr.ScannerConfig) []AdvisorResult {
+func (s *AdvisorScanner) Scan(scan bool, config *ScannerConfig, filters *Filters) []AdvisorResult {
 	advisorResults := []AdvisorResult{}
 	if scan {
 		err := s.Init(config)
@@ -89,9 +95,9 @@ func (s *AdvisorScanner) Scan(scan bool, config *azqr.ScannerConfig) []AdvisorRe
 			log.Fatal().Err(err).Msg("Failed to initialize Advisor Scanner")
 		}
 
-		rec, err := s.ListRecommendations()
+		rec, err := s.listRecommendations(filters)
 		if err != nil {
-			if azqr.ShouldSkipError(err) {
+			if ShouldSkipError(err) {
 				rec = []AdvisorResult{}
 			} else {
 				log.Fatal().Err(err).Msg("Failed to list Advisor recommendations")

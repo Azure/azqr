@@ -6,20 +6,20 @@ package st
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
 // GetRecommendations - Returns the rules for the StorageScanner
-func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *StorageScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"st-001": {
 			RecommendationID: "st-001",
 			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Storage should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armstorage.Account)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"st-003": {
 			RecommendationID:   "st-003",
 			ResourceType:       "Microsoft.Storage/storageAccounts",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Storage should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armstorage.Account)
 				tier := ""
 				sku := string(*i.SKU.Name)
@@ -57,10 +57,10 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"st-006": {
 			RecommendationID: "st-006",
 			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Storage Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				caf := strings.HasPrefix(*c.Name, "st")
 				return !caf, ""
@@ -70,10 +70,10 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"st-007": {
 			RecommendationID: "st-007",
 			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Storage Account should use HTTPS only",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				h := *c.Properties.EnableHTTPSTrafficOnly
 				return !h, ""
@@ -83,10 +83,10 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"st-008": {
 			RecommendationID: "st-008",
 			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Storage Account should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				return len(c.Tags) == 0, ""
 			},
@@ -95,10 +95,10 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"st-009": {
 			RecommendationID: "st-009",
 			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Storage Account should enforce TLS >= 1.2",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				return c.Properties.MinimumTLSVersion == nil || *c.Properties.MinimumTLSVersion != armstorage.MinimumTLSVersionTLS12, ""
 			},
@@ -107,10 +107,10 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"st-010": {
 			RecommendationID: "st-010",
 			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         azqr.CategoryDisasterRecovery,
+			Category:         scanners.CategoryDisasterRecovery,
 			Recommendation:   "Storage Account should have inmutable storage versioning enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armstorage.Account)
 				return c.Properties.ImmutableStorageWithVersioning == nil || c.Properties.ImmutableStorageWithVersioning.Enabled == nil || !*c.Properties.ImmutableStorageWithVersioning.Enabled, ""
 			},
@@ -119,10 +119,10 @@ func (a *StorageScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"st-011": {
 			RecommendationID: "st-011",
 			ResourceType:     "Microsoft.Storage/storageAccounts",
-			Category:         azqr.CategoryDisasterRecovery,
+			Category:         scanners.CategoryDisasterRecovery,
 			Recommendation:   "Storage Account should have soft delete enabled",
-			Impact:           azqr.ImpactMedium,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				broken := false
 				broken = scanContext.BlobServiceProperties != nil && (scanContext.BlobServiceProperties.BlobServiceProperties.BlobServiceProperties.ContainerDeleteRetentionPolicy == nil ||
 					scanContext.BlobServiceProperties.BlobServiceProperties.BlobServiceProperties.ContainerDeleteRetentionPolicy.Enabled == nil ||

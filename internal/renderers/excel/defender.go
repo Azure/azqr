@@ -21,7 +21,7 @@ func renderDefender(f *excelize.File, data *renderers.ReportData) {
 	headers := records[0]
 	createFirstRow(f, "Defender", headers)
 
-	if len(data.DefenderData) > 0 {
+	if len(data.Defender) > 0 {
 		records = records[1:]
 		currentRow := 4
 		for _, row := range records {
@@ -39,5 +39,39 @@ func renderDefender(f *excelize.File, data *renderers.ReportData) {
 		configureSheet(f, "Defender", headers, currentRow)
 	} else {
 		log.Info().Msg("Skipping Defender. No data to render")
+	}
+}
+
+// renderDefenderRecommendations renders the Defender recommendations to the Excel sheet.
+func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData) {
+	sheetName := "DefenderRecommendations"
+	_, err := f.NewSheet(sheetName)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create DefenderRecommendations sheet")
+	}
+
+	records := data.DefenderRecommendationsTable()
+	headers := records[0]
+	createFirstRow(f, sheetName, headers)
+
+	if len(data.DefenderRecommendations) > 0 {
+		records = records[1:]
+		currentRow := 4
+		for _, row := range records {
+			currentRow += 1
+			cell, err := excelize.CoordinatesToCellName(1, currentRow)
+			if err != nil {
+				log.Fatal().Err(err).Msg("Failed to get cell")
+			}
+			err = f.SetSheetRow(sheetName, cell, &row)
+			if err != nil {
+				log.Fatal().Err(err).Msg("Failed to set row")
+			}
+			setHyperLink(f, sheetName, 11, currentRow)
+		}
+
+		configureSheet(f, sheetName, headers, currentRow)
+	} else {
+		log.Info().Msg("Skipping DefenderRecommendations. No data to render")
 	}
 }

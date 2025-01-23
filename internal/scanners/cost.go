@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement"
 	"github.com/rs/zerolog/log"
@@ -25,12 +24,12 @@ type CostResultItem struct {
 
 // CostScanner - Cost scanner
 type CostScanner struct {
-	config *azqr.ScannerConfig
+	config *ScannerConfig
 	client *armcostmanagement.QueryClient
 }
 
 // Init - Initializes the Cost Scanner
-func (s *CostScanner) Init(config *azqr.ScannerConfig) error {
+func (s *CostScanner) Init(config *ScannerConfig) error {
 	s.config = config
 	var err error
 	s.client, err = armcostmanagement.NewQueryClient(config.Cred, config.ClientOptions)
@@ -42,7 +41,7 @@ func (s *CostScanner) Init(config *azqr.ScannerConfig) error {
 
 // QueryCosts - Query Costs.
 func (s *CostScanner) QueryCosts() (*CostResult, error) {
-	azqr.LogSubscriptionScan(s.config.SubscriptionID, "Costs")
+	LogSubscriptionScan(s.config.SubscriptionID, "Costs")
 	timeframeType := armcostmanagement.TimeframeTypeCustom
 	etype := armcostmanagement.ExportTypeActualCost
 	toTime := time.Now().UTC()
@@ -96,7 +95,7 @@ func (s *CostScanner) QueryCosts() (*CostResult, error) {
 	return &result, nil
 }
 
-func (s *CostScanner) Scan(scan bool, config *azqr.ScannerConfig) *CostResult {
+func (s *CostScanner) Scan(scan bool, config *ScannerConfig) *CostResult {
 	costResult := &CostResult{
 		Items: []*CostResultItem{},
 	}
@@ -106,7 +105,7 @@ func (s *CostScanner) Scan(scan bool, config *azqr.ScannerConfig) *CostResult {
 			log.Fatal().Err(err).Msg("Failed to initialize Cost Scanner")
 		}
 		costs, err := s.QueryCosts()
-		if err != nil && !azqr.ShouldSkipError(err) {
+		if err != nil && !ShouldSkipError(err) {
 			log.Fatal().Err(err).Msg("Failed to query costs")
 		}
 		costResult.From = costs.From

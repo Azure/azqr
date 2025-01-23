@@ -4,18 +4,22 @@
 package cosmos
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
 
+func init() {
+	scanners.ScannerList["cosmos"] = []scanners.IAzureScanner{&CosmosDBScanner{}}
+}
+
 // CosmosDBScanner - Scanner for CosmosDB Databases
 type CosmosDBScanner struct {
-	config          *azqr.ScannerConfig
+	config          *scanners.ScannerConfig
 	databasesClient *armcosmos.DatabaseAccountsClient
 }
 
 // Init - Initializes the CosmosDBScanner
-func (a *CosmosDBScanner) Init(config *azqr.ScannerConfig) error {
+func (a *CosmosDBScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.databasesClient, err = armcosmos.NewDatabaseAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (a *CosmosDBScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all CosmosDB Databases in a Resource Group
-func (c *CosmosDBScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *CosmosDBScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	databases, err := c.listDatabases()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, database := range databases {
 		rr := engine.EvaluateRecommendations(rules, database, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*database.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*database.ID),
 			ServiceName:      *database.Name,
 			Type:             *database.Type,
 			Location:         *database.Location,
