@@ -4,18 +4,22 @@
 package log
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights/v2"
 )
 
+func init() {
+	scanners.ScannerList["log"] = []scanners.IAzureScanner{&LogAnalyticsScanner{}}
+}
+
 // LogAnalyticsScanner - Scanner for Log Analytics workspace
 type LogAnalyticsScanner struct {
-	config *azqr.ScannerConfig
+	config *scanners.ScannerConfig
 	client *armoperationalinsights.WorkspacesClient
 }
 
 // Init - Initializes the Log Analytics workspace Scanner
-func (a *LogAnalyticsScanner) Init(config *azqr.ScannerConfig) error {
+func (a *LogAnalyticsScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armoperationalinsights.NewWorkspacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (a *LogAnalyticsScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Log Analytics workspace in a Resource Group
-func (c *LogAnalyticsScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *LogAnalyticsScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	svcs, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, w := range svcs {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,

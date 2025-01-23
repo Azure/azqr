@@ -4,18 +4,22 @@
 package lb
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
+func init() {
+	scanners.ScannerList["lb"] = []scanners.IAzureScanner{&LoadBalancerScanner{}}
+}
+
 // LoadBalancerScanner - Scanner for Loadbalancer
 type LoadBalancerScanner struct {
-	config *azqr.ScannerConfig
+	config *scanners.ScannerConfig
 	client *armnetwork.LoadBalancersClient
 }
 
 // Init - Initializes the LoadBalancerScanner
-func (c *LoadBalancerScanner) Init(config *azqr.ScannerConfig) error {
+func (c *LoadBalancerScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armnetwork.NewLoadBalancersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (c *LoadBalancerScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Loadbalancer in a Resource Group
-func (c *LoadBalancerScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *LoadBalancerScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	lbs, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, w := range lbs {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*w.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*w.ID),
 			ServiceName:      *w.Name,
 			Type:             *w.Type,
 			Location:         *w.Location,

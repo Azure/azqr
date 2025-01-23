@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard"
 )
@@ -16,7 +16,7 @@ func TestManagedGrafanaScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -36,7 +36,7 @@ func TestManagedGrafanaScanner_Rules(t *testing.T) {
 						ZoneRedundancy: to.Ptr(armdashboard.ZoneRedundancyEnabled),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -51,7 +51,7 @@ func TestManagedGrafanaScanner_Rules(t *testing.T) {
 						ZoneRedundancy: to.Ptr(armdashboard.ZoneRedundancyDisabled),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -66,7 +66,7 @@ func TestManagedGrafanaScanner_Rules(t *testing.T) {
 						Name: to.Ptr("Standard"),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -81,7 +81,7 @@ func TestManagedGrafanaScanner_Rules(t *testing.T) {
 						Name: to.Ptr("Basic"),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -95,7 +95,7 @@ func TestManagedGrafanaScanner_Rules(t *testing.T) {
 				target: &armdashboard.ManagedGrafana{
 					Name: to.Ptr("amg-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -110,7 +110,7 @@ func TestManagedGrafanaScanner_Rules(t *testing.T) {
 						PublicNetworkAccess: to.Ptr(armdashboard.PublicNetworkAccessEnabled),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -125,7 +125,7 @@ func TestManagedGrafanaScanner_Rules(t *testing.T) {
 						PublicNetworkAccess: to.Ptr(armdashboard.PublicNetworkAccessDisabled),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,

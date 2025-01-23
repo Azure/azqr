@@ -4,18 +4,22 @@
 package evgd
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
 )
 
+func init() {
+	scanners.ScannerList["evgd"] = []scanners.IAzureScanner{&EventGridScanner{}}
+}
+
 // EventGridScanner - Scanner for EventGrid Domains
 type EventGridScanner struct {
-	config        *azqr.ScannerConfig
+	config        *scanners.ScannerConfig
 	domainsClient *armeventgrid.DomainsClient
 }
 
 // Init - Initializes the EventGridScanner
-func (a *EventGridScanner) Init(config *azqr.ScannerConfig) error {
+func (a *EventGridScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.domainsClient, err = armeventgrid.NewDomainsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (a *EventGridScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all EventGrid Domains in a Resource Group
-func (a *EventGridScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *EventGridScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	domains, err := a.listDomain()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, d := range domains {
 		rr := engine.EvaluateRecommendations(rules, d, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*d.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*d.ID),
 			ServiceName:      *d.Name,
 			Type:             *d.Type,
 			Location:         *d.Location,

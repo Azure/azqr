@@ -6,20 +6,20 @@ package ci
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
 )
 
 // GetRules - Returns the rules for the ContainerInstanceScanner
-func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *ContainerInstanceScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"ci-002": {
 			RecommendationID: "ci-002",
 			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
-			Category:         azqr.CategoryHighAvailability,
+			Category:         scanners.CategoryHighAvailability,
 			Recommendation:   "ContainerInstance should have availability zones enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				zones := len(i.Zones) > 0
 				return !zones, ""
@@ -29,11 +29,11 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"ci-003": {
 			RecommendationID:   "ci-003",
 			ResourceType:       "Microsoft.ContainerInstance/containerGroups",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "ContainerInstance should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/container-instances/v1_0/index.html",
@@ -41,10 +41,10 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"ci-004": {
 			RecommendationID: "ci-004",
 			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "ContainerInstance should use private IP addresses",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerinstance.ContainerGroup)
 				pe := false
 				if i.Properties.IPAddress != nil && i.Properties.IPAddress.Type != nil {
@@ -56,10 +56,10 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"ci-006": {
 			RecommendationID: "ci-006",
 			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "ContainerInstance Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerinstance.ContainerGroup)
 				caf := strings.HasPrefix(*c.Name, "ci")
 				return !caf, ""
@@ -69,10 +69,10 @@ func (a *ContainerInstanceScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"ci-007": {
 			RecommendationID: "ci-007",
 			ResourceType:     "Microsoft.ContainerInstance/containerGroups",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "ContainerInstance should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerinstance.ContainerGroup)
 				return len(c.Tags) == 0, ""
 			},

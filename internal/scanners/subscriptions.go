@@ -3,7 +3,6 @@ package scanners
 import (
 	"context"
 
-	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -13,7 +12,7 @@ import (
 
 type SubcriptionScanner struct{}
 
-func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, filters *azqr.Filters, options *arm.ClientOptions) map[string]string {
+func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, filters *Filters, options *arm.ClientOptions) map[string]string {
 	client, err := armsubscription.NewSubscriptionsClient(cred, options)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create subscriptions client")

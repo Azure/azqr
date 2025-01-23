@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
@@ -16,7 +16,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				target: &armservicebus.SBNamespace{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -54,7 +54,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armservicebus.SKUNameStandard),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +70,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						Name: to.Ptr(armservicebus.SKUNamePremium),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -90,7 +90,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -104,7 +104,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 				target: &armservicebus.SBNamespace{
 					Name: to.Ptr("sb-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -120,7 +120,7 @@ func TestServiceBusScanner_Rules(t *testing.T) {
 						DisableLocalAuth: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,

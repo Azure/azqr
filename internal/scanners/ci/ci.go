@@ -4,18 +4,22 @@
 package ci
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerinstance/armcontainerinstance"
 )
 
+func init() {
+	scanners.ScannerList["ci"] = []scanners.IAzureScanner{&ContainerInstanceScanner{}}
+}
+
 // ContainerInstanceScanner - Scanner for Container Instances
 type ContainerInstanceScanner struct {
-	config          *azqr.ScannerConfig
+	config          *scanners.ScannerConfig
 	instancesClient *armcontainerinstance.ContainerGroupsClient
 }
 
 // Init - Initializes the ContainerInstanceScanner
-func (c *ContainerInstanceScanner) Init(config *azqr.ScannerConfig) error {
+func (c *ContainerInstanceScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.instancesClient, err = armcontainerinstance.NewContainerGroupsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (c *ContainerInstanceScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Container Instances in a Resource Group
-func (c *ContainerInstanceScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *ContainerInstanceScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	instances, err := c.listInstances()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, instance := range instances {
 		rr := engine.EvaluateRecommendations(rules, instance, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*instance.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*instance.ID),
 			ServiceName:      *instance.Name,
 			Type:             *instance.Type,
 			Location:         *instance.Location,

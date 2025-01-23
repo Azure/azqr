@@ -6,21 +6,21 @@ package psql
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
 )
 
 // GetRecommendations - Returns the rules for the PostgreScanner
-func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *PostgreScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"psql-001": {
 			RecommendationID: "psql-001",
 			ResourceType:     "Microsoft.DBforPostgreSQL/servers",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "PostgreSQL should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armpostgresql.Server)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -30,11 +30,11 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"psql-003": {
 			RecommendationID:   "psql-003",
 			ResourceType:       "Microsoft.DBforPostgreSQL/servers",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "PostgreSQL should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/postgresql/",
@@ -42,10 +42,10 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"psql-004": {
 			RecommendationID: "psql-004",
 			ResourceType:     "Microsoft.DBforPostgreSQL/servers",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "PostgreSQL should have private endpoints enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresql.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -55,10 +55,10 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"psql-006": {
 			RecommendationID: "psql-006",
 			ResourceType:     "Microsoft.DBforPostgreSQL/servers",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "PostgreSQL Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				caf := strings.HasPrefix(*c.Name, "psql")
 				return !caf, ""
@@ -68,10 +68,10 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"psql-007": {
 			RecommendationID: "psql-007",
 			ResourceType:     "Microsoft.DBforPostgreSQL/servers",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "PostgreSQL should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				return len(c.Tags) == 0, ""
 			},
@@ -80,10 +80,10 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"psql-008": {
 			RecommendationID: "psql-008",
 			ResourceType:     "Microsoft.DBforPostgreSQL/servers",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "PostgreSQL should enforce SSL",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				return c.Properties.SSLEnforcement == nil || *c.Properties.SSLEnforcement == armpostgresql.SSLEnforcementEnumDisabled, ""
 			},
@@ -92,10 +92,10 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 		"psql-009": {
 			RecommendationID: "psql-009",
 			ResourceType:     "Microsoft.DBforPostgreSQL/servers",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "PostgreSQL should enforce TLS >= 1.2",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresql.Server)
 				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != armpostgresql.MinimalTLSVersionEnumTLS12, ""
 			},
@@ -105,15 +105,15 @@ func (a *PostgreScanner) GetRecommendations() map[string]azqr.AzqrRecommendation
 }
 
 // GetRecommendations - Returns the rules for the PostgreFlexibleScanner
-func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *PostgreFlexibleScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"psqlf-001": {
 			RecommendationID: "psqlf-001",
 			ResourceType:     "Microsoft.DBforPostgreSQL/flexibleServers",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "PostgreSQL should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armpostgresqlflexibleservers.Server)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -123,11 +123,11 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 		"psqlf-003": {
 			RecommendationID:   "psqlf-003",
 			ResourceType:       "Microsoft.DBforPostgreSQL/flexibleServers",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "PostgreSQL should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresqlflexibleservers.Server)
 				sla := "99.9%"
 				if i.Properties.HighAvailability != nil && *i.Properties.HighAvailability.Mode == armpostgresqlflexibleservers.HighAvailabilityModeZoneRedundant {
@@ -144,10 +144,10 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 		"psqlf-004": {
 			RecommendationID: "psqlf-004",
 			ResourceType:     "Microsoft.DBforPostgreSQL/flexibleServers",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "PostgreSQL should have private access enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armpostgresqlflexibleservers.Server)
 				pe := *i.Properties.Network.PublicNetworkAccess == armpostgresqlflexibleservers.ServerPublicNetworkAccessStateDisabled
 				return !pe, ""
@@ -157,10 +157,10 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 		"psqlf-006": {
 			RecommendationID: "psqlf-006",
 			ResourceType:     "Microsoft.DBforPostgreSQL/flexibleServers",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "PostgreSQL Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresqlflexibleservers.Server)
 				caf := strings.HasPrefix(*c.Name, "psql")
 				return !caf, ""
@@ -170,10 +170,10 @@ func (a *PostgreFlexibleScanner) GetRecommendations() map[string]azqr.AzqrRecomm
 		"psqlf-007": {
 			RecommendationID: "psqlf-007",
 			ResourceType:     "Microsoft.DBforPostgreSQL/flexibleServers",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "PostgreSQL should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armpostgresqlflexibleservers.Server)
 				return len(c.Tags) == 0, ""
 			},

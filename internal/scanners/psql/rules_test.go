@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
@@ -17,7 +17,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -35,7 +35,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				target: &armpostgresql.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -51,7 +51,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "psql-003",
 				target:      &armpostgresql.Server{},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -71,7 +71,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -85,7 +85,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 				target: &armpostgresql.Server{
 					Name: to.Ptr("psql-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -101,7 +101,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						SSLEnforcement: to.Ptr(armpostgresql.SSLEnforcementEnumEnabled),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -117,7 +117,7 @@ func TestPostgreScanner_Rules(t *testing.T) {
 						MinimalTLSVersion: to.Ptr(armpostgresql.MinimalTLSVersionEnumTLS12),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -145,7 +145,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -163,7 +163,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -181,7 +181,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Properties: &armpostgresqlflexibleservers.ServerProperties{},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -201,7 +201,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.Ptr("1"),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -221,7 +221,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						AvailabilityZone: to.Ptr("1"),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -239,7 +239,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -253,7 +253,7 @@ func TestPostgreFlexibleScanner_Rules(t *testing.T) {
 				target: &armpostgresqlflexibleservers.Server{
 					Name: to.Ptr("psql-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,

@@ -4,18 +4,22 @@
 package dbw
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
 
+func init() {
+	scanners.ScannerList["dbw"] = []scanners.IAzureScanner{&DatabricksScanner{}}
+}
+
 // DatabricksScanner - Scanner for Azure Databricks
 type DatabricksScanner struct {
-	config *azqr.ScannerConfig
+	config *scanners.ScannerConfig
 	client *armdatabricks.WorkspacesClient
 }
 
 // Init - Initializes the DatabricksScanner
-func (c *DatabricksScanner) Init(config *azqr.ScannerConfig) error {
+func (c *DatabricksScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.client, err = armdatabricks.NewWorkspacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (c *DatabricksScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Azure Databricks in a Resource Group
-func (c *DatabricksScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *DatabricksScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	workspaces, err := c.listWorkspaces()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, ws := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, ws, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*ws.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*ws.ID),
 			ServiceName:      *ws.Name,
 			Type:             *ws.Type,
 			Location:         *ws.Location,

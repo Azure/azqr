@@ -6,20 +6,20 @@ package evgd
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
 )
 
 // GetRecommendations - Returns the rules for the EventGridScanner
-func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *EventGridScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"evgd-001": {
 			RecommendationID: "evgd-001",
 			ResourceType:     "Microsoft.EventGrid/domains",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Event Grid Domain should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armeventgrid.Domain)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"evgd-003": {
 			RecommendationID:   "evgd-003",
 			ResourceType:       "Microsoft.EventGrid/domains",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Event Grid Domain should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/event-grid/",
@@ -41,10 +41,10 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"evgd-004": {
 			RecommendationID: "evgd-004",
 			ResourceType:     "Microsoft.EventGrid/domains",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Event Grid Domain should have private endpoints enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armeventgrid.Domain)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -54,10 +54,10 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"evgd-006": {
 			RecommendationID: "evgd-006",
 			ResourceType:     "Microsoft.EventGrid/domains",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Event Grid Domain Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventgrid.Domain)
 				caf := strings.HasPrefix(*c.Name, "evgd")
 				return !caf, ""
@@ -67,10 +67,10 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"evgd-007": {
 			RecommendationID: "evgd-007",
 			ResourceType:     "Microsoft.EventGrid/domains",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Event Grid Domain should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventgrid.Domain)
 				return len(c.Tags) == 0, ""
 			},
@@ -79,10 +79,10 @@ func (a *EventGridScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"evgd-008": {
 			RecommendationID: "evgd-008",
 			ResourceType:     "Microsoft.EventGrid/domains",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Event Grid Domain should have local authentication disabled",
-			Impact:           azqr.ImpactMedium,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armeventgrid.Domain)
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""

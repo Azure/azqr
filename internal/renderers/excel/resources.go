@@ -12,17 +12,24 @@ import (
 )
 
 func renderResources(f *excelize.File, data *renderers.ReportData) {
-	sheetName := "Inventory"
+	createResourcesSheet(f, "Inventory", data.ResourcesTable())
+}
+
+func renderExcludedResources(f *excelize.File, data *renderers.ReportData) {
+	createResourcesSheet(f, "OutOfScope", data.ExcludedResourcesTable())
+}
+
+func createResourcesSheet(f *excelize.File, sheetName string, table [][]string) {
 	_, err := f.NewSheet(sheetName)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create Inventory sheet")
+		log.Fatal().Err(err).Msgf("Failed to create %s sheet", sheetName)
 	}
 
-	records := data.ResourcesTable()
+	records := table
 	headers := records[0]
 	createFirstRow(f, sheetName, headers)
 
-	if len(data.Resources) > 0 {
+	if len(table) > 0 {
 		records = records[1:]
 		currentRow := 4
 		for _, row := range records {

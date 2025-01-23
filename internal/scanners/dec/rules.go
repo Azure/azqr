@@ -6,20 +6,20 @@ package dec
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto"
 )
 
 // GetRules - Returns the rules for the DataExplorerScanner
-func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *DataExplorerScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"dec-001": {
 			RecommendationID: "dec-001",
 			ResourceType:     "Microsoft.Kusto/clusters",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Azure Data Explorer should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armkusto.Cluster)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 		"dec-002": {
 			RecommendationID:   "dec-002",
 			ResourceType:       "Microsoft.Kusto/clusters",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Azure Data Explorer SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				sla := "99.9%"
 				if c.SKU != nil && c.SKU.Name != nil && strings.HasPrefix(string(*c.SKU.Name), "Dev") {
@@ -47,10 +47,10 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 		"dec-003": {
 			RecommendationID: "dec-003",
 			ResourceType:     "Microsoft.Kusto/clusters",
-			Category:         azqr.CategoryHighAvailability,
+			Category:         scanners.CategoryHighAvailability,
 			Recommendation:   "Azure Data Explorer Production Cluster should not use Dev SKU",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				broken := false
 				if c.SKU != nil && c.SKU.Name != nil {
@@ -64,10 +64,10 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 		"dec-004": {
 			RecommendationID: "dec-004",
 			ResourceType:     "Microsoft.Kusto/clusters",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Azure Data Explorer should have private endpoints enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armkusto.Cluster)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -77,10 +77,10 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 		"dec-006": {
 			RecommendationID: "dec-004",
 			ResourceType:     "Microsoft.Kusto/clusters",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Azure Data Explorer Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				caf := strings.HasPrefix(*c.Name, "dec")
 				return !caf, ""
@@ -90,10 +90,10 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 		"dec-007": {
 			RecommendationID: "dec-005",
 			ResourceType:     "Microsoft.Kusto/clusters",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Azure Data Explorer should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				return len(c.Tags) == 0, ""
 			},
@@ -102,10 +102,10 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 		"dec-008": {
 			RecommendationID: "dec-008",
 			ResourceType:     "Microsoft.Kusto/clusters",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Azure Data Explorer should use Disk Encryption",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				return c.Properties.EnableDiskEncryption == nil || !*c.Properties.EnableDiskEncryption, ""
 			},
@@ -114,10 +114,10 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]azqr.AzqrRecommend
 		"dec-009": {
 			RecommendationID: "dec-009",
 			ResourceType:     "Microsoft.Kusto/clusters",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Azure Data Explorer should use Managed Identities",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armkusto.Cluster)
 				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armkusto.IdentityTypeNone, ""
 			},

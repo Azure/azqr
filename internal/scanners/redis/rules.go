@@ -6,20 +6,20 @@ package redis
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
 // GetRecommendations - Returns the rules for the RedisScanner
-func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *RedisScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"redis-001": {
 			RecommendationID: "redis-001",
 			ResourceType:     "Microsoft.Cache/Redis",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Redis should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armredis.ResourceInfo)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"redis-003": {
 			RecommendationID:   "redis-003",
 			ResourceType:       "Microsoft.Cache/Redis",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Redis should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
@@ -41,10 +41,10 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"redis-006": {
 			RecommendationID: "redis-006",
 			ResourceType:     "Microsoft.Cache/Redis",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Redis Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armredis.ResourceInfo)
 				caf := strings.HasPrefix(*c.Name, "redis")
 				return !caf, ""
@@ -54,10 +54,10 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"redis-007": {
 			RecommendationID: "redis-007",
 			ResourceType:     "Microsoft.Cache/Redis",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Redis should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armredis.ResourceInfo)
 				return len(c.Tags) == 0, ""
 			},
@@ -66,10 +66,10 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"redis-008": {
 			RecommendationID: "redis-008",
 			ResourceType:     "Microsoft.Cache/Redis",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Redis should not enable non SSL ports",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armredis.ResourceInfo)
 				return c.Properties.EnableNonSSLPort != nil && *c.Properties.EnableNonSSLPort, ""
 			},
@@ -78,10 +78,10 @@ func (a *RedisScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"redis-009": {
 			RecommendationID: "redis-009",
 			ResourceType:     "Microsoft.Cache/Redis",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Redis should enforce TLS >= 1.2",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armredis.ResourceInfo)
 				return c.Properties.MinimumTLSVersion == nil || *c.Properties.MinimumTLSVersion != armredis.TLSVersionOne2, ""
 			},

@@ -52,7 +52,7 @@ func writeData(data []interface{}, fileName, extension string) {
 func getResources(data *renderers.ReportData) []renderers.ResourceResult {
 	rows := []renderers.ResourceResult{}
 
-	for _, r := range data.AprlData {
+	for _, r := range data.Aprl {
 		row := renderers.ResourceResult{
 			ValidationAction: "Azure Resource Graph",
 			RecommendationId: r.RecommendationID,
@@ -90,6 +90,6 @@ func getResources(data *renderers.ReportData) []renderers.ResourceResult {
 	// 		}
 	// 	}
 	// }
-	
+
 	return rows
 }

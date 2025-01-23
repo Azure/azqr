@@ -4,18 +4,22 @@
 package redis
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
+func init() {
+	scanners.ScannerList["redis"] = []scanners.IAzureScanner{&RedisScanner{}}
+}
+
 // RedisScanner - Scanner for Redis
 type RedisScanner struct {
-	config      *azqr.ScannerConfig
+	config      *scanners.ScannerConfig
 	redisClient *armredis.Client
 }
 
 // Init - Initializes the RedisScanner
-func (c *RedisScanner) Init(config *azqr.ScannerConfig) error {
+func (c *RedisScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (c *RedisScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Redis in a Resource Group
-func (c *RedisScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *RedisScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	redis, err := c.listRedis()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, redis := range redis {
 		rr := engine.EvaluateRecommendations(rules, redis, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*redis.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*redis.ID),
 			ServiceName:      *redis.Name,
 			Type:             *redis.Type,
 			Location:         *redis.Location,

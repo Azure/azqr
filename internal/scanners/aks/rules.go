@@ -6,21 +6,21 @@ package aks
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
 // GetRecommendations - Returns the rules for the AKSScanner
-func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *AKSScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"aks-001": {
 			RecommendationID: "aks-001",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "AKS Cluster should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcontainerservice.ManagedCluster)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -30,11 +30,11 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"aks-003": {
 			RecommendationID:   "aks-003",
 			ResourceType:       "Microsoft.ContainerService/managedClusters",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "AKS Cluster should have an SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 
 				zones := true
@@ -63,10 +63,10 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"aks-004": {
 			RecommendationID: "aks-004",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "AKS Cluster should be private",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				pe := c.Properties.APIServerAccessProfile != nil && c.Properties.APIServerAccessProfile.EnablePrivateCluster != nil && *c.Properties.APIServerAccessProfile.EnablePrivateCluster
 				return !pe, ""
@@ -76,10 +76,10 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"aks-006": {
 			RecommendationID: "aks-006",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "AKS Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				caf := strings.HasPrefix(*c.Name, "aks")
 				return !caf, ""
@@ -89,10 +89,10 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"aks-007": {
 			RecommendationID: "aks-007",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "AKS should integrate authentication with AAD (Managed)",
-			Impact:           azqr.ImpactMedium,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				aad := c.Properties.AADProfile != nil && c.Properties.AADProfile.Managed != nil && *c.Properties.AADProfile.Managed
 				return !aad, ""
@@ -102,10 +102,10 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"aks-008": {
 			RecommendationID: "aks-008",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "AKS should be RBAC enabled.",
-			Impact:           azqr.ImpactMedium,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				rbac := *c.Properties.EnableRBAC
 				return !rbac, ""
@@ -115,10 +115,10 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"aks-010": {
 			RecommendationID: "aks-010",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "AKS should have httpApplicationRouting disabled",
-			Impact:           azqr.ImpactMedium,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				p, exists := c.Properties.AddonProfiles["httpApplicationRouting"]
 				broken := exists && *p.Enabled
@@ -129,10 +129,10 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"aks-012": {
 			RecommendationID: "aks-012",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "AKS should have outbound type set to user defined routing",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				broken := c.Properties.NetworkProfile.OutboundType == nil || *c.Properties.NetworkProfile.OutboundType != armcontainerservice.OutboundTypeUserDefinedRouting
 				return broken, ""
@@ -142,10 +142,10 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"aks-015": {
 			RecommendationID: "aks-015",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "AKS should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				return len(c.Tags) == 0, ""
 			},
@@ -154,10 +154,10 @@ func (a *AKSScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 		"aks-016": {
 			RecommendationID: "aks-016",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         azqr.CategoryScalability,
+			Category:         scanners.CategoryScalability,
 			Recommendation:   "AKS Node Pools should have MaxSurge set",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerservice.ManagedCluster)
 				defaultMaxSurge := false
 				for _, profile := range c.Properties.AgentPoolProfiles {

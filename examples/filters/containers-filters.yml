@@ -1,0 +1,9 @@
+# Including only Azure Kubernetes Service (aks), Container Apps (ca), Container App Environments (cae), Container Instances (ci) and Container Registry (cr) resources.
+azqr:
+  include:
+    resourceTypes:
+      - aks
+      - ca
+      - cae
+      - ci
+      - cr

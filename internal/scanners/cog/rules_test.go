@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices"
 )
@@ -16,7 +16,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 				target: &armcognitiveservices.Account{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -50,7 +50,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			fields: fields{
 				rule:        "cog-003",
 				target:      &armcognitiveservices.Account{},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -70,7 +70,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 						},
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -85,7 +85,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("oai-test"),
 					Kind: to.Ptr("OpenAi"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -100,7 +100,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("cm-test"),
 					Kind: to.Ptr("ContentModerator"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -115,7 +115,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("cs-test"),
 					Kind: to.Ptr("ContentSafety"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -130,7 +130,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("cstv-test"),
 					Kind: to.Ptr("CustomVision.Prediction"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -145,7 +145,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("cstvt-test"),
 					Kind: to.Ptr("CustomVision.Training"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -160,7 +160,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("di-test"),
 					Kind: to.Ptr("FormRecognizer"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -175,7 +175,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("face-test"),
 					Kind: to.Ptr("Face"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -190,7 +190,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("hi-test"),
 					Kind: to.Ptr("HealthInsights"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -205,7 +205,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("ir-test"),
 					Kind: to.Ptr("ImmersiveReader"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -220,7 +220,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("lang-test"),
 					Kind: to.Ptr("TextAnalytics"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -235,7 +235,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("spch-test"),
 					Kind: to.Ptr("SpeechServices"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -250,7 +250,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("trsl-test"),
 					Kind: to.Ptr("TextTranslation"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -265,7 +265,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("cv-test"),
 					Kind: to.Ptr("ComputerVision"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -280,7 +280,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 					Name: to.Ptr("cog-test"),
 					Kind: to.Ptr("cog"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -294,7 +294,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 				target: &armcognitiveservices.Account{
 					Properties: &armcognitiveservices.AccountProperties{},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -310,7 +310,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 						DisableLocalAuth: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,

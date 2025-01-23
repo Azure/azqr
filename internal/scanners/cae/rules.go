@@ -6,20 +6,20 @@ package cae
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
 // GetRecommendations - Returns the rules for the ContainerAppsEnvironmentScanner
-func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"cae-001": {
 			RecommendationID: "cae-001",
 			ResourceType:     "Microsoft.App/managedenvironments",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Container Apps Environment should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armappcontainers.ManagedEnvironment)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 		"cae-003": {
 			RecommendationID:   "cae-003",
 			ResourceType:       "Microsoft.App/managedenvironments",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Container Apps Environment should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
 			LearnMoreUrl: "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
@@ -41,10 +41,10 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 		"cae-004": {
 			RecommendationID: "cae-004",
 			ResourceType:     "Microsoft.App/managedenvironments",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Container Apps Environment should have private endpoints enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				app := target.(*armappcontainers.ManagedEnvironment)
 				pe := app.Properties.VnetConfiguration != nil && *app.Properties.VnetConfiguration.Internal
 				return !pe, ""
@@ -54,10 +54,10 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 		"cae-006": {
 			RecommendationID: "cae-006",
 			ResourceType:     "Microsoft.App/managedenvironments",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Container Apps Environment Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ManagedEnvironment)
 				caf := strings.HasPrefix(*c.Name, "cae")
 				return !caf, ""
@@ -67,10 +67,10 @@ func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]azqr.A
 		"cae-007": {
 			RecommendationID: "cae-007",
 			ResourceType:     "Microsoft.App/managedenvironments",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Container Apps Environment should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ManagedEnvironment)
 				return len(c.Tags) == 0, ""
 			},

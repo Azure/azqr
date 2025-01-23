@@ -19,12 +19,12 @@ func renderRecommendations(f *excelize.File, data *renderers.ReportData) int {
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to create %s sheet", sheetName)
 	}
-		
+
 	records := data.RecommendationsTable()
 	headers := records[0]
 	createFirstRow(f, sheetName, headers)
 
-	if len(data.Recomendations) > 0 {
+	if len(data.Recommendations) > 0 {
 		records = records[1:]
 		currentRow := 4
 		for _, row := range records {
