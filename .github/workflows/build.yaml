@@ -108,7 +108,7 @@ jobs:
 
       - name: Codecov
         if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
-        uses: codecov/codecov-action@5a605bd92782ce0810fa3b8acc235c921b497052 # v5.2.0
+        uses: codecov/codecov-action@13ce06bfc6bbe3ecf90edbbf1bc32fe5978ca1d3 # v5.3.1
 
       - name: Calculate Version
         run: |
