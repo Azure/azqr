@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 package json
 
 import (
@@ -13,23 +10,17 @@ import (
 )
 
 func CreateJsonReport(data *renderers.ReportData) {
-	results := []interface{}{}
-
-	resources := renderers.ResourceResults{
-		Resource: getResources(data),
-	}
-	results = append(results, resources)
-
-	types := renderers.ResourceTypeCountResults{
-		ResourceType: data.ResourceTypeCount,
-	}
-	results = append(results, types)
-
-	writeData(results, data.OutputFileName, "json")
+	writeData(data.RecommendationsTable(), data.OutputFileName, "recommendations")
+	writeData(data.ImpactedTable(), data.OutputFileName, "impacted")
+	writeData(data.ResourceTypesTable(), data.OutputFileName, "resourceType")
+	writeData(data.ResourcesTable(), data.OutputFileName, "inventory")
+	writeData(data.DefenderTable(), data.OutputFileName, "defender")
+	writeData(data.AdvisorTable(), data.OutputFileName, "advisor")
+	writeData(data.CostTable(), data.OutputFileName, "costs")
 }
 
-func writeData(data []interface{}, fileName, extension string) {
-	filename := fmt.Sprintf("%s.%s", fileName, extension)
+func writeData(data [][]string, fileName, extension string) {
+	filename := fmt.Sprintf("%s.%s.json", fileName, extension)
 	log.Info().Msgf("Generating Report: %s", filename)
 
 	f, err := os.Create(filename)
@@ -38,7 +29,9 @@ func writeData(data []interface{}, fileName, extension string) {
 	}
 	defer f.Close()
 
-	js, err := json.MarshalIndent(data, "", "\t")
+	jsonData := convertToJSON(data)
+
+	js, err := json.MarshalIndent(jsonData, "", "\t")
 	if err != nil {
 		log.Fatal().Err(err).Msg("error marshaling data:")
 	}
@@ -49,47 +42,17 @@ func writeData(data []interface{}, fileName, extension string) {
 	}
 }
 
-func getResources(data *renderers.ReportData) []renderers.ResourceResult {
-	rows := []renderers.ResourceResult{}
+func convertToJSON(data [][]string) []map[string]string {
+	var result []map[string]string
+	headers := data[0]
 
-	for _, r := range data.AprlData {
-		row := renderers.ResourceResult{
-			ValidationAction: "Azure Resource Graph",
-			RecommendationId: r.RecommendationID,
-			Name:             r.Name,
-			Id:               r.ResourceID,
-			Param1:           r.Param1,
-			Param2:           r.Param2,
-			Param3:           r.Param3,
-			Param4:           r.Param4,
-			Param5:           r.Param5,
-			CheckName:        "",
-			Selector:         r.Source,
+	for _, row := range data[1:] {
+		item := make(map[string]string)
+		for i, value := range row {
+			item[headers[i]] = value
 		}
-		rows = append(rows, row)
+		result = append(result, item)
 	}
 
-	// Not sure if we can upload AZQR results
-	// for _, d := range data.AzqrData {
-	// 	for _, r := range d.Recommendations {
-	// 		if r.NotCompliant {
-	// 			row := renderers.ResourceResult{
-	// 				ValidationAction: "Azure Resource Manager",
-	// 				RecommendationId: r.RecommendationID,
-	// 				Name:             d.ServiceName,
-	// 				Id:               renderers.MaskSubscriptionIDInResourceID(d.ResourceID(), data.Mask),
-	// 				Param1:           r.Result,
-	// 				Param2:           "",
-	// 				Param3:           "",
-	// 				Param4:           "",
-	// 				Param5:           "",
-	// 				CheckName:        "",
-	// 				Selector:         "AZQR",
-	// 			}
-	// 			rows = append(rows, row)
-	// 		}
-	// 	}
-	// }
-	
-	return rows
+	return result
 }
