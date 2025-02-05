@@ -67,6 +67,7 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 						SkuTier:        skuTier,
 						Kind:           kind})
 
+				continue
 			}
 
 			resources = append(
