@@ -74,7 +74,7 @@ func (rd *ReportData) ExcludedResourcesTable() [][]string {
 }
 
 func (rd *ReportData) ImpactedTable() [][]string {
-	headers := []string{"Validated Using", "Source", "Category", "Impact", "Resource Type", "Recommendation", "Recommendation Id", "Subscription Id", "Subscription Name", "Resource Group", "Name", "Id", "Param1", "Param2", "Param3", "Param4", "Param5", "Learn"}
+	headers := []string{"Validated Using", "Source", "Category", "Impact", "Resource Type", "Recommendation", "Recommendation Id", "Subscription Id", "Subscription Name", "Resource Group", "Resource Name", "Resource Id", "Param1", "Param2", "Param3", "Param4", "Param5", "Learn"}
 
 	rows := [][]string{}
 	for _, r := range rd.Aprl {
@@ -134,7 +134,7 @@ func (rd *ReportData) ImpactedTable() [][]string {
 }
 
 func (rd *ReportData) CostTable() [][]string {
-	headers := []string{"From", "To", "Subscription", "Subscription Name", "ServiceName", "Value", "Currency"}
+	headers := []string{"From", "To", "Subscription Id", "Subscription Name", "Service Name", "Value", "Currency"}
 
 	rows := [][]string{}
 	for _, r := range rd.Cost.Items {
@@ -155,7 +155,7 @@ func (rd *ReportData) CostTable() [][]string {
 }
 
 func (rd *ReportData) DefenderTable() [][]string {
-	headers := []string{"Subscription", "Subscription Name", "Name", "Tier", "Deprecated"}
+	headers := []string{"Subscription Id", "Subscription Name", "Name", "Tier", "Deprecated"}
 	rows := [][]string{}
 	for _, d := range rd.Defender {
 		row := []string{
@@ -173,7 +173,7 @@ func (rd *ReportData) DefenderTable() [][]string {
 }
 
 func (rd *ReportData) AdvisorTable() [][]string {
-	headers := []string{"Subscription", "Subscription Name", "Type", "Name", "Category", "Impact", "Description", "ResourceID", "RecommendationID"}
+	headers := []string{"Subscription Id", "Subscription Name", "Resource Type", "Resource Name", "Category", "Impact", "Description", "Resource Id", "Recommendation Id"}
 	rows := [][]string{}
 	for _, d := range rd.Advisor {
 		row := []string{
@@ -258,7 +258,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 }
 
 func (rd *ReportData) ResourceTypesTable() [][]string {
-	headers := []string{"Subscription", "Resource Type", "Number of Resources", "Available in APRL?", "Custom1", "Custom2", "Custom3"}
+	headers := []string{"Subscription Name", "Resource Type", "Number of Resources", "Available in APRL?", "Custom1", "Custom2", "Custom3"}
 	rows := [][]string{}
 	for _, r := range rd.ResourceTypeCount {
 		row := []string{
@@ -278,7 +278,7 @@ func (rd *ReportData) ResourceTypesTable() [][]string {
 }
 
 func (rd *ReportData) DefenderRecommendationsTable() [][]string {
-	headers := []string{"SubscriptionId", "SubscriptionName", "ResourceGroupName", "ResourceType", "ResourceName", "Category", "RecommendationSeverity", "RecommendationName", "ActionDescription", "RemediationDescription", "AzPortalLink", "ResourceId"}
+	headers := []string{"Subscription Id", "Subscription Name", "Resource Group", "Resource Type", "Resource Name", "Category", "Recommendation Severity", "Recommendation Name", "Action Description", "Remediation Description", "AzPortal Link", "Resource Id"}
 	rows := [][]string{}
 	for _, d := range rd.DefenderRecommendations {
 		row := []string{
@@ -357,7 +357,7 @@ func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
 }
 
 func (rd *ReportData) resourcesTable(resources []*scanners.Resource) [][]string {
-	headers := []string{"Subscription ID", "Resource Group", "Location", "Type", "Name", "Sku Name", "Sku Tier", "Kind", "SLA", "Resource ID"}
+	headers := []string{"Subscription Id", "Resource Group", "Location", "Resource Type", "Resource Name", "Sku Name", "Sku Tier", "Kind", "SLA", "Resource Id"}
 
 	rows := [][]string{}
 	for _, r := range resources {
