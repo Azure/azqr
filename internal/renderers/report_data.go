@@ -387,7 +387,7 @@ func (rd *ReportData) resourcesTable(resources []*scanners.Resource) [][]string 
 			r.SkuTier,
 			r.Kind,
 			sla,
-			r.ID,
+			MaskSubscriptionIDInResourceID(r.ID, rd.Mask),
 		}
 		rows = append(rows, row)
 	}
