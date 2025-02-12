@@ -174,17 +174,23 @@ or download the latest release from [here](https://github.com/Azure/azqr/release
 
 **Azure Quick Review (azqr)** requires the following permissions:
 
-* Subscription Reader
+* Reader over Subscription or Management Group scope
 
 ### Running the Scan
 
-To scan all resource groups in all subscription run:
+To scan all resources in all subscription run:
 
 ```bash
 ./azqr scan
 ```
 
-To scan all resource groups in a specific subscription run:
+To scan all resources in a specific management group run:
+
+```bash
+./azqr scan --management-group-id <management_group_id>
+```
+
+To scan all resources in a specific subscription run:
 
 ```bash
 ./azqr scan -s <subscription_id>

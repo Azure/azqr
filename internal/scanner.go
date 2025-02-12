@@ -25,6 +25,7 @@ import (
 
 type (
 	ScanParams struct {
+		ManagementGroupID       string
 		SubscriptionID          string
 		ResourceGroup           string
 		OutputName              string
@@ -60,6 +61,10 @@ func (sc Scanner) Scan(params *ScanParams) {
 	filters := params.Filters
 
 	// validate input
+	if params.ManagementGroupID != "" && (params.SubscriptionID != "" || params.ResourceGroup != "") {
+		log.Fatal().Msg("Management Group name cannot be used with a Subscription Id or Resource Group name")
+	}
+
 	if params.SubscriptionID == "" && params.ResourceGroup != "" {
 		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
 	}
@@ -93,8 +98,14 @@ func (sc Scanner) Scan(params *ScanParams) {
 	}
 
 	// list subscriptions. Key is subscription ID, value is subscription name
-	subscriptionScanner := scanners.SubcriptionScanner{}
-	subscriptions := subscriptionScanner.ListSubscriptions(ctx, cred, params.SubscriptionID, filters, clientOptions)
+	var subscriptions map[string]string
+	if params.ManagementGroupID != "" {
+		managementGroupScanner := scanners.ManagementGroupsScanner{}
+		subscriptions = managementGroupScanner.ListSubscriptions(ctx, cred, params.ManagementGroupID, filters, clientOptions)
+	} else {
+		subscriptionScanner := scanners.SubcriptionScanner{}
+		subscriptions = subscriptionScanner.ListSubscriptions(ctx, cred, params.SubscriptionID, filters, clientOptions)
+	}
 
 	// initialize scanners
 	defenderScanner := scanners.DefenderScanner{}
