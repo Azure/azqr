@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Get all expired App Service Certificates
+resources
+| where type == 'microsoft.web/certificates'
+| extend expiresOn = todatetime(properties.expirationDate)
+| where expiresOn <= now()
+| project recommendationId="3e4f5a6b-7c8d-9e0f-1a2b-3c4d5e6f7a8b", name, id, tags

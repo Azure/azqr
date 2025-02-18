@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Get all public IP addresses that are not associated with any resources
+resources
+| where type == "microsoft.network/publicipaddresses"
+| where properties.ipConfiguration == "" and properties.natGateway == "" and properties.publicIPPrefix == ""
+| project recommendationId="5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b", name, id, tags, param1=strcat("Sku: ", sku.name), param2=strcat("AllocationMethod: ", properties.publicIPAllocationMethod)

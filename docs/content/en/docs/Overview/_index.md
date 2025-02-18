@@ -10,8 +10,9 @@ weight: 1
 
 **Azure Quick Review (azqr)** scans your resources with 2 types of recommendations:
 
-* **Azure Resource Graph (ARG)** queries provided by the [Azure Proactive Resiliency Library v2 (APRL)](https://aka.ms/aprl) project.
-* **Azure Resource Manager (ARM)** queries built  with the Golang SDK
+* **Azure Resource Graph (ARG)** queries provided by the [Azure Proactive Resiliency Library v2 (APRL)](https://aka.ms/aprl) project
+* **Azure Resource Manager (ARM)** rules built with the Azure Golang SDK
+* **Azure Orphan Resources (ARG)** queries provided by the [Azure Orphan Resources](https://github.com/dolevshor/azure-orphan-resources) project
 
 To learn more about the recommendations used by **Azure Quick Review (azqr)**, you can refer to the documentation available [here](https://azure.github.io/azqr/docs/recommendations/).
 

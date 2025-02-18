@@ -1,0 +1,16 @@
+- description: SQL elastic pool without databases
+  aprlGuid: 4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Sql/servers/elasticpools
+  recommendationMetadataState: Active
+  longDescription: |
+    SQL elastic pool without databases.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: null
+  learnMoreLink:
+    - name: SQL elastic pool
+      url: "https://learn.microsoft.com/en-us/azure/azure-sql/database/elastic-pool-overview"
