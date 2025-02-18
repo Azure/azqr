@@ -184,7 +184,7 @@ func (rd *ReportData) AdvisorTable() [][]string {
 			d.Category,
 			d.Impact,
 			d.Description,
-			d.ResourceID,
+			MaskSubscriptionIDInResourceID(d.ResourceID, rd.Mask),
 			d.RecommendationID,
 		}
 		rows = append(rows, row)
