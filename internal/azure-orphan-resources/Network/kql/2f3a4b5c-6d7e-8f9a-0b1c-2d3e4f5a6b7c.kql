@@ -1,0 +1,19 @@
+// Azure Resource Graph Query
+// Get all Application Gateways without backend
+resources
+| where type =~ 'microsoft.network/applicationgateways'
+| extend backendPoolsCount = array_length(properties.backendAddressPools),SKUName= tostring(properties.sku.name), SKUTier= tostring(properties.sku.tier),SKUCapacity=properties.sku.capacity,backendPools=properties.backendAddressPools , AppGwId = tostring(id)
+| project AppGwId, resourceGroup, location, subscriptionId, tags, name, SKUName, SKUTier, SKUCapacity
+| join (
+    resources
+    | where type =~ 'microsoft.network/applicationgateways'
+    | mvexpand backendPools = properties.backendAddressPools
+    | extend backendIPCount = array_length(backendPools.properties.backendIPConfigurations)
+    | extend backendAddressesCount = array_length(backendPools.properties.backendAddresses)
+    | extend backendPoolName  = backendPools.properties.backendAddressPools.name
+    | extend AppGwId = tostring(id)
+    | summarize backendIPCount = sum(backendIPCount) ,backendAddressesCount=sum(backendAddressesCount) by AppGwId
+) on AppGwId
+| project-away AppGwId1
+| where  (backendIPCount == 0 or isempty(backendIPCount)) and (backendAddressesCount==0 or isempty(backendAddressesCount))
+| project recommendationId="2f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c", name, id=AppGwId, tags, param1=strcat("SKUTier: ", SKUTier), param2=strcat("SKUCapacity: ", SKUCapacity)

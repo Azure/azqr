@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Get all DDoS protection plans that are not associated with any virtual networks
+resources
+| where type == "microsoft.network/ddosprotectionplans"
+| where isnull(properties.virtualNetworks)
+| project recommendationId="0b1c2d3e-4f5a-6b7c-8d9e-0f1a2b3c4d5e", name, id, tags

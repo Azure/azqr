@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Get all Traffic Manager profiles without endpoints
+resources
+| where type == "microsoft.network/trafficmanagerprofiles"
+| where properties.endpoints == "[]"
+| project recommendationId="1e2f3a4b-5c6d-7e8f-9a0b-1c2d3e4f5a6b", name, id, tags

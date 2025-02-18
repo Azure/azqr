@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Get all availability sets that are not associated with any virtual machines
+resources
+| where type =~ 'Microsoft.Compute/availabilitySets'
+| where properties.virtualMachines == "[]"
+| where not(name endswith "-asr")
+| project recommendationId="2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e", name, id, tags

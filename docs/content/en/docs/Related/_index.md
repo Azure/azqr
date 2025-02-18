@@ -6,11 +6,15 @@ weight: 6
 
 ## AZQR and APRL
 
-As of version 2.0.0-preview, **Azure Quick Review (azqr)** includes all [Azure Resource Graph](https://learn.microsoft.com/azure/governance/resource-graph/overview) queries provided by the the [Azure Proactive Resiliency Library (APRL)](https://aka.ms/aprl), which are used to identify non-compliant resources. 
+As of version 2.0.0-preview, **Azure Quick Review (azqr)** includes all [Azure Resource Graph](https://learn.microsoft.com/azure/governance/resource-graph/overview) queries provided by the the [Azure Proactive Resiliency Library (APRL)](https://aka.ms/aprl), which are used to identify non-compliant resources.
 
 **Azure Quick Review (azqr)** extends [APRL](https://aka.ms/aprl) by providing per service instance SLAs, Diagnostic Settings detection and more. Therefore, scan results display `AZQR` or `APRL`, to indicate the source of the recommendation.
 
 > **APRL** provides a curated catalog of resiliency recommendations for workloads running in Azure. Many of the recommendations contain supporting Azure Resource Graph (ARG) queries
+
+## AZQR and Azure Orphan Resources
+
+As of version 2.4.0 **Azure Quick Review (azqr)** includes all [Azure Resource Graph](https://learn.microsoft.com/azure/governance/resource-graph/overview) queries provided by the the [Azure Orphan Resources](https://github.com/dolevshor/azure-orphan-resources) project
 
 ## AZQR compared to Azure Review Checklists and PSRule.Rules.Azure
 
@@ -26,4 +30,4 @@ In August 2024, we added all [APRL](https://aka.ms/aprl) recommendations to **Az
 
 When compared with [`PSRule.Rules.Azure`](https://github.com/Azure/PSRule.Rules.Azure), **Azure Quick Review (azqr)** only scans deployed Azure resources and provides recommendations based on the current state. **Azure Quick Review (azqr)** does not scan ARM templates or Bicep files.
 
-When compared to the [`review-checklist`](https://github.com/Azure/review-checklists), **Azure Quick Review (azqr)** also provides an actionable list of more than 400 recommendations (70+ Azure resource types), that can be used to improve the resiliency of your Azure solutions. 
+When compared to the [`review-checklist`](https://github.com/Azure/review-checklists), **Azure Quick Review (azqr)** also provides an actionable list of more than 400 recommendations (70+ Azure resource types), that can be used to improve the resiliency of your Azure solutions.

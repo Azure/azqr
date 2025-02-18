@@ -76,6 +76,9 @@ import (
 	_ "github.com/Azure/azqr/internal/scanners/vnet"
 	_ "github.com/Azure/azqr/internal/scanners/vwan"
 	_ "github.com/Azure/azqr/internal/scanners/wps"
+	_ "github.com/Azure/azqr/internal/scanners/rg"
+	_ "github.com/Azure/azqr/internal/scanners/avail"
+	_ "github.com/Azure/azqr/internal/scanners/nic"
 )
 
 var (

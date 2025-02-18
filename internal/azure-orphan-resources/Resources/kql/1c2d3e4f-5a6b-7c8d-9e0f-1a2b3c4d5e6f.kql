@@ -1,0 +1,12 @@
+// Azure Resource Graph Query
+// Get all empty Resource Groups
+ResourceContainers
+ | where type == "microsoft.resources/subscriptions/resourcegroups"
+ | extend rgAndSub = strcat(resourceGroup, "--", subscriptionId)
+ | join kind=leftouter (
+     Resources
+     | extend rgAndSub = strcat(resourceGroup, "--", subscriptionId)
+     | summarize count() by rgAndSub
+ ) on rgAndSub
+ | where isnull(count_)
+ | project recommendationId="1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f", name, id, tags

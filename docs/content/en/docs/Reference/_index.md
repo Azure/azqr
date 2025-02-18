@@ -17,5 +17,6 @@ weight: 21
 
 ## Related Projects
 - [Azure Proactive Resiliency Library (APRL)](https://azure.github.io/Azure-Proactive-Resiliency-Library/)
+- [Azure Orphan Resources](https://github.com/dolevshor/azure-orphan-resources)
 - [review-checklist](https://github.com/Azure/review-checklists)
 - [PSRule.Rules.Azure](https://github.com/Azure/PSRule.Rules.Azure)

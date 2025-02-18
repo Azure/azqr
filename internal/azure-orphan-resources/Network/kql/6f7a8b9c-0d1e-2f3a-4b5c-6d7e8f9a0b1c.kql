@@ -1,0 +1,9 @@
+// Azure Resource Graph Query
+// Get all network interfaces that are not associated with any virtual machines, private endpoints, or private link services
+resources
+| where type has "microsoft.network/networkinterfaces"
+| where isnull(properties.privateEndpoint)
+| where isnull(properties.privateLinkService)
+| where properties.hostedWorkloads == "[]"
+| where properties !has 'virtualmachine'
+| project recommendationId="6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f9a0b1c", name, id, tags

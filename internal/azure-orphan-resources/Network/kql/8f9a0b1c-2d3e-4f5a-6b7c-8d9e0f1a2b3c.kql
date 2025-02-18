@@ -1,0 +1,18 @@
+// Azure Resource Graph Query
+// Get all private endpoints not connected to any resource
+resources
+| where type =~ "microsoft.network/privateendpoints"
+| extend connection = iff(array_length(properties.manualPrivateLinkServiceConnections) > 0, properties.manualPrivateLinkServiceConnections[0], properties.privateLinkServiceConnections[0])
+| extend subnetId = properties.subnet.id
+| extend subnetName = tostring(split(subnetId, "/")[-1])
+| extend subnetIdSplit = split(subnetId, "/")
+| extend vnetId = strcat_array(array_slice(subnetIdSplit,0,8), "/")
+| extend vnetName = tostring(split(vnetId, "/")[-1])
+| extend serviceId = tostring(connection.properties.privateLinkServiceId)
+| extend serviceIdSplit = split(serviceId, "/")
+| extend serviceName = tostring(serviceIdSplit[8])
+| extend serviceTypeEnum = iff(isnotnull(serviceIdSplit[6]), tolower(strcat(serviceIdSplit[6], "/", serviceIdSplit[7])), "microsoft.network/privatelinkservices")
+| extend stateEnum = tostring(connection.properties.privateLinkServiceConnectionState.status)
+| extend groupIds = tostring(connection.properties.groupIds[0])
+| where stateEnum == "Disconnected"
+| project recommendationId="8f9a0b1c-2d3e-4f5a-6b7c-8d9e0f1a2b3c", name, id, tags, param1=strcat("VNET Name: ",  vnetName), param2=strcat("Subnet Name: ",  subnetName)

@@ -1,0 +1,17 @@
+// Azure Resource Graph Query
+// Get all virtual network gateways without Point-to-site configuration or Connections
+resources
+| where type =~ "microsoft.network/virtualnetworkgateways"
+| extend SKU = tostring(properties.sku.name)
+| extend Tier = tostring(properties.sku.tier)
+| extend GatewayType = tostring(properties.gatewayType)
+| extend vpnClientConfiguration = properties.vpnClientConfiguration
+| extend Resource = id
+| join kind=leftouter (
+    resources
+    | where type =~ "microsoft.network/connections"
+    | mv-expand Resource = pack_array(properties.virtualNetworkGateway1.id, properties.virtualNetworkGateway2.id) to typeof(string)
+    | project Resource, connectionId = id, ConnectionProperties=properties
+    ) on Resource
+| where isempty(vpnClientConfiguration) and isempty(connectionId)
+| project recommendationId="9a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d", name, id, tags
