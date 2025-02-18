@@ -69,5 +69,5 @@ func (a *FirewallScanner) list() ([]*armnetwork.AzureFirewall, error) {
 }
 
 func (a *FirewallScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/azureFirewalls"}
+	return []string{"Microsoft.Network/azureFirewalls", "Microsoft.Network/ipGroups"}
 }

@@ -69,5 +69,5 @@ func (c *VirtualNetworkScanner) list() ([]*armnetwork.VirtualNetwork, error) {
 }
 
 func (a *VirtualNetworkScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/virtualNetworks"}
+	return []string{"Microsoft.Network/virtualNetworks", "Microsoft.Network/virtualNetworks/subnets"}
 }

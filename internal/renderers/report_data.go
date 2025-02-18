@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/google/uuid"
 )
 
 type (
@@ -221,12 +220,6 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 	for _, rt := range rd.Recommendations {
 		for _, r := range rt {
 			implemented := counter[r.RecommendationID] == 0
-			source := "APRL"
-			_, err := uuid.Parse(r.RecommendationID)
-			if err != nil {
-				source = "AZQR"
-			}
-
 			categoryPart := ""
 			servicePart := ""
 			typeParts := strings.Split(r.ResourceType, "/")
@@ -239,7 +232,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 				fmt.Sprintf("%t", implemented),
 				fmt.Sprint(counter[r.RecommendationID]),
 				"Azure Service",
-				source,
+				r.Source,
 				categoryPart,
 				servicePart,
 				string(r.Category),
