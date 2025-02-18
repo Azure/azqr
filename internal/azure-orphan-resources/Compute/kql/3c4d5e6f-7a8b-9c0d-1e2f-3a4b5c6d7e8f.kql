@@ -1,0 +1,10 @@
+// Azure Resource Graph Query
+// Get all disks that are not attached
+resources
+| where type has "microsoft.compute/disks"
+| extend diskState = tostring(properties.diskState)
+| where (managedBy == "" and diskState != 'ActiveSAS') or (diskState == 'Unattached' and diskState != 'ActiveSAS')
+| where not(name endswith "-ASRReplica" or name startswith "ms-asr-" or name startswith "asrseeddisk-")
+| where (tags !contains "kubernetes.io-created-for-pvc") and tags !contains "ASR-ReplicaDisk" and tags !contains "asrseeddisk" and tags !contains "RSVaultBackup"
+| extend Details = pack_all()
+| project recommendationId="3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f", name, id, tags, param1=strcat("Sku: ", sku.name), param2=strcat("diskSizeGB: ", properties.diskSizeGB)

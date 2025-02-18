@@ -157,5 +157,7 @@ func (a *AppServiceScanner) ResourceTypes() []string {
 	return []string{
 		"Microsoft.Web/serverFarms",
 		"Microsoft.Web/sites",
+		"Microsoft.Web/connections",
+		"Microsoft.Web/certificates",
 	}
 }

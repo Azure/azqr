@@ -120,8 +120,8 @@ func (sc Scanner) Scan(params *ScanParams) {
 	reportData := renderers.NewReportData(outputFile, params.Mask)
 
 	// get the APRL scan results
-	aprlScanner := AprlScanner{}
-	reportData.Recommendations, reportData.Aprl = aprlScanner.Scan(ctx, cred, serviceScanners, filters, subscriptions)
+	aprlScanner := NewAprlScanner(serviceScanners, filters, subscriptions)
+	reportData.Recommendations, reportData.Aprl = aprlScanner.Scan(ctx, cred)
 
 	resourceScanner := scanners.ResourceScanner{}
 	reportData.Resources, reportData.ExludedResources = resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)

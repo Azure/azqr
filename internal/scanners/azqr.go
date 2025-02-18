@@ -123,6 +123,7 @@ type (
 			Name string `yaml:"name"`
 			Url  string `yaml:"url"`
 		} `yaml:"learnMoreLink,flow"`
+		Source string
 	}
 
 	AprlResult struct {
@@ -210,6 +211,7 @@ func (r *AzqrRecommendation) ToAzureAprlRecommendation() AprlRecommendation {
 			Name string "yaml:\"name\""
 			Url  string "yaml:\"url\""
 		}{{Name: "Learn More", Url: r.LearnMoreUrl}},
+		Source: "AZQR",
 	}
 }
 

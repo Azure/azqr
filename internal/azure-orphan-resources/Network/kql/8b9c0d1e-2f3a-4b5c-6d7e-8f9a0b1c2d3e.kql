@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Get all route tables without subnets
+resources
+| where type == "microsoft.network/routetables"
+| where isnull(properties.subnets)
+| project recommendationId="8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e", name, id, tags
