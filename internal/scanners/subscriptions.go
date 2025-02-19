@@ -38,11 +38,15 @@ func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.
 	result := map[string]string{}
 	for _, s := range subscriptions {
 		sid := *s.SubscriptionID
-		if filters.Azqr.IsSubscriptionExcluded(sid) {
-			log.Info().Msgf("Skipping subscriptions/...%s", sid[29:])
-			continue
+		// If subscriptionID is empty run the filter on all subscriptions.
+		// If SubscriptionID is not empty exlude all subscriptions except the one specified.
+		if subscriptionID == "" || sid == subscriptionID {
+			if filters.Azqr.IsSubscriptionExcluded(sid) {
+				log.Info().Msgf("Skipping subscriptions/...%s", sid[29:])
+				continue
+			}
+			result[sid] = *s.DisplayName
 		}
-		result[*s.SubscriptionID] = *s.DisplayName
 	}
 
 	return result
