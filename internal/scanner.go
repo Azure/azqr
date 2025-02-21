@@ -213,7 +213,6 @@ func (sc Scanner) Scan(params *ScanParams) {
 
 		// scan defender
 		reportData.Defender = append(reportData.Defender, defenderScanner.Scan(params.Defender, config)...)
-		reportData.DefenderRecommendations = append(reportData.DefenderRecommendations, defenderScanner.GetRecommendations(ctx, params.Defender, cred, subscriptions, filters)...)
 
 		// scan advisor
 		reportData.Advisor = append(reportData.Advisor, advisorScanner.Scan(params.Advisor, config, filters)...)
@@ -225,7 +224,11 @@ func (sc Scanner) Scan(params *ScanParams) {
 		reportData.Cost.Items = append(reportData.Cost.Items, costs.Items...)
 	}
 
+	// get the count of resources per resource type
 	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, reportData.Recommendations, filters)
+
+	// get the defender recommendations
+	reportData.DefenderRecommendations = append(reportData.DefenderRecommendations, defenderScanner.GetRecommendations(ctx, params.Defender, cred, subscriptions, filters)...)
 
 	// render excel report
 	excel.CreateExcelReport(&reportData)
