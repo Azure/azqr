@@ -1,0 +1,25 @@
+{
+    "Title": " Azure Quick Review Tutorial",
+    "Summary": "This Drop provides a tutorial on how to use the Azure Quick Review tool to assess your Azure environment.",
+    "Description": "This Drop provides a tutorial on how to use the Azure Quick Review tool to assess your Azure environment. The Azure Quick Review tool is a free, open-source tool that helps you assess your Azure environment and identify areas for improvement. The tool provides a comprehensive report that includes recommendations for best practices, security, and cost optimization.",
+    "Cover": "",
+    "Authors": [
+        {
+            "Name": "Carlos Mendible",
+            "Link": "https://linkedin.com/in/carlosmendible"
+        }
+    ],
+    "Source": "https://github.com/Azure/azqr/tree/main/jumpstart_drops/azqr-tutorial",
+    "Type": "tutorial_guide",
+    "Difficulty": "Medium",
+    "ProgrammingLanguage": [
+        "Bash",
+        "Powershell"
+    ],
+    "Products": [
+        "Azure"
+    ],
+    "LastModified": "",
+    "CreatedDate": "",
+    "Topics": []
+}
