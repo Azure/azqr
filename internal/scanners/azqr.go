@@ -105,20 +105,18 @@ type (
 	}
 
 	AprlRecommendation struct {
-		RecommendationID    string `yaml:"aprlGuid"`
-		Recommendation      string `yaml:"description"`
-		Category            string `yaml:"recommendationControl"`
-		Impact              string `yaml:"recommendationImpact"`
-		ResourceType        string `yaml:"recommendationResourceType"`
-		MetadataState       string `yaml:"recommendationMetadataState"`
-		LongDescription     string `yaml:"longDescription"`
-		PotentialBenefits   string `yaml:"potentialBenefits"`
-		PgVerified          bool   `yaml:"pgVerified"`
-		PublishedToLearn    bool   `yaml:"publishedToLearn"`
-		PublishedToAdvisor  bool   `yaml:"publishedToAdvisor"`
-		AutomationAvailable string `yaml:"automationAvailable"`
-		Tags                string `yaml:"tags,omitempty"`
-		GraphQuery          string `yaml:"graphQuery,omitempty"`
+		RecommendationID    string   `yaml:"aprlGuid"`
+		Recommendation      string   `yaml:"description"`
+		Category            string   `yaml:"recommendationControl"`
+		Impact              string   `yaml:"recommendationImpact"`
+		ResourceType        string   `yaml:"recommendationResourceType"`
+		MetadataState       string   `yaml:"recommendationMetadataState"`
+		LongDescription     string   `yaml:"longDescription"`
+		PotentialBenefits   string   `yaml:"potentialBenefits"`
+		PgVerified          bool     `yaml:"pgVerified"`
+		AutomationAvailable string   `yaml:"automationAvailable"`
+		Tags                []string `yaml:"tags,omitempty"`
+		GraphQuery          string   `yaml:"graphQuery,omitempty"`
 		LearnMoreLink       []struct {
 			Name string `yaml:"name"`
 			Url  string `yaml:"url"`
@@ -202,10 +200,8 @@ func (r *AzqrRecommendation) ToAzureAprlRecommendation() AprlRecommendation {
 		LongDescription:     r.Recommendation,
 		PotentialBenefits:   "",
 		PgVerified:          false,
-		PublishedToLearn:    false,
-		PublishedToAdvisor:  false,
 		AutomationAvailable: "",
-		Tags:                "",
+		Tags:                nil,
 		GraphQuery:          "",
 		LearnMoreLink: []struct {
 			Name string "yaml:\"name\""

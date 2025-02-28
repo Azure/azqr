@@ -10,7 +10,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Resource Groups
       url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview"

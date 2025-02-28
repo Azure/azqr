@@ -10,7 +10,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Availability Sets
       url: "https://learn.microsoft.com/en-us/azure/virtual-machines/availability-set-overview"
@@ -27,7 +27,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Managed Disks
       url: "https://learn.microsoft.com/en-us/azure/virtual-machines/managed-disks-overview"

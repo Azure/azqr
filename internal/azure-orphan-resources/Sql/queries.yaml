@@ -10,7 +10,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: SQL elastic pool
       url: "https://learn.microsoft.com/en-us/azure/azure-sql/database/elastic-pool-overview"

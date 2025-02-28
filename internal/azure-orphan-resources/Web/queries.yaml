@@ -10,7 +10,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: App Service plans
       url: "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans"
@@ -27,7 +27,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: API Connections
       url: "https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview"
@@ -44,7 +44,7 @@
   potentialBenefits: Identifies expired certificates
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Certificates
       url: "https://learn.microsoft.com/en-us/azure/app-service/configure-ssl-certificate"

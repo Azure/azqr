@@ -10,7 +10,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Public IPs
       url: "https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses"
@@ -27,7 +27,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Network Interfaces
       url: "https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/private-ip-addresses"
@@ -44,7 +44,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Network Security Groups
       url: "https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/private-ip-addresses"
@@ -61,7 +61,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Route Tables
       url: "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview"
@@ -78,7 +78,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Load Balancers
       url: "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview"
@@ -95,7 +95,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Front Door WAF Policy
       url: "https://learn.microsoft.com/en-us/azure/web-application-firewall/afds/afds-overview"
@@ -112,7 +112,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Traffic Manager
       url: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview"
@@ -129,7 +129,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Application Gateways
       url: "https://learn.microsoft.com/azure/application-gateway/overview"
@@ -146,7 +146,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Virtual Networks
       url: "https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview"
@@ -163,7 +163,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Subnets
       url: "https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview"
@@ -180,7 +180,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: NAT Gateways
       url: "https://learn.microsoft.com/azure/nat-gateway/nat-overview"
@@ -197,7 +197,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: IP Groups
       url: "https://learn.microsoft.com/azure/firewall/ip-groups"
@@ -214,7 +214,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Private DNS zones
       url: "https://learn.microsoft.com/en-us/azure/dns/private-dns-privatednszone"
@@ -231,7 +231,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Private Endpoints
       url: "https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview"
@@ -248,7 +248,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: Virtual Network Gateways
       url: "https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-about-vpngateways"
@@ -265,7 +265,7 @@
   potentialBenefits: Identifies unused resources
   pgVerified: false
   automationAvailable: false
-  tags: null
+  tags: []
   learnMoreLink:
     - name: DDoS protection
       url: "https://learn.microsoft.com/en-us/azure/ddos-protection/ddos-protection-overview"

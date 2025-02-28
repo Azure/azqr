@@ -24,8 +24,12 @@ var rulesCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		_, serviceScanners := scanners.GetScanners()
-		aprlScanner := internal.AprlScanner{}
+		aprlScanner := internal.NewAprlScanner(serviceScanners, nil, nil)
 		aprl := aprlScanner.GetAprlRecommendations()
+
+		// Print count of aprl recommendations
+		fmt.Println("## APRL Recommendations")
+		fmt.Println("Total recommendations:", len(aprl))
 
 		fmt.Println("#  | Id | Resource Type | Category | Impact | Recommendation | Learn")
 		fmt.Println("---|---|---|---|---|---|---")
