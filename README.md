@@ -52,6 +52,7 @@ aa | Microsoft.Automation/automationAccounts
 adf | Microsoft.DataFactory/factories
 afd | Microsoft.Cdn/profiles
 afw | Microsoft.Network/azureFirewalls
+afw | Microsoft.Network/ipGroups
 agw | Microsoft.Network/applicationGateways
 aks | Microsoft.ContainerService/managedClusters
 amg | Microsoft.Dashboard/grafana
@@ -62,6 +63,9 @@ appi | Microsoft.Insights/activityLogAlerts
 as | Microsoft.AnalysisServices/servers
 asp | Microsoft.Web/serverFarms
 asp | Microsoft.Web/sites
+asp | Microsoft.Web/connections
+asp | Microsoft.Web/certificates
+avail | Microsoft.Compute/availabilitySets
 avd | Specialized.Workload/AVD
 avs | Microsoft.AVS/privateClouds
 avs | Specialized.Workload/AVS
@@ -91,18 +95,20 @@ log | Microsoft.OperationalInsights/workspaces
 logic | Microsoft.Logic/workflows
 maria | Microsoft.DBforMariaDB/servers
 maria | Microsoft.DBforMariaDB/servers/databases
-mysql | Microsoft.DBforMySQL/flexibleServers
 mysql | Microsoft.DBforMySQL/servers
+mysql | Microsoft.DBforMySQL/flexibleServers
 netapp | Microsoft.NetApp/netAppAccounts
 ng | Microsoft.Network/natGateways
+nic | Microsoft.Network/networkInterfaces
 nsg | Microsoft.Network/networkSecurityGroups
 nw | Microsoft.Network/networkWatchers
 pdnsz | Microsoft.Network/privateDnsZones
 pep | Microsoft.Network/privateEndpoints
 pip | Microsoft.Network/publicIPAddresses
-psql | Microsoft.DBforPostgreSQL/flexibleServers
 psql | Microsoft.DBforPostgreSQL/servers
+psql | Microsoft.DBforPostgreSQL/flexibleServers
 redis | Microsoft.Cache/Redis
+rg | Microsoft.Resources/resourceGroups
 rsv | Microsoft.RecoveryServices/vaults
 rt | Microsoft.Network/routeTables
 sap | Specialized.Workload/SAP
@@ -123,6 +129,8 @@ vgw | Microsoft.Network/virtualNetworkGateways
 vm | Microsoft.Compute/virtualMachines
 vmss | Microsoft.Compute/virtualMachineScaleSets
 vnet | Microsoft.Network/virtualNetworks
+vnet | Microsoft.Network/virtualNetworks/subnets
+vwan | Microsoft.Network/virtualWans
 wps | Microsoft.SignalRService/webPubSub
 
 ## Usage
