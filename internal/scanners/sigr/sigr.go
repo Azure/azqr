@@ -4,18 +4,22 @@
 package sigr
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
+func init() {
+	scanners.ScannerList["sigr"] = []scanners.IAzureScanner{&SignalRScanner{}}
+}
+
 // SignalRScanner - Scanner for SignalR
 type SignalRScanner struct {
-	config        *azqr.ScannerConfig
+	config        *scanners.ScannerConfig
 	signalrClient *armsignalr.Client
 }
 
 // Init - Initializes the SignalRScanner
-func (c *SignalRScanner) Init(config *azqr.ScannerConfig) error {
+func (c *SignalRScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.signalrClient, err = armsignalr.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (c *SignalRScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all SignalR in a Resource Group
-func (c *SignalRScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *SignalRScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	signalr, err := c.listSignalR()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, signalr := range signalr {
 		rr := engine.EvaluateRecommendations(rules, signalr, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*signalr.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*signalr.ID),
 			ServiceName:      *signalr.Name,
 			Type:             *signalr.Type,
 			Location:         *signalr.Location,

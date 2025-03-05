@@ -4,7 +4,6 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +17,6 @@ var evgdCmd = &cobra.Command{
 	Long:  "Scan Azure Event Grid Domains",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		scan(cmd, scanners.ScannerList["evgd"])
+		scan(cmd, []string{"evgd"})
 	},
 }

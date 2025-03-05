@@ -58,18 +58,18 @@ jobs:
             target_arch: arm
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
           submodules: 'recursive'
 
       - name: Set up Go ${{ env.GOVER }}
-        uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
         with:
           go-version: ${{ env.GOVER }}
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@ea9897a6e57642ca932850b656df2880bc7cd2a8 # v3.3.0
+        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
         with:
           dotnet-version: 6.0.x
 
@@ -79,7 +79,7 @@ jobs:
 
       - name: golangci-lint
         if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
-        uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # v3.7.0
+        uses: golangci/golangci-lint-action@2226d7cb06a077cd73e56eedd38eecad18e5d837 # v6.5.0
         with:
           version: ${{ env.GOLANGCILINT_VER }}
           skip-pkg-cache: true
@@ -108,7 +108,7 @@ jobs:
 
       - name: Codecov
         if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
-        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
+        uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
 
       - name: Calculate Version
         run: |
@@ -145,7 +145,7 @@ jobs:
           go build -ldflags "-s -w -X 'github.com/Azure/azqr/cmd/azqr.version=${{ env.MINVERVERSIONOVERRIDE }}'" -o ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }} ./cmd/main.go
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: ${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }}
           path: ${{ env.AZQR_OUTPUT_FOLDER }}/${{ matrix.filename }}
@@ -161,7 +161,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
@@ -204,7 +204,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Artifact Name linux & mac
         if: matrix.target_os != 'windows'
@@ -217,7 +217,7 @@ jobs:
           echo AZQR_ARTIFACT_NAME=${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }} >> $env:GITHUB_ENV
 
       - name: download artifacts - ${{ env.AZQR_ARTIFACT_NAME }}
-        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           name: ${{ env.AZQR_ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/
@@ -285,12 +285,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@ea9897a6e57642ca932850b656df2880bc7cd2a8 # v3.3.0
+        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab # v4.3.0
         with:
           dotnet-version: 6.0.x
 
@@ -303,7 +303,7 @@ jobs:
           echo "MINVERVERSIONOVERRIDE=$($HOME/.dotnet/tools/minver -t v. -m 0.1 -p preview.0)" >> $GITHUB_ENV
 
       - name: Trigger Bump Winget
-        uses: peter-evans/repository-dispatch@bf47d102fdb849e755b0b0023ea3e81a44b6f570 # v2.1.2
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
         with:
           event-type: bump-winget
           client-payload: '{"version": "${{ env.MINVERVERSIONOVERRIDE }}"}'

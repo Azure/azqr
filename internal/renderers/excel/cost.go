@@ -20,8 +20,8 @@ func renderCosts(f *excelize.File, data *renderers.ReportData) {
 	records := data.CostTable()
 	headers := records[0]
 	createFirstRow(f, "Costs", headers)
-	
-	if data.CostData != nil && len(data.CostData.Items) > 0 {
+
+	if data.Cost != nil && len(data.Cost.Items) > 0 {
 		records = records[1:]
 		currentRow := 4
 		for _, row := range records {

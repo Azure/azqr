@@ -4,18 +4,22 @@
 package mysql
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysql"
 )
 
+func init() {
+	scanners.ScannerList["mysql"] = []scanners.IAzureScanner{&MySQLScanner{}, &MySQLFlexibleScanner{}}
+}
+
 // MySQLScanner - Scanner for PostgreSQL
 type MySQLScanner struct {
-	config        *azqr.ScannerConfig
+	config        *scanners.ScannerConfig
 	postgreClient *armmysql.ServersClient
 }
 
 // Init - Initializes the MySQLScanner
-func (c *MySQLScanner) Init(config *azqr.ScannerConfig) error {
+func (c *MySQLScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.postgreClient, err = armmysql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (c *MySQLScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all MySQL in a Resource Group
-func (c *MySQLScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *MySQLScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	postgre, err := c.listMySQL()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, postgre := range postgre {
 		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*postgre.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*postgre.ID),
 			ServiceName:      *postgre.Name,
 			Type:             *postgre.Type,
 			Location:         *postgre.Location,

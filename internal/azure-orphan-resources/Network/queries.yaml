@@ -1,0 +1,271 @@
+- description: Public IPs not attached to any resource
+  aprlGuid: 5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/publicIPAddresses
+  recommendationMetadataState: Active
+  longDescription: |
+    Public IPs not attached to any resource.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Public IPs
+      url: "https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses"
+
+- description: Network Interfaces not attached to any resource
+  aprlGuid: 6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f9a0b1c
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/networkInterfaces
+  recommendationMetadataState: Active
+  longDescription: |
+    Network Interfaces not attached to any resource.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Network Interfaces
+      url: "https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/private-ip-addresses"
+
+- description: Network Security Groups not attached to any network interface or subnet
+  aprlGuid: 7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/networkSecurityGroups
+  recommendationMetadataState: Active
+  longDescription: |
+    Network Security Groups not attached to any network interface or subnet.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Network Security Groups
+      url: "https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/private-ip-addresses"
+
+- description: Route Tables not attached to any subnet
+  aprlGuid: 8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/routeTables
+  recommendationMetadataState: Active
+  longDescription: |
+    Route Tables not attached to any subnet.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Route Tables
+      url: "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-udr-overview"
+
+- description: Load Balancers with empty backend address pools
+  aprlGuid: 9c0d1e2f-3a4b-5c6d-7e8f-9a0b1c2d3e4f
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/loadBalancers
+  recommendationMetadataState: Active
+  longDescription: |
+    Load Balancers with empty backend address pools.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Load Balancers
+      url: "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview"
+
+- description: Front Door WAF Policy without associations
+  aprlGuid: 0d1e2f3a-4b5c-6d7e-8f9a-0b1c2d3e4f5a
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/frontDoorWebApplicationFirewallPolicies
+  recommendationMetadataState: Active
+  longDescription: |
+    Front Door WAF Policy without associations.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Front Door WAF Policy
+      url: "https://learn.microsoft.com/en-us/azure/web-application-firewall/afds/afds-overview"
+
+- description: Traffic Manager without endpoints
+  aprlGuid: 1e2f3a4b-5c6d-7e8f-9a0b-1c2d3e4f5a6b
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/trafficManagerProfiles
+  recommendationMetadataState: Active
+  longDescription: |
+    Traffic Manager without endpoints.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Traffic Manager
+      url: "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-overview"
+
+- description: Application Gateways without backend targets
+  aprlGuid: 2f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/applicationGateways
+  recommendationMetadataState: Active
+  longDescription: |
+    Application Gateways without backend targets.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Application Gateways
+      url: "https://learn.microsoft.com/azure/application-gateway/overview"
+
+- description: Virtual Networks without subnets
+  aprlGuid: 3a4b5c6d-7e8f-9a0b-1c2d-3e4f5a6b7c8d
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/virtualNetworks
+  recommendationMetadataState: Active
+  longDescription: |
+    Virtual Networks without subnets.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Virtual Networks
+      url: "https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview"
+
+- description: Subnets without Connected Devices or Delegation
+  aprlGuid: 4b5c6d7e-8f9a-0b1c-2d3e-4f5a6b7c8d9e
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/virtualNetworks/subnets
+  recommendationMetadataState: Active
+  longDescription: |
+    Subnets without Connected Devices or Delegation.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Subnets
+      url: "https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview"
+
+- description: NAT Gateways not attached to any subnet
+  aprlGuid: 5c6d7e8f-9a0b-1c2d-3e4f-5a6b7c8d9e0f
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/natGateways
+  recommendationMetadataState: Active
+  longDescription: |
+    NAT Gateways not attached to any subnet.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: NAT Gateways
+      url: "https://learn.microsoft.com/azure/nat-gateway/nat-overview"
+
+- description: IP Groups not attached to any Azure Firewall
+  aprlGuid: 6d7e8f9a-0b1c-2d3e-4f5a-6b7c8d9e0f1a
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/ipGroups
+  recommendationMetadataState: Active
+  longDescription: |
+    IP Groups not attached to any Azure Firewall.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: IP Groups
+      url: "https://learn.microsoft.com/azure/firewall/ip-groups"
+
+- description: Private DNS zones without Virtual Network Links
+  aprlGuid: 7e8f9a0b-1c2d-3e4f-5a6b-7c8d9e0f1a2b
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/privateDnsZones
+  recommendationMetadataState: Active
+  longDescription: |
+    Private DNS zones without Virtual Network Links.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Private DNS zones
+      url: "https://learn.microsoft.com/en-us/azure/dns/private-dns-privatednszone"
+
+- description: Private Endpoints not connected to any resource
+  aprlGuid: 8f9a0b1c-2d3e-4f5a-6b7c-8d9e0f1a2b3c
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/privateEndpoints
+  recommendationMetadataState: Active
+  longDescription: |
+    Private Endpoints not connected to any resource.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Private Endpoints
+      url: "https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview"
+
+- description: Virtual Network Gateways without Point-to-site configuration or Connections
+  aprlGuid: 9a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/virtualNetworkGateways
+  recommendationMetadataState: Active
+  longDescription: |
+    Virtual Network Gateways without Point-to-site configuration or Connections.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Virtual Network Gateways
+      url: "https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-about-vpngateways"
+
+- description: DDoS protection without protected resources
+  aprlGuid: 0b1c2d3e-4f5a-6b7c-8d9e-0f1a2b3c4d5e
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Network/ddosProtectionPlans
+  recommendationMetadataState: Active
+  longDescription: |
+    DDoS protection without protected resources.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: DDoS protection
+      url: "https://learn.microsoft.com/en-us/azure/ddos-protection/ddos-protection-overview"

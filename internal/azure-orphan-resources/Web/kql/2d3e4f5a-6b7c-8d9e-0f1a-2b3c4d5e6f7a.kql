@@ -1,0 +1,18 @@
+// Azure Resource Graph Query
+// Get all API Connections not related to any Logic App
+resources
+| where type =~ 'Microsoft.Web/connections'
+| project subscriptionId, Resource = id , apiName = name, resourceGroup, tags, location
+| join kind = leftouter (
+    resources
+    | where type == 'microsoft.logic/workflows'
+    | extend resourceGroup, location, subscriptionId, properties
+    | extend varJson = properties["parameters"]["$connections"]["value"]
+    | mvexpand varConnection = varJson
+    | where notnull(varConnection)
+    | extend connectionId = extract("connectionId\":\"(.*?)\"", 1, tostring(varConnection))
+    | project connectionId, name
+    )
+    on $left.Resource == $right.connectionId
+| where connectionId == ""
+| project recommendationId="2d3e4f5a-6b7c-8d9e-0f1a-2b3c4d5e6f7a", name, id=Resource, tags

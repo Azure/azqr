@@ -4,18 +4,18 @@
 package mysql
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 )
 
 // MySQLFlexibleScanner - Scanner for PostgreSQL
 type MySQLFlexibleScanner struct {
-	config         *azqr.ScannerConfig
+	config         *scanners.ScannerConfig
 	flexibleClient *armmysqlflexibleservers.ServersClient
 }
 
 // Init - Initializes the MySQLFlexibleScanner
-func (c *MySQLFlexibleScanner) Init(config *azqr.ScannerConfig) error {
+func (c *MySQLFlexibleScanner) Init(config *scanners.ScannerConfig) error {
 	c.config = config
 	var err error
 	c.flexibleClient, err = armmysqlflexibleservers.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,23 +23,23 @@ func (c *MySQLFlexibleScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all MySQL in a Resource Group
-func (c *MySQLFlexibleScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *MySQLFlexibleScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	flexibles, err := c.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, postgre := range flexibles {
 		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*postgre.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*postgre.ID),
 			SubscriptionName: c.config.SubscriptionName,
 			ServiceName:      *postgre.Name,
 			Type:             *postgre.Type,

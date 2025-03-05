@@ -6,20 +6,20 @@ package cr
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
 // GetRules - Returns the rules for the ContainerRegistryScanner
-func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *ContainerRegistryScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"cr-001": {
 			RecommendationID: "cr-001",
 			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "ContainerRegistry should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcontainerregistry.Registry)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"cr-003": {
 			RecommendationID:   "cr-003",
 			ResourceType:       "Microsoft.ContainerRegistry/registries",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "ContainerRegistry should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/container-registry/",
@@ -41,10 +41,10 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"cr-004": {
 			RecommendationID: "cr-004",
 			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "ContainerRegistry should have private endpoints enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcontainerregistry.Registry)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -54,10 +54,10 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"cr-006": {
 			RecommendationID: "cr-006",
 			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "ContainerRegistry Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerregistry.Registry)
 				caf := strings.HasPrefix(*c.Name, "cr")
 				return !caf, ""
@@ -67,10 +67,10 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"cr-008": {
 			RecommendationID: "cr-008",
 			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "ContainerRegistry should have the Administrator account disabled",
-			Impact:           azqr.ImpactMedium,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerregistry.Registry)
 				admin := c.Properties.AdminUserEnabled != nil && *c.Properties.AdminUserEnabled
 				return admin, ""
@@ -80,10 +80,10 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"cr-009": {
 			RecommendationID: "cr-009",
 			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "ContainerRegistry should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerregistry.Registry)
 				return len(c.Tags) == 0, ""
 			},
@@ -92,10 +92,10 @@ func (a *ContainerRegistryScanner) GetRecommendations() map[string]azqr.AzqrReco
 		"cr-010": {
 			RecommendationID: "cr-010",
 			ResourceType:     "Microsoft.ContainerRegistry/registries",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "ContainerRegistry should use retention policies",
-			Impact:           azqr.ImpactMedium,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcontainerregistry.Registry)
 				return c.Properties.Policies == nil ||
 					c.Properties.Policies.RetentionPolicy == nil ||

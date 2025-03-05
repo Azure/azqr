@@ -6,20 +6,20 @@ package afd
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
 )
 
 // GetRules - Returns the rules for the FrontDoorScanner
-func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *FrontDoorScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"afd-001": {
 			RecommendationID: "afd-001",
 			ResourceType:     "Microsoft.Cdn/profiles",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Azure FrontDoor should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcdn.Profile)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"afd-003": {
 			RecommendationID:   "afd-003",
 			ResourceType:       "Microsoft.Cdn/profiles",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Azure FrontDoor SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			LearnMoreUrl: "https://www.azure.cn/en-us/support/sla/cdn/",
@@ -41,10 +41,10 @@ func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"afd-006": {
 			RecommendationID: "afd-006",
 			ResourceType:     "Microsoft.Cdn/profiles",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Azure FrontDoor Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcdn.Profile)
 				caf := strings.HasPrefix(*c.Name, "afd")
 				return !caf, ""
@@ -54,10 +54,10 @@ func (a *FrontDoorScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"afd-007": {
 			RecommendationID: "afd-007",
 			ResourceType:     "Microsoft.Cdn/profiles",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Azure FrontDoor should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcdn.Profile)
 				return len(c.Tags) == 0, ""
 			},

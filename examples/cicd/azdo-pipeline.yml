@@ -1,0 +1,53 @@
+# AZDO pipeline to run azqr scan and publish the action plan
+
+# Trigger the pipeline manually or every Friday night
+schedules:
+  - cron: "0 0 * * 5" # Every Friday at midnight
+    displayName: "Weekly Friday Night Trigger"
+    branches:
+      include:
+        - main
+
+# Trigger the pipeline on every push to main branch
+trigger:
+  branches:
+    include:
+      - main
+
+# Trigger the pipeline on every pull request to main branch
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: |
+      latest_azqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-) \
+      && wget https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-ubuntu-latest-amd64 -O /usr/local/bin/azqr \
+      && chmod +x /usr/local/bin/azqr
+    displayName: "Install azqr"
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: "<replace-with-your-service-connection>"
+      addSpnToEnvironment: true
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        export AZURE_CLIENT_ID=$servicePrincipalId
+        export AZURE_CLIENT_SECRET=$servicePrincipalKey
+        export AZURE_TENANT_ID=$tenantId
+        timestamp=$( date '+%Y%m%d%H%M%S' )
+        echo "##vso[task.setvariable variable=DATETIME]$timestamp"
+        azqr scan -o "$(System.DefaultWorkingDirectory)/azqr_action_plan_$timestamp"
+    displayName: "Run azqr scan"
+
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: "$(System.DefaultWorkingDirectory)/azqr_action_plan_$(DATETIME).xlsx"
+      artifact: "azqr_result"
+      publishLocation: "pipeline"
+    displayName: "Publish azqr action plan"

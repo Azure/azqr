@@ -6,21 +6,21 @@ package rt
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 // GetRules - Returns the rules for the RouteTableScanner
-func (a *RouteTableScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *RouteTableScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"udr-003": {
 			RecommendationID:   "udr-003",
 			ResourceType:       "Microsoft.Network/routeTables",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Rout Table SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.99%"
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -28,10 +28,10 @@ func (a *RouteTableScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 		"udr-006": {
 			RecommendationID: "udr-006",
 			ResourceType:     "Microsoft.Network/routeTables",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Rout Table Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.RouteTable)
 				caf := strings.HasPrefix(*c.Name, "rt")
 				return !caf, ""
@@ -41,10 +41,10 @@ func (a *RouteTableScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 		"udr-007": {
 			RecommendationID: "udr-007",
 			ResourceType:     "Microsoft.Network/routeTables",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Rout Table should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armnetwork.RouteTable)
 				return len(c.Tags) == 0, ""
 			},

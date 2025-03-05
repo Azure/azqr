@@ -4,18 +4,22 @@
 package cog
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices"
 )
 
+func init() {
+	scanners.ScannerList["cog"] = []scanners.IAzureScanner{&CognitiveScanner{}}
+}
+
 // CognitiveScanner - Scanner for Cognitive Services Accounts
 type CognitiveScanner struct {
-	config *azqr.ScannerConfig
+	config *scanners.ScannerConfig
 	client *armcognitiveservices.AccountsClient
 }
 
 // Init - Initializes the CognitiveScanner
-func (a *CognitiveScanner) Init(config *azqr.ScannerConfig) error {
+func (a *CognitiveScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armcognitiveservices.NewAccountsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (a *CognitiveScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Cognitive Services Accounts in a Resource Group
-func (c *CognitiveScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+func (c *CognitiveScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	eventHubs, err := c.listEventHubs()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, eventHub := range eventHubs {
 		rr := engine.EvaluateRecommendations(rules, eventHub, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*eventHub.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*eventHub.ID),
 			ServiceName:      *eventHub.Name,
 			Type:             *eventHub.Type,
 			Location:         *eventHub.Location,

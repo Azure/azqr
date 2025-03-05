@@ -6,12 +6,12 @@ package sql
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 )
 
 // GetRecommendations - Returns the rules for the SQLScanner
-func (a *SQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
+func (a *SQLScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
 	result := a.getServerRules()
 	for k, v := range a.getDatabaseRules() {
 		result[k] = v
@@ -22,15 +22,15 @@ func (a *SQLScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
 	return result
 }
 
-func (a *SQLScanner) getServerRules() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *SQLScanner) getServerRules() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"sql-004": {
 			RecommendationID: "sql-004",
 			ResourceType:     "Microsoft.Sql/servers",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "SQL should have private endpoints enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Server)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -39,10 +39,10 @@ func (a *SQLScanner) getServerRules() map[string]azqr.AzqrRecommendation {
 		"sql-006": {
 			RecommendationID: "sql-006",
 			ResourceType:     "Microsoft.Sql/servers",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "SQL Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Server)
 				caf := strings.HasPrefix(*c.Name, "sql")
 				return !caf, ""
@@ -52,10 +52,10 @@ func (a *SQLScanner) getServerRules() map[string]azqr.AzqrRecommendation {
 		"sql-007": {
 			RecommendationID: "sql-007",
 			ResourceType:     "Microsoft.Sql/servers",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "SQL should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Server)
 				return len(c.Tags) == 0, ""
 			},
@@ -64,10 +64,10 @@ func (a *SQLScanner) getServerRules() map[string]azqr.AzqrRecommendation {
 		"sql-008": {
 			RecommendationID: "sql-008",
 			ResourceType:     "Microsoft.Sql/servers",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "SQL should enforce TLS >= 1.2",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Server)
 				return c.Properties.MinimalTLSVersion == nil || *c.Properties.MinimalTLSVersion != "1.2", ""
 			},
@@ -76,15 +76,15 @@ func (a *SQLScanner) getServerRules() map[string]azqr.AzqrRecommendation {
 	}
 }
 
-func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *SQLScanner) getDatabaseRules() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"sqldb-001": {
 			RecommendationID: "sqldb-001",
 			ResourceType:     "Microsoft.Sql/servers/databases",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "SQL Database should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armsql.Database)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -93,11 +93,11 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 		"sqldb-003": {
 			RecommendationID:   "sqldb-003",
 			ResourceType:       "Microsoft.Sql/servers/databases",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "SQL Database should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armsql.Database)
 				sla := "99.99%"
 				if i.Properties.ZoneRedundant != nil && *i.Properties.ZoneRedundant && *i.SKU.Tier == "Premium" {
@@ -109,10 +109,10 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 		"sqldb-006": {
 			RecommendationID: "sqldb-006",
 			ResourceType:     "Microsoft.Sql/servers/databases",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "SQL Database Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Database)
 				caf := *c.Name == "master" || strings.HasPrefix(*c.Name, "sqldb")
 				return !caf, ""
@@ -122,10 +122,10 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 		"sqldb-007": {
 			RecommendationID: "sqldb-007",
 			ResourceType:     "Microsoft.Sql/servers/databases",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "SQL Database should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.Database)
 				return len(c.Tags) == 0, ""
 			},
@@ -134,15 +134,15 @@ func (a *SQLScanner) getDatabaseRules() map[string]azqr.AzqrRecommendation {
 	}
 }
 
-func (a *SQLScanner) getPoolRules() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *SQLScanner) getPoolRules() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"sqlep-002": {
 			RecommendationID: "sqlep-002",
 			ResourceType:     "Microsoft.Sql/servers/elasticPools",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "SQL Elastic Pool Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.ElasticPool)
 				caf := strings.HasPrefix(*c.Name, "sqlep")
 				return !caf, ""
@@ -152,10 +152,10 @@ func (a *SQLScanner) getPoolRules() map[string]azqr.AzqrRecommendation {
 		"sqlep-003": {
 			RecommendationID: "sqlep-003",
 			ResourceType:     "Microsoft.Sql/servers/elasticPools",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "SQL Elastic Pool should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armsql.ElasticPool)
 				return len(c.Tags) == 0, ""
 			},

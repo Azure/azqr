@@ -21,7 +21,7 @@ func renderAdvisor(f *excelize.File, data *renderers.ReportData) {
 	headers := records[0]
 	createFirstRow(f, "Advisor", headers)
 
-	if len(data.AdvisorData) > 0 {
+	if len(data.Advisor) > 0 {
 		records = records[1:]
 		currentRow := 4
 		for _, row := range records {

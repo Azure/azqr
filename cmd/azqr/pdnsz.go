@@ -4,7 +4,6 @@
 package azqr
 
 import (
-	"github.com/Azure/azqr/internal/scanners"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +17,6 @@ var pdnszCmd = &cobra.Command{
 	Long:  "Scan Private DNS Zone",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		scan(cmd, scanners.ScannerList["pdnsz"])
+		scan(cmd, []string{"pdnsz"})
 	},
 }

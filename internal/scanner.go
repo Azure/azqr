@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
@@ -26,6 +25,7 @@ import (
 
 type (
 	ScanParams struct {
+		ManagementGroupID       string
 		SubscriptionID          string
 		ResourceGroup           string
 		OutputName              string
@@ -36,9 +36,9 @@ type (
 		Csv                     bool
 		Json                    bool
 		Debug                   bool
-		ServiceScanners         []azqr.IAzureScanner
+		ScannerKeys             []string
 		ForceAzureCliCredential bool
-		FilterFile              string
+		Filters                 *scanners.Filters
 		UseAzqrRecommendations  bool
 		UseAprlRecommendations  bool
 	}
@@ -58,9 +58,13 @@ func (sc Scanner) Scan(params *ScanParams) {
 	outputFile := sc.generateOutputFileName(params.OutputName)
 
 	// load filters
-	filters := azqr.LoadFilters(params.FilterFile)
+	filters := params.Filters
 
 	// validate input
+	if params.ManagementGroupID != "" && (params.SubscriptionID != "" || params.ResourceGroup != "") {
+		log.Fatal().Msg("Management Group name cannot be used with a Subscription Id or Resource Group name")
+	}
+
 	if params.SubscriptionID == "" && params.ResourceGroup != "" {
 		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
 	}
@@ -73,10 +77,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 		filters.Azqr.AddResourceGroup(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", params.SubscriptionID, params.ResourceGroup))
 	}
 
-	serviceScanners := params.ServiceScanners
-	if len(params.ServiceScanners) > 1 && len(filters.Azqr.Include.ResourceTypes) > 0 {
-		serviceScanners = scanners.GetScannerByKeys(filters.Azqr.Include.ResourceTypes)
-	}
+	serviceScanners := filters.Azqr.Scanners
 
 	// create Azure credentials
 	cred := sc.newAzureCredential(params.ForceAzureCliCredential)
@@ -97,8 +98,14 @@ func (sc Scanner) Scan(params *ScanParams) {
 	}
 
 	// list subscriptions. Key is subscription ID, value is subscription name
-	subscriptionScanner := scanners.SubcriptionScanner{}
-	subscriptions := subscriptionScanner.ListSubscriptions(ctx, cred, params.SubscriptionID, filters, clientOptions)
+	var subscriptions map[string]string
+	if params.ManagementGroupID != "" {
+		managementGroupScanner := scanners.ManagementGroupsScanner{}
+		subscriptions = managementGroupScanner.ListSubscriptions(ctx, cred, params.ManagementGroupID, filters, clientOptions)
+	} else {
+		subscriptionScanner := scanners.SubcriptionScanner{}
+		subscriptions = subscriptionScanner.ListSubscriptions(ctx, cred, params.SubscriptionID, filters, clientOptions)
+	}
 
 	// initialize scanners
 	defenderScanner := scanners.DefenderScanner{}
@@ -113,11 +120,11 @@ func (sc Scanner) Scan(params *ScanParams) {
 	reportData := renderers.NewReportData(outputFile, params.Mask)
 
 	// get the APRL scan results
-	aprlScanner := AprlScanner{}
-	reportData.Recomendations, reportData.AprlData = aprlScanner.Scan(ctx, cred, serviceScanners, filters, subscriptions)
+	aprlScanner := NewAprlScanner(serviceScanners, filters, subscriptions)
+	reportData.Recommendations, reportData.Aprl = aprlScanner.Scan(ctx, cred)
 
 	resourceScanner := scanners.ResourceScanner{}
-	reportData.Resources = resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)
+	reportData.Resources, reportData.ExludedResources = resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)
 
 	// For each service scanner, get the recommendations list
 	if params.UseAzqrRecommendations {
@@ -127,15 +134,15 @@ func (sc Scanner) Scan(params *ScanParams) {
 					continue
 				}
 
-				if r.RecommendationType != azqr.TypeRecommendation {
+				if r.RecommendationType != scanners.TypeRecommendation {
 					continue
 				}
 
-				if reportData.Recomendations[strings.ToLower(r.ResourceType)] == nil {
-					reportData.Recomendations[strings.ToLower(r.ResourceType)] = map[string]azqr.AprlRecommendation{}
+				if reportData.Recommendations[strings.ToLower(r.ResourceType)] == nil {
+					reportData.Recommendations[strings.ToLower(r.ResourceType)] = map[string]scanners.AprlRecommendation{}
 				}
 
-				reportData.Recomendations[strings.ToLower(r.ResourceType)][i] = r.ToAzureAprlRecommendation()
+				reportData.Recommendations[strings.ToLower(r.ResourceType)][i] = r.ToAzureAprlRecommendation()
 			}
 		}
 
@@ -150,7 +157,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 
 	// scan each subscription with AZQR scanners
 	for sid, sn := range subscriptions {
-		config := &azqr.ScannerConfig{
+		config := &scanners.ScannerConfig{
 			Ctx:              ctx,
 			SubscriptionID:   sid,
 			SubscriptionName: sn,
@@ -166,7 +173,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 			pips := pipScanner.Scan(config)
 
 			// initialize scan context
-			scanContext := azqr.ScanContext{
+			scanContext := scanners.ScanContext{
 				Filters:             filters,
 				PrivateEndpoints:    peResults,
 				DiagnosticsSettings: diagResults,
@@ -174,7 +181,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 			}
 
 			// scan each resource group
-			ch := make(chan []azqr.AzqrServiceResult, len(serviceScanners))
+			ch := make(chan []scanners.AzqrServiceResult, len(serviceScanners))
 
 			for _, s := range serviceScanners {
 				err := s.Init(config)
@@ -182,7 +189,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 					log.Fatal().Err(err).Msg("Failed to initialize scanner")
 				}
 
-				go func(s azqr.IAzureScanner) {
+				go func(s scanners.IAzureScanner) {
 					res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
 					if err != nil {
 						cancel()
@@ -199,25 +206,29 @@ func (sc Scanner) Scan(params *ScanParams) {
 					if filters.Azqr.IsServiceExcluded(r.ResourceID()) {
 						continue
 					}
-					reportData.AzqrData = append(reportData.AzqrData, r)
+					reportData.Azqr = append(reportData.Azqr, r)
 				}
 			}
 		}
 
 		// scan defender
-		reportData.DefenderData = append(reportData.DefenderData, defenderScanner.Scan(params.Defender, config)...)
+		reportData.Defender = append(reportData.Defender, defenderScanner.Scan(params.Defender, config)...)
 
 		// scan advisor
-		reportData.AdvisorData = append(reportData.AdvisorData, advisorScanner.Scan(params.Advisor, config)...)
+		reportData.Advisor = append(reportData.Advisor, advisorScanner.Scan(params.Advisor, config, filters)...)
 
 		// scan costs
 		costs := costScanner.Scan(params.Cost, config)
-		reportData.CostData.From = costs.From
-		reportData.CostData.To = costs.To
-		reportData.CostData.Items = append(reportData.CostData.Items, costs.Items...)
+		reportData.Cost.From = costs.From
+		reportData.Cost.To = costs.To
+		reportData.Cost.Items = append(reportData.Cost.Items, costs.Items...)
 	}
 
-	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, reportData.Recomendations)
+	// get the count of resources per resource type
+	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, reportData.Recommendations, filters)
+
+	// get the defender recommendations
+	reportData.DefenderRecommendations = append(reportData.DefenderRecommendations, defenderScanner.GetRecommendations(ctx, params.Defender, cred, subscriptions, filters)...)
 
 	// render excel report
 	excel.CreateExcelReport(&reportData)
@@ -236,7 +247,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 }
 
 // retry retries the Azure scanner Scan, a number of times with an increasing delay between retries
-func (sc Scanner) retry(attempts int, sleep time.Duration, a azqr.IAzureScanner, scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
+func (sc Scanner) retry(attempts int, sleep time.Duration, a scanners.IAzureScanner, scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
 	var err error
 	for i := 0; ; i++ {
 		res, err := a.Scan(scanContext)
@@ -244,8 +255,8 @@ func (sc Scanner) retry(attempts int, sleep time.Duration, a azqr.IAzureScanner,
 			return res, nil
 		}
 
-		if azqr.ShouldSkipError(err) {
-			return []azqr.AzqrServiceResult{}, nil
+		if scanners.ShouldSkipError(err) {
+			return []scanners.AzqrServiceResult{}, nil
 		}
 
 		errAsString := err.Error()

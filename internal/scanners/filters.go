@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-package azqr
+package scanners
 
 import (
 	"os"
@@ -20,10 +20,12 @@ type (
 		Exclude          *ExcludeFilter `yaml:"exclude"`
 		iSubscriptions   map[string]bool
 		iResourceGroups  map[string]bool
+		iResourceTypes   map[string]bool
 		xSubscriptions   map[string]bool
 		xResourceGroups  map[string]bool
 		xServices        map[string]bool
 		xRecommendations map[string]bool
+		Scanners         []IAzureScanner
 	}
 
 	// ExcludeFilter - Struct for ExcludeFilter
@@ -69,14 +71,29 @@ func (e *AzqrFilter) IsSubscriptionExcluded(subscriptionID string) bool {
 }
 
 func (e *AzqrFilter) IsServiceExcluded(resourceID string) bool {
-	rgID := GetResourceGroupIDFromResourceID(resourceID)
-	ok := e.isResourceGroupExcluded(rgID)
+	t := GetResourceTypeFromResourceID(resourceID)
+	if _, included := e.iResourceTypes[strings.ToLower(t)]; included {
+		sID := GetSubscriptionFromResourceID(resourceID)
+		excluded := e.IsSubscriptionExcluded(sID)
 
-	if !ok {
-		_, ok = e.xServices[strings.ToLower(resourceID)]
+		if !excluded {
+			rgID := GetResourceGroupIDFromResourceID(resourceID)
+			excluded = e.isResourceGroupExcluded(rgID)
+
+			if !excluded {
+				_, excluded = e.xServices[strings.ToLower(resourceID)]
+			}
+		}
+
+		if excluded {
+			log.Debug().Msgf("Service is excluded: %s", resourceID)
+		}
+
+		return excluded
+	} else {
+		log.Debug().Msgf("Service type is excluded: %s", t)
+		return true
 	}
-
-	return ok
 }
 
 func (e *AzqrFilter) IsRecommendationExcluded(recommendationID string) bool {
@@ -84,7 +101,12 @@ func (e *AzqrFilter) IsRecommendationExcluded(recommendationID string) bool {
 	return ok
 }
 
-func LoadFilters(filterFile string) *Filters {
+func (e *AzqrFilter) IsResourceTypeExcluded(resourceType string) bool {
+	_, ok := e.iResourceTypes[strings.ToLower(resourceType)]
+	return !ok
+}
+
+func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 	filters := &Filters{
 		Azqr: &AzqrFilter{
 			Include: &IncludeFilter{
@@ -98,6 +120,7 @@ func LoadFilters(filterFile string) *Filters {
 				Services:        []string{},
 				Recommendations: []string{},
 			},
+			Scanners: []IAzureScanner{},
 		},
 	}
 
@@ -131,6 +154,29 @@ func LoadFilters(filterFile string) *Filters {
 	filters.Azqr.xRecommendations = make(map[string]bool)
 	for _, id := range filters.Azqr.Exclude.Recommendations {
 		filters.Azqr.xRecommendations[strings.ToLower(id)] = true
+	}
+
+	s := []IAzureScanner{}
+
+	if len(scannerKeys) > 1 && len(filters.Azqr.Include.ResourceTypes) > 0 {
+		for _, key := range filters.Azqr.Include.ResourceTypes {
+			if scannerList, exists := ScannerList[key]; exists {
+				s = append(s, scannerList...)
+			}
+		}
+	} else if len(scannerKeys) == 1 {
+		s = append(s, ScannerList[scannerKeys[0]]...)
+	} else {
+		_, s = GetScanners()
+	}
+
+	filters.Azqr.Scanners = s
+
+	filters.Azqr.iResourceTypes = make(map[string]bool)
+	for _, t := range s {
+		for _, r := range t.ResourceTypes() {
+			filters.Azqr.iResourceTypes[strings.ToLower(r)] = true
+		}
 	}
 
 	return filters

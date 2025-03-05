@@ -1,0 +1,50 @@
+- description: App Service plans without hosting Apps
+  aprlGuid: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/serverFarms
+  recommendationMetadataState: Active
+  longDescription: |
+    App Service plans without hosting Apps.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: App Service plans
+      url: "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans"
+
+- description: API Connections not related to any Logic App
+  aprlGuid: 2d3e4f5a-6b7c-8d9e-0f1a-2b3c4d5e6f7a
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/connections
+  recommendationMetadataState: Active
+  longDescription: |
+    API Connections not related to any Logic App.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: API Connections
+      url: "https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-overview"
+
+- description: Expired certificates
+  aprlGuid: 3e4f5a6b-7c8d-9e0f-1a2b-3c4d5e6f7a8b
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/certificates
+  recommendationMetadataState: Active
+  longDescription: |
+    Expired certificates.
+  potentialBenefits: Identifies expired certificates
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Certificates
+      url: "https://learn.microsoft.com/en-us/azure/app-service/configure-ssl-certificate"

@@ -6,21 +6,21 @@ package ca
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
 // GetRecommendations - Returns the rules for the ContainerAppsScanner
-func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *ContainerAppsScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"ca-003": {
 			RecommendationID:   "ca-003",
 			ResourceType:       "Microsoft.App/containerApps",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "ContainerApp should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.95%"
 			},
 			LearnMoreUrl: "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
@@ -28,10 +28,10 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 		"ca-006": {
 			RecommendationID: "ca-006",
 			ResourceType:     "Microsoft.App/containerApps",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "ContainerApp Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
 				caf := strings.HasPrefix(*c.Name, "ca")
 				return !caf, ""
@@ -41,10 +41,10 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 		"ca-007": {
 			RecommendationID: "ca-007",
 			ResourceType:     "Microsoft.App/containerApps",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "ContainerApp should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
 				return len(c.Tags) == 0, ""
 			},
@@ -53,10 +53,10 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 		"ca-008": {
 			RecommendationID: "ca-008",
 			ResourceType:     "Microsoft.App/containerApps",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "ContainerApp should not allow insecure ingress traffic",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
 				if c.Properties.Configuration != nil && c.Properties.Configuration.Ingress != nil && c.Properties.Configuration.Ingress.AllowInsecure != nil {
 					return *c.Properties.Configuration.Ingress.AllowInsecure, ""
@@ -68,10 +68,10 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 		"ca-009": {
 			RecommendationID: "ca-009",
 			ResourceType:     "Microsoft.App/containerApps",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "ContainerApp should use Managed Identities",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
 				return c.Identity == nil || c.Identity.Type == nil || *c.Identity.Type == armappcontainers.ManagedServiceIdentityTypeNone, ""
 			},
@@ -80,10 +80,10 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 		"ca-010": {
 			RecommendationID: "ca-010",
 			ResourceType:     "Microsoft.App/containerApps",
-			Category:         azqr.CategoryHighAvailability,
+			Category:         scanners.CategoryHighAvailability,
 			Recommendation:   "ContainerApp should use Azure Files to persist container data",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
 				ok := true
 				if c.Properties.Template != nil && c.Properties.Template.Volumes != nil {
@@ -101,10 +101,10 @@ func (a *ContainerAppsScanner) GetRecommendations() map[string]azqr.AzqrRecommen
 		"ca-011": {
 			RecommendationID: "ca-011",
 			ResourceType:     "Microsoft.App/containerApps",
-			Category:         azqr.CategoryHighAvailability,
+			Category:         scanners.CategoryHighAvailability,
 			Recommendation:   "ContainerApp should avoid using session affinity",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armappcontainers.ContainerApp)
 				return c.Properties.Configuration != nil &&
 					c.Properties.Configuration.Ingress != nil &&

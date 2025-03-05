@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
@@ -12,8 +11,8 @@ import (
 
 type ResourceScanner struct{}
 
-func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *azqr.Filters) []*azqr.Resource {
-	azqr.LogResourceTypeScan("Resources")
+func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *Filters) ([]*Resource, []*Resource) {
+	LogResourceTypeScan("Resources")
 
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind"
@@ -23,14 +22,11 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 		subs = append(subs, &s)
 	}
 	result := graphClient.Query(ctx, query, subs)
-	resources := []*azqr.Resource{}
+	resources := []*Resource{}
+	excludedResources := []*Resource{}
 	if result.Data != nil {
 		for _, row := range result.Data {
 			m := row.(map[string]interface{})
-
-			if filters.Azqr.IsServiceExcluded(m["id"].(string)) {
-				continue
-			}
 
 			skuName := ""
 			if m["sku_name"] != nil {
@@ -57,9 +53,26 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 				location = m["location"].(string)
 			}
 
+			if filters.Azqr.IsServiceExcluded(m["id"].(string)) {
+				excludedResources = append(
+					excludedResources,
+					&Resource{
+						ID:             m["id"].(string),
+						SubscriptionID: m["subscriptionId"].(string),
+						ResourceGroup:  resourceGroup,
+						Location:       location,
+						Type:           m["type"].(string),
+						Name:           m["name"].(string),
+						SkuName:        skuName,
+						SkuTier:        skuTier,
+						Kind:           kind})
+
+				continue
+			}
+
 			resources = append(
 				resources,
-				&azqr.Resource{
+				&Resource{
 					ID:             m["id"].(string),
 					SubscriptionID: m["subscriptionId"].(string),
 					ResourceGroup:  resourceGroup,
@@ -71,11 +84,11 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 					Kind:           kind})
 		}
 	}
-	return resources
+	return resources, excludedResources
 }
 
-func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]azqr.AprlRecommendation) []azqr.ResourceTypeCount {
-	azqr.LogResourceTypeScan("Resource Count per Subscription and Type")
+func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]AprlRecommendation, filters *Filters) []ResourceTypeCount {
+	LogResourceTypeScan("Resource Count per Subscription and Type")
 
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | summarize count() by subscriptionId, type | order by subscriptionId, type"
@@ -85,11 +98,16 @@ func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azco
 		subs = append(subs, &s)
 	}
 	result := graphClient.Query(ctx, query, subs)
-	resources := make([]azqr.ResourceTypeCount, len(result.Data))
+	resources := []ResourceTypeCount{}
 	if result.Data != nil {
-		for i, row := range result.Data {
+		for _, row := range result.Data {
 			m := row.(map[string]interface{})
-			resources[i] = azqr.ResourceTypeCount{
+
+			if filters.Azqr.IsResourceTypeExcluded(strings.ToLower(m["type"].(string))) {
+				continue
+			}
+
+			resources = append(resources, ResourceTypeCount{
 				Subscription:    subscriptions[m["subscriptionId"].(string)],
 				ResourceType:    m["type"].(string),
 				Count:           m["count_"].(float64),
@@ -97,13 +115,13 @@ func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azco
 				Custom1:         "",
 				Custom2:         "",
 				Custom3:         "",
-			}
+			})
 		}
 	}
 	return resources
 }
 
-func (sc ResourceScanner) isAvailableInAPRL(resourceType string, recommendations map[string]map[string]azqr.AprlRecommendation) string {
+func (sc ResourceScanner) isAvailableInAPRL(resourceType string, recommendations map[string]map[string]AprlRecommendation) string {
 	_, available := recommendations[strings.ToLower(resourceType)]
 	if available {
 		return "Yes"

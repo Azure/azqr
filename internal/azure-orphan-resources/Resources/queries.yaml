@@ -1,0 +1,16 @@
+- description: Resource Groups without resources
+  aprlGuid: 1c2d3e4f-5a6b-7c8d-9e0f-1a2b3c4d5e6f
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Resources/resourceGroups
+  recommendationMetadataState: Active
+  longDescription: |
+    Resource Groups without resources.
+  potentialBenefits: Identifies unused resources
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+    - name: Resource Groups
+      url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/overview"

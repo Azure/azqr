@@ -6,20 +6,20 @@ package cog
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices"
 )
 
 // GetRecommendations - Returns the rules for the CognitiveScanner
-func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *CognitiveScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"cog-001": {
 			RecommendationID: "cog-001",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Cognitive Service Account should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armcognitiveservices.Account)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"cog-003": {
 			RecommendationID:   "cog-003",
 			ResourceType:       "Microsoft.CognitiveServices/accounts",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Cognitive Service Account should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				return false, "99.9%"
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
@@ -41,10 +41,10 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"cog-004": {
 			RecommendationID: "cog-004",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Cognitive Service Account should have private endpoints enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armcognitiveservices.Account)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -54,10 +54,10 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"cog-006": {
 			RecommendationID: "cog-006",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Cognitive Service Account Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcognitiveservices.Account)
 				switch strings.ToLower(*c.Kind) {
 				case "openai":
@@ -95,10 +95,10 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"cog-007": {
 			RecommendationID: "cog-007",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Cognitive Service Account should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcognitiveservices.Account)
 				return len(c.Tags) == 0, ""
 			},
@@ -107,10 +107,10 @@ func (a *CognitiveScanner) GetRecommendations() map[string]azqr.AzqrRecommendati
 		"cog-008": {
 			RecommendationID: "cog-008",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Cognitive Service Account should have local authentication disabled",
-			Impact:           azqr.ImpactMedium,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armcognitiveservices.Account)
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""

@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Get all private DNS zones without virtual network links
+resources
+| where type == "microsoft.network/privatednszones"
+| where properties.numberOfVirtualNetworkLinks == 0
+| project recommendationId="7e8f9a0b-1c2d-3e4f-5a6b-7c8d9e0f1a2b", name, id, tags, param1=strcat("NumberOfRecordSets: ", properties.numberOfRecordSets)

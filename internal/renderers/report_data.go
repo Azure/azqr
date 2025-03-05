@@ -8,23 +8,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azqr/internal/azqr"
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/google/uuid"
 )
 
 type (
 	ReportData struct {
-		OutputFileName    string
-		Mask              bool
-		AzqrData          []azqr.AzqrServiceResult
-		AprlData          []azqr.AprlResult
-		DefenderData      []scanners.DefenderResult
-		AdvisorData       []scanners.AdvisorResult
-		CostData          *scanners.CostResult
-		Recomendations    map[string]map[string]azqr.AprlRecommendation
-		Resources         []*azqr.Resource
-		ResourceTypeCount []azqr.ResourceTypeCount
+		OutputFileName          string
+		Mask                    bool
+		Azqr                    []scanners.AzqrServiceResult
+		Aprl                    []scanners.AprlResult
+		Defender                []scanners.DefenderResult
+		DefenderRecommendations []scanners.DefenderRecommendation
+		Advisor                 []scanners.AdvisorResult
+		Cost                    *scanners.CostResult
+		Recommendations         map[string]map[string]scanners.AprlRecommendation
+		Resources               []*scanners.Resource
+		ExludedResources        []*scanners.Resource
+		ResourceTypeCount       []scanners.ResourceTypeCount
 	}
 
 	ResourceResult struct {
@@ -46,7 +46,7 @@ type (
 	}
 
 	ResourceTypeCountResults struct {
-		ResourceType []azqr.ResourceTypeCount `json:"ResourceType"`
+		ResourceType []scanners.ResourceTypeCount `json:"ResourceType"`
 	}
 
 	RetirementResult struct {
@@ -65,50 +65,18 @@ type (
 )
 
 func (rd *ReportData) ResourcesTable() [][]string {
-	headers := []string{"Subscription ID", "Resource Group", "Location", "Type", "Name", "Sku Name", "Sku Tier", "Kind", "SLA", "Resource ID"}
+	return rd.resourcesTable(rd.Resources)
+}
 
-	rows := [][]string{}
-	for _, r := range rd.Resources {
-		sla := ""
-
-		for _, a := range rd.AzqrData {
-			if strings.EqualFold(strings.ToLower(a.ResourceID()), strings.ToLower(r.ID)) {
-				for _, rc := range a.Recommendations {
-					if rc.RecommendationType == azqr.TypeSLA {
-						sla = rc.Result
-						break
-					}
-				}
-				if sla != "" {
-					break
-				}
-			}
-		}
-
-		row := []string{
-			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
-			r.ResourceGroup,
-			r.Location,
-			r.Type,
-			r.Name,
-			r.SkuName,
-			r.SkuTier,
-			r.Kind,
-			sla,
-			r.ID,
-		}
-		rows = append(rows, row)
-	}
-
-	rows = append([][]string{headers}, rows...)
-	return rows
+func (rd *ReportData) ExcludedResourcesTable() [][]string {
+	return rd.resourcesTable(rd.ExludedResources)
 }
 
 func (rd *ReportData) ImpactedTable() [][]string {
-	headers := []string{"Validated Using", "Source", "Category", "Impact", "Resource Type", "Recommendation", "Recommendation Id", "Subscription Id", "Subscription Name", "Resource Group", "Name", "Id", "Param1", "Param2", "Param3", "Param4", "Param5", "Learn"}
+	headers := []string{"Validated Using", "Source", "Category", "Impact", "Resource Type", "Recommendation", "Recommendation Id", "Subscription Id", "Subscription Name", "Resource Group", "Resource Name", "Resource Id", "Param1", "Param2", "Param3", "Param4", "Param5", "Learn"}
 
 	rows := [][]string{}
-	for _, r := range rd.AprlData {
+	for _, r := range rd.Aprl {
 		row := []string{
 			"Azure Resource Graph",
 			r.Source,
@@ -132,7 +100,7 @@ func (rd *ReportData) ImpactedTable() [][]string {
 		rows = append(rows, row)
 	}
 
-	for _, d := range rd.AzqrData {
+	for _, d := range rd.Azqr {
 		for _, r := range d.Recommendations {
 			if r.NotCompliant {
 				row := []string{
@@ -165,13 +133,13 @@ func (rd *ReportData) ImpactedTable() [][]string {
 }
 
 func (rd *ReportData) CostTable() [][]string {
-	headers := []string{"From", "To", "Subscription", "Subscription Name", "ServiceName", "Value", "Currency"}
+	headers := []string{"From", "To", "Subscription Id", "Subscription Name", "Service Name", "Value", "Currency"}
 
 	rows := [][]string{}
-	for _, r := range rd.CostData.Items {
+	for _, r := range rd.Cost.Items {
 		row := []string{
-			rd.CostData.From.Format("2006-01-02"),
-			rd.CostData.To.Format("2006-01-02"),
+			rd.Cost.From.Format("2006-01-02"),
+			rd.Cost.To.Format("2006-01-02"),
 			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
 			r.SubscriptionName,
 			r.ServiceName,
@@ -186,9 +154,9 @@ func (rd *ReportData) CostTable() [][]string {
 }
 
 func (rd *ReportData) DefenderTable() [][]string {
-	headers := []string{"Subscription", "Subscription Name", "Name", "Tier", "Deprecated"}
+	headers := []string{"Subscription Id", "Subscription Name", "Name", "Tier", "Deprecated"}
 	rows := [][]string{}
-	for _, d := range rd.DefenderData {
+	for _, d := range rd.Defender {
 		row := []string{
 			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 			d.SubscriptionName,
@@ -204,9 +172,9 @@ func (rd *ReportData) DefenderTable() [][]string {
 }
 
 func (rd *ReportData) AdvisorTable() [][]string {
-	headers := []string{"Subscription", "Subscription Name", "Type", "Name", "Category", "Impact", "Description", "ResourceID", "RecommendationID"}
+	headers := []string{"Subscription Id", "Subscription Name", "Resource Type", "Resource Name", "Category", "Impact", "Description", "Resource Id", "Recommendation Id"}
 	rows := [][]string{}
-	for _, d := range rd.AdvisorData {
+	for _, d := range rd.Advisor {
 		row := []string{
 			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
 			d.SubscriptionName,
@@ -215,7 +183,7 @@ func (rd *ReportData) AdvisorTable() [][]string {
 			d.Category,
 			d.Impact,
 			d.Description,
-			d.ResourceID,
+			MaskSubscriptionIDInResourceID(d.ResourceID, rd.Mask),
 			d.RecommendationID,
 		}
 		rows = append(rows, row)
@@ -227,17 +195,17 @@ func (rd *ReportData) AdvisorTable() [][]string {
 
 func (rd *ReportData) RecommendationsTable() [][]string {
 	counter := map[string]int{}
-	for _, rt := range rd.Recomendations {
+	for _, rt := range rd.Recommendations {
 		for _, r := range rt {
 			counter[r.RecommendationID] = 0
 		}
 	}
 
-	for _, r := range rd.AprlData {
+	for _, r := range rd.Aprl {
 		counter[r.RecommendationID]++
 	}
 
-	for _, d := range rd.AzqrData {
+	for _, d := range rd.Azqr {
 		for _, r := range d.Recommendations {
 			if r.NotCompliant {
 				counter[r.RecommendationID]++
@@ -249,15 +217,9 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 		"Azure Service Category / Well-Architected Area", "Azure Service / Well-Architected Topic", "Resiliency Category", "Recommendation",
 		"Impact", "Best Practices Guidance", "Read More", "Recommendation Id"}
 	rows := [][]string{}
-	for _, rt := range rd.Recomendations {
+	for _, rt := range rd.Recommendations {
 		for _, r := range rt {
 			implemented := counter[r.RecommendationID] == 0
-			source := "APRL"
-			_, err := uuid.Parse(r.RecommendationID)
-			if err != nil {
-				source = "AZQR"
-			}
-
 			categoryPart := ""
 			servicePart := ""
 			typeParts := strings.Split(r.ResourceType, "/")
@@ -270,7 +232,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 				fmt.Sprintf("%t", implemented),
 				fmt.Sprint(counter[r.RecommendationID]),
 				"Azure Service",
-				source,
+				r.Source,
 				categoryPart,
 				servicePart,
 				string(r.Category),
@@ -289,7 +251,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 }
 
 func (rd *ReportData) ResourceTypesTable() [][]string {
-	headers := []string{"Subscription", "Resource Type", "Number of Resources", "Available in APRL?", "Custom1", "Custom2", "Custom3"}
+	headers := []string{"Subscription Name", "Resource Type", "Number of Resources", "Available in APRL?", "Custom1", "Custom2", "Custom3"}
 	rows := [][]string{}
 	for _, r := range rd.ResourceTypeCount {
 		row := []string{
@@ -300,6 +262,31 @@ func (rd *ReportData) ResourceTypesTable() [][]string {
 			"",
 			"",
 			"",
+		}
+		rows = append(rows, row)
+	}
+
+	rows = append([][]string{headers}, rows...)
+	return rows
+}
+
+func (rd *ReportData) DefenderRecommendationsTable() [][]string {
+	headers := []string{"Subscription Id", "Subscription Name", "Resource Group", "Resource Type", "Resource Name", "Category", "Recommendation Severity", "Recommendation Name", "Action Description", "Remediation Description", "AzPortal Link", "Resource Id"}
+	rows := [][]string{}
+	for _, d := range rd.DefenderRecommendations {
+		row := []string{
+			MaskSubscriptionID(d.SubscriptionId, rd.Mask),
+			d.SubscriptionName,
+			d.ResourceGroupName,
+			d.ResourceType,
+			d.ResourceName,
+			d.Category,
+			d.RecommendationSeverity,
+			d.RecommendationName,
+			d.ActionDescription,
+			d.RemediationDescription,
+			d.AzPortalLink,
+			MaskSubscriptionIDInResourceID(d.ResourceId, rd.Mask),
 		}
 		rows = append(rows, row)
 	}
@@ -319,17 +306,18 @@ func (rd *ReportData) ResourceIDs() []*string {
 
 func NewReportData(outputFile string, mask bool) ReportData {
 	return ReportData{
-		OutputFileName: outputFile,
-		Mask:           mask,
-		Recomendations: map[string]map[string]azqr.AprlRecommendation{},
-		AzqrData:       []azqr.AzqrServiceResult{},
-		AprlData:       []azqr.AprlResult{},
-		DefenderData:   []scanners.DefenderResult{},
-		AdvisorData:    []scanners.AdvisorResult{},
-		CostData: &scanners.CostResult{
+		OutputFileName:          outputFile,
+		Mask:                    mask,
+		Recommendations:         map[string]map[string]scanners.AprlRecommendation{},
+		Azqr:                    []scanners.AzqrServiceResult{},
+		Aprl:                    []scanners.AprlResult{},
+		Defender:                []scanners.DefenderResult{},
+		DefenderRecommendations: []scanners.DefenderRecommendation{},
+		Advisor:                 []scanners.AdvisorResult{},
+		Cost: &scanners.CostResult{
 			Items: []*scanners.CostResultItem{},
 		},
-		ResourceTypeCount: []azqr.ResourceTypeCount{},
+		ResourceTypeCount: []scanners.ResourceTypeCount{},
 	}
 }
 
@@ -359,4 +347,44 @@ func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
 	parts[2] = MaskSubscriptionID(parts[2], mask)
 
 	return strings.Join(parts, "/")
+}
+
+func (rd *ReportData) resourcesTable(resources []*scanners.Resource) [][]string {
+	headers := []string{"Subscription Id", "Resource Group", "Location", "Resource Type", "Resource Name", "Sku Name", "Sku Tier", "Kind", "SLA", "Resource Id"}
+
+	rows := [][]string{}
+	for _, r := range resources {
+		sla := ""
+
+		for _, a := range rd.Azqr {
+			if strings.EqualFold(strings.ToLower(a.ResourceID()), strings.ToLower(r.ID)) {
+				for _, rc := range a.Recommendations {
+					if rc.RecommendationType == scanners.TypeSLA {
+						sla = rc.Result
+						break
+					}
+				}
+				if sla != "" {
+					break
+				}
+			}
+		}
+
+		row := []string{
+			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
+			r.ResourceGroup,
+			r.Location,
+			r.Type,
+			r.Name,
+			r.SkuName,
+			r.SkuTier,
+			r.Kind,
+			sla,
+			MaskSubscriptionIDInResourceID(r.ID, rd.Mask),
+		}
+		rows = append(rows, row)
+	}
+
+	rows = append([][]string{headers}, rows...)
+	return rows
 }

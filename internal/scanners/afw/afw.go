@@ -4,18 +4,22 @@
 package afw
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
+func init() {
+	scanners.ScannerList["afw"] = []scanners.IAzureScanner{&FirewallScanner{}}
+}
+
 // FirewallScanner - Scanner for Azure Firewall
 type FirewallScanner struct {
-	config *azqr.ScannerConfig
+	config *scanners.ScannerConfig
 	client *armnetwork.AzureFirewallsClient
 }
 
 // Init - Initializes the Azure Firewall
-func (a *FirewallScanner) Init(config *azqr.ScannerConfig) error {
+func (a *FirewallScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.client, err = armnetwork.NewAzureFirewallsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
@@ -23,24 +27,24 @@ func (a *FirewallScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan - Scans all Azure Firewall in a Resource Group
-func (a *FirewallScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *FirewallScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	gateways, err := a.list()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, g := range gateways {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*g.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*g.ID),
 			Location:         *g.Location,
 			Type:             *g.Type,
 			ServiceName:      *g.Name,
@@ -65,5 +69,5 @@ func (a *FirewallScanner) list() ([]*armnetwork.AzureFirewall, error) {
 }
 
 func (a *FirewallScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/azureFirewalls"}
+	return []string{"Microsoft.Network/azureFirewalls", "Microsoft.Network/ipGroups"}
 }

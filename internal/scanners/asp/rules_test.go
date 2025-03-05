@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 )
@@ -16,7 +16,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -34,7 +34,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				target: &armappservice.Plan{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -54,7 +54,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 						Tier: to.Ptr("Free"),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -70,7 +70,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 						Tier: to.Ptr("ElasticPremium"),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -84,7 +84,7 @@ func TestAppServiceScanner_Rules(t *testing.T) {
 				target: &armappservice.Plan{
 					Name: to.Ptr("asp-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -112,7 +112,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -130,7 +130,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				target: &armappservice.Site{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -148,7 +148,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				target: &armappservice.Site{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					PrivateEndpoints: map[string]bool{
 						"test": true,
 					},
@@ -166,7 +166,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 				target: &armappservice.Site{
 					Name: to.Ptr("app-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -182,7 +182,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 						HTTPSOnly: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -198,7 +198,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 						VirtualNetworkSubnetID: to.Ptr("test"),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -214,7 +214,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 						VirtualNetworkSubnetID: nil,
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -230,7 +230,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 						VnetRouteAllEnabled: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -246,7 +246,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 						VnetRouteAllEnabled: to.Ptr(false),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -262,7 +262,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 						VnetRouteAllEnabled: nil,
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -274,7 +274,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule:   "app-011",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -294,7 +294,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule:   "app-012",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -314,7 +314,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule:   "app-013",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -334,7 +334,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule:   "app-014",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -358,7 +358,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 						ClientAffinityEnabled: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -370,7 +370,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule:   "app-016",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -390,7 +390,7 @@ func TestAppServiceScanner_AppRules(t *testing.T) {
 			fields: fields{
 				rule:   "app-016",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -426,7 +426,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -444,7 +444,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				target: &armappservice.Site{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -462,7 +462,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				target: &armappservice.Site{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					PrivateEndpoints: map[string]bool{
 						"test": true,
 					},
@@ -480,7 +480,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 				target: &armappservice.Site{
 					Name: to.Ptr("func-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -496,7 +496,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 						HTTPSOnly: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -512,7 +512,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 						VirtualNetworkSubnetID: to.Ptr("test"),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -528,7 +528,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 						VirtualNetworkSubnetID: nil,
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -544,7 +544,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 						VnetRouteAllEnabled: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -560,7 +560,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 						VnetRouteAllEnabled: to.Ptr(false),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -576,7 +576,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 						VnetRouteAllEnabled: nil,
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -588,7 +588,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule:   "func-011",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -608,7 +608,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule:   "func-012",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -632,7 +632,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 						ClientAffinityEnabled: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -644,7 +644,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule:   "func-014",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -664,7 +664,7 @@ func TestAppServiceScanner_FunctionRules(t *testing.T) {
 			fields: fields{
 				rule:   "func-014",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -700,7 +700,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
-		scanContext *azqr.ScanContext
+		scanContext *scanners.ScanContext
 	}
 	type want struct {
 		broken bool
@@ -718,7 +718,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				target: &armappservice.Site{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					DiagnosticsSettings: map[string]bool{
 						"test": true,
 					},
@@ -736,7 +736,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				target: &armappservice.Site{
 					ID: to.Ptr("test"),
 				},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					PrivateEndpoints: map[string]bool{
 						"test": true,
 					},
@@ -754,7 +754,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 				target: &armappservice.Site{
 					Name: to.Ptr("logics-test"),
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -770,7 +770,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 						HTTPSOnly: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -786,7 +786,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 						VirtualNetworkSubnetID: to.Ptr("test"),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -802,7 +802,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 						VirtualNetworkSubnetID: nil,
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -818,7 +818,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 						VnetRouteAllEnabled: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: false,
@@ -834,7 +834,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 						VnetRouteAllEnabled: to.Ptr(false),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -850,7 +850,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 						VnetRouteAllEnabled: nil,
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -862,7 +862,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 			fields: fields{
 				rule:   "logics-011",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -882,7 +882,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 			fields: fields{
 				rule:   "logics-012",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -906,7 +906,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 						ClientAffinityEnabled: to.Ptr(true),
 					},
 				},
-				scanContext: &azqr.ScanContext{},
+				scanContext: &scanners.ScanContext{},
 			},
 			want: want{
 				broken: true,
@@ -918,7 +918,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 			fields: fields{
 				rule:   "logics-014",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{
@@ -938,7 +938,7 @@ func TestAppServiceScanner_LogicRules(t *testing.T) {
 			fields: fields{
 				rule:   "logics-014",
 				target: &armappservice.Site{},
-				scanContext: &azqr.ScanContext{
+				scanContext: &scanners.ScanContext{
 					SiteConfig: &armappservice.WebAppsClientGetConfigurationResponse{
 						SiteConfigResource: armappservice.SiteConfigResource{
 							Properties: &armappservice.SiteConfig{

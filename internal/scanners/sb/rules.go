@@ -6,20 +6,20 @@ package sb
 import (
 	"strings"
 
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 )
 
 // GetRecommendations - Returns the rules for the ServiceBusScanner
-func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendation {
-	return map[string]azqr.AzqrRecommendation{
+func (a *ServiceBusScanner) GetRecommendations() map[string]scanners.AzqrRecommendation {
+	return map[string]scanners.AzqrRecommendation{
 		"sb-001": {
 			RecommendationID: "sb-001",
 			ResourceType:     "Microsoft.ServiceBus/namespaces",
-			Category:         azqr.CategoryMonitoringAndAlerting,
+			Category:         scanners.CategoryMonitoringAndAlerting,
 			Recommendation:   "Service Bus should have diagnostic settings enabled",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				service := target.(*armservicebus.SBNamespace)
 				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
 				return !ok, ""
@@ -29,11 +29,11 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 		"sb-003": {
 			RecommendationID:   "sb-003",
 			ResourceType:       "Microsoft.ServiceBus/namespaces",
-			Category:           azqr.CategoryHighAvailability,
+			Category:           scanners.CategoryHighAvailability,
 			Recommendation:     "Service Bus should have a SLA",
-			RecommendationType: azqr.TypeSLA,
-			Impact:             azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			RecommendationType: scanners.TypeSLA,
+			Impact:             scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armservicebus.SBNamespace)
 				sku := string(*i.SKU.Name)
 				sla := "99.9%"
@@ -47,10 +47,10 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 		"sb-004": {
 			RecommendationID: "sb-004",
 			ResourceType:     "Microsoft.ServiceBus/namespaces",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Service Bus should have private endpoints enabled",
-			Impact:           azqr.ImpactHigh,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactHigh,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armservicebus.SBNamespace)
 				pe := len(i.Properties.PrivateEndpointConnections) > 0
 				return !pe, ""
@@ -60,10 +60,10 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 		"sb-006": {
 			RecommendationID: "sb-006",
 			ResourceType:     "Microsoft.ServiceBus/namespaces",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Service Bus Name should comply with naming conventions",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
 				caf := strings.HasPrefix(*c.Name, "sb")
 				return !caf, ""
@@ -73,10 +73,10 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 		"sb-007": {
 			RecommendationID: "sb-007",
 			ResourceType:     "Microsoft.ServiceBus/namespaces",
-			Category:         azqr.CategoryGovernance,
+			Category:         scanners.CategoryGovernance,
 			Recommendation:   "Service Bus should have tags",
-			Impact:           azqr.ImpactLow,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactLow,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
 				return len(c.Tags) == 0, ""
 			},
@@ -85,10 +85,10 @@ func (a *ServiceBusScanner) GetRecommendations() map[string]azqr.AzqrRecommendat
 		"sb-008": {
 			RecommendationID: "sb-008",
 			ResourceType:     "Microsoft.ServiceBus/namespaces",
-			Category:         azqr.CategorySecurity,
+			Category:         scanners.CategorySecurity,
 			Recommendation:   "Service Bus should have local authentication disabled",
-			Impact:           azqr.ImpactMedium,
-			Eval: func(target interface{}, scanContext *azqr.ScanContext) (bool, string) {
+			Impact:           scanners.ImpactMedium,
+			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armservicebus.SBNamespace)
 				localAuth := c.Properties.DisableLocalAuth != nil && *c.Properties.DisableLocalAuth
 				return !localAuth, ""

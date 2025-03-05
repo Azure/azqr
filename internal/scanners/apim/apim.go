@@ -4,18 +4,22 @@
 package apim
 
 import (
-	"github.com/Azure/azqr/internal/azqr"
+	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
 
+func init() {
+	scanners.ScannerList["apim"] = []scanners.IAzureScanner{&APIManagementScanner{}}
+}
+
 // APIManagementScanner - Scanner for API Management Services
 type APIManagementScanner struct {
-	config        *azqr.ScannerConfig
+	config        *scanners.ScannerConfig
 	serviceClient *armapimanagement.ServiceClient
 }
 
 // Init - Initializes the APIManagementScanner
-func (a *APIManagementScanner) Init(config *azqr.ScannerConfig) error {
+func (a *APIManagementScanner) Init(config *scanners.ScannerConfig) error {
 	a.config = config
 	var err error
 	a.serviceClient, err = armapimanagement.NewServiceClient(config.SubscriptionID, config.Cred, config.ClientOptions)
@@ -23,24 +27,24 @@ func (a *APIManagementScanner) Init(config *azqr.ScannerConfig) error {
 }
 
 // Scan -Scans all API Management Services in a Resource Group
-func (a *APIManagementScanner) Scan(scanContext *azqr.ScanContext) ([]azqr.AzqrServiceResult, error) {
-	azqr.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+func (a *APIManagementScanner) Scan(scanContext *scanners.ScanContext) ([]scanners.AzqrServiceResult, error) {
+	scanners.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	services, err := a.listServices()
 	if err != nil {
 		return nil, err
 	}
-	engine := azqr.RecommendationEngine{}
+	engine := scanners.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []azqr.AzqrServiceResult{}
+	results := []scanners.AzqrServiceResult{}
 
 	for _, s := range services {
 		rr := engine.EvaluateRecommendations(rules, s, scanContext)
 
-		results = append(results, azqr.AzqrServiceResult{
+		results = append(results, scanners.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    azqr.GetResourceGroupFromResourceID(*s.ID),
+			ResourceGroup:    scanners.GetResourceGroupFromResourceID(*s.ID),
 			ServiceName:      *s.Name,
 			Type:             *s.Type,
 			Location:         *s.Location,
