@@ -15,10 +15,10 @@ func CreateJsonReport(data *renderers.ReportData) {
 	writeData(data.ResourceTypesTable(), data.OutputFileName, "resourceType")
 	writeData(data.ResourcesTable(), data.OutputFileName, "inventory")
 	writeData(data.DefenderTable(), data.OutputFileName, "defender")
-  writeData(data.DefenderRecommendationsTable(), data.OutputFileName, "defenderRecommendations")
+  	writeData(data.DefenderRecommendationsTable(), data.OutputFileName, "defenderRecommendations")
 	writeData(data.AdvisorTable(), data.OutputFileName, "advisor")
 	writeData(data.CostTable(), data.OutputFileName, "costs")
-  writeData(data.ExcludedResourcesTable(), data.OutputFileName, "outofscope")
+  	writeData(data.ExcludedResourcesTable(), data.OutputFileName, "outofscope")
 }
 
 func writeData(data [][]string, fileName, extension string) {
