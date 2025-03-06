@@ -6,7 +6,6 @@ package renderers
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/Azure/azqr/internal/scanners"
 )
@@ -27,40 +26,8 @@ type (
 		ResourceTypeCount       []scanners.ResourceTypeCount
 	}
 
-	ResourceResult struct {
-		ValidationAction string `json:"validationAction"`
-		RecommendationId string `json:"recommendationId"`
-		Name             string `json:"name"`
-		Id               string `json:"id"`
-		Param1           string `json:"param1"`
-		Param2           string `json:"param2"`
-		Param3           string `json:"param3"`
-		Param4           string `json:"param4"`
-		Param5           string `json:"param5"`
-		CheckName        string `json:"checkName"`
-		Selector         string `json:"selector"`
-	}
-
-	ResourceResults struct {
-		Resource []ResourceResult `json:"Resource"`
-	}
-
 	ResourceTypeCountResults struct {
 		ResourceType []scanners.ResourceTypeCount `json:"ResourceType"`
-	}
-
-	RetirementResult struct {
-		Subscription    string    `json:"Subscription"`
-		TrackingId      string    `json:"TrackingId"`
-		Status          string    `json:"Status"`
-		LastUpdateTime  time.Time `json:"LastUpdateTime"`
-		Endtime         time.Time `json:"Endtime"`
-		Level           string    `json:"Level"`
-		Title           string    `json:"Title"`
-		Summary         string    `json:"Summary"`
-		Header          string    `json:"Header"`
-		ImpactedService string    `json:"ImpactedService"`
-		Description     string    `json:"Description"`
 	}
 )
 
