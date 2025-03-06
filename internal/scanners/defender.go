@@ -6,94 +6,62 @@ package scanners
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity"
 	"github.com/rs/zerolog/log"
 )
 
 // DefenderResult - Defender result
 type DefenderResult struct {
 	SubscriptionID, SubscriptionName, Name, Tier string
-	Deprecated                                   bool
 }
 
 // DefenderScanner - Defender scanner
-type DefenderScanner struct {
-	config       *ScannerConfig
-	client       *armsecurity.PricingsClient
-	defenderFunc func() ([]DefenderResult, error)
-}
+type DefenderScanner struct{}
 
-// Init - Initializes the Defender Scanner
-func (s *DefenderScanner) Init(config *ScannerConfig) error {
-	s.config = config
-	var err error
-	s.client, err = armsecurity.NewPricingsClient(config.Cred, config.ClientOptions)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *Filters) []DefenderResult {
+	LogResourceTypeScan("Defender Status")
+	resources := []DefenderResult{}
 
-// ListConfiguration - Lists Microsoft Defender for Cloud pricing configurations in the subscription.
-func (s *DefenderScanner) ListConfiguration() ([]DefenderResult, error) {
-	LogSubscriptionScan(s.config.SubscriptionID, "Defender Status")
-	if s.defenderFunc == nil {
-		resp, err := s.client.List(s.config.Ctx, fmt.Sprintf("subscriptions/%s", s.config.SubscriptionID), nil)
-		if err != nil {
-			if strings.Contains(err.Error(), "ERROR CODE: Subscription Not Registered") {
-				log.Info().Msg("Subscription Not Registered for Defender. Skipping Defender Scan...")
-				return []DefenderResult{}, nil
-			}
-
-			return nil, err
-		}
-
-		results := make([]DefenderResult, 0, len(resp.Value))
-		for _, v := range resp.Value {
-			deprecated := false
-			if v.Properties.Deprecated != nil {
-				deprecated = *v.Properties.Deprecated
-			}
-			result := DefenderResult{
-				SubscriptionID:   s.config.SubscriptionID,
-				SubscriptionName: s.config.SubscriptionName,
-				Name:             *v.Name,
-				Tier:             string(*v.Properties.PricingTier),
-				Deprecated:       deprecated,
-			}
-
-			results = append(results, result)
-		}
-		return results, nil
-	}
-
-	return s.defenderFunc()
-}
-
-func (s *DefenderScanner) Scan(scan bool, config *ScannerConfig) []DefenderResult {
-	defenderResults := []DefenderResult{}
 	if scan {
-		err := s.Init(config)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to initialize Defender Scanner")
+		graphClient := graph.NewGraphQuery(cred)
+		query := `
+		SecurityResources
+		| join kind=inner (
+			resourcecontainers
+			| where type == 'microsoft.resources/subscriptions'
+			| project subscriptionId, subscriptionName = name)
+		on subscriptionId
+		| where type == 'microsoft.security/pricings'
+		| project SubscriptionId = subscriptionId, SubscriptionName = subscriptionName, Name = name, Tier = properties.pricingTier
+		`
+		log.Debug().Msg(query)
+		subs := make([]*string, 0, len(subscriptions))
+		for s := range subscriptions {
+			subs = append(subs, &s)
 		}
+		result := graphClient.Query(ctx, query, subs)
+		resources = []DefenderResult{}
+		if result.Data != nil {
+			for _, row := range result.Data {
+				m := row.(map[string]interface{})
 
-		res, err := s.ListConfiguration()
-		if err != nil {
-			if ShouldSkipError(err) {
-				res = []DefenderResult{}
-			} else {
-				log.Fatal().Err(err).Msg("Failed to list Defender configuration")
+				if filters.Azqr.IsSubscriptionExcluded(to.String(m["SubscriptionId"])) {
+					continue
+				}
+
+				resources = append(resources, DefenderResult{
+					SubscriptionID:   to.String(m["SubscriptionId"]),
+					SubscriptionName: to.String(m["SubscriptionName"]),
+					Name:             to.String(m["Name"]),
+					Tier:             to.String(m["Tier"]),
+				})
 			}
 		}
-		defenderResults = append(defenderResults, res...)
 	}
-	return defenderResults
+	return resources
 }
 
 func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *Filters) []DefenderRecommendation {

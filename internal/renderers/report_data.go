@@ -154,7 +154,7 @@ func (rd *ReportData) CostTable() [][]string {
 }
 
 func (rd *ReportData) DefenderTable() [][]string {
-	headers := []string{"Subscription Id", "Subscription Name", "Name", "Tier", "Deprecated"}
+	headers := []string{"Subscription Id", "Subscription Name", "Name", "Tier"}
 	rows := [][]string{}
 	for _, d := range rd.Defender {
 		row := []string{
@@ -162,7 +162,6 @@ func (rd *ReportData) DefenderTable() [][]string {
 			d.SubscriptionName,
 			d.Name,
 			d.Tier,
-			fmt.Sprintf("%t", d.Deprecated),
 		}
 		rows = append(rows, row)
 	}
