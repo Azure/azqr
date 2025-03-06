@@ -4,9 +4,9 @@ Welcome to the Azure Quick Review Tutorial: a comprehensive guide on how to inst
 
 ## Table of Contents
 
-- [Installation](#installing-azure-quick-review): Step-by-step instructions for installing Azure Quick Review on various operating systems.
-- [Usage](#usage-of-azure-quick-review): Detailed guide on how to use Azure Quick Review after installation, including running scans and filtering recommendations.
-- [Examples](#scenario-scanning-all-resources-in-a-subscription): Practical examples demonstrating how to use Azure Quick Review effectively with sample commands and expected outputs.
+- [Installation](#installing-azure-quick-review) Step-by-step instructions for installing Azure Quick Review on various operating systems.
+- [Usage](#azure-quick-review-usage) Detailed guide on how to use Azure Quick Review after installation, including running scans and filtering recommendations.
+- [Examples](#scenario-scanning-all-resources-in-a-subscription) Practical examples demonstrating how to use Azure Quick Review effectively with sample commands and expected outputs.
 
 ## Purpose
 
@@ -85,9 +85,7 @@ After installation, you can verify that Azure Quick Review is installed correctl
 
 This command should display the help information for Azure Quick Review, confirming that the installation was successful.
 
-# Usage of Azure Quick Review
-
-## Running Azure Quick Review
+## Azure Quick Review Usage
 
 After installing Azure Quick Review, you can start using it to scan your Azure resources. Here are the basic commands to run scans:
 
@@ -196,20 +194,20 @@ For more information on available commands and help, run:
 
 This command will provide you with a list of all available options and their descriptions.
 
-# Example Scenario for Using Azure Quick Review
+## Example Scenario for Using Azure Quick Review
 
 This document provides an example scenario demonstrating how to effectively use Azure Quick Review (azqr) to scan Azure resources for compliance with best practices.
 
-## Scenario: Scanning All Resources in a Subscription
+### Scenario: Scanning All Resources in a Subscription
 
 In this example, we will scan all resources within a specific Azure subscription to identify any non-compliant configurations.
 
-### Prerequisites
+#### Prerequisites
 
 - Ensure that Azure Quick Review is installed on your system. Refer to the installation guide in `install.md` for detailed instructions.
 - You must have the necessary permissions to access the Azure subscription you wish to scan.
 
-### Step 1: Authentication
+#### Step 1: Authentication
 
 Before running the scan, you need to authenticate with Azure. You can use one of the following methods:
 
@@ -228,7 +226,7 @@ Before running the scan, you need to authenticate with Azure. You can use one of
 
 > **Note**: **azqr** requires Reader permissions over the subscription or management group scope.
 
-### Step 2: Run the Scan
+#### Step 2: Run the Scan
 
 To scan all resources in your subscription, execute the following command in your terminal:
 
@@ -238,7 +236,7 @@ To scan all resources in your subscription, execute the following command in you
 
 Replace `<subscription_id>` with your actual Azure subscription ID.
 
-### Step 3: Review the Output
+#### Step 3: Review the Output
 
 After the scan completes, Azure Quick Review generates an output file (by default in Excel format) containing several sheets:
 
@@ -246,7 +244,7 @@ After the scan completes, Azure Quick Review generates an output file (by defaul
 - **ImpactedResources**: Details all resources that have issues.
 - **Inventory**: Provides a comprehensive list of all scanned resources.
 
-### Example Command and Expected Output
+#### Example Command and Expected Output
 
 **Command:**
 
@@ -257,6 +255,6 @@ After the scan completes, Azure Quick Review generates an output file (by defaul
 **Expected Output:**
 - An Excel file named `azqr_action_plan_YYYY_MM_DD_Thhmmss.xlsx` will be generated in the current directory.
 
-### Conclusion
+#### Conclusion
 
 This example demonstrates how to use Azure Quick Review to scan an Azure subscription for compliance. For further details on filtering recommendations or troubleshooting, refer to the `usage.md` and `troubleshooting` sections in the documentation.

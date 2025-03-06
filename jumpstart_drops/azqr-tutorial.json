@@ -17,9 +17,11 @@
         "Powershell"
     ],
     "Products": [
-        "Azure"
+        "Azure Kubernetes Service",
+        "Azure Cosmos DB",
+        "Azure Firewall"
     ],
-    "LastModified": "",
-    "CreatedDate": "",
+    "LastModified": "2025-02-25T14:27:00.000Z",
+    "CreatedDate": "2025-02-25T14:27:00.000Z",
     "Topics": []
 }
