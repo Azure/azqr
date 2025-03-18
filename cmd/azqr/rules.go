@@ -28,10 +28,11 @@ var rulesCmd = &cobra.Command{
 		aprl := aprlScanner.GetAprlRecommendations()
 
 		// Print count of aprl recommendations
-		fmt.Println("## APRL Recommendations")
+		fmt.Println("## Recommendations List")
+		fmt.Println("")
 		fmt.Println("Total recommendations:", len(aprl))
-
-		fmt.Println("#  | Id | Resource Type | Category | Impact | Recommendation | Learn")
+		fmt.Println("")
+		fmt.Println("|  | Id | Resource Type | Category | Impact | Recommendation | Learn")
 		fmt.Println("---|---|---|---|---|---|---")
 
 		i := 0
