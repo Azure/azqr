@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
 
@@ -73,8 +72,13 @@ func (a *DatabricksScanner) GetRecommendations() map[string]scanners.AzqrRecomme
 			Impact:           scanners.ImpactMedium,
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				c := target.(*armdatabricks.Workspace)
-				broken := c.Properties.Parameters.EnableNoPublicIP != nil && c.Properties.Parameters.EnableNoPublicIP.Value == to.Ptr(true)
-				return broken, ""
+				ok := c.Properties != nil &&
+					c.Properties.Parameters != nil &&
+					c.Properties.Parameters.EnableNoPublicIP != nil &&
+					c.Properties.Parameters.EnableNoPublicIP.Value != nil &&
+					*c.Properties.Parameters.EnableNoPublicIP.Value
+
+				return !ok, ""
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/databricks/security/network/secure-cluster-connectivity",
 		},
