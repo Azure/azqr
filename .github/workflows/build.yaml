@@ -217,7 +217,7 @@ jobs:
           echo AZQR_ARTIFACT_NAME=${{ env.PROJECT_NAME }}-${{ matrix.os }}-${{ matrix.target_arch }} >> $env:GITHUB_ENV
 
       - name: download artifacts - ${{ env.AZQR_ARTIFACT_NAME }}
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@b14cf4c92620c250e1c074ab0a5800e37df86765 # v4.2.0
         with:
           name: ${{ env.AZQR_ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_DIR }}/${{ env.AZQR_ARTIFACT_NAME }}/
