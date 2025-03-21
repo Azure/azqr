@@ -26,32 +26,6 @@ func (a *CosmosDBScanner) GetRecommendations() map[string]scanners.AzqrRecommend
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
 		},
-		"cosmos-002": {
-			RecommendationID: "cosmos-002",
-			ResourceType:     "Microsoft.DocumentDB/databaseAccounts",
-			Category:         scanners.CategoryHighAvailability,
-			Recommendation:   "CosmosDB should have availability zones enabled",
-			Impact:           scanners.ImpactHigh,
-			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
-				i := target.(*armcosmos.DatabaseAccountGetResults)
-				availabilityZones := false
-				availabilityZonesNotEnabledInALocation := false
-				numberOfLocations := 0
-				for _, location := range i.Properties.Locations {
-					numberOfLocations++
-					if *location.IsZoneRedundant {
-						availabilityZones = true
-					} else {
-						availabilityZonesNotEnabledInALocation = true
-					}
-				}
-
-				zones := availabilityZones && numberOfLocations >= 2 && !availabilityZonesNotEnabledInALocation
-
-				return !zones, ""
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability",
-		},
 		"cosmos-003": {
 			RecommendationID:   "cosmos-003",
 			ResourceType:       "Microsoft.DocumentDB/databaseAccounts",
