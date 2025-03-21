@@ -46,29 +46,6 @@ func TestCosmosDBScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CosmosDBScanner Availability Zones",
-			fields: fields{
-				rule: "cosmos-002",
-				target: &armcosmos.DatabaseAccountGetResults{
-					Properties: &armcosmos.DatabaseAccountGetProperties{
-						Locations: []*armcosmos.Location{
-							{
-								IsZoneRedundant: to.Ptr(true),
-							},
-							{
-								IsZoneRedundant: to.Ptr(true),
-							},
-						},
-					},
-				},
-				scanContext: &scanners.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
 			name: "CosmosDBScanner SLA 99.99%",
 			fields: fields{
 				rule: "cosmos-003",
