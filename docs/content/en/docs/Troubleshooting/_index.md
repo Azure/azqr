@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting & Support
 description: Troubleshooting & Support
-weight: 20
+weight: 4
 ---
 
 If you encounter any issue while using **Azure Quick Review (azqr)**, please set the `AZURE_SDK_GO_LOGGING` environment variable to `all`, run the tool with the `--debug` flag and then share the console output with us by filing a new [issue](https://github.com/Azure/azqr/issues).
@@ -17,3 +17,30 @@ Please search the existing issues before filing new issues to avoid duplicates.
 - For help, discussion, and support questions about using this project, join or start a [discussion](https://github.com/Azure/azqr/discussions).
 
 Support for this project / product is limited to the resources listed above.
+
+## Contributing to Documentation
+
+Below are the steps and required packages to get the Azure Quick Review Hugo site to build locally. 
+First please ensure that you have the following packages installed locally.
+
+ - Git.Git
+ - Hugo.Hugo.Extended
+ - OpenJS.NodeJS
+
+Please fork the azqr repository, clone locally and then head to the docs folder
+
+``` powershell
+Set-Location .\azqr\docs
+```
+
+Execute the Node Module installer
+
+``` console
+npm install
+```
+
+Once this has finish you can execute the Hugo Server
+
+``` console
+hugo server
+```

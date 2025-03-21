@@ -1,6 +1,6 @@
 ---
 title: Install
-weight: 3
+weight: 2
 description: Learn how to install Azure Quick Review (azqr)
 ---
 
@@ -16,13 +16,13 @@ chmod +x azqr
 
 Use `winget`:
 
-```console
+``` console
 winget install azqr
 ```
 
 or download the executable file:
 
-```
+``` console
 $latest_azqr=$(iwr https://api.github.com/repos/Azure/azqr/releases/latest).content | convertfrom-json | Select-Object -ExpandProperty tag_name
 iwr https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-windows-latest-amd64.exe -OutFile azqr.exe
 ```
