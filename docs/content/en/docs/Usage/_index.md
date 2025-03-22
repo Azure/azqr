@@ -6,6 +6,10 @@ weight: 3
 
 ## Authentication
 
+**Azure Quick Review (azqr)** requires the following permissions:
+
+* Reader over Subscription or Management Group scope
+
 ### - PowerShell
 
 > Install Azure PowerShell Modules
@@ -29,12 +33,9 @@ From `$spDetails`, Extract the
 > Authenticate to Azure
 
 ``` powershell
-$tenantId = ''
-$appId = ''
-$appSecret = '' | ConvertTo-SecureString -AsPlainText -Force
-$appCreds = New-Object System.Management.Automation.PSCredential($appId , $appSecret)
-
-Connect-AzAccount -Tenant $tenantId -ServicePrincipal -Credential $appCreds
+$env:AZURE_CLIENT_ID = ''
+$env:AZURE_CLIENT_SECRET = ''
+$env:AZURE_TENANT_ID = ''
 ```
 
 > Execute Azure Quick Review Scan
