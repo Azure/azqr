@@ -1,7 +1,7 @@
 ---
 title: Related Projects
 description: Azure Quick Review compared to APRL, Azure Review Checklists and PSRule.Rules.Azure
-weight: 6
+weight: 7
 ---
 
 ## AZQR and APRL
