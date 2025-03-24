@@ -106,13 +106,10 @@ jobs:
           CGO_ENABLED=0 gotestsum --jsonfile ./test_report_unit.json --format standard-quiet -- ./... $COVERAGE_OPTS --tags=unit
           go test ./...
 
-      - name: Create recommendations json
+      - name: Generate recommendations json and check diff
         if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64' && github.event_name != 'pull_request'
         run: |
-          { echo -n '\'; go run ./cmd/main.go rules -j; } > ./data/recommendations.json
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-          if [ -n "$(git diff --exit-code ./data/recommendations.json)" ]; then git add ./data/recommendations.json && git commit -m "Update recommendations.json" && git push; fi
+          git diff --exit-code ./data/recommendations.json
 
       - name: Codecov
         if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'

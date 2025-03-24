@@ -89,18 +89,18 @@
 	},
 	{
 		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/frontdoor/web-application-firewall",
-		"recommendation": "Enable the WAF",
-		"recommendationId": "1bd2b7e8-400f-e64a-99a2-c572f7b08a62",
-		"resourceType": "Microsoft.Cdn/profiles"
-	},
-	{
-		"category": "Security",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/frontdoor/front-door-how-to-redirect-https#create-http-to-https-redirect-rule",
 		"recommendation": "Use HTTP to HTTPS redirection",
 		"recommendationId": "24ab9f11-a3e4-3043-a985-22cf94c4933a",
+		"resourceType": "Microsoft.Cdn/profiles"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/frontdoor/web-application-firewall",
+		"recommendation": "Enable the WAF",
+		"recommendationId": "1bd2b7e8-400f-e64a-99a2-c572f7b08a62",
 		"resourceType": "Microsoft.Cdn/profiles"
 	},
 	{
@@ -209,42 +209,18 @@
 	},
 	{
 		"category": "Scalability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/application-gateway/application-gateway-autoscaling-zone-redundant#autoscaling-and-high-availability",
-		"recommendation": "Ensure Autoscale feature has been enabled",
-		"recommendationId": "823b0cff-05c0-2e4e-a1e7-9965e1cfa16f",
-		"resourceType": "Microsoft.Network/applicationGateways"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/application-gateway/features#web-application-firewall",
-		"recommendation": "Enable Web Application Firewall policies",
-		"recommendationId": "8d9223c4-730d-ca47-af88-a9a024c37270",
-		"resourceType": "Microsoft.Network/applicationGateways"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/well-architected/services/networking/azure-application-gateway#reliability",
-		"recommendation": "Deploy Application Gateway in a zone-redundant configuration",
-		"recommendationId": "c9c00f2a-3888-714b-a72b-b4c9e8fcffb2",
-		"resourceType": "Microsoft.Network/applicationGateways"
-	},
-	{
-		"category": "Governance",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/application-gateway/overview",
-		"recommendation": "Application Gateways without backend targets",
-		"recommendationId": "2f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c",
-		"resourceType": "Microsoft.Network/applicationGateways"
-	},
-	{
-		"category": "Scalability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/application-gateway/overview-v2",
 		"recommendation": "Migrate to Application Gateway v2",
 		"recommendationId": "7893f0b3-8622-1d47-beed-4b50a19f7895",
+		"resourceType": "Microsoft.Network/applicationGateways"
+	},
+	{
+		"category": "Scalability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/application-gateway/application-gateway-autoscaling-zone-redundant#autoscaling-and-high-availability",
+		"recommendation": "Ensure Autoscale feature has been enabled",
+		"recommendationId": "823b0cff-05c0-2e4e-a1e7-9965e1cfa16f",
 		"resourceType": "Microsoft.Network/applicationGateways"
 	},
 	{
@@ -256,11 +232,35 @@
 		"resourceType": "Microsoft.Network/applicationGateways"
 	},
 	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/well-architected/services/networking/azure-application-gateway#reliability",
+		"recommendation": "Deploy Application Gateway in a zone-redundant configuration",
+		"recommendationId": "c9c00f2a-3888-714b-a72b-b4c9e8fcffb2",
+		"resourceType": "Microsoft.Network/applicationGateways"
+	},
+	{
 		"category": "OtherBestPractices",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/application-gateway/configuration-infrastructure#size-of-the-subnet",
 		"recommendation": "Ensure Application Gateway Subnet is using a /24 subnet mask",
 		"recommendationId": "8364fd0a-7c0e-e240-9d95-4bf965aec243",
+		"resourceType": "Microsoft.Network/applicationGateways"
+	},
+	{
+		"category": "Governance",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/application-gateway/overview",
+		"recommendation": "Application Gateways without backend targets",
+		"recommendationId": "2f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c",
+		"resourceType": "Microsoft.Network/applicationGateways"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/application-gateway/features#web-application-firewall",
+		"recommendation": "Enable Web Application Firewall policies",
+		"recommendationId": "8d9223c4-730d-ca47-af88-a9a024c37270",
 		"resourceType": "Microsoft.Network/applicationGateways"
 	},
 	{
@@ -352,46 +352,6 @@
 		"resourceType": "Microsoft.ContainerService/managedClusters"
 	},
 	{
-		"category": "Scalability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/concepts-storage#ephemeral-os-disk",
-		"recommendation": "Use Ephemeral OS disks on AKS clusters",
-		"recommendationId": "a7bfcc18-b0d8-4d37-81f3-8131ed8bead5",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Scalability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/configure-azure-cni-dynamic-ip-allocation",
-		"recommendation": "Configure Azure CNI networking for dynamic allocation of IPs or use CNI overlay",
-		"recommendationId": "c22db132-399b-4e7c-995d-577a60881be8",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "OtherBestPractices",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/architecture/guide/aks/aks-cicd-github-actions-and-gitops",
-		"recommendation": "Enable GitOps when using DevOps frameworks",
-		"recommendationId": "5f3cbd68-692a-4121-988c-9770914859a9",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/use-system-pools?tabs=azure-cli#system-and-user-node-pools",
-		"recommendation": "Isolate system and application pods",
-		"recommendationId": "5ee083cd-6ac3-4a83-8913-9549dd36cf56",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/well-architected/service-guides/azure-kubernetes-service#design-checklist",
-		"recommendation": "Configure user nodepool count",
-		"recommendationId": "005ccbbd-aeab-46ef-80bd-9bd4479412ec",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/availability-zones",
@@ -409,50 +369,10 @@
 	},
 	{
 		"category": "Scalability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/cluster-autoscaler?tabs=azure-cli",
-		"recommendation": "Enable the cluster auto-scaler on an existing cluster",
-		"recommendationId": "902c82ff-4910-4b61-942d-0d6ef7f39b67",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/free-standard-pricing-tiers",
-		"recommendation": "Update AKS tier to Standard or Premium",
-		"recommendationId": "0611251f-e70f-4243-8ddd-cfe894bec2e7",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
+		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/configure-azure-cni-dynamic-ip-allocation",
-		"recommendation": "Nodepool subnet size needs to accommodate maximum auto-scale settings",
-		"recommendationId": "e620fa98-7a40-41a0-bfc9-b4407297fb58",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "DisasterRecovery",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/backup/azure-kubernetes-service-cluster-backup",
-		"recommendation": "Back up Azure Kubernetes Service",
-		"recommendationId": "269a9f1a-6675-460a-831e-b05a887a8c4b",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/architecture/reference-architectures/containers/aks/baseline-aks?toc=https%3A%2F%2Flearn.microsoft.com%2Fazure%2Faks%2Ftoc.json\u0026bc=https%3A%2F%2Flearn.microsoft.com%2Fazure%2Fbread%2Ftoc.json#policy-management",
-		"recommendation": "Enable and remediate Azure Policies configured for AKS",
-		"recommendationId": "26ebaf1f-c70d-4ebd-8641-4b60a0ce0094",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/monitor-aks",
-		"recommendation": "Enable AKS Monitoring",
-		"recommendationId": "dcaf8128-94bd-4d53-9235-3a0371df6b74",
+		"recommendation": "Configure Azure CNI networking for dynamic allocation of IPs or use CNI overlay",
+		"recommendationId": "c22db132-399b-4e7c-995d-577a60881be8",
 		"resourceType": "Microsoft.ContainerService/managedClusters"
 	},
 	{
@@ -464,11 +384,91 @@
 		"resourceType": "Microsoft.ContainerService/managedClusters"
 	},
 	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/architecture/reference-architectures/containers/aks/baseline-aks?toc=https%3A%2F%2Flearn.microsoft.com%2Fazure%2Faks%2Ftoc.json\u0026bc=https%3A%2F%2Flearn.microsoft.com%2Fazure%2Fbread%2Ftoc.json#policy-management",
+		"recommendation": "Enable and remediate Azure Policies configured for AKS",
+		"recommendationId": "26ebaf1f-c70d-4ebd-8641-4b60a0ce0094",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "OtherBestPractices",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/architecture/guide/aks/aks-cicd-github-actions-and-gitops",
+		"recommendation": "Enable GitOps when using DevOps frameworks",
+		"recommendationId": "5f3cbd68-692a-4121-988c-9770914859a9",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/configure-azure-cni-dynamic-ip-allocation",
+		"recommendation": "Nodepool subnet size needs to accommodate maximum auto-scale settings",
+		"recommendationId": "e620fa98-7a40-41a0-bfc9-b4407297fb58",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/free-standard-pricing-tiers",
+		"recommendation": "Update AKS tier to Standard or Premium",
+		"recommendationId": "0611251f-e70f-4243-8ddd-cfe894bec2e7",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "Scalability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/cluster-autoscaler?tabs=azure-cli",
+		"recommendation": "Enable the cluster auto-scaler on an existing cluster",
+		"recommendationId": "902c82ff-4910-4b61-942d-0d6ef7f39b67",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
 		"category": "Security",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/concepts-identity#azure-ad-integration",
 		"recommendation": "Disable local accounts",
 		"recommendationId": "ca324d71-54b0-4a3e-b9e4-10e767daa9fc",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/monitor-aks",
+		"recommendation": "Enable AKS Monitoring",
+		"recommendationId": "dcaf8128-94bd-4d53-9235-3a0371df6b74",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "Scalability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/concepts-storage#ephemeral-os-disk",
+		"recommendation": "Use Ephemeral OS disks on AKS clusters",
+		"recommendationId": "a7bfcc18-b0d8-4d37-81f3-8131ed8bead5",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/well-architected/service-guides/azure-kubernetes-service#design-checklist",
+		"recommendation": "Configure user nodepool count",
+		"recommendationId": "005ccbbd-aeab-46ef-80bd-9bd4479412ec",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/use-system-pools?tabs=azure-cli#system-and-user-node-pools",
+		"recommendation": "Isolate system and application pods",
+		"recommendationId": "5ee083cd-6ac3-4a83-8913-9549dd36cf56",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/backup/azure-kubernetes-service-cluster-backup",
+		"recommendation": "Back up Azure Kubernetes Service",
+		"recommendationId": "269a9f1a-6675-460a-831e-b05a887a8c4b",
 		"resourceType": "Microsoft.ContainerService/managedClusters"
 	},
 	{
@@ -1080,14 +1080,6 @@
 		"resourceType": "Microsoft.Web/serverFarms"
 	},
 	{
-		"category": "Governance",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
-		"recommendation": "App Service plans without hosting Apps",
-		"recommendationId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-		"resourceType": "Microsoft.Web/serverFarms"
-	},
-	{
 		"category": "Scalability",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/architecture/checklist/resiliency-per-service#app-service",
@@ -1098,10 +1090,10 @@
 	{
 		"category": "Governance",
 		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/app-service/app-service-ip-restrictions?tabs=azurecli",
-		"recommendation": "Configure network access restrictions",
-		"recommendationId": "aab6b4a4-9981-43a4-8728-35c7ecbb746d",
-		"resourceType": "Microsoft.Web/sites"
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-hosting-plans",
+		"recommendation": "App Service plans without hosting Apps",
+		"recommendationId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+		"resourceType": "Microsoft.Web/serverFarms"
 	},
 	{
 		"category": "Governance",
@@ -1109,6 +1101,14 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/app-service-web/web-sites-staged-publishing",
 		"recommendation": "Deploy to a staging slot",
 		"recommendationId": "a1d91661-32d4-430b-b3b6-5adeb0975df7",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "Governance",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/app-service/app-service-ip-restrictions?tabs=azurecli",
+		"recommendation": "Configure network access restrictions",
+		"recommendationId": "aab6b4a4-9981-43a4-8728-35c7ecbb746d",
 		"resourceType": "Microsoft.Web/sites"
 	},
 	{
@@ -1162,17 +1162,9 @@
 	{
 		"category": "MonitoringAndAlerting",
 		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/well-architected/azure-vmware/monitoring#configure-and-streamline-alerts",
-		"recommendation": "Monitor Memory Utilization to ensure sufficient resources for workloads",
-		"recommendationId": "029208c8-5186-4a76-8ee8-6e3445fef4dd",
-		"resourceType": "Microsoft.AVS/privateClouds"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/scenarios/azure-vmware/eslz-management-and-monitoring#design-recommendations",
-		"recommendation": "Configure Azure Service Health notifications and alerts for Azure VMware Solution",
-		"recommendationId": "74fcb9f2-9a25-49a6-8c42-d32851c4afb7",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-vmware/configure-alerts-for-azure-vmware-solution#supported-metrics-and-activities",
+		"recommendation": "Configure Azure Monitor Alert warning thresholds for vSAN datastore utilization",
+		"recommendationId": "4232eb32-3241-4049-9e14-9b8005817b56",
 		"resourceType": "Microsoft.AVS/privateClouds"
 	},
 	{
@@ -1186,17 +1178,25 @@
 	{
 		"category": "MonitoringAndAlerting",
 		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-vmware/configure-alerts-for-azure-vmware-solution#supported-metrics-and-activities",
-		"recommendation": "Configure Azure Monitor Alert warning thresholds for vSAN datastore utilization",
-		"recommendationId": "4232eb32-3241-4049-9e14-9b8005817b56",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/well-architected/azure-vmware/monitoring#configure-and-streamline-alerts",
+		"recommendation": "Monitor CPU Utilization to ensure sufficient resources for workloads",
+		"recommendationId": "4ee5d535-c47b-470a-9557-4a3dd297d62f",
 		"resourceType": "Microsoft.AVS/privateClouds"
 	},
 	{
 		"category": "MonitoringAndAlerting",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/well-architected/azure-vmware/monitoring#configure-and-streamline-alerts",
-		"recommendation": "Monitor CPU Utilization to ensure sufficient resources for workloads",
-		"recommendationId": "4ee5d535-c47b-470a-9557-4a3dd297d62f",
+		"recommendation": "Monitor Memory Utilization to ensure sufficient resources for workloads",
+		"recommendationId": "029208c8-5186-4a76-8ee8-6e3445fef4dd",
+		"resourceType": "Microsoft.AVS/privateClouds"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/scenarios/azure-vmware/eslz-management-and-monitoring#design-recommendations",
+		"recommendation": "Configure Azure Service Health notifications and alerts for Azure VMware Solution",
+		"recommendationId": "74fcb9f2-9a25-49a6-8c42-d32851c4afb7",
 		"resourceType": "Microsoft.AVS/privateClouds"
 	},
 	{
@@ -1459,14 +1459,6 @@
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/cosmos-db/distribute-data-globally",
-		"recommendation": "Evaluate multi-region write capability",
-		"recommendationId": "9ce78192-74a0-104c-b5bb-9a443f941649",
-		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/cosmos-db/distribute-data-globally",
 		"recommendation": "Configure at least two regions for high availability",
 		"recommendationId": "43663217-a1d3-844b-80ea-571a2ce37c6c",
 		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
@@ -1493,6 +1485,14 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/cosmos-db/continuous-backup-restore-introduction",
 		"recommendation": "Configure continuous backup mode",
 		"recommendationId": "e544520b-8505-7841-9e77-1f1974ee86ec",
+		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/cosmos-db/distribute-data-globally",
+		"recommendation": "Evaluate multi-region write capability",
+		"recommendationId": "9ce78192-74a0-104c-b5bb-9a443f941649",
 		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
 	},
 	{
@@ -1560,19 +1560,11 @@
 		"resourceType": "Microsoft.ContainerRegistry/registries"
 	},
 	{
-		"category": "Governance",
+		"category": "DisasterRecovery",
 		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices#dedicated-resource-group",
-		"recommendation": "Move Container Registry to a dedicated resource group",
-		"recommendationId": "8e389532-5db5-7e4c-9d4d-443b3e55ae82",
-		"resourceType": "Microsoft.ContainerRegistry/registries"
-	},
-	{
-		"category": "Scalability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices",
-		"recommendation": "Use Premium tier for critical production workloads",
-		"recommendationId": "eb005943-40a8-194b-9db2-474d430046b7",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-soft-delete-policy",
+		"recommendation": "Enable soft delete policy",
+		"recommendationId": "e7f0fd54-fba0-054e-9ab8-e676f2851f88",
 		"resourceType": "Microsoft.ContainerRegistry/registries"
 	},
 	{
@@ -1585,10 +1577,10 @@
 	},
 	{
 		"category": "Scalability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices#manage-registry-size",
-		"recommendation": "Manage registry size",
-		"recommendationId": "3ef86f16-f65b-c645-9901-7830d6dc3a1b",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices",
+		"recommendation": "Use Premium tier for critical production workloads",
+		"recommendationId": "eb005943-40a8-194b-9db2-474d430046b7",
 		"resourceType": "Microsoft.ContainerRegistry/registries"
 	},
 	{
@@ -1600,11 +1592,19 @@
 		"resourceType": "Microsoft.ContainerRegistry/registries"
 	},
 	{
-		"category": "DisasterRecovery",
+		"category": "Governance",
 		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-soft-delete-policy",
-		"recommendation": "Enable soft delete policy",
-		"recommendationId": "e7f0fd54-fba0-054e-9ab8-e676f2851f88",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices#dedicated-resource-group",
+		"recommendation": "Move Container Registry to a dedicated resource group",
+		"recommendationId": "8e389532-5db5-7e4c-9d4d-443b3e55ae82",
+		"resourceType": "Microsoft.ContainerRegistry/registries"
+	},
+	{
+		"category": "Scalability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-best-practices#manage-registry-size",
+		"recommendation": "Manage registry size",
+		"recommendationId": "3ef86f16-f65b-c645-9901-7830d6dc3a1b",
 		"resourceType": "Microsoft.ContainerRegistry/registries"
 	},
 	{
@@ -1672,10 +1672,10 @@
 		"resourceType": "Microsoft.Kusto/clusters"
 	},
 	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
-		"recommendation": "Azure Data Explorer should have private endpoints enabled",
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		"recommendation": "Azure Data Explorer Name should comply with naming conventions",
 		"recommendationID": "dec-004",
 		"resourceType": "Microsoft.Kusto/clusters"
 	},
@@ -1704,19 +1704,19 @@
 		"resourceType": "Microsoft.Kusto/clusters"
 	},
 	{
-		"category": "OtherBestPractices",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/disks-shared",
-		"recommendation": "Shared disks should only be enabled in clustered servers",
-		"recommendationId": "3263a64a-c256-de48-9818-afd3cbc55c2a",
-		"resourceType": "Microsoft.Compute/disks"
-	},
-	{
 		"category": "HighAvailability",
 		"impact": "Medium",
 		"learnMoreUrl": "https://aka.ms/zrsdisksdoc",
 		"recommendation": "Use Azure Disks with Zone Redundant Storage for higher resiliency and availability",
 		"recommendationId": "fa0cf4f5-0b21-47b7-89a9-ee936f193ce1",
+		"resourceType": "Microsoft.Compute/disks"
+	},
+	{
+		"category": "OtherBestPractices",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/disks-shared",
+		"recommendation": "Shared disks should only be enabled in clustered servers",
+		"recommendationId": "3263a64a-c256-de48-9818-afd3cbc55c2a",
 		"resourceType": "Microsoft.Compute/disks"
 	},
 	{
@@ -1736,19 +1736,19 @@
 		"resourceType": "Microsoft.Network/expressRouteCircuits"
 	},
 	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-howto-erdirect#state",
-		"recommendation": "The Admin State of both Links of an ExpressRoute Direct should be in Enabled state",
-		"recommendationId": "60077378-7cb1-4b35-89bb-393884d9921d",
-		"resourceType": "Microsoft.Network/ExpressRoutePorts"
-	},
-	{
 		"category": "Scalability",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-erdirect-about?source=recommendations#circuit-sizes",
 		"recommendation": "Ensure ExpressRoute Direct is not over-subscribed",
 		"recommendationId": "0bee356b-7348-4799-8cab-0c71ffe13018",
+		"resourceType": "Microsoft.Network/ExpressRoutePorts"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-howto-erdirect#state",
+		"recommendation": "The Admin State of both Links of an ExpressRoute Direct should be in Enabled state",
+		"recommendationId": "60077378-7cb1-4b35-89bb-393884d9921d",
 		"resourceType": "Microsoft.Network/ExpressRoutePorts"
 	},
 	{
@@ -1875,14 +1875,6 @@
 		"category": "HighAvailability",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/azure-compute-gallery#best-practices",
-		"recommendation": "A minimum of three replicas should be kept for production image versions",
-		"recommendationId": "b49a39fd-f431-4b61-9062-f2157849d845",
-		"resourceType": "Microsoft.Compute/galleries"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/azure-compute-gallery#best-practices",
 		"recommendation": "Zone redundant storage should be used for image versions",
 		"recommendationId": "488dcc8b-f2e3-40ce-bf95-73deb2db095f",
 		"resourceType": "Microsoft.Compute/galleries"
@@ -1897,11 +1889,11 @@
 	},
 	{
 		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/iot-hub/iot-hub-scaling",
-		"recommendation": "Do not use free tier",
-		"recommendationId": "eeba3a49-fef0-481f-a471-7ff01139b474",
-		"resourceType": "Microsoft.Devices/IotHubs"
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/azure-compute-gallery#best-practices",
+		"recommendation": "A minimum of three replicas should be kept for production image versions",
+		"recommendationId": "b49a39fd-f431-4b61-9062-f2157849d845",
+		"resourceType": "Microsoft.Compute/galleries"
 	},
 	{
 		"category": "Scalability",
@@ -1917,6 +1909,14 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-d2c#fallback-route",
 		"recommendation": "Disabled Fallback Route",
 		"recommendationId": "e7dbd21f-b27a-4b8c-a901-cedb1e6d8e1e",
+		"resourceType": "Microsoft.Devices/IotHubs"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/iot-hub/iot-hub-scaling",
+		"recommendation": "Do not use free tier",
+		"recommendationId": "eeba3a49-fef0-481f-a471-7ff01139b474",
 		"resourceType": "Microsoft.Devices/IotHubs"
 	},
 	{
@@ -1977,14 +1977,6 @@
 	},
 	{
 		"category": "DisasterRecovery",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview",
-		"recommendation": "Key vaults should have soft delete enabled",
-		"recommendationId": "1cca00d2-d9ab-8e42-a788-5d40f49405cb",
-		"resourceType": "Microsoft.KeyVault/vaults"
-	},
-	{
-		"category": "DisasterRecovery",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview#purge-protection",
 		"recommendation": "Key vaults should have purge protection enabled",
@@ -1997,6 +1989,14 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/key-vault/general/security-features#network-security",
 		"recommendation": "Private endpoint should be configured for Key Vault",
 		"recommendationId": "00c3d2b0-ea6e-4c4b-89be-b78a35caeb51",
+		"resourceType": "Microsoft.KeyVault/vaults"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/key-vault/general/soft-delete-overview",
+		"recommendation": "Key vaults should have soft delete enabled",
+		"recommendationId": "1cca00d2-d9ab-8e42-a788-5d40f49405cb",
 		"resourceType": "Microsoft.KeyVault/vaults"
 	},
 	{
@@ -2034,30 +2034,6 @@
 	{
 		"category": "HighAvailability",
 		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/load-balancer/load-balancer-standard-availability-zones#zone-redundant",
-		"recommendation": "Ensure Standard Load Balancer is zone-redundant",
-		"recommendationId": "621dbc78-3745-4d32-8eac-9e65b27b7512",
-		"resourceType": "Microsoft.Network/loadBalancers"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/load-balancer/load-balancer-custom-probe-overview",
-		"recommendation": "Use Health Probes to detect backend instances availability",
-		"recommendationId": "e5f5fcea-f925-4578-8599-9a391e888a60",
-		"resourceType": "Microsoft.Network/loadBalancers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview",
-		"recommendation": "Load Balancers with empty backend address pools",
-		"recommendationId": "9c0d1e2f-3a4b-5c6d-7e8f-9a0b1c2d3e4f",
-		"resourceType": "Microsoft.Network/loadBalancers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/architecture/framework/services/networking/azure-load-balancer/reliability",
 		"recommendation": "Use Standard Load Balancer SKU",
 		"recommendationId": "38c3bca1-97a1-eb42-8cd3-838b243f35ba",
@@ -2077,6 +2053,30 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/architecture/checklist/resiliency-per-service#azure-load-balancer",
 		"recommendation": "Use NAT Gateway instead of Outbound Rules for Production Workloads",
 		"recommendationId": "8d319a05-677b-944f-b9b4-ca0fb42e883c",
+		"resourceType": "Microsoft.Network/loadBalancers"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/load-balancer/load-balancer-standard-availability-zones#zone-redundant",
+		"recommendation": "Ensure Standard Load Balancer is zone-redundant",
+		"recommendationId": "621dbc78-3745-4d32-8eac-9e65b27b7512",
+		"resourceType": "Microsoft.Network/loadBalancers"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/load-balancer/load-balancer-custom-probe-overview",
+		"recommendation": "Use Health Probes to detect backend instances availability",
+		"recommendationId": "e5f5fcea-f925-4578-8599-9a391e888a60",
+		"resourceType": "Microsoft.Network/loadBalancers"
+	},
+	{
+		"category": "Governance",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-overview",
+		"recommendation": "Load Balancers with empty backend address pools",
+		"recommendationId": "9c0d1e2f-3a4b-5c6d-7e8f-9a0b1c2d3e4f",
 		"resourceType": "Microsoft.Network/loadBalancers"
 	},
 	{
@@ -2280,6 +2280,22 @@
 		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
 	},
 	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/mysql/flexible-server/concepts-backup-restore",
+		"recommendation": "Configure geo redundant backup storage",
+		"recommendationId": "5c96afc3-7d2e-46ff-a4c7-9c32850c441b",
+		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/mysql/flexible-server/concepts-read-replicas",
+		"recommendation": "Configure one or more read replicas",
+		"recommendationId": "b49a8653-cc43-48c9-8513-a2d2e3f14dd1",
+		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
+	},
+	{
 		"category": "Scalability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/mysql/flexible-server/concepts-service-tiers-storage#storage-auto-grow",
@@ -2304,35 +2320,11 @@
 		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
 	},
 	{
-		"category": "DisasterRecovery",
+		"category": "HighAvailability",
 		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/mysql/flexible-server/concepts-backup-restore",
-		"recommendation": "Configure geo redundant backup storage",
-		"recommendationId": "5c96afc3-7d2e-46ff-a4c7-9c32850c441b",
-		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
-	},
-	{
-		"category": "DisasterRecovery",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/mysql/flexible-server/concepts-read-replicas",
-		"recommendation": "Configure one or more read replicas",
-		"recommendationId": "b49a8653-cc43-48c9-8513-a2d2e3f14dd1",
-		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
-	},
-	{
-		"category": "DisasterRecovery",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-netapp-files/cross-region-replication-introduction",
-		"recommendation": "Enable Cross-region replication of Azure NetApp Files volumes",
-		"recommendationId": "e30317d2-c502-4dfe-a2d3-0a737cc79545",
-		"resourceType": "Microsoft.NetApp/netAppAccounts"
-	},
-	{
-		"category": "DisasterRecovery",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-netapp-files/cross-zone-replication-introduction",
-		"recommendation": "Enable Cross-zone replication of Azure NetApp Files volumes",
-		"recommendationId": "e3d742e1-dacd-9b48-b6b1-510ec9f87c96",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-netapp-files/use-availability-zones",
+		"recommendation": "Use availability zones for high availability in Azure NetApp Files",
+		"recommendationId": "47d100a5-7f85-5742-967a-67eb5081240a",
 		"resourceType": "Microsoft.NetApp/netAppAccounts"
 	},
 	{
@@ -2344,19 +2336,11 @@
 		"resourceType": "Microsoft.NetApp/netAppAccounts"
 	},
 	{
-		"category": "Scalability",
+		"category": "DisasterRecovery",
 		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-netapp-files/azure-netapp-files-network-topologies",
-		"recommendation": "Use standard network features for production in Azure NetApp Files",
-		"recommendationId": "ab984130-c57b-6c4a-8d04-6723b4e1bdb6",
-		"resourceType": "Microsoft.NetApp/netAppAccounts"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-netapp-files/use-availability-zones",
-		"recommendation": "Use availability zones for high availability in Azure NetApp Files",
-		"recommendationId": "47d100a5-7f85-5742-967a-67eb5081240a",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-netapp-files/cross-zone-replication-introduction",
+		"recommendation": "Enable Cross-zone replication of Azure NetApp Files volumes",
+		"recommendationId": "e3d742e1-dacd-9b48-b6b1-510ec9f87c96",
 		"resourceType": "Microsoft.NetApp/netAppAccounts"
 	},
 	{
@@ -2365,6 +2349,22 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-netapp-files/backup-introduction",
 		"recommendation": "Enable backup for data protection in Azure NetApp Files",
 		"recommendationId": "b2fb3e60-97ec-e34d-af29-b16a0d61c2ac",
+		"resourceType": "Microsoft.NetApp/netAppAccounts"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-netapp-files/cross-region-replication-introduction",
+		"recommendation": "Enable Cross-region replication of Azure NetApp Files volumes",
+		"recommendationId": "e30317d2-c502-4dfe-a2d3-0a737cc79545",
+		"resourceType": "Microsoft.NetApp/netAppAccounts"
+	},
+	{
+		"category": "Scalability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-netapp-files/azure-netapp-files-network-topologies",
+		"recommendation": "Use standard network features for production in Azure NetApp Files",
+		"recommendationId": "ab984130-c57b-6c4a-8d04-6723b4e1bdb6",
 		"resourceType": "Microsoft.NetApp/netAppAccounts"
 	},
 	{
@@ -2448,19 +2448,19 @@
 		"resourceType": "Microsoft.Network/networkSecurityGroups"
 	},
 	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/essentials/activity-log?tabs=powershell",
-		"recommendation": "Monitor changes in Network Security Groups with Azure Monitor",
-		"recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
-		"resourceType": "Microsoft.Network/networkSecurityGroups"
-	},
-	{
 		"category": "Security",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/network-security-groups-overview#security-rules",
 		"recommendation": "The NSG only has Default Security Rules, make sure to configure the necessary rules",
 		"recommendationId": "8291c1fa-650c-b44b-b008-4deb7465919d",
+		"resourceType": "Microsoft.Network/networkSecurityGroups"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/essentials/activity-log?tabs=powershell",
+		"recommendation": "Monitor changes in Network Security Groups with Azure Monitor",
+		"recommendationId": "8bb4a57b-55e4-d24e-9c19-2679d8bc779f",
 		"resourceType": "Microsoft.Network/networkSecurityGroups"
 	},
 	{
@@ -2584,6 +2584,14 @@
 		"resourceType": "Microsoft.Network/publicIPAddresses"
 	},
 	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/ddos-protection/ddos-protection-overview",
+		"recommendation": "Public IP addresses should have DDoS protection enabled",
+		"recommendationId": "c4254c66-b8a5-47aa-82f6-e7d7fb418f47",
+		"resourceType": "Microsoft.Network/publicIPAddresses"
+	},
+	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses#availability-zone",
@@ -2600,27 +2608,19 @@
 		"resourceType": "Microsoft.Network/publicIPAddresses"
 	},
 	{
-		"category": "HighAvailability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-basic-upgrade-guidance",
-		"recommendation": "Upgrade Basic SKU public IP addresses to Standard SKU",
-		"recommendationId": "5cea1501-6fe4-4ec4-ac8f-f72320eb18d3",
-		"resourceType": "Microsoft.Network/publicIPAddresses"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/ddos-protection/ddos-protection-overview",
-		"recommendation": "Public IP addresses should have DDoS protection enabled",
-		"recommendationId": "c4254c66-b8a5-47aa-82f6-e7d7fb418f47",
-		"resourceType": "Microsoft.Network/publicIPAddresses"
-	},
-	{
 		"category": "Governance",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses",
 		"recommendation": "Public IPs not attached to any resource",
 		"recommendationId": "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
+		"resourceType": "Microsoft.Network/publicIPAddresses"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-basic-upgrade-guidance",
+		"recommendation": "Upgrade Basic SKU public IP addresses to Standard SKU",
+		"recommendationId": "5cea1501-6fe4-4ec4-ac8f-f72320eb18d3",
 		"resourceType": "Microsoft.Network/publicIPAddresses"
 	},
 	{
@@ -2720,14 +2720,6 @@
 		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
 	},
 	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-high-availability",
-		"recommendation": "Enable HA with zone redundancy",
-		"recommendationId": "ca87914f-aac4-4783-ab67-82a6f936f194",
-		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
-	},
-	{
 		"category": "Scalability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-maintenance",
@@ -2749,6 +2741,14 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-read-replicas",
 		"recommendation": "Configure one or more read replicas",
 		"recommendationId": "2ab85a67-26be-4ed2-a0bb-101b2513ec63",
+		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-high-availability",
+		"recommendation": "Enable HA with zone redundancy",
+		"recommendationId": "ca87914f-aac4-4783-ab67-82a6f936f194",
 		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
 	},
 	{
@@ -2800,20 +2800,20 @@
 		"resourceType": "Microsoft.Cache/Redis"
 	},
 	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-cache-for-redis/cache-how-to-zone-redundancy",
-		"recommendation": "Enable zone redundancy for Azure Cache for Redis",
-		"recommendationId": "5a44bd30-ae6a-4b81-9b68-dc3a8ffca4d8",
-		"resourceType": "Microsoft.Cache/Redis"
-	},
-	{
 		"category": "Security",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-cache-for-redis/cache-network-isolation",
 		"recommendation": "Configure Private Endpoints",
 		"recommendationId": "c474fc96-4e6a-4fb0-95d0-a26b3f35933c",
 		"resourceType": "Microsoft.Cache/redis"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-cache-for-redis/cache-how-to-zone-redundancy",
+		"recommendation": "Enable zone redundancy for Azure Cache for Redis",
+		"recommendationId": "5a44bd30-ae6a-4b81-9b68-dc3a8ffca4d8",
+		"resourceType": "Microsoft.Cache/Redis"
 	},
 	{
 		"category": "Governance",
@@ -3080,22 +3080,6 @@
 		"resourceType": "Microsoft.Sql/servers/elasticPools"
 	},
 	{
-		"category": "DisasterRecovery",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-sql/database/active-geo-replication-overview",
-		"recommendation": "Use Active Geo Replication to Create a Readable Secondary in Another Region",
-		"recommendationId": "74c2491d-048b-0041-a140-935960220e20",
-		"resourceType": "Microsoft.Sql/servers"
-	},
-	{
-		"category": "DisasterRecovery",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-sql/database/auto-failover-group-overview?tabs=azure-powershell",
-		"recommendation": "Auto Failover Groups can encompass one or multiple databases, usually used by the same app.",
-		"recommendationId": "943c168a-2ec2-a94c-8015-85732a1b4859",
-		"resourceType": "Microsoft.Sql/servers"
-	},
-	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-sql/database/high-availability-sla",
@@ -3109,6 +3093,22 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/insights/azure-sql#analyze-data-and-create-alerts",
 		"recommendation": "Monitor your Azure SQL Database in Near Real-Time to Detect Reliability Incidents",
 		"recommendationId": "7e7daec9-6a81-3546-a4cc-9aef72fec1f7",
+		"resourceType": "Microsoft.Sql/servers"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-sql/database/active-geo-replication-overview",
+		"recommendation": "Use Active Geo Replication to Create a Readable Secondary in Another Region",
+		"recommendationId": "74c2491d-048b-0041-a140-935960220e20",
+		"resourceType": "Microsoft.Sql/servers"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-sql/database/auto-failover-group-overview?tabs=azure-powershell",
+		"recommendation": "Auto Failover Groups can encompass one or multiple databases, usually used by the same app.",
+		"recommendationId": "943c168a-2ec2-a94c-8015-85732a1b4859",
 		"resourceType": "Microsoft.Sql/servers"
 	},
 	{
@@ -3465,18 +3465,18 @@
 	},
 	{
 		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/vpn-gateway/about-zone-redundant-vnet-gateways",
-		"recommendation": "Deploy VPN gateways with zone-redundant Public IPs",
-		"recommendationId": "4bae5a28-5cf4-40d9-bcf1-623d28f6d917",
-		"resourceType": "Microsoft.Network/virtualNetworkGateways"
-	},
-	{
-		"category": "HighAvailability",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/vpn-gateway/customer-controlled-gateway-maintenance",
 		"recommendation": "Configure customer-controlled VPN gateway maintenance",
 		"recommendationId": "f8c2e6d9-4b3a-45d6-b9e2-8e7f3a1c2d04",
+		"resourceType": "Microsoft.Network/virtualNetworkGateways"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/vpn-gateway/about-zone-redundant-vnet-gateways",
+		"recommendation": "Choose a Zone-redundant VPN gateway",
+		"recommendationId": "5b1933a6-90e4-f642-a01f-e58594e5aab2",
 		"resourceType": "Microsoft.Network/virtualNetworkGateways"
 	},
 	{
@@ -3489,26 +3489,26 @@
 	},
 	{
 		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-about-virtual-network-gateways#zrgw",
-		"recommendation": "Use Zone-redundant ExpressRoute gateway SKUs",
-		"recommendationId": "bbe668b7-eb5c-c746-8b82-70afdedf0cae",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/expressroute/customer-controlled-gateway-maintenance#azure-portal-steps",
+		"recommendation": "Configure customer-controlled ExpressRoute gateway maintenance",
+		"recommendationId": "3e115044-a3aa-433e-be01-ce17d67e50da",
 		"resourceType": "Microsoft.Network/virtualNetworkGateways"
 	},
 	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/vpn-gateway/about-zone-redundant-vnet-gateways",
-		"recommendation": "Choose a Zone-redundant VPN gateway",
-		"recommendationId": "5b1933a6-90e4-f642-a01f-e58594e5aab2",
+		"recommendation": "Deploy VPN gateways with zone-redundant Public IPs",
+		"recommendationId": "4bae5a28-5cf4-40d9-bcf1-623d28f6d917",
 		"resourceType": "Microsoft.Network/virtualNetworkGateways"
 	},
 	{
 		"category": "HighAvailability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/expressroute/customer-controlled-gateway-maintenance#azure-portal-steps",
-		"recommendation": "Configure customer-controlled ExpressRoute gateway maintenance",
-		"recommendationId": "3e115044-a3aa-433e-be01-ce17d67e50da",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-about-virtual-network-gateways#zrgw",
+		"recommendation": "Use Zone-redundant ExpressRoute gateway SKUs",
+		"recommendationId": "bbe668b7-eb5c-c746-8b82-70afdedf0cae",
 		"resourceType": "Microsoft.Network/virtualNetworkGateways"
 	},
 	{
@@ -3552,51 +3552,11 @@
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-principles#policy-driven-governance",
-		"recommendation": "Ensure that your VMs are compliant with Azure Policies",
-		"recommendationId": "c42343ae-2712-2843-a285-3437eb0b28a1",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/flexible-virtual-machine-scale-sets-migration-resources",
-		"recommendation": "Migrate VMs using availability sets to VMSS Flex",
-		"recommendationId": "a8d25876-7951-b646-b4e8-880c9031596b",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
 		"category": "Security",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/disk-encryption-overview",
 		"recommendation": "Virtual Machines should have Azure Disk Encryption or EncryptionAtHost enabled",
 		"recommendationId": "f0a97179-133a-6e4f-8a49-8a44da73ffce",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "Scalability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/sizes-b-series-burstable",
-		"recommendation": "Don't use A or B-Series VMs for production needing constant full CPU performance",
-		"recommendationId": "3201dba8-d1da-4826-98a4-104066545170",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/create-portal-availability-zone?tabs=standard",
-		"recommendation": "Deploy VMs across Availability Zones",
-		"recommendationId": "2bd0be95-a825-6f47-a8c6-3db1fb5eb387",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/vm/vminsights-overview",
-		"recommendation": "Enable VM Insights",
-		"recommendationId": "b72214bb-e879-5f4b-b9cd-642db84f36f4",
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
@@ -3608,19 +3568,27 @@
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
-		"category": "Scalability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview",
-		"recommendation": "Enable Accelerated Networking (AccelNet)",
-		"recommendationId": "dfedbeb1-1519-fc47-86a5-52f96cf07105",
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/agents/agents-overview",
+		"recommendation": "Configure monitoring for all Azure Virtual Machines",
+		"recommendationId": "4a9d8973-6dba-0042-b3aa-07924877ebd5",
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
-		"category": "Scalability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/disks-types#disk-type-comparison",
-		"recommendation": "Mission Critical Workloads should consider using Premium or Ultra Disks",
-		"recommendationId": "df0ff862-814d-45a3-95e4-4fad5a244ba6",
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/vm/vminsights-overview",
+		"recommendation": "Enable VM Insights",
+		"recommendationId": "b72214bb-e879-5f4b-b9cd-642db84f36f4",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-principles#policy-driven-governance",
+		"recommendation": "Ensure that your VMs are compliant with Azure Policies",
+		"recommendationId": "c42343ae-2712-2843-a285-3437eb0b28a1",
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
@@ -3629,46 +3597,6 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/managed-disks-overview#data-disk",
 		"recommendation": "Host database data on a data disk",
 		"recommendationId": "4ea2878f-0d69-8d4a-b715-afc10d1e538e",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "OtherBestPractices",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances",
-		"recommendation": "Customer DNS Servers should be configured in the Virtual Network level",
-		"recommendationId": "1cf8fe21-9593-1e4e-966b-779a294c0d30",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/disks-enable-private-links-for-import-export-portal",
-		"recommendation": "Network access to the VM disk should be set to Disable public access and enable private access",
-		"recommendationId": "70b1d2be-e6c4-b54e-9959-b1b690f9e485",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://aka.ms/on-demand-capacity-reservations-docs",
-		"recommendation": "Reserve Compute Capacity for critical workloads",
-		"recommendationId": "302fda08-ee65-4fbe-a916-6dc0b33169c4",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/maintenance-configurations",
-		"recommendation": "Use maintenance configurations for the VMs",
-		"recommendationId": "52ab9e5c-eec0-3148-8bd7-b6dd9e1be870",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface?tabs=network-interface-portal#enable-or-disable-ip-forwarding",
-		"recommendation": "IP Forwarding should only be enabled for Network Virtual Appliances",
-		"recommendationId": "41a22a5e-5e08-9647-92d0-2ffe9ef1bdad",
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
@@ -3682,25 +3610,73 @@
 	{
 		"category": "HighAvailability",
 		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/unmanaged-disks-deprecation",
+		"recommendation": "Use Managed Disks for VM disks",
+		"recommendationId": "122d11d7-b91f-8747-a562-f56b79bcfbdc",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "Scalability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/sizes-b-series-burstable",
+		"recommendation": "Don't use A or B-Series VMs for production needing constant full CPU performance",
+		"recommendationId": "3201dba8-d1da-4826-98a4-104066545170",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes#what-has-changed-with-flexible-orchestration-mode",
 		"recommendation": "Run production workloads on two or more VMs using VMSS Flex",
 		"recommendationId": "273f6b30-68e0-4241-85ea-acf15ffb60bf",
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/agents/agents-overview",
-		"recommendation": "Configure monitoring for all Azure Virtual Machines",
-		"recommendationId": "4a9d8973-6dba-0042-b3aa-07924877ebd5",
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface?tabs=network-interface-portal#enable-or-disable-ip-forwarding",
+		"recommendation": "IP Forwarding should only be enabled for Network Virtual Appliances",
+		"recommendationId": "41a22a5e-5e08-9647-92d0-2ffe9ef1bdad",
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/load-balancer/load-balancer-outbound-connections",
-		"recommendation": "VMs should not have a Public IP directly associated",
-		"recommendationId": "1f629a30-c9d0-d241-82ee-6f2eb9d42cb4",
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/create-portal-availability-zone?tabs=standard",
+		"recommendation": "Deploy VMs across Availability Zones",
+		"recommendationId": "2bd0be95-a825-6f47-a8c6-3db1fb5eb387",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "OtherBestPractices",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances",
+		"recommendation": "Customer DNS Servers should be configured in the Virtual Network level",
+		"recommendationId": "1cf8fe21-9593-1e4e-966b-779a294c0d30",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/flexible-virtual-machine-scale-sets-migration-resources",
+		"recommendation": "Migrate VMs using availability sets to VMSS Flex",
+		"recommendationId": "a8d25876-7951-b646-b4e8-880c9031596b",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/maintenance-configurations",
+		"recommendation": "Use maintenance configurations for the VMs",
+		"recommendationId": "52ab9e5c-eec0-3148-8bd7-b6dd9e1be870",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "Scalability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/disks-types#disk-type-comparison",
+		"recommendation": "Mission Critical Workloads should consider using Premium or Ultra Disks",
+		"recommendationId": "df0ff862-814d-45a3-95e4-4fad5a244ba6",
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
@@ -3714,9 +3690,33 @@
 	{
 		"category": "HighAvailability",
 		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/unmanaged-disks-deprecation",
-		"recommendation": "Use Managed Disks for VM disks",
-		"recommendationId": "122d11d7-b91f-8747-a562-f56b79bcfbdc",
+		"learnMoreUrl": "https://aka.ms/on-demand-capacity-reservations-docs",
+		"recommendation": "Reserve Compute Capacity for critical workloads",
+		"recommendationId": "302fda08-ee65-4fbe-a916-6dc0b33169c4",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/disks-enable-private-links-for-import-export-portal",
+		"recommendation": "Network access to the VM disk should be set to Disable public access and enable private access",
+		"recommendationId": "70b1d2be-e6c4-b54e-9959-b1b690f9e485",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "Scalability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview",
+		"recommendation": "Enable Accelerated Networking (AccelNet)",
+		"recommendationId": "dfedbeb1-1519-fc47-86a5-52f96cf07105",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/load-balancer/load-balancer-outbound-connections",
+		"recommendation": "VMs should not have a Public IP directly associated",
+		"recommendationId": "1f629a30-c9d0-d241-82ee-6f2eb9d42cb4",
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
@@ -3744,6 +3744,14 @@
 		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
 	},
 	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-health-extension?tabs=rest-api",
+		"recommendation": "Enable Azure Virtual Machine Scale Set Application Health Monitoring",
+		"recommendationId": "94794d2a-eff0-2345-9b67-6f9349d0a627",
+		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
+	},
+	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-use-availability-zones",
@@ -3768,6 +3776,22 @@
 		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
 	},
 	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-automatic-instance-repairs#requirements-for-using-automatic-instance-repairs",
+		"recommendation": "Enable Automatic Repair Policy on Azure Virtual Machine Scale Sets",
+		"recommendationId": "820f4743-1f94-e946-ae0b-45efafd87962",
+		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
+	},
+	{
+		"category": "Scalability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/autoscale/autoscale-get-started?WT.mc_id=Portal-Microsoft_Azure_Monitoring",
+		"recommendation": "Configure VMSS Autoscale to custom and configure the scaling metrics",
+		"recommendationId": "ee66ff65-9aa3-2345-93c1-25827cf79f44",
+		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
+	},
+	{
 		"category": "Scalability",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/autoscale/autoscale-predictive",
@@ -3781,30 +3805,6 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-scale-in-policy",
 		"recommendation": "Disable Force strictly even balance across zones to avoid scale in and out fail attempts",
 		"recommendationId": "b5a63aa0-c58e-244f-b8a6-cbba0560a6db",
-		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-health-extension?tabs=rest-api",
-		"recommendation": "Enable Azure Virtual Machine Scale Set Application Health Monitoring",
-		"recommendationId": "94794d2a-eff0-2345-9b67-6f9349d0a627",
-		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
-	},
-	{
-		"category": "Scalability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-monitor/autoscale/autoscale-get-started?WT.mc_id=Portal-Microsoft_Azure_Monitoring",
-		"recommendation": "Configure VMSS Autoscale to custom and configure the scaling metrics",
-		"recommendationId": "ee66ff65-9aa3-2345-93c1-25827cf79f44",
-		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-automatic-instance-repairs#requirements-for-using-automatic-instance-repairs",
-		"recommendation": "Enable Automatic Repair Policy on Azure Virtual Machine Scale Sets",
-		"recommendationId": "820f4743-1f94-e946-ae0b-45efafd87962",
 		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
 	},
 	{
@@ -3841,6 +3841,14 @@
 	},
 	{
 		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/concepts-and-best-practices",
+		"recommendation": "All Subnets should have a Network Security Group associated",
+		"recommendationId": "f0bf9ae6-25a5-974d-87d5-025abec73539",
+		"resourceType": "Microsoft.Network/virtualNetworks"
+	},
+	{
+		"category": "Security",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/architecture/framework/services/networking/azure-virtual-network/reliability",
 		"recommendation": "Shield public endpoints in Azure VNets with Azure DDoS Standard Protection Plans",
@@ -3861,14 +3869,6 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/network-watcher/vnet-flow-logs-overview",
 		"recommendation": "Enable Virtual Network Flow Logs",
 		"recommendationId": "06b77be9-56a3-4d41-b362-8b295c5a283d",
-		"resourceType": "Microsoft.Network/virtualNetworks"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/concepts-and-best-practices",
-		"recommendation": "All Subnets should have a Network Security Group associated",
-		"recommendationId": "f0bf9ae6-25a5-974d-87d5-025abec73539",
 		"resourceType": "Microsoft.Network/virtualNetworks"
 	},
 	{
