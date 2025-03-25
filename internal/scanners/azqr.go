@@ -278,7 +278,7 @@ func ListResourceGroup(ctx context.Context, cred azcore.TokenCredential, subscri
 		if err != nil {
 			return nil, err
 		}
-		resourceGroups = append(resourceGroups, pageResp.ResourceGroupListResult.Value...)
+		resourceGroups = append(resourceGroups, pageResp.Value...)
 	}
 	return resourceGroups, nil
 }

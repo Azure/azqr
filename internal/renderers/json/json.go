@@ -31,7 +31,13 @@ func writeData(data [][]string, fileName, extension string) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("error creating json:")
 	}
-	defer f.Close()
+	
+	defer func() {
+		// Handle error during file close
+		if cerr := f.Close(); cerr != nil {
+			log.Fatal().Err(cerr).Msg("error closing file:")
+		}
+	}()
 
 	jsonData := convertToJSON(data)
 
