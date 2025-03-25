@@ -35,10 +35,7 @@ func (a *WebPubSubScanner) GetRecommendations() map[string]scanners.AzqrRecommen
 			Eval: func(target interface{}, scanContext *scanners.ScanContext) (bool, string) {
 				i := target.(*armwebpubsub.ResourceInfo)
 				sku := string(*i.SKU.Name)
-				zones := false
-				if strings.Contains(sku, "Premium") {
-					zones = true
-				}
+				zones := strings.Contains(sku, "Premium")
 				return !zones, ""
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
