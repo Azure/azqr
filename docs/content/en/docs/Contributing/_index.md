@@ -1,6 +1,6 @@
 ---
 title: Contribution Guidelines
-weight: 22
+weight: 5
 description: How to contribute to the project
 ---
 
