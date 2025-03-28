@@ -131,12 +131,12 @@ func configureSheet(f *excelize.File, sheet string, headers []string, currentRow
 		log.Fatal().Err(err).Msg("Failed to set autofilter")
 	}
 
-	logo := embeded.GetTemplates("microsoft.png")
+	logo := embeded.GetTemplates("azqr.png")
 	opt := &excelize.GraphicOptions{
 		ScaleX:      1,
 		ScaleY:      1,
 		Positioning: "absolute",
-		AltText:     "Azure Logo",
+		AltText:     "azqr logo",
 	}
 	pic := &excelize.Picture{
 		Extension: ".png",
