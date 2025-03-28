@@ -10,6 +10,8 @@
 
 [![Open in vscode.dev](https://img.shields.io/badge/Open%20in-vscode.dev-blue)](https://vscode.dev/github/Azure/azqr)
 
+![Azure Quick Review](/docs/static/logo/azqr_readme.png)
+
 **Azure Quick Review (azqr)** is a powerful command-line interface (CLI) tool that specializes in analyzing Azure resources to ensure compliance with Azure's best practices and recommendations. Its main objective is to offer users a comprehensive overview of their Azure resources, allowing them to easily identify any non-compliant configurations or areas for improvement.
 
 ## Azure Quick Review Recommendations
