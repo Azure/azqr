@@ -4,6 +4,12 @@ description: Use Azure Quick Review &mdash; to analyze Azure resources and ident
 weight: 3
 ---
 
+## Authorization
+
+**Azure Quick Review (azqr)** requires the following permissions:
+
+* Reader over Subscription or Management Group scope
+
 ## Authentication
 
 **Azure Quick Review (azqr)** requires the following permissions:
@@ -12,95 +18,131 @@ weight: 3
 
 ### - PowerShell
 
-> Install Azure PowerShell Modules
+Set the following environment variables:
 
-```powershell
-Install-Module -Name 'Az' --Scope 'CurrentUser'
-```
-
-> Create Service Principal
+Powershell:
 
 ``` powershell
-$spDetails = New-AzADServicePrincipal -DisplayName 'sp-azure-quick-review'
+$env:AZURE_CLIENT_ID = '<service-principal-client-id>'
+$env:AZURE_CLIENT_SECRET = '<service-principal-client-secret>'
+$env:AZURE_TENANT_ID = '<tenant-id>'
 ```
 
-From `$spDetails`, Extract the
+Bash:
 
-- AppId..........: `$spDetails.appId`
-- AppSecret..: `$spDetails.PasswordCredentials.SecretText`
-- TenantId....: `(Get-AzContext).Tenant.Id`
+``` bash
+export AZURE_CLIENT_ID='<service-principal-client-id>'
+export AZURE_CLIENT_SECRET = '<service-principal-client-secret>'
+export AZURE_TENANT_ID = '<tenant-id>'
+```
 
-> Authenticate to Azure
+### Authenticate with a Managed Identity
+
+Set the following environment variables:
+
+Powershell:
 
 ``` powershell
-$env:AZURE_CLIENT_ID = ''
-$env:AZURE_CLIENT_SECRET = ''
-$env:AZURE_TENANT_ID = ''
+$env:AZURE_CLIENT_ID = '<managed-identity-client-id>'
+$env:AZURE_TENANT_ID = '<tenant-id>'
 ```
 
-> Execute Azure Quick Review Scan
+Bash:
 
-``` console
-azqr scan
+``` bash
+export AZURE_CLIENT_ID='<managed-identity-client-id>'
+export AZURE_TENANT_ID = '<tenant-id>'
 ```
 
-### - Azure CLI
+### Authenticate with Azure CLI
 
-> Install Microsoft Azure CLI
-
-```console
-winget install -e 'Microsoft.AzureCLI'
-```
-
-> Authenticate to Azure
+Authenticate to Azure:
 
 ```console
 az login
 ```
 
-> Execute Azure Quick Review Scan
+## Scan Azure Resources
 
-```console
-azqr scan --azure-cli-credential
+* Scan All Resources
+
+  ```console
+  azqr scan
+  ```
+
+* Scan a Management Group
+
+  ```console
+  azqr scan --management-group-id <management_group_id>
+  ```
+
+* Scan a Subscription
+  
+  ```console
+  azqr scan --subscription-id <subscription_id>
+  ```
+
+* Scan a Resource Group
+
+  ```console
+  azqr scan --subscription-id <subscription_id> --resource-group <resource_group_name>
+  ```
+
+## Advanced Filtering
+
+You can configure Azure Quick Review to include or exclude specific subscriptions or resource groups and also exclude services or recommendations. To do so, create a `yaml` file with the following format:
+
+```yaml
+azqr:
+  include:
+    subscriptions:
+      - <subscription_id> # format: <subscription_id>
+    resourceGroups:
+      - <resource_group_resource_id> # format: /subscriptions/<subscription_id>/resourceGroups/<resource_group_name>
+    resourceTypes:
+      - <resource type abbreviation> # format: Abbreviation of the resource type. For example: "vm" for "Microsoft.Compute/virtualMachines"
+  exclude:
+    subscriptions:
+      - <subscription_id> # format: <subscription_id>
+    resourceGroups:
+      - <resource_group_resource_id> # format: /subscriptions/<subscription_id>/resourceGroups/<resource_group_name>
+    services:
+      - <service_resource_id> # format: /subscriptions/<subscription_id>/resourceGroups/<resource_group_name>/providers/<service_provider>/<service_name>
+    recommendations:
+      - <recommendation_id> # format: <recommendation_id>
 ```
 
-## Specific Resources or Subscriptions
+Then run the scan with the `--filters` flag:
 
-Do you need to scan just one subscription or a specific resource group, AzQR can do this!
-
-> Subscription
-
-```console
-azqr scan --subscription-id ''
+```bash
+./azqr scan --filters <path_to_yaml_file>
 ```
 
-> Resource Group
+> Check the [rules](https://azure.github.io/azqr/docs/recommendations/) to get the recommendation ids.
 
-```console
-azqr scan --subscription-id '' --resource-group ''
-```
+> Check the [overview](https://azure.github.io/azqr/docs/overview/) to get the resource type abbreviations.
 
 ## File Outputs
 
 Currently Azure Quick Review supports 3 types of file outputs: `xlsx` (default), `csv`, `json`
 
-### - xlsx
+### xlsx
 
-```powershell
-$date = Get-Date -Format 'yyyy-MM-dd'
-$fileName = "$($date)_azqr_report"
-azqr scan --output-name $fileName
+`xlsx` is the default output format.
+
+> Check the [overview](https://azure.github.io/azqr/docs/overview/) to get the more information.
+
+### csv
+
+By default `azqr` will create an xlsx document, However if you need to export to `csv` you can use the following flag: `--csv`
+
+Example:
+
+```bash
+azqr scan --csv
 ```
 
-### - csv
-
-```powershell
-$date = Get-Date -Format 'yyyy-MM-dd'
-$fileName = "$($date)_azqr_report"
-azqr scan --csv --output-name $fileName
-```
-
-When the scan and export is completed you will be presented with 9 csv files:
+The scan will generate 9 `csv` files:
 
 ```
 <file-name>.advisor.csv
@@ -115,17 +157,18 @@ When the scan and export is completed you will be presented with 9 csv files:
 ```
 
 ### - json
-By default AzQR will create an xlsx document, However if you need to export to json you can use the following command:
 
-``` powershell
-$date = Get-Date -Format 'yyyy-MM-dd'
-$fileName = "$($date)_azqr_report"
-azqr scan --output-name $fileName --json
+By default `azqr` will create an xlsx document, However if you need to export to `json` you can use the following flag: `--json`
+
+Example:
+
+```bash
+azqr scan --json
 ```
 
-When the scan and export is completed you will be presented with 9 json files:
+The scan will generate 9 `json` files:
 
-```
+``` 
 <file-name>.advisor.json
 <file-name>.costs.json
 <file-name>.defender.json
@@ -137,262 +180,30 @@ When the scan and export is completed you will be presented with 9 json files:
 <file-name>.resourceType.json
 ```
 
+### Changing the Output File Name
+
+You can change the output file name by using the `--output-file` or `-o` flag:
+
+Powershell:
+
+```powershell
+$timestamp = Get-Date -Format 'yyyyMMddHHmmss'
+azqr scan --output-file "azqr_action_plan_$timestamp"
+```
+
+Bash:
+
+```bash
+timestamp=$(date '+%Y%m%d%H%M%S')
+azqr scan --output-file "azqr_action_plan_$timestamp"
+```
+
+> By default, the output file name is `azqr_action_plan_YYYY_MM_DD_THHMMSS`.
+
 ## Help
 
-<details>
-<summary>azqr --help</summary>
-<br>
-
-Command:
+You can get help for `azqr` commands by running:
 
 ```console
 azqr --help
 ```
-Help Response:
-
-```
-Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group
-
-Usage:
-  azqr [flags]
-  azqr [command]
-
-Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  help        Help about any command
-  pbi         Creates Power BI Desktop dashboard template
-  rules       Print all recommendations
-  scan        Scan Azure Resources
-  types       Print all supported azure resource types
-
-Flags:
-  -h, --help      help for azqr
-  -v, --version   version for azqr
-
-Use "azqr [command] --help" for more information about a command.
-```
-
-</details>
-<br>
-
-<details>
-<summary>azqr completion --help</summary>
-<br>
-
-Command:
-
-```console
-azqr completion --help
-```
-
-Help Response:
-
-```
-Generate the autocompletion script for azqr for the specified shell.
-See each sub-command's help for details on how to use the generated script.
-
-Usage:
-  azqr completion [command]
-
-Available Commands:
-  bash        Generate the autocompletion script for bash
-  fish        Generate the autocompletion script for fish
-  powershell  Generate the autocompletion script for powershell
-  zsh         Generate the autocompletion script for zsh
-
-Flags:
-  -h, --help   help for completion
-
-Use "azqr completion [command] --help" for more information about a command.
-```
-</details>
-<br>
-
-<details>
-<summary>azqr pbi --help</summary>
-<br>
-
-Command:
-
-```console
-azqr pbi --help
-```
-
-Help Response:
-
-```
-Creates Power BI Desktop dashboard template
-
-Usage:
-  azqr pbi [flags]
-
-Flags:
-  -h, --help                   help for pbi
-  -p, --template-path string   Path were the PowerBI template will be created
-```
-
-</details>
-<br>
-
-<details>
-<summary>azqr rules --help</summary>
-<br>
-
-Command:
-
-```console
-azqr rules --help
-```
-
-Help Response:
-
-```
-Print all recommendations as markdown table
-
-Usage:
-  azqr rules [flags]
-
-Flags:
-  -h, --help   help for rules
-```
-
-</details>
-<br>
-
-<details>
-<summary>azqr types --help</summary>
-<br>
-
-Command:
-
-```console
-azqr types --help
-```
-
-Help Response:
-
-```
-Print all supported azure resource types
-
-Usage:
-  azqr types [flags]
-
-Flags:
-  -h, --help   help for types
-```
-
-</details>
-<br>
-
-<details>
-<summary>azqr scan --help</summary>
-<br>
-
-Command:
-
-```console
-azqr scan --help
-```
-
-Help Response:
-
-```
-Scan Azure Resources
-
-Usage:
-  azqr scan [flags]
-  azqr scan [command]
-
-Available Commands:
-  aa          Scan Azure Automation Account
-  adf         Scan Azure Data Factory
-  afd         Scan Azure Front Door
-  afw         Scan Azure Firewall
-  agw         Scan Azure Application Gateway
-  aks         Scan Azure Kubernetes Service
-  amg         Scan Azure Managed Grafana
-  apim        Scan Azure API Management
-  appcs       Scan Azure App Configuration
-  appi        Scan Azure Application Insights
-  as          Scan Azure Analysis Service
-  asp         Scan Azure App Service
-  avail       Scan Availability Sets
-  avd         Scan Azure Virtual Desktop
-  avs         Scan Azure VMware Solution
-  ba          Scan Azure Batch Account
-  ca          Scan Azure Container Apps
-  cae         Scan Azure Container Apps Environment
-  ci          Scan Azure Container Instances
-  cog         Scan Azure Cognitive Service Accounts
-  con         Scan Connection
-  cosmos      Scan Azure Cosmos DB
-  cr          Scan Azure Container Registries
-  dbw         Scan Azure Databricks
-  dec         Scan Azure Data Explorer
-  disk        Scan Disk
-  erc         Scan Express Route Circuits
-  evgd        Scan Azure Event Grid Domains
-  evh         Scan Azure Event Hubs
-  fdfp        Scan Front Door Web Application Policy
-  gal         Scan Azure Galleries
-  hpc         Scan HPC
-  iot         Scan Azure IoT Hub
-  it          Scan Image Template
-  kv          Scan Azure Key Vault
-  lb          Scan Azure Load Balancer
-  log         Scan Log Analytics workspace
-  logic       Scan Azure Logic Apps
-  maria       Scan Azure Database for MariaDB
-  mysql       Scan Azure Database for MySQL
-  netapp      Scan NetApp
-  ng          Scan Azure NAT Gateway
-  nic         Scan NICs
-  nsg         Scan NSG
-  nw          Scan Network Watcher
-  pdnsz       Scan Private DNS Zone
-  pep         Scan Private Endpoint
-  pip         Scan Public IP
-  psql        Scan Azure Database for psql
-  redis       Scan Azure Cache for Redis
-  rg          Scan Resource Groups
-  rsv         Scan Recovery Service
-  rt          Scan Route Table
-  sap         Scan SAP
-  sb          Scan Azure Service Bus
-  sigr        Scan Azure SignalR
-  sql         Scan Azure SQL Database
-  st          Scan Azure Storage
-  synw        Scan Azure Synapse Workspace
-  traf        Scan Azure Traffic Manager
-  vdpool      Scan Azure Virtual Desktop
-  vgw         Scan Virtual Network Gateway
-  vm          Scan Virtual Machine
-  vmss        Scan Virtual Machine Scale Set
-  vnet        Scan Azure Virtual Network
-  vwan        Scan Azure Virtual WAN
-  wps         Scan Azure Web PubSub
-
-Flags:
-  -a, --advisor                      Scan Azure Advisor Recommendations (default) (default true)
-      --azqr                         Scan Azure Quick Review Recommendations (default) (default true)
-  -f, --azure-cli-credential         Force the use of Azure CLI Credential
-  -c, --costs                        Scan Azure Costs (default) (default true)
-      --csv                          Create csv files
-      --debug                        Set log level to debug
-  -d, --defender                     Scan Defender Status (default) (default true)
-  -e, --filters string               Filters file (YAML format)
-  -h, --help                         help for scan
-      --json                         Create json file
-      --management-group-id string   Azure Management Group Id
-  -m, --mask                         Mask the subscription id in the report (default) (default true)
-  -o, --output-name string           Output file name without extension
-  -g, --resource-group string        Azure Resource Group (Use with --subscription-id)
-  -s, --subscription-id string       Azure Subscription Id
-
-Use "azqr scan [command] --help" for more information about a command.
-```
-
-</details>
-<br>
-
-> Check the [rules](https://azure.github.io/azqr/docs/recommendations/) to get the recommendation ids.
