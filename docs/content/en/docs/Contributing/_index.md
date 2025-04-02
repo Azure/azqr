@@ -18,3 +18,31 @@ instructions provided by the bot. You will only need to do this once across all 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
 or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Contributing to Documentation
+
+Below are the steps and required packages to get the Azure Quick Review Hugo site to build and run locally.
+
+* Ensure that you have the following packages installed locally.
+
+    - git
+    - hugo extended
+    - nodejs
+
+* Fork the azqr repository, clone locally and then head to the docs folder
+
+    ``` powershell
+    cd .\azqr\docs
+    ```
+
+* Execute the Node Module installer
+
+    ``` console
+    npm install
+    ```
+
+* Once this has finish you can execute the Hugo Server
+
+    ``` console
+    hugo server
+    ```
