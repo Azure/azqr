@@ -215,6 +215,10 @@ func (e *RecommendationEngine) EvaluateRecommendations(rules map[string]AzqrReco
 	results := map[string]AzqrResult{}
 
 	for k, rule := range rules {
+		if scanContext.Filters.Azqr.IsRecommendationExcluded(rule.RecommendationID) {
+			continue
+		}
+
 		results[k] = e.evaluateRecommendation(rule, target, scanContext)
 	}
 
