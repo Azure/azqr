@@ -56,6 +56,10 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	filtersFile, _ := cmd.Flags().GetString("filters")
 	useAzqr, _ := cmd.Flags().GetBool("azqr")
 
+	// Normalize lowercase for case-insensitive handling
+	subscriptionID = strings.ToLower(subscriptionID)
+
+	
 	// load filters
 	filters := scanners.LoadFilters(filtersFile, scannerKeys)
 
