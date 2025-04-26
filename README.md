@@ -256,6 +256,7 @@ Then run the scan with the `--filters` flag:
 If you encounter any issue while using **Azure Quick Review (azqr)**, please set the `AZURE_SDK_GO_LOGGING` environment variable to `all`, run the tool with the `--debug` flag and then share the console output with us by filing a new [issue](https://github.com/Azure/azqr/issues).
 
 ## Building Locally
+
 Make sure you have `Go 1.23.x` or higher installed in your environment. You can set `GOROOT=<path_to_go_libexec> folder` and `GOPATH=<path_to_go_dep_folder>` if you want to be specific about where to find Go binary and Go dependencies.
 
 ```bash
@@ -263,7 +264,7 @@ Make sure you have `Go 1.23.x` or higher installed in your environment. You can 
    cd azqr
    git submodulie init
    git submodule update --recursive
-   go build -o azqr cmd/main.go
+   go build -o azqr cmd/azqr/main.go
  ```
 
 ## Support
