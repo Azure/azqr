@@ -66,6 +66,11 @@ func (e *AzqrFilter) IsSubscriptionExcluded(subscriptionID string) bool {
 		return false
 	}
 
+	// If not included, but there are included ressubscriptions, then exclude it
+	if len(e.iSubscriptions) > 0 {
+		return true
+	}
+
 	_, ok = e.xSubscriptions[strings.ToLower(subscriptionID)]
 	return ok
 }
@@ -141,23 +146,39 @@ func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 		}
 	}
 
+	filters.Azqr.iSubscriptions = make(map[string]bool)
+	for _, id := range filters.Azqr.Include.Subscriptions {
+		log.Debug().Msgf("Adding subscription to include: %s", id)
+		filters.Azqr.iSubscriptions[strings.ToLower(id)] = true
+	}
+
+	filters.Azqr.iResourceGroups = make(map[string]bool)
+	for _, id := range filters.Azqr.Include.ResourceGroups {
+		log.Debug().Msgf("Adding resource group to include: %s", id)
+		filters.Azqr.iResourceGroups[strings.ToLower(id)] = true
+	}
+
 	filters.Azqr.xResourceGroups = make(map[string]bool)
 	for _, id := range filters.Azqr.Exclude.ResourceGroups {
+		log.Debug().Msgf("Adding resource group to exclude: %s", id)
 		filters.Azqr.xResourceGroups[strings.ToLower(id)] = true
 	}
 
 	filters.Azqr.xSubscriptions = make(map[string]bool)
 	for _, id := range filters.Azqr.Exclude.Subscriptions {
+		log.Debug().Msgf("Adding subscription to exclude: %s", id)
 		filters.Azqr.xSubscriptions[strings.ToLower(id)] = true
 	}
 
 	filters.Azqr.xServices = make(map[string]bool)
 	for _, id := range filters.Azqr.Exclude.Services {
+		log.Debug().Msgf("Adding service to exclude: %s", id)
 		filters.Azqr.xServices[strings.ToLower(id)] = true
 	}
 
 	filters.Azqr.xRecommendations = make(map[string]bool)
 	for _, id := range filters.Azqr.Exclude.Recommendations {
+		log.Debug().Msgf("Adding recommendation to exclude: %s", id)
 		filters.Azqr.xRecommendations[strings.ToLower(id)] = true
 	}
 
