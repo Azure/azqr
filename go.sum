@@ -145,8 +145,8 @@ github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/
 github.com/mattn/go-isatty v0.0.19/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
-github.com/metoro-io/mcp-golang v0.11.0 h1:1k+VSE9QaeMTLn0gJ3FgE/DcjsCBsLFnz5eSFbgXUiI=
-github.com/metoro-io/mcp-golang v0.11.0/go.mod h1:ifLP9ZzKpN1UqFWNTpAHOqSvNkMK6b7d1FSZ5Lu0lN0=
+github.com/metoro-io/mcp-golang v0.12.0 h1:CFfESIXD9trCNnMFhLL5XXgC4X0EhVbZZ7kfv+5xgkg=
+github.com/metoro-io/mcp-golang v0.12.0/go.mod h1:ifLP9ZzKpN1UqFWNTpAHOqSvNkMK6b7d1FSZ5Lu0lN0=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9M+97sNutRR1RKhG96O6jWumTTnw=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
 github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=
