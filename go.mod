@@ -55,7 +55,7 @@ require (
 	github.com/metoro-io/mcp-golang v0.12.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.9.1
-	github.com/xuri/excelize/v2 v2.9.0
+	github.com/xuri/excelize/v2 v2.9.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -71,7 +71,6 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
@@ -81,11 +80,12 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
+	github.com/tiendc/go-deepcopy v1.6.0 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
-	github.com/xuri/efp v0.0.0-20250227110027-3491fafc2b79 // indirect
-	github.com/xuri/nfp v0.0.0-20250226145837-86d5fc24b2ba // indirect
-	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	github.com/xuri/efp v0.0.1 // indirect
+	github.com/xuri/nfp v0.0.1 // indirect
+	golang.org/x/crypto v0.38.0 // indirect
+	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 )
