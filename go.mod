@@ -1,8 +1,6 @@
 module github.com/Azure/azqr
 
-go 1.23.3
-
-toolchain go1.24.1
+go 1.24.3
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
