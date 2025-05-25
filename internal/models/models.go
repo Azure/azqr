@@ -267,16 +267,16 @@ func (r *AzqrServiceResult) ResourceID() string {
 	return strings.ToLower(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/%s/%s", r.SubscriptionID, r.ResourceGroup, r.Type, r.ServiceName))
 }
 
-func LogResourceGroupScan(subscriptionID string, resourceGroupName string, serviceTypeOrName string) {
-	log.Info().Msgf("Scanning subscriptions/...%s/resourceGroups/%s for %s", subscriptionID[29:], resourceGroupName, serviceTypeOrName)
-}
-
 func LogSubscriptionScan(subscriptionID string, serviceTypeOrName string) {
 	log.Info().Msgf("Scanning subscriptions/...%s for %s", subscriptionID[29:], serviceTypeOrName)
 }
 
 func LogResourceTypeScan(serviceType string) {
 	log.Info().Msgf("Scanning subscriptions for %s", serviceType)
+}
+
+func LogGraphRecommendationScan(serviceType, recommendationId string) {
+	log.Info().Msgf("Scanning subscriptions for %s using rule %s", serviceType, recommendationId)
 }
 
 func ShouldSkipError(err error) bool {

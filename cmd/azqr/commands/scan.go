@@ -17,8 +17,9 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status (default)")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations (default)")
 	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs (default)")
-	scanCmd.PersistentFlags().BoolP("json", "", false, "Create json file")
-	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create csv files")
+	scanCmd.PersistentFlags().BoolP("xslx", "", true, "Create Excel report (default)")
+	scanCmd.PersistentFlags().BoolP("json", "", false, "Create JSON report files")
+	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create CSV report files")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default)")
 	scanCmd.PersistentFlags().BoolP("azure-cli-credential", "f", false, "Force the use of Azure CLI Credential")
@@ -48,6 +49,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	defender, _ := cmd.Flags().GetBool("defender")
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
+	xlsx, _ := cmd.Flags().GetBool("xslx")
 	csv, _ := cmd.Flags().GetBool("csv")
 	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
@@ -66,6 +68,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		OutputName:              outputFileName,
 		Defender:                defender,
 		Advisor:                 advisor,
+		Xlsx:                    xlsx,
 		Cost:                    cost,
 		Csv:                     csv,
 		Json:                    json,

@@ -5,35 +5,55 @@ package scanners
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/rs/zerolog/log"
 )
 
 // DiagnosticSettingsScanner - scanner for diagnostic settings
 type DiagnosticSettingsScanner struct {
-	ctx    context.Context
-	client *arm.Client
+	ctx         context.Context
+	httpClient  *http.Client
+	accessToken string
 }
+
+const (
+	bucketCapacity = 250
+	refillRate     = 25
+)
 
 // Init - Initializes the DiagnosticSettingsScanner
 func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenCredential, options *arm.ClientOptions) error {
-	client, err := arm.NewClient(moduleName+".DiagnosticSettingsBatch", moduleVersion, cred, options)
-	if err != nil {
-		return err
+	// Create a new HTTP client with a timeout
+	httpClient := &http.Client{
+		Timeout: 60 * time.Second,
 	}
-	d.client = client
+	d.httpClient = httpClient
 	d.ctx = ctx
+
+	// Acquire an access token using the provided credential
+	token, err := cred.GetToken(context.Background(), policy.TokenRequestOptions{
+		Scopes: []string{"https://management.azure.com/.default"},
+	})
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to acquire Azure access token")
+	}
+
+	// Set the access token string
+	d.accessToken = token.Token
 	return nil
 }
 
@@ -41,8 +61,15 @@ func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenC
 func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resources []*string) (map[string]bool, error) {
 	res := map[string]bool{}
 
+	// if len(resources) > 0 { // Uncomment this block to test with a large number of resources
+	// 	firstResource := resources[0]
+	// 	for len(resources) < 100000 {
+	// 		resources = append(resources, firstResource)
+	// 	}
+	// }
+
 	if len(resources) > 5000 {
-		log.Warn().Msg(fmt.Sprintf("%d resources detected. Scan will take longer than usual", len(resources)))
+		log.Warn().Msgf("%d resources detected. Scan will take longer than usual", len(resources))
 	}
 
 	batches := int(math.Ceil(float64(len(resources)) / 20))
@@ -58,33 +85,24 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 	ch := make(chan map[string]bool, batches)
 	var wg sync.WaitGroup
 
-	// Start workers
-	// Based on: https://medium.com/insiderengineering/concurrent-http-requests-in-golang-best-practices-and-techniques-f667e5a19dea
-	numWorkers := 100 // Define the number of workers in the pool
+	// Create a burst limiter to control the rate of requests
+	limiter := throttling.NewLimiter(bucketCapacity, refillRate, 1*time.Second, 0*time.Millisecond)
+	burstLimiter := limiter.Start()
+
+	numWorkers := bucketCapacity
 	for w := 0; w < numWorkers; w++ {
-		go d.worker(jobs, ch, &wg)
+		go d.worker(jobs, ch, &wg, burstLimiter)
 	}
 	wg.Add(batches)
 
 	// Split resources into batches of 20 items.
 	batchSize := 20
-	batchCount := 0
 	for i := 0; i < len(resources); i += batchSize {
 		j := i + batchSize
 		if j > len(resources) {
 			j = len(resources)
 		}
 		jobs <- resources[i:j]
-
-		batchCount++
-		if batchCount == numWorkers {
-			log.Debug().Msgf("all %d workers are running. Sleeping for 4 seconds to avoid throttling", numWorkers)
-			batchCount = 0
-			// there are more batches to process
-			// Staggering queries to avoid throttling. Max 15 queries each 5 seconds.
-			// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
-			time.Sleep(4 * time.Second)
-		}
 	}
 
 	// Wait for all workers to finish
@@ -100,17 +118,34 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 	return res, nil
 }
 
-func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<- map[string]bool, wg *sync.WaitGroup) {
+func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<- map[string]bool, wg *sync.WaitGroup, burstLimiter <-chan struct{}) {
+	// Wait for a token from the burstLimiter channel before starting the scan
 	for ids := range jobs {
-		resp, err := d.restCall(d.ctx, ids)
+		<-burstLimiter
+		resp, err := d.retry(d.ctx, 3, 10*time.Millisecond, ids)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to get diagnostic settings")
 		}
 		asyncRes := map[string]bool{}
 		for _, response := range resp.Responses {
-			for _, diagnosticSetting := range response.Content.Value {
-				id := parseResourceId(diagnosticSetting.ID)
-				asyncRes[id] = true
+			if response.HttpStatusCode == http.StatusOK {
+				// Decode the response content into a DiagnosticSettingsResourceCollection
+				var diagnosticSettings armmonitor.DiagnosticSettingsResourceCollection
+				contentBytes, err := json.Marshal(response.Content)
+				if err != nil {
+					log.Fatal().Err(err).Msg("Failed to marshal diagnostic settings content")
+					continue
+				}
+				// Unmarshal the JSON bytes into the DiagnosticSettingsResourceCollection struct
+				if err := json.Unmarshal(contentBytes, &diagnosticSettings); err != nil {
+					log.Fatal().Err(err).Msg("Failed to unmarshal diagnostic settings response")
+					continue
+				}
+
+				for _, diagnosticSetting := range diagnosticSettings.Value {
+					id := parseResourceId(diagnosticSetting.ID)
+					asyncRes[id] = true
+				}
 			}
 		}
 		results <- asyncRes
@@ -118,25 +153,40 @@ func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<-
 	}
 }
 
-const (
-	moduleName    = "armresources"
-	moduleVersion = "v1.1.1"
-)
+// retry executes the Resource Graph query with retries and exponential backoff.
+// Returns the QueryResponse or error.
+func (d *DiagnosticSettingsScanner) retry(ctx context.Context, attempts int, sleep time.Duration, resourceIds []*string) (*ArmBatchResponse, error) {
+	var err error
+	for i := 0; ; i++ {
+		resp, err := d.doRequest(ctx, resourceIds)
+		if err == nil {
+			return resp, nil
+		}
 
-func (d *DiagnosticSettingsScanner) restCall(ctx context.Context, resourceIds []*string) (*ArmBatchResponse, error) {
-	req, err := runtime.NewRequest(ctx, http.MethodPost, runtime.JoinPaths(d.client.Endpoint(), "batch"))
-	if err != nil {
-		return nil, err
+		errAsString := err.Error()
+
+		if i >= (attempts - 1) {
+			log.Info().Msgf("Retry limit reached. Error: %s", errAsString)
+			break
+		}
+
+		log.Debug().Msgf("Retrying after error: %s", errAsString)
+
+		time.Sleep(sleep)
+		sleep *= 2
 	}
-	reqQP := req.Raw().URL.Query()
-	reqQP.Set("api-version", "2020-06-01")
-	req.Raw().URL.RawQuery = reqQP.Encode()
-	req.Raw().Header["Accept"] = []string{"application/json"}
+	return nil, err
+}
 
+// restCall performs a batch request to retrieve diagnostic settings using an HTTP client.
+func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds []*string) (*ArmBatchResponse, error) {
+	// Build the batch endpoint URL.
+	batchURL := "https://management.azure.com/batch?api-version=2020-06-01"
+
+	// Prepare the batch request payload.
 	batch := ArmBatchRequest{
 		Requests: []ArmBatchRequestItem{},
 	}
-
 	for _, resourceId := range resourceIds {
 		batch.Requests = append(batch.Requests, ArmBatchRequestItem{
 			HttpMethod:  http.MethodGet,
@@ -144,22 +194,63 @@ func (d *DiagnosticSettingsScanner) restCall(ctx context.Context, resourceIds []
 		})
 	}
 
-	// set request body
-	err = runtime.MarshalAsJSON(req, batch)
+	// Marshal the batch request to JSON.
+	body, err := json.Marshal(batch)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := d.client.Pipeline().Do(req)
+	// Create the HTTP request.
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, batchURL, strings.NewReader(string(body)))
 	if err != nil {
 		return nil, err
 	}
-	if !runtime.HasStatusCode(resp, http.StatusOK, http.StatusAccepted) {
-		return nil, runtime.NewResponseError(resp)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+d.accessToken)
+
+	// Send the HTTP request.
+	resp, err := d.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Fatal().Err(err).Msg("Failed to close response body")
+		}
+	}()
+
+	quotaStr := resp.Header.Get("x-ms-ratelimit-remaining-tenant-reads")
+	if quotaStr != "" {
+		quota, err := strconv.Atoi(quotaStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse quota header: %w", err)
+		}
+		log.Debug().Msgf("Graph query remaining quota: %d", quota)
+		// Quota limit reached, sleep for the duration specified in the response header
+		if quota == 0 {
+			log.Debug().Msg("Graph query quota limit reached.")
+		}
 	}
 
-	result := ArmBatchResponse{}
-	if err := runtime.UnmarshalAsJSON(resp, &result); err != nil {
+	// Check for successful status code.
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+		// Check if the response status code is 429 (Too Many Requests).
+		if resp.StatusCode == http.StatusTooManyRequests {
+			// Parse the Retry-After header from the response headers
+			retryAfterStr := resp.Header.Get("Retry-After")
+			retryAfter, _ := strconv.Atoi(retryAfterStr)
+			log.Debug().Msgf("Received 429 Too Many Requests. Retry-After: %d seconds", retryAfter)
+			time.Sleep(time.Duration(retryAfter) * time.Second)
+		}
+
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	// Decode the response body.
+	var result ArmBatchResponse
+	decoder := json.NewDecoder(resp.Body)
+	if err := decoder.Decode(&result); err != nil {
 		return nil, err
 	}
 
@@ -187,7 +278,8 @@ type (
 	}
 
 	ArmBatchResponseItem struct {
-		Content armmonitor.DiagnosticSettingsResourceCollection `json:"content"`
+		HttpStatusCode int         `json:"httpStatusCode"` // HTTP status code of the response
+		Content        interface{} `json:"content"`        //armmonitor.DiagnosticSettingsResourceCollection
 	}
 )
 
