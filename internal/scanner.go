@@ -16,6 +16,7 @@ import (
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -101,6 +102,7 @@ type (
 		OutputName              string
 		Defender                bool
 		Advisor                 bool
+		Xlsx                    bool
 		Cost                    bool
 		Mask                    bool
 		Csv                     bool
@@ -114,6 +116,11 @@ type (
 	}
 
 	Scanner struct{}
+)
+
+const (
+	bucketCapacity = 250
+	refillRate     = 25
 )
 
 func NewScanParams() *ScanParams {
@@ -138,6 +145,7 @@ func NewScanParams() *ScanParams {
 }
 
 func (sc Scanner) Scan(params *ScanParams) {
+	startTime := time.Now()
 	// Default level for this example is info, unless debug flag is present
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if params.Debug {
@@ -189,9 +197,10 @@ func (sc Scanner) Scan(params *ScanParams) {
 	clientOptions := &arm.ClientOptions{
 		ClientOptions: policy.ClientOptions{
 			Retry: policy.RetryOptions{
-				RetryDelay:    20 * time.Millisecond,
+				// Only if the HTTP response does not contain a Retry-After header
+				RetryDelay:    1 * time.Second, // More agressive than default (4s)
 				MaxRetries:    3,
-				MaxRetryDelay: 10 * time.Minute,
+				MaxRetryDelay: 60 * time.Second,
 			},
 		},
 	}
@@ -218,12 +227,43 @@ func (sc Scanner) Scan(params *ScanParams) {
 	// initialize report data
 	reportData := renderers.NewReportData(outputFile, params.Mask)
 
-	// get the APRL scan results
-	aprlScanner := graph.NewAprlScanner(serviceScanners, filters, subscriptions)
-	reportData.Recommendations, reportData.Aprl = aprlScanner.Scan(ctx, cred)
-
 	resourceScanner := scanners.ResourceScanner{}
 	reportData.Resources, reportData.ExludedResources = resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)
+
+	// Check if the number of resources exceeds Excel's row limit (1,048,576 rows) - 10 rows reserved for headers
+	const excelMaxRows = 1048566
+	if len(reportData.Resources) > excelMaxRows {
+		log.Fatal().Msgf("Number of resources (%d) exceeds Excel's maximum row limit (%d). Aborting scan.", len(reportData.Resources), excelMaxRows)
+	}
+
+	aprlScanner := graph.NewAprlScanner(serviceScanners, filters, subscriptions)
+	reportData.Recommendations, _ = aprlScanner.ListRecommendations()
+
+	resourceTypes := resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, filters)
+
+	// Filter service scanners to include only those with resource types present in reportData.ResourceTypeCount and count > 0
+	var filteredServiceScanners []models.IAzureScanner
+	for _, s := range serviceScanners {
+		for _, resourceType := range s.ResourceTypes() {
+			resourceType = strings.ToLower(resourceType)
+
+			// Check if the resource type is in the resourceTypes
+			if count, exists := resourceTypes[resourceType]; !exists || count <= 0 {
+				log.Debug().Msgf("Skipping scanner for resource type %s as it has no resources", resourceType)
+				continue
+			} else {
+				filteredServiceScanners = append(filteredServiceScanners, s)
+				log.Info().Msgf("Scanner for resource type %s will be used", resourceType)
+			}
+		}
+	}
+
+	// get the APRL scan results
+	aprlScanner = graph.NewAprlScanner(filteredServiceScanners, filters, subscriptions)
+	reportData.Aprl = aprlScanner.Scan(ctx, cred)
+
+	// get the count of resources per resource type
+	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceTypeAndSubscription(ctx, cred, subscriptions, reportData.Recommendations, filters)
 
 	// For each service scanner, get the recommendations list
 	if params.UseAzqrRecommendations {
@@ -280,15 +320,21 @@ func (sc Scanner) Scan(params *ScanParams) {
 			}
 
 			// scan each resource group
-			ch := make(chan []models.AzqrServiceResult, len(serviceScanners))
+			ch := make(chan []models.AzqrServiceResult, len(filteredServiceScanners))
 
-			for _, s := range serviceScanners {
+			// Create a burst limiter to control the rate of requests
+			limiter := throttling.NewLimiter(bucketCapacity, refillRate, 1*time.Second, 0*time.Millisecond)
+			burstLimiter := limiter.Start()
+
+			for _, s := range filteredServiceScanners {
 				err := s.Init(config)
 				if err != nil {
 					log.Fatal().Err(err).Msg("Failed to initialize scanner")
 				}
 
 				go func(s models.IAzureScanner) {
+					// Wait for a token from the burstLimiter channel before starting the scan
+					<-burstLimiter
 					res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
 					if err != nil {
 						cancel()
@@ -298,7 +344,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 				}(s)
 			}
 
-			for i := 0; i < len(serviceScanners); i++ {
+			for i := 0; i < len(filteredServiceScanners); i++ {
 				res := <-ch
 				for _, r := range res {
 					// check if the resource is excluded
@@ -317,9 +363,6 @@ func (sc Scanner) Scan(params *ScanParams) {
 		reportData.Cost.Items = append(reportData.Cost.Items, costs.Items...)
 	}
 
-	// get the count of resources per resource type
-	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, reportData.Recommendations, filters)
-
 	// scan advisor
 	reportData.Advisor = append(reportData.Advisor, advisorScanner.Scan(ctx, params.Defender, cred, subscriptions, filters)...)
 
@@ -329,8 +372,10 @@ func (sc Scanner) Scan(params *ScanParams) {
 	// get the defender recommendations
 	reportData.DefenderRecommendations = append(reportData.DefenderRecommendations, defenderScanner.GetRecommendations(ctx, params.Defender, cred, subscriptions, filters)...)
 
-	// render excel report
-	excel.CreateExcelReport(&reportData)
+	if params.Xlsx {
+		// render excel report
+		excel.CreateExcelReport(&reportData)
+	}
 
 	// render json report
 	if params.Json {
@@ -342,7 +387,12 @@ func (sc Scanner) Scan(params *ScanParams) {
 		csv.CreateCsvReport(&reportData)
 	}
 
-	log.Info().Msg("Scan completed.")
+	elapsedTime := time.Since(startTime)
+	// Format the elapsed time as HH:MM:SS and log the scan completion time
+	hours := int(elapsedTime.Hours())
+	minutes := int(elapsedTime.Minutes()) % 60
+	seconds := int(elapsedTime.Seconds()) % 60
+	log.Info().Msgf("Scan completed in %02d:%02d:%02d", hours, minutes, seconds)
 }
 
 // retry retries the Azure scanner Scan, a number of times with an increasing delay between retries

@@ -88,7 +88,7 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 	return resources, excludedResources
 }
 
-func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]models.AprlRecommendation, filters *models.Filters) []models.ResourceTypeCount {
+func (sc ResourceScanner) GetCountPerResourceTypeAndSubscription(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]models.AprlRecommendation, filters *models.Filters) []models.ResourceTypeCount {
 	models.LogResourceTypeScan("Resource Count per Subscription and Type")
 
 	graphClient := graph.NewGraphQuery(cred)
@@ -117,6 +117,32 @@ func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azco
 				Custom2:         "",
 				Custom3:         "",
 			})
+		}
+	}
+	return resources
+}
+
+func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) map[string]float64 {
+	models.LogResourceTypeScan("Resource Count per Type")
+
+	graphClient := graph.NewGraphQuery(cred)
+	query := "resources | summarize count() by type | order by type"
+	log.Debug().Msg(query)
+	subs := make([]*string, 0, len(subscriptions))
+	for s := range subscriptions {
+		subs = append(subs, &s)
+	}
+	result := graphClient.Query(ctx, query, subs)
+	resources := map[string]float64{}
+	if result.Data != nil {
+		for _, row := range result.Data {
+			m := row.(map[string]interface{})
+
+			if filters.Azqr.IsResourceTypeExcluded(strings.ToLower(m["type"].(string))) {
+				continue
+			}
+
+			resources[m["type"].(string)] = m["count_"].(float64)
 		}
 	}
 	return resources
