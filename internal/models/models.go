@@ -61,14 +61,14 @@ type (
 	}
 
 	AzqrRecommendation struct {
-		RecommendationID   string
-		ResourceType       string
-		Recommendation     string
-		Category           RecommendationCategory
-		Impact             RecommendationImpact
-		RecommendationType RecommendationType
-		LearnMoreUrl       string
-		Eval               func(target interface{}, scanContext *ScanContext) (bool, string)
+		RecommendationID   string                                                            `json:"recommendationId"`
+		ResourceType       string                                                            `json:"resourceType"`
+		Recommendation     string                                                            `json:"recommendation"`
+		Category           RecommendationCategory                                            `json:"category"`
+		Impact             RecommendationImpact                                              `json:"impact"`
+		RecommendationType RecommendationType                                                `json:"recommendationType"`
+		LearnMoreUrl       string                                                            `json:"learnMoreUrl"`
+		Eval               func(target interface{}, scanContext *ScanContext) (bool, string) `json:"-"`
 	}
 
 	AzqrResult struct {

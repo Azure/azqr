@@ -4,6 +4,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/Azure/azqr/internal"
@@ -65,35 +66,66 @@ func mcp(cmd *cobra.Command) {
 	err = server.RegisterTool(
 		"recommendations",
 		`List all supported recommendations. This command returns details of the Recommendations
-		supported by Azure Quick Review (azqr). Use this to explore recommendations per id, category, impact and resource type.`,
-		func(arguments EmptyArguments) (*mcp_golang.ToolResponse, error) {
-			output := renderers.GetAllRecommendations(true)
-			return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(output)), nil
+		supported by Azure Quick Review (azqr). Use this to explore recommendations per id, category, impact and resource type.
+		Provide the resource type abbreviation (e.g., "aks", "sql", "kv") as the "key" argument.`,
+		func(arguments ScanArguments) (*mcp_golang.ToolResponse, error) {
+			// Get the list of scanners for the provided service key.
+			scanners := models.ScannerList[arguments.ServiceKey]
+			rec := map[string]models.AzqrRecommendation{}
+
+			// Iterate over each scanner and get recommendations.
+			for _, sc := range scanners {
+				r := sc.GetRecommendations() // You can process or collect recommendations as needed.
+				for id, recommendation := range r {
+					rec[id] = recommendation
+				}
+			}
+
+			jsonBytes, err := json.Marshal(rec)
+			if err != nil {
+				return nil, fmt.Errorf("failed to serialize recommendations: %w", err)
+			}
+
+			return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(string(jsonBytes))), nil
 		},
 	)
 	if err != nil {
 		panic(err)
 	}
 
+	// Register the "scan" tool in the MCP server.
+	// This tool runs an azqr scan for a given Azure resource type.
+	// The user must provide the resource type abbreviation as the "key" argument.
 	err = server.RegisterTool(
 		"scan",
-		"Run an azqr scan for a given reource type.",
+		`Run an Azure Quick Review (azqr) scan for a given Azure resource type.
+		Provide the resource type abbreviation (e.g., "aks", "sql", "kv") as the "key" argument.
+		This will trigger a scan for the specified resource type. The scan runs asynchronously; 
+		you will receive a confirmation message immediately, and results will be available once the scan completes.`,
 		func(arguments ScanArguments) (*mcp_golang.ToolResponse, error) {
-			output := "Scan started, please wait for the results."
+			// Inform the user that the scan has started.
+			output := "Scan started for resource type '" + arguments.ServiceKey + "'. Please wait for the results."
 
+			// Run the scan asynchronously.
 			go func() {
+				// Prepare scanner keys and filters.
 				scannerKeys := []string{arguments.ServiceKey}
 				filters := models.LoadFilters("", scannerKeys)
+
+				// Set up scan parameters.
 				params := internal.NewScanParams()
 				params.Cost = false
 				params.Defender = false
 				params.Advisor = false
 				params.ScannerKeys = scannerKeys
 				params.Filters = filters
+
+				// Create and run the scanner.
 				scanner := internal.Scanner{}
 				scanner.Scan(params)
 			}()
 
+			// Return immediate response to the user.
 			return mcp_golang.NewToolResponse(mcp_golang.NewTextContent(output)), nil
 		},
 	)
