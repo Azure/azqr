@@ -11,9 +11,9 @@ import (
 )
 
 func init() {
-	scanCmd.PersistentFlags().StringP("management-group-id", "", "", "Azure Management Group Id")
-	scanCmd.PersistentFlags().StringP("subscription-id", "s", "", "Azure Subscription Id")
-	scanCmd.PersistentFlags().StringP("resource-group", "g", "", "Azure Resource Group (Use with --subscription-id)")
+	scanCmd.PersistentFlags().StringArrayP("management-group-id", "", []string{}, "Azure Management Group Id")
+	scanCmd.PersistentFlags().StringArrayP("subscription-id", "s", []string{}, "Azure Subscription Id")
+	scanCmd.PersistentFlags().StringArrayP("resource-group", "g", []string{}, "Azure Resource Group (Use with --subscription-id)")
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status (default)")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations (default)")
 	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs (default)")
@@ -41,9 +41,9 @@ var scanCmd = &cobra.Command{
 }
 
 func scan(cmd *cobra.Command, scannerKeys []string) {
-	managementGroupID, _ := cmd.Flags().GetString("management-group-id")
-	subscriptionID, _ := cmd.Flags().GetString("subscription-id")
-	resourceGroupName, _ := cmd.Flags().GetString("resource-group")
+	managementGroups, _ := cmd.Flags().GetStringArray("management-group-id")
+	subscriptions, _ := cmd.Flags().GetStringArray("subscription-id")
+	resourceGroups, _ := cmd.Flags().GetStringArray("resource-group")
 	outputFileName, _ := cmd.Flags().GetString("output-name")
 	defender, _ := cmd.Flags().GetBool("defender")
 	advisor, _ := cmd.Flags().GetBool("advisor")
@@ -60,9 +60,9 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	filters := models.LoadFilters(filtersFile, scannerKeys)
 
 	params := internal.ScanParams{
-		ManagementGroupID:       managementGroupID,
-		SubscriptionID:          subscriptionID,
-		ResourceGroup:           resourceGroupName,
+		ManagementGroups:        managementGroups,
+		Subscriptions:           subscriptions,
+		ResourceGroups:          resourceGroups,
 		OutputName:              outputFileName,
 		Defender:                defender,
 		Advisor:                 advisor,
