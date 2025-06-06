@@ -95,9 +95,9 @@ import (
 
 type (
 	ScanParams struct {
-		ManagementGroupID       string
-		SubscriptionID          string
-		ResourceGroup           string
+		ManagementGroups        []string
+		Subscriptions           []string
+		ResourceGroups          []string
 		OutputName              string
 		Defender                bool
 		Advisor                 bool
@@ -118,8 +118,9 @@ type (
 
 func NewScanParams() *ScanParams {
 	return &ScanParams{
-		SubscriptionID:          "",
-		ResourceGroup:           "",
+		ManagementGroups:        []string{},
+		Subscriptions:           []string{},
+		ResourceGroups:          []string{},
 		OutputName:              "",
 		Defender:                true,
 		Advisor:                 true,
@@ -151,20 +152,28 @@ func (sc Scanner) Scan(params *ScanParams) {
 	filters := params.Filters
 
 	// validate input
-	if params.ManagementGroupID != "" && (params.SubscriptionID != "" || params.ResourceGroup != "") {
+	if len(params.ManagementGroups) > 0 && (len(params.Subscriptions) > 0 || len(params.ResourceGroups) > 0) {
 		log.Fatal().Msg("Management Group name cannot be used with a Subscription Id or Resource Group name")
 	}
 
-	if params.SubscriptionID == "" && params.ResourceGroup != "" {
+	if len(params.Subscriptions) < 1 && len(params.ResourceGroups) > 0 {
 		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
 	}
 
-	if params.SubscriptionID != "" {
-		filters.Azqr.AddSubscription(params.SubscriptionID)
+	if len(params.Subscriptions) > 1 && len(params.ResourceGroups) > 0 {
+		log.Fatal().Msg("Resource Group name can only be used with 1 Subscription Id")
 	}
 
-	if params.ResourceGroup != "" {
-		filters.Azqr.AddResourceGroup(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", params.SubscriptionID, params.ResourceGroup))
+	if len(params.Subscriptions) > 0 {
+		for _, sub := range params.Subscriptions {
+			filters.Azqr.AddSubscription(sub)
+		}
+	}
+
+	if len(params.ResourceGroups) > 0 {
+		for _, rg := range params.ResourceGroups {
+			filters.Azqr.AddResourceGroup(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", params.Subscriptions[0], rg))
+		}
 	}
 
 	serviceScanners := filters.Azqr.Scanners
@@ -189,12 +198,12 @@ func (sc Scanner) Scan(params *ScanParams) {
 
 	// list subscriptions. Key is subscription ID, value is subscription name
 	var subscriptions map[string]string
-	if params.ManagementGroupID != "" {
+	if len(params.ManagementGroups) > 0 {
 		managementGroupScanner := scanners.ManagementGroupsScanner{}
-		subscriptions = managementGroupScanner.ListSubscriptions(ctx, cred, params.ManagementGroupID, filters, clientOptions)
+		subscriptions = managementGroupScanner.ListSubscriptions(ctx, cred, params.ManagementGroups, filters, clientOptions)
 	} else {
 		subscriptionScanner := scanners.SubcriptionScanner{}
-		subscriptions = subscriptionScanner.ListSubscriptions(ctx, cred, params.SubscriptionID, filters, clientOptions)
+		subscriptions = subscriptionScanner.ListSubscriptions(ctx, cred, params.Subscriptions, filters, clientOptions)
 	}
 
 	// initialize scanners

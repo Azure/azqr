@@ -13,7 +13,7 @@ import (
 
 type SubcriptionScanner struct{}
 
-func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, filters *models.Filters, options *arm.ClientOptions) map[string]string {
+func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptions []string, filters *models.Filters, options *arm.ClientOptions) map[string]string {
 	client, err := armsubscription.NewSubscriptionsClient(cred, options)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create subscriptions client")
@@ -21,7 +21,7 @@ func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.
 
 	resultPager := client.NewListPager(nil)
 
-	subscriptions := make([]*armsubscription.Subscription, 0)
+	subs := make([]*armsubscription.Subscription, 0)
 	for resultPager.More() {
 		pageResp, err := resultPager.NextPage(ctx)
 		if err != nil {
@@ -31,17 +31,17 @@ func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.
 		for _, s := range pageResp.Value {
 			if s.State != to.Ptr(armsubscription.SubscriptionStateDisabled) &&
 				s.State != to.Ptr(armsubscription.SubscriptionStateDeleted) {
-				subscriptions = append(subscriptions, s)
+				subs = append(subs, s)
 			}
 		}
 	}
 
 	result := map[string]string{}
-	for _, s := range subscriptions {
+	for _, s := range subs {
 		sid := *s.SubscriptionID
-		// If subscriptionID is empty run the filter on all subscriptions.
-		// If SubscriptionID is not empty exlude all subscriptions except the one specified.
-		if subscriptionID == "" || sid == subscriptionID {
+		// If subscriptionns is empty run the filter on all subscriptions.
+		// If Subscriptions is not empty exlude all subscriptions except the ones specified.
+		if len(subscriptions) == 0 || containsString(subscriptions, sid) {
 			if filters.Azqr.IsSubscriptionExcluded(sid) {
 				log.Info().Msgf("Skipping subscriptions/...%s", sid[29:])
 				continue
@@ -51,4 +51,14 @@ func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.
 	}
 
 	return result
+}
+
+// Chek if string is in slice
+func containsString(slice []string, str string) bool {
+	for _, item := range slice {
+		if item == str {
+			return true
+		}
+	}
+	return false
 }
