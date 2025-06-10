@@ -107,8 +107,9 @@ jobs:
           go test ./...
 
       - name: Generate recommendations json and check diff
-        if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64' && github.event_name != 'pull_request'
+        if: matrix.target_os == 'linux' && matrix.target_arch == 'amd64'
         run: |
+          go run ./cmd/azqr/main.go rules --json > ./data/recommendations.json 
           git diff --exit-code ./data/recommendations.json
 
       - name: Codecov

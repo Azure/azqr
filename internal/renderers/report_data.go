@@ -188,7 +188,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 			implemented := "N/A"
 			typeIsDeployed := false
 			for _, resType := range rd.ResourceTypeCount {
-				if strings.ToLower(resType.ResourceType) == strings.ToLower(r.ResourceType) {
+				if strings.EqualFold(resType.ResourceType, r.ResourceType) {
 					typeIsDeployed = true
 					break
 				}

@@ -19,6 +19,39 @@ func GetAllRecommendations(md bool) string {
 
 	var output string
 
+	recommendations := map[string]models.AzqrRecommendation{}
+	graphRecommendations := map[string]models.AprlRecommendation{}
+	for _, scanner := range serviceScanners {
+		rm := scanner.GetRecommendations()
+
+		for _, r := range rm {
+			recommendations[r.RecommendationID] = r
+		}
+
+		for _, t := range scanner.ResourceTypes() {
+			for _, r := range aprl[strings.ToLower(t)] {
+				if strings.Contains(r.GraphQuery, "cannot-be-validated-with-arg") ||
+					strings.Contains(r.GraphQuery, "under-development") ||
+					strings.Contains(r.GraphQuery, "under development") {
+					continue
+				}
+				graphRecommendations[r.RecommendationID] = r
+			}
+		}
+	}
+
+	keys := make([]string, 0, len(recommendations))
+	for k := range recommendations {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	graphKeys := make([]string, 0, len(graphRecommendations))
+	for k := range graphRecommendations {
+		graphKeys = append(graphKeys, k)
+	}
+	sort.Strings(graphKeys)
+
 	if md {
 		output += "## Recommendations List\n\n"
 		output += fmt.Sprintf("Total Supported Azure Resource Types: %d\n\n", len(aprl))
@@ -26,88 +59,47 @@ func GetAllRecommendations(md bool) string {
 		output += "---|---|---|---|---|---|---\n"
 
 		i := 0
-		for _, scanner := range serviceScanners {
-			rm := scanner.GetRecommendations()
 
-			recommendations := map[string]models.AzqrRecommendation{}
-			for _, r := range rm {
-				recommendations[r.RecommendationID] = r
-			}
+		for _, k := range keys {
+			r := recommendations[k]
+			i++
+			output += fmt.Sprintf("%s | %s | %s | %s | %s | %s | [Learn](%s)\n", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.LearnMoreUrl)
+		}
 
-			keys := make([]string, 0, len(recommendations))
-			for k := range recommendations {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-
-			for _, k := range keys {
-				r := recommendations[k]
-				i++
-				output += fmt.Sprintf("%s | %s | %s | %s | %s | %s | [Learn](%s)\n", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.LearnMoreUrl)
-			}
-
-			for _, t := range scanner.ResourceTypes() {
-				for _, r := range aprl[strings.ToLower(t)] {
-					if strings.Contains(r.GraphQuery, "cannot-be-validated-with-arg") ||
-						strings.Contains(r.GraphQuery, "under-development") ||
-						strings.Contains(r.GraphQuery, "under development") {
-						continue
-					}
-
-					i++
-					output += fmt.Sprintf("%s | %s | %s | %s | %s | %s | [Learn](%s)\n", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.LearnMoreLink[0].Url)
-				}
-			}
+		for _, k := range graphKeys {
+			r := graphRecommendations[k]
+			i++
+			output += fmt.Sprintf("%s | %s | %s | %s | %s | %s | [Learn](%s)\n", fmt.Sprint(i), r.RecommendationID, r.ResourceType, r.Category, r.Impact, r.Recommendation, r.LearnMoreLink[0].Url)
 		}
 	} else {
 		j := []map[string]string{}
 		i := 0
-		for _, scanner := range serviceScanners {
-			rm := scanner.GetRecommendations()
 
-			recommendations := map[string]models.AzqrRecommendation{}
-			for _, r := range rm {
-				recommendations[r.RecommendationID] = r
-			}
-
-			keys := make([]string, 0, len(recommendations))
-			for k := range recommendations {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-
-			for _, k := range keys {
-				j = append(j, map[string]string{})
-				j[i] = map[string]string{}
-				j[i]["recommendationId"] = recommendations[k].RecommendationID
-				j[i]["resourceType"] = recommendations[k].ResourceType
-				j[i]["category"] = string(recommendations[k].Category)
-				j[i]["impact"] = string(recommendations[k].Impact)
-				j[i]["recommendation"] = recommendations[k].Recommendation
-				j[i]["learnMoreUrl"] = recommendations[k].LearnMoreUrl
-				i++
-			}
-
-			for _, t := range scanner.ResourceTypes() {
-				for _, r := range aprl[strings.ToLower(t)] {
-					if strings.Contains(r.GraphQuery, "cannot-be-validated-with-arg") ||
-						strings.Contains(r.GraphQuery, "under-development") ||
-						strings.Contains(r.GraphQuery, "under development") {
-						continue
-					}
-
-					j = append(j, map[string]string{})
-					j[i] = map[string]string{}
-					j[i]["recommendationId"] = r.RecommendationID
-					j[i]["resourceType"] = r.ResourceType
-					j[i]["category"] = string(r.Category)
-					j[i]["impact"] = string(r.Impact)
-					j[i]["recommendation"] = r.Recommendation
-					j[i]["learnMoreUrl"] = r.LearnMoreLink[0].Url
-					i++
-				}
-			}
+		for _, k := range keys {
+			j = append(j, map[string]string{})
+			j[i] = map[string]string{}
+			j[i]["recommendationId"] = recommendations[k].RecommendationID
+			j[i]["resourceType"] = recommendations[k].ResourceType
+			j[i]["category"] = string(recommendations[k].Category)
+			j[i]["impact"] = string(recommendations[k].Impact)
+			j[i]["recommendation"] = recommendations[k].Recommendation
+			j[i]["learnMoreUrl"] = recommendations[k].LearnMoreUrl
+			i++
 		}
+
+		for _, k := range graphKeys {
+			r := graphRecommendations[k]
+			j = append(j, map[string]string{})
+			j[i] = map[string]string{}
+			j[i]["recommendationId"] = r.RecommendationID
+			j[i]["resourceType"] = r.ResourceType
+			j[i]["category"] = string(r.Category)
+			j[i]["impact"] = string(r.Impact)
+			j[i]["recommendation"] = r.Recommendation
+			j[i]["learnMoreUrl"] = r.LearnMoreLink[0].Url
+			i++
+		}
+
 		// print j as json to stdout
 		js, err := json.MarshalIndent(j, "", "\t")
 		if err != nil {
