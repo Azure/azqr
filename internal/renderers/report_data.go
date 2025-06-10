@@ -180,12 +180,25 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 	}
 
 	headers := []string{"Implemented", "Number of Impacted Resources", "Azure Service / Well-Architected", "Recommendation Source",
-		"Azure Service Category / Well-Architected Area", "Azure Service / Well-Architected Topic", "Resiliency Category", "Recommendation",
+		"Azure Service Category / Well-Architected Area", "Azure Service / Well-Architected Topic", "Category", "Recommendation",
 		"Impact", "Best Practices Guidance", "Read More", "Recommendation Id"}
 	rows := [][]string{}
 	for _, rt := range rd.Recommendations {
 		for _, r := range rt {
-			implemented := counter[r.RecommendationID] == 0
+			implemented := "N/A"
+			typeIsDeployed := false
+			for _, resType := range rd.ResourceTypeCount {
+				if strings.ToLower(resType.ResourceType) == strings.ToLower(r.ResourceType) {
+					typeIsDeployed = true
+					break
+				}
+			}
+			if typeIsDeployed && counter[r.RecommendationID] == 0 {
+				implemented = "true"
+			} else if typeIsDeployed && counter[r.RecommendationID] > 0 {
+				implemented = "false"
+			}
+
 			categoryPart := ""
 			servicePart := ""
 			typeParts := strings.Split(r.ResourceType, "/")
@@ -195,7 +208,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 			}
 
 			row := []string{
-				fmt.Sprintf("%t", implemented),
+				implemented,
 				fmt.Sprint(counter[r.RecommendationID]),
 				"Azure Service",
 				r.Source,
