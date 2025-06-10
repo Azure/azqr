@@ -86,9 +86,9 @@ func renderRecommendationsPivotTables(f *excelize.File, lastRow int) {
 			Columns: []excelize.PivotTableField{
 				{Data: "Impact"}},
 			Rows: []excelize.PivotTableField{
-				{Data: "Resiliency Category"}},
+				{Data: "Category"}},
 			Data: []excelize.PivotTableField{
-				{Data: "Resiliency Category", Name: "Count of Resiliency Category", Subtotal: "Count"}},
+				{Data: "Category", Name: "Count of Category", Subtotal: "Count"}},
 			RowGrandTotals: true,
 			ColGrandTotals: true,
 			ShowDrill:      true,
