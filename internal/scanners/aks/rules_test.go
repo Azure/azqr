@@ -184,38 +184,6 @@ func TestAKSScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "AKSScanner Enable RBAC",
-			fields: fields{
-				rule: "aks-008",
-				target: &armcontainerservice.ManagedCluster{
-					Properties: &armcontainerservice.ManagedClusterProperties{
-						EnableRBAC: to.Ptr(true),
-					},
-				},
-				scanContext: &models.ScanContext{},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "AKSScanner Disable RBAC",
-			fields: fields{
-				rule: "aks-008",
-				target: &armcontainerservice.ManagedCluster{
-					Properties: &armcontainerservice.ManagedClusterProperties{
-						EnableRBAC: to.Ptr(false),
-					},
-				},
-				scanContext: &models.ScanContext{},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
 			name: "AKSScanner httpApplicationRouting enabled",
 			fields: fields{
 				rule: "aks-010",

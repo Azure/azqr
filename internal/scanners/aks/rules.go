@@ -99,19 +99,6 @@ func (a *AKSScanner) GetRecommendations() map[string]models.AzqrRecommendation {
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/aks/managed-azure-ad",
 		},
-		"aks-008": {
-			RecommendationID: "aks-008",
-			ResourceType:     "Microsoft.ContainerService/managedClusters",
-			Category:         models.CategorySecurity,
-			Recommendation:   "AKS should be RBAC enabled.",
-			Impact:           models.ImpactMedium,
-			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
-				c := target.(*armcontainerservice.ManagedCluster)
-				rbac := *c.Properties.EnableRBAC
-				return !rbac, ""
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/azure/aks/manage-azure-rbac",
-		},
 		"aks-010": {
 			RecommendationID: "aks-010",
 			ResourceType:     "Microsoft.ContainerService/managedClusters",
