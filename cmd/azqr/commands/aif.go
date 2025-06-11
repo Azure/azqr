@@ -12,11 +12,11 @@ func init() {
 }
 
 var cogCmd = &cobra.Command{
-	Use:   "cog",
-	Short: "Scan Azure Cognitive Service Accounts",
-	Long:  "Scan Azure Cognitive Service Accounts",
+	Use:   "aif",
+	Short: "Scan Azure AI Foundry and Cognitive Services",
+	Long:  "Scan Azure AI and Cognitive Services",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		scan(cmd, []string{"cog"})
+		scan(cmd, []string{"aif"})
 	},
 }

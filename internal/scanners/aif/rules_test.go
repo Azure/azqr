@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package cog
+package aif
 
 import (
 	"reflect"
@@ -12,7 +12,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices"
 )
 
-func TestCognitiveScanner_Rules(t *testing.T) {
+func TestAIFoundryScanner_Rules(t *testing.T) {
 	type fields struct {
 		rule        string
 		target      interface{}
@@ -28,9 +28,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "CognitiveScanner DiagnosticSettings",
+			name: "AIFoundryScanner DiagnosticSettings",
 			fields: fields{
-				rule: "cog-001",
+				rule: "aif-001",
 				target: &armcognitiveservices.Account{
 					ID: to.Ptr("test"),
 				},
@@ -46,9 +46,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner SLA 99.99%",
+			name: "AIFoundryScanner SLA 99.99%",
 			fields: fields{
-				rule:        "cog-003",
+				rule:        "aif-003",
 				target:      &armcognitiveservices.Account{},
 				scanContext: &models.ScanContext{},
 			},
@@ -58,9 +58,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner Private Endpoint",
+			name: "AIFoundryScanner Private Endpoint",
 			fields: fields{
-				rule: "cog-004",
+				rule: "aif-004",
 				target: &armcognitiveservices.Account{
 					Properties: &armcognitiveservices.AccountProperties{
 						PrivateEndpointConnections: []*armcognitiveservices.PrivateEndpointConnection{
@@ -78,9 +78,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner OpenAi CAF",
+			name: "AIFoundryScanner OpenAi CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("oai-test"),
 					Kind: to.Ptr("OpenAi"),
@@ -93,9 +93,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner ContentModerator CAF",
+			name: "AIFoundryScanner ContentModerator CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("cm-test"),
 					Kind: to.Ptr("ContentModerator"),
@@ -108,9 +108,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner ContentSafety CAF",
+			name: "AIFoundryScanner ContentSafety CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("cs-test"),
 					Kind: to.Ptr("ContentSafety"),
@@ -123,9 +123,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner CustomVision.Prediction CAF",
+			name: "AIFoundryScanner CustomVision.Prediction CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("cstv-test"),
 					Kind: to.Ptr("CustomVision.Prediction"),
@@ -138,9 +138,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner CustomVision.Training CAF",
+			name: "AIFoundryScanner CustomVision.Training CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("cstvt-test"),
 					Kind: to.Ptr("CustomVision.Training"),
@@ -153,9 +153,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner FormRecognizer CAF",
+			name: "AIFoundryScanner FormRecognizer CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("di-test"),
 					Kind: to.Ptr("FormRecognizer"),
@@ -168,9 +168,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner Face CAF",
+			name: "AIFoundryScanner Face CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("face-test"),
 					Kind: to.Ptr("Face"),
@@ -183,9 +183,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner HealthInsights CAF",
+			name: "AIFoundryScanner HealthInsights CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("hi-test"),
 					Kind: to.Ptr("HealthInsights"),
@@ -198,9 +198,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner ImmersiveReader CAF",
+			name: "AIFoundryScanner ImmersiveReader CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("ir-test"),
 					Kind: to.Ptr("ImmersiveReader"),
@@ -213,9 +213,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner TextAnalytics CAF",
+			name: "AIFoundryScanner TextAnalytics CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("lang-test"),
 					Kind: to.Ptr("TextAnalytics"),
@@ -228,9 +228,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner SpeechServices CAF",
+			name: "AIFoundryScanner SpeechServices CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("spch-test"),
 					Kind: to.Ptr("SpeechServices"),
@@ -243,9 +243,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner TextTranslation CAF",
+			name: "AIFoundryScanner TextTranslation CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("trsl-test"),
 					Kind: to.Ptr("TextTranslation"),
@@ -258,9 +258,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner ComputerVision CAF",
+			name: "AIFoundryScanner ComputerVision CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
 					Name: to.Ptr("cv-test"),
 					Kind: to.Ptr("ComputerVision"),
@@ -273,12 +273,12 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner CAF",
+			name: "AIFoundryScanner CAF",
 			fields: fields{
-				rule: "cog-006",
+				rule: "aif-006",
 				target: &armcognitiveservices.Account{
-					Name: to.Ptr("cog-test"),
-					Kind: to.Ptr("cog"),
+					Name: to.Ptr("aif-test"),
+					Kind: to.Ptr("aif"),
 				},
 				scanContext: &models.ScanContext{},
 			},
@@ -288,9 +288,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner DisableLocalAuth nil",
+			name: "AIFoundryScanner DisableLocalAuth nil",
 			fields: fields{
-				rule: "cog-008",
+				rule: "aif-008",
 				target: &armcognitiveservices.Account{
 					Properties: &armcognitiveservices.AccountProperties{},
 				},
@@ -302,9 +302,9 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 			},
 		},
 		{
-			name: "CognitiveScanner DisableLocalAuth true",
+			name: "AIFoundryScanner DisableLocalAuth true",
 			fields: fields{
-				rule: "cog-008",
+				rule: "aif-008",
 				target: &armcognitiveservices.Account{
 					Properties: &armcognitiveservices.AccountProperties{
 						DisableLocalAuth: to.Ptr(true),
@@ -320,7 +320,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &CognitiveScanner{}
+			s := &AIFoundryScanner{}
 			rules := s.GetRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
@@ -328,7 +328,7 @@ func TestCognitiveScanner_Rules(t *testing.T) {
 				result: w,
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("CognitiveScanner Rule.Eval() = %v, want %v", got, tt.want)
+				t.Errorf("AIFoundryScanner Rule.Eval() = %v, want %v", got, tt.want)
 			}
 		})
 	}

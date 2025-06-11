@@ -138,6 +138,54 @@
 	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+		"recommendation": "Service should have diagnostic settings enabled",
+		"recommendationId": "aif-001",
+		"resourceType": "Microsoft.CognitiveServices/accounts"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
+		"recommendation": "Service should have a SLA",
+		"recommendationId": "aif-003",
+		"resourceType": "Microsoft.CognitiveServices/accounts"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-virtual-networks",
+		"recommendation": "Service should have private endpoints enabled",
+		"recommendationId": "aif-004",
+		"resourceType": "Microsoft.CognitiveServices/accounts"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		"recommendation": "Service Name should comply with naming conventions",
+		"recommendationId": "aif-006",
+		"resourceType": "Microsoft.CognitiveServices/accounts"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		"recommendation": "Service should have tags",
+		"recommendationId": "aif-007",
+		"resourceType": "Microsoft.CognitiveServices/accounts"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/ai-services/policy-reference#azure-ai-services",
+		"recommendation": "Service should have local authentication disabled",
+		"recommendationId": "aif-008",
+		"resourceType": "Microsoft.CognitiveServices/accounts"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
 		"recommendation": "AKS Cluster should have diagnostic settings enabled",
 		"recommendationId": "aks-001",
@@ -698,54 +746,6 @@
 	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
-		"recommendation": "Cognitive Service Account should have diagnostic settings enabled",
-		"recommendationId": "cog-001",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-		"recommendation": "Cognitive Service Account should have a SLA",
-		"recommendationId": "cog-003",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-virtual-networks",
-		"recommendation": "Cognitive Service Account should have private endpoints enabled",
-		"recommendationId": "cog-004",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Cognitive Service Account Name should comply with naming conventions",
-		"recommendationId": "cog-006",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Cognitive Service Account should have tags",
-		"recommendationId": "cog-007",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/ai-services/policy-reference#azure-ai-services",
-		"recommendation": "Cognitive Service Account should have local authentication disabled",
-		"recommendationId": "cog-008",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
 		"recommendation": "CosmosDB should have diagnostic settings enabled",
 		"recommendationId": "cosmos-001",
@@ -920,10 +920,10 @@
 		"resourceType": "Microsoft.Kusto/clusters"
 	},
 	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Data Explorer Name should comply with naming conventions",
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
+		"recommendation": "Azure Data Explorer should have private endpoints enabled",
 		"recommendationId": "dec-004",
 		"resourceType": "Microsoft.Kusto/clusters"
 	},
@@ -933,6 +933,14 @@
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		"recommendation": "Azure Data Explorer should have tags",
 		"recommendationId": "dec-005",
+		"resourceType": "Microsoft.Kusto/clusters"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		"recommendation": "Azure Data Explorer Name should comply with naming conventions",
+		"recommendationId": "dec-006",
 		"resourceType": "Microsoft.Kusto/clusters"
 	},
 	{
@@ -1134,6 +1142,54 @@
 		"recommendation": "Function should use Managed Identities",
 		"recommendationId": "func-014",
 		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		"recommendation": "Service name should comply with naming conventions",
+		"recommendationId": "hub-001",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Service SLA",
+		"recommendationId": "hub-002",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		"recommendation": "Service should have tags",
+		"recommendationId": "hub-003",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/machine-learning/how-to-managed-network?view=azureml-api-2",
+		"recommendation": "Service should disable public network access",
+		"recommendationId": "hub-004",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/machine-learning/how-to-configure-private-link?view=azureml-api-2\u0026tabs=cli",
+		"recommendation": "Service should have private enpoints enabled",
+		"recommendationId": "hub-005",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+		"recommendation": "Service should have diagnostic settings enabled",
+		"recommendationId": "hub-006",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
 	},
 	{
 		"category": "Governance",
@@ -1952,6 +2008,54 @@
 		"resourceType": "Microsoft.Sql/servers/elasticPools"
 	},
 	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		"recommendation": "Azure AI Search name should comply with naming conventions",
+		"recommendationId": "srch-001",
+		"resourceType": "Microsoft.Search/searchServices"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure AI Search SLA",
+		"recommendationId": "srch-002",
+		"resourceType": "Microsoft.Search/searchServices"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		"recommendation": "Azure AI Search should have tags",
+		"recommendationId": "srch-003",
+		"resourceType": "Microsoft.Search/searchServices"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/search/service-configure-firewall#when-to-configure-network-access",
+		"recommendation": "Azure AI Search should disable public network access",
+		"recommendationId": "srch-004",
+		"resourceType": "Microsoft.Search/searchServices"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/search/service-create-private-endpoint",
+		"recommendation": "Azure AI Search should have private enpoints enabled",
+		"recommendationId": "srch-005",
+		"resourceType": "Microsoft.Search/searchServices"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/search/search-monitor-enable-logging",
+		"recommendation": "Azure AI Search should have diagnostic settings enabled",
+		"recommendationId": "srch-006",
+		"resourceType": "Microsoft.Search/searchServices"
+	},
+	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
@@ -2504,6 +2608,14 @@
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/machine-learning/how-to-high-availability-machine-learning?view=azureml-api-2",
+		"recommendation": "Ensure to create Machine Learning Compute resources in secondary region",
+		"recommendationId": "13794a63-8d95-47ce-acbd-5925ede5b208",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-use-availability-zones",
@@ -2872,6 +2984,14 @@
 		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
 	},
 	{
+		"category": "OtherBestPractices",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/machine-learning/how-to-manage-quotas?view=azureml-api-2",
+		"recommendation": "Make Azure Machine Learning quota requests through the Azure Machine Learning Studio",
+		"recommendationId": "48ea6480-6263-40ba-8937-326d790e63f6",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
 		"category": "Governance",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview",
@@ -3032,6 +3152,14 @@
 		"resourceType": "Microsoft.ContainerRegistry/registries"
 	},
 	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/machine-learning/how-to-high-availability-machine-learning?view=azureml-api-2",
+		"recommendation": "Deploy Azure Machine learning workspace in secondary region",
+		"recommendationId": "675d249a-9486-45e3-8e89-863f5802782d",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
 		"category": "Security",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/architecture/framework/services/networking/azure-virtual-network/reliability",
@@ -3070,6 +3198,22 @@
 		"recommendation": "Ensure the Backend Pool contains at least two instances",
 		"recommendationId": "6d82d042-6d61-ad49-86f0-6a5455398081",
 		"resourceType": "Microsoft.Network/loadBalancers"
+	},
+	{
+		"category": "ServiceUpgradeAndRetirement",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/machine-learning/concept-compute-target?view=azureml-api-2#supported-vm-series-and-sizes",
+		"recommendation": "Choose SKUs with longer terms and avoid those nearing retirement",
+		"recommendationId": "6e2af91f-477d-46a5-b8ce-6cd1b8176550",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/machine-learning/how-to-manage-quotas?view=azureml-api-2",
+		"recommendation": "Selecting regions for BCDR, ensure that both regions offer adequate compute quotas",
+		"recommendationId": "6e4f0fd1-1853-4b94-9736-6d6d239d2694",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
 	},
 	{
 		"category": "Governance",
@@ -3352,6 +3496,14 @@
 		"resourceType": "Microsoft.DesktopVirtualization/hostPools"
 	},
 	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/machine-learning/reference-checkpoint-performance-for-large-models?view=azureml-api-2\u0026tabs=PYTORCH#why-checkpoint-optimization-for-large-model-training-matters",
+		"recommendation": "Ensure checkpoints are used for AI training models",
+		"recommendationId": "98f15850-f31e-4fb2-8874-74f5aabbcf91",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
 		"category": "Governance",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-about-vpngateways",
@@ -3416,6 +3568,14 @@
 		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
 	},
 	{
+		"category": "DisasterRecovery",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/machine-learning/how-to-high-availability-machine-learning?view=azureml-api-2",
+		"recommendation": "Plan for a multi-regional deployment of Azure Machine Learning and associated resources",
+		"recommendationId": "a86ed26a-59d9-47bd-b440-6bc71b843978",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machine-scale-sets/flexible-virtual-machine-scale-sets-migration-resources",
@@ -3454,6 +3614,14 @@
 		"recommendation": "Enable custom maintenance schedule",
 		"recommendationId": "b2bad57d-7e03-4c0f-9024-597c9eb295bb",
 		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/search/search-reliability#availability-zone-support",
+		"recommendation": "Enable AZ support in AI Search by configuring multiple replicas to your search service",
+		"recommendationId": "b376281d-bfec-4695-8f90-9a44544fdfa4",
+		"resourceType": "Microsoft.Search/searchServices"
 	},
 	{
 		"category": "DisasterRecovery",
@@ -3590,6 +3758,14 @@
 		"recommendation": "Enable HA with zone redundancy",
 		"recommendationId": "ca87914f-aac4-4783-ab67-82a6f936f194",
 		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
+	},
+	{
+		"category": "ServiceUpgradeAndRetirement",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-machines/n-series-migration",
+		"recommendation": "Avoid NC and NC_Promo series Azure VMs for machine learning quotas; migrate to newer versions",
+		"recommendationId": "cf2569bb-1cf2-46ce-8885-d742dc6f4a4c",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
 	},
 	{
 		"category": "DisasterRecovery",

@@ -56,6 +56,7 @@ afd | Microsoft.Cdn/profiles
 afw | Microsoft.Network/azureFirewalls
 afw | Microsoft.Network/ipGroups
 agw | Microsoft.Network/applicationGateways
+aif | Microsoft.CognitiveServices/accounts
 aks | Microsoft.ContainerService/managedClusters
 amg | Microsoft.Dashboard/grafana
 apim | Microsoft.ApiManagement/service
@@ -75,7 +76,6 @@ ba | Microsoft.Batch/batchAccounts
 ca | Microsoft.App/containerApps
 cae | Microsoft.App/managedenvironments
 ci | Microsoft.ContainerInstance/containerGroups
-cog | Microsoft.CognitiveServices/accounts
 con | Microsoft.Network/connections
 cosmos | Microsoft.DocumentDB/databaseAccounts
 cr | Microsoft.ContainerRegistry/registries
@@ -89,6 +89,7 @@ evh | Microsoft.EventHub/namespaces
 fdfp | Microsoft.Network/frontdoorWebApplicationFirewallPolicies
 gal | Microsoft.Compute/galleries
 hpc | Specialized.Workload/HPC
+hub | Microsoft.MachineLearningServices/workspaces
 iot | Microsoft.Devices/IotHubs
 it | Microsoft.VirtualMachineImages/imageTemplates
 kv | Microsoft.KeyVault/vaults
@@ -119,6 +120,7 @@ sigr | Microsoft.SignalRService/SignalR
 sql | Microsoft.Sql/servers
 sql | Microsoft.Sql/servers/databases
 sql | Microsoft.Sql/servers/elasticPools
+srch | Microsoft.Search/searchServices
 st | Microsoft.Storage/storageAccounts
 synw | Microsoft.Synapse/workspaces
 synw | Microsoft.Synapse workspaces/bigDataPools
