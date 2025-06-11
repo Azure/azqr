@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package cog
+package aif
 
 import (
 	"strings"
@@ -10,14 +10,14 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices"
 )
 
-// GetRecommendations - Returns the rules for the CognitiveScanner
-func (a *CognitiveScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// GetRecommendations - Returns the rules for the AIFoundryScanner
+func (a *AIFoundryScanner) GetRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
-		"cog-001": {
-			RecommendationID: "cog-001",
+		"aif-001": {
+			RecommendationID: "aif-001",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
 			Category:         models.CategoryMonitoringAndAlerting,
-			Recommendation:   "Cognitive Service Account should have diagnostic settings enabled",
+			Recommendation:   "Service should have diagnostic settings enabled",
 			Impact:           models.ImpactLow,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				service := target.(*armcognitiveservices.Account)
@@ -26,11 +26,11 @@ func (a *CognitiveScanner) GetRecommendations() map[string]models.AzqrRecommenda
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
 		},
-		"cog-003": {
-			RecommendationID:   "cog-003",
+		"aif-003": {
+			RecommendationID:   "aif-003",
 			ResourceType:       "Microsoft.CognitiveServices/accounts",
 			Category:           models.CategoryHighAvailability,
-			Recommendation:     "Cognitive Service Account should have a SLA",
+			Recommendation:     "Service should have a SLA",
 			RecommendationType: models.TypeSLA,
 			Impact:             models.ImpactHigh,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
@@ -38,11 +38,11 @@ func (a *CognitiveScanner) GetRecommendations() map[string]models.AzqrRecommenda
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
 		},
-		"cog-004": {
-			RecommendationID: "cog-004",
+		"aif-004": {
+			RecommendationID: "aif-004",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
 			Category:         models.CategorySecurity,
-			Recommendation:   "Cognitive Service Account should have private endpoints enabled",
+			Recommendation:   "Service should have private endpoints enabled",
 			Impact:           models.ImpactHigh,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				i := target.(*armcognitiveservices.Account)
@@ -51,15 +51,17 @@ func (a *CognitiveScanner) GetRecommendations() map[string]models.AzqrRecommenda
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-virtual-networks",
 		},
-		"cog-006": {
-			RecommendationID: "cog-006",
+		"aif-006": {
+			RecommendationID: "aif-006",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
 			Category:         models.CategoryGovernance,
-			Recommendation:   "Cognitive Service Account Name should comply with naming conventions",
+			Recommendation:   "Service Name should comply with naming conventions",
 			Impact:           models.ImpactLow,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armcognitiveservices.Account)
 				switch strings.ToLower(*c.Kind) {
+				case "aiservices":
+					return !strings.HasPrefix(*c.Name, "aif"), ""
 				case "openai":
 					return !strings.HasPrefix(*c.Name, "oai"), ""
 				case "computervision":
@@ -87,16 +89,16 @@ func (a *CognitiveScanner) GetRecommendations() map[string]models.AzqrRecommenda
 				case "texttranslation":
 					return !strings.HasPrefix(*c.Name, "trsl"), ""
 				default:
-					return !strings.HasPrefix(*c.Name, "cog"), ""
+					return !strings.HasPrefix(*c.Name, "aif"), ""
 				}
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
-		"cog-007": {
-			RecommendationID: "cog-007",
+		"aif-007": {
+			RecommendationID: "aif-007",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
 			Category:         models.CategoryGovernance,
-			Recommendation:   "Cognitive Service Account should have tags",
+			Recommendation:   "Service should have tags",
 			Impact:           models.ImpactLow,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armcognitiveservices.Account)
@@ -104,11 +106,11 @@ func (a *CognitiveScanner) GetRecommendations() map[string]models.AzqrRecommenda
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
 		},
-		"cog-008": {
-			RecommendationID: "cog-008",
+		"aif-008": {
+			RecommendationID: "aif-008",
 			ResourceType:     "Microsoft.CognitiveServices/accounts",
 			Category:         models.CategorySecurity,
-			Recommendation:   "Cognitive Service Account should have local authentication disabled",
+			Recommendation:   "Service should have local authentication disabled",
 			Impact:           models.ImpactMedium,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armcognitiveservices.Account)

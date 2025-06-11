@@ -75,7 +75,7 @@ func (a *DataExplorerScanner) GetRecommendations() map[string]models.AzqrRecomme
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
 		},
 		"dec-006": {
-			RecommendationID: "dec-004",
+			RecommendationID: "dec-006",
 			ResourceType:     "Microsoft.Kusto/clusters",
 			Category:         models.CategoryGovernance,
 			Recommendation:   "Azure Data Explorer Name should comply with naming conventions",
