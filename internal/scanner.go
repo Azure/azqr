@@ -246,6 +246,7 @@ func (sc Scanner) Scan(params *ScanParams) {
 	// Filter service scanners to include only those with resource types present in reportData.ResourceTypeCount and count > 0
 	var filteredServiceScanners []models.IAzureScanner
 	for _, s := range serviceScanners {
+		add := true
 		for _, resourceType := range s.ResourceTypes() {
 			resourceType = strings.ToLower(resourceType)
 
@@ -254,8 +255,11 @@ func (sc Scanner) Scan(params *ScanParams) {
 				log.Debug().Msgf("Skipping scanner for resource type %s as it has no resources", resourceType)
 				continue
 			} else {
-				filteredServiceScanners = append(filteredServiceScanners, s)
-				log.Info().Msgf("Scanner for resource type %s will be used", resourceType)
+				if add {
+					filteredServiceScanners = append(filteredServiceScanners, s)
+					add = false
+					log.Info().Msgf("Scanner for resource type %s will be used", resourceType)
+				}
 			}
 		}
 	}
