@@ -264,7 +264,7 @@ Make sure you have `Go 1.23.x` or higher installed in your environment. You can 
 ```bash
    git clone git@github.com:Azure/azqr.git
    cd azqr
-   git submodulie init
+   git submodule init
    git submodule update --recursive
    go build -o azqr cmd/azqr/main.go
  ```
