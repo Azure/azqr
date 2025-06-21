@@ -36,7 +36,7 @@ queries:
       | project id, name, resourceGroup, location
 `
 
-	if err := os.WriteFile(yamlPath, []byte(yamlContent), 0644); err != nil {
+	if err := os.WriteFile(yamlPath, []byte(yamlContent), 0600); err != nil {
 		t.Fatalf("Failed to create test YAML file: %v", err)
 	}
 
@@ -101,7 +101,7 @@ queries:
     missing proper formatting
 `
 
-	if err := os.WriteFile(yamlPath, []byte(invalidYaml), 0644); err != nil {
+	if err := os.WriteFile(yamlPath, []byte(invalidYaml), 0600); err != nil {
 		t.Fatalf("Failed to create test YAML file: %v", err)
 	}
 
@@ -122,7 +122,7 @@ queries:
     query: resources
 `
 
-	if err := os.WriteFile(yamlPath, []byte(missingFields), 0644); err != nil {
+	if err := os.WriteFile(yamlPath, []byte(missingFields), 0600); err != nil {
 		t.Fatalf("Failed to create test YAML file: %v", err)
 	}
 
@@ -136,7 +136,7 @@ queries:
 func TestLoadYamlPluginExternalKqlFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	kqlDir := filepath.Join(tmpDir, "kql")
-	if err := os.MkdirAll(kqlDir, 0755); err != nil {
+	if err := os.MkdirAll(kqlDir, 0750); err != nil {
 		t.Fatalf("Failed to create kql directory: %v", err)
 	}
 
@@ -147,7 +147,7 @@ func TestLoadYamlPluginExternalKqlFile(t *testing.T) {
 | where tags["environment"] == "production"
 | project id, name, resourceGroup, location`
 
-	if err := os.WriteFile(kqlPath, []byte(kqlContent), 0644); err != nil {
+	if err := os.WriteFile(kqlPath, []byte(kqlContent), 0600); err != nil {
 		t.Fatalf("Failed to create KQL file: %v", err)
 	}
 
@@ -168,7 +168,7 @@ queries:
     queryFile: ./kql/test-query.kql
 `
 
-	if err := os.WriteFile(yamlPath, []byte(yamlContent), 0644); err != nil {
+	if err := os.WriteFile(yamlPath, []byte(yamlContent), 0600); err != nil {
 		t.Fatalf("Failed to create YAML file: %v", err)
 	}
 
@@ -220,7 +220,7 @@ queries:
     query: resources | where type == "microsoft.network/publicipaddresses"
 `
 
-	if err := os.WriteFile(yamlPath, []byte(yamlContent), 0644); err != nil {
+	if err := os.WriteFile(yamlPath, []byte(yamlContent), 0600); err != nil {
 		t.Fatalf("Failed to create YAML file: %v", err)
 	}
 
@@ -283,7 +283,7 @@ queries:
     recommendationResourceType: Microsoft.Test/resources
     query: resources
 `
-		if err := os.WriteFile(yamlPath, []byte(yamlContent), 0644); err != nil {
+		if err := os.WriteFile(yamlPath, []byte(yamlContent), 0600); err != nil {
 			t.Fatalf("Failed to create YAML file: %v", err)
 		}
 	}
@@ -326,7 +326,7 @@ func TestDiscoverYamlPluginsIgnoresNonYaml(t *testing.T) {
 
 	for filename, content := range files {
 		path := filepath.Join(tmpDir, filename)
-		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(path, []byte(content), 0600); err != nil {
 			t.Fatalf("Failed to create file %s: %v", filename, err)
 		}
 	}
@@ -346,7 +346,7 @@ func TestDiscoverYamlPluginsIgnoresNonYaml(t *testing.T) {
 func TestDiscoverYamlPluginsDuplicates(t *testing.T) {
 	tmpDir := t.TempDir()
 	subDir := filepath.Join(tmpDir, "subdir")
-	if err := os.MkdirAll(subDir, 0755); err != nil {
+	if err := os.MkdirAll(subDir, 0750); err != nil {
 		t.Fatalf("Failed to create subdirectory: %v", err)
 	}
 
@@ -355,10 +355,10 @@ func TestDiscoverYamlPluginsDuplicates(t *testing.T) {
 	path1 := filepath.Join(tmpDir, "plugin.yaml")
 	path2 := filepath.Join(subDir, "plugin.yaml")
 
-	if err := os.WriteFile(path1, []byte(yamlContent), 0644); err != nil {
+	if err := os.WriteFile(path1, []byte(yamlContent), 0600); err != nil {
 		t.Fatalf("Failed to create first YAML file: %v", err)
 	}
-	if err := os.WriteFile(path2, []byte(yamlContent), 0644); err != nil {
+	if err := os.WriteFile(path2, []byte(yamlContent), 0600); err != nil {
 		t.Fatalf("Failed to create second YAML file: %v", err)
 	}
 

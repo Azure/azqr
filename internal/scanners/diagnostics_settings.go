@@ -312,7 +312,7 @@ type (
 
 	ArmBatchResponseItem struct {
 		HttpStatusCode int         `json:"httpStatusCode"` // HTTP status code of the response
-		Content        interface{} `json:"content"`        //armmonitor.DiagnosticSettingsResourceCollection
+		Content        interface{} `json:"content"`        // armmonitor.DiagnosticSettingsResourceCollection
 	}
 )
 

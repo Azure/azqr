@@ -11,12 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// CreateJsonReport generates a single consolidated JSON report
-func CreateJsonReport(data *renderers.ReportData) {
-	filename := fmt.Sprintf("%s.json", data.OutputFileName)
-	log.Info().Msgf("Generating Report: %s", filename)
-
-	// Build consolidated JSON structure
+// buildConsolidatedReport builds the consolidated JSON structure from report data
+func buildConsolidatedReport(data *renderers.ReportData) map[string]interface{} {
 	consolidatedReport := map[string]interface{}{}
 
 	// Only include AZQR-related data if the feature is enabled
@@ -80,15 +76,24 @@ func CreateJsonReport(data *renderers.ReportData) {
 		consolidatedReport["externalPlugins"] = plugins
 	}
 
-	// Write consolidated JSON to single file
+	return consolidatedReport
+}
+
+// CreateJsonReport generates a single consolidated JSON report file
+func CreateJsonReport(data *renderers.ReportData) {
+	filename := fmt.Sprintf("%s.json", data.OutputFileName)
+	log.Info().Msgf("Generating Report: %s", filename)
+
+	consolidatedReport := buildConsolidatedReport(data)
 	writeData(consolidatedReport, filename)
 }
 
+// CreateJsonOutput generates the same consolidated JSON structure as CreateJsonReport
+// but returns it as a string for console output instead of writing to a file
 func CreateJsonOutput(data *renderers.ReportData) string {
-	// Build consolidated JSON structure
-	impacted := convertToJSON(data.ImpactedTable())
+	consolidatedReport := buildConsolidatedReport(data)
 
-	js, err := json.MarshalIndent(impacted, "", "\t")
+	js, err := json.MarshalIndent(consolidatedReport, "", "\t")
 	if err != nil {
 		log.Fatal().Err(err).Msg("error marshaling data:")
 	}

@@ -386,6 +386,51 @@ You can compare two azqr scan reports to identify differences in recommendations
 ./azqr compare --file1 scan1.xlsx --file2 scan2.xlsx --output comparison.txt
 ```
 
+## MCP Server (Model Context Protocol)
+
+Azure Quick Review includes a Model Context Protocol (MCP) server that enables AI assistants and tools to interact with azqr functionality. The MCP server can run in two modes:
+
+### stdio Mode (Default)
+
+The stdio mode is designed for integration with tools like VS Code and AI assistants that communicate via standard input/output:
+
+```bash
+# Start MCP server in stdio mode
+azqr mcp
+```
+
+This mode is typically used when azqr is configured as an MCP server in your IDE or AI assistant configuration.
+
+### HTTP/SSE Mode
+
+The HTTP/SSE (Server-Sent Events) mode allows the MCP server to be accessed over HTTP, enabling remote access and web-based integrations:
+
+```bash
+# Start MCP server in HTTP mode on default port (:8080)
+azqr mcp --mode http
+
+# Start MCP server on a custom port
+azqr mcp --mode http --addr :3000
+
+# Start with specific host and port
+azqr mcp --mode http --addr localhost:9090
+```
+
+**HTTP/SSE Mode Features:**
+- 🌐 Remote access via HTTP
+- 🔌 Web-based tool integrations
+- 📡 Server-Sent Events for real-time updates
+- 🔧 RESTful API access to azqr tools
+
+**Endpoints:**
+When running in HTTP mode, the MCP server exposes SSE endpoints at the configured address. Clients can connect to these endpoints to interact with azqr's scanning capabilities, prompts, and tools.
+
+**Example Use Cases:**
+- Integrate azqr with web-based AI assistants
+- Build custom dashboards that leverage azqr scanning
+- Create CI/CD pipelines with HTTP-based azqr integration
+- Enable remote team access to azqr capabilities
+
 ## Help
 
 You can get help for `azqr` commands by running:

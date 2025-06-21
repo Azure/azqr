@@ -226,15 +226,20 @@ func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 
 	s := []IAzureScanner{}
 
-	if len(scannerKeys) > 1 && len(filters.Azqr.Include.ResourceTypes) > 0 {
+	switch {
+	case len(scannerKeys) > 1 && len(filters.Azqr.Include.ResourceTypes) > 0:
 		for _, key := range filters.Azqr.Include.ResourceTypes {
 			if scannerList, exists := ScannerList[key]; exists {
 				s = append(s, scannerList...)
 			}
 		}
-	} else if len(scannerKeys) == 1 {
-		s = append(s, ScannerList[scannerKeys[0]]...)
-	} else {
+	case len(scannerKeys) >= 1:
+		for _, key := range scannerKeys {
+			if scannerList, exists := ScannerList[key]; exists {
+				s = append(s, scannerList...)
+			}
+		}
+	default:
 		_, s = GetScanners()
 	}
 

@@ -71,10 +71,8 @@ func TestGenerateOutputFileName(t *testing.T) {
 				if result[:len(tt.expected)] != tt.expected {
 					t.Errorf("Expected prefix %s, got %s", tt.expected, result[:len(tt.expected)])
 				}
-			} else {
-				if result != tt.expected {
-					t.Errorf("Expected %s, got %s", tt.expected, result)
-				}
+			} else if result != tt.expected {
+				t.Errorf("Expected %s, got %s", tt.expected, result)
 			}
 		})
 	}

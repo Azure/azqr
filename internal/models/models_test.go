@@ -298,14 +298,8 @@ func TestRecommendationConstants(t *testing.T) {
 func TestAzqrResult_Fields(t *testing.T) {
 	result := AzqrResult{
 		RecommendationID:   "test-001",
-		ResourceType:       "Microsoft.Test/resources",
-		Recommendation:     "Test recommendation",
 		Category:           CategorySecurity,
-		Impact:             ImpactHigh,
-		RecommendationType: TypeRecommendation,
-		LearnMoreUrl:       "https://test.com",
 		NotCompliant:       true,
-		Result:             "Failed check",
 	}
 
 	if result.RecommendationID != "test-001" {
