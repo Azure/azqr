@@ -190,8 +190,12 @@ func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 				s = append(s, scannerList...)
 			}
 		}
-	} else if len(scannerKeys) == 1 {
-		s = append(s, ScannerList[scannerKeys[0]]...)
+	} else if len(scannerKeys) >= 1 {
+		for _, key := range scannerKeys {
+			if scannerList, exists := ScannerList[key]; exists {
+				s = append(s, scannerList...)
+			}
+		}
 	} else {
 		_, s = GetScanners()
 	}
