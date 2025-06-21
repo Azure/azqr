@@ -14,6 +14,26 @@
 
 **Azure Quick Review (azqr)** is a powerful command-line interface (CLI) tool that specializes in analyzing Azure resources to ensure compliance with Azure's best practices and recommendations. Its main objective is to offer users a comprehensive overview of their Azure resources, allowing them to easily identify any non-compliant configurations or areas for improvement.
 
+## REST API
+
+You can also use azqr as a REST API server to expose supported commands:
+
+### Start the API server
+
+```sh
+azqr-server api
+```
+
+The server listens on port 8080 by default (set `AZQR_API_PORT` to override).
+
+### Endpoints
+
+- `GET /api/types` — List all supported resource types
+- `GET /api/recommendations` — List all supported recommendations
+- `POST /api/scan` — Trigger a scan for a given resource type (body: `{ "key": "<serviceKey>" }`)
+
+All endpoints return JSON.
+
 ## Azure Quick Review Recommendations
 
 **Azure Quick Review (azqr)** scans your resources with 3 types of recommendations:
