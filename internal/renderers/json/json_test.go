@@ -91,7 +91,7 @@ func TestCreateJsonOutput(t *testing.T) {
 	output := CreateJsonOutput(data)
 
 	// Verify it's valid JSON
-	var result []map[string]string
+	var result map[string]interface{}
 	if err := json.Unmarshal([]byte(output), &result); err != nil {
 		t.Errorf("CreateJsonOutput() returned invalid JSON: %v", err)
 	}

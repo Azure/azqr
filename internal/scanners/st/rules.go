@@ -43,11 +43,12 @@ func (a *StorageScanner) GetRecommendations() map[string]models.AzqrRecommendati
 					}
 				}
 				sla := "99%"
-				if strings.Contains(sku, "RAGRS") && strings.Contains(tier, "Hot") {
+				switch {
+				case strings.Contains(sku, "RAGRS") && strings.Contains(tier, "Hot"):
 					sla = "99.99%"
-				} else if strings.Contains(sku, "RAGRS") && !strings.Contains(tier, "Hot") {
+				case strings.Contains(sku, "RAGRS") && !strings.Contains(tier, "Hot"):
 					sla = "99.9%"
-				} else if (strings.Contains(sku, "LRS") || strings.Contains(sku, "ZRS") || strings.Contains(sku, "GRS")) && strings.Contains(tier, "Hot") {
+				case (strings.Contains(sku, "LRS") || strings.Contains(sku, "ZRS") || strings.Contains(sku, "GRS")) && strings.Contains(tier, "Hot"):
 					sla = "99.9%"
 				}
 				return false, sla

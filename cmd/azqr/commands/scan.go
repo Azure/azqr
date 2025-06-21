@@ -6,8 +6,6 @@
 package commands
 
 import (
-	"time"
-
 	"github.com/Azure/azqr/internal"
 	"github.com/Azure/azqr/internal/models"
 
@@ -150,5 +148,5 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 
 	scanner := internal.Scanner{}
 	// Call ScanPlugins directly for optimized plugin-only execution
-	scanner.ScanPlugins(&params, time.Now())
+	scanner.ScanPlugins(&params)
 }

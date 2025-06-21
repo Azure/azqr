@@ -309,7 +309,7 @@ func TestCompareExcelFiles_InvalidFile(t *testing.T) {
 
 	// Test with invalid Excel file
 	invalidFile := filepath.Join(tmpDir, "invalid.xlsx")
-	if err := os.WriteFile(invalidFile, []byte("not an excel file"), 0644); err != nil {
+	if err := os.WriteFile(invalidFile, []byte("not an excel file"), 0600); err != nil {
 		t.Fatalf("Failed to create invalid test file: %v", err)
 	}
 

@@ -86,7 +86,11 @@ func NewHandler(ds *DataStore) http.Handler {
 
 // StartServer serves until context cancellation.
 func StartServer(ctx context.Context, addr string, ds *DataStore) error {
-	srv := &http.Server{Addr: addr, Handler: NewHandler(ds)}
+	srv := &http.Server{
+		Addr:              addr,
+		Handler:           NewHandler(ds),
+		ReadHeaderTimeout: 10 * time.Second,
+	}
 	go func() {
 		<-ctx.Done()
 		ctxS, cancel := context.WithTimeout(context.Background(), 5*time.Second)

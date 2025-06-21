@@ -69,7 +69,7 @@ For Excel format, the comparison provides:
 		// Output results
 		if output != "" {
 			// Write to file
-			if err := os.WriteFile(output, []byte(resultStr), 0644); err != nil {
+			if err := os.WriteFile(output, []byte(resultStr), 0600); err != nil {
 				return fmt.Errorf("failed to write output file: %w", err)
 			}
 			log.Info().Msgf("Comparison results written to: %s", output)

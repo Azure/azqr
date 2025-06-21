@@ -421,7 +421,9 @@ func (sc Scanner) Scan(params *ScanParams) string {
 }
 
 // ScanPlugins performs a fast plugin-only scan without resource or APRL scanning
-func (sc Scanner) ScanPlugins(params *ScanParams, startTime time.Time) string {
+func (sc Scanner) ScanPlugins(params *ScanParams) string {
+	startTime := time.Now()
+
 	sc.initializeLogLevel(params.Debug)
 
 	log.Info().Msg("Running in plugin-only mode: skipping resource and APRL scanning")
@@ -532,12 +534,10 @@ func (sc Scanner) buildFilteredServiceScanners(serviceScanners []models.IAzureSc
 			if count, exists := resourceTypes[resourceType]; !exists || count <= 0 {
 				log.Debug().Msgf("Skipping scanner for resource type %s as it has no resources", resourceType)
 				continue
-			} else {
-				if add {
-					filteredScanners = append(filteredScanners, s)
-					add = false
-					log.Info().Msgf("Scanner for resource type %s will be used", resourceType)
-				}
+			} else if add {
+				filteredScanners = append(filteredScanners, s)
+				add = false
+				log.Info().Msgf("Scanner for resource type %s will be used", resourceType)
 			}
 		}
 	}
@@ -694,12 +694,10 @@ func (sc Scanner) buildSubscriptionFilteredScanners(serviceScanners []models.IAz
 			if count, exists := subscriptionResourceTypes[resourceType]; !exists || count <= 0 {
 				log.Debug().Msgf("Skipping scanner for resource type %s in subscription %s as it has no resources", resourceType, renderers.MaskSubscriptionID(subscriptionID, mask))
 				continue
-			} else {
-				if add {
-					filteredScanners = append(filteredScanners, s)
-					add = false
-					log.Info().Msgf("Scanner for resource type %s will be used in subscription %s", resourceType, renderers.MaskSubscriptionID(subscriptionID, mask))
-				}
+			} else if add {
+				filteredScanners = append(filteredScanners, s)
+				add = false
+				log.Info().Msgf("Scanner for resource type %s will be used in subscription %s", resourceType, renderers.MaskSubscriptionID(subscriptionID, mask))
 			}
 		}
 	}

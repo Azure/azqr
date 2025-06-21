@@ -51,11 +51,16 @@ help:
 	@echo "  PRODUCT_VERSION - Git tag for version info and Docker tagging"
 	@echo "  BUILD_TAGS   - Custom build tags to include"
 
-lint:
-	@if [ ! -f $(GOLANGCI_LINT) ]; then \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.3.0; \
-	fi
+lint: lint-install
 	$(GOLANGCI_LINT) run
+
+lint-all: lint-install
+	$(GOLANGCI_LINT) run --enable=errcheck,govet,ineffassign,staticcheck,gocyclo,unused,gocognit,gosec,gocritic
+
+lint-install:
+	@if [ ! -f $(GOLANGCI_LINT) ]; then \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.8.0; \
+	fi
 
 vet:
 	go vet ./...
