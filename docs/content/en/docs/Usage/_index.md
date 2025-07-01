@@ -16,7 +16,17 @@ weight: 3
 
 * Reader over Subscription or Management Group scope
 
-### - PowerShell
+### Credential Chain Configuration
+
+**Azure Quick Review (azqr)** uses the Azure SDK's `DefaultAzureCredential` which automatically selects the most appropriate credential based on your environment. You can customize the credential chain behavior by setting the `AZURE_TOKEN_CREDENTIALS` environment variable.
+
+**Development environments:**
+Set `AZURE_TOKEN_CREDENTIALS=az;azd` to use Azure CLI (`az`) or Azure Developer CLI (`azd`) credentials.
+
+**Production environments:** 
+Set `AZURE_TOKEN_CREDENTIALS=env;workloadIdentity;managedIdentity` to use environment variables, workload identity, or managed identity credentials.
+
+### Service Principal Authentication
 
 Set the following environment variables:
 
@@ -32,8 +42,8 @@ Bash:
 
 ``` bash
 export AZURE_CLIENT_ID='<service-principal-client-id>'
-export AZURE_CLIENT_SECRET = '<service-principal-client-secret>'
-export AZURE_TENANT_ID = '<tenant-id>'
+export AZURE_CLIENT_SECRET='<service-principal-client-secret>'
+export AZURE_TENANT_ID='<tenant-id>'
 ```
 
 ### Authenticate with a Managed Identity
@@ -51,7 +61,7 @@ Bash:
 
 ``` bash
 export AZURE_CLIENT_ID='<managed-identity-client-id>'
-export AZURE_TENANT_ID = '<tenant-id>'
+export AZURE_TENANT_ID='<tenant-id>'
 ```
 
 ### Authenticate with Azure CLI

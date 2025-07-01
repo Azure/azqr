@@ -22,7 +22,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create CSV report files")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default)")
-	scanCmd.PersistentFlags().BoolP("azure-cli-credential", "f", false, "Force the use of Azure CLI Credential")
+
 	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
 	scanCmd.PersistentFlags().BoolP("azqr", "", true, "Scan Azure Quick Review Recommendations (default)")
@@ -54,7 +54,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
-	forceAzureCliCredential, _ := cmd.Flags().GetBool("azure-cli-credential")
+
 	filtersFile, _ := cmd.Flags().GetString("filters")
 	useAzqr, _ := cmd.Flags().GetBool("azqr")
 
@@ -75,7 +75,6 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		Mask:                    mask,
 		Debug:                   debug,
 		ScannerKeys:             scannerKeys,
-		ForceAzureCliCredential: forceAzureCliCredential,
 		Filters:                 filters,
 		UseAzqrRecommendations:  useAzqr,
 	}
