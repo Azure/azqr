@@ -166,18 +166,26 @@ Example:
 azqr scan --json
 ```
 
-The scan will generate 9 `json` files:
+The scan will generate a single consolidated `json` file:
 
 ``` 
-<file-name>.advisor.json
-<file-name>.costs.json
-<file-name>.defender.json
-<file-name>.defenderRecommendations.json
-<file-name>.impacted.json
-<file-name>.inventory.json
-<file-name>.outofscope.json
-<file-name>.recommendations.json
-<file-name>.resourceType.json
+<file-name>.json
+```
+
+The JSON file contains all data sections in a single consolidated structure:
+
+```json
+{
+    "recommendations": [...],
+    "impacted": [...],
+    "resourceType": [...],
+    "inventory": [...],
+    "defender": [...],
+    "defenderRecommendations": [...],
+    "advisor": [...],
+    "costs": [...],
+    "outOfScope": [...]
+}
 ```
 
 ### Changing the Output File Name
