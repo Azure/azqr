@@ -21,10 +21,10 @@ weight: 3
 **Azure Quick Review (azqr)** uses the Azure SDK's `DefaultAzureCredential` which automatically selects the most appropriate credential based on your environment. You can customize the credential chain behavior by setting the `AZURE_TOKEN_CREDENTIALS` environment variable.
 
 **Development environments:**
-Set `AZURE_TOKEN_CREDENTIALS=az;azd` to use Azure CLI (`az`) or Azure Developer CLI (`azd`) credentials.
+Set `AZURE_TOKEN_CREDENTIALS=dev` to use Azure CLI (`az`) or Azure Developer CLI (`azd`) credentials.
 
 **Production environments:** 
-Set `AZURE_TOKEN_CREDENTIALS=env;workloadIdentity;managedIdentity` to use environment variables, workload identity, or managed identity credentials.
+Set `AZURE_TOKEN_CREDENTIALS=pro` to use environment variables, workload identity, or managed identity credentials.
 
 ### Service Principal Authentication
 

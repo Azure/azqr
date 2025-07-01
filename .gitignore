@@ -36,9 +36,11 @@ dist/
 .azqr
 main
 main.exe
+
+# azqr binaries
+azqr
 azqr.exe
 
 # azqr outputs
 *.xlsx
 *.csv
-azqr
