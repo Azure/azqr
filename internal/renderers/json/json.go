@@ -18,57 +18,28 @@ func CreateJsonReport(data *renderers.ReportData) {
 
 	// Build consolidated JSON structure
 	consolidatedReport := map[string]interface{}{
-		"recommendations":          convertToJSON(data.RecommendationsTable()),
-		"impacted":                 convertToJSON(data.ImpactedTable()),
-		"resourceType":             convertToJSON(data.ResourceTypesTable()),
-		"inventory":                convertToJSON(data.ResourcesTable()),
-		"defender":                 convertToJSON(data.DefenderTable()),
-		"defenderRecommendations":  convertToJSON(data.DefenderRecommendationsTable()),
-		"advisor":                  convertToJSON(data.AdvisorTable()),
-		"costs":                    convertToJSON(data.CostTable()),
-		"outOfScope":               convertToJSON(data.ExcludedResourcesTable()),
+		"recommendations":         convertToJSON(data.RecommendationsTable()),
+		"impacted":                convertToJSON(data.ImpactedTable()),
+		"resourceType":            convertToJSON(data.ResourceTypesTable()),
+		"inventory":               convertToJSON(data.ResourcesTable()),
+		"defender":                convertToJSON(data.DefenderTable()),
+		"defenderRecommendations": convertToJSON(data.DefenderRecommendationsTable()),
+		"advisor":                 convertToJSON(data.AdvisorTable()),
+		"costs":                   convertToJSON(data.CostTable()),
+		"outOfScope":              convertToJSON(data.ExcludedResourcesTable()),
 	}
 
 	// Write consolidated JSON to single file
-	writeConsolidatedData(consolidatedReport, filename)
+	writeData(consolidatedReport, filename)
 }
 
-func writeData(data [][]string, fileName, extension string) {
-	filename := fmt.Sprintf("%s.%s.json", fileName, extension)
-	log.Info().Msgf("Generating Report: %s", filename)
-
+// writeData writes the consolidated JSON data to a single file
+func writeData(data map[string]interface{}, filename string) {
 	f, err := os.Create(filename)
 	if err != nil {
 		log.Fatal().Err(err).Msg("error creating json:")
 	}
-	
-	defer func() {
-		// Handle error during file close
-		if cerr := f.Close(); cerr != nil {
-			log.Fatal().Err(cerr).Msg("error closing file:")
-		}
-	}()
 
-	jsonData := convertToJSON(data)
-
-	js, err := json.MarshalIndent(jsonData, "", "\t")
-	if err != nil {
-		log.Fatal().Err(err).Msg("error marshaling data:")
-	}
-
-	_, err = f.Write(js)
-	if err != nil {
-		log.Fatal().Err(err).Msg("error writing json:")
-	}
-}
-
-// writeConsolidatedData writes the consolidated JSON data to a single file
-func writeConsolidatedData(data map[string]interface{}, filename string) {
-	f, err := os.Create(filename)
-	if err != nil {
-		log.Fatal().Err(err).Msg("error creating json:")
-	}
-	
 	defer func() {
 		// Handle error during file close
 		if cerr := f.Close(); cerr != nil {
