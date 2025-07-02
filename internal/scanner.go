@@ -98,22 +98,23 @@ import (
 
 type (
 	ScanParams struct {
-		ManagementGroups        []string
-		Subscriptions           []string
-		ResourceGroups          []string
-		OutputName              string
-		Defender                bool
-		Advisor                 bool
-		Xlsx                    bool
-		Cost                    bool
-		Mask                    bool
-		Csv                     bool
-		Json                    bool
-		Debug                   bool
-		ScannerKeys             []string
-		Filters                 *models.Filters
-		UseAzqrRecommendations  bool
-		UseAprlRecommendations  bool
+		ManagementGroups       []string
+		Subscriptions          []string
+		ResourceGroups         []string
+		OutputName             string
+		Defender               bool
+		Advisor                bool
+		Xlsx                   bool
+		Cost                   bool
+		Mask                   bool
+		Csv                    bool
+		Json                   bool
+		Stdout                 bool
+		Debug                  bool
+		ScannerKeys            []string
+		Filters                *models.Filters
+		UseAzqrRecommendations bool
+		UseAprlRecommendations bool
 	}
 
 	Scanner struct{}
@@ -126,25 +127,25 @@ const (
 
 func NewScanParams() *ScanParams {
 	return &ScanParams{
-		ManagementGroups:        []string{},
-		Subscriptions:           []string{},
-		ResourceGroups:          []string{},
-		OutputName:              "",
-		Defender:                true,
-		Advisor:                 true,
-		Cost:                    true,
-		Mask:                    true,
-		Csv:                     false,
-		Json:                    false,
-		Debug:                   false,
-		ScannerKeys:             []string{},
-		Filters:                 models.NewFilters(),
-		UseAzqrRecommendations:  true,
-		UseAprlRecommendations:  true,
+		ManagementGroups:       []string{},
+		Subscriptions:          []string{},
+		ResourceGroups:         []string{},
+		OutputName:             "",
+		Defender:               true,
+		Advisor:                true,
+		Cost:                   true,
+		Mask:                   true,
+		Csv:                    false,
+		Json:                   false,
+		Debug:                  false,
+		ScannerKeys:            []string{},
+		Filters:                models.NewFilters(),
+		UseAzqrRecommendations: true,
+		UseAprlRecommendations: true,
 	}
 }
 
-func (sc Scanner) Scan(params *ScanParams) {
+func (sc Scanner) Scan(params *ScanParams) string {
 	startTime := time.Now()
 	// Default level for this example is info, unless debug flag is present
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
@@ -391,12 +392,20 @@ func (sc Scanner) Scan(params *ScanParams) {
 		csv.CreateCsvReport(&reportData)
 	}
 
+	// Write the JSON output to stdout
+	outputJson := json.CreateJsonOutput(&reportData)
+	if params.Stdout {
+		fmt.Println(outputJson)
+	}
+
 	elapsedTime := time.Since(startTime)
 	// Format the elapsed time as HH:MM:SS and log the scan completion time
 	hours := int(elapsedTime.Hours())
 	minutes := int(elapsedTime.Minutes()) % 60
 	seconds := int(elapsedTime.Seconds()) % 60
 	log.Info().Msgf("Scan completed in %02d:%02d:%02d", hours, minutes, seconds)
+
+	return outputJson
 }
 
 // retry retries the Azure scanner Scan, a number of times with an increasing delay between retries

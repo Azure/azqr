@@ -20,12 +20,12 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("xslx", "", true, "Create Excel report (default)")
 	scanCmd.PersistentFlags().BoolP("json", "", false, "Create JSON report files")
 	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create CSV report files")
+	scanCmd.PersistentFlags().BoolP("stdout", "", false, "Create CSV report files")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default)")
-
-	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
 	scanCmd.PersistentFlags().BoolP("azqr", "", true, "Scan Azure Quick Review Recommendations (default)")
+	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
 
 	rootCmd.AddCommand(scanCmd)
 }
@@ -54,7 +54,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
-
+	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
 	useAzqr, _ := cmd.Flags().GetBool("azqr")
 
@@ -62,21 +62,22 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	filters := models.LoadFilters(filtersFile, scannerKeys)
 
 	params := internal.ScanParams{
-		ManagementGroups:        managementGroups,
-		Subscriptions:           subscriptions,
-		ResourceGroups:          resourceGroups,
-		OutputName:              outputFileName,
-		Defender:                defender,
-		Advisor:                 advisor,
-		Xlsx:                    xlsx,
-		Cost:                    cost,
-		Csv:                     csv,
-		Json:                    json,
-		Mask:                    mask,
-		Debug:                   debug,
-		ScannerKeys:             scannerKeys,
-		Filters:                 filters,
-		UseAzqrRecommendations:  useAzqr,
+		ManagementGroups:       managementGroups,
+		Subscriptions:          subscriptions,
+		ResourceGroups:         resourceGroups,
+		OutputName:             outputFileName,
+		Defender:               defender,
+		Advisor:                advisor,
+		Xlsx:                   xlsx,
+		Cost:                   cost,
+		Csv:                    csv,
+		Json:                   json,
+		Mask:                   mask,
+		Stdout:                 stdout,
+		Debug:                  debug,
+		ScannerKeys:            scannerKeys,
+		Filters:                filters,
+		UseAzqrRecommendations: useAzqr,
 	}
 
 	scanner := internal.Scanner{}

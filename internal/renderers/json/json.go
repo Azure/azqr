@@ -33,6 +33,18 @@ func CreateJsonReport(data *renderers.ReportData) {
 	writeData(consolidatedReport, filename)
 }
 
+func CreateJsonOutput(data *renderers.ReportData) string {
+	// Build consolidated JSON structure
+	impacted := convertToJSON(data.ImpactedTable())
+
+	js, err := json.MarshalIndent(impacted, "", "\t")
+	if err != nil {
+		log.Fatal().Err(err).Msg("error marshaling data:")
+	}
+
+	return string(js)
+}
+
 // writeData writes the consolidated JSON data to a single file
 func writeData(data map[string]interface{}, filename string) {
 	f, err := os.Create(filename)
