@@ -16,12 +16,57 @@ import (
 
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/throttling"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/rs/zerolog/log"
 )
+
+var typesWithDiagnosticSettingsSupport = map[string]*bool{
+	"microsoft.network/virtualwans":                 to.Ptr(true),
+	"microsoft.apimanagement/service":               to.Ptr(true),
+	"microsoft.compute/virtualmachines":             to.Ptr(true),
+	"microsoft.containerservice/managedclusters":    to.Ptr(true),
+	"microsoft.machinelearningservices/workspaces":  to.Ptr(true),
+	"microsoft.dbforpostgresql/servers":             to.Ptr(true),
+	"microsoft.dbforpostgresql/flexibleservers":     to.Ptr(true),
+	"microsoft.network/virtualnetworks":             to.Ptr(true),
+	"microsoft.network/loadbalancers":               to.Ptr(true),
+	"microsoft.synapse/workspaces":                  to.Ptr(true),
+	"microsoft.synapse workspaces/bigdatapools":     to.Ptr(true),
+	"microsoft.synapse/workspaces/sqlpools":         to.Ptr(true),
+	"microsoft.containerregistry/registries":        to.Ptr(true),
+	"microsoft.eventgrid/domains":                   to.Ptr(true),
+	"microsoft.dashboard/managedgrafana":            to.Ptr(true),
+	"microsoft.virtualmachineimages/imagetemplates": to.Ptr(true),
+	"microsoft.dbformysql/servers":                  to.Ptr(true),
+	"microsoft.dbformysql/flexibleservers":          to.Ptr(true),
+	"microsoft.network/virtualnetworkgateways":      to.Ptr(true),
+	"microsoft.network/routetables":                 to.Ptr(true),
+	"microsoft.app/containerapps":                   to.Ptr(true),
+	"microsoft.network/trafficmanagerprofiles":      to.Ptr(true),
+	"microsoft.search/searchservices":               to.Ptr(true),
+	"microsoft.signalrservice/webpubsub":            to.Ptr(true),
+	"microsoft.network/publicipaddresses":           to.Ptr(true),
+	"microsoft.sql/servers":                         to.Ptr(true),
+	"microsoft.sql/servers/databases":               to.Ptr(true),
+	"microsoft.sql/servers/elasticpools":            to.Ptr(true),
+	"microsoft.keyvault/vaults":                     to.Ptr(true),
+	"microsoft.network/natgateways":                 to.Ptr(true),
+	"microsoft.operationalinsights/workspaces":      to.Ptr(true),
+	"microsoft.analysisservices/servers":            to.Ptr(true),
+	"microsoft.insights/components":                 to.Ptr(true),
+	"microsoft.datafactory/factories":               to.Ptr(true),
+	"microsoft.cognitiveservices/accounts":          to.Ptr(true),
+	"microsoft.kusto/clusters":                      to.Ptr(true),
+	"microsoft.app/managedenvironments":             to.Ptr(true),
+	"microsoft.compute/virtualmachinescalesets":     to.Ptr(true),
+	"microsoft.storage/storageaccounts":             to.Ptr(true),
+	"microsoft.network/privateendpoints":            to.Ptr(true),
+	"microsoft.containerinstance/containergroups":   to.Ptr(true),
+}
 
 // DiagnosticSettingsScanner - scanner for diagnostic settings
 type DiagnosticSettingsScanner struct {
@@ -58,21 +103,34 @@ func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenC
 }
 
 // ListResourcesWithDiagnosticSettings - Lists all resources with diagnostic settings
-func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resources []*string) (map[string]bool, error) {
+func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resources []*models.Resource) (map[string]bool, error) {
 	res := map[string]bool{}
 
-	// if len(resources) > 0 { // Uncomment this block to test with a large number of resources
-	// 	firstResource := resources[0]
-	// 	for len(resources) < 100000 {
-	// 		resources = append(resources, firstResource)
+	// Filter resources to only include those that support diagnostic settings
+	if len(resources) == 0 {
+		log.Debug().Msg("No resources found to scan for diagnostic settings")
+		return res, nil
+	}
+	filteredResources := []*string{}
+	for _, resource := range resources {
+		// Check if the resource type (in lowercase) supports diagnostic settings
+		if _, ok := typesWithDiagnosticSettingsSupport[strings.ToLower(resource.Type)]; ok {
+			filteredResources = append(filteredResources, &resource.ID)
+		}
+	}
+
+	// if len(filteredResources) > 0 { // Uncomment this block to test with a large number of filteredResources
+	// 	firstResource := filteredResources[0]
+	// 	for len(filteredResources) < 100000 {
+	// 		filteredResources = append(filteredResources, firstResource)
 	// 	}
 	// }
 
-	if len(resources) > 5000 {
-		log.Warn().Msgf("%d resources detected. Scan will take longer than usual", len(resources))
+	if len(filteredResources) > 5000 {
+		log.Warn().Msgf("%d resources detected. Scan will take longer than usual", len(filteredResources))
 	}
 
-	batches := int(math.Ceil(float64(len(resources)) / 20))
+	batches := int(math.Ceil(float64(len(filteredResources)) / 20))
 
 	models.LogResourceTypeScan("Diagnostic Settings")
 
@@ -95,14 +153,14 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 	}
 	wg.Add(batches)
 
-	// Split resources into batches of 20 items.
+	// Split filteredResources into batches of 20 items.
 	batchSize := 20
-	for i := 0; i < len(resources); i += batchSize {
+	for i := 0; i < len(filteredResources); i += batchSize {
 		j := i + batchSize
-		if j > len(resources) {
-			j = len(resources)
+		if j > len(filteredResources) {
+			j = len(filteredResources)
 		}
-		jobs <- resources[i:j]
+		jobs <- filteredResources[i:j]
 	}
 
 	// Wait for all workers to finish
@@ -283,7 +341,7 @@ type (
 	}
 )
 
-func (d *DiagnosticSettingsScanner) Scan(resources []*string) map[string]bool {
+func (d *DiagnosticSettingsScanner) Scan(resources []*models.Resource) map[string]bool {
 	diagResults, err := d.ListResourcesWithDiagnosticSettings(resources)
 	if err != nil {
 		if models.ShouldSkipError(err) {
