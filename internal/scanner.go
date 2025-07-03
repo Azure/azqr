@@ -296,7 +296,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 			log.Fatal().Err(err).Msg("Failed to initialize diagnostic settings scanner")
 		}
 
-		diagResults = diagnosticsScanner.Scan(reportData.ResourceIDs())
+		diagResults = diagnosticsScanner.Scan(reportData.Resources)
 	}
 
 	// scan each subscription with AZQR scanners
