@@ -5,6 +5,7 @@ package traf
 
 import (
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/trafficmanager/armtrafficmanager"
 )
 
@@ -59,6 +60,8 @@ func (c *TrafficManagerScanner) list() ([]*armtrafficmanager.Profile, error) {
 
 	vnets := make([]*armtrafficmanager.Profile, 0)
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

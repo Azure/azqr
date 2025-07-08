@@ -5,6 +5,7 @@ package agw
 
 import (
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
@@ -58,6 +59,8 @@ func (a *ApplicationGatewayScanner) listGateways() ([]*armnetwork.ApplicationGat
 	pager := a.gatewaysClient.NewListAllPager(nil)
 	results := []*armnetwork.ApplicationGateway{}
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

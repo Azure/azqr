@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
@@ -109,6 +110,9 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 
 		var skipToken *string = nil
 		for ok := true; ok; ok = skipToken != nil {
+			// Wait for a token from the burstLimiter channel before making the request
+			<-throttling.GraphLimiter
+			
 			options.SkipToken = skipToken
 			request := QueryRequest{
 				Subscriptions: subscriptionIDs[i:j],
