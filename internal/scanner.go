@@ -16,7 +16,6 @@ import (
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -118,11 +117,6 @@ type (
 	}
 
 	Scanner struct{}
-)
-
-const (
-	bucketCapacity = 250
-	refillRate     = 25
 )
 
 func NewScanParams() *ScanParams {
@@ -327,10 +321,6 @@ func (sc Scanner) Scan(params *ScanParams) string {
 			// scan each resource group
 			ch := make(chan []models.AzqrServiceResult, len(filteredServiceScanners))
 
-			// Create a burst limiter to control the rate of requests
-			limiter := throttling.NewLimiter(bucketCapacity, refillRate, 1*time.Second, 0*time.Millisecond)
-			burstLimiter := limiter.Start()
-
 			for _, s := range filteredServiceScanners {
 				err := s.Init(config)
 				if err != nil {
@@ -338,8 +328,6 @@ func (sc Scanner) Scan(params *ScanParams) string {
 				}
 
 				go func(s models.IAzureScanner) {
-					// Wait for a token from the burstLimiter channel before starting the scan
-					<-burstLimiter
 					res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
 					if err != nil {
 						cancel()

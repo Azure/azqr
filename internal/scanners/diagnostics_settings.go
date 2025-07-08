@@ -25,47 +25,78 @@ import (
 )
 
 var typesWithDiagnosticSettingsSupport = map[string]*bool{
-	"microsoft.network/virtualwans":                 to.Ptr(true),
-	"microsoft.apimanagement/service":               to.Ptr(true),
-	"microsoft.compute/virtualmachines":             to.Ptr(true),
-	"microsoft.containerservice/managedclusters":    to.Ptr(true),
-	"microsoft.machinelearningservices/workspaces":  to.Ptr(true),
-	"microsoft.dbforpostgresql/servers":             to.Ptr(true),
-	"microsoft.dbforpostgresql/flexibleservers":     to.Ptr(true),
-	"microsoft.network/virtualnetworks":             to.Ptr(true),
-	"microsoft.network/loadbalancers":               to.Ptr(true),
-	"microsoft.synapse/workspaces":                  to.Ptr(true),
-	"microsoft.synapse workspaces/bigdatapools":     to.Ptr(true),
-	"microsoft.synapse/workspaces/sqlpools":         to.Ptr(true),
-	"microsoft.containerregistry/registries":        to.Ptr(true),
-	"microsoft.eventgrid/domains":                   to.Ptr(true),
-	"microsoft.dashboard/managedgrafana":            to.Ptr(true),
-	"microsoft.virtualmachineimages/imagetemplates": to.Ptr(true),
-	"microsoft.dbformysql/servers":                  to.Ptr(true),
-	"microsoft.dbformysql/flexibleservers":          to.Ptr(true),
-	"microsoft.network/virtualnetworkgateways":      to.Ptr(true),
-	"microsoft.network/routetables":                 to.Ptr(true),
-	"microsoft.app/containerapps":                   to.Ptr(true),
-	"microsoft.network/trafficmanagerprofiles":      to.Ptr(true),
-	"microsoft.search/searchservices":               to.Ptr(true),
-	"microsoft.signalrservice/webpubsub":            to.Ptr(true),
-	"microsoft.network/publicipaddresses":           to.Ptr(true),
-	"microsoft.sql/servers":                         to.Ptr(true),
-	"microsoft.sql/servers/databases":               to.Ptr(true),
-	"microsoft.sql/servers/elasticpools":            to.Ptr(true),
-	"microsoft.keyvault/vaults":                     to.Ptr(true),
-	"microsoft.network/natgateways":                 to.Ptr(true),
-	"microsoft.operationalinsights/workspaces":      to.Ptr(true),
-	"microsoft.analysisservices/servers":            to.Ptr(true),
-	"microsoft.insights/components":                 to.Ptr(true),
-	"microsoft.datafactory/factories":               to.Ptr(true),
-	"microsoft.cognitiveservices/accounts":          to.Ptr(true),
-	"microsoft.kusto/clusters":                      to.Ptr(true),
-	"microsoft.app/managedenvironments":             to.Ptr(true),
-	"microsoft.compute/virtualmachinescalesets":     to.Ptr(true),
-	"microsoft.storage/storageaccounts":             to.Ptr(true),
-	"microsoft.network/privateendpoints":            to.Ptr(true),
-	"microsoft.containerinstance/containergroups":   to.Ptr(true),
+	// Resource types from all scanners' ResourceTypes()
+	"microsoft.network/networkinterfaces":                       to.Ptr(true),
+	"microsoft.keyvault/vaults":                                 to.Ptr(true),
+	"microsoft.network/trafficmanagerprofiles":                  to.Ptr(true),
+	"microsoft.network/applicationgateways":                     to.Ptr(true),
+	"microsoft.network/routetables":                             to.Ptr(true),
+	"microsoft.recoveryservices/vaults":                         to.Ptr(true),
+	"specialized.workload/avd":                                  to.Ptr(true),
+	"microsoft.compute/virtualmachines":                         to.Ptr(true),
+	"microsoft.network/virtualwans":                             to.Ptr(true),
+	"microsoft.network/virtualnetworks":                         to.Ptr(true),
+	"microsoft.network/virtualnetworks/subnets":                 to.Ptr(true),
+	"specialized.workload/hpc":                                  to.Ptr(true),
+	"microsoft.automation/automationaccounts":                   to.Ptr(true),
+	"microsoft.machinelearningservices/workspaces":              to.Ptr(true),
+	"microsoft.containerservice/managedclusters":                to.Ptr(true),
+	"microsoft.dbforpostgresql/flexibleservers":                 to.Ptr(true),
+	"microsoft.dbforpostgresql/servers":                         to.Ptr(true),
+	"microsoft.network/loadbalancers":                           to.Ptr(true),
+	"microsoft.signalrservice/signalr":                          to.Ptr(true),
+	"specialized.workload/sap":                                  to.Ptr(true),
+	"microsoft.dashboard/grafana":                               to.Ptr(true),
+	"microsoft.containerregistry/registries":                    to.Ptr(true),
+	"microsoft.virtualmachineimages/imagetemplates":             to.Ptr(true),
+	"microsoft.devices/iothubs":                                 to.Ptr(true),
+	"microsoft.dbformysql/servers":                              to.Ptr(true),
+	"microsoft.dbformysql/flexibleservers":                      to.Ptr(true),
+	"microsoft.eventgrid/domains":                               to.Ptr(true),
+	"microsoft.compute/disks":                                   to.Ptr(true),
+	"microsoft.network/connections":                             to.Ptr(true),
+	"microsoft.app/containerapps":                               to.Ptr(true),
+	"microsoft.network/virtualnetworkgateways":                  to.Ptr(true),
+	"microsoft.network/frontdoorwebapplicationfirewallpolicies": to.Ptr(true),
+	"microsoft.batch/batchaccounts":                             to.Ptr(true),
+	"microsoft.search/searchservices":                           to.Ptr(true),
+	"microsoft.network/publicipaddresses":                       to.Ptr(true),
+	"microsoft.signalrservice/webpubsub":                        to.Ptr(true),
+	"microsoft.sql/servers":                                     to.Ptr(true),
+	"microsoft.sql/servers/databases":                           to.Ptr(true),
+	"microsoft.sql/servers/elasticpools":                        to.Ptr(true),
+	"microsoft.network/natgateways":                             to.Ptr(true),
+	"microsoft.operationalinsights/workspaces":                  to.Ptr(true),
+	"microsoft.analysisservices/servers":                        to.Ptr(true),
+	"microsoft.insights/components":                             to.Ptr(true),
+	"microsoft.datafactory/factories":                           to.Ptr(true),
+	"microsoft.cognitiveservices/accounts":                      to.Ptr(true),
+	"microsoft.kusto/clusters":                                  to.Ptr(true),
+	"microsoft.app/managedenvironments":                         to.Ptr(true),
+	"microsoft.compute/virtualmachinescalesets":                 to.Ptr(true),
+	"microsoft.storage/storageaccounts":                         to.Ptr(true),
+	"microsoft.network/privateendpoints":                        to.Ptr(true),
+	"microsoft.containerinstance/containergroups":               to.Ptr(true),
+	"microsoft.resources/resourcegroups":                        to.Ptr(true),
+	"microsoft.servicebus/namespaces":                           to.Ptr(true),
+	"microsoft.network/azurefirewalls":                          to.Ptr(true),
+	"microsoft.network/ipgroups":                                to.Ptr(true),
+	"microsoft.cache/redis":                                     to.Ptr(true),
+	"microsoft.network/networksecuritygroups":                   to.Ptr(true),
+	"microsoft.eventhub/namespaces":                             to.Ptr(true),
+	"microsoft.documentdb/databaseaccounts":                     to.Ptr(true),
+	"microsoft.compute/galleries":                               to.Ptr(true),
+	"microsoft.appconfiguration/configurationstores":            to.Ptr(true),
+	"microsoft.cdn/profiles":                                    to.Ptr(true),
+	"microsoft.logic/workflows":                                 to.Ptr(true),
+	"microsoft.databricks/workspaces":                           to.Ptr(true),
+	"microsoft.network/privatednszones":                         to.Ptr(true),
+	"microsoft.network/networkwatchers":                         to.Ptr(true),
+	"microsoft.compute/availabilitysets":                        to.Ptr(true),
+	"microsoft.web/serverfarms":                                 to.Ptr(true),
+	"microsoft.web/sites":                                       to.Ptr(true),
+	"microsoft.web/connections":                                 to.Ptr(true),
+	"microsoft.web/certificates":                                to.Ptr(true),
 }
 
 // DiagnosticSettingsScanner - scanner for diagnostic settings
@@ -143,13 +174,9 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 	ch := make(chan map[string]bool, batches)
 	var wg sync.WaitGroup
 
-	// Create a burst limiter to control the rate of requests
-	limiter := throttling.NewLimiter(bucketCapacity, refillRate, 1*time.Second, 0*time.Millisecond)
-	burstLimiter := limiter.Start()
-
 	numWorkers := bucketCapacity
 	for w := 0; w < numWorkers; w++ {
-		go d.worker(jobs, ch, &wg, burstLimiter)
+		go d.worker(jobs, ch, &wg)
 	}
 	wg.Add(batches)
 
@@ -176,10 +203,8 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 	return res, nil
 }
 
-func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<- map[string]bool, wg *sync.WaitGroup, burstLimiter <-chan struct{}) {
-	// Wait for a token from the burstLimiter channel before starting the scan
+func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<- map[string]bool, wg *sync.WaitGroup) {
 	for ids := range jobs {
-		<-burstLimiter
 		resp, err := d.retry(d.ctx, 3, 10*time.Millisecond, ids)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to get diagnostic settings")
@@ -266,6 +291,9 @@ func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds [
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+d.accessToken)
+
+	// Wait for a token from the burstLimiter channel before making the request
+	<-throttling.ARMLimiter
 
 	// Send the HTTP request.
 	resp, err := d.httpClient.Do(req)

@@ -5,6 +5,7 @@ package aks
 
 import (
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
@@ -61,6 +62,8 @@ func (a *AKSScanner) listClusters() ([]*armcontainerservice.ManagedCluster, erro
 
 	clusters := make([]*armcontainerservice.ManagedCluster, 0)
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

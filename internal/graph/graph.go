@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
@@ -116,19 +117,11 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 				Options:       options,
 			}
 
-			startTime := time.Now()
 			resp, err := q.retry(ctx, 3, 10*time.Second, request)
-			elapsed := time.Since(startTime).Milliseconds()
 			if err == nil {
 				result.Data = append(result.Data, resp.Data...)
 				skipToken = resp.SkipToken
-				// If the response contains a skip token, it means there are more results to fetch
-				// so if the request took less than 333ms, we wait to avoid throttling
-				if skipToken != nil && elapsed < 333 {
-					// If the query took less than 333ms, wait to avoid throttling
-					log.Debug().Msgf("Graph query took %d ms, waiting to avoid throttling", elapsed)
-					time.Sleep(time.Duration(400-elapsed) * time.Millisecond)
-				}
+			
 				// Quota limit reached, sleep for the duration specified in the response header
 				if resp.Quota == 0 {
 					duration := resp.RetryAfter
@@ -186,6 +179,9 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 	// Set headers
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+q.accessToken)
+
+	// Wait for a token from the burstLimiter channel before making the request
+	<-throttling.GraphLimiter
 
 	// Send request
 	resp, err := q.httpClient.Do(req)

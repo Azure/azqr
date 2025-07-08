@@ -5,6 +5,7 @@ package maria
 
 import (
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb"
 )
 
@@ -87,6 +88,8 @@ func (c *MariaScanner) listServers() ([]*armmariadb.Server, error) {
 
 	servers := make([]*armmariadb.Server, 0)
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err
@@ -101,6 +104,8 @@ func (c *MariaScanner) listDatabases(resourceGroupName, serverName string) ([]*a
 
 	databases := make([]*armmariadb.Database, 0)
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

@@ -5,6 +5,7 @@ package scanners
 
 import (
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 	"github.com/rs/zerolog/log"
 )
@@ -36,6 +37,8 @@ func (s *PublicIPScanner) ListPublicIPs() (map[string]*armnetwork.PublicIPAddres
 	pager := s.client.NewListAllPager(&opt)
 
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(s.config.Ctx)
 		if err != nil {
 			return nil, err
