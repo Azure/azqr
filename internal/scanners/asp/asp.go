@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
 )
 
@@ -130,6 +131,8 @@ func (a *AppServiceScanner) listPlans() ([]*armappservice.Plan, error) {
 	pager := a.plansClient.NewListPager(nil)
 	results := []*armappservice.Plan{}
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
@@ -144,6 +147,8 @@ func (a *AppServiceScanner) listSites(resourceGroupName string, plan string) ([]
 	pager := a.plansClient.NewListWebAppsPager(resourceGroupName, plan, nil)
 	results := []*armappservice.Site{}
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

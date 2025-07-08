@@ -5,6 +5,7 @@ package mysql
 
 import (
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 )
 
@@ -55,6 +56,8 @@ func (c *MySQLFlexibleScanner) list() ([]*armmysqlflexibleservers.Server, error)
 
 	servers := make([]*armmysqlflexibleservers.Server, 0)
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement"
 	"github.com/rs/zerolog/log"
@@ -62,6 +63,8 @@ func (s *CostScanner) QueryCosts() (*models.CostResult, error) {
 		},
 	}
 
+	// Wait for a token from the burstLimiter channel before making the request
+	<-throttling.ARMLimiter
 	resp, err := s.client.Usage(s.config.Ctx, fmt.Sprintf("/subscriptions/%s", s.config.SubscriptionID), qd, nil)
 	if err != nil {
 		return nil, err

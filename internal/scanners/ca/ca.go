@@ -5,6 +5,7 @@ package ca
 
 import (
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
@@ -58,6 +59,8 @@ func (a *ContainerAppsScanner) listApps() ([]*armappcontainers.ContainerApp, err
 	pager := a.appsClient.NewListBySubscriptionPager(nil)
 	apps := make([]*armappcontainers.ContainerApp, 0)
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
