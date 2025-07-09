@@ -10,10 +10,8 @@ import (
 	"math"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
@@ -43,7 +41,6 @@ const (
 	AprlScanType   ScanType = "aprl/azure-resources"
 	OrphanScanType ScanType = "azure-orphan-resources"
 	bucketCapacity          = 14
-	refillRate              = 12
 )
 
 // create a new APRL scanner
@@ -191,15 +188,11 @@ func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []mo
 	jobs := make(chan models.AprlRecommendation, len(rules))
 	ch := make(chan []models.AprlResult, len(rules))
 
-	// Create a burst limiter to control the rate of requests
-	limiter := throttling.NewLimiter(bucketCapacity, refillRate, 5*time.Second, 200*time.Millisecond)
-	burstLimiter := limiter.Start()
-
 	var wg sync.WaitGroup
 
 	numWorkers := bucketCapacity
 	for w := 0; w < numWorkers; w++ {
-		go a.worker(ctx, graph, a.subscriptions, jobs, ch, &wg, burstLimiter)
+		go a.worker(ctx, graph, a.subscriptions, jobs, ch, &wg)
 	}
 
 	wg.Add(len(rules))
@@ -233,10 +226,9 @@ func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []mo
 	return results
 }
 
-func (a *AprlScanner) worker(ctx context.Context, graph *GraphQueryClient, subscriptions map[string]string, jobs <-chan models.AprlRecommendation, results chan<- []models.AprlResult, wg *sync.WaitGroup, burstLimiter <-chan struct{}) {
+func (a *AprlScanner) worker(ctx context.Context, graph *GraphQueryClient, subscriptions map[string]string, jobs <-chan models.AprlRecommendation, results chan<- []models.AprlResult, wg *sync.WaitGroup) {
 	// worker processes batches of APRL recommendations from the jobs channel
 	for r := range jobs {
-		<-burstLimiter // Wait for a token from the burstLimiter channel before starting the
 		models.LogGraphRecommendationScan(r.ResourceType, r.RecommendationID)
 		res, err := a.graphScan(ctx, graph, r, subscriptions)
 		if err != nil {

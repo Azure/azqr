@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -26,6 +27,8 @@ func (sc ManagementGroupsScanner) ListSubscriptions(ctx context.Context, cred az
 
 		subscriptions := make([]*armmanagementgroups.SubscriptionUnderManagementGroup, 0)
 		for resultPager.More() {
+			// Wait for a token from the burstLimiter channel before making the request
+			<-throttling.ARMLimiter
 			pageResp, err := resultPager.NextPage(ctx)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to list management group subscriptions")

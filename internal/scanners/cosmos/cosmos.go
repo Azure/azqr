@@ -5,6 +5,7 @@ package cosmos
 
 import (
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
 
@@ -59,6 +60,8 @@ func (c *CosmosDBScanner) listDatabases() ([]*armcosmos.DatabaseAccountGetResult
 
 	domains := make([]*armcosmos.DatabaseAccountGetResults, 0)
 	for pager.More() {
+		// Wait for a token from the burstLimiter channel before making the request
+		<-throttling.ARMLimiter
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err
