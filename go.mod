@@ -53,7 +53,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub v1.3.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/invopop/jsonschema v0.13.0
-	github.com/metoro-io/mcp-golang v0.13.0
+	github.com/metoro-io/mcp-golang v0.14.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.9.1
 	github.com/xuri/excelize/v2 v2.9.0
