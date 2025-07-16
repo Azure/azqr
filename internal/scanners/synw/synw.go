@@ -70,25 +70,27 @@ func (a *SynapseWorkspaceScanner) Scan(scanContext *models.ScanContext) ([]model
 			Recommendations:  rr,
 		})
 
-		sqlPools, err := a.listSqlPools(resourceGroupName, *w.Name)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, s := range sqlPools {
-			var result models.AzqrServiceResult
-			rr := engine.EvaluateRecommendations(sqlPoolRules, s, scanContext)
-
-			result = models.AzqrServiceResult{
-				SubscriptionID:   a.config.SubscriptionID,
-				SubscriptionName: a.config.SubscriptionName,
-				ResourceGroup:    resourceGroupName,
-				ServiceName:      *s.Name,
-				Type:             *s.Type,
-				Location:         *w.Location,
-				Recommendations:  rr,
+		if w.Properties.ExtraProperties["WorkspaceType"].(string) != "Connected" {
+			sqlPools, err := a.listSqlPools(resourceGroupName, *w.Name)
+			if err != nil {
+				return nil, err
 			}
-			results = append(results, result)
+
+			for _, s := range sqlPools {
+				var result models.AzqrServiceResult
+				rr := engine.EvaluateRecommendations(sqlPoolRules, s, scanContext)
+
+				result = models.AzqrServiceResult{
+					SubscriptionID:   a.config.SubscriptionID,
+					SubscriptionName: a.config.SubscriptionName,
+					ResourceGroup:    resourceGroupName,
+					ServiceName:      *s.Name,
+					Type:             *s.Type,
+					Location:         *w.Location,
+					Recommendations:  rr,
+				}
+				results = append(results, result)
+			}
 		}
 
 		sparkPools, err := a.listSparkPools(resourceGroupName, *w.Name)
