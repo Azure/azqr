@@ -15,7 +15,7 @@ permissions:
 jobs:
   winget-bump:
     name: Bump azqr winget
-    runs-on: windows-2019
+    runs-on: windows-latest
     defaults:
       run:
         shell: powershell
