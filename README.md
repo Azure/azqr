@@ -183,6 +183,16 @@ or download the latest release from [here](https://github.com/Azure/azqr/release
 * Azure Managed Identity
 * Azure CLI (Using this type of authentication will make scans run slower)
 
+### Credential Chain Configuration
+
+**Azure Quick Review (azqr)** uses the Azure SDK's `DefaultAzureCredential` which automatically selects the most appropriate credential based on your environment. You can customize the credential chain behavior by setting the `AZURE_TOKEN_CREDENTIALS` environment variable.
+
+**Development environments:**
+Set `AZURE_TOKEN_CREDENTIALS=dev` to use Azure CLI (`az`) or Azure Developer CLI (`azd`) credentials.
+
+**Production environments:** 
+Set `AZURE_TOKEN_CREDENTIALS=pro` to use environment variables, workload identity, or managed identity credentials.
+
 ### Authorization
 
 **Azure Quick Review (azqr)** requires the following permissions:
