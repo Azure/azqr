@@ -60,14 +60,14 @@ var GraphLimiter chan struct{}
 
 func init() {
 	// Create a  limiter for ARM API
-	bucketCapacity := 250 // Maximum number of requests allowed at once
-	refillRate := 25      // Number of requests to refill per interval
+	bucketCapacity := 250
+	refillRate := 25
 	armlimiter := NewLimiter(bucketCapacity, refillRate, 1*time.Second, 0*time.Millisecond)
 	ARMLimiter = armlimiter.Start()
 
-	// Create a separate limiter for Graph API with different parameters
-	graphBucketCapacity := 10 // Maximum number of requests allowed at once for Graph API
-	graphRefillRate := 15     // Number of requests to refill per interval for Graph API
-	graphLimiter := NewLimiter(graphBucketCapacity, graphRefillRate, 5*time.Second, 300*time.Millisecond)
+	// Create a separate limiter for Graph API
+	graphBucketCapacity := 3
+	graphRefillRate := 2
+	graphLimiter := NewLimiter(graphBucketCapacity, graphRefillRate, 1*time.Second, 100*time.Millisecond)
 	GraphLimiter = graphLimiter.Start()
 }

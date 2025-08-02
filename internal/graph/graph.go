@@ -117,17 +117,10 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 				Options:       options,
 			}
 
-			resp, err := q.retry(ctx, 3, 10*time.Second, request)
+			resp, err := q.retry(ctx, 3, request)
 			if err == nil {
 				result.Data = append(result.Data, resp.Data...)
 				skipToken = resp.SkipToken
-			
-				// Quota limit reached, sleep for the duration specified in the response header
-				if resp.Quota == 0 {
-					duration := resp.RetryAfter
-					log.Debug().Msgf("Graph query quota limit reached. Sleeping for %s", duration)
-					time.Sleep(duration)
-				}
 			} else {
 				log.Fatal().Err(err).Msgf("Failed to run Resource Graph query: %s", query)
 				return nil
@@ -137,9 +130,9 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 	return &result
 }
 
-// retry executes the Resource Graph query with retries and exponential backoff.
+// retry executes the Resource Graph query with retries when throttling occurs.
 // Returns the QueryResponse or error.
-func (q *GraphQueryClient) retry(ctx context.Context, attempts int, sleep time.Duration, request QueryRequest) (*QueryResponse, error) {
+func (q *GraphQueryClient) retry(ctx context.Context, attempts int, request QueryRequest) (*QueryResponse, error) {
 	var err error
 	for i := 0; ; i++ {
 		resp, err := q.doRequest(ctx, request)
@@ -147,17 +140,18 @@ func (q *GraphQueryClient) retry(ctx context.Context, attempts int, sleep time.D
 			return resp, nil
 		}
 
-		errAsString := err.Error()
-
 		if i >= (attempts - 1) {
-			log.Info().Msgf("Retry limit reached. Error: %s", errAsString)
+			log.Error().Msgf("Retry limit reached for Graph query: %s", request.Query)
 			break
 		}
 
-		log.Debug().Msgf("Retrying after error: %s", errAsString)
+		// Quota limit reached, sleep for the duration specified in the response header
+		if resp.Quota == 0 {
+			duration := resp.RetryAfter
+			log.Debug().Msgf("Graph query quota limit reached. Sleeping for %s", duration)
+			time.Sleep(duration)
+		}
 
-		time.Sleep(sleep)
-		sleep *= 2
 	}
 	return nil, err
 }
@@ -185,34 +179,11 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 
 	// Send request
 	resp, err := q.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send HTTP request: %w", err)
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Fatal().Err(err).Msg("Failed to close response body")
-		}
-	}()
-
-	// Read response body
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	// Check for non-200 status codes
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("received non-2xx status code: %d, body: %s", resp.StatusCode, string(respBody))
-	}
 
 	// Parse response JSON
-	var queryResp QueryResponse
-	if err := json.Unmarshal(respBody, &queryResp); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
-	}
+	queryResp := QueryResponse{}
 
 	// Extract quota headers and set them in the QueryResponse struct
-
 	// Parse x-ms-user-quota-remaining as int
 	quotaStr := resp.Header.Get("x-ms-user-quota-remaining")
 	if quotaStr != "" {
@@ -236,6 +207,30 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 	}
 
 	log.Debug().Msgf("Graph query quota remaining: %d, Retry after: %s", queryResp.Quota, queryResp.RetryAfter)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to send HTTP request: %w", err)
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Fatal().Err(err).Msg("Failed to close response body")
+		}
+	}()
+
+	// Read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Check for non-200 status codes
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return &queryResp, fmt.Errorf("received non-2xx status code: %d, body: %s", resp.StatusCode, string(respBody))
+	}
+
+	if err := json.Unmarshal(respBody, &queryResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
 
 	return &queryResp, nil
 }
