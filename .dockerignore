@@ -1,0 +1,47 @@
+# Docker ignore file for kubelogin
+# Ignore development and build files that are not needed in Docker context
+
+# Version control
+.git
+.gitignore
+.gitmodules
+.precommit-config.yaml
+
+# Documentation
+docs/
+CODE_OF_CONDUCT.md
+CODEOWNERS
+CONTRIBUTING.md
+LICENSE
+README.md
+SECURITY.md
+jumpstart_drops/
+
+# Examples
+examples/
+
+# Data
+data/
+
+# Scripts
+scripts/
+
+# Test files
+*_test.go
+**/*_test.go
+**/testdata/
+**/*VCR.yaml
+
+# Development files
+.github/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

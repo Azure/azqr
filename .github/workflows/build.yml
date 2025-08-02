@@ -1,0 +1,305 @@
+name: "azqr-build"
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - docs/**
+    branches:
+      - main
+      - release-*
+      - feature-*
+    tags:
+      - v*
+  pull_request:
+    paths-ignore:
+      - docs/**
+    branches:
+      - main
+      - release-*
+
+permissions: read-all
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          submodules: "recursive"
+
+      - name: Set up Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: "go.mod"
+          cache: false
+
+      - name: Run tests
+        run: make test
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24 # v5.4.3
+
+  calculate-version:
+    name: Calculate Version
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      version: ${{ steps.calculate_version.outputs.version }}
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Setup MinVer
+        run: |
+          dotnet tool install --global minver-cli --version 4.3.0
+
+      - name: Calculate Version
+        id: calculate_version
+        run: |
+          echo "version=$($HOME/.dotnet/tools/minver -t v. -m 0.1 -p preview.0)" >> $GITHUB_OUTPUT
+
+  build-linux-and-windows:
+    name: Build Linux and Windows Binaries
+    runs-on: ubuntu-latest
+    needs: calculate-version
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          submodules: "recursive"
+
+      - name: Set up Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: "go.mod"
+          cache: false
+
+      - name: Build JSON data
+        run: make json
+
+      - name: Build Linux AMD64
+        run: make
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: 0
+          PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
+
+      - name: Build Linux ARM64
+        run: make
+        env:
+          GOOS: linux
+          GOARCH: arm64
+          CGO_ENABLED: 0
+          PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
+
+      - name: Build Windows AMD64
+        run: make
+        env:
+          GOOS: windows
+          GOARCH: amd64
+          CGO_ENABLED: 0
+          PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
+
+      - name: Build Windows ARM64
+        run: make
+        env:
+          GOOS: windows
+          GOARCH: arm64
+          CGO_ENABLED: 0
+          PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
+
+      - name: tarball Linux binaries
+        run: |
+          tar -czf linux-azqr.tar.gz bin/linux_*
+
+      - name: tarball windows binaries
+        run: |
+          tar -czf windows-azqr.tar.gz bin/windows_*
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: linux-binaries
+          path: linux-azqr.tar.gz
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-binaries
+          path: windows-azqr.tar.gz
+
+  build-macos:
+    name: Build macOS Binaries
+    runs-on: macos-latest
+    needs: calculate-version
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          submodules: "recursive"
+
+      - name: Set up Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: "go.mod"
+          cache: false
+
+      - name: Build macOS AMD64
+        run: make
+        env:
+          GOOS: darwin
+          GOARCH: amd64
+          CGO_ENABLED: 1
+          PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
+
+      - name: Build macOS ARM64
+        run: make
+        env:
+          GOOS: darwin
+          GOARCH: arm64
+          CGO_ENABLED: 1
+          PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
+
+      - name: tarball macos binaries
+        run: |
+          tar -czf macos-azqr.tar.gz bin/darwin_*
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: macos-binaries
+          path: macos-azqr.tar.gz
+
+  release:
+    name: Create Release
+    needs: [calculate-version, build-linux-and-windows, build-macos]
+    if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+    steps:
+      - name: Create azqr Release
+        id: create_release
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          name: ${{ needs.calculate-version.outputs.version }}
+          body: ""
+          draft: false
+
+  publish:
+    name: Publish binaries
+    needs: [release]
+    permissions:
+      contents: write
+    if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: bin
+
+      - name: untar binaries
+        run: |
+          tar -xzf bin/linux-binaries/linux-azqr.tar.gz
+          tar -xzf bin/macos-binaries/macos-azqr.tar.gz
+          tar -xzf bin/windows-binaries/windows-azqr.tar.gz
+
+      - name: Move binaries to correct locations
+        run: |
+          mkdir -p bin/linux_amd64 bin/linux_arm64 bin/linux_armv7 \
+                 bin/darwin_amd64 bin/darwin_arm64 \
+                 bin/windows_amd64 bin/windows_arm64
+          rm -rf bin/linux-binaries bin/macos-binaries bin/windows-binaries
+
+      - name: Zip
+        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
+        with:
+          args: zip -qq -r azqr.zip bin
+
+      - name: Zip (win-amd64)
+        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
+        with:
+          args: zip -qq azqr-win-amd64.zip bin/windows_amd64/azqr.exe
+
+      - name: Zip (win-arm64)
+        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
+        with:
+          args: zip -qq azqr-win-arm64.zip bin/windows_arm64/azqr.exe
+
+      - name: Zip (darwin-amd64)
+        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
+        with:
+          args: zip -qq azqr-darwin-amd64.zip bin/darwin_amd64/azqr
+
+      - name: Zip (darwin-arm64)
+        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
+        with:
+          args: zip -qq azqr-darwin-arm64.zip bin/darwin_arm64/azqr
+
+      - name: Zip (linux-amd64)
+        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
+        with:
+          args: zip -qq azqr-linux-amd64.zip bin/linux_amd64/azqr
+
+      - name: Zip (linux-arm64)
+        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
+        with:
+          args: zip -qq azqr-linux-arm64.zip bin/linux_arm64/azqr
+
+      - name: Create sha256 Checksums
+        run: |
+          sha256sum azqr.zip > azqr.zip.sha256
+          sha256sum azqr-win-amd64.zip > azqr-win-amd64.zip.sha256
+          sha256sum azqr-win-arm64.zip > azqr-win-arm64.zip.sha256
+          sha256sum azqr-darwin-amd64.zip > azqr-darwin-amd64.zip.sha256
+          sha256sum azqr-darwin-arm64.zip > azqr-darwin-arm64.zip.sha256
+          sha256sum azqr-linux-amd64.zip > azqr-linux-amd64.zip.sha256
+          sha256sum azqr-linux-arm64.zip > azqr-linux-arm64.zip.sha256
+
+      - name: Publish
+        uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: azqr.zip azqr-win-amd64.zip azqr-win-arm64.zip azqr-darwin-amd64.zip azqr-darwin-arm64.zip azqr-linux-amd64.zip azqr-linux-arm64.zip azqr.zip.sha256 azqr-win-amd64.zip.sha256 azqr-win-arm64.zip.sha256 azqr-darwin-amd64.zip.sha256 azqr-darwin-arm64.zip.sha256 azqr-linux-amd64.zip.sha256 azqr-linux-arm64.zip.sha256
+          releaseId: ${{ needs.release.outputs.release_id }}
+
+  bump-winget:
+    name: bump-winget
+    needs: [calculate-version, publish]
+    permissions:
+      contents: write
+    if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Bump Winget
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          event-type: bump-winget
+          client-payload: '{"version": "${{ needs.calculate-version.outputs.version }}"}'

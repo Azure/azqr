@@ -143,8 +143,11 @@ wps | Microsoft.SignalRService/webPubSub
 
 ```bash
 latest_azqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-)
-wget https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-ubuntu-latest-amd64 -O azqr
+wget https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-linux-arm64.zip -O azqr.zip
+unzip -uj -qq azqr.zip
+rm azqr.zip
 chmod +x azqr
+./azqr --version
 ```
 
 ### Install on Windows
@@ -158,8 +161,13 @@ winget install azqr
 or download the executable file:
 
 ```
-$latest_azqr=$(iwr https://api.github.com/repos/Azure/azqr/releases/latest).content | convertfrom-json | Select-Object -ExpandProperty tag_name
-iwr https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-windows-latest-amd64.exe -OutFile azqr.exe
+$latest_azqr=$(iwr https://api.github.com/repos/Azure/kubelogin/releases/latest).content | convertfrom-json | Select-Object -ExpandProperty tag_name
+iwr https://github.com/Azure/kubelogin/releases/download/$latest_azqr/kubelogin-win-amd64.zip -OutFile azqr.zip
+Expand-Archive -Path azqr.zip -DestinationPath ./azqr_bin
+Get-ChildItem -Path ./azqr_bin -Recurse -File | ForEach-Object { Move-Item -Path $_.FullName -Destination . -Force }
+Remove-Item -Path ./azqr_bin -Recurse -Force
+Remove-Item -Path azqr.zip
+.\kubelogin.exe --version
 ```
 
 ### Install on Mac
@@ -276,7 +284,7 @@ Make sure you have `Go 1.23.x` or higher installed in your environment. You can 
    cd azqr
    git submodule init
    git submodule update --recursive
-   go build -o azqr cmd/azqr/main.go
+   make
  ```
 
 ## Support
