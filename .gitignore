@@ -7,10 +7,10 @@
 *.dll
 *.so
 *.dylib
-./azqr
 
 # Test binary, built with `go test -c`
 *.test
+coverage.txt
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
@@ -38,6 +38,7 @@ main
 main.exe
 
 # azqr binaries
+bin/
 azqr
 azqr.exe
 
