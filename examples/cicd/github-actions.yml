@@ -26,7 +26,9 @@ jobs:
       - name: Install azqr
         run: |
           latestAzqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-) \
-          && wget https://github.com/Azure/azqr/releases/download/$latestAzqr/azqr-ubuntu-latest-amd64 -O /usr/local/bin/azqr \
+          && wget https://github.com/Azure/azqr/releases/download/$latestAzqr/azqr-linux-amd64.zip -O azqr.zip \
+          && unzip -uj -qq azqr.zip -d /usr/local/bin \
+          && rm azqr.zip \
           && chmod +x /usr/local/bin/azqr
 
       # Run azqr scan
