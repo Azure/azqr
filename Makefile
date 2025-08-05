@@ -12,7 +12,19 @@ GOLANGCI_LINT := ./bin/golangci-lint
 
 PRODUCT_VERSION	:= $(if $(PRODUCT_VERSION),$(PRODUCT_VERSION),'dev')
 
-LDFLAGS	:= -s -w -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION)
+# Build flags for better antivirus compatibility
+# -s -w strips symbols but can trigger false positives
+# For signed builds, we'll keep some debug info to improve reputation
+ifeq ($(GOOS),windows)
+  # For Windows, use less aggressive stripping to reduce false positives
+  LDFLAGS	:= -w -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION) -buildid= -extldflags="-static"
+  # Add build tags for Windows to improve binary metadata
+  BUILD_TAGS := -tags="netgo,osusergo"
+else
+  # For other platforms, use full stripping
+  LDFLAGS	:= -s -w -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION)
+  BUILD_TAGS := -tags="netgo"
+endif
 
 all: $(TARGET)
 
@@ -55,7 +67,7 @@ test: lint vet tidy
 	go test -race ./... -coverprofile=coverage.txt -covermode=atomic ./...
 
 $(TARGET): clean
-	CGO_ENABLED=$(if $(CGO_ENABLED),$(CGO_ENABLED),0) go build -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/azqr/main.go
+	CGO_ENABLED=$(if $(CGO_ENABLED),$(CGO_ENABLED),0) go build $(BUILD_TAGS) -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/azqr/main.go
 
 clean:
 	-rm -f $(BIN)
