@@ -284,7 +284,7 @@ Some antivirus software, including Windows Defender, may occasionally flag **Azu
 **If you encounter an antivirus warning:**
 
 1. **Verify the download source**: Only download azqr from the official [GitHub releases page](https://github.com/Azure/azqr/releases)
-2. **Check file hashes**: Compare the SHA256 checksum of your downloaded file with the official checksums provided in the release
+2. **Check file hashes**: Compare the SHA256 checksum of your downloaded file with the official checksums provided in the release. You can use our [verification script](scripts/verify-checksum.sh) or verify manually
 3. **Report false positive**: Submit the file to your antivirus vendor's false positive reporting system:
    - For Windows Defender: [Submit a file for analysis](https://www.microsoft.com/en-us/wdsi/filesubmission)
    - For other antivirus products: Check your vendor's documentation for their submission process
