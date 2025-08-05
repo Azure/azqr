@@ -13,6 +13,16 @@ Before adding antivirus exceptions, always verify the authenticity of the binary
 1. **Download Source**: Only download from the official [GitHub releases page](https://github.com/Azure/azqr/releases)
 
 2. **Checksum Verification**: Each release includes SHA256 checksums. Verify your download:
+   
+   **Using our verification script (recommended):**
+   ```bash
+   # Download and run the verification script
+   curl -sL https://raw.githubusercontent.com/Azure/azqr/main/scripts/verify-checksum.sh -o verify-checksum.sh
+   chmod +x verify-checksum.sh
+   ./verify-checksum.sh 2.7.3 win-amd64
+   ```
+   
+   **Manual verification:**
    ```bash
    # Download the checksum file
    curl -sL https://github.com/Azure/azqr/releases/download/v<version>/azqr-win-amd64.zip.sha256 -o azqr-win-amd64.zip.sha256
