@@ -143,12 +143,14 @@ wps | Microsoft.SignalRService/webPubSub
 
 ```bash
 latest_azqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-)
-wget https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-linux-arm64.zip -O azqr.zip
+wget https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-linux-amd64.zip -O azqr.zip
 unzip -uj -qq azqr.zip
 rm azqr.zip
 chmod +x azqr
 ./azqr --version
 ```
+
+> For ARM64 architecture, use `azqr-linux-arm64.zip` instead of `azqr-linux-amd64.zip`.
 
 ### Install on Windows
 
