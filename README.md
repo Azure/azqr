@@ -201,7 +201,7 @@ or download the latest release from [here](https://github.com/Azure/azqr/release
 Set `AZURE_TOKEN_CREDENTIALS=dev` to use Azure CLI (`az`) or Azure Developer CLI (`azd`) credentials.
 
 **Production environments:** 
-Set `AZURE_TOKEN_CREDENTIALS=pro` to use environment variables, workload identity, or managed identity credentials.
+Set `AZURE_TOKEN_CREDENTIALS=pros` to use environment variables, workload identity, or managed identity credentials.
 
 ### Authorization
 
