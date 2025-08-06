@@ -241,6 +241,10 @@ For information on available commands and help run:
 ./azqr -h
 ```
 
+## Binary Verification
+
+To verify the authenticity of downloaded binaries, see our [Binary Verification Guide](SECURITY_VERIFICATION.md).
+
 ## Filtering Recommendations and more
 
 You can configure Azure Quick Review to include or exclude specific subscriptions or resource groups and also exclude services or recommendations. To do so, create a `yaml` file with the following format:
@@ -275,31 +279,7 @@ Then run the scan with the `--filters` flag:
 
 ## Troubleshooting
 
-### General Issues
-
 If you encounter any issue while using **Azure Quick Review (azqr)**, please set the `AZURE_SDK_GO_LOGGING` environment variable to `all`, run the tool with the `--debug` flag and then share the console output with us by filing a new [issue](https://github.com/Azure/azqr/issues).
-
-### Antivirus False Positives
-
-Some antivirus software, including Windows Defender, may occasionally flag **Azure Quick Review (azqr)** binaries as potentially malicious. This is a false positive that can occur with Go-compiled binaries, especially unsigned ones.
-
-**If you encounter an antivirus warning:**
-
-1. **Verify the download source**: Only download azqr from the official [GitHub releases page](https://github.com/Azure/azqr/releases)
-2. **Check file hashes**: Compare the SHA256 checksum of your downloaded file with the official checksums provided in the release. You can use our [verification script](scripts/verify-checksum.sh) or verify manually
-3. **Report false positive**: Submit the file to your antivirus vendor's false positive reporting system:
-   - For Windows Defender: [Submit a file for analysis](https://www.microsoft.com/en-us/wdsi/filesubmission)
-   - For other antivirus products: Check your vendor's documentation for their submission process
-4. **Temporary workaround**: Add an exception in your antivirus software for the azqr executable
-
-**Why this happens:**
-- Go binaries can exhibit patterns that trigger heuristic detection
-- The binary is currently unsigned, which some antivirus software treats as suspicious
-- We are working on implementing code signing for Windows binaries in future releases to reduce these false positives
-
-If you continue to experience issues after verifying the authenticity of the binary, please [file an issue](https://github.com/Azure/azqr/issues) with details about your antivirus software and the specific warning message.
-
-For detailed information about binary verification and security, see our [Security Verification Guide](SECURITY_VERIFICATION.md).
 
 ## Building Locally
 
