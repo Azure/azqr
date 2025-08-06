@@ -23,7 +23,7 @@ func CreateExcelReport(data *renderers.ReportData) {
 		}
 	}()
 
-	lastRow := renderRecommendations(f, data)
+	renderRecommendations(f, data)
 	renderImpactedResources(f, data)
 	renderResourceTypes(f, data)
 	renderResources(f, data)
@@ -32,7 +32,6 @@ func CreateExcelReport(data *renderers.ReportData) {
 	renderExcludedResources(f, data)
 	renderDefender(f, data)
 	renderCosts(f, data)
-	renderRecommendationsPivotTables(f, lastRow)
 
 	if err := f.SaveAs(filename); err != nil {
 		log.Fatal().Err(err).Msg("Failed to save Excel file")
