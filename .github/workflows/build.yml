@@ -237,45 +237,6 @@ jobs:
                  bin/windows_amd64 bin/windows_arm64
           rm -rf bin/linux-binaries bin/macos-binaries bin/windows-binaries
 
-      # Code signing for Windows binaries (optional, requires signing certificate)
-      # This step will be skipped if WINDOWS_CERTIFICATE is not available
-      - name: Sign Windows binaries
-        if: env.WINDOWS_CERTIFICATE != ''
-        env:
-          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-        run: |
-          # Install osslsigncode for signing Windows executables
-          sudo apt-get update
-          sudo apt-get install -y osslsigncode
-          
-          # Decode certificate from base64
-          echo "$WINDOWS_CERTIFICATE" | base64 -d > certificate.p12
-          
-          # Sign Windows binaries
-          if [ -f "bin/windows_amd64/azqr.exe" ]; then
-            osslsigncode sign -pkcs12 certificate.p12 -pass "$WINDOWS_CERTIFICATE_PASSWORD" \
-              -n "Azure Quick Review" \
-              -i "https://github.com/Azure/azqr" \
-              -t "http://timestamp.digicert.com" \
-              -in bin/windows_amd64/azqr.exe \
-              -out bin/windows_amd64/azqr_signed.exe
-            mv bin/windows_amd64/azqr_signed.exe bin/windows_amd64/azqr.exe
-          fi
-          
-          if [ -f "bin/windows_arm64/azqr.exe" ]; then
-            osslsigncode sign -pkcs12 certificate.p12 -pass "$WINDOWS_CERTIFICATE_PASSWORD" \
-              -n "Azure Quick Review" \
-              -i "https://github.com/Azure/azqr" \
-              -t "http://timestamp.digicert.com" \
-              -in bin/windows_arm64/azqr.exe \
-              -out bin/windows_arm64/azqr_signed.exe
-            mv bin/windows_arm64/azqr_signed.exe bin/windows_arm64/azqr.exe
-          fi
-          
-          # Clean up certificate
-          rm certificate.p12
-
       - name: Zip
         uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
         with:
