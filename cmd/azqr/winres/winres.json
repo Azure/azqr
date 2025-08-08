@@ -1,0 +1,53 @@
+{
+  "RT_MANIFEST": {
+    "#1": {
+      "0409": {
+        "identity": {
+          "name": "com.microsoft.azqr",
+          "version": "2.7.4.0"
+        },
+        "description": "Azure Quick Review - Azure Resource Compliance Scanner",
+        "minimum-os": "win7",
+        "execution-level": "as invoker",
+        "ui-access": false,
+        "auto-elevate": false,
+        "dpi-awareness": "system",
+        "disable-theming": false,
+        "disable-window-filtering": false,
+        "high-resolution-scrolling-aware": false,
+        "ultra-high-resolution-scrolling-aware": false,
+        "long-path-aware": true,
+        "printer-driver-isolation": true,
+        "gdi-scaling": false,
+        "segment-heap": true,
+        "use-common-controls-v6": false
+      }
+    }
+  },
+  "RT_VERSION": {
+    "#1": {
+      "0000": {
+        "fixed": {
+          "file_version": "2.7.4.0",
+          "product_version": "2.7.4.0"
+        },
+        "info": {
+          "0409": {
+            "Comments": "Azure Quick Review (azqr) is a CLI tool for analyzing Azure resources compliance with Azure best practices and recommendations.",
+            "CompanyName": "Microsoft Corporation",
+            "FileDescription": "Azure Quick Review - Azure Resource Compliance Scanner",
+            "FileVersion": "2.7.4.0",
+            "InternalName": "azqr",
+            "LegalCopyright": "Copyright (c) Microsoft Corporation. Licensed under the MIT License.",
+            "LegalTrademarks": "",
+            "OriginalFilename": "azqr.exe",
+            "PrivateBuild": "",
+            "ProductName": "Azure Quick Review",
+            "ProductVersion": "2.7.4",
+            "SpecialBuild": ""
+          }
+        }
+      }
+    }
+  }
+}
