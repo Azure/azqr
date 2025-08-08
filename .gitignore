@@ -45,3 +45,7 @@ azqr.exe
 # azqr outputs
 *.xlsx
 *.csv
+
+# Windows resource files (keep winres config and syso files)
+# cmd/azqr/winres/winres.json - KEEP (configuration)
+# cmd/azqr/*.syso - KEEP (generated Windows resources)

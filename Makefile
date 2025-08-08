@@ -12,18 +12,21 @@ GOLANGCI_LINT := ./bin/golangci-lint
 
 PRODUCT_VERSION	:= $(if $(PRODUCT_VERSION),$(PRODUCT_VERSION),'dev')
 
-# Build flags for better antivirus compatibility
-# -s -w strips symbols but can trigger false positives
-# For signed builds, we'll keep some debug info to improve reputation
+# Build flags for better antivirus compatibility and Windows Defender ASR rules
+# Carefully chosen flags to minimize false positives while maintaining functionality
 ifeq ($(GOOS),windows)
-  # For Windows, use less aggressive stripping to reduce false positives
-  LDFLAGS	:= -w -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION) -buildid= -extldflags="-static"
-  # Add build tags for Windows to improve binary metadata
-  BUILD_TAGS := -tags="netgo,osusergo"
+  # For Windows, use minimal stripping and preserve build metadata for better reputation
+  # Avoid removing all debug information to reduce ASR rule triggers
+  LDFLAGS	:= -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION) -extldflags="-static"
+  # Add build tags for Windows compatibility and security
+  BUILD_TAGS := -tags="netgo,osusergo" -buildmode=exe
+  # Add trimpath to remove local file system paths from binary for better security
+  TRIM_PATH := -trimpath
 else
-  # For other platforms, use full stripping
+  # For other platforms, use full stripping for smaller binaries
   LDFLAGS	:= -s -w -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION)
   BUILD_TAGS := -tags="netgo"
+  TRIM_PATH := -trimpath
 endif
 
 all: $(TARGET)
@@ -67,7 +70,7 @@ test: lint vet tidy
 	go test -race ./... -coverprofile=coverage.txt -covermode=atomic ./...
 
 $(TARGET): clean
-	CGO_ENABLED=$(if $(CGO_ENABLED),$(CGO_ENABLED),0) go build $(BUILD_TAGS) -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/azqr/main.go
+	CGO_ENABLED=$(if $(CGO_ENABLED),$(CGO_ENABLED),0) go build $(TRIM_PATH) $(BUILD_TAGS) -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/azqr/main.go
 
 clean:
 	-rm -f $(BIN)
