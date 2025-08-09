@@ -72,9 +72,6 @@ test: lint vet tidy
 
 # Windows resource generation
 ifeq ($(GOOS),windows)
-cmd/azqr/winres/winres.json: cmd/azqr/winres/winres.json.template
-	sed 's/{{PRODUCT_VERSION}}/$(PRODUCT_VERSION)/g' cmd/azqr/winres/winres.json.template > cmd/azqr/winres/winres.json
-
 # Install go-winres tool if not found
 install-winres:
 	@if [ ! -f $(GO_WINRES) ]; then \
@@ -84,10 +81,10 @@ install-winres:
 	fi
 
 cmd/azqr/rsrc_windows_amd64.syso: cmd/azqr/winres/winres.json install-winres
-	$(GO_WINRES) make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_amd64.syso --arch amd64 --no-suffix --file-version=git-tag --product-version=git-tag
+	$(GO_WINRES) simply --out cmd/azqr/rsrc_windows_amd64.syso --arch amd64 --no-suffix --file-version=git-tag --product-version=git-tag --file-description "Azure Quick Review" --product-name="Azure Quick Review" --copyright="Copyright (c) Microsoft Corporation. All rights reserved." --original-filename azqr.exe --icon="docs/static/favicons/favicon.ico"
 
 cmd/azqr/rsrc_windows_arm64.syso: cmd/azqr/winres/winres.json install-winres
-	$(GO_WINRES) make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_arm64.syso --arch arm64 --no-suffix --file-version=git-tag --product-version=git-tag
+	$(GO_WINRES) simply --out cmd/azqr/rsrc_windows_arm64.syso --arch arm64 --no-suffix --file-version=git-tag --product-version=git-tag --file-description "Azure Quick Review" --product-name="Azure Quick Review" --copyright="Copyright (c) Microsoft Corporation. All rights reserved." --original-filename azqr.exe --icon="docs/static/favicons/favicon.ico"
 
 WINDOWS_RESOURCES := cmd/azqr/rsrc_windows_$(ARCH).syso
 else
