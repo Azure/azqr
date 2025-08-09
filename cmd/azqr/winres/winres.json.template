@@ -1,0 +1,50 @@
+{
+  "RT_GROUP_ICON": {},
+  "RT_MANIFEST": {
+    "#1": {
+      "0409": {
+        "identity": {
+          "name": "azqr",
+          "version": "{{PRODUCT_VERSION}}"
+        },
+        "description": "Azure Quick Review",
+        "minimum-os": "win10",
+        "execution-level": "asInvoker",
+        "ui-access": false,
+        "auto-elevate": false,
+        "dpi-awareness": "system",
+        "disable-theming": false,
+        "disable-window-filtering": false,
+        "high-resolution-scrolling-aware": false,
+        "ultra-high-resolution-scrolling-aware": false,
+        "long-path-aware": false,
+        "printer-driver-isolation": false,
+        "gdi-scaling": false,
+        "segment-heap": false,
+        "use-common-controls-v6": false
+      }
+    }
+  },
+  "RT_VERSION": {
+    "#1": {
+      "0000": {
+        "fixed": {
+          "file_version": "{{PRODUCT_VERSION}}",
+          "product_version": "{{PRODUCT_VERSION}}"
+        },
+        "info": {
+          "0409": {
+            "CompanyName": "Microsoft Corporation",
+            "FileDescription": "Azure Quick Review",
+            "FileVersion": "{{PRODUCT_VERSION}}",
+            "InternalName": "azqr",
+            "LegalCopyright": "Copyright (c) Microsoft Corporation. All rights reserved.",
+            "OriginalFilename": "azqr.exe",
+            "ProductName": "Azure Quick Review",
+            "ProductVersion": "{{PRODUCT_VERSION}}"
+          }
+        }
+      }
+    }
+  }
+}
