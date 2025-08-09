@@ -39,7 +39,7 @@ main.exe
 
 # azqr binaries
 bin/
-azqr
+/azqr
 azqr.exe
 
 # azqr outputs
