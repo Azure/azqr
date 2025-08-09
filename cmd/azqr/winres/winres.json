@@ -6,7 +6,7 @@
           "name": "com.microsoft.azqr",
           "version": "2.7.4.0"
         },
-        "description": "Azure Quick Review - Azure Resource Compliance Scanner",
+        "description": "Azure Quick Review",
         "minimum-os": "win7",
         "execution-level": "as invoker",
         "ui-access": false,
@@ -35,7 +35,7 @@
           "0409": {
             "Comments": "Azure Quick Review (azqr) is a CLI tool for analyzing Azure resources compliance with Azure best practices and recommendations.",
             "CompanyName": "Microsoft Corporation",
-            "FileDescription": "Azure Quick Review - Azure Resource Compliance Scanner",
+            "FileDescription": "Azure Quick Review",
             "FileVersion": "2.7.4.0",
             "InternalName": "azqr",
             "LegalCopyright": "Copyright (c) Microsoft Corporation. Licensed under the MIT License.",
