@@ -84,10 +84,10 @@ install-winres:
 	fi
 
 cmd/azqr/rsrc_windows_amd64.syso: cmd/azqr/winres/winres.json install-winres
-	$(GO_WINRES) make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_amd64.syso --arch amd64 --no-suffix
+	$(GO_WINRES) make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_amd64.syso --arch amd64 --no-suffix --file-version=git-tag --product-version=git-tag
 
 cmd/azqr/rsrc_windows_arm64.syso: cmd/azqr/winres/winres.json install-winres
-	$(GO_WINRES) make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_arm64.syso --arch arm64 --no-suffix
+	$(GO_WINRES) make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_arm64.syso --arch arm64 --no-suffix --file-version=git-tag --product-version=git-tag
 
 WINDOWS_RESOURCES := cmd/azqr/rsrc_windows_$(ARCH).syso
 else
