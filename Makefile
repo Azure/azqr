@@ -69,11 +69,29 @@ tidy:
 test: lint vet tidy
 	go test -race ./... -coverprofile=coverage.txt -covermode=atomic ./...
 
-$(TARGET): clean
+# Windows resource generation
+ifeq ($(GOOS),windows)
+cmd/azqr/winres/winres.json: cmd/azqr/winres/winres.json.template
+	sed 's/{{PRODUCT_VERSION}}/$(PRODUCT_VERSION)/g' cmd/azqr/winres/winres.json.template > cmd/azqr/winres/winres.json
+
+cmd/azqr/rsrc_windows_amd64.syso: cmd/azqr/winres/winres.json
+	env -u GOOS -u GOARCH go run ./cmd/genwinres -in cmd/azqr/winres/winres.json -out cmd/azqr/rsrc_windows_amd64.syso -arch amd64
+
+cmd/azqr/rsrc_windows_arm64.syso: cmd/azqr/winres/winres.json
+	env -u GOOS -u GOARCH go run ./cmd/genwinres -in cmd/azqr/winres/winres.json -out cmd/azqr/rsrc_windows_arm64.syso -arch arm64
+
+WINDOWS_RESOURCES := cmd/azqr/rsrc_windows_$(ARCH).syso
+else
+WINDOWS_RESOURCES :=
+endif
+
+$(TARGET): clean $(WINDOWS_RESOURCES)
 	CGO_ENABLED=$(if $(CGO_ENABLED),$(CGO_ENABLED),0) go build $(TRIM_PATH) $(BUILD_TAGS) -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/azqr/main.go
 
 clean:
 	-rm -f $(BIN)
+	-rm -f cmd/azqr/winres/winres.json
+	-rm -f cmd/azqr/*.syso
 
 json:
 	go run ./cmd/azqr/main.go rules --json > ./data/recommendations.json 
