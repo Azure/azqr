@@ -11,7 +11,7 @@ endif
 GOLANGCI_LINT := ./bin/golangci-lint
 GO_WINRES := ./bin/go-winres
 
-PRODUCT_VERSION	:= $(if $(PRODUCT_VERSION),$(PRODUCT_VERSION),'dev')
+PRODUCT_VERSION	:= $(if $(PRODUCT_VERSION),$(PRODUCT_VERSION),'0.0.0-dev')
 
 # Build flags for better antivirus compatibility and Windows Defender ASR rules
 # Carefully chosen flags to minimize false positives while maintaining functionality
