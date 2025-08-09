@@ -9,6 +9,7 @@ ifeq ($(OS),windows)
   BIN = bin/$(OS)_$(ARCH)$(if $(GOARM),v$(GOARM),)/$(TARGET).exe
 endif
 GOLANGCI_LINT := ./bin/golangci-lint
+GO_WINRES := ./bin/go-winres
 
 PRODUCT_VERSION	:= $(if $(PRODUCT_VERSION),$(PRODUCT_VERSION),'dev')
 
@@ -75,26 +76,18 @@ cmd/azqr/winres/winres.json: cmd/azqr/winres/winres.json.template
 	sed 's/{{PRODUCT_VERSION}}/$(PRODUCT_VERSION)/g' cmd/azqr/winres/winres.json.template > cmd/azqr/winres/winres.json
 
 # Install go-winres tool if not found
-.PHONY: install-winres
 install-winres:
-	@if ! command -v go-winres >/dev/null 2>&1; then \
+	@if [ ! -f $(GO_WINRES) ]; then \
 		echo "Installing go-winres tool..."; \
+		mkdir -p bin; \
 		env -u GOOS -u GOARCH GOBIN=$(shell pwd)/bin go install github.com/tc-hib/go-winres@latest; \
 	fi
 
 cmd/azqr/rsrc_windows_amd64.syso: cmd/azqr/winres/winres.json install-winres
-	@if command -v go-winres >/dev/null 2>&1; then \
-		go-winres make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_amd64.syso --arch amd64 --no-suffix; \
-	else \
-		$(shell pwd)/bin/go-winres make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_amd64.syso --arch amd64 --no-suffix; \
-	fi
+	$(GO_WINRES) make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_amd64.syso --arch amd64 --no-suffix
 
 cmd/azqr/rsrc_windows_arm64.syso: cmd/azqr/winres/winres.json install-winres
-	@if command -v go-winres >/dev/null 2>&1; then \
-		go-winres make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_arm64.syso --arch arm64 --no-suffix; \
-	else \
-		$(shell pwd)/bin/go-winres make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_arm64.syso --arch arm64 --no-suffix; \
-	fi
+	$(GO_WINRES) make --in cmd/azqr/winres/winres.json --out cmd/azqr/rsrc_windows_arm64.syso --arch arm64 --no-suffix
 
 WINDOWS_RESOURCES := cmd/azqr/rsrc_windows_$(ARCH).syso
 else
