@@ -97,7 +97,6 @@ $(TARGET): clean $(WINDOWS_RESOURCES)
 clean:
 	-rm -f $(BIN)
 	-rm -f cmd/azqr/*.syso
-	-rm -rf bin
 
 json:
 	go run ./cmd/azqr/main.go rules --json > ./data/recommendations.json 
