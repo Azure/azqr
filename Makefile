@@ -9,25 +9,12 @@ ifeq ($(OS),windows)
   BIN = bin/$(OS)_$(ARCH)$(if $(GOARM),v$(GOARM),)/$(TARGET).exe
 endif
 GOLANGCI_LINT := ./bin/golangci-lint
-GO_WINRES := ./bin/go-winres
-
 PRODUCT_VERSION	:= $(if $(PRODUCT_VERSION),$(PRODUCT_VERSION),'0.0.0-dev')
+LDFLAGS	:= -s -w -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION)
+TRIM_PATH := -trimpath
 
-# Build flags for better antivirus compatibility and Windows Defender ASR rules
-# Carefully chosen flags to minimize false positives while maintaining functionality
 ifeq ($(GOOS),windows)
-  # For Windows, use minimal stripping and preserve build metadata for better reputation
-  # Avoid removing all debug information to reduce ASR rule triggers
-  LDFLAGS	:= -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION) -extldflags="-static"
-  # Add build tags for Windows compatibility and security
-  BUILD_TAGS := -tags="netgo,osusergo" -buildmode=exe
-  # Add trimpath to remove local file system paths from binary for better security
-  TRIM_PATH := -trimpath
-else
-  # For other platforms, use full stripping for smaller binaries
-  LDFLAGS	:= -s -w -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION)
-  BUILD_TAGS := -tags="netgo"
-  TRIM_PATH := -trimpath
+  CGO_ENABLED := 1
 endif
 
 all: $(TARGET)
@@ -45,7 +32,7 @@ help:
 	@echo "  build-image  - Build Docker image with azqr binary"
 	@echo ""
 	@echo "Docker image build options:"
-	@echo "  make build-image                      # Build with 'latest' tag"
+	@echo "  make build-image                         # Build with 'latest' tag"
 	@echo "  PRODUCT_VERSION=1.0.0 make build-image   # Build with specific tag"
 	@echo ""
 	@echo "Environment variables:"
@@ -70,33 +57,11 @@ tidy:
 test: lint vet tidy
 	go test -race ./... -coverprofile=coverage.txt -covermode=atomic ./...
 
-# Windows resource generation
-ifeq ($(GOOS),windows)
-# Install go-winres tool if not found
-install-winres:
-	@if [ ! -f $(GO_WINRES) ]; then \
-		echo "Installing go-winres tool..."; \
-		mkdir -p bin; \
-		env -u GOOS -u GOARCH GOBIN=$(shell pwd)/bin go install github.com/tc-hib/go-winres@latest; \
-	fi
-
-cmd/azqr/rsrc_windows_amd64.syso: install-winres
-	$(GO_WINRES) simply --out cmd/azqr/rsrc_windows_amd64.syso --arch amd64 --no-suffix --file-version=git-tag --product-version=git-tag --file-description "Azure Quick Review" --product-name="Azure Quick Review" --copyright="Copyright (c) Microsoft Corporation. All rights reserved." --original-filename azqr.exe --icon="docs/static/favicons/favicon.ico"
-
-cmd/azqr/rsrc_windows_arm64.syso: install-winres
-	$(GO_WINRES) simply --out cmd/azqr/rsrc_windows_arm64.syso --arch arm64 --no-suffix --file-version=git-tag --product-version=git-tag --file-description "Azure Quick Review" --product-name="Azure Quick Review" --copyright="Copyright (c) Microsoft Corporation. All rights reserved." --original-filename azqr.exe --icon="docs/static/favicons/favicon.ico"
-
-WINDOWS_RESOURCES := cmd/azqr/rsrc_windows_$(ARCH).syso
-else
-WINDOWS_RESOURCES :=
-endif
-
-$(TARGET): clean $(WINDOWS_RESOURCES)
-	CGO_ENABLED=$(if $(CGO_ENABLED),$(CGO_ENABLED),0) go build $(TRIM_PATH) $(BUILD_TAGS) -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/azqr/main.go
+$(TARGET): clean
+	CGO_ENABLED=$(if $(CGO_ENABLED),$(CGO_ENABLED),0) go build $(TRIM_PATH) -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/azqr/main.go
 
 clean:
 	-rm -f $(BIN)
-	-rm -f cmd/azqr/*.syso
 
 json:
 	go run ./cmd/azqr/main.go rules --json > ./data/recommendations.json 
