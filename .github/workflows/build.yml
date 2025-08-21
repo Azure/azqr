@@ -134,7 +134,7 @@ jobs:
         env:
           GOOS: windows
           GOARCH: amd64
-          CGO_ENABLED: 1
+          CGO_ENABLED: 0
           PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
 
       - name: Build Windows ARM64
@@ -142,7 +142,7 @@ jobs:
         env:
           GOOS: windows
           GOARCH: arm64
-          CGO_ENABLED: 1
+          CGO_ENABLED: 0
           PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
 
       - name: tarball windows binaries
