@@ -13,10 +13,6 @@ PRODUCT_VERSION	:= $(if $(PRODUCT_VERSION),$(PRODUCT_VERSION),'0.0.0-dev')
 LDFLAGS	:= -s -w -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION)
 TRIM_PATH := -trimpath
 
-ifeq ($(GOOS),windows)
-  CGO_ENABLED := 1
-endif
-
 all: $(TARGET)
 
 help:
