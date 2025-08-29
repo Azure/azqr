@@ -142,15 +142,8 @@ wps | Microsoft.SignalRService/webPubSub
 ### Install on Linux or Azure Cloud Shell (Bash)
 
 ```bash
-latest_azqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-)
-wget https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-linux-amd64.zip -O azqr.zip
-unzip -uj -qq azqr.zip
-rm azqr.zip
-chmod +x azqr
-./azqr --version
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/azure/azqr/main/scripts/install.sh)"
 ```
-
-> For ARM64 architecture, use `azqr-linux-arm64.zip` instead of `azqr-linux-amd64.zip`.
 
 ### Install on Windows
 
@@ -163,13 +156,7 @@ winget install azqr
 or download the executable file:
 
 ```
-$latest_azqr=$(iwr https://api.github.com/repos/Azure/azqr/releases/latest).content | convertfrom-json | Select-Object -ExpandProperty tag_name
-iwr https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-win-amd64.zip -OutFile azqr.zip
-Expand-Archive -Path azqr.zip -DestinationPath ./azqr_bin
-Get-ChildItem -Path ./azqr_bin -Recurse -File | ForEach-Object { Move-Item -Path $_.FullName -Destination . -Force }
-Remove-Item -Path ./azqr_bin -Recurse -Force
-Remove-Item -Path azqr.zip
-.\azqr.exe --version
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/azure/azqr/main/scripts/install.ps1'))
 ```
 
 ### Install on Mac

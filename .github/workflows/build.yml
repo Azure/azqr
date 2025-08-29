@@ -145,6 +145,13 @@ jobs:
           CGO_ENABLED: 0
           PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
 
+      - name: Copy README and LICENSE
+        run: |
+          copy README.md bin\windows_amd64\README.md
+          copy LICENSE bin\windows_amd64\LICENSE
+          copy README.md bin\windows_arm64\README.md
+          copy LICENSE bin\windows_arm64\LICENSE
+
       - name: tarball windows binaries
         run: |
           tar -czf windows-azqr.tar.gz bin/windows_*
@@ -256,12 +263,12 @@ jobs:
       - name: Zip (win-amd64)
         uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
         with:
-          args: zip -qq azqr-win-amd64.zip bin/windows_amd64/azqr.exe
+          args: zip -qq azqr-win-amd64.zip bin/windows_amd64/azqr.exe bin/windows_amd64/README.md bin/windows_amd64/LICENSE 
 
       - name: Zip (win-arm64)
         uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
         with:
-          args: zip -qq azqr-win-arm64.zip bin/windows_arm64/azqr.exe
+          args: zip -qq azqr-win-arm64.zip bin/windows_arm64/azqr.exe bin/windows_arm64/README.md bin/windows_arm64/LICENSE
 
       - name: Zip (darwin-amd64)
         uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
