@@ -1,4 +1,4 @@
-name: github pages
+name: GitHub pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HUGO_VERSION: 0.145.0
-      GOVER: '1.21'
+      GOVER: '1.23'
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
