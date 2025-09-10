@@ -303,7 +303,8 @@ func (a AprlScanner) getGraphRules(service string, aprl map[string]map[string]mo
 			if a.filters.Azqr.IsRecommendationExcluded(recommendation.RecommendationID) ||
 				strings.Contains(recommendation.GraphQuery, "cannot-be-validated-with-arg") ||
 				strings.Contains(recommendation.GraphQuery, "under-development") ||
-				strings.Contains(recommendation.GraphQuery, "under development") {
+				strings.Contains(recommendation.GraphQuery, "under development") ||
+				strings.EqualFold(recommendation.MetadataState, "disabled") {
 				continue
 			}
 

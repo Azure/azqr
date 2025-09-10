@@ -32,7 +32,8 @@ func GetAllRecommendations(md bool) string {
 			for _, r := range aprl[strings.ToLower(t)] {
 				if strings.Contains(r.GraphQuery, "cannot-be-validated-with-arg") ||
 					strings.Contains(r.GraphQuery, "under-development") ||
-					strings.Contains(r.GraphQuery, "under development") {
+					strings.Contains(r.GraphQuery, "under development") ||
+					strings.EqualFold(r.MetadataState, "disabled") {
 					continue
 				}
 				graphRecommendations[r.RecommendationID] = r
