@@ -3,6 +3,7 @@
 package models
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -111,6 +112,33 @@ func (e *AzqrFilter) IsResourceTypeExcluded(resourceType string) bool {
 	return !ok
 }
 
+// validateResourceGroupID validates that a resource group ID matches the expected ARM format:
+// /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}
+func validateResourceGroupID(resourceGroupID string) error {
+	parts := strings.Split(resourceGroupID, "/")
+	
+	// ARM resource group ID should have exactly 5 parts: ["", "subscriptions", "sub-id", "resourceGroups", "rg-name"]
+	if len(parts) != 5 {
+		return fmt.Errorf("resource group ID '%s' has incorrect format. Expected format: /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}", resourceGroupID)
+	}
+	
+	// Validate the structure
+	if parts[0] != "" || parts[1] != "subscriptions" || parts[3] != "resourceGroups" {
+		return fmt.Errorf("resource group ID '%s' has incorrect format. Expected format: /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}", resourceGroupID)
+	}
+	
+	// Validate subscription ID and resource group name are not empty
+	if parts[2] == "" {
+		return fmt.Errorf("resource group ID '%s' has empty subscription ID. Expected format: /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}", resourceGroupID)
+	}
+	
+	if parts[4] == "" {
+		return fmt.Errorf("resource group ID '%s' has empty resource group name. Expected format: /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}", resourceGroupID)
+	}
+	
+	return nil
+}
+
 func NewFilters() *Filters {
 	filters := &Filters{
 		Azqr: &AzqrFilter{
@@ -150,6 +178,20 @@ func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 	for _, id := range filters.Azqr.Include.Subscriptions {
 		log.Debug().Msgf("Adding subscription to include: %s", id)
 		filters.Azqr.iSubscriptions[strings.ToLower(id)] = true
+	}
+
+	// Validate resource group IDs in include list
+	for _, id := range filters.Azqr.Include.ResourceGroups {
+		if err := validateResourceGroupID(id); err != nil {
+			log.Fatal().Err(err).Msgf("invalid resource group ID in include list")
+		}
+	}
+
+	// Validate resource group IDs in exclude list
+	for _, id := range filters.Azqr.Exclude.ResourceGroups {
+		if err := validateResourceGroupID(id); err != nil {
+			log.Fatal().Err(err).Msgf("invalid resource group ID in exclude list")
+		}
 	}
 
 	filters.Azqr.iResourceGroups = make(map[string]bool)
