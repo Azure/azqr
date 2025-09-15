@@ -19,6 +19,7 @@ type (
 		Defender                []models.DefenderResult
 		DefenderRecommendations []models.DefenderRecommendation
 		Advisor                 []models.AdvisorResult
+		AzurePolicy             []models.AzurePolicyResult
 		Cost                    *models.CostResult
 		Recommendations         map[string]map[string]models.AprlRecommendation
 		Resources               []*models.Resource
@@ -151,6 +152,34 @@ func (rd *ReportData) AdvisorTable() [][]string {
 			d.Description,
 			MaskSubscriptionIDInResourceID(d.ResourceID, rd.Mask),
 			d.RecommendationID,
+		}
+		rows = append(rows, row)
+	}
+
+	rows = append([][]string{headers}, rows...)
+	return rows
+}
+
+// AzurePolicyTable returns Azure Policy data formatted as a table with headers and rows for reporting.
+func (rd *ReportData) AzurePolicyTable() [][]string {
+	headers := []string{"Subscription Id", "Subscription Name", "Resource Group", "Resource Type", "Resource Name", "Policy Display Name", "Policy Description", "Resource Id", "Time Stamp", "Policy Definition Name", "Policy Definition Id", "Policy Assignment Name", "Policy Assignment Id", "Compliance State"}
+	rows := [][]string{}
+	for _, d := range rd.AzurePolicy {
+		row := []string{
+			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			d.SubscriptionName,
+			d.ResourceGroupName,
+			d.Type,
+			d.Name,
+			d.PolicyDisplayName,
+			d.PolicyDescription,
+			MaskSubscriptionIDInResourceID(d.ResourceID, rd.Mask),
+			d.TimeStamp,
+			d.PolicyDefinitionName,
+			d.PolicyDefinitionID,
+			d.PolicyAssignmentName,
+			d.PolicyAssignmentID,
+			d.ComplianceState,
 		}
 		rows = append(rows, row)
 	}

@@ -176,7 +176,7 @@ type (
 		Items    []*CostResultItem
 	}
 
-	// CostResultItem - Cost result ite,
+	// CostResultItem - Cost result,
 	CostResultItem struct {
 		SubscriptionID, SubscriptionName, ServiceName, Value, Currency string
 	}
@@ -184,6 +184,11 @@ type (
 	// AdvisorResult - Advisor result
 	AdvisorResult struct {
 		RecommendationID, SubscriptionID, SubscriptionName, Type, Name, ResourceID, Category, Impact, Description string
+	}
+
+	// AzurePolicyResult - Azure Policy result
+	AzurePolicyResult struct {
+		SubscriptionID, SubscriptionName, PolicyDisplayName, PolicyDescription, ComplianceState, Type, Name, ResourceGroupName, ResourceID, TimeStamp, PolicyDefinitionName, PolicyDefinitionID, PolicyAssignmentName, PolicyAssignmentID string
 	}
 
 	RecommendationEngine struct{}
@@ -319,7 +324,11 @@ func GetSubscriptionFromResourceID(resourceID string) string {
 	return parts[2]
 }
 
-// GetResourceGroupFromResourceID - Get Resource Group from Resource ID
+// GetResourceGroupFromResourceID extracts and returns the resource group name from an Azure resource ID.
+//
+// resourceID: The full Azure resource ID string in the follwoing format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{resourceType}/{resourceName}
+//
+// Returns the resource group name if present, otherwise returns an empty string.
 func GetResourceGroupFromResourceID(resourceID string) string {
 	parts := strings.Split(resourceID, "/")
 	if len(parts) < 5 {
@@ -345,6 +354,15 @@ func GetResourceTypeFromResourceID(resourceID string) string {
 		return ""
 	}
 	return fmt.Sprintf("%s/%s", parts[6], parts[7])
+}
+
+// GetResourceNameFromResourceID - Get Resource Name from Resource ID
+func GetResourceNameFromResourceID(resourceID string) string {
+	parts := strings.Split(resourceID, "/")
+	if len(parts) < 9 {
+		return ""
+	}
+	return parts[8]
 }
 
 // ScannerList is a map of service abbreviation to scanner
