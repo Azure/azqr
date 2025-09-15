@@ -152,10 +152,11 @@ Example:
 azqr scan --csv
 ```
 
-The scan will generate 9 `csv` files:
+The scan will generate 10 `csv` files:
 
 ```
 <file-name>.advisor.csv
+<file-name>.azurePolicy.csv
 <file-name>.costs.csv
 <file-name>.defender.csv
 <file-name>.defenderRecommendations.csv
@@ -190,9 +191,10 @@ The JSON file contains all data sections in a single consolidated structure:
     "impacted": [...],
     "resourceType": [...],
     "inventory": [...],
+    "advisor": [...],
+    "azurePolicy": [...],
     "defender": [...],
     "defenderRecommendations": [...],
-    "advisor": [...],
     "costs": [...],
     "outOfScope": [...]
 }
