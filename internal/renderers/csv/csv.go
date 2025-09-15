@@ -32,6 +32,9 @@ func CreateCsvReport(data *renderers.ReportData) {
 	records = data.DefenderRecommendationsTable()
 	writeData(records, data.OutputFileName, "defenderRecommendations")
 
+	records = data.AzurePolicyTable()
+	writeData(records, data.OutputFileName, "azurePolicy")
+
 	records = data.AdvisorTable()
 	writeData(records, data.OutputFileName, "advisor")
 

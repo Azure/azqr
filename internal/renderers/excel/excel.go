@@ -28,9 +28,10 @@ func CreateExcelReport(data *renderers.ReportData) {
 	renderResourceTypes(f, data)
 	renderResources(f, data)
 	renderAdvisor(f, data)
+	renderAzurePolicy(f, data)
 	renderDefenderRecommendations(f, data)
-	renderExcludedResources(f, data)
 	renderDefender(f, data)
+	renderExcludedResources(f, data)
 	renderCosts(f, data)
 
 	if err := f.SaveAs(filename); err != nil {

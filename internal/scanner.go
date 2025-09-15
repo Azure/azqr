@@ -216,6 +216,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	peScanner := scanners.PrivateEndpointScanner{}
 	diagnosticsScanner := scanners.DiagnosticSettingsScanner{}
 	advisorScanner := scanners.AdvisorScanner{}
+	azurePolicyScanner := scanners.AzurePolicyScanner{}
 	costScanner := scanners.CostScanner{}
 	diagResults := map[string]bool{}
 
@@ -358,6 +359,9 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 	// scan advisor
 	reportData.Advisor = append(reportData.Advisor, advisorScanner.Scan(ctx, params.Defender, cred, subscriptions, filters)...)
+
+	// scan Azure Policy
+	reportData.AzurePolicy = append(reportData.AzurePolicy, azurePolicyScanner.Scan(ctx, cred, subscriptions, filters)...)
 
 	// scan defender
 	reportData.Defender = append(reportData.Defender, defenderScanner.Scan(ctx, params.Defender, cred, subscriptions, filters)...)

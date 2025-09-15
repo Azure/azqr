@@ -34,9 +34,10 @@ type GraphResult struct {
 
 // QueryRequestOptions represents options for the Resource Graph query.
 type QueryRequestOptions struct {
-	ResultFormat string  `json:"resultFormat,omitempty"` // Format of the result
-	Top          *int32  `json:"top,omitempty"`          // Max number of results
-	SkipToken    *string `json:"skipToken,omitempty"`    // Token for pagination
+	ResultFormat             string  `json:"resultFormat,omitempty"`             // Format of the result
+	Top                      *int32  `json:"top,omitempty"`                      // Max number of results
+	SkipToken                *string `json:"skipToken,omitempty"`                // Token for pagination
+	AuthorizationScopeFilter *string `json:"authorizationScopeFilter,omitempty"` // Filter by authorization scope
 }
 
 // QueryRequest represents the payload for a Resource Graph query.
@@ -74,7 +75,7 @@ func NewGraphQuery(cred azcore.TokenCredential) *GraphQueryClient {
 
 	return &GraphQueryClient{
 		httpClient:  httpClient,
-		endpoint:    "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2021-03-01",
+		endpoint:    "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2024-04-01",
 		accessToken: accessToken,
 	}
 }
@@ -104,8 +105,9 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 
 		format := "objectArray"
 		options := &QueryRequestOptions{
-			ResultFormat: format,
-			Top:          to.Ptr(int32(1000)),
+			ResultFormat:             format,
+			Top:                      to.Ptr(int32(1000)),
+			AuthorizationScopeFilter: to.Ptr("AtScopeAndAbove"), // Include management groups for Azure Policy queries
 		}
 
 		var skipToken *string = nil

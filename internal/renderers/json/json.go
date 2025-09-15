@@ -22,9 +22,10 @@ func CreateJsonReport(data *renderers.ReportData) {
 		"impacted":                convertToJSON(data.ImpactedTable()),
 		"resourceType":            convertToJSON(data.ResourceTypesTable()),
 		"inventory":               convertToJSON(data.ResourcesTable()),
+		"advisor":                 convertToJSON(data.AdvisorTable()),
+		"azurePolicy":             convertToJSON(data.AzurePolicyTable()),
 		"defender":                convertToJSON(data.DefenderTable()),
 		"defenderRecommendations": convertToJSON(data.DefenderRecommendationsTable()),
-		"advisor":                 convertToJSON(data.AdvisorTable()),
 		"costs":                   convertToJSON(data.CostTable()),
 		"outOfScope":              convertToJSON(data.ExcludedResourcesTable()),
 	}
