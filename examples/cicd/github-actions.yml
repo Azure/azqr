@@ -14,7 +14,7 @@ on:
       - main # Trigger on pull request to main
 
 jobs:
-  build:
+  azqr:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,29 +22,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Install azqr
-      - name: Install azqr
-        run: |
-          latestAzqr=$(curl -sL https://api.github.com/repos/Azure/azqr/releases/latest | jq -r ".tag_name" | cut -c1-) \
-          && wget https://github.com/Azure/azqr/releases/download/$latestAzqr/azqr-linux-amd64.zip -O azqr.zip \
-          && unzip -uj -qq azqr.zip -d /usr/local/bin \
-          && rm azqr.zip \
-          && chmod +x /usr/local/bin/azqr
-
       # Run azqr scan
-      - name: Run azqr scan
+      - name: Run Azure Quick Review
+        uses: Azure/azqr/.github/actions/azqr-scan
         env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        run: |
-          timestamp=$(date '+%Y%m%d%H%M%S')
-          echo "DATETIME=$timestamp" >> $GITHUB_ENV
-          azqr scan -o "${{ github.workspace }}/azqr_action_plan_$timestamp"
-
-      # Publish azqr action plan
-      - name: Publish azqr action plan
-        uses: actions/upload-artifact@v2
         with:
-          name: azqr_result
-          path: ${{ github.workspace }}/azqr_action_plan_${{ env.DATETIME }}.xlsx
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          output-format: 'json'

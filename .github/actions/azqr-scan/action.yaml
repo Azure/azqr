@@ -1,0 +1,207 @@
+name: 'Setup Azure Quick Review (azqr)'
+description: 'Run azqr scan in GitHub Actions workflows'
+author: 'Microsoft Azure'
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  version:
+    description: 'Version of azqr to use (e.g., v1.12.4). Use "latest" for the most recent version.'
+    required: false
+    default: 'latest'
+  subscription-id:
+    description: 'Azure subscription ID to scan'
+    required: false
+  resource-group:
+    description: 'Specific resource group to scan (optional)'
+    required: false
+  output-format:
+    description: 'Output format (json, xlsx)'
+    required: false
+    default: 'json'
+  output-path:
+    description: 'Output file path'
+    required: false
+    default: 'azqr-report'
+  extra-args:
+    description: 'Additional arguments to pass to azqr'
+    required: false
+    default: ''
+
+outputs:
+  report-path:
+    description: 'Path to the generated report file'
+    value: ${{ steps.scan.outputs.report-path }}
+  exit-code:
+    description: 'Exit code of the azqr scan'
+    value: ${{ steps.scan.outputs.exit-code }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Determine OS and Architecture
+      id: os-info
+      shell: bash
+      run: |
+        case "${{ runner.os }}" in
+          Linux)
+            if [ "${{ runner.arch }}" == "ARM64" ]; then
+              echo "platform=linux-arm64" >> $GITHUB_OUTPUT
+              echo "binary-name=azqr" >> $GITHUB_OUTPUT
+            else
+              echo "platform=linux-amd64" >> $GITHUB_OUTPUT
+              echo "binary-name=azqr" >> $GITHUB_OUTPUT
+            fi
+            ;;
+          Windows)
+            if [ "${{ runner.arch }}" == "ARM64" ]; then
+              echo "platform=windows-arm64" >> $GITHUB_OUTPUT
+              echo "binary-name=azqr.exe" >> $GITHUB_OUTPUT
+            else
+              echo "platform=windows-amd64" >> $GITHUB_OUTPUT
+              echo "binary-name=azqr.exe" >> $GITHUB_OUTPUT
+            fi
+            ;;
+          macOS)
+            if [ "${{ runner.arch }}" == "ARM64" ]; then
+              echo "platform=darwin-arm64" >> $GITHUB_OUTPUT
+              echo "binary-name=azqr" >> $GITHUB_OUTPUT
+            else
+              echo "platform=darwin-amd64" >> $GITHUB_OUTPUT
+              echo "binary-name=azqr" >> $GITHUB_OUTPUT
+            fi
+            ;;
+          *)
+            echo "Unsupported OS: ${{ runner.os }}"
+            exit 1
+            ;;
+        esac
+
+    - name: Get Latest Release
+      id: get-version
+      shell: bash
+      run: |
+        if [ "${{ inputs.version }}" == "latest" ]; then
+          VERSION=$(curl -s https://api.github.com/repos/Azure/azqr/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "Using version: $VERSION"
+        else
+          VERSION="${{ inputs.version }}"
+          echo "Using specified version: $VERSION"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Download azqr Binary
+      shell: bash
+      run: |
+        VERSION="${{ steps.get-version.outputs.version }}"
+        PLATFORM="${{ steps.os-info.outputs.platform }}"
+        BINARY_NAME="${{ steps.os-info.outputs.binary-name }}"
+        
+        echo "Downloading azqr for platform: $PLATFORM"
+        
+        # For versions 2.7.3+, azqr uses ZIP files with platform-specific naming
+        # Check if we're dealing with a newer version that uses ZIP files
+        VERSION_NUM=$(echo $VERSION | sed 's/v\.//' | sed 's/\.//' | head -c 3)
+        
+        # Use ZIP format for newer versions (2.7.3+)
+        DOWNLOAD_URL="https://github.com/Azure/azqr/releases/download/${VERSION}/azqr-${PLATFORM}.zip"
+        echo "Using ZIP format: $DOWNLOAD_URL"
+        
+        # Download and extract ZIP
+        curl -L -f -o azqr.zip "$DOWNLOAD_URL"
+        
+        if [ -f "azqr.zip" ]; then
+          unzip -uj --q azqr.zip
+          rm -f azqr.zip
+        fi
+
+        # Verify file was downloaded
+        if [ ! -f "$BINARY_NAME" ]; then
+          echo "Error: Binary file $BINARY_NAME not found after download"
+          ls -la
+          exit 1
+        fi
+        
+        # Make executable (for Unix-like systems)
+        if [ "${{ runner.os }}" != "Windows" ]; then
+          chmod +x "$BINARY_NAME"
+        fi
+        
+        # Move to azqr-bin directory
+        mkdir -p azqr-bin
+        mv "$BINARY_NAME" azqr-bin/
+        
+        echo "azqr binary downloaded and prepared at azqr-bin/$BINARY_NAME"
+
+    - name: Verify Installation
+      shell: bash
+      run: |
+        BINARY_PATH="azqr-bin/${{ steps.os-info.outputs.binary-name }}"
+        echo "Verifying azqr installation..."
+        "$BINARY_PATH" --version || true
+
+    - name: Run azqr Scan
+      id: scan
+      shell: bash
+      run: |
+        BINARY_PATH="./azqr-bin/${{ steps.os-info.outputs.binary-name }}"
+        
+        # Build command arguments
+        ARGS="scan"
+        
+        if [ -n "${{ inputs.subscription-id }}" ]; then
+          ARGS="$ARGS --subscription-id ${{ inputs.subscription-id }}"
+        fi
+        
+        if [ -n "${{ inputs.resource-group }}" ]; then
+          ARGS="$ARGS --resource-group ${{ inputs.resource-group }}"
+        fi
+        
+        OUTPUT_FILE="${{ inputs.output-path }}"
+        case "${{ inputs.output-format }}" in
+          json)
+            ARGS="$ARGS --json -o $OUTPUT_FILE"
+            OUTPUT_FILE="${OUTPUT_FILE}.json"
+            ;;
+          xlsx)
+            ARGS="$ARGS -o $OUTPUT_FILE"
+            OUTPUT_FILE="${OUTPUT_FILE}.xlsx"
+            ;;
+          *)
+            echo "Unsupported output format: ${{ inputs.output-format }}"
+            exit 1
+            ;;
+        esac
+        
+        if [ -n "${{ inputs.extra-args }}" ]; then
+          ARGS="$ARGS ${{ inputs.extra-args }}"
+        fi
+        
+        echo "Running command: $BINARY_PATH $ARGS"
+        
+        # Run the scan and capture exit code
+        set +e
+        "$BINARY_PATH" $ARGS
+        EXIT_CODE=$?
+        set -e
+        
+        echo "exit-code=$EXIT_CODE" >> $GITHUB_OUTPUT
+        echo "report-path=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+        
+        if [ $EXIT_CODE -ne 0 ]; then
+          echo "azqr scan completed with exit code $EXIT_CODE"
+        else
+          echo "azqr scan completed successfully"
+        fi
+        
+        # Don't fail the action even if scan finds issues
+        exit 0
+
+    - name: Upload Report Artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: azqr-report-${{ github.run_number }}
+        path: ${{ steps.scan.outputs.report-path }}
+        retention-days: 30
