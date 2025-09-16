@@ -50,6 +50,30 @@ func (sc ManagementGroupsScanner) ListSubscriptions(ctx context.Context, cred az
 			}
 			result[sid] = *s.Properties.DisplayName
 		}
+
+		// Get child management groups
+		decendants := make([]string, 0)
+		decendantsPager := client.NewClient().NewGetDescendantsPager(group, nil)
+		for decendantsPager.More() {
+			// Wait for a token from the burstLimiter channel before making the request
+			<-throttling.ARMLimiter
+			pageResp, err := decendantsPager.NextPage(ctx)
+			if err != nil {
+				log.Fatal().Err(err).Msg("Failed to list management group descendants")
+			}
+
+			for _, s := range pageResp.Value {
+				if *s.Type == "Microsoft.Management/managementGroups" {
+					decendants = append(decendants, *s.Name)
+				}
+			}
+		}
+		if len(decendants) > 0 {
+			subscriptions := sc.ListSubscriptions(ctx, cred, decendants, filters, options)
+			for k, v := range subscriptions {
+				result[k] = v
+			}
+		}
 	}
 
 	return result
