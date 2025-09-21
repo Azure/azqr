@@ -19,12 +19,13 @@ if [ -z "$VERSION" ] || [ -z "$PLATFORM" ]; then
 fi
 
 # Define URLs
-BASE_URL="https://github.com/Azure/azqr/releases/download/v${VERSION}"
+BASE_URL="https://github.com/Azure/azqr/releases/download/v.${VERSION}"
 FILE_NAME="azqr-${PLATFORM}.zip"
 CHECKSUM_NAME="${FILE_NAME}.sha256"
 
 echo "Verifying azqr ${VERSION} for ${PLATFORM}..."
 echo "File: ${FILE_NAME}"
+echo "Checksum: ${CHECKSUM_NAME}"
 
 # Check if files exist locally
 if [ ! -f "$FILE_NAME" ]; then
@@ -37,6 +38,7 @@ fi
 # Download checksum if not exists
 if [ ! -f "$CHECKSUM_NAME" ]; then
     echo "Downloading checksum file..."
+    echo " curl -sL ${BASE_URL}/${CHECKSUM_NAME} -o $CHECKSUM_NAME"
     curl -sL "${BASE_URL}/${CHECKSUM_NAME}" -o "$CHECKSUM_NAME"
 fi
 

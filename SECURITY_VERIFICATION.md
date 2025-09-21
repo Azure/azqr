@@ -19,7 +19,7 @@ chmod +x verify-checksum.sh
 
 ```bash
 # Download the checksum file
-curl -sL https://github.com/Azure/azqr/releases/download/v<version>/azqr-win-amd64.zip.sha256 -o azqr-win-amd64.zip.sha256
+curl -sL https://github.com/Azure/azqr/releases/download/v.<version>/azqr-win-amd64.zip.sha256 -o azqr-win-amd64.zip.sha256
 
 # Verify the checksum (Windows)
 CertUtil -hashfile azqr-win-amd64.zip SHA256
