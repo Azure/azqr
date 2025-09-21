@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>azqr Viewer</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body>
+    <!-- Modern Bootstrap Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow">
+        <div class="container-fluid">
+            <div class="navbar-brand d-flex align-items-center">
+                <svg class="logo me-2" viewBox="0 0 871.9 871.9" xmlns="http://www.w3.org/2000/svg" width="32"
+                    height="32">
+                    <defs>
+                        <linearGradient id="linear-gradient" x1="0" y1="871.9" x2="871.9" y2="0"
+                            gradientUnits="userSpaceOnUse">
+                            <stop offset="0" stop-color="#ec009f" />
+                            <stop offset=".23" stop-color="#b01cb4" />
+                            <stop offset=".61" stop-color="#524ad6" />
+                            <stop offset=".87" stop-color="#1767ec" />
+                            <stop offset="1" stop-color="#0073f5" />
+                        </linearGradient>
+                    </defs>
+                    <rect fill="url(#linear-gradient)" x="0" width="871.9" height="871.9" />
+                    <path fill="#fff"
+                        d="M635.62,593.75h-44.64v-115.64c0-85.34-69.42-154.76-154.76-154.76v-44.64c109.95,0,199.4,89.45,199.4,199.4v115.64ZM547.08,478.12c0-61.13-49.73-110.86-110.86-110.86v44.64c36.51,0,66.22,29.71,66.22,66.22v115.64h44.64v-115.64ZM283.07,411.9h-45c11.13,99.47,95.75,177.08,198.15,177.08v-44.65c-77.75,0-142.3-57.62-153.15-132.43M373.88,411.9h-46.26c10.36,50.47,55.12,88.53,108.6,88.53v-44.64c-28.68,0-53.16-18.33-62.34-43.9" />
+                </svg>
+                <span id="brand-text" class="fw-bold">Azure Quick Review</span>
+            </div>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" id="nav">
+                    <!-- Navigation items will be populated by JavaScript -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <section id="dashboard" class="view">
+            <!-- Removed large dashboard header to save vertical space; title now in navbar brand -->
+            <div id="cards" class="row g-3"></div>
+        </section>
+
+        <section id="dataset-view" class="view" style="display:none;">
+            <!-- Row count and filter controls will be inserted here by JS -->
+            <div id="table-controls-container"></div>
+
+            <!-- Data Table -->
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table id="data-table" class="table table-hover table-striped mb-0"></table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light py-3 mt-5 border-top">
+        <div class="container-fluid text-center">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Azure Quick Review
+            </small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="/bootstrap.bundle.min.js"></script>
+    <script src="/app.js"></script>
+</body>
+
+</html>

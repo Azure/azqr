@@ -24,7 +24,7 @@ When some of our peers saw the assessments we were able to deliver with the earl
 
 As many of our customers work in restrictive environments, the ability to run a self-contained, cross-platform binary while using read-only permissions became a key feature.
 
-Moving forward to 2023, based on great feedback from both peers and customers, we moved the original repo to the [Azure](https://aka.ms/azqr) organization, added support for more services, fixed some issues and even added a Power BI template.
+Moving forward to 2023, based on great feedback from both peers and customers, we moved the original repo to the [Azure](https://aka.ms/azqr) organization, added support for more services, and fixed various issues.
 
 In August 2024, we added all [APRL](https://aka.ms/aprl) recommendations to **Azure Quick Review (azqr)** and removed duplicates in favor of the ones already available as [Azure Resource Graph](https://learn.microsoft.com/azure/governance/resource-graph/overview) queries.
 

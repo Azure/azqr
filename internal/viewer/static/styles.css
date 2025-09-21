@@ -1,0 +1,249 @@
+/* Custom Bootstrap overrides and modern styling - Microsoft Azure Blue Theme */
+:root {
+    --bs-primary: #0078d4;
+    --bs-primary-rgb: 0, 120, 212;
+    --azure-blue: #0078d4;
+    --azure-blue-dark: #106ebe;
+    --azure-blue-light: #40e0ff;
+}
+
+body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+}
+
+/* Modern navbar styling */
+.navbar-brand .logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-dark {
+    background: linear-gradient(135deg, var(--azure-blue) 0%, var(--azure-blue-dark) 100%) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced card styling */
+.card {
+    transition: all 0.3s ease;
+    border: none !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Modern badge styling */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5em 0.75em;
+}
+
+/* Enhanced table styling */
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Always wrap tables in a horizontal scroll container */
+.table-responsive,
+.table-responsive::-webkit-scrollbar-thumb {
+    scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
+.table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Two-line clamp for table body cells (not headers) */
+tbody td span.text-break {
+    display: block;
+    white-space: normal;
+    overflow: visible;
+}
+
+/* Preserve button/link cell contents */
+tbody td a.btn {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Allow hover to show full content via tooltip if title present */
+tbody td span.text-break[title] {
+    cursor: help;
+}
+
+.table-dark th {
+    background: linear-gradient(135deg, var(--azure-blue) 0%, var(--azure-blue-dark) 100%) !important;
+    border: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.table-secondary th {
+    background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%) !important;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 120, 212, 0.05) !important;
+}
+
+/* Column filter styling */
+.table-filter {
+    min-width: 120px;
+    font-size: 0.75rem;
+}
+
+.table-filter:focus {
+    border-color: var(--azure-blue);
+    box-shadow: 0 0 0 0.1rem rgba(0, 120, 212, 0.15);
+}
+
+/* Row count styling */
+#row-count {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+    position: relative;
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-height: 3rem;
+    width: 100%;
+}
+
+#row-count>div:first-child {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 240px;
+    gap: 0.25rem;
+}
+
+#row-count strong {
+    margin: 0 0.25rem;
+    color: var(--azure-blue);
+}
+
+#row-count .d-flex {
+    margin-left: auto;
+}
+
+/* Button enhancements */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Form styling */
+.form-control,
+.form-select {
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--azure-blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 120, 212, 0.15);
+}
+
+/* Responsive enhancements */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .display-6 {
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.view {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Icon styling */
+.bi {
+    vertical-align: -0.125em;
+}
+
+/* Footer styling */
+footer {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Z-index fixes for dropdown overlapping table */
+.navbar .dropdown-menu {
+    z-index: 1080;
+    /* Above sticky headers and cards */
+}
+
+/* Ensure sticky table headers don't exceed dropdown level */
+table thead.sticky-top th {
+    z-index: 50;
+    position: sticky;
+    top: 0;
+}
+
+/* Defensive: raise navbar itself */
+.navbar.sticky-top {
+    z-index: 1100;
+}
+
+/* Utility classes for modern look */
+.text-break {
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.shadow-sm {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
