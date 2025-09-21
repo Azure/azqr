@@ -40,7 +40,7 @@ azqr/
 ├── internal/              # Internal packages
 │   ├── scanner.go         # Main scanning logic
 │   ├── models/            # Data models and filters
-│   ├── renderers/         # Output formatters (Excel, CSV, JSON, PBI)
+│   ├── renderers/         # Output formatters (Excel, CSV, JSON)
 │   ├── scanners/          # Service-specific scanners (one per Azure service)
 │   ├── graph/             # Azure Resource Graph queries
 │   └── throttling/        # Rate limiting utilities
@@ -137,7 +137,6 @@ azqr generates reports in multiple formats:
 - **Excel** (default): Multi-sheet workbook with recommendations, impacted resources, inventory, etc.
 - **CSV**: Same data as Excel but in CSV format (use `--csv` flag)
 - **JSON**: Machine-readable format
-- **Power BI**: Template generation (use `pbi` command)
 
 ## Common Tasks for Agents
 
