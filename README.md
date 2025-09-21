@@ -228,6 +228,27 @@ For information on available commands and help run:
 ./azqr -h
 ```
 
+### Interactive Dashboard (show command)
+
+You can explore the JSON report with a lightweight embedded web UI using the `show` command:
+
+1. Generate a JSON report:
+
+```bash
+./azqr scan -s <subscription_id> --output-name report --json
+```
+
+2. Launch the dashboard:
+
+```bash
+./azqr show -f report.json --open
+```
+
+Sections available: Dashboard, Recommendations, Impacted, ResourceType, Inventory, Advisor, AzurePolicy, Defender, DefenderRecommendations, Costs, OutOfScope. Use the global search box and dropdown filters to refine results.
+
+The dashboard now also surfaces executive analytics (implementation rate, high-impact gaps, impact distribution, top categories, top impacted resource types, policy non-compliance %, Defender severity mix, cost per impacted resource, hotspot score, and SLA coverage). An `/api/analytics` endpoint powers these metrics for potential external integrations.
+
+
 ## Binary Verification
 
 To verify the authenticity of downloaded binaries, see our [Binary Verification Guide](SECURITY_VERIFICATION.md).
