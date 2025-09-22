@@ -282,24 +282,13 @@ message: "Access to cost data has been disabled for account admins..."
 
 This occurs when your account has READER permissions but lacks access to cost analysis data. Azure Cost Management requires specific permissions beyond standard READER access.
 
-**Solution Options:**
+**Solution:**
 
-1. **Disable cost scanning** by using the `-c=false` flag:
-   ```bash
-   azqr scan -c=false
-   ```
-   This will skip cost analysis and generate a complete report with all other Azure resource recommendations.
-
-2. **Request cost analysis permissions** from your Azure administrator:
-   - For Enterprise Agreements (EA): Enable "AO View Charges" in the Enterprise portal
-   - For other subscription types: Request "Cost Management Reader" or "Cost Management Contributor" role assignment
-
-3. **Use service-specific scanning** to avoid cost analysis:
-   ```bash
-   # Scan specific services without cost analysis
-   azqr scan vm    # Scan only Virtual Machines
-   azqr scan sql   # Scan only SQL resources
-   ```
+**Disable cost scanning** by using the `-c=false` flag:
+```bash
+azqr scan -c=false
+```
+This will skip cost analysis and generate a complete report with all other Azure resource recommendations.
 
 **Note:** Cost analysis provides valuable insights into resource spending over the last 3 months, but it's optional for security and compliance recommendations.
 
