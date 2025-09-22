@@ -266,7 +266,42 @@ Then run the scan with the `--filters` flag:
 
 ## Troubleshooting
 
+### General Issues
+
 If you encounter any issue while using **Azure Quick Review (azqr)**, please set the `AZURE_SDK_GO_LOGGING` environment variable to `all`, run the tool with the `--debug` flag and then share the console output with us by filing a new [issue](https://github.com/Azure/azqr/issues).
+
+### Cost Analysis Permission Issues
+
+If you encounter an error related to cost analysis access when running `azqr scan`, such as:
+
+```
+FTL Failed to query costs error="POST https://management.azure.com/subscriptions/.../providers/Microsoft.CostManagement/query
+ERROR CODE: AccountCostDisabled
+message: "Access to cost data has been disabled for account admins..."
+```
+
+This occurs when your account has READER permissions but lacks access to cost analysis data. Azure Cost Management requires specific permissions beyond standard READER access.
+
+**Solution Options:**
+
+1. **Disable cost scanning** by using the `-c=false` flag:
+   ```bash
+   azqr scan -c=false
+   ```
+   This will skip cost analysis and generate a complete report with all other Azure resource recommendations.
+
+2. **Request cost analysis permissions** from your Azure administrator:
+   - For Enterprise Agreements (EA): Enable "AO View Charges" in the Enterprise portal
+   - For other subscription types: Request "Cost Management Reader" or "Cost Management Contributor" role assignment
+
+3. **Use service-specific scanning** to avoid cost analysis:
+   ```bash
+   # Scan specific services without cost analysis
+   azqr scan vm    # Scan only Virtual Machines
+   azqr scan sql   # Scan only SQL resources
+   ```
+
+**Note:** Cost analysis provides valuable insights into resource spending over the last 3 months, but it's optional for security and compliance recommendations.
 
 ## Building Locally
 
