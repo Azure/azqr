@@ -23,6 +23,10 @@ coverage.txt
 # Go workspace file
 go.work
 
+# Go profiling
+*.prof
+profiles/
+
 ## Hugo & Node
 public/
 resources/
