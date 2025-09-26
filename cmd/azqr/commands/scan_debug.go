@@ -1,14 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-//go:build !debug
+//go:build debug
 
 package commands
 
 import (
+	"os"
+	"runtime/pprof"
+	"runtime/trace"
+
 	"github.com/Azure/azqr/internal"
 	"github.com/Azure/azqr/internal/models"
-
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,13 +33,18 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("azqr", "", true, "Scan Azure Quick Review Recommendations (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
 
+	// Profiling flags (only available in debug builds)
+	scanCmd.PersistentFlags().StringP("cpu-profile", "", "", "Write CPU profile to file (debug build only)")
+	scanCmd.PersistentFlags().StringP("mem-profile", "", "", "Write memory profile to file (debug build only)")
+	scanCmd.PersistentFlags().StringP("trace-profile", "", "", "Write execution trace to file (debug build only)")
+
 	rootCmd.AddCommand(scanCmd)
 }
 
 var scanCmd = &cobra.Command{
 	Use:   "scan",
 	Short: "Scan Azure Resources",
-	Long:  "Scan Azure Resources",
+	Long:  "Scan Azure Resources (debug build with profiling support)",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		scannerKeys, _ := models.GetScanners()
@@ -59,6 +68,49 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
 	useAzqr, _ := cmd.Flags().GetBool("azqr")
+
+	// Get profiling flags (only available in debug builds)
+	cpuProfile, _ := cmd.Flags().GetString("cpu-profile")
+	memProfile, _ := cmd.Flags().GetString("mem-profile")
+	traceProfile, _ := cmd.Flags().GetString("trace-profile")
+
+	// Start CPU profiling if requested
+	if cpuProfile != "" {
+		f, err := os.Create(cpuProfile)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to create CPU profile file")
+		}
+		defer func() {
+			if err := f.Close(); err != nil {
+				log.Error().Err(err).Msg("Failed to close CPU profile file")
+			}
+		}()
+
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal().Err(err).Msg("Failed to start CPU profiling")
+		}
+		defer pprof.StopCPUProfile()
+		log.Info().Msgf("CPU profiling enabled, writing to: %s", cpuProfile)
+	}
+
+	// Start execution trace if requested
+	if traceProfile != "" {
+		f, err := os.Create(traceProfile)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to create trace profile file")
+		}
+		defer func() {
+			if err := f.Close(); err != nil {
+				log.Error().Err(err).Msg("Failed to close trace profile file")
+			}
+		}()
+
+		if err := trace.Start(f); err != nil {
+			log.Fatal().Err(err).Msg("Failed to start execution trace")
+		}
+		defer trace.Stop()
+		log.Info().Msgf("Execution trace enabled, writing to: %s", traceProfile)
+	}
 
 	// load filters
 	filters := models.LoadFilters(filtersFile, scannerKeys)
@@ -84,4 +136,22 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 
 	scanner := internal.Scanner{}
 	scanner.Scan(&params)
+
+	// Write memory profile if requested
+	if memProfile != "" {
+		f, err := os.Create(memProfile)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to create memory profile file")
+		}
+		defer func() {
+			if err := f.Close(); err != nil {
+				log.Error().Err(err).Msg("Failed to close memory profile file")
+			}
+		}()
+
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal().Err(err).Msg("Failed to write memory profile")
+		}
+		log.Info().Msgf("Memory profile written to: %s", memProfile)
+	}
 }
