@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -62,9 +63,12 @@ func NewGraphQuery(cred azcore.TokenCredential) *GraphQueryClient {
 		Timeout: 60 * time.Second,
 	}
 
+	resourceManagerEndpoint := az.GetResourceManagerEndpoint()
+	scope := fmt.Sprintf("%s/.default", resourceManagerEndpoint)
+
 	// Acquire an access token using the provided credential
 	token, err := cred.GetToken(context.Background(), policy.TokenRequestOptions{
-		Scopes: []string{"https://management.azure.com/.default"},
+		Scopes: []string{scope},
 	})
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to acquire Azure access token")
@@ -75,7 +79,7 @@ func NewGraphQuery(cred azcore.TokenCredential) *GraphQueryClient {
 
 	return &GraphQueryClient{
 		httpClient:  httpClient,
-		endpoint:    "https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2024-04-01",
+		endpoint:    fmt.Sprintf("%s/providers/Microsoft.ResourceGraph/resources?api-version=2024-04-01", resourceManagerEndpoint),
 		accessToken: accessToken,
 	}
 }

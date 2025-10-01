@@ -196,6 +196,14 @@ Set `AZURE_TOKEN_CREDENTIALS=pros` to use environment variables, workload identi
 
 * Reader over Subscription or Management Group scope
 
+### Cloud Configuration
+
+**Azure Quick Review (azqr)** supports scanning resources in different Azure cloud environments including Azure Public Cloud, Azure Government, Azure China, and custom cloud configurations.
+
+You can configure the target cloud using environment variables such as `AZURE_CLOUD`, `AZURE_AUTHORITY_HOST`, `AZURE_RESOURCE_MANAGER_ENDPOINT`, and `AZURE_RESOURCE_MANAGER_AUDIENCE`.
+
+> For detailed cloud configuration options and examples, see the [Usage section](https://azure.github.io/azqr/docs/usage/) in the documentation.
+
 ### Running the Scan
 
 To scan all resources in all subscription run:

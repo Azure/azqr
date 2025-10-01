@@ -72,6 +72,80 @@ Authenticate to Azure:
 az login
 ```
 
+## Cloud Configuration
+
+**Azure Quick Review (azqr)** supports scanning resources in different Azure cloud environments. You can configure the target cloud using environment variables.
+
+### Predefined Cloud Environments
+
+Set the `AZURE_CLOUD` environment variable to specify the Azure cloud environment:
+
+**Azure Public Cloud (default):**
+
+Powershell:
+``` powershell
+$env:AZURE_CLOUD = 'AzurePublic'
+```
+
+Bash:
+``` bash
+export AZURE_CLOUD='AzurePublic'
+```
+
+**Azure US Government Cloud:**
+
+Powershell:
+``` powershell
+$env:AZURE_CLOUD = 'AzureGovernment'
+```
+
+Bash:
+``` bash
+export AZURE_CLOUD='AzureGovernment'
+```
+
+**Azure China Cloud:**
+
+Powershell:
+``` powershell
+$env:AZURE_CLOUD = 'AzureChina'
+```
+
+Bash:
+``` bash
+export AZURE_CLOUD='AzureChina'
+```
+
+Supported values for `AZURE_CLOUD`:
+- `AzurePublic`, `public`, or empty (default)
+- `AzureGovernment`, `AzureUSGovernment`, or `usgovernment`
+- `AzureChina` or `china`
+
+### Custom Cloud Configuration
+
+For custom or sovereign cloud environments, you can specify custom endpoints that will override the predefined cloud settings:
+
+Powershell:
+``` powershell
+$env:AZURE_AUTHORITY_HOST = 'https://login.microsoftonline.custom/'
+$env:AZURE_RESOURCE_MANAGER_ENDPOINT = 'https://management.custom.azure.com'
+$env:AZURE_RESOURCE_MANAGER_AUDIENCE = 'https://management.core.custom.azure.com/'
+```
+
+Bash:
+``` bash
+export AZURE_AUTHORITY_HOST='https://login.microsoftonline.custom/'
+export AZURE_RESOURCE_MANAGER_ENDPOINT='https://management.custom.azure.com'
+export AZURE_RESOURCE_MANAGER_AUDIENCE='https://management.core.custom.azure.com/'
+```
+
+**Environment Variables:**
+- `AZURE_AUTHORITY_HOST`: Custom Active Directory authority host (e.g., `https://login.microsoftonline.us/`)
+- `AZURE_RESOURCE_MANAGER_ENDPOINT`: Custom ARM endpoint (e.g., `https://management.usgovcloudapi.net`)
+- `AZURE_RESOURCE_MANAGER_AUDIENCE`: Custom ARM token audience (optional, e.g., `https://management.core.usgovcloudapi.net/`)
+
+> **Note:** When custom endpoints are provided (both `AZURE_AUTHORITY_HOST` and `AZURE_RESOURCE_MANAGER_ENDPOINT`), they take priority over the `AZURE_CLOUD` setting.
+
 ## Scan Azure Resources
 
 * Scan All Resources

@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
@@ -120,9 +121,12 @@ func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenC
 	d.httpClient = httpClient
 	d.ctx = ctx
 
+	resourceManagerEndpoint := az.GetResourceManagerEndpoint()
+	scope := fmt.Sprintf("%s/.default", resourceManagerEndpoint)
+
 	// Acquire an access token using the provided credential
 	token, err := cred.GetToken(context.Background(), policy.TokenRequestOptions{
-		Scopes: []string{"https://management.azure.com/.default"},
+		Scopes: []string{scope},
 	})
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to acquire Azure access token")
@@ -264,7 +268,8 @@ func (d *DiagnosticSettingsScanner) retry(ctx context.Context, attempts int, sle
 // restCall performs a batch request to retrieve diagnostic settings using an HTTP client.
 func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds []*string) (*ArmBatchResponse, error) {
 	// Build the batch endpoint URL.
-	batchURL := "https://management.azure.com/batch?api-version=2020-06-01"
+	resourceManagerEndpoint := az.GetResourceManagerEndpoint()
+	batchURL := fmt.Sprintf("%s/batch?api-version=2020-06-01", resourceManagerEndpoint)
 
 	// Prepare the batch request payload.
 	batch := ArmBatchRequest{

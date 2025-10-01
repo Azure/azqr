@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/renderers"
@@ -19,10 +20,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 
 	_ "github.com/Azure/azqr/internal/scanners/aa"
 	_ "github.com/Azure/azqr/internal/scanners/adf"
@@ -182,7 +181,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	serviceScanners := filters.Azqr.Scanners
 
 	// create Azure credentials
-	cred := sc.newAzureCredential()
+	cred := az.NewAzureCredential()
 
 	// create a cancelable context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -426,18 +425,6 @@ func (sc Scanner) retry(attempts int, sleep time.Duration, a models.IAzureScanne
 		sleep *= 2
 	}
 	return nil, err
-}
-
-// newAzureCredential creates a new Azure credential using DefaultAzureCredential.
-// The credential chain behavior can be customized using the AZURE_TOKEN_CREDENTIALS environment variable.
-func (sc Scanner) newAzureCredential() azcore.TokenCredential {
-	var cred azcore.TokenCredential
-	var err error
-	cred, err = azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to get Azure credentials")
-	}
-	return cred
 }
 
 func (sc Scanner) generateOutputFileName(outputName string) string {
