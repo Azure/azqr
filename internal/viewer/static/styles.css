@@ -231,6 +231,47 @@ table thead.sticky-top th {
     z-index: 1100;
 }
 
+/* Prevent horizontal scroll from navbar */
+body {
+    overflow-x: hidden;
+}
+
+/* Fix navbar dropdown overflow */
+.navbar-collapse {
+    max-width: 100%;
+}
+
+/* Ensure dropdown menus don't cause horizontal scroll */
+.navbar .dropdown-menu {
+    position: absolute;
+    right: auto;
+    left: 0;
+    max-width: 100vw;
+}
+
+/* For right-aligned dropdowns, position them properly */
+.navbar-nav .dropdown:last-child .dropdown-menu {
+    right: 0;
+    left: auto;
+}
+
+/* Responsive navbar adjustments */
+@media (max-width: 991.98px) {
+    .navbar .dropdown-menu {
+        position: static;
+        float: none;
+        width: auto;
+        margin-top: 0;
+        background-color: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .navbar .dropdown-item {
+        padding-left: 2rem;
+    }
+}
+
 /* Utility classes for modern look */
 .text-break {
     word-break: break-word;

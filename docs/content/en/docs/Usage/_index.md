@@ -206,6 +206,32 @@ Then run the scan with the `--filters` flag:
 
 > Check the [overview](https://azure.github.io/azqr/docs/overview/) to get the resource type abbreviations.
 
+## Optional Scans
+
+### Disabling Cost Analysis
+
+If you encounter permission issues with cost analysis or want to skip it, use the `-c=false` or `--costs=false` flag:
+
+```bash
+azqr scan -c=false
+```
+
+### Disabling Defender Scanning
+
+To skip Microsoft Defender for Cloud scanning:
+
+```bash
+azqr scan --defender=false
+```
+
+### Disabling Azure Advisor Scanning
+
+To skip Azure Advisor recommendations:
+
+```bash
+azqr scan --advisor=false
+```
+
 ## File Outputs
 
 Currently Azure Quick Review supports 3 types of file outputs: `xlsx` (default), `csv`, `json`
@@ -226,10 +252,11 @@ Example:
 azqr scan --csv
 ```
 
-The scan will generate 10 `csv` files:
+The scan will generate 11 `csv` files:
 
 ```
 <file-name>.advisor.csv
+<file-name>.arcSQL.csv
 <file-name>.azurePolicy.csv
 <file-name>.costs.csv
 <file-name>.defender.csv
@@ -267,6 +294,7 @@ The JSON file contains all data sections in a single consolidated structure:
     "inventory": [...],
     "advisor": [...],
     "azurePolicy": [...],
+    "arcSQL": [...],
     "defender": [...],
     "defenderRecommendations": [...],
     "costs": [...],
