@@ -191,6 +191,26 @@ type (
 		SubscriptionID, SubscriptionName, PolicyDisplayName, PolicyDescription, ComplianceState, Type, Name, ResourceGroupName, ResourceID, TimeStamp, PolicyDefinitionName, PolicyDefinitionID, PolicyAssignmentName, PolicyAssignmentID string
 	}
 
+	// ArcSQLResult - Arc-enabled SQL Server result
+	ArcSQLResult struct {
+		SubscriptionID    string
+		SubscriptionName  string
+		ResourceGroup     string
+		Location          string
+		MachineName       string
+		MachineID         string
+		Tags              string
+		Status            string
+		ProvisioningState string
+		LicenseType       string
+		ESU               string
+		ExtensionVersion  string
+		ExcludedInstances string
+		PurviewEnabled    string
+		EntraEnabled      string
+		BPAEnabled        string
+	}
+
 	RecommendationEngine struct{}
 
 	RecommendationImpact   string

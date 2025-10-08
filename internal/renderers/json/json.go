@@ -24,6 +24,7 @@ func CreateJsonReport(data *renderers.ReportData) {
 		"inventory":               convertToJSON(data.ResourcesTable()),
 		"advisor":                 convertToJSON(data.AdvisorTable()),
 		"azurePolicy":             convertToJSON(data.AzurePolicyTable()),
+		"arcSQL":                  convertToJSON(data.ArcSQLTable()),
 		"defender":                convertToJSON(data.DefenderTable()),
 		"defenderRecommendations": convertToJSON(data.DefenderRecommendationsTable()),
 		"costs":                   convertToJSON(data.CostTable()),
