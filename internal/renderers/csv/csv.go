@@ -35,6 +35,9 @@ func CreateCsvReport(data *renderers.ReportData) {
 	records = data.AzurePolicyTable()
 	writeData(records, data.OutputFileName, "azurePolicy")
 
+	records = data.ArcSQLTable()
+	writeData(records, data.OutputFileName, "arcSQL")
+
 	records = data.AdvisorTable()
 	writeData(records, data.OutputFileName, "advisor")
 

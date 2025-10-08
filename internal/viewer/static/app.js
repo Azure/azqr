@@ -1,4 +1,4 @@
-const routes = ['dashboard', 'recommendations', 'impacted', 'resourceType', 'inventory', 'advisor', 'azurePolicy', 'defender', 'defenderRecommendations', 'costs', 'outOfScope'];
+const routes = ['dashboard', 'recommendations', 'impacted', 'resourceType', 'inventory', 'advisor', 'azurePolicy', 'arcSQL', 'defender', 'defenderRecommendations', 'costs', 'outOfScope'];
 const routeLabels = {
     'dashboard': 'Overview',
     'recommendations': 'Recommendations',
@@ -7,6 +7,7 @@ const routeLabels = {
     'inventory': 'Resource Inventory',
     'advisor': 'Azure Advisor',
     'azurePolicy': 'Azure Policy',
+    'arcSQL': 'Arc SQL Server',
     'defender': 'Microsoft Defender',
     'defenderRecommendations': 'Defender Recommendations',
     'costs': 'Cost Analysis',
@@ -42,6 +43,12 @@ const menuStructure = [
         children: [
             { label: 'Azure Policy', route: 'azurePolicy' },
             { label: 'Cost Analysis', route: 'costs' }
+        ]
+    },
+    {
+        label: 'Arc',
+        children: [
+            { label: 'SQL Server', route: 'arcSQL' }
         ]
     }
 ];
@@ -120,6 +127,8 @@ function getMenuIcon(label) {
         'Resource Types': '<i class="bi bi-collection me-1"></i>',
         'Resource Inventory': '<i class="bi bi-box-seam me-1"></i>',
         'Out of Scope': '<i class="bi bi-x-circle me-1"></i>',
+        'Arc': '<i class="bi bi-hdd-network me-1"></i>',
+        'SQL Server': '<i class="bi bi-database me-1"></i>',
         'Security': '<i class="bi bi-shield-lock me-1"></i>',
         'Microsoft Defender': '<i class="bi bi-shield-check me-1"></i>',
         'Defender Recommendations': '<i class="bi bi-shield-exclamation me-1"></i>',
@@ -154,7 +163,7 @@ async function showDashboard() {
         'advisorCount', 'azurePolicyCount', 'costItems', 'defenderCount', 'defenderRecommendationsCount',
         'impactedCount', 'inventoryCount', 'outOfScopeCount', 'azurePolicyNonCompliant',
         'recommendationsImplemented', 'recommendationsNotImplemented', 'recommendationsTotal',
-        'resourceTypeCount', 'totalCost'
+        'resourceTypeCount', 'totalCost', 'arcSQLCount'
     ]);
     Object.entries(summary).forEach(([k, v]) => {
         if (exclude.has(k)) return;
@@ -379,6 +388,7 @@ function renderTable(rows, datasetName) {
         'defender': ['subscriptionId', 'subscriptionName', 'name', 'tier'],
         'advisor': ['subscriptionId', 'subscriptionName', 'resourceType', 'resourceName', 'category', 'impact', 'description', 'resourceId', 'recommendationId'],
         'azurePolicy': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'policyDisplayName', 'policyDescription', 'resourceId', 'timeStamp', 'policyDefinitionName', 'policyDefinitionId', 'policyAssignmentName', 'policyAssignmentId', 'complianceState'],
+        'arcSQL': ['subscriptionId', 'subscriptionName', 'azureArcServer', 'sqlInstance', 'resourceGroup', 'version', 'build', 'patchLevel', 'edition', 'vCores', 'dpsStatus', 'license', 'telStatus', 'defenderStatus'],
         'recommendations': ['implemented', 'numberOfImpactedResources', 'azureServiceWellArchitected', 'recommendationSource', 'azureServiceCategoryWellArchitectedArea', 'azureServiceWellArchitectedTopic', 'category', 'recommendation', 'impact', 'bestPracticesGuidance', 'readMore', 'recommendationId'],
         'resourceType': ['subscription', 'resourceType', 'numberOfResources'],
         'defenderRecommendations': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'category', 'recommendationSeverity', 'recommendationName', 'actionDescription', 'remediationDescription', 'resourceId'],
@@ -405,6 +415,7 @@ function renderTable(rows, datasetName) {
         const filterConfig = {
             'costs': ['subscriptionId', 'subscriptionName', 'serviceName'],
             'azurePolicy': ['subscriptionId', 'subscriptionName', 'resourceType', 'resourceName'],
+            'arcSQL': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'version', 'edition', 'dpsStatus', 'license', 'telStatus', 'defenderStatus'],
             'defender': ['subscriptionId', 'subscriptionName', 'name', 'tier'],
             'defenderRecommendations': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'category', 'recommendationSeverity'],
             'inventory': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName'],
@@ -425,6 +436,7 @@ function renderTable(rows, datasetName) {
             'inventory': ['resourceType', 'location'],
             'outOfScope': ['resourceType', 'location'],
             'azurePolicy': ['resourceType'],
+            'arcSQL': ['edition', 'dpsStatus', 'license', 'defenderStatus'],
         };
 
         const datasetFilters = filterConfig[datasetName] || [];
@@ -447,8 +459,8 @@ function renderTable(rows, datasetName) {
                 a.toLowerCase().localeCompare(b.toLowerCase())
             );
 
-            if (datasetDropdowns.includes(field) && uniqueValues.length > 1 && uniqueValues.length <= 50) {
-                // Dropdown for specified fields
+            if (datasetDropdowns.includes(field) && uniqueValues.length >= 1 && uniqueValues.length <= 50) {
+                // Dropdown for specified fields (show even with 1 value)
                 return `<th class="p-1">
                     <select class="form-select form-select-sm table-filter" data-column="${index}">
                         <option value="">All</option>
@@ -529,6 +541,41 @@ function renderTable(rows, datasetName) {
                 }
                 // Valid SLA value = green
                 return `<td><span class="badge bg-success">${escapeHTML(value)}</span></td>`;
+            }
+            // Arc SQL dataset formatting
+            if (datasetName === 'arcSQL') {
+                // License Type formatting (SA/PAYG = green, unset = gray)
+                if (h === 'license') {
+                    const lowerValue = value.toLowerCase().trim();
+                    if (lowerValue === '' || !value) return `<td></td>`;
+                    let badgeClass = 'success';
+                    if (lowerValue === 'unset') badgeClass = 'secondary';
+                    return `<td><span class="badge bg-${badgeClass}">${escapeHTML(value)}</span></td>`;
+                }
+                // DPS Status formatting (OK = success, others = warning)
+                if (h === 'dpsStatus') {
+                    const lowerValue = value.toLowerCase().trim();
+                    if (lowerValue === '' || !value) return `<td></td>`;
+                    const badgeClass = lowerValue === 'ok' ? 'success' : (lowerValue === 'no data' ? 'secondary' : 'warning');
+                    return `<td><span class="badge bg-${badgeClass}">${escapeHTML(value)}</span></td>`;
+                }
+                // TEL Status formatting (OK/__  = success, others = warning)
+                if (h === 'telStatus') {
+                    const lowerValue = value.toLowerCase().trim();
+                    if (lowerValue === '' || !value) return `<td></td>`;
+                    const badgeClass = (lowerValue === 'ok' || lowerValue === '__') ? 'success' : (lowerValue === 'no data' ? 'secondary' : 'warning');
+                    const displayValue = lowerValue === '__' ? 'OK' : value;
+                    return `<td><span class="badge bg-${badgeClass}">${escapeHTML(displayValue)}</span></td>`;
+                }
+                // Defender Status formatting (Protected = success, others = danger/gray)
+                if (h === 'defenderStatus') {
+                    const lowerValue = value.toLowerCase().trim();
+                    if (lowerValue === '' || !value) return `<td></td>`;
+                    let badgeClass = 'secondary';
+                    if (lowerValue === 'protected') badgeClass = 'success';
+                    else if (lowerValue === 'not protected') badgeClass = 'danger';
+                    return `<td><span class="badge bg-${badgeClass}">${escapeHTML(value)}</span></td>`;
+                }
             }
             // Render clipboard button for resourceId
             if (h === 'resourceId' && value) {
@@ -777,7 +824,14 @@ function makeReadable(str) {
         'azureServiceWellArchitectedTopic': 'Azure Service Well Architected Topic',
         'recommendationSource': 'Source',
         'bestPracticesGuidance': 'Best Practices',
-        'readMore': 'Learn More'
+        'readMore': 'Learn More',
+        'azureArcServer': 'Azure Arc Server',
+        'sqlInstance': 'SQL Instance',
+        'vCores': 'VCores',
+        'patchLevel': 'Patch Level',
+        'dpsStatus': 'DPS Status',
+        'telStatus': 'TEL Status',
+        'defenderStatus': 'Defender Status'
     };
     return mappings[str] || str.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
 }
