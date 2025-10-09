@@ -196,6 +196,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 				MaxRetries:    3,
 				MaxRetryDelay: 60 * time.Second,
 			},
+			Cloud: az.GetCloudConfiguration(),
 		},
 	}
 
