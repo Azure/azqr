@@ -20,6 +20,7 @@ type (
 		DefenderRecommendations []models.DefenderRecommendation
 		Advisor                 []models.AdvisorResult
 		AzurePolicy             []models.AzurePolicyResult
+		ArcSQL                  []models.ArcSQLResult
 		Cost                    *models.CostResult
 		Recommendations         map[string]map[string]models.AprlRecommendation
 		Resources               []*models.Resource
@@ -188,6 +189,36 @@ func (rd *ReportData) AzurePolicyTable() [][]string {
 	return rows
 }
 
+// ArcSQLTable returns Arc-enabled SQL Server data formatted as a table with headers and rows for reporting.
+func (rd *ReportData) ArcSQLTable() [][]string {
+	headers := []string{"Subscription Id", "Subscription Name", "Resource Group", "Location", "Machine Name", "Machine Id", "Tags", "Status", "Provisioning State", "License Type", "ESU", "Extension Version", "Excluded Instances", "Purview", "Entra ID", "BPA"}
+	rows := [][]string{}
+	for _, d := range rd.ArcSQL {
+		row := []string{
+			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			d.SubscriptionName,
+			d.ResourceGroup,
+			d.Location,
+			d.MachineName,
+			MaskSubscriptionIDInResourceID(d.MachineID, rd.Mask),
+			d.Tags,
+			d.Status,
+			d.ProvisioningState,
+			d.LicenseType,
+			d.ESU,
+			d.ExtensionVersion,
+			d.ExcludedInstances,
+			d.PurviewEnabled,
+			d.EntraEnabled,
+			d.BPAEnabled,
+		}
+		rows = append(rows, row)
+	}
+
+	rows = append([][]string{headers}, rows...)
+	return rows
+}
+
 func (rd *ReportData) RecommendationsTable() [][]string {
 	counter := map[string]int{}
 	for _, rt := range rd.Recommendations {
@@ -313,6 +344,8 @@ func NewReportData(outputFile string, mask bool) ReportData {
 		Defender:                []models.DefenderResult{},
 		DefenderRecommendations: []models.DefenderRecommendation{},
 		Advisor:                 []models.AdvisorResult{},
+		AzurePolicy:             []models.AzurePolicyResult{},
+		ArcSQL:                  []models.ArcSQLResult{},
 		Cost: &models.CostResult{
 			Items: []*models.CostResultItem{},
 		},

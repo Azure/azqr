@@ -34,6 +34,7 @@ import (
 	_ "github.com/Azure/azqr/internal/scanners/apim"
 	_ "github.com/Azure/azqr/internal/scanners/appcs"
 	_ "github.com/Azure/azqr/internal/scanners/appi"
+	_ "github.com/Azure/azqr/internal/scanners/arc"
 	_ "github.com/Azure/azqr/internal/scanners/as"
 	_ "github.com/Azure/azqr/internal/scanners/asp"
 	_ "github.com/Azure/azqr/internal/scanners/avail"
@@ -102,6 +103,7 @@ type (
 		OutputName             string
 		Defender               bool
 		Advisor                bool
+		Arc                    bool
 		Xlsx                   bool
 		Cost                   bool
 		Mask                   bool
@@ -217,6 +219,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	diagnosticsScanner := scanners.DiagnosticSettingsScanner{}
 	advisorScanner := scanners.AdvisorScanner{}
 	azurePolicyScanner := scanners.AzurePolicyScanner{}
+	arcSQLScanner := scanners.ArcSQLScanner{}
 	costScanner := scanners.CostScanner{}
 	diagResults := map[string]bool{}
 
@@ -362,6 +365,11 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 	// scan Azure Policy
 	reportData.AzurePolicy = append(reportData.AzurePolicy, azurePolicyScanner.Scan(ctx, cred, subscriptions, filters)...)
+
+	// scan Arc-enabled SQL Server
+	if params.Arc {
+		reportData.ArcSQL = append(reportData.ArcSQL, arcSQLScanner.Scan(ctx, cred, subscriptions, filters)...)
+	}
 
 	// scan defender
 	reportData.Defender = append(reportData.Defender, defenderScanner.Scan(ctx, params.Defender, cred, subscriptions, filters)...)

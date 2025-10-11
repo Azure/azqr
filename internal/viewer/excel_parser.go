@@ -127,6 +127,8 @@ func mapSheetToDataset(sheetName string) string {
 		"azure policy":             DataSetAzurePolicy,
 		"azurepolicy":              DataSetAzurePolicy,
 		"policies":                 DataSetAzurePolicy,
+		"arc sql":                  DataSetArcSQL,
+		"arcsql":                   DataSetArcSQL,
 		"defender":                 DataSetDefender,
 		"microsoft defender":       DataSetDefender,
 		"defender for cloud":       DataSetDefender,
@@ -214,6 +216,19 @@ func cleanHeaderName(header string) string {
 		"To":                                             "to",
 		"Name":                                           "name",
 		"Tier":                                           "tier",
+		"Machine Name":                                   "machineName",
+		"Machine Id":                                     "machineId",
+		"Machine ID":                                     "machineId",
+		"Tags":                                           "tags",
+		"Status":                                         "status",
+		"Provisioning State":                             "provisioningState",
+		"License Type":                                   "licenseType",
+		"ESU":                                            "esu",
+		"Extension Version":                              "extensionVersion",
+		"Excluded Instances":                             "excludedInstances",
+		"Purview":                                        "purview",
+		"Entra ID":                                       "entraId",
+		"BPA":                                            "bpa",
 	}
 
 	// Check for exact matches first

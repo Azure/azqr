@@ -1,4 +1,4 @@
-const routes = ['dashboard', 'recommendations', 'impacted', 'resourceType', 'inventory', 'advisor', 'azurePolicy', 'defender', 'defenderRecommendations', 'costs', 'outOfScope'];
+const routes = ['dashboard', 'recommendations', 'impacted', 'resourceType', 'inventory', 'advisor', 'azurePolicy', 'arcSQL', 'defender', 'defenderRecommendations', 'costs', 'outOfScope'];
 const routeLabels = {
     'dashboard': 'Overview',
     'recommendations': 'Recommendations',
@@ -7,6 +7,7 @@ const routeLabels = {
     'inventory': 'Resource Inventory',
     'advisor': 'Azure Advisor',
     'azurePolicy': 'Azure Policy',
+    'arcSQL': 'Arc SQL Server',
     'defender': 'Microsoft Defender',
     'defenderRecommendations': 'Defender Recommendations',
     'costs': 'Cost Analysis',
@@ -42,6 +43,12 @@ const menuStructure = [
         children: [
             { label: 'Azure Policy', route: 'azurePolicy' },
             { label: 'Cost Analysis', route: 'costs' }
+        ]
+    },
+    {
+        label: 'Arc',
+        children: [
+            { label: 'SQL Server', route: 'arcSQL' }
         ]
     }
 ];
@@ -120,6 +127,8 @@ function getMenuIcon(label) {
         'Resource Types': '<i class="bi bi-collection me-1"></i>',
         'Resource Inventory': '<i class="bi bi-box-seam me-1"></i>',
         'Out of Scope': '<i class="bi bi-x-circle me-1"></i>',
+        'Arc': '<i class="bi bi-hdd-network me-1"></i>',
+        'SQL Server': '<i class="bi bi-database me-1"></i>',
         'Security': '<i class="bi bi-shield-lock me-1"></i>',
         'Microsoft Defender': '<i class="bi bi-shield-check me-1"></i>',
         'Defender Recommendations': '<i class="bi bi-shield-exclamation me-1"></i>',
@@ -154,7 +163,7 @@ async function showDashboard() {
         'advisorCount', 'azurePolicyCount', 'costItems', 'defenderCount', 'defenderRecommendationsCount',
         'impactedCount', 'inventoryCount', 'outOfScopeCount', 'azurePolicyNonCompliant',
         'recommendationsImplemented', 'recommendationsNotImplemented', 'recommendationsTotal',
-        'resourceTypeCount', 'totalCost'
+        'resourceTypeCount', 'totalCost', 'arcSQLCount'
     ]);
     Object.entries(summary).forEach(([k, v]) => {
         if (exclude.has(k)) return;
@@ -379,6 +388,7 @@ function renderTable(rows, datasetName) {
         'defender': ['subscriptionId', 'subscriptionName', 'name', 'tier'],
         'advisor': ['subscriptionId', 'subscriptionName', 'resourceType', 'resourceName', 'category', 'impact', 'description', 'resourceId', 'recommendationId'],
         'azurePolicy': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'policyDisplayName', 'policyDescription', 'resourceId', 'timeStamp', 'policyDefinitionName', 'policyDefinitionId', 'policyAssignmentName', 'policyAssignmentId', 'complianceState'],
+        'arcSQL': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'location', 'machineName', 'machineId', 'tags', 'status', 'provisioningState', 'licenseType', 'esu', 'extensionVersion', 'excludedInstances', 'purview', 'entraId', 'bpa'],
         'recommendations': ['implemented', 'numberOfImpactedResources', 'azureServiceWellArchitected', 'recommendationSource', 'azureServiceCategoryWellArchitectedArea', 'azureServiceWellArchitectedTopic', 'category', 'recommendation', 'impact', 'bestPracticesGuidance', 'readMore', 'recommendationId'],
         'resourceType': ['subscription', 'resourceType', 'numberOfResources'],
         'defenderRecommendations': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'category', 'recommendationSeverity', 'recommendationName', 'actionDescription', 'remediationDescription', 'resourceId'],
@@ -405,6 +415,7 @@ function renderTable(rows, datasetName) {
         const filterConfig = {
             'costs': ['subscriptionId', 'subscriptionName', 'serviceName'],
             'azurePolicy': ['subscriptionId', 'subscriptionName', 'resourceType', 'resourceName'],
+            'arcSQL': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'location', 'machineName', 'status', 'provisioningState', 'licenseType', 'esu', 'purview', 'entraId', 'bpa'],
             'defender': ['subscriptionId', 'subscriptionName', 'name', 'tier'],
             'defenderRecommendations': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'category', 'recommendationSeverity'],
             'inventory': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName'],
@@ -425,6 +436,7 @@ function renderTable(rows, datasetName) {
             'inventory': ['resourceType', 'location'],
             'outOfScope': ['resourceType', 'location'],
             'azurePolicy': ['resourceType'],
+            'arcSQL': ['status', 'provisioningState', 'licenseType', 'esu', 'purview', 'entraId', 'bpa'],
         };
 
         const datasetFilters = filterConfig[datasetName] || [];
@@ -447,8 +459,8 @@ function renderTable(rows, datasetName) {
                 a.toLowerCase().localeCompare(b.toLowerCase())
             );
 
-            if (datasetDropdowns.includes(field) && uniqueValues.length > 1 && uniqueValues.length <= 50) {
-                // Dropdown for specified fields
+            if (datasetDropdowns.includes(field) && uniqueValues.length >= 1 && uniqueValues.length <= 50) {
+                // Dropdown for specified fields (show even with 1 value)
                 return `<th class="p-1">
                     <select class="form-select form-select-sm table-filter" data-column="${index}">
                         <option value="">All</option>
@@ -530,9 +542,49 @@ function renderTable(rows, datasetName) {
                 // Valid SLA value = green
                 return `<td><span class="badge bg-success">${escapeHTML(value)}</span></td>`;
             }
-            // Render clipboard button for resourceId
-            if (h === 'resourceId' && value) {
-                return `<td><button class="btn btn-sm btn-outline-secondary copy-to-clipboard" data-clipboard="${escapeHTML(value)}" title="Copy Resource ID to clipboard">
+            // Arc SQL dataset formatting
+            if (datasetName === 'arcSQL') {
+                // Status formatting
+                if (h === 'status') {
+                    const badgeClass = value.toLowerCase().includes('installed') && !value.toLowerCase().includes('not') ? 'success' : 'danger';
+                    return `<td><span class="badge bg-${badgeClass}">${escapeHTML(value)}</span></td>`;
+                }
+                // Provisioning State formatting
+                if (h === 'provisioningState') {
+                    const lowerValue = value.toLowerCase().trim();
+                    let badgeClass = 'secondary';
+                    if (lowerValue === 'succeeded') badgeClass = 'success';
+                    else if (lowerValue === 'failed') badgeClass = 'danger';
+                    else if (lowerValue === 'creating' || lowerValue === 'updating' || lowerValue === 'deleting') badgeClass = 'warning';
+                    if (lowerValue === '' || !value) return `<td></td>`;
+                    return `<td><span class="badge bg-${badgeClass}">${escapeHTML(value)}</span></td>`;
+                }
+                // ESU, Purview, Entra, BPA enabled/disabled formatting
+                if (h === 'esu' || h === 'purview' || h === 'entraId' || h === 'bpa') {
+                    const lowerValue = value.toLowerCase().trim();
+                    if (lowerValue === '' || !value) return `<td></td>`;
+                    const badgeClass = lowerValue === 'enabled' ? 'success' : 'danger';
+                    const displayValue = lowerValue === 'enabled' ? 'Enabled' : 'Disabled';
+                    return `<td><span class="badge bg-${badgeClass}">${escapeHTML(displayValue)}</span></td>`;
+                }
+                // License Type formatting (Paid = green, others = red)
+                if (h === 'licenseType') {
+                    const lowerValue = value.toLowerCase().trim();
+                    if (lowerValue === '' || !value) return `<td></td>`;
+                    const badgeClass = lowerValue === 'paid' ? 'success' : 'danger';
+                    return `<td><span class="badge bg-${badgeClass}">${escapeHTML(value)}</span></td>`;
+                }
+                // Tags clipboard button
+                if (h === 'tags' && value) {
+                    return `<td><button class="btn btn-sm btn-outline-secondary copy-to-clipboard" data-clipboard="${escapeHTML(value)}" title="Copy Tags to clipboard">
+                        <i class="bi bi-clipboard"></i>
+                    </button></td>`;
+                }
+            }
+            // Render clipboard button for resourceId and machineId
+            if ((h === 'resourceId' || h === 'machineId') && value) {
+                const title = h === 'machineId' ? 'Copy Machine ID to clipboard' : 'Copy Resource ID to clipboard';
+                return `<td><button class="btn btn-sm btn-outline-secondary copy-to-clipboard" data-clipboard="${escapeHTML(value)}" title="${title}">
                     <i class="bi bi-clipboard"></i>
                 </button></td>`;
             }

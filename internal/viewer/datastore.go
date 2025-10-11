@@ -5,7 +5,6 @@ package viewer
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -23,6 +22,7 @@ const (
 	DataSetInventory               = "inventory"
 	DataSetAdvisor                 = "advisor"
 	DataSetAzurePolicy             = "azurePolicy"
+	DataSetArcSQL                  = "arcSQL"
 	DataSetDefender                = "defender"
 	DataSetDefenderRecommendations = "defenderRecommendations"
 	DataSetCosts                   = "costs"
@@ -115,7 +115,9 @@ func (ds *DataStore) ListDataSets() []string {
 func (ds *DataStore) Filter(name string, params map[string][]string) ([]map[string]string, error) {
 	records := ds.Get(name)
 	if records == nil {
-		return nil, errors.New("dataset not found")
+		// Return empty array instead of error for datasets that don't exist
+		// This handles cases where optional datasets (like arcSQL) have no data
+		return []map[string]string{}, nil
 	}
 
 	global := strings.ToLower(first(params, "q"))
@@ -168,6 +170,7 @@ func (ds *DataStore) Summary() map[string]interface{} {
 	inventory := ds.Get(DataSetInventory)
 	advisor := ds.Get(DataSetAdvisor)
 	policy := ds.Get(DataSetAzurePolicy)
+	arcSQL := ds.Get(DataSetArcSQL)
 	defender := ds.Get(DataSetDefender)
 	defRec := ds.Get(DataSetDefenderRecommendations)
 	costs := ds.Get(DataSetCosts)
@@ -207,6 +210,7 @@ func (ds *DataStore) Summary() map[string]interface{} {
 		"advisorCount":                  len(advisor),
 		"azurePolicyCount":              len(policy),
 		"azurePolicyNonCompliant":       nonCompliantPolicy,
+		"arcSQLCount":                   len(arcSQL),
 		"defenderCount":                 len(defender),
 		"defenderRecommendationsCount":  len(defRec),
 		"costItems":                     len(costs),
