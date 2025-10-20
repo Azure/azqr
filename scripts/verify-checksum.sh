@@ -2,7 +2,7 @@
 
 # Script to verify azqr binary checksum
 # Usage: ./scripts/verify-checksum.sh <version> <platform>
-# Example: ./scripts/verify-checksum.sh 2.7.3 win-amd64
+# Example: ./scripts/verify-checksum.sh 2.7.3 windows-amd64
 
 set -e
 
@@ -12,15 +12,25 @@ PLATFORM=$2
 if [ -z "$VERSION" ] || [ -z "$PLATFORM" ]; then
     echo "Usage: $0 <version> <platform>"
     echo "Examples:"
-    echo "  $0 2.7.3 win-amd64"
+    echo "  $0 2.7.3 windows-amd64"
+    echo "  $0 2.7.3 windows-arm64"
     echo "  $0 2.7.3 linux-amd64"
+    echo "  $0 2.7.3 linux-arm64"
     echo "  $0 2.7.3 darwin-amd64"
+    echo "  $0 2.7.3 darwin-arm64"
     exit 1
+fi
+
+# Define file extension based on platform
+if [[ "$PLATFORM" == windows-* ]]; then
+    FILE_EXT=".exe"
+else
+    FILE_EXT=""
 fi
 
 # Define URLs
 BASE_URL="https://github.com/Azure/azqr/releases/download/v.${VERSION}"
-FILE_NAME="azqr-${PLATFORM}.zip"
+FILE_NAME="azqr-${PLATFORM}${FILE_EXT}"
 CHECKSUM_NAME="${FILE_NAME}.sha256"
 
 echo "Verifying azqr ${VERSION} for ${PLATFORM}..."
@@ -56,4 +66,4 @@ else
 fi
 
 echo "✅ Checksum verification successful!"
-echo "The file ${FILE_NAME} is authentic and has not been tampered with."
+echo "The binary ${FILE_NAME} is authentic and has not been tampered with."

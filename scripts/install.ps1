@@ -8,9 +8,5 @@ if ($env:PROCESSOR_ARCHITECTURE -eq "AMD64") {
 }
 
 $latest_azqr=$(iwr https://api.github.com/repos/Azure/azqr/releases/latest).content | convertfrom-json | Select-Object -ExpandProperty tag_name
-iwr https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-win-$arch.zip -OutFile azqr.zip
-Expand-Archive -Path azqr.zip -DestinationPath ./azqr_bin
-Get-ChildItem -Path ./azqr_bin -Recurse -File | ForEach-Object { Move-Item -Path $_.FullName -Destination . -Force }
-Remove-Item -Path ./azqr_bin -Recurse -Force
-Remove-Item -Path azqr.zip
+iwr https://github.com/Azure/azqr/releases/download/$latest_azqr/azqr-windows-$arch.exe -OutFile azqr.exe
 .\azqr.exe --version

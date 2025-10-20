@@ -12,20 +12,46 @@ Each release includes SHA256 checksums. Verify your download:
 # Download and run the verification script
 curl -sL https://raw.githubusercontent.com/Azure/azqr/main/scripts/verify-checksum.sh -o verify-checksum.sh
 chmod +x verify-checksum.sh
-./verify-checksum.sh 2.7.3 win-amd64
+./verify-checksum.sh 2.7.3 windows-amd64
 ```
 
 ### Manual verification
 
+**Windows:**
 ```bash
+# Download the binary
+curl -sL https://github.com/Azure/azqr/releases/download/v.<version>/azqr-windows-amd64.exe -o azqr.exe
+
 # Download the checksum file
-curl -sL https://github.com/Azure/azqr/releases/download/v.<version>/azqr-win-amd64.zip.sha256 -o azqr-win-amd64.zip.sha256
+curl -sL https://github.com/Azure/azqr/releases/download/v.<version>/azqr-windows-amd64.exe.sha256 -o azqr-windows-amd64.exe.sha256
 
-# Verify the checksum (Windows)
-CertUtil -hashfile azqr-win-amd64.zip SHA256
+# Verify the checksum
+CertUtil -hashfile azqr.exe SHA256
+# Compare the output with the content of azqr-windows-amd64.exe.sha256
+```
 
-# Verify the checksum (Linux/macOS)
-sha256sum -c azqr-win-amd64.zip.sha256
+**Linux:**
+```bash
+# Download the binary
+curl -sL https://github.com/Azure/azqr/releases/download/v.<version>/azqr-linux-amd64 -o azqr
+
+# Download the checksum file
+curl -sL https://github.com/Azure/azqr/releases/download/v.<version>/azqr-linux-amd64.sha256 -o azqr-linux-amd64.sha256
+
+# Verify the checksum
+sha256sum -c azqr-linux-amd64.sha256
+```
+
+**macOS:**
+```bash
+# Download the binary
+curl -sL https://github.com/Azure/azqr/releases/download/v.<version>/azqr-darwin-amd64 -o azqr
+
+# Download the checksum file
+curl -sL https://github.com/Azure/azqr/releases/download/v.<version>/azqr-darwin-amd64.sha256 -o azqr-darwin-amd64.sha256
+
+# Verify the checksum
+shasum -a 256 -c azqr-darwin-amd64.sha256
 ```
 
 ## Download Source

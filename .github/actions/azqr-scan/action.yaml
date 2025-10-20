@@ -100,21 +100,18 @@ runs:
         
         echo "Downloading azqr for platform: $PLATFORM"
         
-        # For versions 2.7.3+, azqr uses ZIP files with platform-specific naming
-        # Check if we're dealing with a newer version that uses ZIP files
-        VERSION_NUM=$(echo $VERSION | sed 's/v\.//' | sed 's/\.//' | head -c 3)
+        # Download direct binary (no zip extraction needed)
+        DOWNLOAD_URL="https://github.com/Azure/azqr/releases/download/${VERSION}/azqr-${PLATFORM}"
         
-        # Use ZIP format for newer versions (2.7.3+)
-        DOWNLOAD_URL="https://github.com/Azure/azqr/releases/download/${VERSION}/azqr-${PLATFORM}.zip"
-        echo "Using ZIP format: $DOWNLOAD_URL"
-        
-        # Download and extract ZIP
-        curl -L -f -o azqr.zip "$DOWNLOAD_URL"
-        
-        if [ -f "azqr.zip" ]; then
-          unzip -uj --q azqr.zip
-          rm -f azqr.zip
+        # Add .exe extension for Windows
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          DOWNLOAD_URL="${DOWNLOAD_URL}.exe"
         fi
+        
+        echo "Downloading from: $DOWNLOAD_URL"
+        
+        # Download binary
+        curl -L -f -o "$BINARY_NAME" "$DOWNLOAD_URL"
 
         # Verify file was downloaded
         if [ ! -f "$BINARY_NAME" ]; then

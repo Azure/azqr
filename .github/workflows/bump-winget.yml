@@ -39,4 +39,4 @@ jobs:
           .\wingetcreate.exe update Microsoft.Azure.QuickReview -u $Env:URL -v ${{ env.WINGETVERSION }} -t $Env:TOKEN --submit
         env:
           TOKEN: ${{ secrets.WINGET_PAT_ACCESS_TOKEN }}
-          URL: ${{ format('https://github.com/Azure/azqr/releases/download/v.{0}/azqr-win-amd64.zip', env.WINGETVERSION) }}
+          URL: ${{ format('https://github.com/Azure/azqr/releases/download/v.{0}/azqr-windows-amd64.exe', env.WINGETVERSION) }}

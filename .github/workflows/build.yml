@@ -145,13 +145,6 @@ jobs:
           CGO_ENABLED: 0
           PRODUCT_VERSION: ${{ needs.calculate-version.outputs.version }}
 
-      - name: Copy README and LICENSE
-        run: |
-          copy README.md bin\windows_amd64\README.md
-          copy LICENSE bin\windows_amd64\LICENSE
-          copy README.md bin\windows_arm64\README.md
-          copy LICENSE bin\windows_arm64\LICENSE
-
       - name: tarball windows binaries
         run: |
           tar -czf windows-azqr.tar.gz bin/windows_*
@@ -255,57 +248,30 @@ jobs:
                  bin/windows_amd64 bin/windows_arm64
           rm -rf bin/linux-binaries bin/macos-binaries bin/windows-binaries
 
-      - name: Zip
-        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
-        with:
-          args: zip -qq -r azqr.zip bin
-
-      - name: Zip (win-amd64)
-        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
-        with:
-          args: zip -qq azqr-win-amd64.zip bin/windows_amd64/azqr.exe bin/windows_amd64/README.md bin/windows_amd64/LICENSE 
-
-      - name: Zip (win-arm64)
-        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
-        with:
-          args: zip -qq azqr-win-arm64.zip bin/windows_arm64/azqr.exe bin/windows_arm64/README.md bin/windows_arm64/LICENSE
-
-      - name: Zip (darwin-amd64)
-        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
-        with:
-          args: zip -qq azqr-darwin-amd64.zip bin/darwin_amd64/azqr
-
-      - name: Zip (darwin-arm64)
-        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
-        with:
-          args: zip -qq azqr-darwin-arm64.zip bin/darwin_arm64/azqr
-
-      - name: Zip (linux-amd64)
-        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
-        with:
-          args: zip -qq azqr-linux-amd64.zip bin/linux_amd64/azqr
-
-      - name: Zip (linux-arm64)
-        uses: montudor/action-zip@a8e75c9faefcd80fac3baf53ef40b9b119d5b702 # v1
-        with:
-          args: zip -qq azqr-linux-arm64.zip bin/linux_arm64/azqr
+      - name: Rename binaries with platform suffix
+        run: |
+          cp bin/windows_amd64/azqr.exe azqr-windows-amd64.exe
+          cp bin/windows_arm64/azqr.exe azqr-windows-arm64.exe
+          cp bin/darwin_amd64/azqr azqr-darwin-amd64
+          cp bin/darwin_arm64/azqr azqr-darwin-arm64
+          cp bin/linux_amd64/azqr azqr-linux-amd64
+          cp bin/linux_arm64/azqr azqr-linux-arm64
 
       - name: Create sha256 Checksums
         run: |
-          sha256sum azqr.zip > azqr.zip.sha256
-          sha256sum azqr-win-amd64.zip > azqr-win-amd64.zip.sha256
-          sha256sum azqr-win-arm64.zip > azqr-win-arm64.zip.sha256
-          sha256sum azqr-darwin-amd64.zip > azqr-darwin-amd64.zip.sha256
-          sha256sum azqr-darwin-arm64.zip > azqr-darwin-arm64.zip.sha256
-          sha256sum azqr-linux-amd64.zip > azqr-linux-amd64.zip.sha256
-          sha256sum azqr-linux-arm64.zip > azqr-linux-arm64.zip.sha256
+          sha256sum azqr-windows-amd64.exe > azqr-windows-amd64.exe.sha256
+          sha256sum azqr-windows-arm64.exe > azqr-windows-arm64.exe.sha256
+          sha256sum azqr-darwin-amd64 > azqr-darwin-amd64.sha256
+          sha256sum azqr-darwin-arm64 > azqr-darwin-arm64.sha256
+          sha256sum azqr-linux-amd64 > azqr-linux-amd64.sha256
+          sha256sum azqr-linux-arm64 > azqr-linux-arm64.sha256
 
       - name: Publish
         uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: azqr.zip azqr-win-amd64.zip azqr-win-arm64.zip azqr-darwin-amd64.zip azqr-darwin-arm64.zip azqr-linux-amd64.zip azqr-linux-arm64.zip azqr.zip.sha256 azqr-win-amd64.zip.sha256 azqr-win-arm64.zip.sha256 azqr-darwin-amd64.zip.sha256 azqr-darwin-arm64.zip.sha256 azqr-linux-amd64.zip.sha256 azqr-linux-arm64.zip.sha256
+          args: azqr-windows-amd64.exe azqr-windows-arm64.exe azqr-darwin-amd64 azqr-darwin-arm64 azqr-linux-amd64 azqr-linux-arm64 azqr-windows-amd64.exe.sha256 azqr-windows-arm64.exe.sha256 azqr-darwin-amd64.sha256 azqr-darwin-arm64.sha256 azqr-linux-amd64.sha256 azqr-linux-arm64.sha256
           releaseId: ${{ needs.release.outputs.release_id }}
 
   bump-winget:
