@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"net/http"
 	"path"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -46,7 +45,8 @@ func NewHandler(ds *DataStore) http.Handler {
 			return
 		}
 		clean := strings.TrimPrefix(path.Clean(p), "/")
-		fp := filepath.Join("static", clean)
+		// Use path.Join instead of filepath.Join for embed.FS (always uses forward slashes)
+		fp := path.Join("static", clean)
 		if _, err := staticFS.Open(fp); err == nil {
 			serveStatic(w, fp)
 			return

@@ -59,7 +59,9 @@ func LoadDataStore(path string) (*DataStore, error) {
 
 // loadJSONDataStore loads a JSON format report (original implementation).
 func loadJSONDataStore(path string) (*DataStore, error) {
-	f, err := os.Open(path)
+	// Clean and normalize the path for cross-platform compatibility
+	cleanPath := filepath.Clean(path)
+	f, err := os.Open(cleanPath)
 	if err != nil {
 		return nil, fmt.Errorf("open json file: %w", err)
 	}
