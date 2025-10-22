@@ -5,6 +5,7 @@ package viewer
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/xuri/excelize/v2"
@@ -12,7 +13,9 @@ import (
 
 // ExcelToDataStore parses an Excel file and converts it to the same DataStore format as JSON files.
 func ExcelToDataStore(path string) (*DataStore, error) {
-	f, err := excelize.OpenFile(path)
+	// Clean and normalize the path for cross-platform compatibility
+	cleanPath := filepath.Clean(path)
+	f, err := excelize.OpenFile(cleanPath)
 	if err != nil {
 		return nil, fmt.Errorf("open excel file: %w", err)
 	}
