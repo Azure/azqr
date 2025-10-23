@@ -34,6 +34,7 @@ func CreateExcelReport(data *renderers.ReportData) {
 	renderDefender(f, data)
 	renderExcludedResources(f, data)
 	renderCosts(f, data)
+	renderCarbonEmissions(f, data)
 
 	if err := f.SaveAs(filename); err != nil {
 		log.Fatal().Err(err).Msg("Failed to save Excel file")

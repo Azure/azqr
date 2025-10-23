@@ -181,6 +181,18 @@ type (
 		SubscriptionID, SubscriptionName, ServiceName, Value, Currency string
 	}
 
+	// CarbonResult - Carbon emissions result
+	CarbonResult struct {
+		From                               time.Time
+		To                                 time.Time
+		ResourceType                       string
+		LatestMonthEmissions               string
+		PreviousMonthEmissions             string
+		MonthOverMonthEmissionsChangeRatio string
+		MonthlyEmissionsChangeValue        string
+		Unit                               string
+	}
+
 	// AdvisorResult - Advisor result
 	AdvisorResult struct {
 		RecommendationID, SubscriptionID, SubscriptionName, Type, Name, ResourceID, Category, Impact, Description string

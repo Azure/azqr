@@ -28,6 +28,7 @@ func CreateJsonReport(data *renderers.ReportData) {
 		"defender":                convertToJSON(data.DefenderTable()),
 		"defenderRecommendations": convertToJSON(data.DefenderRecommendationsTable()),
 		"costs":                   convertToJSON(data.CostTable()),
+		"carbon":                  convertToJSON(data.CarbonTable()),
 		"outOfScope":              convertToJSON(data.ExcludedResourcesTable()),
 	}
 

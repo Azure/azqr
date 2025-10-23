@@ -106,6 +106,7 @@ type (
 		Arc                    bool
 		Xlsx                   bool
 		Cost                   bool
+		Carbon                 bool
 		Mask                   bool
 		Csv                    bool
 		Json                   bool
@@ -129,6 +130,7 @@ func NewScanParams() *ScanParams {
 		Defender:               true,
 		Advisor:                true,
 		Cost:                   true,
+		Carbon:                 true,
 		Mask:                   true,
 		Csv:                    false,
 		Json:                   false,
@@ -221,6 +223,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	azurePolicyScanner := scanners.AzurePolicyScanner{}
 	arcSQLScanner := scanners.ArcSQLScanner{}
 	costScanner := scanners.CostScanner{}
+	carbonScanner := scanners.CarbonScanner{}
 	diagResults := map[string]bool{}
 
 	// initialize report data
@@ -365,6 +368,11 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 	// scan Azure Policy
 	reportData.AzurePolicy = append(reportData.AzurePolicy, azurePolicyScanner.Scan(ctx, cred, subscriptions, filters)...)
+
+	// scan carbon emissions (batch operation across all subscriptions)
+	if params.Carbon {
+		reportData.Carbon = append(reportData.Carbon, carbonScanner.Scan(ctx, cred, subscriptions, filters, clientOptions)...)
+	}
 
 	// scan Arc-enabled SQL Server
 	if params.Arc {

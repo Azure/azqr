@@ -19,6 +19,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs (default) (default true)")
+	scanCmd.PersistentFlags().BoolP("carbon", "", true, "Scan Azure Carbon Emissions (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("arc", "", true, "Scan Azure Arc-enabled resources (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("xlsx", "", true, "Create Excel report (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("json", "", false, "Create JSON report files")
@@ -52,6 +53,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	defender, _ := cmd.Flags().GetBool("defender")
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
+	carbon, _ := cmd.Flags().GetBool("carbon")
 	arc, _ := cmd.Flags().GetBool("arc")
 	xlsx, _ := cmd.Flags().GetBool("xlsx")
 	csv, _ := cmd.Flags().GetBool("csv")
@@ -75,6 +77,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		Arc:                    arc,
 		Xlsx:                   xlsx,
 		Cost:                   cost,
+		Carbon:                 carbon,
 		Csv:                    csv,
 		Json:                   json,
 		Mask:                   mask,

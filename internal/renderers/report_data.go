@@ -22,6 +22,7 @@ type (
 		AzurePolicy             []models.AzurePolicyResult
 		ArcSQL                  []models.ArcSQLResult
 		Cost                    *models.CostResult
+		Carbon                  []models.CarbonResult
 		Recommendations         map[string]map[string]models.AprlRecommendation
 		Resources               []*models.Resource
 		ExludedResources        []*models.Resource
@@ -114,6 +115,28 @@ func (rd *ReportData) CostTable() [][]string {
 			r.ServiceName,
 			r.Value,
 			r.Currency,
+		}
+		rows = append(rows, row)
+	}
+
+	rows = append([][]string{headers}, rows...)
+	return rows
+}
+
+func (rd *ReportData) CarbonTable() [][]string {
+	headers := []string{"From", "To", "Resource Type", "Latest Month Emissions", "Previous Month Emissions", "Month Over Month Change Ratio", "Monthly Emissions Change Value", "Unit"}
+
+	rows := [][]string{}
+	for _, r := range rd.Carbon {
+		row := []string{
+			r.From.Format("2006-01-02"),
+			r.To.Format("2006-01-02"),
+			r.ResourceType,
+			r.LatestMonthEmissions,
+			r.PreviousMonthEmissions,
+			r.MonthOverMonthEmissionsChangeRatio,
+			r.MonthlyEmissionsChangeValue,
+			r.Unit,
 		}
 		rows = append(rows, row)
 	}
@@ -347,6 +370,7 @@ func NewReportData(outputFile string, mask bool) ReportData {
 		Cost: &models.CostResult{
 			Items: []*models.CostResultItem{},
 		},
+		Carbon:            []models.CarbonResult{},
 		ResourceTypeCount: []models.ResourceTypeCount{},
 	}
 }

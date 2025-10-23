@@ -44,6 +44,9 @@ func CreateCsvReport(data *renderers.ReportData) {
 	records = data.CostTable()
 	writeData(records, data.OutputFileName, "costs")
 
+	records = data.CarbonTable()
+	writeData(records, data.OutputFileName, "carbon")
+
 	records = data.ExcludedResourcesTable()
 	writeData(records, data.OutputFileName, "outofscope")
 }
