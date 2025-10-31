@@ -13,6 +13,8 @@ const routeLabels = {
     'costs': 'Cost Analysis',
     'outOfScope': 'Out of Scope'
 };
+let pluginRoutes = [];
+let pluginMetadata = {};
 const menuStructure = [
     { label: 'Overview', route: 'dashboard', children: [] },
     {
@@ -64,6 +66,9 @@ function navigate() {
     if (routes.includes(h)) {
         updateBrand(h);
         showDataset(h);
+    } else if (pluginRoutes.includes(h)) {
+        updateBrand(h);
+        showPlugin(h);
     } else {
         console.log('Unknown route:', h, 'redirecting to dashboard');
         updateBrand('dashboard');
@@ -112,6 +117,32 @@ async function initNav() {
             html += `</ul></li>`;
         }
     });
+
+    // Load plugins and add plugin menu if plugins exist
+    try {
+        const plugins = await fetchJSON('/api/plugins');
+        if (plugins && plugins.length > 0) {
+            pluginRoutes = plugins.map(p => `plugin-${p.name}`);
+            plugins.forEach(p => {
+                pluginMetadata[`plugin-${p.name}`] = p;
+                routeLabels[`plugin-${p.name}`] = p.displayName || p.name;
+            });
+
+            html += `<li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-plugin me-1"></i> Plugins
+                </a>
+                <ul class="dropdown-menu">`;
+            plugins.forEach(p => {
+                html += `<li><a class="dropdown-item" href="#plugin-${p.name}" onclick="closeMenu()">
+                    <i class="bi bi-puzzle me-1"></i> ${p.displayName || p.name}
+                </a></li>`;
+            });
+            html += `</ul></li>`;
+        }
+    } catch (error) {
+        console.warn('No plugins available or error loading plugins:', error);
+    }
 
     nav.innerHTML = html;
 }
@@ -163,8 +194,9 @@ async function showDashboard() {
         'advisorCount', 'azurePolicyCount', 'costItems', 'defenderCount', 'defenderRecommendationsCount',
         'impactedCount', 'inventoryCount', 'outOfScopeCount', 'azurePolicyNonCompliant',
         'recommendationsImplemented', 'recommendationsNotImplemented', 'recommendationsTotal',
-        'resourceTypeCount', 'totalCost', 'arcSQLCount'
+        'resourceTypeCount', 'totalCost', 'arcSQLCount', 'pluginCounts'
     ]);
+
     Object.entries(summary).forEach(([k, v]) => {
         if (exclude.has(k)) return;
         const target = routes.find(r => k.toLowerCase().includes(r.toLowerCase()));
@@ -372,6 +404,24 @@ async function showDataset(name) {
     } catch (error) {
         console.error('Error fetching data:', error);
         document.getElementById('data-table').innerHTML = '<tbody><tr><td class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle me-2"></i>Error loading data</td></tr></tbody>';
+    }
+}
+
+async function showPlugin(routeName) {
+    console.log('showPlugin called with:', routeName);
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('dataset-view').style.display = 'block';
+
+    const pluginName = routeName.replace('plugin-', '');
+    const plugin = pluginMetadata[routeName];
+
+    try {
+        const data = await fetchJSON(`/api/plugin/${pluginName}`);
+        console.log('Plugin data fetched:', data.length, 'rows');
+        renderPluginTable(data, plugin);
+    } catch (error) {
+        console.error('Error fetching plugin data:', error);
+        document.getElementById('data-table').innerHTML = '<tbody><tr><td class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle me-2"></i>Error loading plugin data</td></tr></tbody>';
     }
 }
 function renderTable(rows, datasetName) {
@@ -593,6 +643,84 @@ function renderTable(rows, datasetName) {
     console.log('Table rendered with', rows.length, 'rows');
 
     // Add filtering functionality with delay to ensure DOM is ready
+    setTimeout(() => {
+        try {
+            addTableFilters();
+        } catch (error) {
+            console.warn('Filter setup failed:', error);
+        }
+    }, 100);
+}
+
+function renderPluginTable(rows, plugin) {
+    const table = document.getElementById('data-table');
+    if (rows.length === 0) {
+        table.innerHTML = '<tbody><tr><td class="text-center text-muted py-4"><i class="bi bi-inbox me-2"></i>No data available</td></tr></tbody>';
+        return;
+    }
+
+    const columns = plugin.columns || [];
+    const readableHeaders = columns.map(c => c.name);
+
+    // Build table with filter headers based on metadata
+    let html = '<thead class="table-dark sticky-top">';
+    html += '<tr>' + readableHeaders.map(h => `<th scope="col" class="fw-semibold">${h}</th>`).join('') + '</tr>';
+
+    // Add filter row with dynamic filter types
+    html += '<tr class="table-secondary">';
+    html += columns.map((col, index) => {
+        const filterType = col.filterType || 'none';
+        if (filterType === 'none') {
+            return `<th class="p-1"></th>`;
+        } else if (filterType === 'dropdown') {
+            // Get unique values for dropdown - use dataKey if available
+            const dataKey = col.dataKey || col.name;
+            const valueMap = new Map();
+            rows.forEach(r => {
+                const val = r[dataKey];
+                if (val && val.trim()) {
+                    const lowerKey = val.toLowerCase();
+                    if (!valueMap.has(lowerKey)) {
+                        valueMap.set(lowerKey, val);
+                    }
+                }
+            });
+            const uniqueValues = Array.from(valueMap.values()).sort((a, b) =>
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+
+            return `<th class="p-1">
+                <select class="form-select form-select-sm table-filter" data-column="${index}">
+                    <option value="">All</option>
+                    ${uniqueValues.map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`).join('')}
+                </select>
+            </th>`;
+        } else { // search
+            return `<th class="p-1">
+                <input type="text" class="form-control form-control-sm table-filter" data-column="${index}" placeholder="Filter...">
+            </th>`;
+        }
+    }).join('');
+    html += '</tr></thead>';
+
+    // Build table body
+    html += '<tbody>';
+    rows.forEach((r, rowIndex) => {
+        html += `<tr class="filterable-row ${rowIndex % 2 === 0 ? 'table-light' : ''}">`;
+        html += columns.map(col => {
+            // Use dataKey if available, otherwise fall back to name
+            const dataKey = col.dataKey || col.name;
+            const value = r[dataKey] || '';
+            return `<td><span class="text-break">${escapeHTML(value)}</span></td>`;
+        }).join('');
+        html += '</tr>';
+    });
+    html += '</tbody>';
+
+    table.innerHTML = html;
+    console.log('Plugin table rendered with', rows.length, 'rows');
+
+    // Add filtering functionality
     setTimeout(() => {
         try {
             addTableFilters();

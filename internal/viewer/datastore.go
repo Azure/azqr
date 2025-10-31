@@ -12,6 +12,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/Azure/azqr/internal/plugins"
 )
 
 // Dataset constants as produced by the JSON renderer.
@@ -29,9 +31,21 @@ const (
 	DataSetOutOfScope              = "outOfScope"
 )
 
+// PluginDataset represents a plugin's data with metadata from the plugin registry
+type PluginDataset struct {
+	Name        string              `json:"name"`
+	DisplayName string              `json:"displayName"`
+	Description string              `json:"description"`
+	Version     string              `json:"version"`
+	Author      string              `json:"author,omitempty"`
+	Columns     []map[string]string `json:"columns"` // {"name": "...", "filterType": "..."}
+	Data        []map[string]string `json:"-"`       // Not exposed in metadata API
+}
+
 // DataStore holds all report datasets in memory.
 type DataStore struct {
-	Data map[string][]map[string]string
+	Data    map[string][]map[string]string
+	Plugins []PluginDataset
 }
 
 // LoadDataStore loads a consolidated azqr JSON or Excel report.
@@ -77,8 +91,57 @@ func loadJSONDataStore(path string) (*DataStore, error) {
 		return nil, fmt.Errorf("unmarshal json: %w", err)
 	}
 
-	ds := &DataStore{Data: map[string][]map[string]string{}}
+	ds := &DataStore{Data: map[string][]map[string]string{}, Plugins: []PluginDataset{}}
 	for k, v := range raw {
+		// Handle externalPlugins object specially
+		if k == "externalPlugins" {
+			pluginsObj, ok := v.(map[string]interface{})
+			if ok {
+				for pluginName, pluginDataRaw := range pluginsObj {
+					pluginObj, ok := pluginDataRaw.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					// Extract the data array from the plugin object
+					dataArray, ok := pluginObj["data"].([]interface{})
+					if !ok {
+						continue
+					}
+					// Convert to records
+					records := make([]map[string]string, 0, len(dataArray))
+					for _, row := range dataArray {
+						obj, ok := row.(map[string]interface{})
+						if !ok {
+							continue
+						}
+						rec := map[string]string{}
+						for key, val := range obj {
+							rec[key] = toString(val)
+						}
+						records = append(records, rec)
+					}
+					// Extract column metadata if present
+					var columns []map[string]string
+					if colMeta, ok := pluginObj["columnMetadata"].([]interface{}); ok {
+						for _, cm := range colMeta {
+							if colMap, ok := cm.(map[string]interface{}); ok {
+								columns = append(columns, map[string]string{
+									"name":       toString(colMap["name"]),
+									"filterType": toString(colMap["filterType"]),
+								})
+							}
+						}
+					}
+					// Create plugin dataset
+					plugin := ds.createPluginDataset(pluginName, pluginObj, records, columns)
+					ds.Plugins = append(ds.Plugins, plugin)
+					// Store in Data map with plugin_ prefix
+					ds.Data["plugin_"+pluginName] = records
+				}
+			}
+			continue
+		}
+
 		arr, ok := v.([]interface{})
 		if !ok {
 			continue
@@ -95,7 +158,18 @@ func loadJSONDataStore(path string) (*DataStore, error) {
 			}
 			records = append(records, rec)
 		}
-		ds.Data[k] = records
+
+		// Check if this is a plugin dataset (starts with "plugin_")
+		if strings.HasPrefix(k, "plugin_") {
+			pluginName := strings.TrimPrefix(k, "plugin_")
+			// Create minimal plugin dataset without metadata from JSON
+			plugin := ds.createPluginDataset(pluginName, nil, records, nil)
+			ds.Plugins = append(ds.Plugins, plugin)
+			// Also store in Data map for compatibility
+			ds.Data[k] = records
+		} else {
+			ds.Data[k] = records
+		}
 	}
 	return ds, nil
 }
@@ -202,6 +276,12 @@ func (ds *DataStore) Summary() map[string]interface{} {
 		}
 	}
 
+	// Count plugin results
+	pluginCounts := make(map[string]int)
+	for _, plugin := range ds.Plugins {
+		pluginCounts[plugin.Name] = len(plugin.Data)
+	}
+
 	return map[string]interface{}{
 		"recommendationsTotal":          len(recs),
 		"recommendationsImplemented":    implemented,
@@ -218,6 +298,7 @@ func (ds *DataStore) Summary() map[string]interface{} {
 		"costItems":                     len(costs),
 		"totalCost":                     totalCost,
 		"outOfScopeCount":               len(outOfScope),
+		"pluginCounts":                  pluginCounts,
 	}
 }
 
@@ -484,4 +565,112 @@ func toString(v interface{}) string {
 		b, _ := json.Marshal(t)
 		return string(b)
 	}
+}
+
+// createPluginDataset creates a plugin dataset from metadata and data
+func (ds *DataStore) createPluginDataset(pluginName string, pluginObj map[string]interface{}, records []map[string]string, columns []map[string]string) PluginDataset {
+	// Default values
+	description := fmt.Sprintf("Results from %s plugin", toDisplayName(pluginName))
+	version := ""
+	author := ""
+
+	// Try to get metadata from plugin registry first
+	if plugin, exists := plugins.GetInternalPlugin(pluginName); exists {
+		metadata := plugin.GetMetadata()
+		description = metadata.Description
+		version = metadata.Version
+		author = metadata.Author
+
+		// Use column metadata from plugin registry if available
+		if len(metadata.ColumnMetadata) > 0 {
+			columns = make([]map[string]string, 0, len(metadata.ColumnMetadata))
+			for _, col := range metadata.ColumnMetadata {
+				// Use DataKey if provided, otherwise fall back to Name
+				dataKey := col.DataKey
+				if dataKey == "" {
+					dataKey = col.Name
+				}
+				columns = append(columns, map[string]string{
+					"name":       col.Name,
+					"dataKey":    dataKey,
+					"filterType": string(col.FilterType),
+				})
+			}
+		}
+	} else {
+		// Fall back to metadata from plugin object if plugin not in registry
+		if pluginObj != nil {
+			if desc, ok := pluginObj["description"].(string); ok && desc != "" {
+				description = desc
+			}
+			if vers, ok := pluginObj["version"].(string); ok {
+				version = vers
+			}
+			if auth, ok := pluginObj["author"].(string); ok {
+				author = auth
+			}
+		}
+
+		// If no column metadata from registry or object, infer from data
+		if len(columns) == 0 && len(records) > 0 {
+			for key := range records[0] {
+				columns = append(columns, map[string]string{
+					"name":       key,
+					"filterType": inferFilterType(key, records),
+				})
+			}
+		}
+	}
+
+	return PluginDataset{
+		Name:        pluginName,
+		DisplayName: toDisplayName(pluginName),
+		Description: description,
+		Version:     version,
+		Author:      author,
+		Columns:     columns,
+		Data:        records,
+	}
+}
+
+// inferFilterType determines the appropriate filter type for a column
+func inferFilterType(columnName string, records []map[string]string) string {
+	// Keywords that suggest no filtering needed
+	noFilterKeywords := []string{"description", "url", "link", "id", "guid"}
+	lowerName := strings.ToLower(columnName)
+	for _, keyword := range noFilterKeywords {
+		if strings.Contains(lowerName, keyword) {
+			return "none"
+		}
+	}
+
+	// Count unique values
+	uniqueValues := make(map[string]bool)
+	for _, rec := range records {
+		if val, ok := rec[columnName]; ok && val != "" {
+			uniqueValues[val] = true
+			// If more than 20 unique values, use search instead of dropdown
+			if len(uniqueValues) > 20 {
+				return "search"
+			}
+		}
+	}
+
+	// If few unique values, use dropdown; otherwise search
+	if len(uniqueValues) <= 20 && len(uniqueValues) > 1 {
+		return "dropdown"
+	} else if len(uniqueValues) > 1 {
+		return "search"
+	}
+
+	return "none"
+}
+
+// toDisplayName converts a plugin name to a display-friendly format
+func toDisplayName(name string) string {
+	// Replace hyphens and underscores with spaces
+	name = strings.ReplaceAll(name, "-", " ")
+	name = strings.ReplaceAll(name, "_", " ")
+
+	return name
 }

@@ -31,6 +31,20 @@ func CreateJsonReport(data *renderers.ReportData) {
 		"outOfScope":              convertToJSON(data.ExcludedResourcesTable()),
 	}
 
+	// Add external plugin results
+	if len(data.PluginResults) > 0 {
+		plugins := make(map[string]interface{})
+		for _, result := range data.PluginResults {
+			pluginData := map[string]interface{}{
+				"description": result.Description,
+				"sheetName":   result.SheetName,
+				"data":        convertToJSON(result.Table),
+			}
+			plugins[result.PluginName] = pluginData
+		}
+		consolidatedReport["externalPlugins"] = plugins
+	}
+
 	// Write consolidated JSON to single file
 	writeData(consolidatedReport, filename)
 }

@@ -46,6 +46,14 @@ func CreateCsvReport(data *renderers.ReportData) {
 
 	records = data.ExcludedResourcesTable()
 	writeData(records, data.OutputFileName, "outofscope")
+
+	// Render external plugin results
+	for _, result := range data.PluginResults {
+		if len(result.Table) > 0 {
+			// Use plugin name for the CSV filename extension
+			writeData(result.Table, data.OutputFileName, fmt.Sprintf("plugin_%s", result.PluginName))
+		}
+	}
 }
 
 func writeData(data [][]string, fileName, extension string) {

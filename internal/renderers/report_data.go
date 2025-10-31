@@ -26,6 +26,15 @@ type (
 		Resources               []*models.Resource
 		ExludedResources        []*models.Resource
 		ResourceTypeCount       []models.ResourceTypeCount
+		PluginResults           []PluginResult // Results from external plugins
+	}
+
+	// PluginResult represents data from an external plugin
+	PluginResult struct {
+		PluginName  string     // Name of the plugin
+		SheetName   string     // Name for Excel sheet
+		Description string     // Description of the data
+		Table       [][]string // Table data (first row is headers)
 	}
 
 	ResourceTypeCountResults struct {

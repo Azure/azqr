@@ -1,0 +1,85 @@
+name: example-custom-checks
+version: 1.0.0
+description: Example YAML plugin with custom Azure Resource Graph queries
+author: Azure Quick Review Team
+license: MIT
+
+queries:
+  # Example 1: Inline query for unused NICs
+  - description: Network interfaces not attached to any VM
+    aprlGuid: yaml-001-unused-nics
+    recommendationTypeId: null
+    recommendationControl: Governance
+    recommendationImpact: Low
+    recommendationResourceType: Microsoft.Network/networkInterfaces
+    recommendationMetadataState: Active
+    longDescription: |
+      Network interfaces that are not attached to any virtual machine.
+      These resources incur costs and should be reviewed for cleanup.
+    potentialBenefits: Cost optimization and resource cleanup
+    pgVerified: false
+    automationAvailable: false
+    tags:
+      - cost-optimization
+      - cleanup
+    learnMoreLink:
+      - name: Network Interface Overview
+        url: "https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface"
+    query: |
+      resources
+      | where type =~ 'Microsoft.Network/networkInterfaces'
+      | where properties.virtualMachine == "" or isnull(properties.virtualMachine)
+      | where properties.privateEndpoint == "" or isnull(properties.privateEndpoint)
+      | project recommendationId="yaml-001-unused-nics", name, id, tags, 
+                param1=strcat("Location: ", location),
+                param2=strcat("Resource Group: ", resourceGroup)
+
+  # Example 2: Query from external file
+  - description: Public IP addresses not associated with any resource
+    aprlGuid: yaml-002-unused-public-ips
+    recommendationTypeId: null
+    recommendationControl: Governance
+    recommendationImpact: Medium
+    recommendationResourceType: Microsoft.Network/publicIPAddresses
+    recommendationMetadataState: Active
+    longDescription: |
+      Public IP addresses that are not associated with any Azure resource.
+      These IPs cost money even when not in use.
+    potentialBenefits: Reduce costs by removing unused public IPs
+    pgVerified: false
+    automationAvailable: true
+    tags:
+      - cost-optimization
+      - security
+    learnMoreLink:
+      - name: Public IP Addresses
+        url: "https://learn.microsoft.com/azure/virtual-network/ip-services/public-ip-addresses"
+    queryFile: kql/unused-public-ips.kql
+
+  # Example 3: Security check
+  - description: Storage accounts without secure transfer enabled
+    aprlGuid: yaml-003-storage-secure-transfer
+    recommendationTypeId: null
+    recommendationControl: Security
+    recommendationImpact: High
+    recommendationResourceType: Microsoft.Storage/storageAccounts
+    recommendationMetadataState: Active
+    longDescription: |
+      Storage accounts that do not have secure transfer (HTTPS) required.
+      This is a security risk as data can be transmitted over insecure connections.
+    potentialBenefits: Improved security and data protection
+    pgVerified: true
+    automationAvailable: true
+    tags:
+      - security
+      - compliance
+    learnMoreLink:
+      - name: Require secure transfer
+        url: "https://learn.microsoft.com/azure/storage/common/storage-require-secure-transfer"
+    query: |
+      resources
+      | where type =~ 'Microsoft.Storage/storageAccounts'
+      | where properties.supportsHttpsTrafficOnly == false
+      | project recommendationId="yaml-003-storage-secure-transfer", name, id, tags,
+                param1=strcat("SKU: ", sku.name),
+                param2=strcat("Location: ", location)

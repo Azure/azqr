@@ -12,6 +12,7 @@ import (
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/plugins"
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
@@ -115,6 +116,7 @@ type (
 		Filters                *models.Filters
 		UseAzqrRecommendations bool
 		UseAprlRecommendations bool
+		EnabledInternalPlugins map[string]bool
 	}
 
 	Scanner struct{}
@@ -236,6 +238,21 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	}
 
 	aprlScanner := graph.NewAprlScanner(serviceScanners, filters, subscriptions)
+
+	// Register YAML plugin recommendations with the APRL scanner
+	yamlPluginRegistry := plugins.GetRegistry()
+	for _, plugin := range yamlPluginRegistry.List() {
+		if len(plugin.YamlRecommendations) > 0 {
+			log.Info().
+				Str("plugin", plugin.Metadata.Name).
+				Int("queries", len(plugin.YamlRecommendations)).
+				Msg("Registering YAML plugin queries with APRL scanner")
+			for _, rec := range plugin.YamlRecommendations {
+				aprlScanner.RegisterExternalQuery(rec.ResourceType, rec)
+			}
+		}
+	}
+
 	reportData.Recommendations, _ = aprlScanner.ListRecommendations()
 
 	resourceTypes := resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, filters)
@@ -261,9 +278,82 @@ func (sc Scanner) Scan(params *ScanParams) string {
 		}
 	}
 
-	// get the APRL scan results
+	// Get plugin scanners - they will be executed separately
+	pluginRegistry := plugins.GetRegistry()
+	registeredPlugins := pluginRegistry.List()
+	log.Info().Msgf("Found %d registered plugins", len(registeredPlugins))
+	var internalPluginScanners []plugins.InternalPluginScanner
+	for _, plugin := range registeredPlugins {
+		if plugin.InternalScanner != nil {
+			log.Info().
+				Str("plugin", plugin.Metadata.Name).
+				Str("type", "internal").
+				Str("version", plugin.Metadata.Version).
+				Msg("Internal plugin ready for execution")
+			internalPluginScanners = append(internalPluginScanners, plugin.InternalScanner)
+		}
+	}
+
+	// get the APRL scan results (built-in APRL recommendations only)
 	aprlScanner = graph.NewAprlScanner(filteredServiceScanners, filters, subscriptions)
+
+	// Register YAML plugin recommendations with the APRL scanner
+	for _, plugin := range yamlPluginRegistry.List() {
+		if len(plugin.YamlRecommendations) > 0 {
+			for _, rec := range plugin.YamlRecommendations {
+				aprlScanner.RegisterExternalQuery(rec.ResourceType, rec)
+			}
+		}
+	}
+
 	reportData.Aprl = aprlScanner.Scan(ctx, cred)
+
+	// Execute internal plugin scanners (only if enabled)
+	if len(internalPluginScanners) > 0 {
+		for _, internalScanner := range internalPluginScanners {
+			pluginName := internalScanner.GetMetadata().Name
+			// Check if plugin is enabled (default: false)
+			enabled := false
+			if params.EnabledInternalPlugins != nil {
+				enabled = params.EnabledInternalPlugins[pluginName]
+			}
+
+			if !enabled {
+				log.Info().
+					Str("plugin", pluginName).
+					Msg("Internal plugin skipped (not enabled)")
+				continue
+			}
+
+			log.Info().
+				Str("plugin", pluginName).
+				Str("type", "internal").
+				Str("version", internalScanner.GetMetadata().Version).
+				Msg("Executing internal plugin")
+
+			output, err := internalScanner.Scan(ctx, cred, subscriptions, filters)
+			if err != nil {
+				log.Error().
+					Err(err).
+					Str("plugin", pluginName).
+					Msg("Internal plugin execution failed")
+				continue
+			}
+
+			// Add internal plugin results to report data
+			reportData.PluginResults = append(reportData.PluginResults, renderers.PluginResult{
+				PluginName:  pluginName,
+				SheetName:   output.SheetName,
+				Description: output.Description,
+				Table:       output.Table,
+			})
+
+			log.Info().
+				Str("plugin", pluginName).
+				Int("rows", len(output.Table)-1).
+				Msg("Internal plugin completed")
+		}
+	}
 
 	// get the count of resources per resource type
 	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceTypeAndSubscription(ctx, cred, subscriptions, reportData.Recommendations, filters)
@@ -322,7 +412,6 @@ func (sc Scanner) Scan(params *ScanParams) string {
 				PublicIPs:           pips,
 			}
 
-			// scan each resource group
 			ch := make(chan []models.AzqrServiceResult, len(filteredServiceScanners))
 
 			for _, s := range filteredServiceScanners {
@@ -448,3 +537,4 @@ func (sc Scanner) generateOutputFileName(outputName string) string {
 	}
 	return outputFile
 }
+
