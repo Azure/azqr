@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"path"
 	"strings"
 	"time"
@@ -24,6 +25,32 @@ func NewHandler(ds *DataStore) http.Handler {
 	mux.HandleFunc("/api/datasets", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, ds.ListDataSets()) })
 	mux.HandleFunc("/api/summary", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, ds.Summary()) })
 	mux.HandleFunc("/api/analytics", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, ds.Analytics()) })
+	mux.HandleFunc("/api/plugins", func(w http.ResponseWriter, r *http.Request) {
+		// Return plugin metadata (without data)
+		writeJSON(w, ds.Plugins)
+	})
+	mux.HandleFunc("/api/plugin/", func(w http.ResponseWriter, r *http.Request) {
+		pluginName := strings.Trim(strings.TrimPrefix(r.URL.Path, "/api/plugin/"), "/")
+		if pluginName == "" {
+			http.Error(w, "plugin name required", http.StatusBadRequest)
+			return
+		}
+		// Find plugin and filter data
+		var plugin *PluginDataset
+		for i := range ds.Plugins {
+			if ds.Plugins[i].Name == pluginName {
+				plugin = &ds.Plugins[i]
+				break
+			}
+		}
+		if plugin == nil {
+			http.Error(w, "plugin not found", http.StatusNotFound)
+			return
+		}
+		// Filter plugin data using query parameters
+		filtered := filterPluginData(plugin.Data, r.URL.Query())
+		writeJSON(w, filtered)
+	})
 	mux.HandleFunc("/api/data/", func(w http.ResponseWriter, r *http.Request) {
 		dataset := strings.Trim(strings.TrimPrefix(r.URL.Path, "/api/data/"), "/")
 		if dataset == "" {
@@ -69,9 +96,50 @@ func StartServer(ctx context.Context, addr string, ds *DataStore) error {
 	return srv.ListenAndServe()
 }
 
-func writeJSON(w http.ResponseWriter, v interface{}) {
+// writeJSON writes JSON to the response
+func writeJSON(w http.ResponseWriter, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+// filterPluginData filters plugin data based on query parameters
+func filterPluginData(data []map[string]string, query url.Values) []map[string]string {
+	if len(query) == 0 {
+		return data
+	}
+
+	filtered := make([]map[string]string, 0)
+	for _, record := range data {
+		matches := true
+		for key, values := range query {
+			if len(values) == 0 {
+				continue
+			}
+			// Check if record value matches any of the filter values
+			recordValue, exists := record[key]
+			if !exists {
+				matches = false
+				break
+			}
+			// For search filters, check if the value contains the search term
+			found := false
+			for _, filterValue := range values {
+				if strings.Contains(strings.ToLower(recordValue), strings.ToLower(filterValue)) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				matches = false
+				break
+			}
+		}
+		if matches {
+			filtered = append(filtered, record)
+		}
+	}
+
+	return filtered
 }
 func serveStatic(w http.ResponseWriter, name string) {
 	data, err := staticFS.ReadFile(name)

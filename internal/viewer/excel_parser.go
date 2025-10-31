@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Azure/azqr/internal/plugins"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -23,7 +24,7 @@ func ExcelToDataStore(path string) (*DataStore, error) {
 		_ = f.Close()
 	}()
 
-	ds := &DataStore{Data: map[string][]map[string]string{}}
+	ds := &DataStore{Data: map[string][]map[string]string{}, Plugins: []PluginDataset{}}
 
 	// Get all sheet names
 	sheets := f.GetSheetList()
@@ -31,8 +32,15 @@ func ExcelToDataStore(path string) (*DataStore, error) {
 	for _, sheetName := range sheets {
 		// Map sheet names to dataset names (matching azqr output conventions)
 		datasetName := mapSheetToDataset(sheetName)
+
+		// If not a known dataset, check if it's a plugin sheet
 		if datasetName == "" {
-			continue // Skip unknown sheets
+			// Try to detect plugin sheets (e.g., "Carbon Emissions", "OpenAI Throttling")
+			if isPluginSheet(sheetName) {
+				datasetName = "plugin_" + normalizePluginName(sheetName)
+			} else {
+				continue // Skip unknown sheets
+			}
 		}
 
 		// Get all rows from the sheet
@@ -70,6 +78,13 @@ func ExcelToDataStore(path string) (*DataStore, error) {
 			continue // No valid headers found
 		}
 
+		// For plugin sheets, try to get header mapping from plugin registry
+		var headerToDataKey map[string]string
+		if strings.HasPrefix(datasetName, "plugin_") {
+			pluginName := strings.TrimPrefix(datasetName, "plugin_")
+			headerToDataKey = getPluginHeaderMapping(pluginName)
+		}
+
 		// Process data rows (skip header row and any empty rows before it)
 		records := make([]map[string]string, 0, len(rows)-headerRowIndex-1)
 		for i := headerRowIndex + 1; i < len(rows); i++ {
@@ -87,9 +102,21 @@ func ExcelToDataStore(path string) (*DataStore, error) {
 					cellValue = strings.TrimSpace(row[j])
 				}
 
-				// Clean up header name (remove spaces, make consistent with JSON output)
-				cleanHeader := cleanHeaderName(header)
-				record[cleanHeader] = cellValue
+				// For plugin sheets, use the header mapping from plugin metadata
+				var dataKey string
+				if headerToDataKey != nil {
+					if mappedKey, exists := headerToDataKey[header]; exists {
+						dataKey = mappedKey
+					} else {
+						// Fallback to cleanHeaderName if no mapping found
+						dataKey = cleanHeaderName(header)
+					}
+				} else {
+					// For non-plugin sheets, use cleanHeaderName
+					dataKey = cleanHeaderName(header)
+				}
+
+				record[dataKey] = cellValue
 			}
 
 			// Only add non-empty records
@@ -100,6 +127,13 @@ func ExcelToDataStore(path string) (*DataStore, error) {
 
 		if len(records) > 0 {
 			ds.Data[datasetName] = records
+
+			// If this is a plugin dataset, also create plugin metadata
+			if strings.HasPrefix(datasetName, "plugin_") {
+				pluginName := strings.TrimPrefix(datasetName, "plugin_")
+				pluginDataset := ds.createPluginDataset(pluginName, nil, records, nil)
+				ds.Plugins = append(ds.Plugins, pluginDataset)
+			}
 		}
 	}
 
@@ -270,4 +304,66 @@ func cleanHeaderName(header string) string {
 	result = strings.ReplaceAll(result, "IDID", "ID")
 
 	return result
+}
+
+// isPluginSheet determines if a sheet name is a plugin sheet by checking the plugin registry.
+func isPluginSheet(sheetName string) bool {
+	clean := strings.ToLower(strings.TrimSpace(sheetName))
+
+	// Known non-plugin patterns that should never be considered plugins
+	nonPluginPatterns := []string{
+		"sheet", "cover", "summary", "overview", "dashboard", "readme",
+	}
+
+	for _, pattern := range nonPluginPatterns {
+		if strings.Contains(clean, pattern) {
+			return false
+		}
+	}
+
+	// Normalize the sheet name to match plugin naming convention
+	normalizedName := normalizePluginName(sheetName)
+
+	// Check if a plugin with this name exists in the registry
+	if _, exists := plugins.GetInternalPlugin(normalizedName); exists {
+		return true
+	}
+
+	return false
+}
+
+// getPluginHeaderMapping returns a mapping from Excel header names to dataKeys
+// by consulting the plugin registry metadata
+func getPluginHeaderMapping(pluginName string) map[string]string {
+	plugin, exists := plugins.GetInternalPlugin(pluginName)
+	if !exists {
+		return nil
+	}
+
+	metadata := plugin.GetMetadata()
+	if len(metadata.ColumnMetadata) == 0 {
+		return nil
+	}
+
+	// Create mapping from column Name (display name) to DataKey
+	mapping := make(map[string]string)
+	for _, col := range metadata.ColumnMetadata {
+		dataKey := col.DataKey
+		if dataKey == "" {
+			dataKey = col.Name
+		}
+		mapping[col.Name] = dataKey
+	}
+
+	return mapping
+}
+
+// normalizePluginName converts a plugin sheet name to a normalized plugin identifier.
+// Example: "Carbon Emissions" -> "carbon-emissions", "OpenAI Throttling" -> "openai-throttling"
+func normalizePluginName(sheetName string) string {
+	// Convert to lowercase and replace spaces with hyphens
+	normalized := strings.ToLower(strings.TrimSpace(sheetName))
+	normalized = strings.ReplaceAll(normalized, " ", "-")
+	normalized = strings.ReplaceAll(normalized, "_", "-")
+	return normalized
 }

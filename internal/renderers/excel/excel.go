@@ -34,6 +34,7 @@ func CreateExcelReport(data *renderers.ReportData) {
 	renderDefender(f, data)
 	renderExcludedResources(f, data)
 	renderCosts(f, data)
+	renderExternalPlugins(f, data)
 
 	if err := f.SaveAs(filename); err != nil {
 		log.Fatal().Err(err).Msg("Failed to save Excel file")
@@ -194,6 +195,157 @@ func applyBlueStyle(f *excelize.File, sheet string, lastRow int, columns int) {
 				if err != nil {
 					log.Fatal().Err(err).Msg("Failed to set style")
 				}
+			}
+		}
+	}
+}
+
+// renderExternalPlugins creates Excel sheets for external plugin results
+func renderExternalPlugins(f *excelize.File, data *renderers.ReportData) {
+	if len(data.PluginResults) == 0 {
+		return
+	}
+
+	// Create styles
+	headerStyle, err := f.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+		Fill: excelize.Fill{
+			Type:    "pattern",
+			Color:   []string{"#CAEDFB"},
+			Pattern: 1,
+		},
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to create header style")
+		return
+	}
+
+	blueStyle, err := f.NewStyle(&excelize.Style{
+		Fill: excelize.Fill{
+			Type:    "pattern",
+			Color:   []string{"#DDEBF7"},
+			Pattern: 1,
+		},
+		Alignment: &excelize.Alignment{
+			Vertical: "top",
+			WrapText: true,
+		},
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to create blue style")
+		return
+	}
+
+	whiteStyle, err := f.NewStyle(&excelize.Style{
+		Alignment: &excelize.Alignment{
+			Vertical: "top",
+			WrapText: true,
+		},
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to create white style")
+		return
+	}
+
+	for _, result := range data.PluginResults {
+		// Use the plugin-specified sheet name
+		sheetName := result.SheetName
+
+		// Create the sheet
+		_, err := f.NewSheet(sheetName)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to create sheet for plugin %s", result.PluginName)
+			continue
+		}
+
+		// Render the table data starting at row 4 (like other renderers)
+		if len(result.Table) == 0 {
+			// No data to render
+			continue
+		}
+
+		currentRow := 4
+
+		// Write all rows (headers and data)
+		for rowIdx, row := range result.Table {
+			for colIdx, cellValue := range row {
+				cell, err := excelize.CoordinatesToCellName(colIdx+1, currentRow+rowIdx)
+				if err != nil {
+					log.Error().Err(err).Msgf("Failed to get cell coordinates for plugin %s", result.PluginName)
+					continue
+				}
+				err = f.SetCellValue(sheetName, cell, cellValue)
+				if err != nil {
+					log.Error().Err(err).Msgf("Failed to set cell value for plugin %s", result.PluginName)
+				}
+			}
+		}
+
+		// Apply header style to first row of table
+		if len(result.Table) > 0 {
+			numColumns := len(result.Table[0])
+			numRows := len(result.Table)
+
+			for colIdx := 1; colIdx <= numColumns; colIdx++ {
+				cell, err := excelize.CoordinatesToCellName(colIdx, currentRow)
+				if err != nil {
+					continue
+				}
+				err = f.SetCellStyle(sheetName, cell, cell, headerStyle)
+				if err != nil {
+					log.Error().Err(err).Msgf("Failed to set header style for plugin %s", result.PluginName)
+				}
+			}
+
+			// Apply alternating row colors to data rows
+			for rowIdx := 1; rowIdx < numRows; rowIdx++ { // Start from 1 to skip header
+				style := blueStyle
+				if rowIdx%2 == 0 {
+					style = whiteStyle
+				}
+				for colIdx := 1; colIdx <= numColumns; colIdx++ {
+					cell, err := excelize.CoordinatesToCellName(colIdx, currentRow+rowIdx)
+					if err != nil {
+						continue
+					}
+					err = f.SetCellStyle(sheetName, cell, cell, style)
+					if err != nil {
+						log.Error().Err(err).Msgf("Failed to set cell style for plugin %s", result.PluginName)
+					}
+				}
+			}
+
+			// Autofit columns
+			_ = autofit(f, sheetName)
+
+			// Add autofilter
+			lastCell, err := excelize.CoordinatesToCellName(numColumns, currentRow+numRows-1)
+			if err != nil {
+				log.Error().Err(err).Msgf("Failed to get last cell for plugin %s", result.PluginName)
+			} else {
+				err = f.AutoFilter(sheetName, fmt.Sprintf("A4:%s", lastCell), nil)
+				if err != nil {
+					log.Error().Err(err).Msgf("Failed to set autofilter for plugin %s", result.PluginName)
+				}
+			}
+
+			// Add logo
+			logo := embeded.GetTemplates("azqr.png")
+			opt := &excelize.GraphicOptions{
+				ScaleX:      1,
+				ScaleY:      1,
+				Positioning: "absolute",
+				AltText:     "azqr logo",
+			}
+			pic := &excelize.Picture{
+				Extension: ".png",
+				File:      logo,
+				Format:    opt,
+			}
+			if err := f.AddPictureFromBytes(sheetName, "A1", pic); err != nil {
+				log.Error().Err(err).Msgf("Failed to add logo for plugin %s", result.PluginName)
 			}
 		}
 	}

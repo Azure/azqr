@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/Azure/azqr/internal/plugins"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -32,6 +33,11 @@ func Execute() {
 	output := zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}
 
 	log.Logger = zerolog.New(output).With().Timestamp().Logger()
+
+	// Load all YAML plugins after logger is configured
+	if err := plugins.LoadAll(); err != nil {
+		log.Warn().Err(err).Msg("Failed to load some plugins")
+	}
 
 	cobra.CheckErr(rootCmd.Execute())
 }

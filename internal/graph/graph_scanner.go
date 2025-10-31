@@ -32,6 +32,7 @@ type (
 		serviceScanners []models.IAzureScanner
 		filters         *models.Filters
 		subscriptions   map[string]string
+		externalQueries map[string]map[string]models.AprlRecommendation // External YAML plugin queries by resource type
 	}
 
 	ScanType string
@@ -53,7 +54,17 @@ func NewAprlScanner(serviceScanners []models.IAzureScanner, filters *models.Filt
 		serviceScanners: serviceScanners,
 		filters:         filters,
 		subscriptions:   subscriptions,
+		externalQueries: make(map[string]map[string]models.AprlRecommendation),
 	}
+}
+
+// RegisterExternalQuery adds an external YAML plugin query to the scanner
+func (a *AprlScanner) RegisterExternalQuery(resourceType string, recommendation models.AprlRecommendation) {
+	resourceType = strings.ToLower(resourceType)
+	if a.externalQueries[resourceType] == nil {
+		a.externalQueries[resourceType] = make(map[string]models.AprlRecommendation)
+	}
+	a.externalQueries[resourceType][recommendation.RecommendationID] = recommendation
 }
 
 // GetAprlRecommendations returns a map with all APRL recommendations
@@ -298,6 +309,8 @@ func (a AprlScanner) graphScan(ctx context.Context, graphClient *GraphQueryClien
 
 func (a AprlScanner) getGraphRules(service string, aprl map[string]map[string]models.AprlRecommendation) map[string]models.AprlRecommendation {
 	r := map[string]models.AprlRecommendation{}
+
+	// Add embedded APRL recommendations
 	if i, ok := aprl[strings.ToLower(service)]; ok {
 		for _, recommendation := range i {
 			if a.filters.Azqr.IsRecommendationExcluded(recommendation.RecommendationID) ||
@@ -311,5 +324,16 @@ func (a AprlScanner) getGraphRules(service string, aprl map[string]map[string]mo
 			r[recommendation.RecommendationID] = recommendation
 		}
 	}
+
+	// Add external YAML plugin queries
+	if external, ok := a.externalQueries[strings.ToLower(service)]; ok {
+		for id, recommendation := range external {
+			if a.filters.Azqr.IsRecommendationExcluded(recommendation.RecommendationID) {
+				continue
+			}
+			r[id] = recommendation
+		}
+	}
+
 	return r
 }

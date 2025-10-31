@@ -1,0 +1,9 @@
+// Azure Resource Graph Query
+// Find all public IP addresses that are not associated with any resource
+resources
+| where type =~ 'Microsoft.Network/publicIPAddresses'
+| where properties.ipConfiguration == "" or isnull(properties.ipConfiguration)
+| where properties.natGateway == "" or isnull(properties.natGateway)
+| project recommendationId="yaml-002-unused-public-ips", name, id, tags,
+          param1=strcat("SKU: ", sku.name),
+          param2=strcat("Allocation: ", properties.publicIPAllocationMethod)
