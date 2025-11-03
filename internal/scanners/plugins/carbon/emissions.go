@@ -62,7 +62,13 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 
 	now := time.Now().UTC()
 	firstOfCurrentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
-	toTime := firstOfCurrentMonth.AddDate(0, -1, 0)
+	// Determine the "toTime" based on whether we are in the first week of the current month
+	var toTime time.Time
+	if now.Day() <= 7 {
+		toTime = firstOfCurrentMonth.AddDate(0, -2, 0)
+	} else {
+		toTime = firstOfCurrentMonth.AddDate(0, -1, 0)
+	}
 	fromTime := toTime
 
 	// Initialize client options
