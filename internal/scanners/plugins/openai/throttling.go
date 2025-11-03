@@ -43,8 +43,11 @@ func (s *ThrottlingScanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Account Name", DataKey: "accountName", FilterType: plugins.FilterTypeSearch},
 			{Name: "Kind", DataKey: "kind", FilterType: plugins.FilterTypeDropdown},
 			{Name: "SKU", DataKey: "sku", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Hour", DataKey: "hour", FilterType: plugins.FilterTypeSearch},
+			{Name: "Deployment Name", DataKey: "deploymentName", FilterType: plugins.FilterTypeSearch},
 			{Name: "Model Name", DataKey: "modelName", FilterType: plugins.FilterTypeDropdown},
+			{Name: "Spillover Enabled", DataKey: "spilloverEnabled", FilterType: plugins.FilterTypeDropdown},
+			{Name: "Spillover Deployment", DataKey: "spilloverDeployment", FilterType: plugins.FilterTypeSearch},
+			{Name: "Hour", DataKey: "hour", FilterType: plugins.FilterTypeSearch},
 			{Name: "Status Code", DataKey: "statusCode", FilterType: plugins.FilterTypeDropdown},
 			{Name: "Request Count", DataKey: "requestCount", FilterType: plugins.FilterTypeNone},
 		},
@@ -55,7 +58,7 @@ func (s *ThrottlingScanner) GetMetadata() plugins.PluginMetadata {
 func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) (*plugins.ExternalPluginOutput, error) {
 	// Initialize table with headers
 	table := [][]string{
-		{"Subscription", "Resource Group", "Account Name", "Kind", "SKU", "Hour", "Model Name", "Status Code", "Request Count"},
+		{"Subscription", "Resource Group", "Account Name", "Kind", "SKU", "Deployment Name", "Model Name", "Spillover Enabled", "Spillover Deployment", "Hour", "Status Code", "Request Count"},
 	}
 
 	// Scan all subscriptions
@@ -88,6 +91,14 @@ func (s *ThrottlingScanner) scanSubscription(ctx context.Context, cred azcore.To
 		return nil, fmt.Errorf("failed to create cognitive services client: %w", err)
 	}
 
+	// Create Deployments client
+	deploymentsClient, err := armcognitiveservices.NewDeploymentsClient(subscriptionID, cred, &arm.ClientOptions{
+		ClientOptions: *clientOptions,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create deployments client: %w", err)
+	}
+
 	// Create Monitor metrics client
 	metricsClient, err := armmonitor.NewMetricsClient(subscriptionID, cred, &arm.ClientOptions{
 		ClientOptions: *clientOptions,
@@ -115,7 +126,19 @@ func (s *ThrottlingScanner) scanSubscription(ctx context.Context, cred azcore.To
 			}
 
 			// Only check OpenAI accounts
-			if account.Kind == nil || !strings.Contains(strings.ToLower(*account.Kind), "openai") {
+			if account.Kind == nil ||
+				(!strings.Contains(strings.ToLower(*account.Kind), "openai") &&
+					!strings.Contains(strings.ToLower(*account.Kind), "aiservices")) {
+				continue
+			}
+
+			// Extract resource group from ID
+			resourceGroup := extractResourceGroup(*account.ID)
+
+			// Get deployments for this account
+			deployments, err := s.getDeployments(ctx, deploymentsClient, resourceGroup, *account.Name)
+			if err != nil {
+				// Skip accounts with deployment errors but don't fail the entire scan
 				continue
 			}
 
@@ -125,9 +148,6 @@ func (s *ThrottlingScanner) scanSubscription(ctx context.Context, cred azcore.To
 				// Skip accounts with metrics errors but don't fail the entire scan
 				continue
 			}
-
-			// Extract resource group from ID
-			resourceGroup := extractResourceGroup(*account.ID)
 
 			// Get SKU name
 			skuName := "Unknown"
@@ -140,21 +160,45 @@ func (s *ThrottlingScanner) scanSubscription(ctx context.Context, cred azcore.To
 				kind = *account.Kind
 			}
 
-			// Create one row per hour per model per status code
-			for hourKey, models := range hourlyMetrics {
-				for modelName, statusCodes := range models {
-					for statusCode, count := range statusCodes {
-						results = append(results, []string{
-							subscriptionName,
-							resourceGroup,
-							*account.Name,
-							kind,
-							skuName,
-							hourKey,
-							modelName,
-							statusCode,
-							fmt.Sprintf("%.0f", count),
-						})
+			// Create a map of deployment names to their properties for quick lookup
+			deploymentMap := make(map[string]*armcognitiveservices.Deployment)
+			for _, deployment := range deployments {
+				if deployment.Name != nil {
+					deploymentMap[*deployment.Name] = deployment
+				}
+			}
+
+			// Create one row per hour per deployment per model per status code from metrics
+			for hourKey, deploymentMetrics := range hourlyMetrics {
+				for metricDeploymentName, models := range deploymentMetrics {
+					for modelName, statusCodes := range models {
+						for statusCode, count := range statusCodes {
+							// Look up deployment properties
+							spilloverEnabled := "No"
+							spilloverDeployment := "N/A"
+
+							if deployment, exists := deploymentMap[metricDeploymentName]; exists {
+								if deployment.Properties != nil && deployment.Properties.SpilloverDeploymentName != nil {
+									spilloverEnabled = "Yes"
+									spilloverDeployment = *deployment.Properties.SpilloverDeploymentName
+								}
+							}
+
+							results = append(results, []string{
+								subscriptionName,
+								resourceGroup,
+								*account.Name,
+								kind,
+								skuName,
+								metricDeploymentName,
+								modelName,
+								spilloverEnabled,
+								spilloverDeployment,
+								hourKey,
+								statusCode,
+								fmt.Sprintf("%.0f", count),
+							})
+						}
 					}
 				}
 			}
@@ -164,8 +208,8 @@ func (s *ThrottlingScanner) scanSubscription(ctx context.Context, cred azcore.To
 	return results, nil
 }
 
-// getMetricsWithStatusCodeSplit queries Azure Monitor for request metrics split by status code and model
-func (s *ThrottlingScanner) getMetricsWithStatusCodeSplit(ctx context.Context, client *armmonitor.MetricsClient, resourceID string, hours int) (map[string]map[string]map[string]float64, error) {
+// getMetricsWithStatusCodeSplit queries Azure Monitor for request metrics split by status code, deployment name, and model
+func (s *ThrottlingScanner) getMetricsWithStatusCodeSplit(ctx context.Context, client *armmonitor.MetricsClient, resourceID string, hours int) (map[string]map[string]map[string]map[string]float64, error) {
 	endTime := time.Now().UTC()
 	startTime := endTime.Add(-time.Duration(hours) * time.Hour)
 	timespan := fmt.Sprintf("%s/%s",
@@ -176,7 +220,9 @@ func (s *ThrottlingScanner) getMetricsWithStatusCodeSplit(ctx context.Context, c
 	interval := "PT1H"
 
 	// Use wildcard filter to get all status codes and model names
-	filter := "StatusCode eq '*' and ModelName eq '*'"
+	filter := "StatusCode eq '*' and ModelDeploymentName eq '*' and ModelName eq '*'"
+
+	<-throttling.ARMLimiter
 
 	result, err := client.List(ctx, resourceID, &armmonitor.MetricsClientListOptions{
 		Timespan:    &timespan,
@@ -189,17 +235,19 @@ func (s *ThrottlingScanner) getMetricsWithStatusCodeSplit(ctx context.Context, c
 		return nil, fmt.Errorf("failed to get metrics: %w", err)
 	}
 
-	// Aggregate by hour, model name, and status code: map[hour]map[modelName]map[statusCode]count
-	hourlyData := make(map[string]map[string]map[string]float64)
+	// Aggregate by hour, deployment name, model name, and status code: map[hour]map[deploymentName]map[modelName]map[statusCode]count
+	hourlyData := make(map[string]map[string]map[string]map[string]float64)
 
 	for _, metric := range result.Value {
 		if metric.Timeseries == nil {
 			continue
 		}
 		for _, timeseries := range metric.Timeseries {
-			// Extract status code and model name from metadata
+			// Extract status code, deployment name, and model name from metadata
 			statusCode := "Unknown"
+			deploymentName := "Unknown"
 			modelName := "Unknown"
+
 			if len(timeseries.Metadatavalues) > 0 {
 				for _, meta := range timeseries.Metadatavalues {
 					if meta.Name != nil && meta.Value != nil {
@@ -208,6 +256,8 @@ func (s *ThrottlingScanner) getMetricsWithStatusCodeSplit(ctx context.Context, c
 								statusCode = *meta.Value
 							} else if strings.EqualFold(*meta.Name.Value, "ModelName") {
 								modelName = *meta.Value
+							} else if strings.EqualFold(*meta.Name.Value, "ModelDeploymentName") {
+								deploymentName = *meta.Value
 							}
 						}
 					}
@@ -222,14 +272,17 @@ func (s *ThrottlingScanner) getMetricsWithStatusCodeSplit(ctx context.Context, c
 						hourKey := data.TimeStamp.Format("2006-01-02 15:00")
 
 						if hourlyData[hourKey] == nil {
-							hourlyData[hourKey] = make(map[string]map[string]float64)
+							hourlyData[hourKey] = make(map[string]map[string]map[string]float64)
 						}
-						if hourlyData[hourKey][modelName] == nil {
-							hourlyData[hourKey][modelName] = make(map[string]float64)
+						if hourlyData[hourKey][deploymentName] == nil {
+							hourlyData[hourKey][deploymentName] = make(map[string]map[string]float64)
+						}
+						if hourlyData[hourKey][deploymentName][modelName] == nil {
+							hourlyData[hourKey][deploymentName][modelName] = make(map[string]float64)
 						}
 						// Use Count field (which we requested via Aggregation)
 						if data.Count != nil {
-							hourlyData[hourKey][modelName][statusCode] += *data.Count
+							hourlyData[hourKey][deploymentName][modelName][statusCode] += *data.Count
 						}
 					}
 				}
@@ -238,6 +291,26 @@ func (s *ThrottlingScanner) getMetricsWithStatusCodeSplit(ctx context.Context, c
 	}
 
 	return hourlyData, nil
+}
+
+// getDeployments retrieves all deployments for a cognitive services account
+func (s *ThrottlingScanner) getDeployments(ctx context.Context, client *armcognitiveservices.DeploymentsClient, resourceGroup, accountName string) ([]*armcognitiveservices.Deployment, error) {
+	pager := client.NewListPager(resourceGroup, accountName, nil)
+	var deployments []*armcognitiveservices.Deployment
+
+	for pager.More() {
+		// Wait for rate limiter
+		<-throttling.ARMLimiter
+
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list deployments: %w", err)
+		}
+
+		deployments = append(deployments, page.Value...)
+	}
+
+	return deployments, nil
 }
 
 // extractResourceGroup extracts the resource group name from an Azure resource ID
