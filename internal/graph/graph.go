@@ -37,7 +37,7 @@ type GraphResult struct {
 type QueryRequestOptions struct {
 	ResultFormat             string  `json:"resultFormat,omitempty"`             // Format of the result
 	Top                      *int32  `json:"top,omitempty"`                      // Max number of results
-	SkipToken                *string `json:"skipToken,omitempty"`                // Token for pagination
+	SkipToken                *string `json:"$skipToken,omitempty"`                // Token for pagination
 	AuthorizationScopeFilter *string `json:"authorizationScopeFilter,omitempty"` // Filter by authorization scope
 }
 
@@ -51,7 +51,7 @@ type QueryRequest struct {
 // QueryResponse represents the response from the Resource Graph API.
 type QueryResponse struct {
 	Data       []interface{} `json:"data"` // Query result data
-	SkipToken  *string       `json:"skipToken,omitempty"`
+	SkipToken  *string       `json:"$skipToken,omitempty"`
 	Quota      int           // Value of x-ms-user-quota-remaining header as int
 	RetryAfter time.Duration // Value of x-ms-user-quota-resets-after header as timespan
 }
