@@ -9,7 +9,7 @@ import (
 
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices/v2"
 )
 
 func TestAIFoundryScanner_Rules(t *testing.T) {
