@@ -121,7 +121,7 @@ func (a *SynapseWorkspaceScanner) listWorkspaces() ([]*armsynapse.Workspace, err
 	workspaces := make([]*armsynapse.Workspace, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
@@ -136,7 +136,7 @@ func (a *SynapseWorkspaceScanner) listSqlPools(resourceGroupName string, workspa
 	results := make([]*armsynapse.SQLPool, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
@@ -151,7 +151,7 @@ func (a *SynapseWorkspaceScanner) listSparkPools(resourceGroupName string, works
 	results := make([]*armsynapse.BigDataPoolResourceInfo, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

@@ -121,7 +121,7 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 		}
 
 		// Wait for rate limiter
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(ctx) // nolint:errcheck
 
 		// Execute the request
 		resp, err := clientFactory.NewCarbonServiceClient().QueryCarbonEmissionReports(ctx, queryFilter, nil)

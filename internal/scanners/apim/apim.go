@@ -61,7 +61,7 @@ func (a *APIManagementScanner) listServices() ([]*armapimanagement.ServiceResour
 	services := make([]*armapimanagement.ServiceResource, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

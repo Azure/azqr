@@ -49,7 +49,7 @@ func (c *StorageScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrSe
 
 		scanContext.BlobServiceProperties = nil
 		// Wait for a token from the burstLimiter channel before making the request
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
 		blobServicesProperties, err := c.blobServicesClient.GetServiceProperties(c.config.Ctx, resourceGroupName, *storage.Name, nil)
 		if err == nil {
 			scanContext.BlobServiceProperties = &blobServicesProperties
@@ -76,7 +76,7 @@ func (c *StorageScanner) listStorage() ([]*armstorage.Account, error) {
 	staccounts := make([]*armstorage.Account, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err
