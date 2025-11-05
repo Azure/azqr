@@ -139,7 +139,6 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 // retry executes the Resource Graph query with retries when throttling occurs.
 // Returns the QueryResponse or error.
 func (q *GraphQueryClient) retry(ctx context.Context, attempts int, request QueryRequest) (*QueryResponse, error) {
-	var err error
 	for i := 0; ; i++ {
 		resp, err := q.doRequest(ctx, request)
 		if err == nil {
@@ -148,7 +147,7 @@ func (q *GraphQueryClient) retry(ctx context.Context, attempts int, request Quer
 
 		if i >= (attempts - 1) {
 			log.Error().Msgf("Retry limit reached for Graph query: %s", request.Query)
-			break
+			return nil, err
 		}
 
 		// Quota limit reached, sleep for the duration specified in the response header
@@ -157,9 +156,7 @@ func (q *GraphQueryClient) retry(ctx context.Context, attempts int, request Quer
 			log.Debug().Msgf("Graph query quota limit reached. Sleeping for %s", duration)
 			time.Sleep(duration)
 		}
-
 	}
-	return nil, err
 }
 
 // doRequest sends the HTTP request to the Resource Graph API and returns the response.
