@@ -109,13 +109,9 @@ func (sc ResourceScanner) GetCountPerResourceTypeAndSubscription(ctx context.Con
 			}
 
 			resources = append(resources, models.ResourceTypeCount{
-				Subscription:    subscriptions[m["subscriptionId"].(string)],
-				ResourceType:    m["type"].(string),
-				Count:           m["count_"].(float64),
-				AvailableInAPRL: sc.isAvailableInAPRL(m["type"].(string), recommendations),
-				Custom1:         "",
-				Custom2:         "",
-				Custom3:         "",
+				Subscription: subscriptions[m["subscriptionId"].(string)],
+				ResourceType: m["type"].(string),
+				Count:        m["count_"].(float64),
 			})
 		}
 	}
@@ -146,13 +142,4 @@ func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azco
 		}
 	}
 	return resources
-}
-
-func (sc ResourceScanner) isAvailableInAPRL(resourceType string, recommendations map[string]map[string]models.AprlRecommendation) string {
-	_, available := recommendations[strings.ToLower(resourceType)]
-	if available {
-		return "Yes"
-	} else {
-		return "No"
-	}
 }
