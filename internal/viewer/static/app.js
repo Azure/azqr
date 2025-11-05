@@ -54,6 +54,18 @@ const menuStructure = [
         ]
     }
 ];
+function showLoading(message = 'Loading data...') {
+    const overlay = document.getElementById('loading-overlay');
+    const text = overlay.querySelector('.loading-text');
+    if (text) text.textContent = message;
+    overlay.style.display = 'flex';
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.display = 'none';
+}
+
 async function fetchJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(await r.text()); return r.json(); }
 function navigate() {
     const h = location.hash.replace('#', '');
@@ -184,10 +196,21 @@ async function showDashboard() {
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('dataset-view').style.display = 'none';
     const cards = document.getElementById('cards');
-    const [summary, analytics] = await Promise.all([
-        fetchJSON('/api/summary'),
-        fetchJSON('/api/analytics').catch(() => ({}))
-    ]);
+
+    showLoading('Loading dashboard...');
+    let summary, analytics;
+    try {
+        [summary, analytics] = await Promise.all([
+            fetchJSON('/api/summary'),
+            fetchJSON('/api/analytics').catch(() => ({}))
+        ]);
+    } catch (error) {
+        hideLoading();
+        console.error('Error loading dashboard:', error);
+        cards.innerHTML = '<div class="col-12"><div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error loading dashboard data</div></div>';
+        return;
+    }
+
     cards.innerHTML = '';
     // Basic summary cards (filter out low-value counts per request)
     const exclude = new Set([
@@ -271,6 +294,8 @@ async function showDashboard() {
         wrapper.appendChild(buildBootstrapTable('Top Impacted Resource Types', readableRTs, ['Resource Type', 'Count'], 'success'));
     }
     cards.parentElement.appendChild(wrapper);
+
+    hideLoading();
 }
 
 function getCardIcon(key) {
@@ -397,6 +422,7 @@ async function showDataset(name) {
     document.getElementById('dashboard').style.display = 'none';
     document.getElementById('dataset-view').style.display = 'block';
 
+    showLoading(`Loading ${routeLabels[name] || name}...`);
     try {
         const data = await fetchJSON(`/api/data/${name}`);
         console.log('Data fetched:', data.length, 'rows');
@@ -404,6 +430,8 @@ async function showDataset(name) {
     } catch (error) {
         console.error('Error fetching data:', error);
         document.getElementById('data-table').innerHTML = '<tbody><tr><td class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle me-2"></i>Error loading data</td></tr></tbody>';
+    } finally {
+        hideLoading();
     }
 }
 
@@ -415,6 +443,7 @@ async function showPlugin(routeName) {
     const pluginName = routeName.replace('plugin-', '');
     const plugin = pluginMetadata[routeName];
 
+    showLoading(`Loading ${plugin?.displayName || pluginName}...`);
     try {
         const data = await fetchJSON(`/api/plugin/${pluginName}`);
         console.log('Plugin data fetched:', data.length, 'rows');
@@ -422,6 +451,8 @@ async function showPlugin(routeName) {
     } catch (error) {
         console.error('Error fetching plugin data:', error);
         document.getElementById('data-table').innerHTML = '<tbody><tr><td class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle me-2"></i>Error loading plugin data</td></tr></tbody>';
+    } finally {
+        hideLoading();
     }
 }
 function renderTable(rows, datasetName) {
