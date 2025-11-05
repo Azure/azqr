@@ -74,18 +74,19 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 		| extend
 			AssessmentId = id,
 			AssessmentKey = name,
-			ResourceId = properties.resourceDetails.Id,
+			ResourceId = tostring(properties.resourceDetails.Id),
 			ResourceIdsplit = split(properties.resourceDetails.Id, '/'),
-			RecommendationName = properties.displayName,
-			RecommendationState = properties.status.code,
-			ActionDescription = properties.metadata.description,
-			RemediationDescription = properties.metadata.remediationDescription,
-			RecommendationSeverity = properties.metadata.severity,
+			RecommendationName = tostring(properties.displayName),
+			RecommendationState = tostring(properties.status.code),
+			ActionDescription = tostring(properties.metadata.description),
+			RemediationDescription = tostring(properties.metadata.remediationDescription),
+			RecommendationSeverity = tostring(properties.metadata.severity),
 			PolicyDefinitionId = properties.metadata.policyDefinitionId,
 			AssessmentType = properties.metadata.assessmentType,
 			Threats = properties.metadata.threats,
 			UserImpact = properties.metadata.userImpact,
-			AzPortalLink = tostring(properties.links.azurePortal)
+			AzPortalLink = tostring(properties.links.azurePortal),
+			CategoryString = tostring(Category)
 		| extend
 			ResourceSubId = tostring(ResourceIdsplit[2]),
 			ResourceGroupName = tostring(ResourceIdsplit[4]),
@@ -95,8 +96,9 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 			| where type == 'microsoft.resources/subscriptions'
 			| project SubscriptionName = name, subscriptionId) on subscriptionId
 		| project SubscriptionId=subscriptionId, SubscriptionName, ResourceGroupName, ResourceType,
-			ResourceName, Category, RecommendationSeverity, RecommendationName, ActionDescription,
+			ResourceName, Category=CategoryString, RecommendationSeverity, RecommendationName, ActionDescription,
 			RemediationDescription, AzPortalLink, ResourceId
+		| distinct SubscriptionId, SubscriptionName, ResourceGroupName, ResourceType, ResourceName, Category, RecommendationSeverity, RecommendationName, ActionDescription, RemediationDescription, AzPortalLink, ResourceId
 	`
 		log.Debug().Msg(query)
 		subs := make([]*string, 0, len(subscriptions))
@@ -105,6 +107,7 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 		}
 		result := graphClient.Query(ctx, query, subs)
 		resources = []*models.DefenderRecommendation{}
+		seen := make(map[string]bool) // Deduplication map
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
@@ -113,7 +116,8 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 					continue
 				}
 
-				resources = append(resources, &models.DefenderRecommendation{
+				// Create a unique key for deduplication based on all fields
+				rec := &models.DefenderRecommendation{
 					SubscriptionId:         to.String(m["SubscriptionId"]),
 					SubscriptionName:       to.String(m["SubscriptionName"]),
 					ResourceGroupName:      to.String(m["ResourceGroupName"]),
@@ -126,7 +130,17 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 					RemediationDescription: to.String(m["RemediationDescription"]),
 					AzPortalLink:           fmt.Sprintf("https://%s", to.String(m["AzPortalLink"])),
 					ResourceId:             to.String(m["ResourceId"]),
-				})
+				}
+
+				// Create unique key from ResourceId + Category + RecommendationName
+				// This combination should uniquely identify a defender recommendation
+				key := fmt.Sprintf("%s|%s|%s", rec.ResourceId, rec.Category, rec.RecommendationName)
+
+				if !seen[key] {
+					seen[key] = true
+					// Create a unique key for deduplication based on all fields
+					resources = append(resources, rec)
+				}
 			}
 		}
 	}

@@ -43,6 +43,7 @@ func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenC
 		}
 		result := graphClient.Query(ctx, query, subs)
 		resources = []*models.AdvisorResult{}
+		seen := make(map[string]bool) // Deduplication map
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
@@ -56,7 +57,7 @@ func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenC
 					continue
 				}
 
-				resources = append(resources, &models.AdvisorResult{
+				rec := &models.AdvisorResult{
 					SubscriptionID:   to.String(m["SubscriptionId"]),
 					SubscriptionName: to.String(m["SubscriptionName"]),
 					Name:             to.String(m["ImpactedValue"]),
@@ -66,7 +67,16 @@ func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenC
 					Impact:           to.String(m["Impact"]),
 					Description:      to.String(m["Problem"]),
 					RecommendationID: to.String(m["RecommendationTypeId"]),
-				})
+				}
+
+				// Create unique key from ResourceID + RecommendationID
+				// This combination should uniquely identify an advisor recommendation
+				key := rec.ResourceID + "|" + rec.RecommendationID + "|" + rec.Category
+
+				if !seen[key] {
+					seen[key] = true
+					resources = append(resources, rec)
+				}
 			}
 		}
 	}

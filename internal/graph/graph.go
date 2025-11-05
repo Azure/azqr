@@ -110,7 +110,7 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 		format := "objectArray"
 		options := &QueryRequestOptions{
 			ResultFormat:             format,
-			Top:                      to.Ptr(int32(1000)),
+			Top:                      to.Ptr(int32(5000)),
 			AuthorizationScopeFilter: to.Ptr("AtScopeAndAbove"), // Include management groups for Azure Policy queries
 		}
 
