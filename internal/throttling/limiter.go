@@ -1,73 +1,28 @@
 package throttling
 
-import "time"
+import (
+	"context"
 
-type Limiter struct {
-	bucketCapacity int
-	refillRate     int
-	refillEvery    time.Duration
-	refillWait     time.Duration
+	"golang.org/x/time/rate"
+)
+
+// ARMLimiter rate limits Azure Resource Manager API calls
+// Allows 25 operations per second with burst capacity of 250
+// https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/request-limits-and-throttling#regional-throttling-and-token-bucket-algorithm
+var ARMLimiter = rate.NewLimiter(rate.Limit(25), 250)
+
+// GraphLimiter rate limits Azure Resource Graph API calls
+// Allows 2 operations per second with burst capacity of 5
+// Azure Graph throttling is very aggressive, so we use conservative limits
+// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
+var GraphLimiter = rate.NewLimiter(rate.Limit(2), 5)
+
+// WaitARM waits for permission to make an ARM API call using the provided context
+func WaitARM(ctx context.Context) error {
+	return ARMLimiter.Wait(ctx)
 }
 
-func NewLimiter(bucketCapacity, refillRate int, refillEvery, refillWait time.Duration) *Limiter {
-	return &Limiter{
-		bucketCapacity: bucketCapacity,
-		refillRate:     refillRate,
-		refillEvery:    refillEvery,
-		refillWait:     refillWait,
-	}
-}
-
-func (l *Limiter) Start() chan struct{} {
-	bucketCapacity := l.bucketCapacity
-	refillRate := l.refillRate
-
-	// Create a channel to act as a burst limiter.
-	// This will allow up to bucketCapacity requests at once.
-
-	// Staggering queries to avoid throttling.
-	// https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/request-limits-and-throttling#regional-throttling-and-token-bucket-algorithm
-	// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
-	burstLimiter := make(chan struct{}, bucketCapacity)
-
-	// Fill the burstLimiter channel with initial tokens.
-	for i := 0; i < bucketCapacity; i++ {
-		burstLimiter <- struct{}{}
-	}
-
-	// Create a ticker to limit the rate of requests
-	limiter := time.NewTicker(l.refillEvery)
-
-	// Start a goroutine to send ticks to the burstLimiter channel
-	go func() {
-		for range limiter.C {
-			for i := 0; i < refillRate; i++ {
-				// Only add a token if the channel is not full to avoid blocking
-				select {
-				case burstLimiter <- struct{}{}:
-					time.Sleep(l.refillWait) // Wait for the specified refill wait time
-				default:
-					// Channel is full, skip adding more tokens
-				}
-			}
-		}
-	}()
-	return burstLimiter
-}
-
-var ARMLimiter chan struct{}
-var GraphLimiter chan struct{}
-
-func init() {
-	// Create a  limiter for ARM API
-	bucketCapacity := 250
-	refillRate := 25
-	armlimiter := NewLimiter(bucketCapacity, refillRate, 1*time.Second, 0*time.Millisecond)
-	ARMLimiter = armlimiter.Start()
-
-	// Create a separate limiter for Graph API
-	graphBucketCapacity := 3
-	graphRefillRate := 2
-	graphLimiter := NewLimiter(graphBucketCapacity, graphRefillRate, 1*time.Second, 100*time.Millisecond)
-	GraphLimiter = graphLimiter.Start()
+// WaitGraph waits for permission to make a Graph API call using the provided context
+func WaitGraph(ctx context.Context) error {
+	return GraphLimiter.Wait(ctx)
 }

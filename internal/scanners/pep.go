@@ -40,7 +40,7 @@ func (s *PrivateEndpointScanner) ListResourcesWithPrivateEndpoints() (map[string
 
 		for pager.More() {
 			// Wait for a token from the burstLimiter channel before making the request
-			<-throttling.ARMLimiter
+			_ = throttling.WaitARM(s.config.Ctx); // nolint:errcheck
 			resp, err := pager.NextPage(s.config.Ctx)
 			if err != nil {
 				return nil, err

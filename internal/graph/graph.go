@@ -37,7 +37,7 @@ type GraphResult struct {
 type QueryRequestOptions struct {
 	ResultFormat             string  `json:"resultFormat,omitempty"`             // Format of the result
 	Top                      *int32  `json:"top,omitempty"`                      // Max number of results
-	SkipToken                *string `json:"$skipToken,omitempty"`                // Token for pagination
+	SkipToken                *string `json:"$skipToken,omitempty"`               // Token for pagination
 	AuthorizationScopeFilter *string `json:"authorizationScopeFilter,omitempty"` // Filter by authorization scope
 }
 
@@ -177,8 +177,10 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+q.accessToken)
 
-	// Wait for a token from the burstLimiter channel before making the request
-	<-throttling.GraphLimiter
+	// Wait for a token from the rate limiter before making the request
+	if err := throttling.WaitGraph(ctx); err != nil {
+		return nil, fmt.Errorf("rate limiter error: %w", err)
+	}
 
 	// Send request
 	resp, err := q.httpClient.Do(req)

@@ -132,7 +132,7 @@ func (a *AppServiceScanner) listPlans() ([]*armappservice.Plan, error) {
 	results := []*armappservice.Plan{}
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
@@ -148,7 +148,7 @@ func (a *AppServiceScanner) listSites(resourceGroupName string, plan string) ([]
 	results := []*armappservice.Site{}
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

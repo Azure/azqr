@@ -61,7 +61,7 @@ func (a *AISearchScanner) listWorkspaces() ([]*armsearch.Service, error) {
 	workspaces := make([]*armsearch.Service, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
