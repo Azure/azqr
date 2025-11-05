@@ -23,9 +23,9 @@ func (a *AzureVirtualDesktopScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all AVD in a Resource Group
-func (a *AzureVirtualDesktopScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *AzureVirtualDesktopScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []models.AzqrServiceResult{}, nil
+	return []*models.AzqrServiceResult{}, nil
 }
 
 func (a *AzureVirtualDesktopScanner) ResourceTypes() []string {

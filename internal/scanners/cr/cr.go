@@ -28,7 +28,7 @@ func (c *ContainerRegistryScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Container Registries in a Resource Group
-func (c *ContainerRegistryScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *ContainerRegistryScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	regsitries, err := c.listRegistries()
@@ -37,12 +37,12 @@ func (c *ContainerRegistryScanner) Scan(scanContext *models.ScanContext) ([]mode
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, registry := range regsitries {
 		rr := engine.EvaluateRecommendations(rules, registry, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*registry.ID),

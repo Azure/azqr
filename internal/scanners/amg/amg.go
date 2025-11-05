@@ -28,7 +28,7 @@ func (a *ManagedGrafanaScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Managed Grafana in a Resource Group
-func (a *ManagedGrafanaScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *ManagedGrafanaScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	workspaces, err := a.listWorkspaces()
@@ -37,12 +37,12 @@ func (a *ManagedGrafanaScanner) Scan(scanContext *models.ScanContext) ([]models.
 	}
 	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, g := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),

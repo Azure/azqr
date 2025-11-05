@@ -29,9 +29,9 @@ func (c *VirtualNetworkGatewayScanner) Init(config *models.ScannerConfig) error 
 }
 
 // Scan - Scans all VirtualNetwork in a Resource Group
-func (c *VirtualNetworkGatewayScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *VirtualNetworkGatewayScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	rgs, err := models.ListResourceGroup(c.config.Ctx, c.config.Cred, c.config.SubscriptionID, c.config.ClientOptions)
 	if err != nil {
@@ -49,7 +49,7 @@ func (c *VirtualNetworkGatewayScanner) Scan(scanContext *models.ScanContext) ([]
 		for _, w := range vpns {
 			rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-			results = append(results, models.AzqrServiceResult{
+			results = append(results, &models.AzqrServiceResult{
 				SubscriptionID:   c.config.SubscriptionID,
 				SubscriptionName: c.config.SubscriptionName,
 				ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),

@@ -182,8 +182,8 @@ func (a AprlScanner) ListRecommendations() (map[string]map[string]models.AprlRec
 }
 
 // AprlScan scans Azure resources using Azure Proactive Resiliency Library v2 (APRL)
-func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []models.AprlResult {
-	results := []models.AprlResult{}
+func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*models.AprlResult {
+	results := []*models.AprlResult{}
 	graph := NewGraphQuery(cred)
 
 	_, rules := a.ListRecommendations()
@@ -197,7 +197,7 @@ func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []mo
 
 	// Buffer the jobs and results channels to the number of rules to avoid deadlocks.
 	jobs := make(chan models.AprlRecommendation, len(rules))
-	ch := make(chan []models.AprlResult, len(rules))
+	ch := make(chan []*models.AprlResult, len(rules))
 
 	var wg sync.WaitGroup
 
@@ -237,7 +237,7 @@ func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []mo
 	return results
 }
 
-func (a *AprlScanner) worker(ctx context.Context, graph *GraphQueryClient, subscriptions map[string]string, jobs <-chan models.AprlRecommendation, results chan<- []models.AprlResult, wg *sync.WaitGroup) {
+func (a *AprlScanner) worker(ctx context.Context, graph *GraphQueryClient, subscriptions map[string]string, jobs <-chan models.AprlRecommendation, results chan<- []*models.AprlResult, wg *sync.WaitGroup) {
 	// worker processes batches of APRL recommendations from the jobs channel
 	for r := range jobs {
 		models.LogGraphRecommendationScan(r.ResourceType, r.RecommendationID)
@@ -250,8 +250,8 @@ func (a *AprlScanner) worker(ctx context.Context, graph *GraphQueryClient, subsc
 	}
 }
 
-func (a AprlScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule models.AprlRecommendation, subscriptions map[string]string) ([]models.AprlResult, error) {
-	results := []models.AprlResult{}
+func (a AprlScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule models.AprlRecommendation, subscriptions map[string]string) ([]*models.AprlResult, error) {
+	results := []*models.AprlResult{}
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
 		subs = append(subs, &s)
@@ -277,7 +277,7 @@ func (a AprlScanner) graphScan(ctx context.Context, graphClient *GraphQueryClien
 					subscriptionName = ""
 				}
 
-				results = append(results, models.AprlResult{
+				results = append(results, &models.AprlResult{
 					RecommendationID:    rule.RecommendationID,
 					Category:            models.RecommendationCategory(rule.Category),
 					Recommendation:      rule.Recommendation,

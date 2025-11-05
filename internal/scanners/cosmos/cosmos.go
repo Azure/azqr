@@ -28,7 +28,7 @@ func (a *CosmosDBScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all CosmosDB Databases in a Resource Group
-func (c *CosmosDBScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *CosmosDBScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	databases, err := c.listDatabases()
@@ -37,12 +37,12 @@ func (c *CosmosDBScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrSe
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, database := range databases {
 		rr := engine.EvaluateRecommendations(rules, database, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*database.ID),

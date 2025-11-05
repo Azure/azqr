@@ -36,7 +36,7 @@ func (c *MariaScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all MariaDB servers in a Resource Group
-func (c *MariaScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *MariaScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	servers, err := c.listServers()
@@ -46,14 +46,14 @@ func (c *MariaScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServi
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
 	databaseRules := c.GetDatabaseRules()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, server := range servers {
 		rr := engine.EvaluateRecommendations(rules, server, scanContext)
 
 		resourceGroupName := models.GetResourceGroupFromResourceID(*server.ID)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
@@ -70,7 +70,7 @@ func (c *MariaScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServi
 		for _, database := range databases {
 			rr := engine.EvaluateRecommendations(databaseRules, database, scanContext)
 
-			results = append(results, models.AzqrServiceResult{
+			results = append(results, &models.AzqrServiceResult{
 				SubscriptionID:  c.config.SubscriptionID,
 				ResourceGroup:   resourceGroupName,
 				ServiceName:     *database.Name,

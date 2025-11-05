@@ -28,7 +28,7 @@ func (a *NetworkWatcherScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Network Watcher in a Resource Group
-func (c *NetworkWatcherScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *NetworkWatcherScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	svcs, err := c.list()
@@ -37,12 +37,12 @@ func (c *NetworkWatcherScanner) Scan(scanContext *models.ScanContext) ([]models.
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, w := range svcs {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),

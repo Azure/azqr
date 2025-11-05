@@ -33,7 +33,7 @@ func (c *StorageScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Storage in a Resource Group
-func (c *StorageScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *StorageScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	storage, err := c.listStorage()
@@ -42,7 +42,7 @@ func (c *StorageScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrSer
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, storage := range storage {
 		resourceGroupName := models.GetResourceGroupFromResourceID(*storage.ID)
@@ -57,7 +57,7 @@ func (c *StorageScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrSer
 
 		rr := engine.EvaluateRecommendations(rules, storage, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,

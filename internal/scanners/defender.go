@@ -17,9 +17,9 @@ import (
 // DefenderScanner - Defender scanner
 type DefenderScanner struct{}
 
-func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []models.DefenderResult {
+func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []*models.DefenderResult {
 	models.LogResourceTypeScan("Defender Status")
-	resources := []models.DefenderResult{}
+	resources := []*models.DefenderResult{}
 
 	if scan {
 		graphClient := graph.NewGraphQuery(cred)
@@ -39,7 +39,7 @@ func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.Token
 			subs = append(subs, &s)
 		}
 		result := graphClient.Query(ctx, query, subs)
-		resources = []models.DefenderResult{}
+		resources = []*models.DefenderResult{}
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
@@ -48,7 +48,7 @@ func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.Token
 					continue
 				}
 
-				resources = append(resources, models.DefenderResult{
+				resources = append(resources, &models.DefenderResult{
 					SubscriptionID:   to.String(m["SubscriptionId"]),
 					SubscriptionName: to.String(m["SubscriptionName"]),
 					Name:             to.String(m["Name"]),
@@ -60,9 +60,9 @@ func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.Token
 	return resources
 }
 
-func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []models.DefenderRecommendation {
+func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []*models.DefenderRecommendation {
 	models.LogResourceTypeScan("Defender Recommendations")
-	resources := []models.DefenderRecommendation{}
+	resources := []*models.DefenderRecommendation{}
 
 	if scan {
 		graphClient := graph.NewGraphQuery(cred)
@@ -104,7 +104,7 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 			subs = append(subs, &s)
 		}
 		result := graphClient.Query(ctx, query, subs)
-		resources = []models.DefenderRecommendation{}
+		resources = []*models.DefenderRecommendation{}
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
@@ -113,7 +113,7 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 					continue
 				}
 
-				resources = append(resources, models.DefenderRecommendation{
+				resources = append(resources, &models.DefenderRecommendation{
 					SubscriptionId:         to.String(m["SubscriptionId"]),
 					SubscriptionName:       to.String(m["SubscriptionName"]),
 					ResourceGroupName:      to.String(m["ResourceGroupName"]),

@@ -23,9 +23,9 @@ func (a *ExpressRouteScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Express Routes in a Resource Group
-func (a *ExpressRouteScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *ExpressRouteScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []models.AzqrServiceResult{}, nil
+	return []*models.AzqrServiceResult{}, nil
 }
 
 func (a *ExpressRouteScanner) ResourceTypes() []string {

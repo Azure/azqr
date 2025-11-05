@@ -41,7 +41,7 @@ func (a *SynapseWorkspaceScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Synapse Workspaces in a Resource Group
-func (a *SynapseWorkspaceScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *SynapseWorkspaceScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	workspaces, err := a.listWorkspaces()
@@ -53,14 +53,14 @@ func (a *SynapseWorkspaceScanner) Scan(scanContext *models.ScanContext) ([]model
 	rules := a.getWorkspaceRules()
 	sqlPoolRules := a.getSqlPoolRules()
 	sparkPoolRules := a.getSparkPoolRules()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, w := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
 		resourceGroupName := models.GetResourceGroupFromResourceID(*w.ID)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    resourceGroupName,
@@ -77,10 +77,9 @@ func (a *SynapseWorkspaceScanner) Scan(scanContext *models.ScanContext) ([]model
 			}
 
 			for _, s := range sqlPools {
-				var result models.AzqrServiceResult
 				rr := engine.EvaluateRecommendations(sqlPoolRules, s, scanContext)
 
-				result = models.AzqrServiceResult{
+				result := &models.AzqrServiceResult{
 					SubscriptionID:   a.config.SubscriptionID,
 					SubscriptionName: a.config.SubscriptionName,
 					ResourceGroup:    resourceGroupName,
@@ -99,10 +98,9 @@ func (a *SynapseWorkspaceScanner) Scan(scanContext *models.ScanContext) ([]model
 		}
 
 		for _, s := range sparkPools {
-			var result models.AzqrServiceResult
 			rr := engine.EvaluateRecommendations(sparkPoolRules, s, scanContext)
 
-			result = models.AzqrServiceResult{
+			result := &models.AzqrServiceResult{
 				SubscriptionID:   a.config.SubscriptionID,
 				SubscriptionName: a.config.SubscriptionName,
 				ResourceGroup:    resourceGroupName,

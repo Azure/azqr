@@ -28,7 +28,7 @@ func (a *APIManagementScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan -Scans all API Management Services in a Resource Group
-func (a *APIManagementScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *APIManagementScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	services, err := a.listServices()
@@ -37,12 +37,12 @@ func (a *APIManagementScanner) Scan(scanContext *models.ScanContext) ([]models.A
 	}
 	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, s := range services {
 		rr := engine.EvaluateRecommendations(rules, s, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*s.ID),

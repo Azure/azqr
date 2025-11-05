@@ -28,7 +28,7 @@ func (c *VirtualMachineScaleSetScanner) Init(config *models.ScannerConfig) error
 }
 
 // Scan - Scans all Virtual Machines Scale Sets in a Resource Group
-func (c *VirtualMachineScaleSetScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *VirtualMachineScaleSetScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	vmss, err := c.list()
@@ -37,12 +37,12 @@ func (c *VirtualMachineScaleSetScanner) Scan(scanContext *models.ScanContext) ([
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, w := range vmss {
 		rr := engine.EvaluateRecommendations(rules, w, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),

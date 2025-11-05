@@ -28,7 +28,7 @@ func (a *AIFoundryScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Cognitive Services Accounts in a Resource Group
-func (c *AIFoundryScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *AIFoundryScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	services, err := c.list()
@@ -37,12 +37,12 @@ func (c *AIFoundryScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrS
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, service := range services {
 		rr := engine.EvaluateRecommendations(rules, service, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*service.ID),

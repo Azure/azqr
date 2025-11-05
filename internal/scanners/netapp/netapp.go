@@ -23,9 +23,9 @@ func (a *NetAppScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all NetApp in a Resource Group
-func (a *NetAppScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *NetAppScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []models.AzqrServiceResult{}, nil
+	return []*models.AzqrServiceResult{}, nil
 }
 
 func (a *NetAppScanner) ResourceTypes() []string {

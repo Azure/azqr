@@ -23,9 +23,9 @@ func (a *DiskScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Disk in a Resource Group
-func (a *DiskScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *DiskScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []models.AzqrServiceResult{}, nil
+	return []*models.AzqrServiceResult{}, nil
 }
 
 func (a *DiskScanner) ResourceTypes() []string {

@@ -28,7 +28,7 @@ func (c *SignalRScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all SignalR in a Resource Group
-func (c *SignalRScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *SignalRScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	signalr, err := c.listSignalR()
@@ -37,12 +37,12 @@ func (c *SignalRScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrSer
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, signalr := range signalr {
 		rr := engine.EvaluateRecommendations(rules, signalr, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*signalr.ID),

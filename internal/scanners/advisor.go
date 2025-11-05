@@ -16,9 +16,9 @@ import (
 // AdvisorScanner - Advisor scanner
 type AdvisorScanner struct{}
 
-func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []models.AdvisorResult {
+func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []*models.AdvisorResult {
 	models.LogResourceTypeScan("Advisor Recommendations")
-	resources := []models.AdvisorResult{}
+	resources := []*models.AdvisorResult{}
 
 	if scan {
 		graphClient := graph.NewGraphQuery(cred)
@@ -42,7 +42,7 @@ func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenC
 			subs = append(subs, &s)
 		}
 		result := graphClient.Query(ctx, query, subs)
-		resources = []models.AdvisorResult{}
+		resources = []*models.AdvisorResult{}
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
@@ -56,7 +56,7 @@ func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenC
 					continue
 				}
 
-				resources = append(resources, models.AdvisorResult{
+				resources = append(resources, &models.AdvisorResult{
 					SubscriptionID:   to.String(m["SubscriptionId"]),
 					SubscriptionName: to.String(m["SubscriptionName"]),
 					Name:             to.String(m["ImpactedValue"]),
