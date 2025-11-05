@@ -43,7 +43,7 @@ func (c *SQLScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all SQL in a Resource Group
-func (c *SQLScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *SQLScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	sql, err := c.listSQL()
@@ -54,14 +54,14 @@ func (c *SQLScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrService
 	rules := c.getServerRules()
 	databaseRules := c.getDatabaseRules()
 	poolRules := c.getPoolRules()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, sql := range sql {
 		rr := engine.EvaluateRecommendations(rules, sql, scanContext)
 
 		resourceGroupName := models.GetResourceGroupFromResourceID(*sql.ID)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:  c.config.SubscriptionID,
 			ResourceGroup:   resourceGroupName,
 			ServiceName:     *sql.Name,
@@ -77,7 +77,7 @@ func (c *SQLScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrService
 		for _, pool := range pools {
 			rr := engine.EvaluateRecommendations(poolRules, pool, scanContext)
 
-			results = append(results, models.AzqrServiceResult{
+			results = append(results, &models.AzqrServiceResult{
 				SubscriptionID:   c.config.SubscriptionID,
 				SubscriptionName: c.config.SubscriptionName,
 				ResourceGroup:    resourceGroupName,
@@ -99,7 +99,7 @@ func (c *SQLScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrService
 
 			rr := engine.EvaluateRecommendations(databaseRules, database, scanContext)
 
-			results = append(results, models.AzqrServiceResult{
+			results = append(results, &models.AzqrServiceResult{
 				SubscriptionID:   c.config.SubscriptionID,
 				SubscriptionName: c.config.SubscriptionName,
 				ResourceGroup:    resourceGroupName,

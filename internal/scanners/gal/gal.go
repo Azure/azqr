@@ -23,9 +23,9 @@ func (a *GalleryScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Galleries in a Resource Group
-func (a *GalleryScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *GalleryScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []models.AzqrServiceResult{}, nil
+	return []*models.AzqrServiceResult{}, nil
 }
 
 func (a *GalleryScanner) ResourceTypes() []string {

@@ -17,7 +17,7 @@ import (
 type ArcSQLScanner struct{}
 
 // Scan queries Azure Resource Graph for Arc-enabled machines with SQL Server discovered but without the SQL Server extension installed
-func (s *ArcSQLScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []models.ArcSQLResult {
+func (s *ArcSQLScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []*models.ArcSQLResult {
 	models.LogResourceTypeScan("Azure Arc-enabled SQL Server")
 
 	graphClient := graph.NewGraphQuery(cred)
@@ -56,7 +56,7 @@ func (s *ArcSQLScanner) Scan(ctx context.Context, cred azcore.TokenCredential, s
 		subs = append(subs, &s)
 	}
 	result := graphClient.Query(ctx, query, subs)
-	resources := []models.ArcSQLResult{}
+	resources := []*models.ArcSQLResult{}
 
 	if result.Data != nil {
 		for _, row := range result.Data {
@@ -77,7 +77,7 @@ func (s *ArcSQLScanner) Scan(ctx context.Context, cred azcore.TokenCredential, s
 				subscriptionName = ""
 			}
 
-			resources = append(resources, models.ArcSQLResult{
+			resources = append(resources, &models.ArcSQLResult{
 				SubscriptionID:   subscription,
 				SubscriptionName: subscriptionName,
 				Status:           to.String(m["status"]),

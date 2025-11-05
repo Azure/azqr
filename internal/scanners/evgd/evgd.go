@@ -28,7 +28,7 @@ func (a *EventGridScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all EventGrid Domains in a Resource Group
-func (a *EventGridScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *EventGridScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	domains, err := a.listDomain()
@@ -37,12 +37,12 @@ func (a *EventGridScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrS
 	}
 	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, d := range domains {
 		rr := engine.EvaluateRecommendations(rules, d, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*d.ID),

@@ -28,7 +28,7 @@ func (c *DatabricksScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Azure Databricks in a Resource Group
-func (c *DatabricksScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *DatabricksScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	workspaces, err := c.listWorkspaces()
@@ -37,12 +37,12 @@ func (c *DatabricksScanner) Scan(scanContext *models.ScanContext) ([]models.Azqr
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, ws := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, ws, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*ws.ID),

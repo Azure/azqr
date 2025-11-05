@@ -23,9 +23,9 @@ func (a *NICScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all NICs
-func (a *NICScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *NICScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []models.AzqrServiceResult{}, nil
+	return []*models.AzqrServiceResult{}, nil
 }
 
 func (a *NICScanner) ResourceTypes() []string {

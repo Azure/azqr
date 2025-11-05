@@ -24,7 +24,7 @@ func (c *MySQLFlexibleScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all MySQL in a Resource Group
-func (c *MySQLFlexibleScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *MySQLFlexibleScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	flexibles, err := c.list()
@@ -33,12 +33,12 @@ func (c *MySQLFlexibleScanner) Scan(scanContext *models.ScanContext) ([]models.A
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, postgre := range flexibles {
 		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*postgre.ID),
 			SubscriptionName: c.config.SubscriptionName,

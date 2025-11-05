@@ -23,8 +23,8 @@ func (a *ResourceGroupScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Resource Groups
-func (a *ResourceGroupScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
-	return []models.AzqrServiceResult{}, nil
+func (a *ResourceGroupScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
+	return []*models.AzqrServiceResult{}, nil
 }
 
 func (a *ResourceGroupScanner) ResourceTypes() []string {

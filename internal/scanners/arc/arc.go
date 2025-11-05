@@ -23,11 +23,11 @@ func (c *ArcScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Azure Arc-enabled machines in a Resource Group
-func (c *ArcScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *ArcScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 	// This scanner doesn't perform actual scans - it's here to register the resource type
 	// Actual Arc SQL scanning is done by the graph-based ArcSQLScanner
-	return []models.AzqrServiceResult{}, nil
+	return []*models.AzqrServiceResult{}, nil
 }
 
 // ResourceTypes - Returns the resource types that this scanner covers

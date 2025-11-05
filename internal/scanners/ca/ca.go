@@ -28,7 +28,7 @@ func (a *ContainerAppsScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Container Apps in a Resource Group
-func (a *ContainerAppsScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *ContainerAppsScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	apps, err := a.listApps()
@@ -37,12 +37,12 @@ func (a *ContainerAppsScanner) Scan(scanContext *models.ScanContext) ([]models.A
 	}
 	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, app := range apps {
 		rr := engine.EvaluateRecommendations(rules, app, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*app.ID),
