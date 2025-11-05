@@ -297,17 +297,13 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 }
 
 func (rd *ReportData) ResourceTypesTable() [][]string {
-	headers := []string{"Subscription Name", "Resource Type", "Number of Resources", "Available in APRL?", "Custom1", "Custom2", "Custom3"}
+	headers := []string{"Subscription Name", "Resource Type", "Number of Resources"}
 	rows := [][]string{}
 	for _, r := range rd.ResourceTypeCount {
 		row := []string{
 			r.Subscription,
 			r.ResourceType,
 			fmt.Sprint(r.Count),
-			r.AvailableInAPRL,
-			"",
-			"",
-			"",
 		}
 		rows = append(rows, row)
 	}

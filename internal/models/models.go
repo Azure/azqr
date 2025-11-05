@@ -97,13 +97,9 @@ type (
 	}
 
 	ResourceTypeCount struct {
-		Subscription    string  `json:"Subscription"`
-		ResourceType    string  `json:"Resource Type"`
-		Count           float64 `json:"Number of Resources"`
-		AvailableInAPRL string  `json:"Available In APRL?"`
-		Custom1         string  `json:"Custom1"`
-		Custom2         string  `json:"Custom2"`
-		Custom3         string  `json:"Custom3"`
+		Subscription string  `json:"Subscription"`
+		ResourceType string  `json:"Resource Type"`
+		Count        float64 `json:"Number of Resources"`
 	}
 
 	AprlRecommendation struct {
