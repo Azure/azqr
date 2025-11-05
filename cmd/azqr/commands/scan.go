@@ -20,6 +20,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("defender", "d", true, "Scan Defender Status (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("advisor", "a", true, "Scan Azure Advisor Recommendations (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("costs", "c", true, "Scan Azure Costs (default) (default true)")
+	scanCmd.PersistentFlags().BoolP("policy", "p", false, "Scan Azure Policy compliance")
 	// ...existing code...
 	// Add flags for all internal plugins, default to false
 	for _, pluginName := range requireInternalPluginsList() {
@@ -60,6 +61,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	defender, _ := cmd.Flags().GetBool("defender")
 	advisor, _ := cmd.Flags().GetBool("advisor")
 	cost, _ := cmd.Flags().GetBool("costs")
+	policy, _ := cmd.Flags().GetBool("policy")
 	arc, _ := cmd.Flags().GetBool("arc")
 	xlsx, _ := cmd.Flags().GetBool("xlsx")
 	csv, _ := cmd.Flags().GetBool("csv")
@@ -95,6 +97,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		Mask:                   mask,
 		Stdout:                 stdout,
 		Debug:                  debug,
+		Policy:                 policy,
 		ScannerKeys:            scannerKeys,
 		Filters:                filters,
 		UseAzqrRecommendations: useAzqr,

@@ -112,6 +112,7 @@ type (
 		Json                   bool
 		Stdout                 bool
 		Debug                  bool
+		Policy                 bool
 		ScannerKeys            []string
 		Filters                *models.Filters
 		UseAzqrRecommendations bool
@@ -135,6 +136,7 @@ func NewScanParams() *ScanParams {
 		Csv:                    false,
 		Json:                   false,
 		Debug:                  false,
+		Policy:                 false,
 		ScannerKeys:            []string{},
 		Filters:                models.NewFilters(),
 		UseAzqrRecommendations: true,
@@ -453,7 +455,9 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	reportData.Advisor = append(reportData.Advisor, advisorScanner.Scan(ctx, params.Defender, cred, subscriptions, filters)...)
 
 	// scan Azure Policy
-	reportData.AzurePolicy = append(reportData.AzurePolicy, azurePolicyScanner.Scan(ctx, cred, subscriptions, filters)...)
+	if params.Policy {
+		reportData.AzurePolicy = append(reportData.AzurePolicy, azurePolicyScanner.Scan(ctx, cred, subscriptions, filters)...)
+	}
 
 	// scan Arc-enabled SQL Server
 	if params.Arc {
@@ -537,4 +541,3 @@ func (sc Scanner) generateOutputFileName(outputName string) string {
 	}
 	return outputFile
 }
-
