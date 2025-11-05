@@ -113,7 +113,7 @@ func (s *ThrottlingScanner) scanSubscription(ctx context.Context, cred azcore.To
 
 	for pager.More() {
 		// Wait for rate limiter
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(ctx); // nolint:errcheck
 
 		page, err := pager.NextPage(ctx)
 		if err != nil {
@@ -222,7 +222,7 @@ func (s *ThrottlingScanner) getMetricsWithStatusCodeSplit(ctx context.Context, c
 	// Use wildcard filter to get all status codes and model names
 	filter := "StatusCode eq '*' and ModelDeploymentName eq '*' and ModelName eq '*'"
 
-	<-throttling.ARMLimiter
+	_ = throttling.WaitARM(ctx); // nolint:errcheck
 
 	result, err := client.List(ctx, resourceID, &armmonitor.MetricsClientListOptions{
 		Timespan:    &timespan,
@@ -300,7 +300,7 @@ func (s *ThrottlingScanner) getDeployments(ctx context.Context, client *armcogni
 
 	for pager.More() {
 		// Wait for rate limiter
-		<-throttling.ARMLimiter
+		_ = throttling.WaitARM(ctx); // nolint:errcheck
 
 		page, err := pager.NextPage(ctx)
 		if err != nil {

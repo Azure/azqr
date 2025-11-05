@@ -64,7 +64,7 @@ func (s *CostScanner) QueryCosts() (*models.CostResult, error) {
 	}
 
 	// Wait for a token from the burstLimiter channel before making the request
-	<-throttling.ARMLimiter
+	_ = throttling.WaitARM(s.config.Ctx); // nolint:errcheck
 	resp, err := s.client.Usage(s.config.Ctx, fmt.Sprintf("/subscriptions/%s", s.config.SubscriptionID), qd, nil)
 	if err != nil {
 		return nil, err
