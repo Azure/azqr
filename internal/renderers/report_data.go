@@ -14,13 +14,13 @@ type (
 	ReportData struct {
 		OutputFileName          string
 		Mask                    bool
-		Azqr                    []models.AzqrServiceResult
-		Aprl                    []models.AprlResult
-		Defender                []models.DefenderResult
-		DefenderRecommendations []models.DefenderRecommendation
-		Advisor                 []models.AdvisorResult
-		AzurePolicy             []models.AzurePolicyResult
-		ArcSQL                  []models.ArcSQLResult
+		Azqr                    []*models.AzqrServiceResult
+		Aprl                    []*models.AprlResult
+		Defender                []*models.DefenderResult
+		DefenderRecommendations []*models.DefenderRecommendation
+		Advisor                 []*models.AdvisorResult
+		AzurePolicy             []*models.AzurePolicyResult
+		ArcSQL                  []*models.ArcSQLResult
 		Cost                    *models.CostResult
 		Recommendations         map[string]map[string]models.AprlRecommendation
 		Resources               []*models.Resource
@@ -342,13 +342,13 @@ func NewReportData(outputFile string, mask bool) ReportData {
 		OutputFileName:          outputFile,
 		Mask:                    mask,
 		Recommendations:         map[string]map[string]models.AprlRecommendation{},
-		Azqr:                    []models.AzqrServiceResult{},
-		Aprl:                    []models.AprlResult{},
-		Defender:                []models.DefenderResult{},
-		DefenderRecommendations: []models.DefenderRecommendation{},
-		Advisor:                 []models.AdvisorResult{},
-		AzurePolicy:             []models.AzurePolicyResult{},
-		ArcSQL:                  []models.ArcSQLResult{},
+		Azqr:                    []*models.AzqrServiceResult{},
+		Aprl:                    []*models.AprlResult{},
+		Defender:                []*models.DefenderResult{},
+		DefenderRecommendations: []*models.DefenderRecommendation{},
+		Advisor:                 []*models.AdvisorResult{},
+		AzurePolicy:             []*models.AzurePolicyResult{},
+		ArcSQL:                  []*models.ArcSQLResult{},
 		Cost: &models.CostResult{
 			Items: []*models.CostResultItem{},
 		},

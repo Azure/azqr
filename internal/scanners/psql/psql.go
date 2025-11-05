@@ -28,7 +28,7 @@ func (c *PostgreScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all PostgreSQL in a Resource Group
-func (c *PostgreScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *PostgreScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	postgre, err := c.listPostgre()
@@ -37,12 +37,12 @@ func (c *PostgreScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrSer
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, postgre := range postgre {
 		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*postgre.ID),

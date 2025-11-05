@@ -28,7 +28,7 @@ func (c *AnalysisServicesScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Analysis Services in a Resource Group
-func (c *AnalysisServicesScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *AnalysisServicesScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	workspaces, err := c.listWorkspaces()
@@ -37,12 +37,12 @@ func (c *AnalysisServicesScanner) Scan(scanContext *models.ScanContext) ([]model
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, ws := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, ws, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*ws.ID),

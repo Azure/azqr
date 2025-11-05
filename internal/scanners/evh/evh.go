@@ -28,7 +28,7 @@ func (a *EventHubScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Event Hubs in a Resource Group
-func (c *EventHubScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (c *EventHubScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
 
 	eventHubs, err := c.listEventHubs()
@@ -37,12 +37,12 @@ func (c *EventHubScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrSe
 	}
 	engine := models.RecommendationEngine{}
 	rules := c.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, eventHub := range eventHubs {
 		rr := engine.EvaluateRecommendations(rules, eventHub, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   c.config.SubscriptionID,
 			SubscriptionName: c.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*eventHub.ID),

@@ -17,7 +17,7 @@ import (
 type AzurePolicyScanner struct{}
 
 // Scan queries Azure Resource Graph for non-compliant policy states across the specified subscriptions
-func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []models.AzurePolicyResult {
+func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []*models.AzurePolicyResult {
 	models.LogResourceTypeScan("Azure Policy (Non Compliant Resources)")
 
 	graphClient := graph.NewGraphQuery(cred)
@@ -54,7 +54,7 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 		subs = append(subs, &s)
 	}
 	result := graphClient.Query(ctx, query, subs)
-	resources := []models.AzurePolicyResult{}
+	resources := []*models.AzurePolicyResult{}
 
 	if result.Data != nil {
 		for _, row := range result.Data {
@@ -69,7 +69,7 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 				continue
 			}
 
-			resources = append(resources, models.AzurePolicyResult{
+			resources = append(resources, &models.AzurePolicyResult{
 				SubscriptionID:       to.String(m["subscriptionId"]),
 				SubscriptionName:     to.String(m["subscriptionName"]),
 				Type:                 models.GetResourceTypeFromResourceID(resourceId),

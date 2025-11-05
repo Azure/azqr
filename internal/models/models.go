@@ -45,7 +45,7 @@ type (
 	IAzureScanner interface {
 		Init(config *ScannerConfig) error
 		GetRecommendations() map[string]AzqrRecommendation
-		Scan(scanContext *ScanContext) ([]AzqrServiceResult, error)
+		Scan(scanContext *ScanContext) ([]*AzqrServiceResult, error)
 		ResourceTypes() []string
 	}
 
@@ -57,7 +57,7 @@ type (
 		Location         string
 		Type             string
 		ServiceName      string
-		Recommendations  map[string]AzqrResult
+		Recommendations  map[string]*AzqrResult
 	}
 
 	AzqrRecommendation struct {
@@ -254,15 +254,16 @@ func (r *AzqrRecommendation) ToAzureAprlRecommendation() AprlRecommendation {
 	}
 }
 
-func (e *RecommendationEngine) EvaluateRecommendations(rules map[string]AzqrRecommendation, target interface{}, scanContext *ScanContext) map[string]AzqrResult {
-	results := map[string]AzqrResult{}
+func (e *RecommendationEngine) EvaluateRecommendations(rules map[string]AzqrRecommendation, target interface{}, scanContext *ScanContext) map[string]*AzqrResult {
+	results := map[string]*AzqrResult{}
 
 	for k, rule := range rules {
 		if scanContext.Filters.Azqr.IsRecommendationExcluded(rule.RecommendationID) {
 			continue
 		}
 
-		results[k] = e.evaluateRecommendation(rule, target, scanContext)
+		result := e.evaluateRecommendation(rule, target, scanContext)
+		results[k] = &result
 	}
 
 	return results

@@ -28,7 +28,7 @@ func (a *AppInsightsScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Application Insights in a Resource Group
-func (a *AppInsightsScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *AppInsightsScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	gateways, err := a.list()
@@ -37,12 +37,12 @@ func (a *AppInsightsScanner) Scan(scanContext *models.ScanContext) ([]models.Azq
 	}
 	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, g := range gateways {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),

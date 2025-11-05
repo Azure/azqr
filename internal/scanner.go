@@ -414,7 +414,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 				PublicIPs:           pips,
 			}
 
-			ch := make(chan []models.AzqrServiceResult, len(filteredServiceScanners))
+			ch := make(chan []*models.AzqrServiceResult, len(filteredServiceScanners))
 
 			for _, s := range filteredServiceScanners {
 				err := s.Init(config)
@@ -502,7 +502,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 }
 
 // retry retries the Azure scanner Scan, a number of times with an increasing delay between retries
-func (sc Scanner) retry(attempts int, sleep time.Duration, a models.IAzureScanner, scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (sc Scanner) retry(attempts int, sleep time.Duration, a models.IAzureScanner, scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	var err error
 	for i := 0; ; i++ {
 		res, err := a.Scan(scanContext)
@@ -511,7 +511,7 @@ func (sc Scanner) retry(attempts int, sleep time.Duration, a models.IAzureScanne
 		}
 
 		if models.ShouldSkipError(err) {
-			return []models.AzqrServiceResult{}, nil
+			return []*models.AzqrServiceResult{}, nil
 		}
 
 		errAsString := err.Error()

@@ -23,9 +23,9 @@ func (a *IoTHubScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all IoT Hub in a Resource Group
-func (a *IoTHubScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *IoTHubScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []models.AzqrServiceResult{}, nil
+	return []*models.AzqrServiceResult{}, nil
 }
 
 func (a *IoTHubScanner) ResourceTypes() []string {

@@ -28,7 +28,7 @@ func (a *AIFoundryHubScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all AI Foundry Hubs
-func (a *AIFoundryHubScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *AIFoundryHubScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
 
 	workspaces, err := a.listWorkspaces()
@@ -37,12 +37,12 @@ func (a *AIFoundryHubScanner) Scan(scanContext *models.ScanContext) ([]models.Az
 	}
 	engine := models.RecommendationEngine{}
 	rules := a.GetRecommendations()
-	results := []models.AzqrServiceResult{}
+	results := []*models.AzqrServiceResult{}
 
 	for _, g := range workspaces {
 		rr := engine.EvaluateRecommendations(rules, g, scanContext)
 
-		results = append(results, models.AzqrServiceResult{
+		results = append(results, &models.AzqrServiceResult{
 			SubscriptionID:   a.config.SubscriptionID,
 			SubscriptionName: a.config.SubscriptionName,
 			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),

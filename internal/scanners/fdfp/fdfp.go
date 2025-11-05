@@ -23,9 +23,9 @@ func (a *FrontDoorWAFPolicyScanner) Init(config *models.ScannerConfig) error {
 }
 
 // Scan - Scans all Front Door Web Application Policy in a Resource Group
-func (a *FrontDoorWAFPolicyScanner) Scan(scanContext *models.ScanContext) ([]models.AzqrServiceResult, error) {
+func (a *FrontDoorWAFPolicyScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
 	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []models.AzqrServiceResult{}, nil
+	return []*models.AzqrServiceResult{}, nil
 }
 
 func (a *FrontDoorWAFPolicyScanner) ResourceTypes() []string {
