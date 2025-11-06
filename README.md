@@ -260,6 +260,18 @@ You can explore your scan results with a lightweight embedded web UI using the `
 ./azqr show -f report.json --open
 ```
 
+### Compare Scan Reports (compare command)
+
+You can compare two azqr scan reports to identify differences in recommendations and resources using the `compare` command:
+
+```bash
+# Compare two Excel reports
+./azqr compare --file1 scan_before.xlsx --file2 scan_after.xlsx
+
+# Save comparison results to a file
+./azqr compare --file1 scan1.xlsx --file2 scan2.xlsx --output comparison.txt
+```
+
 ## Binary Verification
 
 To verify the authenticity of downloaded binaries, see our [Binary Verification Guide](SECURITY_VERIFICATION.md).
