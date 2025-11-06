@@ -36,7 +36,7 @@ type GraphResult struct {
 // QueryRequestOptions represents options for the Resource Graph query.
 type QueryRequestOptions struct {
 	ResultFormat             string  `json:"resultFormat,omitempty"`             // Format of the result
-	Top                      *int32  `json:"top,omitempty"`                      // Max number of results
+	Top                      *int32  `json:"$top,omitempty"`                      // Max number of results
 	SkipToken                *string `json:"$skipToken,omitempty"`               // Token for pagination
 	AuthorizationScopeFilter *string `json:"authorizationScopeFilter,omitempty"` // Filter by authorization scope
 }
