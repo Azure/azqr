@@ -133,6 +133,7 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 			}
 		}
 	}
+	log.Debug().Msgf("Graph query returned %d records", len(result.Data))
 	return &result
 }
 
