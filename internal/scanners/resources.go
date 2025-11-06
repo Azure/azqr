@@ -16,7 +16,7 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 	models.LogResourceTypeScan("Resources")
 
 	graphClient := graph.NewGraphQuery(cred)
-	query := "resources | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind"
+	query := "resources | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind | order by subscriptionId, resourceGroup"
 	log.Debug().Msg(query)
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
