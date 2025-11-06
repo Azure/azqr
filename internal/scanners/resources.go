@@ -6,6 +6,7 @@ import (
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
@@ -20,7 +21,7 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 	log.Debug().Msg(query)
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
-		subs = append(subs, &s)
+		subs = append(subs, to.Ptr(s))
 	}
 	result := graphClient.Query(ctx, query, subs)
 	resources := []*models.Resource{}
@@ -96,7 +97,7 @@ func (sc ResourceScanner) GetCountPerResourceTypeAndSubscription(ctx context.Con
 	log.Debug().Msg(query)
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
-		subs = append(subs, &s)
+		subs = append(subs, to.Ptr(s))
 	}
 	result := graphClient.Query(ctx, query, subs)
 	resources := []models.ResourceTypeCount{}
@@ -126,7 +127,7 @@ func (sc ResourceScanner) GetCountPerResourceType(ctx context.Context, cred azco
 	log.Debug().Msg(query)
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
-		subs = append(subs, &s)
+		subs = append(subs, to.Ptr(s))
 	}
 	result := graphClient.Query(ctx, query, subs)
 	resources := map[string]float64{}

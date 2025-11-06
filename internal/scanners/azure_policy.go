@@ -51,7 +51,7 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 	log.Debug().Msg(query)
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
-		subs = append(subs, &s)
+		subs = append(subs, to.Ptr(s))
 	}
 	result := graphClient.Query(ctx, query, subs)
 	resources := []*models.AzurePolicyResult{}

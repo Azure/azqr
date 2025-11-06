@@ -254,7 +254,7 @@ func (a AprlScanner) graphScan(ctx context.Context, graphClient *GraphQueryClien
 	results := []*models.AprlResult{}
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
-		subs = append(subs, &s)
+		subs = append(subs, to.Ptr(s))
 	}
 
 	if rule.GraphQuery != "" {
