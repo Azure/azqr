@@ -39,7 +39,7 @@ func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenC
 		log.Debug().Msg(query)
 		subs := make([]*string, 0, len(subscriptions))
 		for s := range subscriptions {
-			subs = append(subs, &s)
+			subs = append(subs, to.Ptr(s))
 		}
 		result := graphClient.Query(ctx, query, subs)
 		resources = []*models.AdvisorResult{}

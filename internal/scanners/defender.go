@@ -36,7 +36,7 @@ func (s *DefenderScanner) Scan(ctx context.Context, scan bool, cred azcore.Token
 		log.Debug().Msg(query)
 		subs := make([]*string, 0, len(subscriptions))
 		for s := range subscriptions {
-			subs = append(subs, &s)
+			subs = append(subs, to.Ptr(s))
 		}
 		result := graphClient.Query(ctx, query, subs)
 		resources = []*models.DefenderResult{}
@@ -103,7 +103,7 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 		log.Debug().Msg(query)
 		subs := make([]*string, 0, len(subscriptions))
 		for s := range subscriptions {
-			subs = append(subs, &s)
+			subs = append(subs, to.Ptr(s))
 		}
 		result := graphClient.Query(ctx, query, subs)
 		resources = []*models.DefenderRecommendation{}
