@@ -53,8 +53,18 @@ func (rd *ReportData) ExcludedResourcesTable() [][]string {
 func (rd *ReportData) ImpactedTable() [][]string {
 	headers := []string{"Validated Using", "Source", "Category", "Impact", "Resource Type", "Recommendation", "Recommendation Id", "Subscription Id", "Subscription Name", "Resource Group", "Resource Name", "Resource Id", "Param1", "Param2", "Param3", "Param4", "Param5", "Learn"}
 
+	// Use a map to track unique entries by ResourceID + RecommendationID
+	seen := make(map[string]bool)
 	rows := [][]string{}
+
 	for _, r := range rd.Aprl {
+		// Create composite key for deduplication
+		key := r.ResourceID + "|" + r.RecommendationID
+		if seen[key] {
+			continue // Skip duplicate
+		}
+		seen[key] = true
+
 		row := []string{
 			"Azure Resource Graph",
 			r.Source,
@@ -81,6 +91,13 @@ func (rd *ReportData) ImpactedTable() [][]string {
 	for _, d := range rd.Azqr {
 		for _, r := range d.Recommendations {
 			if r.NotCompliant {
+				// Create composite key for deduplication
+				key := d.ResourceID() + "|" + r.RecommendationID
+				if seen[key] {
+					continue // Skip duplicate
+				}
+				seen[key] = true
+
 				row := []string{
 					"Azure Resource Manager",
 					"AZQR",
