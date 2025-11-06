@@ -322,6 +322,18 @@ azqr scan --output-file "azqr_action_plan_$timestamp"
 
 > By default, the output file name is `azqr_action_plan_YYYY_MM_DD_THHMMSS`.
 
+## Compare Scan Reports (compare command)
+
+You can compare two azqr scan reports to identify differences in recommendations using the `compare` command:
+
+```bash
+# Compare two Excel reports
+./azqr compare --file1 scan_before.xlsx --file2 scan_after.xlsx
+
+# Save comparison results to a file
+./azqr compare --file1 scan1.xlsx --file2 scan2.xlsx --output comparison.txt
+```
+
 ## Help
 
 You can get help for `azqr` commands by running:
