@@ -109,7 +109,6 @@ type DiagnosticSettingsScanner struct {
 
 const (
 	bucketCapacity = 250
-	refillRate     = 25
 )
 
 // Init - Initializes the DiagnosticSettingsScanner
