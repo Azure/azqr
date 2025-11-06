@@ -182,6 +182,14 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 
 	// Send request
 	resp, err := q.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send HTTP request: %w", err)
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Fatal().Err(err).Msg("Failed to close response body")
+		}
+	}()
 
 	// Parse response JSON
 	queryResp := QueryResponse{}
@@ -210,15 +218,6 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 	}
 
 	log.Debug().Msgf("Graph query quota remaining: %d, Retry after: %s", queryResp.Quota, queryResp.RetryAfter)
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to send HTTP request: %w", err)
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Fatal().Err(err).Msg("Failed to close response body")
-		}
-	}()
 
 	// Read response body
 	respBody, err := io.ReadAll(resp.Body)
