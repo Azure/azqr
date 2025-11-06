@@ -188,7 +188,8 @@ func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*m
 
 	_, rules := a.ListRecommendations()
 
-	// Staggering queries to avoid throttling. Max 15 queries each 5 seconds. Azure Graph throttling is so agressive that only 1 worker will be used.
+	// Staggering queries to avoid throttling. Max 15 queries each 5 seconds.
+	// Use 10 workers to match burst capacity and fully utilize the 5-second window
 	// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
 	batchSize := bucketCapacity
 	batches := int(math.Ceil(float64(len(rules)) / float64(batchSize)))
@@ -201,7 +202,8 @@ func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*m
 
 	var wg sync.WaitGroup
 
-	numWorkers := bucketCapacity
+	// Use 10 workers to match the rate limiter's burst capacity
+	numWorkers := 10
 	for w := 0; w < numWorkers; w++ {
 		go a.worker(ctx, graph, a.subscriptions, jobs, ch, &wg)
 	}
