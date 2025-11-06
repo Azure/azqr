@@ -55,6 +55,7 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 	}
 	result := graphClient.Query(ctx, query, subs)
 	resources := []*models.AzurePolicyResult{}
+	seen := make(map[string]bool) // Deduplication map
 
 	if result.Data != nil {
 		for _, row := range result.Data {
@@ -69,7 +70,7 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 				continue
 			}
 
-			resources = append(resources, &models.AzurePolicyResult{
+			rec := &models.AzurePolicyResult{
 				SubscriptionID:       to.String(m["subscriptionId"]),
 				SubscriptionName:     to.String(m["subscriptionName"]),
 				Type:                 models.GetResourceTypeFromResourceID(resourceId),
@@ -84,7 +85,16 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 				PolicyAssignmentName: to.String(m["policyAssignmentName"]),
 				PolicyAssignmentID:   to.String(m["policyAssignmentId"]),
 				ComplianceState:      to.String(m["complianceState"]),
-			})
+			}
+
+			// Create unique key from ResourceID + PolicyDefinitionID
+			// This combination should uniquely identify a policy compliance state
+			key := rec.ResourceID + "|" + rec.PolicyDefinitionID
+
+			if !seen[key] {
+				seen[key] = true
+				resources = append(resources, rec)
+			}
 		}
 	}
 
