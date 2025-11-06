@@ -7,15 +7,15 @@ import (
 )
 
 // ARMLimiter rate limits Azure Resource Manager API calls
-// Allows 25 operations per second with burst capacity of 250
+// Allows 3 operations per second with burst capacity of 100
 // https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/request-limits-and-throttling#regional-throttling-and-token-bucket-algorithm
-var ARMLimiter = rate.NewLimiter(rate.Limit(25), 250)
+var ARMLimiter = rate.NewLimiter(rate.Limit(3), 100)
 
 // GraphLimiter rate limits Azure Resource Graph API calls
-// Allows 2 operations per second with burst capacity of 5
+// Allows 2 operations per second with burst capacity of 3
 // Azure Graph throttling is very aggressive, so we use conservative limits
 // https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
-var GraphLimiter = rate.NewLimiter(rate.Limit(2), 5)
+var GraphLimiter = rate.NewLimiter(rate.Limit(2), 3)
 
 // WaitARM waits for permission to make an ARM API call using the provided context
 func WaitARM(ctx context.Context) error {
