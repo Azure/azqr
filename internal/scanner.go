@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Azure/azqr/internal/az"
@@ -414,26 +415,50 @@ func (sc Scanner) Scan(params *ScanParams) string {
 				PublicIPs:           pips,
 			}
 
-			ch := make(chan []*models.AzqrServiceResult, len(filteredServiceScanners))
+			// Worker pool to limit concurrent scanner goroutines
+			const numScannerWorkers = 10
+			jobs := make(chan models.IAzureScanner, len(filteredServiceScanners))
+			results := make(chan []*models.AzqrServiceResult, len(filteredServiceScanners))
 
-			for _, s := range filteredServiceScanners {
-				err := s.Init(config)
-				if err != nil {
-					log.Fatal().Err(err).Msg("Failed to initialize scanner")
-				}
+			// Start worker pool
+			var workerWg sync.WaitGroup
+			for w := 0; w < numScannerWorkers; w++ {
+				workerWg.Add(1)
+				go func() {
+					defer workerWg.Done()
+					for s := range jobs {
+						// Initialize scanner with this subscription's config
+						err := s.Init(config)
+						if err != nil {
+							log.Fatal().Err(err).Msg("Failed to initialize scanner")
+						}
 
-				go func(s models.IAzureScanner) {
-					res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
-					if err != nil {
-						cancel()
-						log.Fatal().Err(err).Msg("Failed to scan")
+						res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
+						if err != nil {
+							cancel()
+							log.Fatal().Err(err).Msg("Failed to scan")
+						}
+						results <- res
 					}
-					ch <- res
-				}(s)
+				}()
 			}
 
-			for i := 0; i < len(filteredServiceScanners); i++ {
-				res := <-ch
+			// Send scanner jobs to workers
+			go func() {
+				for _, s := range filteredServiceScanners {
+					jobs <- s
+				}
+				close(jobs)
+			}()
+
+			// Wait for workers to finish and close results channel
+			go func() {
+				workerWg.Wait()
+				close(results)
+			}()
+
+			// Collect results from all scanners
+			for res := range results {
 				for _, r := range res {
 					// check if the resource is excluded
 					if filters.Azqr.IsServiceExcluded(r.ResourceID()) {
