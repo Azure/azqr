@@ -5,12 +5,11 @@ package logic
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/logic/armlogic"
 )
 
 func init() {
-	models.ScannerList["logic"] = []models.IAzureScanner{&LogicAppScanner{}}
+	models.ScannerFactoryList["logic"] = []models.ScannerFactory{func() models.IAzureScanner { return &LogicAppScanner{ }}}
 }
 
 // LogicAppScanner - Scanner for LogicApp
@@ -61,7 +60,7 @@ func (c *LogicAppScanner) list() ([]*armlogic.Workflow, error) {
 	logicApps := make([]*armlogic.Workflow, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

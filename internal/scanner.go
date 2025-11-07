@@ -19,6 +19,7 @@ import (
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -185,7 +186,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 		}
 	}
 
-	serviceScanners := filters.Azqr.Scanners
+	serviceScannerFactories := filters.Azqr.Scanners
 
 	// create Azure credentials
 	cred := az.NewAzureCredential()
@@ -219,13 +220,10 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 	// initialize scanners
 	defenderScanner := scanners.DefenderScanner{}
-	pipScanner := scanners.PublicIPScanner{}
-	peScanner := scanners.PrivateEndpointScanner{}
 	diagnosticsScanner := scanners.DiagnosticSettingsScanner{}
 	advisorScanner := scanners.AdvisorScanner{}
 	azurePolicyScanner := scanners.AzurePolicyScanner{}
 	arcSQLScanner := scanners.ArcSQLScanner{}
-	costScanner := scanners.CostScanner{}
 	diagResults := map[string]bool{}
 
 	// initialize report data
@@ -238,6 +236,12 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	const excelMaxRows = 1048566
 	if len(reportData.Resources) > excelMaxRows {
 		log.Fatal().Msgf("Number of resources (%d) exceeds Excel's maximum row limit (%d). Aborting scan.", len(reportData.Resources), excelMaxRows)
+	}
+
+	// Create scanner instances for APRL
+	serviceScanners := make([]models.IAzureScanner, len(serviceScannerFactories))
+	for i, factory := range serviceScannerFactories {
+		serviceScanners[i] = factory()
 	}
 
 	aprlScanner := graph.NewAprlScanner(serviceScanners, filters, subscriptions)
@@ -260,11 +264,13 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 	resourceTypes := resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, filters)
 
-	// Filter service scanners to include only those with resource types present in reportData.ResourceTypeCount and count > 0
-	var filteredServiceScanners []models.IAzureScanner
-	for _, s := range serviceScanners {
+	// Filter service scanner factories to include only those with resource types present and count > 0
+	var filteredServiceScannerFactories []models.ScannerFactory
+	for _, factory := range serviceScannerFactories {
+		// Create temporary instance to check resource types
+		tempScanner := factory()
 		add := true
-		for _, resourceType := range s.ResourceTypes() {
+		for _, resourceType := range tempScanner.ResourceTypes() {
 			resourceType = strings.ToLower(resourceType)
 
 			// Check if the resource type is in the resourceTypes
@@ -273,7 +279,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 				continue
 			} else {
 				if add {
-					filteredServiceScanners = append(filteredServiceScanners, s)
+					filteredServiceScannerFactories = append(filteredServiceScannerFactories, factory)
 					add = false
 					log.Info().Msgf("Scanner for resource type %s will be used", resourceType)
 				}
@@ -295,6 +301,12 @@ func (sc Scanner) Scan(params *ScanParams) string {
 				Msg("Internal plugin ready for execution")
 			internalPluginScanners = append(internalPluginScanners, plugin.InternalScanner)
 		}
+	}
+
+	// Create filtered scanner instances for APRL
+	filteredServiceScanners := make([]models.IAzureScanner, len(filteredServiceScannerFactories))
+	for i, factory := range filteredServiceScannerFactories {
+		filteredServiceScanners[i] = factory()
 	}
 
 	// get the APRL scan results (built-in APRL recommendations only)
@@ -390,91 +402,143 @@ func (sc Scanner) Scan(params *ScanParams) string {
 		diagResults = diagnosticsScanner.Scan(reportData.Resources)
 	}
 
-	// scan each subscription with AZQR scanners
+	// scan each subscription with AZQR scanners in parallel
+	// Use a mutex to protect concurrent writes to reportData
+	var reportDataMutex sync.Mutex
+	var subscriptionWg sync.WaitGroup
+
+	// Limit concurrent subscription scans to avoid overwhelming Azure APIs
+	const maxConcurrentSubscriptions = 5
+	subscriptionSemaphore := make(chan struct{}, maxConcurrentSubscriptions)
+
 	for sid, sn := range subscriptions {
-		config := &models.ScannerConfig{
-			Ctx:              ctx,
-			SubscriptionID:   sid,
-			SubscriptionName: sn,
-			Cred:             cred,
-			ClientOptions:    clientOptions,
-		}
+		subscriptionWg.Add(1)
 
-		if params.UseAzqrRecommendations {
-			// scan private endpoints
-			peResults := peScanner.Scan(config)
+		// Capture loop variables for goroutine
+		subscriptionID := sid
+		subscriptionName := sn
 
-			// scan public IPs
-			pips := pipScanner.Scan(config)
+		go func() {
+			defer subscriptionWg.Done()
 
-			// initialize scan context
-			scanContext := models.ScanContext{
-				Filters:             filters,
-				PrivateEndpoints:    peResults,
-				DiagnosticsSettings: diagResults,
-				PublicIPs:           pips,
+			// Acquire semaphore slot
+			subscriptionSemaphore <- struct{}{}
+			defer func() { <-subscriptionSemaphore }()
+
+			// Create per-subscription rate limiter for ARM API calls
+			armLimiter := throttling.NewARMLimiter()
+
+			config := &models.ScannerConfig{
+				Ctx:              ctx,
+				SubscriptionID:   subscriptionID,
+				SubscriptionName: subscriptionName,
+				Cred:             cred,
+				ClientOptions:    clientOptions,
+				ARMLimiter:       armLimiter,
 			}
 
-			// Worker pool to limit concurrent scanner goroutines
-			const numScannerWorkers = 10
-			jobs := make(chan models.IAzureScanner, len(filteredServiceScanners))
-			results := make(chan []*models.AzqrServiceResult, len(filteredServiceScanners))
+			if params.UseAzqrRecommendations {
+				// Create fresh scanner instances for this subscription using the filtered factories
+				// This ensures each subscription has its own isolated scanner state
+				filteredFreshScanners := make([]models.IAzureScanner, len(filteredServiceScannerFactories))
+				for i, factory := range filteredServiceScannerFactories {
+					filteredFreshScanners[i] = factory()
+				}
 
-			// Start worker pool
-			var workerWg sync.WaitGroup
-			for w := 0; w < numScannerWorkers; w++ {
-				workerWg.Add(1)
+				// Create per-subscription instances to avoid race conditions
+				subPeScanner := scanners.PrivateEndpointScanner{}
+				subPipScanner := scanners.PublicIPScanner{}
+
+				// scan private endpoints
+				peResults := subPeScanner.Scan(config)
+
+				// scan public IPs
+				pips := subPipScanner.Scan(config) // initialize scan context
+				scanContext := models.ScanContext{
+					Filters:             filters,
+					PrivateEndpoints:    peResults,
+					DiagnosticsSettings: diagResults,
+					PublicIPs:           pips,
+				}
+
+				// Worker pool to limit concurrent scanner goroutines
+				const numScannerWorkers = 10
+				jobs := make(chan models.IAzureScanner, len(filteredFreshScanners))
+				results := make(chan []*models.AzqrServiceResult, len(filteredFreshScanners))
+
+				// Start worker pool
+				var workerWg sync.WaitGroup
+				for w := 0; w < numScannerWorkers; w++ {
+					workerWg.Add(1)
+					go func() {
+						defer workerWg.Done()
+						for s := range jobs {
+							// Initialize scanner with this subscription's config
+							err := s.Init(config)
+							if err != nil {
+								log.Fatal().Err(err).Msg("Failed to initialize scanner")
+							}
+
+							res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
+							if err != nil {
+								cancel()
+								log.Fatal().Err(err).Msg("Failed to scan")
+							}
+							results <- res
+						}
+					}()
+				}
+
+				// Send scanner jobs to workers
 				go func() {
-					defer workerWg.Done()
-					for s := range jobs {
-						// Initialize scanner with this subscription's config
-						err := s.Init(config)
-						if err != nil {
-							log.Fatal().Err(err).Msg("Failed to initialize scanner")
-						}
-
-						res, err := sc.retry(3, 10*time.Millisecond, s, &scanContext)
-						if err != nil {
-							cancel()
-							log.Fatal().Err(err).Msg("Failed to scan")
-						}
-						results <- res
+					for _, s := range filteredFreshScanners {
+						jobs <- s
 					}
+					close(jobs)
 				}()
-			}
 
-			// Send scanner jobs to workers
-			go func() {
-				for _, s := range filteredServiceScanners {
-					jobs <- s
-				}
-				close(jobs)
-			}()
+				// Wait for workers to finish and close results channel
+				go func() {
+					workerWg.Wait()
+					close(results)
+				}()
 
-			// Wait for workers to finish and close results channel
-			go func() {
-				workerWg.Wait()
-				close(results)
-			}()
-
-			// Collect results from all scanners
-			for res := range results {
-				for _, r := range res {
-					// check if the resource is excluded
-					if filters.Azqr.IsServiceExcluded(r.ResourceID()) {
-						continue
+				// Collect results from all scanners
+				localResults := []*models.AzqrServiceResult{}
+				for res := range results {
+					for _, r := range res {
+						// check if the resource is excluded
+						if filters.Azqr.IsServiceExcluded(r.ResourceID()) {
+							continue
+						}
+						localResults = append(localResults, r)
 					}
-					reportData.Azqr = append(reportData.Azqr, r)
 				}
-			}
-		}
 
-		// scan costs
-		costs := costScanner.Scan(params.Cost, config)
-		reportData.Cost.From = costs.From
-		reportData.Cost.To = costs.To
-		reportData.Cost.Items = append(reportData.Cost.Items, costs.Items...)
+				// Thread-safe append to shared reportData
+				reportDataMutex.Lock()
+				reportData.Azqr = append(reportData.Azqr, localResults...)
+				reportDataMutex.Unlock()
+			}
+
+			// Create per-subscription cost scanner to avoid race conditions
+			subCostScanner := scanners.CostScanner{}
+			costs := subCostScanner.Scan(params.Cost, config)
+
+			// Thread-safe update to shared reportData
+			reportDataMutex.Lock()
+			// Set From/To only if not already set (all subscriptions use same date range)
+			if reportData.Cost.From.IsZero() {
+				reportData.Cost.From = costs.From
+				reportData.Cost.To = costs.To
+			}
+			reportData.Cost.Items = append(reportData.Cost.Items, costs.Items...)
+			reportDataMutex.Unlock()
+		}()
 	}
+
+	// Wait for all subscription scans to complete
+	subscriptionWg.Wait()
 
 	// scan advisor
 	reportData.Advisor = append(reportData.Advisor, advisorScanner.Scan(ctx, params.Defender, cred, subscriptions, filters)...)

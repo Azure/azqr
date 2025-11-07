@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["rg"] = []models.IAzureScanner{&ResourceGroupScanner{}}
+	models.ScannerFactoryList["rg"] = []models.ScannerFactory{func() models.IAzureScanner { return &ResourceGroupScanner{ }}}
 }
 
 // ResourceGroupScanner - Scanner for Resource Groups

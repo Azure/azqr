@@ -5,12 +5,11 @@ package as
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/analysisservices/armanalysisservices"
 )
 
 func init() {
-	models.ScannerList["as"] = []models.IAzureScanner{&AnalysisServicesScanner{}}
+	models.ScannerFactoryList["as"] = []models.ScannerFactory{func() models.IAzureScanner { return &AnalysisServicesScanner{ }}}
 }
 
 // AnalysisServicesScanner - Scanner for Analysis Services
@@ -61,7 +60,7 @@ func (c *AnalysisServicesScanner) listWorkspaces() ([]*armanalysisservices.Serve
 	registries := make([]*armanalysisservices.Server, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

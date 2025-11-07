@@ -5,13 +5,12 @@ package vgw
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 	"github.com/rs/zerolog/log"
 )
 
 func init() {
-	models.ScannerList["vgw"] = []models.IAzureScanner{&VirtualNetworkGatewayScanner{}}
+	models.ScannerFactoryList["vgw"] = []models.ScannerFactory{func() models.IAzureScanner { return &VirtualNetworkGatewayScanner{ }}}
 }
 
 // VirtualNetworkGatewayScanner - Scanner for VPN Gateway
@@ -70,7 +69,7 @@ func (c *VirtualNetworkGatewayScanner) listVirtualNetworkGateways(resourceGroupN
 	vpns := make([]*armnetwork.VirtualNetworkGateway, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

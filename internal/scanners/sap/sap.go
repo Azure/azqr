@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["sap"] = []models.IAzureScanner{&SAPScanner{}}
+	models.ScannerFactoryList["sap"] = []models.ScannerFactory{func() models.IAzureScanner { return &SAPScanner{ }}}
 }
 
 // SAPScanner - Scanner for SAP

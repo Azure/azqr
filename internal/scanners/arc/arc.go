@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["arc"] = []models.IAzureScanner{&ArcScanner{}}
+	models.ScannerFactoryList["arc"] = []models.ScannerFactory{func() models.IAzureScanner { return &ArcScanner{ }}}
 }
 
 // ArcScanner - Scanner for Azure Arc-enabled machines

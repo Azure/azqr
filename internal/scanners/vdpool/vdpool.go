@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["vdpool"] = []models.IAzureScanner{&VirtualDesktopScanner{}}
+	models.ScannerFactoryList["vdpool"] = []models.ScannerFactory{func() models.IAzureScanner { return &VirtualDesktopScanner{ }}}
 }
 
 // VirtualDesktopScanner - Scanner for Virtual Desktop

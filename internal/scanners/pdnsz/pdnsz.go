@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["pdnsz"] = []models.IAzureScanner{&PrivateDNSZoneScanner{}}
+	models.ScannerFactoryList["pdnsz"] = []models.ScannerFactory{func() models.IAzureScanner { return &PrivateDNSZoneScanner{ }}}
 }
 
 // PrivateDNSZoneScanner - Scanner for Private DNS Zone

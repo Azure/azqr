@@ -5,12 +5,11 @@ package amg
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard"
 )
 
 func init() {
-	models.ScannerList["amg"] = []models.IAzureScanner{&ManagedGrafanaScanner{}}
+	models.ScannerFactoryList["amg"] = []models.ScannerFactory{func() models.IAzureScanner { return &ManagedGrafanaScanner{ }}}
 }
 
 // ManagedGrafanaScanner - Scanner for Managed Grafana
@@ -61,7 +60,7 @@ func (a *ManagedGrafanaScanner) listWorkspaces() ([]*armdashboard.ManagedGrafana
 	workspaces := make([]*armdashboard.ManagedGrafana, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
+		_ = a.config.ARMLimiter.Wait(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

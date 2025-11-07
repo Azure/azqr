@@ -5,12 +5,11 @@ package sigr
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
 func init() {
-	models.ScannerList["sigr"] = []models.IAzureScanner{&SignalRScanner{}}
+	models.ScannerFactoryList["sigr"] = []models.ScannerFactory{func() models.IAzureScanner { return &SignalRScanner{ }}}
 }
 
 // SignalRScanner - Scanner for SignalR
@@ -61,7 +60,7 @@ func (c *SignalRScanner) listSignalR() ([]*armsignalr.ResourceInfo, error) {
 	signalrs := make([]*armsignalr.ResourceInfo, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

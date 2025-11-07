@@ -5,12 +5,11 @@ package st
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
 func init() {
-	models.ScannerList["st"] = []models.IAzureScanner{&StorageScanner{}}
+	models.ScannerFactoryList["st"] = []models.ScannerFactory{func() models.IAzureScanner { return &StorageScanner{ }}}
 }
 
 // StorageScanner - Scanner for Storage
@@ -49,7 +48,7 @@ func (c *StorageScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrSe
 
 		scanContext.BlobServiceProperties = nil
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		blobServicesProperties, err := c.blobServicesClient.GetServiceProperties(c.config.Ctx, resourceGroupName, *storage.Name, nil)
 		if err == nil {
 			scanContext.BlobServiceProperties = &blobServicesProperties
@@ -76,7 +75,7 @@ func (c *StorageScanner) listStorage() ([]*armstorage.Account, error) {
 	staccounts := make([]*armstorage.Account, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

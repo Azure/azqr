@@ -22,8 +22,8 @@ func TestRegistryRegister(t *testing.T) {
 		plugins: make(map[string]*Plugin),
 	}
 
-	// Initialize models.ScannerList
-	models.ScannerList = make(map[string][]models.IAzureScanner)
+	// Initialize models.ScannerFactoryList
+	models.ScannerFactoryList = make(map[string][]models.ScannerFactory)
 
 	plugin := &Plugin{
 		Metadata: PluginMetadata{

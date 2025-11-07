@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["disk"] = []models.IAzureScanner{&DiskScanner{}}
+	models.ScannerFactoryList["disk"] = []models.ScannerFactory{func() models.IAzureScanner { return &DiskScanner{ }}}
 }
 
 // DiskScanner - Scanner for Disk

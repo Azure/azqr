@@ -13,7 +13,13 @@ import (
 )
 
 func GetAllRecommendations(md bool) string {
-	_, serviceScanners := models.GetScanners()
+	_, serviceScannerFactories := models.GetScanners()
+	serviceScanners := []models.IAzureScanner{}
+	for _, factory := range serviceScannerFactories {
+		scanner := factory()
+		serviceScanners = append(serviceScanners, scanner)
+	}
+
 	aprlScanner := graph.NewAprlScanner(serviceScanners, nil, nil)
 	aprl := aprlScanner.GetAprlRecommendations()
 

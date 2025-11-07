@@ -5,12 +5,11 @@ package hub
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/machinelearning/armmachinelearning"
 )
 
 func init() {
-	models.ScannerList["hub"] = []models.IAzureScanner{&AIFoundryHubScanner{}}
+	models.ScannerFactoryList["hub"] = []models.ScannerFactory{func() models.IAzureScanner { return &AIFoundryHubScanner{ }}}
 }
 
 // AIFoundryHubScanner - Scanner for Azure AI Foundry Hubs
@@ -61,7 +60,7 @@ func (a *AIFoundryHubScanner) listWorkspaces() ([]*armmachinelearning.Workspace,
 	workspaces := make([]*armmachinelearning.Workspace, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
+		_ = a.config.ARMLimiter.Wait(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

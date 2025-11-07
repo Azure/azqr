@@ -5,12 +5,11 @@ package cae
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
 func init() {
-	models.ScannerList["cae"] = []models.IAzureScanner{&ContainerAppsEnvironmentScanner{}}
+	models.ScannerFactoryList["cae"] = []models.ScannerFactory{func() models.IAzureScanner { return &ContainerAppsEnvironmentScanner{ }}}
 }
 
 // ContainerAppsEnvironmentScanner - Scanner for Container Apps
@@ -60,7 +59,7 @@ func (a *ContainerAppsEnvironmentScanner) listApps() ([]*armappcontainers.Manage
 	apps := make([]*armappcontainers.ManagedEnvironment, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
+		_ = a.config.ARMLimiter.Wait(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

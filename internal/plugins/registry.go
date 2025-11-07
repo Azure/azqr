@@ -64,8 +64,8 @@ func (r *Registry) Unregister(name string) error {
 		return fmt.Errorf("plugin %s not found", name)
 	}
 
-	// Remove from ScannerList
-	delete(models.ScannerList, name)
+	// Remove from ScannerFactoryList
+	delete(models.ScannerFactoryList, name)
 
 	delete(r.plugins, name)
 

@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["erc"] = []models.IAzureScanner{&ExpressRouteScanner{}}
+	models.ScannerFactoryList["erc"] = []models.ScannerFactory{func() models.IAzureScanner { return &ExpressRouteScanner{ }}}
 }
 
 // ExpressRouteScanner - Scanner for Express Route

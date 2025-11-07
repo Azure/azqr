@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["gal"] = []models.IAzureScanner{&GalleryScanner{}}
+	models.ScannerFactoryList["gal"] = []models.ScannerFactory{func() models.IAzureScanner { return &GalleryScanner{ }}}
 }
 
 // GalleryScanner - Scanner for Galleries

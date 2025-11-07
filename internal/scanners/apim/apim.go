@@ -5,12 +5,11 @@ package apim
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
 
 func init() {
-	models.ScannerList["apim"] = []models.IAzureScanner{&APIManagementScanner{}}
+	models.ScannerFactoryList["apim"] = []models.ScannerFactory{func() models.IAzureScanner { return &APIManagementScanner{ }}}
 }
 
 // APIManagementScanner - Scanner for API Management Services
@@ -61,7 +60,7 @@ func (a *APIManagementScanner) listServices() ([]*armapimanagement.ServiceResour
 	services := make([]*armapimanagement.ServiceResource, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
+		_ = a.config.ARMLimiter.Wait(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

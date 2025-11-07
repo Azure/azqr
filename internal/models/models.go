@@ -18,6 +18,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/time/rate"
 )
 
 type (
@@ -29,6 +30,7 @@ type (
 		ClientOptions    *arm.ClientOptions
 		SubscriptionID   string
 		SubscriptionName string
+		ARMLimiter       *rate.Limiter // Per-subscription ARM rate limiter
 	}
 
 	// ScanContext - Struct for Scanner Context
@@ -381,19 +383,23 @@ func GetResourceNameFromResourceID(resourceID string) string {
 	return parts[8]
 }
 
-// ScannerList is a map of service abbreviation to scanner
-var ScannerList = map[string][]IAzureScanner{}
+// ScannerFactory is a function that creates a new scanner instance
+type ScannerFactory func() IAzureScanner
 
-// GetScanners returns a list of all scanners in ScannerList
-func GetScanners() ([]string, []IAzureScanner) {
-	var scanners []IAzureScanner
-	keys := make([]string, 0, len(ScannerList))
-	for key := range ScannerList {
+// ScannerFactoryList is a map of service abbreviation to scanner factories
+// Factories allow creating fresh scanner instances per subscription for parallel execution
+var ScannerFactoryList = map[string][]ScannerFactory{}
+
+// GetScanners returns a list of all scanner factories in ScannerFactoryList
+func GetScanners() ([]string, []ScannerFactory) {
+	var factories []ScannerFactory
+	keys := make([]string, 0, len(ScannerFactoryList))
+	for key := range ScannerFactoryList {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
 	for _, key := range keys {
-		scanners = append(scanners, ScannerList[key]...)
+		factories = append(factories, ScannerFactoryList[key]...)
 	}
-	return keys, scanners
+	return keys, factories
 }

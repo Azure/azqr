@@ -5,12 +5,11 @@ package evgd
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid"
 )
 
 func init() {
-	models.ScannerList["evgd"] = []models.IAzureScanner{&EventGridScanner{}}
+	models.ScannerFactoryList["evgd"] = []models.ScannerFactory{func() models.IAzureScanner { return &EventGridScanner{ }}}
 }
 
 // EventGridScanner - Scanner for EventGrid Domains
@@ -61,7 +60,7 @@ func (a *EventGridScanner) listDomain() ([]*armeventgrid.Domain, error) {
 	domains := make([]*armeventgrid.Domain, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
+		_ = a.config.ARMLimiter.Wait(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

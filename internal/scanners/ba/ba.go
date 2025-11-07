@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["ba"] = []models.IAzureScanner{&BatchAccountScanner{}}
+	models.ScannerFactoryList["ba"] = []models.ScannerFactory{func() models.IAzureScanner { return &BatchAccountScanner{ }}}
 }
 
 // BatchAccountScanner - Scanner for Batch Account

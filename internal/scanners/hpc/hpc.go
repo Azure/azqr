@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["hpc"] = []models.IAzureScanner{&HighPerformanceComputingScanner{}}
+	models.ScannerFactoryList["hpc"] = []models.ScannerFactory{func() models.IAzureScanner { return &HighPerformanceComputingScanner{ }}}
 }
 
 // HighPerformanceComputingScanner - Scanner for HPC

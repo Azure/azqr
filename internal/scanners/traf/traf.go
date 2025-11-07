@@ -5,12 +5,11 @@ package traf
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/trafficmanager/armtrafficmanager"
 )
 
 func init() {
-	models.ScannerList["traf"] = []models.IAzureScanner{&TrafficManagerScanner{}}
+	models.ScannerFactoryList["traf"] = []models.ScannerFactory{func() models.IAzureScanner { return &TrafficManagerScanner{ }}}
 }
 
 // TrafficManagerScanner - Scanner for TrafficManager
@@ -61,7 +60,7 @@ func (c *TrafficManagerScanner) list() ([]*armtrafficmanager.Profile, error) {
 	vnets := make([]*armtrafficmanager.Profile, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

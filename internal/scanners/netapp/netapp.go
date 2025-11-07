@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["netapp"] = []models.IAzureScanner{&NetAppScanner{}}
+	models.ScannerFactoryList["netapp"] = []models.ScannerFactory{func() models.IAzureScanner { return &NetAppScanner{ }}}
 }
 
 // NetAppScanner - Scanner for NetApp

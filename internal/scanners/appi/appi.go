@@ -5,12 +5,11 @@ package appi
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights"
 )
 
 func init() {
-	models.ScannerList["appi"] = []models.IAzureScanner{&AppInsightsScanner{}}
+	models.ScannerFactoryList["appi"] = []models.ScannerFactory{func() models.IAzureScanner { return &AppInsightsScanner{ }}}
 }
 
 // AppInsightsScanner - Scanner for Front Door
@@ -61,7 +60,7 @@ func (a *AppInsightsScanner) list() ([]*armapplicationinsights.Component, error)
 	services := make([]*armapplicationinsights.Component, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
+		_ = a.config.ARMLimiter.Wait(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

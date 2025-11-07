@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["fdfp"] = []models.IAzureScanner{&FrontDoorWAFPolicyScanner{}}
+	models.ScannerFactoryList["fdfp"] = []models.ScannerFactory{func() models.IAzureScanner { return &FrontDoorWAFPolicyScanner{ }}}
 }
 
 // FrontDoorWAFPolicyScanner - Scanner for Front Door Web Application Policy

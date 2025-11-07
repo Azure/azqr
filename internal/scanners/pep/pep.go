@@ -5,12 +5,11 @@ package pep
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	models.ScannerList["pep"] = []models.IAzureScanner{&PrivateEndpointScanner{}}
+	models.ScannerFactoryList["pep"] = []models.ScannerFactory{func() models.IAzureScanner { return &PrivateEndpointScanner{ }}}
 }
 
 // PrivateEndpointScanner - Scanner for Private Endpoint
@@ -61,7 +60,7 @@ func (c *PrivateEndpointScanner) list() ([]*armnetwork.PrivateEndpoint, error) {
 	svcs := make([]*armnetwork.PrivateEndpoint, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

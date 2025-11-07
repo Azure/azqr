@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["rsv"] = []models.IAzureScanner{&RecoveryServiceScanner{}}
+	models.ScannerFactoryList["rsv"] = []models.ScannerFactory{func() models.IAzureScanner { return &RecoveryServiceScanner{ }}}
 }
 
 // RecoveryServiceScanner - Scanner for Recovery Service

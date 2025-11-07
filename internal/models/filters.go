@@ -26,7 +26,7 @@ type (
 		xResourceGroups  map[string]bool
 		xServices        map[string]bool
 		xRecommendations map[string]bool
-		Scanners         []IAzureScanner
+		Scanners         []ScannerFactory
 	}
 
 	// ExcludeFilter - Struct for ExcludeFilter
@@ -116,26 +116,26 @@ func (e *AzqrFilter) IsResourceTypeExcluded(resourceType string) bool {
 // /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}
 func validateResourceGroupID(resourceGroupID string) error {
 	parts := strings.Split(resourceGroupID, "/")
-	
+
 	// ARM resource group ID should have exactly 5 parts: ["", "subscriptions", "sub-id", "resourceGroups", "rg-name"]
 	if len(parts) != 5 {
 		return fmt.Errorf("resource group ID '%s' has incorrect format. Expected format: /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}", resourceGroupID)
 	}
-	
+
 	// Validate the structure
 	if parts[0] != "" || parts[1] != "subscriptions" || parts[3] != "resourceGroups" {
 		return fmt.Errorf("resource group ID '%s' has incorrect format. Expected format: /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}", resourceGroupID)
 	}
-	
+
 	// Validate subscription ID and resource group name are not empty
 	if parts[2] == "" {
 		return fmt.Errorf("resource group ID '%s' has empty subscription ID. Expected format: /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}", resourceGroupID)
 	}
-	
+
 	if parts[4] == "" {
 		return fmt.Errorf("resource group ID '%s' has empty resource group name. Expected format: /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}", resourceGroupID)
 	}
-	
+
 	return nil
 }
 
@@ -153,7 +153,7 @@ func NewFilters() *Filters {
 				Services:        []string{},
 				Recommendations: []string{},
 			},
-			Scanners: []IAzureScanner{},
+			Scanners: []ScannerFactory{},
 		},
 	}
 	return filters
@@ -224,24 +224,26 @@ func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 		filters.Azqr.xRecommendations[strings.ToLower(id)] = true
 	}
 
-	s := []IAzureScanner{}
+	factories := []ScannerFactory{}
 
 	if len(scannerKeys) > 1 && len(filters.Azqr.Include.ResourceTypes) > 0 {
 		for _, key := range filters.Azqr.Include.ResourceTypes {
-			if scannerList, exists := ScannerList[key]; exists {
-				s = append(s, scannerList...)
+			if factoryList, exists := ScannerFactoryList[key]; exists {
+				factories = append(factories, factoryList...)
 			}
 		}
 	} else if len(scannerKeys) == 1 {
-		s = append(s, ScannerList[scannerKeys[0]]...)
+		factories = append(factories, ScannerFactoryList[scannerKeys[0]]...)
 	} else {
-		_, s = GetScanners()
+		_, factories = GetScanners()
 	}
 
-	filters.Azqr.Scanners = s
+	filters.Azqr.Scanners = factories
 
 	filters.Azqr.iResourceTypes = make(map[string]bool)
-	for _, t := range s {
+	for _, factory := range factories {
+		// Create a temporary instance to get resource types
+		t := factory()
 		for _, r := range t.ResourceTypes() {
 			filters.Azqr.iResourceTypes[strings.ToLower(r)] = true
 		}

@@ -5,12 +5,11 @@ package appcs
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
 )
 
 func init() {
-	models.ScannerList["appcs"] = []models.IAzureScanner{&AppConfigurationScanner{}}
+	models.ScannerFactoryList["appcs"] = []models.ScannerFactory{func() models.IAzureScanner { return &AppConfigurationScanner{ }}}
 }
 
 // AppConfigurationScanner - Scanner for Container Apps
@@ -60,7 +59,7 @@ func (a *AppConfigurationScanner) list() ([]*armappconfiguration.ConfigurationSt
 	apps := make([]*armappconfiguration.ConfigurationStore, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
+		_ = a.config.ARMLimiter.Wait(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err

@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["avd"] = []models.IAzureScanner{&AzureVirtualDesktopScanner{}}
+	models.ScannerFactoryList["avd"] = []models.ScannerFactory{func() models.IAzureScanner { return &AzureVirtualDesktopScanner{ }}}
 }
 
 // AzureVirtualDesktopScanner - Scanner for AVD

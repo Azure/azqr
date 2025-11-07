@@ -7,12 +7,11 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/sql/armsql"
 )
 
 func init() {
-	models.ScannerList["sql"] = []models.IAzureScanner{&SQLScanner{}}
+	models.ScannerFactoryList["sql"] = []models.ScannerFactory{func() models.IAzureScanner { return &SQLScanner{ }}}
 }
 
 // SQLScanner - Scanner for SQL
@@ -120,7 +119,7 @@ func (c *SQLScanner) listSQL() ([]*armsql.Server, error) {
 	servers := make([]*armsql.Server, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err
@@ -136,7 +135,7 @@ func (c *SQLScanner) listDatabases(resourceGroupName, serverName string) ([]*arm
 	databases := make([]*armsql.Database, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err
@@ -152,7 +151,7 @@ func (c *SQLScanner) listPools(resourceGroupName, serverName string) ([]*armsql.
 	pools := make([]*armsql.ElasticPool, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

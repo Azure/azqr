@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["nic"] = []models.IAzureScanner{&NICScanner{}}
+	models.ScannerFactoryList["nic"] = []models.ScannerFactory{func() models.IAzureScanner { return &NICScanner{ }}}
 }
 
 // NICScanner - Scanner for NICs

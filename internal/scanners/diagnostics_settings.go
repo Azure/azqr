@@ -297,7 +297,7 @@ func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds [
 	req.Header.Set("Authorization", "Bearer "+d.accessToken)
 
 	// Wait for a token from the burstLimiter channel before making the request
-	_ = throttling.WaitARM(ctx); // nolint:errcheck
+	_ = throttling.WaitARM(ctx) // nolint:errcheck
 
 	// Send the HTTP request.
 	resp, err := d.httpClient.Do(req)

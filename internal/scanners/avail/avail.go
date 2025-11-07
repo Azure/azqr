@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["avail"] = []models.IAzureScanner{&AvailabilitySetScanner{}}
+	models.ScannerFactoryList["avail"] = []models.ScannerFactory{func() models.IAzureScanner { return &AvailabilitySetScanner{ }}}
 }
 
 // AvailabilitySetScanner - Scanner for Availability Sets

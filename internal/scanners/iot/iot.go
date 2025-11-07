@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["iot"] = []models.IAzureScanner{&IoTHubScanner{}}
+	models.ScannerFactoryList["iot"] = []models.ScannerFactory{func() models.IAzureScanner { return &IoTHubScanner{ }}}
 }
 
 // IoTHubScanner - Scanner for IoT Hub

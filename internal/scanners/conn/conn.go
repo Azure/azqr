@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["con"] = []models.IAzureScanner{&ConnectionScanner{}}
+	models.ScannerFactoryList["con"] = []models.ScannerFactory{func() models.IAzureScanner { return &ConnectionScanner{ }}}
 }
 
 // ConnectionScanner - Scanner for Automation Account

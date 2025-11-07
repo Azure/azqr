@@ -5,12 +5,11 @@ package nsg
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	models.ScannerList["nsg"] = []models.IAzureScanner{&NSGScanner{}}
+	models.ScannerFactoryList["nsg"] = []models.ScannerFactory{func() models.IAzureScanner { return &NSGScanner{ }}}
 }
 
 // NSGScanner - Scanner for NSG
@@ -61,7 +60,7 @@ func (c *NSGScanner) list() ([]*armnetwork.SecurityGroup, error) {
 	svcs := make([]*armnetwork.SecurityGroup, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(c.config.Ctx); // nolint:errcheck
+		_ = c.config.ARMLimiter.Wait(c.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(c.config.Ctx)
 		if err != nil {
 			return nil, err

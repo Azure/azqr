@@ -5,12 +5,11 @@ package adf
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
 )
 
 func init() {
-	models.ScannerList["adf"] = []models.IAzureScanner{&DataFactoryScanner{}}
+	models.ScannerFactoryList["adf"] = []models.ScannerFactory{func() models.IAzureScanner { return &DataFactoryScanner{ }}}
 }
 
 // DataFactoryScanner - Scanner for Data Factory
@@ -61,7 +60,7 @@ func (a *DataFactoryScanner) listFactories() ([]*armdatafactory.Factory, error) 
 	factories := make([]*armdatafactory.Factory, 0)
 	for pager.More() {
 		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
+		_ = a.config.ARMLimiter.Wait(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
