@@ -2920,6 +2920,14 @@
 		"resourceType": "Microsoft.MachineLearningServices/workspaces"
 	},
 	{
+		"category": "OtherBestPractices",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/rest/api/oracle/cloud-vm-clusters/get?view=rest-oracle-2023-09-01\u0026tabs=HTTP#cloudvmclusterlifecyclestate",
+		"recommendation": "Ensure ODAA clusters are in Available state under normal operations",
+		"recommendationId": "4b33324a-70cd-4bac-bdae-da4c382c436b",
+		"resourceType": "Oracle.Database/cloudVmClusters"
+	},
+	{
 		"category": "Governance",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-overview",
@@ -3219,7 +3227,7 @@
 		"category": "OtherBestPractices",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/application-gateway/configuration-infrastructure#size-of-the-subnet",
-		"recommendation": "Ensure Application Gateway Subnet is using a /24 subnet mask",
+		"recommendation": "A minimum subnet size of /24 is recommended for Application Gateway v2 subnets.",
 		"recommendationId": "8364fd0a-7c0e-e240-9d95-4bf965aec243",
 		"resourceType": "Microsoft.Network/applicationGateways"
 	},
@@ -3424,6 +3432,14 @@
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
+		"category": "OtherBestPractices",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/csi-storage-drivers",
+		"recommendation": "Upgrade Persistent Volumes using in-tree drivers to Azure CSI drivers",
+		"recommendationId": "b002c030-72e6-4a37-8217-1cb276c43169",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
 		"category": "Scalability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/iot-dps/concepts-service",
@@ -3558,6 +3574,14 @@
 		"recommendation": "Deploy Azure Firewall across multiple availability zones",
 		"recommendationId": "c72b7fee-1fa0-5b4b-98e5-54bcae95bb74",
 		"resourceType": "Microsoft.Network/azureFirewalls"
+	},
+	{
+		"category": "OtherBestPractices",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/rest/api/oracle/cloud-exadata-infrastructures/get?view=rest-oracle-2023-09-01\u0026tabs=HTTP#cloudexadatainfrastructurelifecyclestate",
+		"recommendation": "Ensure ODAA infrastructure is in Available state under normal operations",
+		"recommendationId": "c99d730b-8754-447f-bd5d-3e8850a12235",
+		"resourceType": "Oracle.Database/cloudExadataInfrastructures"
 	},
 	{
 		"category": "HighAvailability",

@@ -72,6 +72,7 @@ import (
 	_ "github.com/Azure/azqr/internal/scanners/nic"
 	_ "github.com/Azure/azqr/internal/scanners/nsg"
 	_ "github.com/Azure/azqr/internal/scanners/nw"
+	_ "github.com/Azure/azqr/internal/scanners/odb"
 	_ "github.com/Azure/azqr/internal/scanners/pdnsz"
 	_ "github.com/Azure/azqr/internal/scanners/pep"
 	_ "github.com/Azure/azqr/internal/scanners/pip"
