@@ -105,6 +105,8 @@ ng | Microsoft.Network/natGateways
 nic | Microsoft.Network/networkInterfaces
 nsg | Microsoft.Network/networkSecurityGroups
 nw | Microsoft.Network/networkWatchers
+odb | Oracle.Database/cloudExadataInfrastructures
+odb | Oracle.Database/cloudVmClusters
 pdnsz | Microsoft.Network/privateDnsZones
 pep | Microsoft.Network/privateEndpoints
 pip | Microsoft.Network/publicIPAddresses
