@@ -33,7 +33,6 @@ func LoadAll() error {
 				Msg("Failed to register internal plugin")
 		}
 	}
-	log.Info().Int("count", len(internalPlugins)).Msg("Internal plugins discovered")
 
 	// Discover YAML plugins
 	yamlPlugins, err := discoverYamlPlugins(getPluginDirs())
@@ -48,7 +47,6 @@ func LoadAll() error {
 					Msg("Failed to register YAML plugin")
 			}
 		}
-		log.Info().Int("count", len(yamlPlugins)).Msg("YAML plugins discovered")
 	}
 
 	return nil

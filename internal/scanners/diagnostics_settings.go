@@ -107,10 +107,6 @@ type DiagnosticSettingsScanner struct {
 	accessToken string
 }
 
-const (
-	bucketCapacity = 250
-)
-
 // Init - Initializes the DiagnosticSettingsScanner
 func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenCredential, options *arm.ClientOptions) error {
 	// Create a new HTTP client with a timeout
@@ -177,7 +173,13 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 	ch := make(chan map[string]bool, batches)
 	var wg sync.WaitGroup
 
-	numWorkers := bucketCapacity
+	// Use 30 workers to balance throughput with ARM API rate limits
+	// ARM limits: 3 req/sec sustained, 100 burst capacity
+	// 30 workers allows efficient use of burst capacity while maintaining sustainable rate
+	numWorkers := 30
+	if batches < numWorkers {
+		numWorkers = batches
+	}
 	for w := 0; w < numWorkers; w++ {
 		go d.worker(jobs, ch, &wg)
 	}
@@ -297,7 +299,7 @@ func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds [
 	req.Header.Set("Authorization", "Bearer "+d.accessToken)
 
 	// Wait for a token from the burstLimiter channel before making the request
-	_ = throttling.WaitARM(ctx); // nolint:errcheck
+	_ = throttling.WaitARM(ctx) // nolint:errcheck
 
 	// Send the HTTP request.
 	resp, err := d.httpClient.Do(req)

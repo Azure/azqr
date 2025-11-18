@@ -261,26 +261,8 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 	resourceTypes := resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, filters)
 
-	// Filter service scanners to include only those with resource types present in reportData.ResourceTypeCount and count > 0
-	var filteredServiceScanners []models.IAzureScanner
-	for _, s := range serviceScanners {
-		add := true
-		for _, resourceType := range s.ResourceTypes() {
-			resourceType = strings.ToLower(resourceType)
-
-			// Check if the resource type is in the resourceTypes
-			if count, exists := resourceTypes[resourceType]; !exists || count <= 0 {
-				log.Debug().Msgf("Skipping scanner for resource type %s as it has no resources", resourceType)
-				continue
-			} else {
-				if add {
-					filteredServiceScanners = append(filteredServiceScanners, s)
-					add = false
-					log.Info().Msgf("Scanner for resource type %s will be used", resourceType)
-				}
-			}
-		}
-	}
+	// Filter service scanners to include only those with resource types present across all subscriptions
+	filteredServiceScanners := sc.buildFilteredServiceScanners(serviceScanners, resourceTypes)
 
 	// Get plugin scanners - they will be executed separately
 	pluginRegistry := plugins.GetRegistry()
@@ -362,6 +344,9 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	// get the count of resources per resource type
 	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceTypeAndSubscription(ctx, cred, subscriptions, reportData.Recommendations, filters)
 
+	// Build a map of subscription ID -> resource type -> count for efficient lookup
+	subscriptionResourceTypeMap := sc.buildSubscriptionResourceTypeMap(reportData.ResourceTypeCount, subscriptions)
+
 	// For each service scanner, get the recommendations list
 	if params.UseAzqrRecommendations {
 		for _, s := range serviceScanners {
@@ -402,6 +387,20 @@ func (sc Scanner) Scan(params *ScanParams) string {
 		}
 
 		if params.UseAzqrRecommendations {
+			// Filter service scanners for this subscription only
+			subscriptionFilteredScanners := sc.buildSubscriptionFilteredScanners(
+				serviceScanners,
+				subscriptionResourceTypeMap[sid],
+				sid,
+				params.Mask,
+			)
+
+			// Skip scanning if no scanners are needed for this subscription
+			if len(subscriptionFilteredScanners) == 0 {
+				log.Info().Msgf("No scanners needed for subscription %s, skipping AZQR scan", renderers.MaskSubscriptionID(sid, params.Mask))
+				continue
+			}
+
 			// scan private endpoints
 			peResults := peScanner.Scan(config)
 
@@ -418,8 +417,8 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 			// Worker pool to limit concurrent scanner goroutines
 			const numScannerWorkers = 10
-			jobs := make(chan models.IAzureScanner, len(filteredServiceScanners))
-			results := make(chan []*models.AzqrServiceResult, len(filteredServiceScanners))
+			jobs := make(chan models.IAzureScanner, len(subscriptionFilteredScanners))
+			results := make(chan []*models.AzqrServiceResult, len(subscriptionFilteredScanners))
 
 			// Start worker pool
 			var workerWg sync.WaitGroup
@@ -446,7 +445,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 			// Send scanner jobs to workers
 			go func() {
-				for _, s := range filteredServiceScanners {
+				for _, s := range subscriptionFilteredScanners {
 					jobs <- s
 				}
 				close(jobs)
@@ -566,4 +565,77 @@ func (sc Scanner) generateOutputFileName(outputName string) string {
 		outputFile = fmt.Sprintf("%s_%s", "azqr_action_plan", outputFileStamp)
 	}
 	return outputFile
+}
+
+// buildSubscriptionResourceTypeMap creates a map of subscription ID -> resource type -> count
+// from the ResourceTypeCount data for efficient per-subscription lookups
+func (sc Scanner) buildSubscriptionResourceTypeMap(resourceTypeCounts []models.ResourceTypeCount, subscriptions map[string]string) map[string]map[string]float64 {
+	subscriptionResourceTypeMap := make(map[string]map[string]float64)
+	for _, rtc := range resourceTypeCounts {
+		// Find subscription ID by name
+		for sid, sname := range subscriptions {
+			if sname == rtc.Subscription {
+				if subscriptionResourceTypeMap[sid] == nil {
+					subscriptionResourceTypeMap[sid] = make(map[string]float64)
+				}
+				subscriptionResourceTypeMap[sid][strings.ToLower(rtc.ResourceType)] = rtc.Count
+				break
+			}
+		}
+	}
+	return subscriptionResourceTypeMap
+}
+
+// buildFilteredServiceScanners filters service scanners based on resource types
+// present across all subscriptions, returning only scanners that have resources to scan
+func (sc Scanner) buildFilteredServiceScanners(serviceScanners []models.IAzureScanner, resourceTypes map[string]float64) []models.IAzureScanner {
+	var filteredScanners []models.IAzureScanner
+	for _, s := range serviceScanners {
+		add := true
+		for _, resourceType := range s.ResourceTypes() {
+			resourceType = strings.ToLower(resourceType)
+
+			// Check if the resource type exists across any subscription
+			if count, exists := resourceTypes[resourceType]; !exists || count <= 0 {
+				log.Debug().Msgf("Skipping scanner for resource type %s as it has no resources", resourceType)
+				continue
+			} else {
+				if add {
+					filteredScanners = append(filteredScanners, s)
+					add = false
+					log.Info().Msgf("Scanner for resource type %s will be used", resourceType)
+				}
+			}
+		}
+	}
+	return filteredScanners
+}
+
+// buildSubscriptionFilteredScanners filters service scanners based on resource types
+// present in a specific subscription, returning only scanners needed for that subscription
+func (sc Scanner) buildSubscriptionFilteredScanners(serviceScanners []models.IAzureScanner, subscriptionResourceTypes map[string]float64, subscriptionID string, mask bool) []models.IAzureScanner {
+	if subscriptionResourceTypes == nil {
+		subscriptionResourceTypes = make(map[string]float64)
+	}
+
+	var filteredScanners []models.IAzureScanner
+	for _, s := range serviceScanners {
+		add := true
+		for _, resourceType := range s.ResourceTypes() {
+			resourceType = strings.ToLower(resourceType)
+
+			// Check if the resource type is in this subscription's resource types
+			if count, exists := subscriptionResourceTypes[resourceType]; !exists || count <= 0 {
+				log.Debug().Msgf("Skipping scanner for resource type %s in subscription %s as it has no resources", resourceType, renderers.MaskSubscriptionID(subscriptionID, mask))
+				continue
+			} else {
+				if add {
+					filteredScanners = append(filteredScanners, s)
+					add = false
+					log.Info().Msgf("Scanner for resource type %s will be used in subscription %s", resourceType, renderers.MaskSubscriptionID(subscriptionID, mask))
+				}
+			}
+		}
+	}
+	return filteredScanners
 }
