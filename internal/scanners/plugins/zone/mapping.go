@@ -46,7 +46,7 @@ func (s *ZoneMappingScanner) GetMetadata() plugins.PluginMetadata {
 }
 
 // Scan executes the plugin and returns table data
-func (s *ZoneMappingScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) (*plugins.ExternalPluginOutput, error) {
+func (s *ZoneMappingScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
 	log.Info().Msg("Scanning availability zone mappings across subscriptions")
 
 	// Initialize table with headers
@@ -127,12 +127,12 @@ func (s *ZoneMappingScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 		})
 	}
 
-	return &plugins.ExternalPluginOutput{
+	return []plugins.ExternalPluginOutput{{
 		Metadata:    s.GetMetadata(),
 		SheetName:   "Zone Mapping",
 		Description: "Logical-to-physical availability zone mappings for Azure regions by subscription",
 		Table:       table,
-	}, nil
+	}}, nil
 }
 
 // locationResponse represents the API response structure

@@ -44,19 +44,20 @@ func (s *PluginExecutionStage) Execute(ctx *ScanContext) error {
 	// Execute plugins and collect results
 	results := []*renderers.PluginResult{}
 	for _, pluginScanner := range internalPluginScanners {
-		result, err := pluginScanner.Scan(ctx.Ctx, ctx.Cred, ctx.Subscriptions, ctx.Params.Filters)
+		pluginName := pluginScanner.GetMetadata().Name
+		sheets, err := pluginScanner.Scan(ctx.Ctx, ctx.Cred, ctx.Subscriptions, ctx.Params)
 		if err != nil {
-			log.Error().Err(err).Str("plugin", result.Metadata.Name).Msg("Plugin scan failed")
+			log.Error().Err(err).Str("plugin", pluginName).Msg("Plugin scan failed")
 			continue
 		}
-		// Convert ExternalPluginOutput to PluginResult
-		pluginResult := renderers.PluginResult{
-			PluginName:  result.Metadata.Name,
-			SheetName:   result.SheetName,
-			Description: result.Description,
-			Table:       result.Table,
+		for _, sheet := range sheets {
+			results = append(results, &renderers.PluginResult{
+				PluginName:  pluginName,
+				SheetName:   sheet.SheetName,
+				Description: sheet.Description,
+				Table:       sheet.Table,
+			})
 		}
-		results = append(results, &pluginResult)
 	}
 
 	ctx.ReportData.PluginResults = results

@@ -110,6 +110,46 @@ Retrieves logical-to-physical availability zone mappings for all Azure regions i
 
 ---
 
+### 4. Region Selection
+
+**Plugin Name**: `region-selection`  
+**Command**: `azqr region-selection`  
+**Flag**: `--plugin region-selection`  
+**Version**: 0.1.0-beta
+
+Scores and ranks Azure regions for workload migration or expansion. For each source region (where your resources currently live) × target region (candidate), the plugin computes a weighted 0–100 recommendation score across four dimensions.
+
+| Dimension | Weight | Data source |
+|-----------|-------:|-------------|
+| Resource type availability | 35 % | ARM Providers API |
+| SKU availability | 30 % | Per-resource-type ARM SKU APIs |
+| Cost difference | 15 % | Azure Cost Management + Retail Prices API |
+| Network latency | 20 % | Published Azure inter-region RTT statistics |
+
+Availability zone loss/gain applies a multiplicative adjustment to the final score.
+
+**Key Features**:
+- Qualitative **Recommended** (≥ 80), **Neutral** (60–79), **Not Recommended** (< 60) bands
+- **Score Quality** flag notes when cost or latency data was unavailable
+- Per-target-region **Svc Avail** Excel sheets with service and SKU availability per resource type
+- **CostComparison** Excel sheet with per-meter retail pricing across all analysed regions
+- Optional `--target-regions` flag to narrow analysis to specific candidates
+
+**Use Cases**:
+- Migration planning and DR site selection
+- Regional expansion decisions
+- Compliance with data-residency requirements
+
+**Output Columns** (main sheet):
+- Subscription, Source Region, Target Region
+- Source Resource Type Count, Available/Unavailable Resource Types, Availability %
+- Total SKUs Checked, Available/Unavailable/Restricted/Unknown SKUs, SKU Availability %
+- Availability Zones, Avg Latency (ms), Avg Cost Difference %
+- Recommendation Score, Score Quality, Recommendation
+- Missing Resource Types, Unavailable SKUs (detail), Restricted SKUs (detail)
+
+---
+
 ## Usage
 
 ### Running Internal Plugins
@@ -129,6 +169,12 @@ azqr carbon-emissions
 
 # Run zone mapping plugin
 azqr zone-mapping
+
+# Run region selection plugin
+azqr region-selection
+
+# Narrow region selection to specific target regions
+azqr region-selection --target-regions=swedencentral,germanywestcentral
 
 # Run with specific subscriptions
 azqr zone-mapping --subscription-id <sub-id>
@@ -151,7 +197,7 @@ Run plugins alongside standard compliance scanning using the `--plugin` flag:
 azqr scan --plugin openai-throttling
 
 # Enable multiple plugins during scan
-azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping
+azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --plugin region-selection
 
 # Combine with other scan options
 azqr scan --subscription-id <sub-id> --plugin zone-mapping --output-name analysis
@@ -176,6 +222,7 @@ NAME                  VERSION    TYPE       DESCRIPTION
 openai-throttling     1.0.0      internal   Checks OpenAI/Cognitive Services accounts for...
 carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure resource type
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
+region-selection      0.1.0      internal   Scores and ranks Azure regions for workload migration...
 ```
 
 ### Plugin Details
@@ -196,15 +243,19 @@ Each internal plugin creates a dedicated worksheet in the Excel workbook:
 - **Zone Mapping** sheet
 - **OpenAI Throttling** sheet  
 - **Carbon Emissions** sheet
+- **Region Selection** sheet (main scored table)
+- **Svc Avail `<region>`** sheets — one per target region with per-resource-type availability
+- **CostComparison** sheet — per-meter retail pricing across all analysed regions
 
 ```bash
 # Run plugins as standalone commands (fastest)
 azqr openai-throttling
 azqr carbon-emissions
 azqr zone-mapping
+azqr region-selection
 
 # Or run with full scan
-azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping
+azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --plugin region-selection
 # Generates: azqr_action_plan_YYYY_MM_DD_THHMMSS.xlsx
 ```
 

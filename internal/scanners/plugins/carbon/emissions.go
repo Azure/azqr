@@ -55,7 +55,7 @@ type aggregatedEmissions struct {
 }
 
 // Scan executes the plugin and returns table data
-func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) (*plugins.ExternalPluginOutput, error) {
+func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
 	log.Info().Msg("Scanning carbon emissions across subscriptions")
 
 	// Initialize client options with standard retry and throttling configuration
@@ -135,7 +135,7 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 						resourceType := *detailData.ItemName
 
 						// Check if the item should be filtered
-						if filters.Azqr.IsResourceTypeExcluded(resourceType) {
+						if params.Filters.Azqr.IsResourceTypeExcluded(resourceType) {
 							continue
 						}
 
@@ -203,12 +203,12 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 
 	log.Info().Msgf("Carbon emissions scan completed with %d resource types", len(aggregatedResults))
 
-	return &plugins.ExternalPluginOutput{
+	return []plugins.ExternalPluginOutput{{
 		Metadata:    s.GetMetadata(),
 		SheetName:   "Carbon Emissions",
 		Description: "Analysis of carbon emissions by Azure resource type for the previous month",
 		Table:       table,
-	}, nil
+	}}, nil
 }
 
 // getAvailableDateRange queries the Carbon API for the available date range

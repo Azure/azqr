@@ -10,6 +10,7 @@ import (
 	_ "github.com/Azure/azqr/internal/scanners/plugins/carbon"
 	_ "github.com/Azure/azqr/internal/scanners/plugins/openai"
 	_ "github.com/Azure/azqr/internal/scanners/plugins/zone"
+	_ "github.com/Azure/azqr/internal/scanners/plugins/region"
 )
 
 func main() {

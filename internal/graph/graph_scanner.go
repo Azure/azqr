@@ -278,6 +278,7 @@ func (a *GraphScanner) worker(ctx context.Context, graph *GraphQueryClient, subs
 func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule *models.GraphRecommendation, subscriptions map[string]string) ([]*models.GraphResult, error) {
 	results := []*models.GraphResult{}
 	if rule.GraphQuery != "" {
+		log.Debug().Msg(rule.GraphQuery)
 		result, err := graphClient.Query(ctx, rule.GraphQuery, subscriptions)
 		if err != nil {
 			return nil, fmt.Errorf("recommendation %s query failed: %w", rule.RecommendationID, err)
@@ -286,8 +287,6 @@ func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryCli
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
-
-				log.Debug().Msg(rule.GraphQuery)
 
 				// Check if "id" is present in the map
 				if _, ok := m["id"]; !ok {

@@ -18,13 +18,13 @@ type OptionSpec struct {
 
 // StageOptionRegistry defines allowed options for each stage
 var stageOptionRegistry = map[string]map[string]OptionSpec{
-	// StageNameCost: {
-	// 	"previousMonth": {
-	// 		Type:        "bool",
-	// 		Default:     false,
-	// 		Description: "Scan costs for the previous calendar month (UTC) instead of default 3-month period",
-	// 	},
-	// },
+	StageNamePlugin: {
+		"target-regions": {
+			Type:        "string",
+			Default:     "",
+			Description: "Comma-separated list of target regions for the scan",
+		},
+	},
 }
 
 // ParseAndValidateStageParams parses and validates stage parameters against the registry.

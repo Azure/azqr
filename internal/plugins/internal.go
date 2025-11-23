@@ -14,8 +14,8 @@ import (
 
 // InternalPluginScanner defines the interface for internal plugins
 type InternalPluginScanner interface {
-	// Scan executes the plugin and returns table data
-	Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) (*ExternalPluginOutput, error)
+	// Scan executes the plugin and returns one or more table sheets
+	Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]ExternalPluginOutput, error)
 
 	// GetMetadata returns metadata about the plugin
 	GetMetadata() PluginMetadata
@@ -31,6 +31,11 @@ func RegisterInternalPlugin(name string, scanner InternalPluginScanner) {
 	// Create a Cobra command for this plugin
 	metadata := scanner.GetMetadata()
 	cmd := createPluginCommand(name, metadata.Description)
+
+	// Allow the scanner to register its own plugin-specific flags
+	if fp, ok := scanner.(FlagProvider); ok {
+		fp.RegisterFlags(cmd)
+	}
 
 	// Register the plugin with the global registry immediately
 	plugin := &Plugin{
@@ -72,7 +77,6 @@ func createPluginCommand(name, description string) *cobra.Command {
 	cmd.Flags().StringP("output-name", "o", "", "Output file name without extension")
 	cmd.Flags().BoolP("mask", "m", true, "Mask the subscription id in the report (default) (default true)")
 	cmd.Flags().StringP("filters", "e", "", "Filters file (YAML format)")
-	cmd.Flags().BoolP("debug", "", false, "Set log level to debug")
 
 	return cmd
 }

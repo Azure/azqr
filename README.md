@@ -394,6 +394,28 @@ azqr zone-mapping --subscription-id sub1 --subscription-id sub2
 azqr scan --plugin zone-mapping
 ```
 
+### Region Selection
+
+Scores and ranks Azure regions for workload migration or expansion across four dimensions: service availability, SKU availability, network latency, and cost.
+
+- Compares every source region (where your resources live) against each candidate target region
+- Produces a weighted 0–100 score with qualitative **Recommended / Neutral / Not Recommended** bands
+- Flags Score Quality when cost or latency data is unavailable
+- Generates per-target-region **Svc Avail** sheets and a **CostComparison** sheet in Excel output
+
+**Use Cases**: Migration planning, regional expansion, DR site selection
+
+```bash
+# Analyse all regions across subscriptions
+azqr region-selection
+
+# Narrow to specific target regions
+azqr region-selection --target-regions=swedencentral,germanywestcentral,italynorth
+
+# Or integrate with full scan
+azqr scan --plugin region-selection
+```
+
 [Internal Plugins Documentation](https://azure.github.io/azqr/docs/plugins/internal-plugins/)
 
 ### Combining Features
@@ -403,6 +425,7 @@ azqr scan --subscription-id <sub-id> \
   --plugin openai-throttling \
   --plugin carbon-emissions \
   --plugin zone-mapping \
+  --plugin region-selection \
   --output-name comprehensive-analysis
 ```
 
