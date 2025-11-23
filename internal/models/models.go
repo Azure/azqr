@@ -47,6 +47,8 @@ type (
 		Name           string
 		SkuName        string
 		SkuTier        string
+		SkuFamily      string
+		SkuCapacity    int
 		Kind           string
 		SLA            string
 	}

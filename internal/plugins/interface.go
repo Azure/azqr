@@ -4,8 +4,6 @@
 package plugins
 
 import (
-	"context"
-
 	"github.com/Azure/azqr/internal/models"
 	"github.com/spf13/cobra"
 )
@@ -50,14 +48,6 @@ type Plugin struct {
 	YamlRecommendations []models.GraphRecommendation
 	// Command is the Cobra command for this plugin (optional)
 	Command *cobra.Command
-}
-
-// PluginInitializer is an optional interface for plugins that need custom initialization
-type PluginInitializer interface {
-	// Initialize is called when the plugin is loaded, before any scanning
-	Initialize(ctx context.Context) error
-	// Cleanup is called when the plugin is unloaded or azqr exits
-	Cleanup() error
 }
 
 // YamlPluginQuery represents a single query definition in a YAML plugin
@@ -124,6 +114,12 @@ const (
 	// FilterTypeSearch indicates a search/text filter (>20 unique values)
 	FilterTypeSearch FilterType = "search"
 )
+
+// FlagProvider is an optional interface that plugins can implement to register
+// plugin-specific CLI flags onto their cobra command.
+type FlagProvider interface {
+	RegisterFlags(cmd *cobra.Command)
+}
 
 // ColumnMetadata defines filtering behavior for a column in the viewer
 type ColumnMetadata struct {

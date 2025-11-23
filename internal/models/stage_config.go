@@ -17,6 +17,7 @@ const (
 	StageNamePolicy                  = "policy"
 	StageNameCost                    = "cost"
 	StageNameDiagnostics             = "diagnostics"
+	StageNamePlugin                  = "plugin"
 )
 
 // allStages defines all available stages and whether they are enabled by default
@@ -30,6 +31,7 @@ var allStages = map[string]bool{
 	StageNameArc:                     false, // Disabled by default
 	StageNamePolicy:                  false, // Disabled by default
 	StageNameCost:                    false, // Disabled by default
+	StageNamePlugin:                  false, // Disabled by default
 }
 
 // BaseStageConfig contains configuration for a stage

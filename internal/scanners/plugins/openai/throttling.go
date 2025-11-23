@@ -108,7 +108,7 @@ func extractDeploymentInfo(deployment *armcognitiveservices.Deployment) deployme
 }
 
 // Scan executes the plugin and returns table data
-func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) (*plugins.ExternalPluginOutput, error) {
+func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
 	// Initialize table with headers
 	table := [][]string{
 		{"Subscription", "Resource Group", "Account Name", "Kind", "SKU", "Deployment Name", "Model Name", "Model Version", "Model Format", "SKU Capacity", "Version Upgrade Option", "Spillover Enabled", "Spillover Deployment", "Hour", "Status Code", "Request Count"},
@@ -117,19 +117,19 @@ func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredentia
 	// Use a targeted Resource Graph query instead of fetching all resources.
 	// This avoids downloading the entire resource inventory when only
 	// CognitiveServices/accounts with OpenAI or AI Services kind are needed.
-	openAIResources, err := s.discoverOpenAIResources(ctx, cred, subscriptions, filters)
+	openAIResources, err := s.discoverOpenAIResources(ctx, cred, subscriptions, params.Filters)
 	if err != nil {
 		return nil, fmt.Errorf("failed to discover OpenAI resources: %w", err)
 	}
 	log.Debug().Msgf("Discovered %d OpenAI/AI Services accounts", len(openAIResources))
 
 	if len(openAIResources) == 0 {
-		return &plugins.ExternalPluginOutput{
+		return []plugins.ExternalPluginOutput{{
 			Metadata:    s.GetMetadata(),
 			SheetName:   "OpenAI Throttling",
 			Description: "Analysis of throttling errors for OpenAI/Cognitive Services accounts by hour, model, and status code",
 			Table:       table,
-		}, nil
+		}}, nil
 	}
 
 	// Group resources by subscription and region for batch processing
@@ -188,12 +188,12 @@ func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredentia
 		}
 	}
 
-	return &plugins.ExternalPluginOutput{
+	return []plugins.ExternalPluginOutput{{
 		Metadata:    s.GetMetadata(),
 		SheetName:   "OpenAI Throttling",
 		Description: "Analysis of throttling errors for OpenAI/Cognitive Services accounts by hour, model, and status code",
 		Table:       table,
-	}, nil
+	}}, nil
 }
 
 // discoverOpenAIResources queries Azure Resource Graph for CognitiveServices accounts
