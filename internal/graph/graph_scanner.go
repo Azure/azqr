@@ -268,12 +268,11 @@ func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryCli
 	}
 
 	if rule.GraphQuery != "" {
+		log.Debug().Msg(rule.GraphQuery)
 		result := graphClient.Query(ctx, rule.GraphQuery, subs)
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
-
-				log.Debug().Msg(rule.GraphQuery)
 
 				// Check if "id" is present in the map
 				if _, ok := m["id"]; !ok {

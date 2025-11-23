@@ -17,7 +17,7 @@ func (sc *ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.To
 	models.LogResourceTypeScan("Resources")
 
 	graphClient := graph.NewGraphQuery(cred)
-	query := "resources | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind | order by subscriptionId, resourceGroup"
+	query := "resources | project id=tostring(id), subscriptionId=tostring(subscriptionId), resourceGroup=tostring(resourceGroup), location=tostring(location), type=tostring(type), name=tostring(name), skuName=tostring(coalesce(sku.name, properties.sku.name, properties.hardwareProfile.vmSize, properties.tier, sku)), skuTier=tostring(coalesce(sku.tier, properties.sku.tier)), skuFamily=tostring(coalesce(sku.family, properties.sku.family)), skuCapacity=tolong(coalesce(sku.capacity, properties.sku.capacity, 0)), ['kind']=tostring(kind) | order by subscriptionId, resourceGroup"
 	log.Debug().Msg(query)
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
@@ -30,63 +30,59 @@ func (sc *ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.To
 		for _, row := range result.Data {
 			m := row.(map[string]interface{})
 
-			skuName := ""
-			if m["sku_name"] != nil {
-				skuName = m["sku_name"].(string)
+			resource := &models.Resource{
+				ID:             getStringField(m, "id"),
+				SubscriptionID: getStringField(m, "subscriptionId"),
+				ResourceGroup:  getStringField(m, "resourceGroup"),
+				Location:       getStringField(m, "location"),
+				Type:           getStringField(m, "type"),
+				Name:           getStringField(m, "name"),
+				SkuName:        getStringField(m, "skuName"),
+				SkuTier:        getStringField(m, "skuTier"),
+				SkuFamily:      getStringField(m, "skuFamily"),
+				SkuCapacity:    getIntField(m, "skuCapacity"),
+				Kind:           getStringField(m, "kind"),
 			}
 
-			skuTier := ""
-			if m["sku_tier"] != nil {
-				skuTier = m["sku_tier"].(string)
-			}
-
-			kind := ""
-			if m["kind"] != nil {
-				kind = m["kind"].(string)
-			}
-
-			resourceGroup := ""
-			if m["resourceGroup"] != nil {
-				resourceGroup = m["resourceGroup"].(string)
-			}
-
-			location := ""
-			if m["location"] != nil {
-				location = m["location"].(string)
-			}
-
-			if filters.Azqr.IsServiceExcluded(m["id"].(string)) {
+			if filters != nil && filters.Azqr.IsServiceExcluded(resource.ID) {
 				excludedResources = append(
 					excludedResources,
-					&models.Resource{
-						ID:             m["id"].(string),
-						SubscriptionID: m["subscriptionId"].(string),
-						ResourceGroup:  resourceGroup,
-						Location:       location,
-						Type:           m["type"].(string),
-						Name:           m["name"].(string),
-						SkuName:        skuName,
-						SkuTier:        skuTier,
-						Kind:           kind})
+					resource)
 
 				continue
 			}
 
-			resources = append(
-				resources,
-				&models.Resource{
-					ID:             m["id"].(string),
-					SubscriptionID: m["subscriptionId"].(string),
-					ResourceGroup:  resourceGroup,
-					Location:       location,
-					Type:           m["type"].(string),
-					Name:           m["name"].(string),
-					SkuName:        skuName,
-					SkuTier:        skuTier,
-					Kind:           kind})
+			resources = append(resources, resource)
 		}
 	}
 	return resources, excludedResources
+}
+
+func getStringField(row map[string]interface{}, key string) string {
+	if v, ok := row[key]; ok && v != nil {
+		if s, ok := v.(string); ok {
+			return s
+		}
+	}
+
+	return ""
+}
+
+func getIntField(row map[string]interface{}, key string) int {
+	if v, ok := row[key]; ok && v != nil {
+		switch n := v.(type) {
+		case int:
+			return n
+		case int32:
+			return int(n)
+		case int64:
+			return int(n)
+		case float64:
+			return int(n)
+		}
+	}
+
+	return 0
 }
 
 func (sc ResourceDiscovery) GetCountPerResourceTypeAndSubscription(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]*models.GraphRecommendation, filters *models.Filters) []*models.ResourceTypeCount {
