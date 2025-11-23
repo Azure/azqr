@@ -17,7 +17,9 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 	models.LogResourceTypeScan("Resources")
 
 	graphClient := graph.NewGraphQuery(cred)
-	query := "resources | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind | order by subscriptionId, resourceGroup"
+	// Query without project to get all properties (including nested ones like properties.hardwareProfile)
+	// This matches PowerShell behavior which queries "resources" without projection
+	query := "resources | order by subscriptionId, resourceGroup"
 	log.Debug().Msg(query)
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
@@ -30,14 +32,25 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 		for _, row := range result.Data {
 			m := row.(map[string]interface{})
 
+			// Extract SKU information - check both sku and properties.sku
 			skuName := ""
-			if m["sku_name"] != nil {
-				skuName = m["sku_name"].(string)
-			}
-
 			skuTier := ""
-			if m["sku_tier"] != nil {
-				skuTier = m["sku_tier"].(string)
+			if sku, ok := m["sku"].(map[string]interface{}); ok {
+				if name, ok := sku["name"].(string); ok {
+					skuName = name
+				}
+				if tier, ok := sku["tier"].(string); ok {
+					skuTier = tier
+				}
+			} else if props, ok := m["properties"].(map[string]interface{}); ok {
+				if sku, ok := props["sku"].(map[string]interface{}); ok {
+					if name, ok := sku["name"].(string); ok {
+						skuName = name
+					}
+					if tier, ok := sku["tier"].(string); ok {
+						skuTier = tier
+					}
+				}
 			}
 
 			kind := ""
@@ -55,7 +68,7 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 				location = m["location"].(string)
 			}
 
-			if filters.Azqr.IsServiceExcluded(m["id"].(string)) {
+			if filters != nil && filters.Azqr.IsServiceExcluded(m["id"].(string)) {
 				excludedResources = append(
 					excludedResources,
 					&models.Resource{
@@ -67,7 +80,9 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 						Name:           m["name"].(string),
 						SkuName:        skuName,
 						SkuTier:        skuTier,
-						Kind:           kind})
+						Kind:           kind,
+						Properties:     m, // Store full resource object for property extraction
+					})
 
 				continue
 			}
@@ -83,7 +98,9 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 					Name:           m["name"].(string),
 					SkuName:        skuName,
 					SkuTier:        skuTier,
-					Kind:           kind})
+					Kind:           kind,
+					Properties:     m, // Store full resource object for property extraction
+				})
 		}
 	}
 	return resources, excludedResources

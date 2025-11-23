@@ -1,0 +1,29 @@
+[
+  {
+    "resourceType": "microsoft.Compute/disks",
+    "property": "properties.tier",
+    "description": "Get sku for a managed disk",
+    "isContainedInOriginalGraphOutput": true
+  },
+  {
+    "resourceType": "microsoft.compute/virtualmachines",
+    "property": "properties.hardwareProfile",
+    "description": "Get sku for a VM",
+    "isContainedInOriginalGraphOutput": true
+  },
+  {
+    "resourceType": "microsoft.sql/servers/databases",
+    "property": "sku",
+    "description": "Get sku for a SQL Database",
+    "isContainedInOriginalGraphOutput": true,
+    "excludeFromReport": ["family"]
+  },
+  {
+    "resourceType": "microsoft.apimanagement/service",
+    "property": "sku",
+    "description": "Get sku for an API Management Service",
+    "isContainedInOriginalGraphOutput": true,
+    "excludeFromReport": ["capacity"]
+  }
+]
+

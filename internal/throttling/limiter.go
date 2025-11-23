@@ -9,13 +9,17 @@ import (
 // ARMLimiter rate limits Azure Resource Manager API calls
 // Allows 3 operations per second with burst capacity of 100
 // https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/request-limits-and-throttling#regional-throttling-and-token-bucket-algorithm
-var ARMLimiter = rate.NewLimiter(rate.Limit(3), 100)
+var ARMLimiter = rate.NewLimiter(rate.Limit(10), 150)
 
 // GraphLimiter rate limits Azure Resource Graph API calls
 // Allows 3 operations per second with burst capacity of 10
 // With higher burst capacity to better utilize the 5-second window
 // https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
 var GraphLimiter = rate.NewLimiter(rate.Limit(2), 10)
+
+// RetailPricesLimiter rate limits Azure Retail Prices API calls
+// https://learn.microsoft.com/en-us/rest/api/cost-management/retail-prices/azure-retail-prices
+var RetailPricesLimiter = rate.NewLimiter(rate.Limit(3), 10)
 
 // WaitARM waits for permission to make an ARM API call using the provided context
 func WaitARM(ctx context.Context) error {
@@ -25,4 +29,9 @@ func WaitARM(ctx context.Context) error {
 // WaitGraph waits for permission to make a Graph API call using the provided context
 func WaitGraph(ctx context.Context) error {
 	return GraphLimiter.Wait(ctx)
+}
+
+// WaitRetailPrices waits for permission to make a Retail Prices API call using the provided context
+func WaitRetailPrices(ctx context.Context) error {
+	return RetailPricesLimiter.Wait(ctx)
 }

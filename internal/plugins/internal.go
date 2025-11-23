@@ -8,6 +8,7 @@ import (
 
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/spf13/cobra"
 )
 
 // InternalPluginScanner defines the interface for internal plugins
@@ -17,6 +18,12 @@ type InternalPluginScanner interface {
 
 	// GetMetadata returns metadata about the plugin
 	GetMetadata() PluginMetadata
+}
+
+// FlagProvider is an optional interface that internal plugins can implement to register custom flags
+type FlagProvider interface {
+	// RegisterFlags registers plugin-specific flags on the scan command
+	RegisterFlags(cmd *cobra.Command)
 }
 
 // internalPluginRegistry holds all registered internal plugins

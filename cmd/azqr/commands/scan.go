@@ -39,6 +39,15 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("azqr", "", true, "Scan Azure Quick Review Recommendations (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
 
+	// Allow internal plugins to register their own flags
+	for _, pluginName := range requireInternalPluginsList() {
+		if plugin, ok := plugins.GetInternalPlugin(pluginName); ok {
+			if flagProvider, ok := plugin.(plugins.FlagProvider); ok {
+				flagProvider.RegisterFlags(scanCmd)
+			}
+		}
+	}
+
 	rootCmd.AddCommand(scanCmd)
 }
 
@@ -82,7 +91,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		enabledInternalPlugins[pluginName] = val
 	}
 
-	params := internal.ScanParams{
+	params := models.ScanParams{
 		ManagementGroups:       managementGroups,
 		Subscriptions:          subscriptions,
 		ResourceGroups:         resourceGroups,

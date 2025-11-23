@@ -1,0 +1,87 @@
+[
+    {
+        "resourceType": "microsoft.compute/virtualmachines",
+        "uri": "https://management.azure.com/subscriptions/{0}/providers/Microsoft.Compute/locations/{1}/vmSizes?api-version=2023-03-01",
+        "regionalApi": true,
+        "properties": {
+            "startPath": [],
+            "topLevelProperties": {
+                "vmSize": "name"
+            }
+        }
+    },
+    {
+        "resourceType": "microsoft.storage/storageaccounts",
+        "uri": "https://management.azure.com/subscriptions/{0}/providers/Microsoft.Storage/skus?api-version=2023-01-01",
+        "regionalApi": false,
+        "properties": {
+            "startPath": [],
+            "topLevelProperties": {
+                "name": "name",
+                "tier": "tier"
+            }
+        }
+    },
+    {
+        "resourceType": "microsoft.sql/servers/databases",
+        "uri": "https://management.azure.com/subscriptions/{0}/providers/Microsoft.Sql/locations/{1}/capabilities?api-version=2021-11-01",
+        "regionalApi": true,
+        "properties": {
+            "startPath": [
+                "supportedServerVersions",
+                "supportedEditions",
+                "supportedServiceLevelObjectives"
+            ],
+            "topLevelProperties": {
+                "name": "sku.name",
+                "tier": "sku.tier"
+            }
+        }
+    },
+    {
+        "resourceType": "microsoft.sql/managedinstances",
+        "uri": "https://management.azure.com/subscriptions/{0}/providers/Microsoft.Sql/locations/{1}/capabilities?api-version=2021-11-01",
+        "regionalApi": true,
+        "properties": {
+            "startPath": [
+                "supportedManagedInstanceVersions",
+                "supportedEditions"
+            ],
+            "topLevelProperties": {
+                "tier": "name"
+            },
+            "childProperties": {
+                "name": [
+                    "supportedFamilies"
+                ],
+                "props": {
+                    "name": "name"
+                }
+            }
+        }
+    },
+    {
+        "resourceType": "microsoft.compute/disks",
+        "uri": "https://management.azure.com/subscriptions/{0}/providers/Microsoft.Compute/skus?api-version=2023-03-01",
+        "regionalApi": false,
+        "properties": {
+            "startPath": [],
+            "topLevelProperties": {
+                "name": "name",
+                "tier": "tier"
+            }
+        }
+    },
+    {
+        "resourceType": "microsoft.cache/redis",
+        "uri": "https://management.azure.com/subscriptions/{0}/providers/Microsoft.Cache/locations/{1}/capabilities?api-version=2023-08-01",
+        "regionalApi": true,
+        "properties": {
+            "startPath": [],
+            "topLevelProperties": {
+                "name": "name",
+                "family": "family"
+            }
+        }
+    }
+]

@@ -94,6 +94,7 @@ type (
 		SkuTier        string
 		Kind           string
 		SLA            string
+		Properties     map[string]interface{} // Full resource properties from Azure Resource Graph
 	}
 
 	ResourceTypeCount struct {
