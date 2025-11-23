@@ -278,6 +278,24 @@ You can compare two azqr scan reports to identify differences in recommendations
 
 Azure Quick Review includes optional **internal plugins** that provide advanced analytics beyond standard compliance recommendations. These plugins are disabled by default and must be explicitly enabled.
 
+### Region Selection
+
+**Flag**: `--region-selection`
+
+Analyzes optimal Azure region selection based on service availability, network latency, and cost comparison.
+
+- Multi-factor region scoring (availability 50%, latency 30%, cost 20%)
+- Service availability validation across regions
+- Network latency analysis using Azure RTT statistics
+- Cost comparison based on Azure Retail Prices
+
+**Use Cases**: Disaster recovery planning, cost optimization, multi-region strategy, migration feasibility
+
+```bash
+# Analyze optimal regions for your workloads
+./azqr scan --region-selection
+```
+
 ### OpenAI Throttling Monitor
 
 **Flag**: `--openai-throttling`
@@ -332,13 +350,12 @@ Retrieves logical-to-physical availability zone mappings for all Azure regions i
 ./azqr scan --subscription-id sub1 --subscription-id sub2 --zone-mapping
 ```
 
-[📖 Full Documentation](https://azure.github.io/azqr/docs/plugins/zone-mapping/)
-
 ### Combining Features
 
 ```bash
 # Run multiple plugins together
 ./azqr scan --subscription-id <sub-id> \
+  --region-selection \
   --openai-throttling \
   --carbon-emissions \
   --zone-mapping \

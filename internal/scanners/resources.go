@@ -55,7 +55,7 @@ func (sc ResourceScanner) GetAllResources(ctx context.Context, cred azcore.Token
 				location = m["location"].(string)
 			}
 
-			if filters.Azqr.IsServiceExcluded(m["id"].(string)) {
+			if filters != nil && filters.Azqr.IsServiceExcluded(m["id"].(string)) {
 				excludedResources = append(
 					excludedResources,
 					&models.Resource{

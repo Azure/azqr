@@ -12,7 +12,45 @@ Internal plugins are disabled by default and must be explicitly enabled using co
 
 ## Available Internal Plugins
 
-### 1. OpenAI Throttling
+### 1. Region Selection
+
+**Plugin Name**: `region-selection`  
+**Flag**: `--region-selection`  
+**Version**: 1.0.0
+
+Analyzes optimal Azure region selection based on service availability, network latency, and cost comparison.
+
+**Key Features**:
+- Multi-factor region scoring (availability, latency, cost)
+- Service availability validation across regions
+- Network latency analysis using Azure RTT statistics
+- Cost comparison based on Azure Retail Prices
+- Identifies best alternative regions for migration or DR
+
+**Scoring Weights**:
+- **Service Availability**: 50% - Ensures all resource types are available
+- **Network Latency**: 30% - Evaluates performance using Azure RTT data
+- **Cost Comparison**: 20% - Compares regional pricing differences
+
+**Use Cases**:
+- Disaster recovery planning and region pairing
+- Cost optimization through region migration
+- Multi-region strategy evaluation
+- Migration feasibility assessment
+
+**Output Columns**:
+- Source Region, Target Region
+- Recommendation Score (0-100)
+- Availability Percentage
+- Average Latency (ms)
+- Average Cost Difference (%)
+- Missing Resource Types
+
+**Data Source**: Azure Resource Graph, Resource Providers API, Retail Prices API, Cost Management API
+
+---
+
+### 2. OpenAI Throttling
 
 **Plugin Name**: `openai-throttling`  
 **Flag**: `--openai-throttling`  
@@ -43,7 +81,7 @@ Monitors Azure OpenAI and Cognitive Services accounts for throttling (429 errors
 
 ---
 
-### 2. Carbon Emissions
+### 3. Carbon Emissions
 
 **Plugin Name**: `carbon-emissions`  
 **Flag**: `--carbon-emissions`  
@@ -76,7 +114,7 @@ Analyzes carbon emissions by Azure resource type to support sustainability repor
 
 ---
 
-### 3. Zone Mapping
+### 4. Zone Mapping
 
 **Plugin Name**: `zone-mapping`  
 **Flag**: `--zone-mapping`  
@@ -103,8 +141,6 @@ Retrieves logical-to-physical availability zone mappings for all Azure regions i
 
 **Data Source**: Azure Resource Manager Subscriptions API
 
-[📖 Full Documentation](./zone-mapping)
-
 ---
 
 ## Usage
@@ -114,6 +150,9 @@ Retrieves logical-to-physical availability zone mappings for all Azure regions i
 Internal plugins are opt-in and must be enabled individually using command-line flags:
 
 ```bash
+# Enable region selection plugin
+azqr scan --region-selection
+
 # Enable OpenAI throttling plugin
 azqr scan --openai-throttling
 
@@ -124,10 +163,10 @@ azqr scan --carbon-emissions
 azqr scan --zone-mapping
 
 # Enable multiple plugins
-azqr scan --openai-throttling --carbon-emissions --zone-mapping
+azqr scan --region-selection --openai-throttling --carbon-emissions --zone-mapping
 
 # Combine with other scan options
-azqr scan --subscription-id <sub-id> --output-name analysis
+azqr scan --subscription-id <sub-id> --region-selection --output-name analysis
 ```
 
 ### Listing Available Plugins
@@ -141,6 +180,7 @@ azqr plugins list
 **Sample Output**:
 ```
 NAME                  VERSION    TYPE       DESCRIPTION
+region-selection      1.0.0      internal   Analyzes optimal Azure region selection based on...
 openai-throttling     1.0.0      internal   Checks OpenAI/Cognitive Services accounts for...
 carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure resource type
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
@@ -161,12 +201,13 @@ Internal plugin results are included in all output formats:
 ### Excel (Default)
 
 Each internal plugin creates a dedicated worksheet in the Excel workbook:
+- **Region Selection** sheet
 - **Zone Mapping** sheet
 - **OpenAI Throttling** sheet  
 - **Carbon Emissions** sheet
 
 ```bash
-azqr scan --openai-throttling --carbon-emissions --zone-mapping
+azqr scan --region-selection --openai-throttling --carbon-emissions --zone-mapping
 # Generates: azqr_action_plan_YYYY_MM_DD_THHMMSS.xlsx
 ```
 
@@ -234,6 +275,7 @@ Internal plugins may require additional permissions beyond standard `Reader` acc
 
 | Plugin | Required Permissions | API Dependencies |
 |--------|---------------------|------------------|
+| **region-selection** | Reader | Resource Graph, Resource Providers, Retail Prices, Cost Management |
 | **zone-mapping** | Reader | Subscriptions API (locations endpoint) |
 | **openai-throttling** | Reader + Monitoring Reader | Cognitive Services, Monitor Metrics |
 | **carbon-emissions** | Reader | Carbon Optimization API |
@@ -244,6 +286,7 @@ Internal plugins may require additional permissions beyond standard `Reader` acc
 
 Internal plugins add processing time to scans:
 
+- **region-selection**: 2-5 minutes (depends on number of regions and resource types)
 - **openai-throttling**: 1-3 minutes (depends on number of OpenAI accounts)
 - **carbon-emissions**: 1-2 minutes (depends on subscription count)
 - **zone-mapping**: <10 seconds (very fast, one API call per subscription)

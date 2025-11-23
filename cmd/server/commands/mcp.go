@@ -84,7 +84,7 @@ func mcp(cmd *cobra.Command) {
 			go func() {
 				scannerKeys := []string{arguments.ServiceKey}
 				filters := models.LoadFilters("", scannerKeys)
-				params := internal.NewScanParams()
+				params := models.NewScanParams()
 				params.Cost = false
 				params.Defender = false
 				params.Advisor = false

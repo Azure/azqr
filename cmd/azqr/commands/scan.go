@@ -82,7 +82,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		enabledInternalPlugins[pluginName] = val
 	}
 
-	params := internal.ScanParams{
+	params := models.ScanParams{
 		ManagementGroups:       managementGroups,
 		Subscriptions:          subscriptions,
 		ResourceGroups:         resourceGroups,

@@ -99,54 +99,10 @@ import (
 )
 
 type (
-	ScanParams struct {
-		ManagementGroups       []string
-		Subscriptions          []string
-		ResourceGroups         []string
-		OutputName             string
-		Defender               bool
-		Advisor                bool
-		Arc                    bool
-		Xlsx                   bool
-		Cost                   bool
-		Mask                   bool
-		Csv                    bool
-		Json                   bool
-		Stdout                 bool
-		Debug                  bool
-		Policy                 bool
-		ScannerKeys            []string
-		Filters                *models.Filters
-		UseAzqrRecommendations bool
-		UseAprlRecommendations bool
-		EnabledInternalPlugins map[string]bool
-	}
-
 	Scanner struct{}
 )
 
-func NewScanParams() *ScanParams {
-	return &ScanParams{
-		ManagementGroups:       []string{},
-		Subscriptions:          []string{},
-		ResourceGroups:         []string{},
-		OutputName:             "",
-		Defender:               true,
-		Advisor:                true,
-		Cost:                   true,
-		Mask:                   true,
-		Csv:                    false,
-		Json:                   false,
-		Debug:                  false,
-		Policy:                 false,
-		ScannerKeys:            []string{},
-		Filters:                models.NewFilters(),
-		UseAzqrRecommendations: true,
-		UseAprlRecommendations: true,
-	}
-}
-
-func (sc Scanner) Scan(params *ScanParams) string {
+func (sc Scanner) Scan(params *models.ScanParams) string {
 	startTime := time.Now()
 	// Default level for this example is info, unless debug flag is present
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
@@ -162,16 +118,8 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	filters := params.Filters
 
 	// validate input
-	if len(params.ManagementGroups) > 0 && (len(params.Subscriptions) > 0 || len(params.ResourceGroups) > 0) {
-		log.Fatal().Msg("Management Group name cannot be used with a Subscription Id or Resource Group name")
-	}
-
-	if len(params.Subscriptions) < 1 && len(params.ResourceGroups) > 0 {
-		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
-	}
-
-	if len(params.Subscriptions) > 1 && len(params.ResourceGroups) > 0 {
-		log.Fatal().Msg("Resource Group name can only be used with 1 Subscription Id")
+	if err := params.Validate(); err != nil {
+		log.Fatal().Err(err).Msg("Invalid scan parameters")
 	}
 
 	if len(params.Subscriptions) > 0 {
