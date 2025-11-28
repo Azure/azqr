@@ -174,7 +174,7 @@ type (
 
 	// CostResultItem - Cost result,
 	CostResultItem struct {
-		SubscriptionID, SubscriptionName, ServiceName, Value, Currency string
+		SubscriptionID, SubscriptionName, ServiceName, Value, Currency, Date string
 	}
 
 	// AdvisorResult - Advisor result

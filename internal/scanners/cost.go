@@ -39,6 +39,7 @@ func (s *CostScanner) QueryCosts() (*models.CostResult, error) {
 	fromTime := time.Date(toTime.Year(), toTime.Month()-3, 1, 0, 0, 0, 0, time.UTC)
 	sum := armcostmanagement.FunctionTypeSum
 	dimension := armcostmanagement.QueryColumnTypeDimension
+	daily := armcostmanagement.GranularityTypeDaily
 	qd := armcostmanagement.QueryDefinition{
 		Type:      &etype,
 		Timeframe: &timeframeType,
@@ -47,7 +48,7 @@ func (s *CostScanner) QueryCosts() (*models.CostResult, error) {
 			To:   &toTime,
 		},
 		Dataset: &armcostmanagement.QueryDataset{
-			// Granularity: &daily,
+			Granularity: &daily,
 			Aggregation: map[string]*armcostmanagement.QueryAggregation{
 				"TotalCost": {
 					Name:     to.Ptr("Cost"),
@@ -76,13 +77,25 @@ func (s *CostScanner) QueryCosts() (*models.CostResult, error) {
 		Items: []*models.CostResultItem{},
 	}
 
+	// With daily granularity, the response columns are:
+	// [0] = Cost (aggregation value)
+	// [1] = UsageDate (YYYYMMDD format as number, e.g., 20250801)
+	// [2] = ServiceName (grouping dimension)
+	// [3] = Currency
 	for _, v := range resp.Properties.Rows {
+		// Parse UsageDate from YYYYMMDD number format to YYYY-MM-DD string
+		// The API returns this as a float64, so we need to format it as an integer first
+		usageDate := fmt.Sprintf("%.0f", v[1])
+		if len(usageDate) == 8 {
+			usageDate = usageDate[:4] + "-" + usageDate[4:6] + "-" + usageDate[6:8]
+		}
 		result.Items = append(result.Items, &models.CostResultItem{
 			SubscriptionID:   s.config.SubscriptionID,
 			SubscriptionName: s.config.SubscriptionName,
-			ServiceName:      fmt.Sprintf("%v", v[1]),
+			ServiceName:      fmt.Sprintf("%v", v[2]),
 			Value:            fmt.Sprintf("%v", v[0]),
-			Currency:         fmt.Sprintf("%v", v[2]),
+			Currency:         fmt.Sprintf("%v", v[3]),
+			Date:             usageDate,
 		})
 	}
 	return &result, nil
