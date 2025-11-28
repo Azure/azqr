@@ -128,13 +128,14 @@ func (rd *ReportData) ImpactedTable() [][]string {
 }
 
 func (rd *ReportData) CostTable() [][]string {
-	headers := []string{"From", "To", "Subscription Id", "Subscription Name", "Service Name", "Value", "Currency"}
+	headers := []string{"From", "To", "Date", "Subscription Id", "Subscription Name", "Service Name", "Value", "Currency"}
 
 	rows := [][]string{}
 	for _, r := range rd.Cost.Items {
 		row := []string{
 			rd.Cost.From.Format("2006-01-02"),
 			rd.Cost.To.Format("2006-01-02"),
+			r.Date,
 			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
 			r.SubscriptionName,
 			r.ServiceName,
