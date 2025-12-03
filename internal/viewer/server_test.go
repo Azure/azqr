@@ -15,7 +15,7 @@ var sample = &DataStore{Data: map[string][]map[string]string{
 	DataSetAzurePolicy:             {{"complianceState": "NonCompliant"}},
 	DataSetDefender:                {},
 	DataSetDefenderRecommendations: {},
-	DataSetCosts:                   {{"value": "10.50"}},
+	DataSetCosts:                   {{"value": "10.50", "date": "2024-01-15"}},
 	DataSetOutOfScope:              {},
 }}
 
