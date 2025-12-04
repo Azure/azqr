@@ -56,7 +56,7 @@ require (
 	github.com/invopop/jsonschema v0.13.0
 	github.com/metoro-io/mcp-golang v0.14.0
 	github.com/rs/zerolog v1.34.0
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/xuri/excelize/v2 v2.10.0
 	golang.org/x/time v0.14.0
