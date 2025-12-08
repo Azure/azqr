@@ -274,6 +274,83 @@ You can compare two azqr scan reports to identify differences in recommendations
 ./azqr compare --file1 scan1.xlsx --file2 scan2.xlsx --output comparison.txt
 ```
 
+## Advanced Features
+
+Azure Quick Review includes optional **internal plugins** that provide advanced analytics beyond standard compliance recommendations. These plugins are disabled by default and must be explicitly enabled.
+
+### OpenAI Throttling Monitor
+
+**Flag**: `--openai-throttling`
+
+Monitors Azure OpenAI and Cognitive Services accounts for throttling (HTTP 429 errors) to identify capacity constraints.
+
+- Tracks throttling by hour, model, and deployment
+- Analyzes spillover configuration effectiveness  
+- Reports request counts by status code
+
+**Use Cases**: Capacity planning, troubleshooting throttling, optimizing deployment configuration
+
+```bash
+# Monitor OpenAI throttling across subscriptions
+./azqr scan --openai-throttling
+```
+
+### Carbon Emissions Tracking
+
+**Flag**: `--carbon-emissions`
+
+Analyzes carbon emissions by Azure resource type to support sustainability reporting and optimization.
+
+- Tracks emissions by resource type
+- Calculates month-over-month trends
+- Aggregates across subscriptions
+
+**Use Cases**: Sustainability reporting, compliance, environmental impact analysis
+
+```bash
+# Generate carbon emissions report
+./azqr scan --carbon-emissions
+```
+
+### Zone Mapping
+
+**Flag**: `--zone-mapping`
+
+Retrieves logical-to-physical availability zone mappings for all Azure regions in each subscription.
+
+- Maps logical zones (1, 2, 3) to physical zone identifiers
+- Reveals subscription-specific zone mappings
+- Essential for multi-subscription architectures
+
+**Use Cases**: Multi-subscription architecture design, DR planning with zone awareness, zone alignment
+
+```bash
+# Get zone mappings for all subscriptions
+./azqr scan --zone-mapping
+
+# Compare mappings across subscriptions
+./azqr scan --subscription-id sub1 --subscription-id sub2 --zone-mapping
+```
+
+[📖 Full Documentation](https://azure.github.io/azqr/docs/plugins/zone-mapping/)
+
+### Combining Features
+
+```bash
+# Run multiple plugins together
+./azqr scan --subscription-id <sub-id> \
+  --openai-throttling \
+  --carbon-emissions \
+  --zone-mapping \
+  --output-name comprehensive-analysis
+```
+
+Results from all enabled plugins are included in the Excel, JSON, or CSV output.
+
+> 💡 **Tip**: Plugin results appear in dedicated sheets (Excel) or sections (JSON/CSV). Use `azqr plugins list` to see all available plugins.
+
+[📖 Internal Plugins Documentation](https://azure.github.io/azqr/docs/plugins/internal-plugins/)
+
 ## Binary Verification
 
 To verify the authenticity of downloaded binaries, see our [Binary Verification Guide](SECURITY_VERIFICATION.md).
