@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["avail"] = []models.IAzureScanner{&AvailabilitySetScanner{
+	models.ScannerList["avail"] = []models.IAzureScanner{NewAvailabilitySetScanner()}
+}
+
+// NewAvailabilitySetScanner creates a new AvailabilitySetScanner
+func NewAvailabilitySetScanner() *AvailabilitySetScanner {
+	return &AvailabilitySetScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.Compute/availabilitySets"),
-	}}
+	}
 }
 
 // AvailabilitySetScanner - Scanner for Availability Set

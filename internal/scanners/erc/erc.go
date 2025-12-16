@@ -8,12 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["erc"] = []models.IAzureScanner{&ExpressRouteScanner{
+	models.ScannerList["erc"] = []models.IAzureScanner{NewExpressRouteScanner()}
+}
+
+// NewExpressRouteScanner creates a new ExpressRouteScanner
+func NewExpressRouteScanner() *ExpressRouteScanner {
+	return &ExpressRouteScanner{
 		BaseScanner: models.NewBaseScanner(
 			"Microsoft.Network/expressRouteCircuits",
 			"Microsoft.Network/ExpressRoutePorts",
 		),
-	}}
+	}
 }
 
 // ExpressRouteScanner - Scanner for Express Route

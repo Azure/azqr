@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["avd"] = []models.IAzureScanner{&AzureVirtualDesktopScanner{
+	models.ScannerList["avd"] = []models.IAzureScanner{NewAzureVirtualDesktopScanner()}
+}
+
+// NewAzureVirtualDesktopScanner creates a new AzureVirtualDesktopScanner
+func NewAzureVirtualDesktopScanner() *AzureVirtualDesktopScanner {
+	return &AzureVirtualDesktopScanner{
 		BaseScanner: models.NewBaseScanner("Specialized.Workload/AVD"),
-	}}
+	}
 }
 
 // AzureVirtualDesktopScanner - Scanner for Azure Virtual Desktop

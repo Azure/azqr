@@ -8,12 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["avs"] = []models.IAzureScanner{&AVSScanner{
+	models.ScannerList["avs"] = []models.IAzureScanner{NewAVSScanner()}
+}
+
+// NewAVSScanner creates a new AVSScanner
+func NewAVSScanner() *AVSScanner {
+	return &AVSScanner{
 		BaseScanner: models.NewBaseScanner(
 			"Microsoft.AVS/privateClouds",
 			"Specialized.Workload/AVS",
 		),
-	}}
+	}
 }
 
 // AVSScanner - Scanner for AVS

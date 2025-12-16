@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["disk"] = []models.IAzureScanner{&DiskScanner{
+	models.ScannerList["disk"] = []models.IAzureScanner{NewDiskScanner()}
+}
+
+// NewDiskScanner creates a new DiskScanner
+func NewDiskScanner() *DiskScanner {
+	return &DiskScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.Compute/disks"),
-	}}
+	}
 }
 
 // DiskScanner - Scanner for Disk

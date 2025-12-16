@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["iot"] = []models.IAzureScanner{&IoTHubScanner{
+	models.ScannerList["iot"] = []models.IAzureScanner{NewIoTHubScanner()}
+}
+
+// NewIoTHubScanner creates a new IoTHubScanner
+func NewIoTHubScanner() *IoTHubScanner {
+	return &IoTHubScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.Devices/IotHubs"),
-	}}
+	}
 }
 
 // IoTHubScanner - Scanner for IoT Hub

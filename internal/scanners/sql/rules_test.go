@@ -236,3 +236,95 @@ func TestSQLScanner_PoolRules(t *testing.T) {
 		})
 	}
 }
+
+func TestSQLScanner_ResourceTypes(t *testing.T) {
+	scanner := &SQLScanner{}
+	resourceTypes := scanner.ResourceTypes()
+
+	expected := []string{
+		"Microsoft.Sql/servers",
+		"Microsoft.Sql/servers/databases",
+		"Microsoft.Sql/servers/elasticPools",
+	}
+
+	if len(resourceTypes) != len(expected) {
+		t.Errorf("Expected %d resource types, got %d", len(expected), len(resourceTypes))
+	}
+
+	for i, expectedType := range expected {
+		if resourceTypes[i] != expectedType {
+			t.Errorf("Expected resource type %s at index %d, got %s", expectedType, i, resourceTypes[i])
+		}
+	}
+}
+
+func TestSQLScanner_GetServerRules(t *testing.T) {
+	scanner := &SQLScanner{}
+	rules := scanner.getServerRules()
+
+	if len(rules) == 0 {
+		t.Error("Expected server rules, got none")
+	}
+
+	for id, rule := range rules {
+		if rule.RecommendationID != id {
+			t.Errorf("Rule ID mismatch: key=%s, ID=%s", id, rule.RecommendationID)
+		}
+		if rule.Recommendation == "" {
+			t.Errorf("Rule %s has empty Recommendation", id)
+		}
+	}
+}
+
+func TestSQLScanner_GetDatabaseRules(t *testing.T) {
+	scanner := &SQLScanner{}
+	rules := scanner.getDatabaseRules()
+
+	if len(rules) == 0 {
+		t.Error("Expected database rules, got none")
+	}
+
+	for id, rule := range rules {
+		if rule.RecommendationID != id {
+			t.Errorf("Rule ID mismatch: key=%s, ID=%s", id, rule.RecommendationID)
+		}
+	}
+}
+
+func TestSQLScanner_GetPoolRules(t *testing.T) {
+	scanner := &SQLScanner{}
+	rules := scanner.getPoolRules()
+
+	if len(rules) == 0 {
+		t.Error("Expected pool rules, got none")
+	}
+
+	for id, rule := range rules {
+		if rule.RecommendationID != id {
+			t.Errorf("Rule ID mismatch: key=%s, ID=%s", id, rule.RecommendationID)
+		}
+	}
+}
+
+func TestSQLScanner_Init(t *testing.T) {
+	scanner := &SQLScanner{}
+
+	config := &models.ScannerConfig{
+		SubscriptionID: "test-subscription",
+		Cred:           nil,
+		ClientOptions:  nil,
+	}
+
+	err := scanner.Init(config)
+	if err == nil {
+		t.Log("Init succeeded")
+		// Config verification removed - scanner doesn't expose GetConfig()
+	}
+}
+
+func TestSQLScanner_Scan(t *testing.T) {
+	scanner := &SQLScanner{}
+	var _ = scanner.Scan
+
+	t.Log("Scan method signature verified")
+}

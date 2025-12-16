@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["ba"] = []models.IAzureScanner{&BatchAccountScanner{
+	models.ScannerList["ba"] = []models.IAzureScanner{NewBatchAccountScanner()}
+}
+
+// NewBatchAccountScanner creates a new BatchAccountScanner
+func NewBatchAccountScanner() *BatchAccountScanner {
+	return &BatchAccountScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.Batch/batchAccounts"),
-	}}
+	}
 }
 
 // BatchAccountScanner - Scanner for Batch Account
