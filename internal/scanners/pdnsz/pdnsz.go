@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["pdnsz"] = []models.IAzureScanner{&PrivateDNSZoneScanner{
+	models.ScannerList["pdnsz"] = []models.IAzureScanner{NewPrivateDNSZoneScanner()}
+}
+
+// NewPrivateDNSZoneScanner creates a new PrivateDNSZoneScanner
+func NewPrivateDNSZoneScanner() *PrivateDNSZoneScanner {
+	return &PrivateDNSZoneScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.Network/privateDnsZones"),
-	}}
+	}
 }
 
 // PrivateDNSZoneScanner - Scanner for Private DNS Zone

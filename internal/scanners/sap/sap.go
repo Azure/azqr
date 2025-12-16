@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["sap"] = []models.IAzureScanner{&SAPScanner{
+	models.ScannerList["sap"] = []models.IAzureScanner{NewSAPScanner()}
+}
+
+// NewSAPScanner creates a new SAPScanner
+func NewSAPScanner() *SAPScanner {
+	return &SAPScanner{
 		BaseScanner: models.NewBaseScanner("Specialized.Workload/SAP"),
-	}}
+	}
 }
 
 // SAPScanner - Scanner for SAP

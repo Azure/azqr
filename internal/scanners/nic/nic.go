@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["nic"] = []models.IAzureScanner{&NICScanner{
+	models.ScannerList["nic"] = []models.IAzureScanner{NewNICScanner()}
+}
+
+// NewNICScanner creates a new NICScanner
+func NewNICScanner() *NICScanner {
+	return &NICScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.Network/networkInterfaces"),
-	}}
+	}
 }
 
 // NICScanner - Scanner for NIC

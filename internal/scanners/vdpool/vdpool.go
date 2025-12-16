@@ -8,13 +8,18 @@ import (
 )
 
 func init() {
-	models.ScannerList["vdpool"] = []models.IAzureScanner{&VirtualDesktopScanner{
+	models.ScannerList["vdpool"] = []models.IAzureScanner{NewVirtualDesktopScanner()}
+}
+
+// NewVirtualDesktopScanner creates a new VirtualDesktopScanner
+func NewVirtualDesktopScanner() *VirtualDesktopScanner {
+	return &VirtualDesktopScanner{
 		BaseScanner: models.NewBaseScanner(
 			"Microsoft.DesktopVirtualization/hostPools",
 			"Microsoft.DesktopVirtualization/scalingPlans",
 			"Microsoft.DesktopVirtualization/workspaces",
 		),
-	}}
+	}
 }
 
 // VirtualDesktopScanner - Scanner for Virtual Desktop

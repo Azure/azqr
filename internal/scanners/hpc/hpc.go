@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["hpc"] = []models.IAzureScanner{&HighPerformanceComputingScanner{
+	models.ScannerList["hpc"] = []models.IAzureScanner{NewHighPerformanceComputingScanner()}
+}
+
+// NewHighPerformanceComputingScanner creates a new HighPerformanceComputingScanner
+func NewHighPerformanceComputingScanner() *HighPerformanceComputingScanner {
+	return &HighPerformanceComputingScanner{
 		BaseScanner: models.NewBaseScanner("Specialized.Workload/HPC"),
-	}}
+	}
 }
 
 // HighPerformanceComputingScanner - Scanner for High Performance Computing

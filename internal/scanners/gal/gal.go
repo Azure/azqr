@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["gal"] = []models.IAzureScanner{&GalleryScanner{
+	models.ScannerList["gal"] = []models.IAzureScanner{NewGalleryScanner()}
+}
+
+// NewGalleryScanner creates a new GalleryScanner
+func NewGalleryScanner() *GalleryScanner {
+	return &GalleryScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.Compute/galleries"),
-	}}
+	}
 }
 
 // GalleryScanner - Scanner for Gallery

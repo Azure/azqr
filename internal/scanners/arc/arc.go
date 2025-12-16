@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["arc"] = []models.IAzureScanner{&ArcScanner{
+	models.ScannerList["arc"] = []models.IAzureScanner{NewArcScanner()}
+}
+
+// NewArcScanner creates a new ArcScanner
+func NewArcScanner() *ArcScanner {
+	return &ArcScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.AzureArcData/sqlServerInstances"),
-	}}
+	}
 }
 
 // ArcScanner - Scanner for Arc SQL

@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["rsv"] = []models.IAzureScanner{&RecoveryServiceScanner{
+	models.ScannerList["rsv"] = []models.IAzureScanner{NewRecoveryServiceScanner()}
+}
+
+// NewRecoveryServiceScanner creates a new RecoveryServiceScanner
+func NewRecoveryServiceScanner() *RecoveryServiceScanner {
+	return &RecoveryServiceScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.RecoveryServices/vaults"),
-	}}
+	}
 }
 
 // RecoveryServiceScanner - Scanner for Recovery Service

@@ -8,12 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["odb"] = []models.IAzureScanner{&OracleDatabaseScanner{
+	models.ScannerList["odb"] = []models.IAzureScanner{NewOracleDatabaseScanner()}
+}
+
+// NewOracleDatabaseScanner creates a new OracleDatabaseScanner
+func NewOracleDatabaseScanner() *OracleDatabaseScanner {
+	return &OracleDatabaseScanner{
 		BaseScanner: models.NewBaseScanner(
 			"Oracle.Database/cloudExadataInfrastructures",
 			"Oracle.Database/cloudVmClusters",
 		),
-	}}
+	}
 }
 
 // OracleDatabaseScanner - Scanner for Oracle Database@Azure

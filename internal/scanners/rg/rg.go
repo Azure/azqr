@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["rg"] = []models.IAzureScanner{&ResourceGroupScanner{
+	models.ScannerList["rg"] = []models.IAzureScanner{NewResourceGroupScanner()}
+}
+
+// NewResourceGroupScanner creates a new ResourceGroupScanner
+func NewResourceGroupScanner() *ResourceGroupScanner {
+	return &ResourceGroupScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.Resources/resourceGroups"),
-	}}
+	}
 }
 
 // ResourceGroupScanner - Scanner for Resource Groups

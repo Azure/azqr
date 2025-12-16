@@ -8,9 +8,14 @@ import (
 )
 
 func init() {
-	models.ScannerList["netapp"] = []models.IAzureScanner{&NetAppScanner{
+	models.ScannerList["netapp"] = []models.IAzureScanner{NewNetAppScanner()}
+}
+
+// NewNetAppScanner creates a new NetAppScanner
+func NewNetAppScanner() *NetAppScanner {
+	return &NetAppScanner{
 		BaseScanner: models.NewBaseScanner("Microsoft.NetApp/netAppAccounts"),
-	}}
+	}
 }
 
 // NetAppScanner - Scanner for NetApp
