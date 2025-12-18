@@ -19,6 +19,7 @@ import (
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/throttling"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -205,6 +206,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 				MaxRetryDelay: 60 * time.Second,
 			},
 			Cloud: az.GetCloudConfiguration(),
+			PerRetryPolicies: []policy.Policy{throttling.NewThrottlingPolicy()},
 		},
 	}
 

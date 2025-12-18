@@ -5,7 +5,6 @@ package afd
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
 )
 
@@ -60,8 +59,6 @@ func (a *FrontDoorScanner) list() ([]*armcdn.Profile, error) {
 
 	services := make([]*armcdn.Profile, 0)
 	for pager.More() {
-		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
