@@ -5,7 +5,6 @@ package dec
 
 import (
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto"
 )
 
@@ -60,8 +59,6 @@ func (a *DataExplorerScanner) listClusters() ([]*armkusto.Cluster, error) {
 
 	kustoclusters := make([]*armkusto.Cluster, 0)
 	for pager.More() {
-		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(a.config.Ctx); // nolint:errcheck
 		resp, err := pager.NextPage(a.config.Ctx)
 		if err != nil {
 			return nil, err
