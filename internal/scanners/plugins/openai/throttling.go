@@ -9,12 +9,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/plugins"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices/v2"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
@@ -81,28 +79,23 @@ func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredentia
 
 // scanSubscription scans a single subscription for OpenAI accounts
 func (s *ThrottlingScanner) scanSubscription(ctx context.Context, cred azcore.TokenCredential, subscriptionID, subscriptionName string) ([][]string, error) {
-	clientOptions := &policy.ClientOptions{}
+	// Create client options with standard retry and throttling configuration
+	clientOptions := az.NewDefaultClientOptions()
 
 	// Create Cognitive Services client
-	cognitiveClient, err := armcognitiveservices.NewAccountsClient(subscriptionID, cred, &arm.ClientOptions{
-		ClientOptions: *clientOptions,
-	})
+	cognitiveClient, err := armcognitiveservices.NewAccountsClient(subscriptionID, cred, clientOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cognitive services client: %w", err)
 	}
 
 	// Create Deployments client
-	deploymentsClient, err := armcognitiveservices.NewDeploymentsClient(subscriptionID, cred, &arm.ClientOptions{
-		ClientOptions: *clientOptions,
-	})
+	deploymentsClient, err := armcognitiveservices.NewDeploymentsClient(subscriptionID, cred, clientOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create deployments client: %w", err)
 	}
 
 	// Create Monitor metrics client
-	metricsClient, err := armmonitor.NewMetricsClient(subscriptionID, cred, &arm.ClientOptions{
-		ClientOptions: *clientOptions,
-	})
+	metricsClient, err := armmonitor.NewMetricsClient(subscriptionID, cred, clientOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create metrics client: %w", err)
 	}
@@ -112,9 +105,6 @@ func (s *ThrottlingScanner) scanSubscription(ctx context.Context, cred azcore.To
 	var results [][]string
 
 	for pager.More() {
-		// Wait for rate limiter
-		_ = throttling.WaitARM(ctx); // nolint:errcheck
-
 		page, err := pager.NextPage(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list accounts: %w", err)
@@ -222,8 +212,6 @@ func (s *ThrottlingScanner) getMetricsWithStatusCodeSplit(ctx context.Context, c
 	// Use wildcard filter to get all status codes and model names
 	filter := "StatusCode eq '*' and ModelDeploymentName eq '*' and ModelName eq '*'"
 
-	_ = throttling.WaitARM(ctx); // nolint:errcheck
-
 	result, err := client.List(ctx, resourceID, &armmonitor.MetricsClientListOptions{
 		Timespan:    &timespan,
 		Interval:    &interval,
@@ -299,9 +287,6 @@ func (s *ThrottlingScanner) getDeployments(ctx context.Context, client *armcogni
 	var deployments []*armcognitiveservices.Deployment
 
 	for pager.More() {
-		// Wait for rate limiter
-		_ = throttling.WaitARM(ctx); // nolint:errcheck
-
 		page, err := pager.NextPage(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to list deployments: %w", err)

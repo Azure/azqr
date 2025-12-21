@@ -8,24 +8,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/Azure/azqr/internal/az"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/rs/zerolog/log"
 )
 
 // GraphQueryClient provides methods to query Azure Resource Graph using HTTP client.
 type GraphQueryClient struct {
-	httpClient  *http.Client // HTTP client for making requests
-	endpoint    string       // Resource Graph endpoint URL
-	accessToken string       // Bearer token for authentication
+	httpClient *az.HttpClient // Azure HTTP client with built-in retry logic
+	endpoint   string         // Resource Graph endpoint URL
 }
 
 // GraphResult holds the data returned from a Resource Graph query.
@@ -36,7 +31,7 @@ type GraphResult struct {
 // QueryRequestOptions represents options for the Resource Graph query.
 type QueryRequestOptions struct {
 	ResultFormat             string  `json:"resultFormat,omitempty"`             // Format of the result
-	Top                      *int32  `json:"$top,omitempty"`                      // Max number of results
+	Top                      *int32  `json:"$top,omitempty"`                     // Max number of results
 	SkipToken                *string `json:"$skipToken,omitempty"`               // Token for pagination
 	AuthorizationScopeFilter *string `json:"authorizationScopeFilter,omitempty"` // Filter by authorization scope
 }
@@ -58,29 +53,14 @@ type QueryResponse struct {
 
 // NewGraphQuery creates a new GraphQuery using the provided TokenCredential.
 func NewGraphQuery(cred azcore.TokenCredential) *GraphQueryClient {
-	// Create a new HTTP client with a timeout
-	httpClient := &http.Client{
-		Timeout: 60 * time.Second,
-	}
+	// Create Azure HTTP client with built-in retry and throttling
+	httpClient := az.NewHttpClient(cred, 60*time.Second)
 
 	resourceManagerEndpoint := az.GetResourceManagerEndpoint()
-	scope := fmt.Sprintf("%s/.default", resourceManagerEndpoint)
-
-	// Acquire an access token using the provided credential
-	token, err := cred.GetToken(context.Background(), policy.TokenRequestOptions{
-		Scopes: []string{scope},
-	})
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to acquire Azure access token")
-	}
-
-	// Set the access token string
-	accessToken := token.Token
 
 	return &GraphQueryClient{
-		httpClient:  httpClient,
-		endpoint:    fmt.Sprintf("%s/providers/Microsoft.ResourceGraph/resources?api-version=2024-04-01", resourceManagerEndpoint),
-		accessToken: accessToken,
+		httpClient: httpClient,
+		endpoint:   fmt.Sprintf("%s/providers/Microsoft.ResourceGraph/resources?api-version=2024-04-01", resourceManagerEndpoint),
 	}
 }
 
@@ -123,10 +103,11 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 				Options:       options,
 			}
 
-			resp, err := q.retry(ctx, 3, request)
+			resp, err := q.doRequest(ctx, request)
 			if err == nil {
 				result.Data = append(result.Data, resp.Data...)
 				skipToken = resp.SkipToken
+				log.Debug().Msgf("Graph query batch %d-%d returned %d records, next skipToken: %v", i, j, len(resp.Data), skipToken)
 			} else {
 				log.Fatal().Err(err).Msgf("Failed to run Resource Graph query: %s", query)
 				return nil
@@ -137,29 +118,6 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 	return &result
 }
 
-// retry executes the Resource Graph query with retries when throttling occurs.
-// Returns the QueryResponse or error.
-func (q *GraphQueryClient) retry(ctx context.Context, attempts int, request QueryRequest) (*QueryResponse, error) {
-	for i := 0; ; i++ {
-		resp, err := q.doRequest(ctx, request)
-		if err == nil {
-			return resp, nil
-		}
-
-		if i >= (attempts - 1) {
-			log.Error().Msgf("Retry limit reached for Graph query: %s", request.Query)
-			return nil, err
-		}
-
-		// Quota limit reached, sleep for the duration specified in the response header
-		if resp.Quota == 0 {
-			duration := resp.RetryAfter
-			log.Debug().Msgf("Graph query quota limit reached. Sleeping for %s", duration)
-			time.Sleep(duration)
-		}
-	}
-}
-
 // doRequest sends the HTTP request to the Resource Graph API and returns the response.
 func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) (*QueryResponse, error) {
 	// Serialize request to JSON
@@ -168,42 +126,30 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	// Create HTTP request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, q.endpoint, bytes.NewReader(body))
+	// Create seekable request body reader (needed for retries)
+	readSeekCloser := &bytesReadSeekCloser{
+		Reader: bytes.NewReader(body),
+	}
+
+	// Get resource manager endpoint scope
+	resourceManagerEndpoint := az.GetResourceManagerEndpoint()
+	scope := to.Ptr(fmt.Sprintf("%s/.default", resourceManagerEndpoint))
+
+	// Send POST request using HttpClient (handles retries and throttling automatically)
+	respBody, resp, err := q.httpClient.DoPost(ctx, q.endpoint, readSeekCloser, scope)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
+		return nil, err
 	}
-
-	// Set headers
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+q.accessToken)
-
-	// Wait for a token from the rate limiter before making the request
-	if err := throttling.WaitGraph(ctx); err != nil {
-		return nil, fmt.Errorf("rate limiter error: %w", err)
-	}
-
-	// Send request
-	resp, err := q.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send HTTP request: %w", err)
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Fatal().Err(err).Msg("Failed to close response body")
-		}
-	}()
 
 	// Parse response JSON
 	queryResp := QueryResponse{}
 
-	// Extract quota headers and set them in the QueryResponse struct
-	// Parse x-ms-user-quota-remaining as int
+	// Extract quota headers from response
 	quotaStr := resp.Header.Get("x-ms-user-quota-remaining")
 	if quotaStr != "" {
-		quota, err := strconv.Atoi(quotaStr)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse quota header: %w", err)
+		quota, parseErr := strconv.Atoi(quotaStr)
+		if parseErr != nil {
+			return nil, fmt.Errorf("failed to parse quota header: %w", parseErr)
 		}
 		queryResp.Quota = quota
 	}
@@ -211,7 +157,6 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 	// Parse x-ms-user-quota-resets-after as timespan in "hh:mm:ss" format
 	retryAfterStr := resp.Header.Get("x-ms-user-quota-resets-after")
 	if retryAfterStr != "" {
-		// If time.ParseDuration fails, fallback to manual parsing
 		var h, m, s int
 		_, scanErr := fmt.Sscanf(retryAfterStr, "%d:%d:%d", &h, &m, &s)
 		if scanErr != nil {
@@ -222,20 +167,21 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 
 	log.Debug().Msgf("Graph query quota remaining: %d, Retry after: %s", queryResp.Quota, queryResp.RetryAfter)
 
-	// Read response body
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	// Check for non-200 status codes
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return &queryResp, fmt.Errorf("received non-2xx status code: %d, body: %s", resp.StatusCode, string(respBody))
-	}
-
+	// Unmarshal response body
 	if err := json.Unmarshal(respBody, &queryResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
 	return &queryResp, nil
+}
+
+// bytesReadSeekCloser wraps a bytes.Reader to implement io.ReadSeekCloser
+// This allows the Azure SDK pipeline to seek back to the beginning for retries
+type bytesReadSeekCloser struct {
+	*bytes.Reader
+}
+
+// Close implements io.Closer (no-op for bytes.Reader)
+func (b *bytesReadSeekCloser) Close() error {
+	return nil
 }

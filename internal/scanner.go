@@ -19,12 +19,8 @@ import (
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
 	"github.com/Azure/azqr/internal/scanners"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 
 	_ "github.com/Azure/azqr/internal/scanners/aa"
 	_ "github.com/Azure/azqr/internal/scanners/adf"
@@ -196,19 +192,8 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// create ARM client options
-	clientOptions := &arm.ClientOptions{
-		ClientOptions: policy.ClientOptions{
-			Retry: policy.RetryOptions{
-				// Only if the HTTP response does not contain a Retry-After header
-				RetryDelay:    1 * time.Second, // More agressive than default (4s)
-				MaxRetries:    3,
-				MaxRetryDelay: 60 * time.Second,
-			},
-			Cloud: az.GetCloudConfiguration(),
-			PerRetryPolicies: []policy.Policy{throttling.NewThrottlingPolicy()},
-		},
-	}
+	// create ARM client options with standard retry and throttling configuration
+	clientOptions := az.NewDefaultClientOptions()
 
 	// list subscriptions. Key is subscription ID, value is subscription name
 	var subscriptions map[string]string

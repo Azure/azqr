@@ -8,13 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/plugins"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/carbonoptimization/armcarbonoptimization"
 	"github.com/rs/zerolog/log"
 )
@@ -71,10 +69,8 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 	}
 	fromTime := toTime
 
-	// Initialize client options
-	clientOptions := &arm.ClientOptions{
-		ClientOptions: policy.ClientOptions{},
-	}
+	// Initialize client options with standard retry and throttling configuration
+	clientOptions := az.NewDefaultClientOptions()
 
 	// Initialize the client factory
 	clientFactory, err := armcarbonoptimization.NewClientFactory(cred, clientOptions)
@@ -119,9 +115,6 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 			SortDirection: to.Ptr(armcarbonoptimization.SortDirectionEnumDesc),
 			PageSize:      to.Ptr[int32](1000),
 		}
-
-		// Wait for rate limiter
-		_ = throttling.WaitARM(ctx) // nolint:errcheck
 
 		// Execute the request
 		resp, err := clientFactory.NewCarbonServiceClient().QueryCarbonEmissionReports(ctx, queryFilter, nil)

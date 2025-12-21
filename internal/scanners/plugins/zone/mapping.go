@@ -7,17 +7,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"sort"
 	"sync"
+	"time"
 
+	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/plugins"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/rs/zerolog/log"
 )
 
@@ -147,51 +144,24 @@ type availabilityZoneMapping struct {
 	PhysicalZone *string `json:"physicalZone"`
 }
 
-// fetchZoneMappings retrieves zone mappings for a single subscription using direct REST API call
+// fetchZoneMappings retrieves zone mappings for a single subscription using az.HttpClient
 func (s *ZoneMappingScanner) fetchZoneMappings(ctx context.Context, cred azcore.TokenCredential, subscriptionID, subscriptionName string) ([]zoneMappingResult, error) {
-	// Apply throttling to respect ARM API limits
-	_ = throttling.WaitARM(ctx) // nolint:errcheck
-
-	// Create pipeline with authentication
-	clientOptions := policy.ClientOptions{
-		PerCallPolicies: []policy.Policy{
-			runtime.NewBearerTokenPolicy(cred, []string{"https://management.azure.com/.default"}, nil),
-		},
-	}
-	pipeline := runtime.NewPipeline("azqr", "1.0.0", runtime.PipelineOptions{}, &clientOptions)
+	// Create HTTP client with authentication and retry capabilities
+	httpClient := az.NewHttpClient(cred, 30*time.Second)
 
 	// Construct the REST API URL
 	// GET /subscriptions/{subscriptionId}/locations?api-version=2022-12-01
 	endpoint := fmt.Sprintf("https://management.azure.com/subscriptions/%s/locations?api-version=2022-12-01", subscriptionID)
 
-	// Create the request
-	req, err := runtime.NewRequest(ctx, http.MethodGet, endpoint)
+	// Make the request with authentication (empty string uses default scope)
+	emptyScope := ""
+	body, err := httpClient.Do(ctx, endpoint, &emptyScope, 3)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	// Send the request through the pipeline
-	resp, err := pipeline.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send request: %w", err)
-	}
-	defer func() {
-		_ = resp.Body.Close() // nolint:errcheck
-	}()
-
-	// Check response status
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("failed to fetch locations: %w", err)
 	}
 
 	// Parse the response
 	var locationsResp locationResponse
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
 	if err := json.Unmarshal(body, &locationsResp); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
