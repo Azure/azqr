@@ -8,30 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["sap"] = []models.IAzureScanner{&SAPScanner{}}
+	models.ScannerList["sap"] = []models.IAzureScanner{&SAPScanner{
+		BaseScanner: models.NewBaseScanner("Specialized.Workload/SAP"),
+	}}
 }
 
 // SAPScanner - Scanner for SAP
 type SAPScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
 // Init - Initializes the SAP Scanner
 func (a *SAPScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all SAP in a Resource Group
-func (a *SAPScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *SAPScanner) ResourceTypes() []string {
-	return []string{"Specialized.Workload/SAP"}
-}
-
-func (a *SAPScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

@@ -8,30 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["aa"] = []models.IAzureScanner{&AutomationAccountScanner{}}
+	models.ScannerList["aa"] = []models.IAzureScanner{&AutomationAccountScanner{
+		BaseScanner: models.NewBaseScanner("Microsoft.Automation/automationAccounts"),
+	}}
 }
 
 // AutomationAccountScanner - Scanner for Automation Account
 type AutomationAccountScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
 // Init - Initializes the Automation Account Scanner
 func (a *AutomationAccountScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all Automation Accounts in a Resource Group
-func (a *AutomationAccountScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *AutomationAccountScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Automation/automationAccounts"}
-}
-
-func (a *AutomationAccountScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

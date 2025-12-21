@@ -8,29 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["rg"] = []models.IAzureScanner{&ResourceGroupScanner{}}
+	models.ScannerList["rg"] = []models.IAzureScanner{&ResourceGroupScanner{
+		BaseScanner: models.NewBaseScanner("Microsoft.Resources/resourceGroups"),
+	}}
 }
 
 // ResourceGroupScanner - Scanner for Resource Groups
 type ResourceGroupScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
 // Init - Initializes the Resource Groups Scanner
 func (a *ResourceGroupScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all Resource Groups
-func (a *ResourceGroupScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *ResourceGroupScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Resources/resourceGroups"}
-}
-
-func (a *ResourceGroupScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

@@ -8,30 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["avail"] = []models.IAzureScanner{&AvailabilitySetScanner{}}
+	models.ScannerList["avail"] = []models.IAzureScanner{&AvailabilitySetScanner{
+		BaseScanner: models.NewBaseScanner("Microsoft.Compute/availabilitySets"),
+	}}
 }
 
-// AvailabilitySetScanner - Scanner for Availability Sets
+// AvailabilitySetScanner - Scanner for Availability Set
 type AvailabilitySetScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
-// Init - Initializes the Availability Sets Scanner
+// Init - Initializes the Availability Set Scanner
 func (a *AvailabilitySetScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all Availability Sets in a Resource Group
-func (a *AvailabilitySetScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *AvailabilitySetScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Compute/availabilitySets"}
-}
-
-func (a *AvailabilitySetScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

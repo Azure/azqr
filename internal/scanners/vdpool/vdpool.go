@@ -8,34 +8,21 @@ import (
 )
 
 func init() {
-	models.ScannerList["vdpool"] = []models.IAzureScanner{&VirtualDesktopScanner{}}
+	models.ScannerList["vdpool"] = []models.IAzureScanner{&VirtualDesktopScanner{
+		BaseScanner: models.NewBaseScanner(
+			"Microsoft.DesktopVirtualization/hostPools",
+			"Microsoft.DesktopVirtualization/scalingPlans",
+			"Microsoft.DesktopVirtualization/workspaces",
+		),
+	}}
 }
 
 // VirtualDesktopScanner - Scanner for Virtual Desktop
 type VirtualDesktopScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
 // Init - Initializes the Virtual Desktop Scanner
 func (a *VirtualDesktopScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all Virtual Desktop in a Resource Group
-func (a *VirtualDesktopScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *VirtualDesktopScanner) ResourceTypes() []string {
-	return []string{
-		"Microsoft.DesktopVirtualization/hostPools",
-		"Microsoft.DesktopVirtualization/scalingPlans",
-		"Microsoft.DesktopVirtualization/workspaces",
-	}
-}
-
-func (a *VirtualDesktopScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }
