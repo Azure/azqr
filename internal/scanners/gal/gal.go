@@ -8,30 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["gal"] = []models.IAzureScanner{&GalleryScanner{}}
+	models.ScannerList["gal"] = []models.IAzureScanner{&GalleryScanner{
+		BaseScanner: models.NewBaseScanner("Microsoft.Compute/galleries"),
+	}}
 }
 
-// GalleryScanner - Scanner for Galleries
+// GalleryScanner - Scanner for Gallery
 type GalleryScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
-// Init - Initializes the Galleries Scanner
+// Init - Initializes the Gallery Scanner
 func (a *GalleryScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all Galleries in a Resource Group
-func (a *GalleryScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *GalleryScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Compute/galleries"}
-}
-
-func (a *GalleryScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

@@ -8,33 +8,20 @@ import (
 )
 
 func init() {
-	models.ScannerList["avs"] = []models.IAzureScanner{&AVSScanner{}}
+	models.ScannerList["avs"] = []models.IAzureScanner{&AVSScanner{
+		BaseScanner: models.NewBaseScanner(
+			"Microsoft.AVS/privateClouds",
+			"Specialized.Workload/AVS",
+		),
+	}}
 }
 
 // AVSScanner - Scanner for AVS
 type AVSScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
 // Init - Initializes the AVS Scanner
 func (a *AVSScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all AVS in a Resource Group
-func (a *AVSScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *AVSScanner) ResourceTypes() []string {
-	return []string{
-		"Microsoft.AVS/privateClouds",
-		"Specialized.Workload/AVS",
-	}
-}
-
-func (a *AVSScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

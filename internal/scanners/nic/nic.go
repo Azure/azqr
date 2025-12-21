@@ -8,30 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["nic"] = []models.IAzureScanner{&NICScanner{}}
+	models.ScannerList["nic"] = []models.IAzureScanner{&NICScanner{
+		BaseScanner: models.NewBaseScanner("Microsoft.Network/networkInterfaces"),
+	}}
 }
 
-// NICScanner - Scanner for NICs
+// NICScanner - Scanner for NIC
 type NICScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
-// Init - Initializes the NICs Scanner
+// Init - Initializes the NIC Scanner
 func (a *NICScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all NICs
-func (a *NICScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *NICScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/networkInterfaces"}
-}
-
-func (a *NICScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

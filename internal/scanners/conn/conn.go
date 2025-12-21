@@ -8,30 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["con"] = []models.IAzureScanner{&ConnectionScanner{}}
+	models.ScannerList["conn"] = []models.IAzureScanner{&ConnectionScanner{
+		BaseScanner: models.NewBaseScanner("Microsoft.Network/connections"),
+	}}
 }
 
-// ConnectionScanner - Scanner for Automation Account
+// ConnectionScanner - Scanner for Connection
 type ConnectionScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
-// Init - Initializes the Automation Account Scanner
+// Init - Initializes the Connection Scanner
 func (a *ConnectionScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all Automation Accounts in a Resource Group
-func (a *ConnectionScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *ConnectionScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/connections"}
-}
-
-func (a *ConnectionScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

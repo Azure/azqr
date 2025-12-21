@@ -8,30 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["ba"] = []models.IAzureScanner{&BatchAccountScanner{}}
+	models.ScannerList["ba"] = []models.IAzureScanner{&BatchAccountScanner{
+		BaseScanner: models.NewBaseScanner("Microsoft.Batch/batchAccounts"),
+	}}
 }
 
 // BatchAccountScanner - Scanner for Batch Account
 type BatchAccountScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
 // Init - Initializes the Batch Account Scanner
 func (a *BatchAccountScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all Batch Accounts in a Resource Group
-func (a *BatchAccountScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *BatchAccountScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Batch/batchAccounts"}
-}
-
-func (a *BatchAccountScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

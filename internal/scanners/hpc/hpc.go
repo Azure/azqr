@@ -8,30 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["hpc"] = []models.IAzureScanner{&HighPerformanceComputingScanner{}}
+	models.ScannerList["hpc"] = []models.IAzureScanner{&HighPerformanceComputingScanner{
+		BaseScanner: models.NewBaseScanner("Specialized.Workload/HPC"),
+	}}
 }
 
-// HighPerformanceComputingScanner - Scanner for HPC
+// HighPerformanceComputingScanner - Scanner for High Performance Computing
 type HighPerformanceComputingScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
-// Init - Initializes the HPC Scanner
+// Init - Initializes the High Performance Computing Scanner
 func (a *HighPerformanceComputingScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all HPC in a Resource Group
-func (a *HighPerformanceComputingScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *HighPerformanceComputingScanner) ResourceTypes() []string {
-	return []string{"Specialized.Workload/HPC"}
-}
-
-func (a *HighPerformanceComputingScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }

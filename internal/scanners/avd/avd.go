@@ -8,30 +8,17 @@ import (
 )
 
 func init() {
-	models.ScannerList["avd"] = []models.IAzureScanner{&AzureVirtualDesktopScanner{}}
+	models.ScannerList["avd"] = []models.IAzureScanner{&AzureVirtualDesktopScanner{
+		BaseScanner: models.NewBaseScanner("Specialized.Workload/AVD"),
+	}}
 }
 
-// AzureVirtualDesktopScanner - Scanner for AVD
+// AzureVirtualDesktopScanner - Scanner for Azure Virtual Desktop
 type AzureVirtualDesktopScanner struct {
-	config *models.ScannerConfig
+	models.BaseScanner
 }
 
-// Init - Initializes the AVD Scanner
+// Init - Initializes the Azure Virtual Desktop Scanner
 func (a *AzureVirtualDesktopScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	return nil
-}
-
-// Scan - Scans all AVD in a Resource Group
-func (a *AzureVirtualDesktopScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
-	return []*models.AzqrServiceResult{}, nil
-}
-
-func (a *AzureVirtualDesktopScanner) ResourceTypes() []string {
-	return []string{"Specialized.Workload/AVD"}
-}
-
-func (a *AzureVirtualDesktopScanner) GetRecommendations() map[string]models.AzqrRecommendation {
-	return map[string]models.AzqrRecommendation{}
+	return a.BaseScanner.Init(config)
 }
