@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -24,8 +23,6 @@ func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.
 
 	subs := make([]*armsubscription.Subscription, 0)
 	for resultPager.More() {
-		// Wait for a token from the burstLimiter channel before making the request
-		_ = throttling.WaitARM(ctx) // nolint:errcheck
 		pageResp, err := resultPager.NextPage(ctx)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to list subscriptions")

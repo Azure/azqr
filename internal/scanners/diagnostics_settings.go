@@ -4,6 +4,7 @@
 package scanners
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -16,11 +17,9 @@ import (
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/rs/zerolog/log"
 )
@@ -102,33 +101,15 @@ var typesWithDiagnosticSettingsSupport = map[string]*bool{
 
 // DiagnosticSettingsScanner - scanner for diagnostic settings
 type DiagnosticSettingsScanner struct {
-	ctx         context.Context
-	httpClient  *http.Client
-	accessToken string
+	ctx        context.Context
+	httpClient *az.HttpClient
 }
 
 // Init - Initializes the DiagnosticSettingsScanner
 func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenCredential, options *arm.ClientOptions) error {
-	// Create a new HTTP client with a timeout
-	httpClient := &http.Client{
-		Timeout: 60 * time.Second,
-	}
-	d.httpClient = httpClient
 	d.ctx = ctx
-
-	resourceManagerEndpoint := az.GetResourceManagerEndpoint()
-	scope := fmt.Sprintf("%s/.default", resourceManagerEndpoint)
-
-	// Acquire an access token using the provided credential
-	token, err := cred.GetToken(context.Background(), policy.TokenRequestOptions{
-		Scopes: []string{scope},
-	})
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to acquire Azure access token")
-	}
-
-	// Set the access token string
-	d.accessToken = token.Token
+	// Create HTTP client with built-in retry logic, authentication, and throttling
+	d.httpClient = az.NewHttpClient(cred, 60*time.Second)
 	return nil
 }
 
@@ -210,7 +191,8 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 
 func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<- map[string]bool, wg *sync.WaitGroup) {
 	for ids := range jobs {
-		resp, err := d.retry(d.ctx, 3, 10*time.Millisecond, ids)
+		// doRequest now includes built-in retry logic via HttpClient
+		resp, err := d.doRequest(d.ctx, ids)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to get diagnostic settings")
 		}
@@ -241,38 +223,13 @@ func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<-
 	}
 }
 
-// retry executes the Resource Graph query with retries and exponential backoff.
-// Returns the QueryResponse or error.
-func (d *DiagnosticSettingsScanner) retry(ctx context.Context, attempts int, sleep time.Duration, resourceIds []*string) (*ArmBatchResponse, error) {
-	var err error
-	for i := 0; ; i++ {
-		resp, err := d.doRequest(ctx, resourceIds)
-		if err == nil {
-			return resp, nil
-		}
-
-		errAsString := err.Error()
-
-		if i >= (attempts - 1) {
-			log.Info().Msgf("Retry limit reached. Error: %s", errAsString)
-			break
-		}
-
-		log.Debug().Msgf("Retrying after error: %s", errAsString)
-
-		time.Sleep(sleep)
-		sleep *= 2
-	}
-	return nil, err
-}
-
-// restCall performs a batch request to retrieve diagnostic settings using an HTTP client.
+// doRequest performs a batch request to retrieve diagnostic settings using the HTTP client with built-in retry logic.
 func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds []*string) (*ArmBatchResponse, error) {
-	// Build the batch endpoint URL.
+	// Build the batch endpoint URL
 	resourceManagerEndpoint := az.GetResourceManagerEndpoint()
 	batchURL := fmt.Sprintf("%s/batch?api-version=2020-06-01", resourceManagerEndpoint)
 
-	// Prepare the batch request payload.
+	// Prepare the batch request payload
 	batch := ArmBatchRequest{
 		Requests: []ArmBatchRequestItem{},
 	}
@@ -283,67 +240,40 @@ func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds [
 		})
 	}
 
-	// Marshal the batch request to JSON.
-	body, err := json.Marshal(batch)
+	// Marshal the batch request to JSON
+	bodyBytes, err := json.Marshal(batch)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to marshal batch request: %w", err)
 	}
 
-	// Create the HTTP request.
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, batchURL, strings.NewReader(string(body)))
+	// Create ReadSeekCloser for the request body
+	readSeekCloser := &bytesReadSeekCloser{
+		Reader: bytes.NewReader(bodyBytes),
+	}
+
+	// Use default scope for Azure Management API
+	scope := ""
+
+	// Send POST request using HttpClient (handles auth, throttling, and retries)
+	respBody, resp, err := d.httpClient.DoPost(ctx, batchURL, readSeekCloser, &scope)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("batch request failed: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+d.accessToken)
 
-	// Wait for a token from the burstLimiter channel before making the request
-	_ = throttling.WaitARM(ctx) // nolint:errcheck
-
-	// Send the HTTP request.
-	resp, err := d.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			log.Fatal().Err(err).Msg("Failed to close response body")
-		}
-	}()
-
-	quotaStr := resp.Header.Get("x-ms-ratelimit-remaining-tenant-reads")
-	if quotaStr != "" {
-		quota, err := strconv.Atoi(quotaStr)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse quota header: %w", err)
-		}
-		log.Debug().Msgf("Graph query remaining quota: %d", quota)
-		// Quota limit reached, sleep for the duration specified in the response header
-		if quota == 0 {
-			log.Debug().Msg("Graph query quota limit reached.")
+	// Log quota information if available
+	if quotaStr := resp.Header.Get("x-ms-ratelimit-remaining-tenant-reads"); quotaStr != "" {
+		if quota, err := strconv.Atoi(quotaStr); err == nil {
+			log.Debug().Msgf("ARM batch remaining quota: %d", quota)
+			if quota == 0 {
+				log.Debug().Msg("ARM batch quota limit reached")
+			}
 		}
 	}
 
-	// Check for successful status code.
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		// Check if the response status code is 429 (Too Many Requests).
-		if resp.StatusCode == http.StatusTooManyRequests {
-			// Parse the Retry-After header from the response headers
-			retryAfterStr := resp.Header.Get("Retry-After")
-			retryAfter, _ := strconv.Atoi(retryAfterStr)
-			log.Debug().Msgf("Received 429 Too Many Requests. Retry-After: %d seconds", retryAfter)
-			time.Sleep(time.Duration(retryAfter) * time.Second)
-		}
-
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	// Decode the response body.
+	// Decode the response body
 	var result ArmBatchResponse
-	decoder := json.NewDecoder(resp.Body)
-	if err := decoder.Decode(&result); err != nil {
-		return nil, err
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal batch response: %w", err)
 	}
 
 	return &result, nil
@@ -353,6 +283,17 @@ func parseResourceId(diagnosticSettingID *string) string {
 	id := *diagnosticSettingID
 	i := strings.Index(id, "/providers/microsoft.insights/diagnosticSettings/")
 	return strings.ToLower(id[:i])
+}
+
+// bytesReadSeekCloser wraps a bytes.Reader to implement io.ReadSeekCloser
+// This allows the Azure SDK pipeline to seek back to the beginning for retries
+type bytesReadSeekCloser struct {
+	*bytes.Reader
+}
+
+// Close implements io.Closer (no-op for bytes.Reader)
+func (b *bytesReadSeekCloser) Close() error {
+	return nil
 }
 
 type (

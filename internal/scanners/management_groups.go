@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/throttling"
 	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
@@ -27,8 +26,6 @@ func (sc ManagementGroupsScanner) ListSubscriptions(ctx context.Context, cred az
 
 		subscriptions := make([]*armmanagementgroups.SubscriptionUnderManagementGroup, 0)
 		for resultPager.More() {
-			// Wait for a token from the burstLimiter channel before making the request
-			_ = throttling.WaitARM(ctx) // nolint:errcheck
 			pageResp, err := resultPager.NextPage(ctx)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to list management group subscriptions")
@@ -55,8 +52,6 @@ func (sc ManagementGroupsScanner) ListSubscriptions(ctx context.Context, cred az
 		decendants := make([]string, 0)
 		decendantsPager := client.NewClient().NewGetDescendantsPager(group, nil)
 		for decendantsPager.More() {
-			// Wait for a token from the burstLimiter channel before making the request
-			_ = throttling.WaitARM(ctx) // nolint:errcheck
 			pageResp, err := decendantsPager.NextPage(ctx)
 			if err != nil {
 				log.Fatal().Err(err).Msg("Failed to list management group descendants")
