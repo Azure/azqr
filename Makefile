@@ -63,7 +63,11 @@ tidy:
 	git diff --exit-code ./go.mod
 	git diff --exit-code ./go.sum
 
-test: lint vet tidy
+json:
+	go run ./cmd/azqr/main.go rules --json > ./data/recommendations.json 
+	git diff --exit-code ./data/recommendations.json
+
+test: lint vet tidy json
 	go test -race ./... -coverprofile=coverage.txt -covermode=atomic ./...
 
 $(TARGET): clean
@@ -77,10 +81,6 @@ $(TARGET)-debug: clean
 clean:
 	-rm -f $(BIN)
 	-rm -f $(DEBUG_BIN)
-
-json:
-	go run ./cmd/azqr/main.go rules --json > ./data/recommendations.json 
-	git diff --exit-code ./data/recommendations.json
 
 # Docker image build target
 IMAGE_NAME    := ghcr.io/azure/azqr
