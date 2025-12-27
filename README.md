@@ -86,6 +86,7 @@ erc | Microsoft.Network/expressRouteCircuits
 erc | Microsoft.Network/ExpressRoutePorts
 evgd | Microsoft.EventGrid/domains
 evh | Microsoft.EventHub/namespaces
+fabric | Microsoft.Fabric/capacities
 fdfp | Microsoft.Network/frontdoorWebApplicationFirewallPolicies
 gal | Microsoft.Compute/galleries
 hpc | Specialized.Workload/HPC

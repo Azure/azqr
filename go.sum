@@ -46,6 +46,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid v1.
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid v1.0.0/go.mod h1:t8kRpcgm+RdImuJgHG6SfoQ0tpb9LGl7MF1E6u0yeeA=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub v1.3.0 h1:4hGvxD72TluuFIXVr8f4XkKZfqAa7Pj61t0jmQ7+kes=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub v1.3.0/go.mod h1:TSH7DcFItwAufy0Lz+Ft2cyopExCpxbOxI5SkH4dRNo=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/fabric/armfabric v1.0.0 h1:rSss+KFqv/y2WeWCVjNmfPL1riYJ8dTbE0HqidCowuk=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/fabric/armfabric v1.0.0/go.mod h1:oiQJZy3KaFouyQYLQow7+Zek9MS885GJ3u8YCmuS9wQ=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/internal v1.1.2 h1:mLY+pNLjCUeKhgnAJWAKhEUQM+RJQo2H1fuGSw1Ky1E=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/internal v1.1.2/go.mod h1:FbdwsQ2EzwvXxOPcMFYO8ogEc9uMMIj3YkmCdXdAFmk=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/internal/v2 v2.0.0 h1:PTFGRSlMKCQelWwxUyYVEUqseBJVemLyqWJjvMyt0do=
