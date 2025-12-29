@@ -1058,6 +1058,54 @@
 	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/fabric/admin/monitoring-overview",
+		"recommendation": "Fabric Capacity should have diagnostic settings enabled",
+		"recommendationId": "fabric-001",
+		"resourceType": "Microsoft.Fabric/capacities"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Fabric Capacity should have a SLA",
+		"recommendationId": "fabric-002",
+		"resourceType": "Microsoft.Fabric/capacities"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		"recommendation": "Fabric Capacity Name should comply with naming conventions",
+		"recommendationId": "fabric-003",
+		"resourceType": "Microsoft.Fabric/capacities"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources",
+		"recommendation": "Fabric Capacity should have tags defined",
+		"recommendationId": "fabric-004",
+		"resourceType": "Microsoft.Fabric/capacities"
+	},
+	{
+		"category": "OtherBestPractices",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/fabric/enterprise/pause-resume",
+		"recommendation": "Fabric Capacity should be in Active state",
+		"recommendationId": "fabric-005",
+		"resourceType": "Microsoft.Fabric/capacities"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/fabric/admin/capacity-settings",
+		"recommendation": "Fabric Capacity should have administrators configured",
+		"recommendationId": "fabric-006",
+		"resourceType": "Microsoft.Fabric/capacities"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-monitor-log-analytics?tabs=csharp",
 		"recommendation": "Function should have diagnostic settings enabled",
 		"recommendationId": "func-001",
