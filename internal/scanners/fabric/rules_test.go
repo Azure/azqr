@@ -28,43 +28,9 @@ func TestFabricScanner_Rules(t *testing.T) {
 		want   want
 	}{
 		{
-			name: "FabricScanner DiagnosticSettings",
-			fields: fields{
-				rule: "fabric-001",
-				target: &armfabric.Capacity{
-					ID: to.Ptr("test"),
-				},
-				scanContext: &models.ScanContext{
-					DiagnosticsSettings: map[string]bool{
-						"test": true,
-					},
-				},
-			},
-			want: want{
-				broken: false,
-				result: "",
-			},
-		},
-		{
-			name: "FabricScanner DiagnosticSettings not configured",
-			fields: fields{
-				rule: "fabric-001",
-				target: &armfabric.Capacity{
-					ID: to.Ptr("test"),
-				},
-				scanContext: &models.ScanContext{
-					DiagnosticsSettings: map[string]bool{},
-				},
-			},
-			want: want{
-				broken: true,
-				result: "",
-			},
-		},
-		{
 			name: "FabricScanner SLA",
 			fields: fields{
-				rule:        "fabric-002",
+				rule:        "fabric-001",
 				target:      &armfabric.Capacity{},
 				scanContext: &models.ScanContext{},
 			},
@@ -76,7 +42,7 @@ func TestFabricScanner_Rules(t *testing.T) {
 		{
 			name: "FabricScanner CAF compliant",
 			fields: fields{
-				rule: "fabric-003",
+				rule: "fabric-002",
 				target: &armfabric.Capacity{
 					Name: to.Ptr("fc-production"),
 				},
@@ -90,7 +56,7 @@ func TestFabricScanner_Rules(t *testing.T) {
 		{
 			name: "FabricScanner CAF non-compliant",
 			fields: fields{
-				rule: "fabric-003",
+				rule: "fabric-002",
 				target: &armfabric.Capacity{
 					Name: to.Ptr("my-fabric-capacity"),
 				},
@@ -104,7 +70,7 @@ func TestFabricScanner_Rules(t *testing.T) {
 		{
 			name: "FabricScanner Tags defined",
 			fields: fields{
-				rule: "fabric-004",
+				rule: "fabric-003",
 				target: &armfabric.Capacity{
 					Tags: map[string]*string{
 						"env": to.Ptr("production"),
@@ -120,7 +86,7 @@ func TestFabricScanner_Rules(t *testing.T) {
 		{
 			name: "FabricScanner Tags not defined",
 			fields: fields{
-				rule: "fabric-004",
+				rule: "fabric-003",
 				target: &armfabric.Capacity{
 					Tags: map[string]*string{},
 				},
@@ -134,7 +100,7 @@ func TestFabricScanner_Rules(t *testing.T) {
 		{
 			name: "FabricScanner Active state",
 			fields: fields{
-				rule: "fabric-005",
+				rule: "fabric-004",
 				target: &armfabric.Capacity{
 					Properties: &armfabric.CapacityProperties{
 						State: to.Ptr(armfabric.ResourceStateActive),
@@ -150,7 +116,7 @@ func TestFabricScanner_Rules(t *testing.T) {
 		{
 			name: "FabricScanner Paused state",
 			fields: fields{
-				rule: "fabric-005",
+				rule: "fabric-004",
 				target: &armfabric.Capacity{
 					Properties: &armfabric.CapacityProperties{
 						State: to.Ptr(armfabric.ResourceStatePaused),
@@ -166,7 +132,7 @@ func TestFabricScanner_Rules(t *testing.T) {
 		{
 			name: "FabricScanner Administrators configured",
 			fields: fields{
-				rule: "fabric-006",
+				rule: "fabric-005",
 				target: &armfabric.Capacity{
 					Properties: &armfabric.CapacityProperties{
 						Administration: &armfabric.CapacityAdministration{
@@ -186,7 +152,7 @@ func TestFabricScanner_Rules(t *testing.T) {
 		{
 			name: "FabricScanner No administrators",
 			fields: fields{
-				rule: "fabric-006",
+				rule: "fabric-005",
 				target: &armfabric.Capacity{
 					Properties: &armfabric.CapacityProperties{
 						Administration: &armfabric.CapacityAdministration{
@@ -199,6 +165,50 @@ func TestFabricScanner_Rules(t *testing.T) {
 			want: want{
 				broken: true,
 				result: "",
+			},
+		},
+		{
+			name: "FabricScanner SKU Fabric tier",
+			fields: fields{
+				rule: "fabric-006",
+				target: &armfabric.Capacity{
+					SKU: &armfabric.RpSKU{
+						Tier: to.Ptr(armfabric.RpSKUTierFabric),
+					},
+				},
+				scanContext: &models.ScanContext{},
+			},
+			want: want{
+				broken: false,
+				result: "Fabric",
+			},
+		},
+		{
+			name: "FabricScanner SKU Trial tier",
+			fields: fields{
+				rule: "fabric-006",
+				target: &armfabric.Capacity{
+					SKU: &armfabric.RpSKU{
+						Tier: to.Ptr(armfabric.RpSKUTier("Trial")),
+					},
+				},
+				scanContext: &models.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "Trial",
+			},
+		},
+		{
+			name: "FabricScanner SKU nil",
+			fields: fields{
+				rule:        "fabric-006",
+				target:      &armfabric.Capacity{},
+				scanContext: &models.ScanContext{},
+			},
+			want: want{
+				broken: true,
+				result: "Unknown",
 			},
 		},
 	}

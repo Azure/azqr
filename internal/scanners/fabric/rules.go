@@ -14,20 +14,7 @@ import (
 func (a *FabricScanner) GetRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"fabric-001": {
-			RecommendationID: "fabric-001",
-			ResourceType:     "Microsoft.Fabric/capacities",
-			Category:         models.CategoryMonitoringAndAlerting,
-			Recommendation:   "Fabric Capacity should have diagnostic settings enabled",
-			Impact:           models.ImpactLow,
-			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
-				service := target.(*armfabric.Capacity)
-				_, ok := scanContext.DiagnosticsSettings[strings.ToLower(*service.ID)]
-				return !ok, ""
-			},
-			LearnMoreUrl: "https://learn.microsoft.com/en-us/fabric/admin/monitoring-overview",
-		},
-		"fabric-002": {
-			RecommendationID:   "fabric-002",
+			RecommendationID:   "fabric-001",
 			ResourceType:       "Microsoft.Fabric/capacities",
 			Category:           models.CategoryHighAvailability,
 			Recommendation:     "Fabric Capacity should have a SLA",
@@ -38,8 +25,8 @@ func (a *FabricScanner) GetRecommendations() map[string]models.AzqrRecommendatio
 			},
 			LearnMoreUrl: "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
 		},
-		"fabric-003": {
-			RecommendationID: "fabric-003",
+		"fabric-002": {
+			RecommendationID: "fabric-002",
 			ResourceType:     "Microsoft.Fabric/capacities",
 			Category:         models.CategoryGovernance,
 			Recommendation:   "Fabric Capacity Name should comply with naming conventions",
@@ -51,8 +38,8 @@ func (a *FabricScanner) GetRecommendations() map[string]models.AzqrRecommendatio
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
 		},
-		"fabric-004": {
-			RecommendationID: "fabric-004",
+		"fabric-003": {
+			RecommendationID: "fabric-003",
 			ResourceType:     "Microsoft.Fabric/capacities",
 			Category:         models.CategoryGovernance,
 			Recommendation:   "Fabric Capacity should have tags defined",
@@ -63,8 +50,8 @@ func (a *FabricScanner) GetRecommendations() map[string]models.AzqrRecommendatio
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources",
 		},
-		"fabric-005": {
-			RecommendationID: "fabric-005",
+		"fabric-004": {
+			RecommendationID: "fabric-004",
 			ResourceType:     "Microsoft.Fabric/capacities",
 			Category:         models.CategoryOtherBestPractices,
 			Recommendation:   "Fabric Capacity should be in Active state",
@@ -80,8 +67,8 @@ func (a *FabricScanner) GetRecommendations() map[string]models.AzqrRecommendatio
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/fabric/enterprise/pause-resume",
 		},
-		"fabric-006": {
-			RecommendationID: "fabric-006",
+		"fabric-005": {
+			RecommendationID: "fabric-005",
 			ResourceType:     "Microsoft.Fabric/capacities",
 			Category:         models.CategorySecurity,
 			Recommendation:   "Fabric Capacity should have administrators configured",
@@ -95,6 +82,22 @@ func (a *FabricScanner) GetRecommendations() map[string]models.AzqrRecommendatio
 				return !hasAdmins, ""
 			},
 			LearnMoreUrl: "https://learn.microsoft.com/en-us/fabric/admin/capacity-settings",
+		},
+		"fabric-006": {
+			RecommendationID: "fabric-006",
+			ResourceType:     "Microsoft.Fabric/capacities",
+			Category:         models.CategoryGovernance,
+			Recommendation:   "Fabric Capacity should use Fabric (F) SKU tier for production workloads",
+			Impact:           models.ImpactMedium,
+			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
+				c := target.(*armfabric.Capacity)
+				if c.SKU != nil && c.SKU.Tier != nil {
+					tier := string(*c.SKU.Tier)
+					return tier != "Fabric", tier
+				}
+				return true, "Unknown"
+			},
+			LearnMoreUrl: "https://learn.microsoft.com/en-us/fabric/enterprise/licenses",
 		},
 	}
 }
