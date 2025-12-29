@@ -27,6 +27,12 @@ type (
 		ExludedResources        []*models.Resource
 		ResourceTypeCount       []models.ResourceTypeCount
 		PluginResults           []PluginResult // Results from external plugins
+		// Feature flags to differentiate between disabled features and no data
+		PolicyEnabled   bool
+		ArcEnabled      bool
+		DefenderEnabled bool
+		AdvisorEnabled  bool
+		CostEnabled     bool
 	}
 
 	// PluginResult represents data from an external plugin
@@ -354,7 +360,7 @@ func (rd *ReportData) DefenderRecommendationsTable() [][]string {
 	return rows
 }
 
-func NewReportData(outputFile string, mask bool) ReportData {
+func NewReportData(outputFile string, mask bool, policyEnabled bool, arcEnabled bool, defenderEnabled bool, advisorEnabled bool, costEnabled bool) ReportData {
 	return ReportData{
 		OutputFileName:          outputFile,
 		Mask:                    mask,
@@ -370,6 +376,11 @@ func NewReportData(outputFile string, mask bool) ReportData {
 			Items: []*models.CostResultItem{},
 		},
 		ResourceTypeCount: []models.ResourceTypeCount{},
+		PolicyEnabled:     policyEnabled,
+		ArcEnabled:        arcEnabled,
+		DefenderEnabled:   defenderEnabled,
+		AdvisorEnabled:    advisorEnabled,
+		CostEnabled:       costEnabled,
 	}
 }
 

@@ -38,7 +38,11 @@ func renderDefender(f *excelize.File, data *renderers.ReportData) {
 
 		configureSheet(f, "Defender", headers, currentRow)
 	} else {
-		log.Info().Msg("Skipping Defender. No data to render")
+		if !data.DefenderEnabled {
+			log.Info().Msg("Skipping Defender. Feature is disabled")
+		} else {
+			log.Info().Msg("Skipping Defender. No data to render")
+		}
 	}
 }
 
@@ -72,6 +76,10 @@ func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData)
 
 		configureSheet(f, sheetName, headers, currentRow)
 	} else {
-		log.Info().Msg("Skipping DefenderRecommendations. No data to render")
+		if !data.DefenderEnabled {
+			log.Info().Msg("Skipping DefenderRecommendations. Feature is disabled")
+		} else {
+			log.Info().Msg("Skipping DefenderRecommendations. No data to render")
+		}
 	}
 }

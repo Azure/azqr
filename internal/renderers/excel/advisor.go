@@ -38,6 +38,10 @@ func renderAdvisor(f *excelize.File, data *renderers.ReportData) {
 
 		configureSheet(f, "Advisor", headers, currentRow)
 	} else {
-		log.Info().Msg("Skipping Advisor. No data to render")
+		if !data.AdvisorEnabled {
+			log.Info().Msg("Skipping Advisor. Feature is disabled")
+		} else {
+			log.Info().Msg("Skipping Advisor. No data to render")
+		}
 	}
 }

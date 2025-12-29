@@ -39,6 +39,10 @@ func renderArcSQL(f *excelize.File, data *renderers.ReportData) {
 
 		configureSheet(f, "Arc SQL", headers, currentRow)
 	} else {
-		log.Info().Msg("Skipping Arc SQL. No data to render")
+		if !data.ArcEnabled {
+			log.Info().Msg("Skipping Arc SQL. Feature is disabled")
+		} else {
+			log.Info().Msg("Skipping Arc SQL. No data to render")
+		}
 	}
 }

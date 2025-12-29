@@ -218,7 +218,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	diagResults := map[string]bool{}
 
 	// initialize report data
-	reportData := renderers.NewReportData(outputFile, params.Mask)
+	reportData := renderers.NewReportData(outputFile, params.Mask, params.Policy, params.Arc, params.Defender, params.Advisor, params.Cost)
 
 	resourceScanner := scanners.ResourceScanner{}
 	reportData.Resources, reportData.ExludedResources = resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)
