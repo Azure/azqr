@@ -38,6 +38,10 @@ func renderCosts(f *excelize.File, data *renderers.ReportData) {
 
 		configureSheet(f, "Costs", headers, currentRow)
 	} else {
-		log.Info().Msg("Skipping Costs. No data to render")
+		if !data.CostEnabled {
+			log.Info().Msg("Skipping Costs. Feature is disabled")
+		} else {
+			log.Info().Msg("Skipping Costs. No data to render")
+		}
 	}
 }

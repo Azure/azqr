@@ -39,6 +39,10 @@ func renderAzurePolicy(f *excelize.File, data *renderers.ReportData) {
 
 		configureSheet(f, "Azure Policy", headers, currentRow)
 	} else {
-		log.Info().Msg("Skipping Azure Policy. No data to render")
+		if !data.PolicyEnabled {
+			log.Info().Msg("Skipping Azure Policy. Feature is disabled")
+		} else {
+			log.Info().Msg("Skipping Azure Policy. No data to render")
+		}
 	}
 }
