@@ -76,8 +76,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork v1.0.0 
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork v1.0.0/go.mod h1:243D9iHbcQXoFUtgHJwL7gl2zx1aDuDMjvBZVGr2uW0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6 v6.2.0 h1:HYGD75g0bQ3VO/Omedm54v4LrD3B1cGImuRF3AJ5wLo=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6 v6.2.0/go.mod h1:ulHyBFJOI0ONiRL4vcJTmS7rx18jQQlEPmAgo80cRdM=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights/v2 v2.0.1 h1:WHf/xLAeCSC+oTi8IKGsQGmM0ki+23piyKN+D0S8wfo=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights/v2 v2.0.1/go.mod h1:H3EFkhcVTisidszwtIkRDggjS2HmOIA26J3g8hDdHAY=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights/v2 v2.0.2 h1:SFLbQmpdytToYZQJw5NqrZRwHPIGJmf5ZgjStbLfUuU=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights/v2 v2.0.2/go.mod h1:H3EFkhcVTisidszwtIkRDggjS2HmOIA26J3g8hDdHAY=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql v1.2.0 h1:0hXKrsbh2M6CQyW0TDC9Bsyd99vQmrOxiBTUfQHZjPA=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql v1.2.0/go.mod h1:bvZZor36Jg9q9kouuMyfJ+ay77+qK+YUfThXH1FdXjU=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers v1.1.0 h1:HzqcSJWx32XQdr8KtxAu/SZJj0PqDo9tKf2YGPdynV0=
