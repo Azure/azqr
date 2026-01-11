@@ -20,6 +20,8 @@ DEBUG_BUILD_TAGS := debug
 
 all: $(TARGET)
 
+build: $(TARGET)
+
 debug: $(TARGET)-debug
 
 help:
