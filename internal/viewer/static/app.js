@@ -106,6 +106,18 @@ async function initNav() {
     const nav = document.getElementById('nav');
     let html = '';
 
+    // Fetch available datasets first
+    let availableDatasets = [];
+    try {
+        availableDatasets = await fetchJSON('/api/datasets');
+        console.log('Available datasets:', availableDatasets);
+    } catch (error) {
+        console.error('Error fetching datasets:', error);
+    }
+
+    // Check which routes have data
+    const hasData = (route) => availableDatasets.includes(route);
+
     menuStructure.forEach(section => {
         if (section.route) {
             // Single item (like Home)
@@ -115,18 +127,24 @@ async function initNav() {
 				</a>
 			</li>`;
         } else if (section.children && section.children.length > 0) {
-            // Group with children - use Bootstrap dropdown
-            html += `<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-					${getMenuIcon(section.label)} ${section.label}
-				</a>
-				<ul class="dropdown-menu">`;
-            section.children.forEach(child => {
-                html += `<li><a class="dropdown-item" href="#${child.route}" onclick="closeMenu()">
-					${getMenuIcon(child.label)} ${child.label}
-				</a></li>`;
-            });
-            html += `</ul></li>`;
+            // Filter children to only those with data
+            const availableChildren = section.children.filter(child => hasData(child.route));
+
+            // Only render the section if it has children with data
+            if (availableChildren.length > 0) {
+                // Group with children - use Bootstrap dropdown
+                html += `<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+						${getMenuIcon(section.label)} ${section.label}
+					</a>
+					<ul class="dropdown-menu">`;
+                availableChildren.forEach(child => {
+                    html += `<li><a class="dropdown-item" href="#${child.route}" onclick="closeMenu()">
+						${getMenuIcon(child.label)} ${child.label}
+					</a></li>`;
+                });
+                html += `</ul></li>`;
+            }
         }
     });
 
