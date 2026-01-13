@@ -13,6 +13,12 @@ import (
 
 // renderAzurePolicy creates and populates the Azure Policy sheet in the Excel report.
 func renderAzurePolicy(f *excelize.File, data *renderers.ReportData) {
+	// Skip creating the sheet if the feature is disabled
+	if !data.PolicyEnabled {
+		log.Info().Msg("Skipping Azure Policy. Feature is disabled")
+		return
+	}
+
 	_, err := f.NewSheet("Azure Policy")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create Azure Policy sheet")
@@ -22,27 +28,24 @@ func renderAzurePolicy(f *excelize.File, data *renderers.ReportData) {
 	headers := records[0]
 	createFirstRow(f, "Azure Policy", headers)
 
-	if len(data.AzurePolicy) > 0 {
-		records = records[1:]
-		currentRow := 4
-		for _, row := range records {
-			currentRow += 1
-			cell, err := excelize.CoordinatesToCellName(1, currentRow)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to get cell")
-			}
-			err = f.SetSheetRow("Azure Policy", cell, &row)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to set row")
-			}
-		}
+	// Skip if no data to render
+	if len(data.AzurePolicy) == 0 {
+		log.Info().Msg("Skipping Azure Policy. No data to render")
+	}
 
-		configureSheet(f, "Azure Policy", headers, currentRow)
-	} else {
-		if !data.PolicyEnabled {
-			log.Info().Msg("Skipping Azure Policy. Feature is disabled")
-		} else {
-			log.Info().Msg("Skipping Azure Policy. No data to render")
+	records = records[1:]
+	currentRow := 4
+	for _, row := range records {
+		currentRow += 1
+		cell, err := excelize.CoordinatesToCellName(1, currentRow)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to get cell")
+		}
+		err = f.SetSheetRow("Azure Policy", cell, &row)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to set row")
 		}
 	}
+
+	configureSheet(f, "Azure Policy", headers, currentRow)
 }
