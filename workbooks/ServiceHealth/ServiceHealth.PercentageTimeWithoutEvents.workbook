@@ -1,0 +1,490 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "## Service Health - Percentage of Time Without Events"
+      },
+      "name": "text - 1"
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          {
+            "id": "b73eaab2-8756-451c-a6ce-393df0664cb6",
+            "cellValue": "SelectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "Readme / Disclaimer",
+            "subTarget": "Readme",
+            "style": "link"
+          },
+          {
+            "id": "31d01941-5f0b-4fc2-add4-e494547cadc1",
+            "cellValue": "SelectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "% of Time Without Events",
+            "subTarget": "ImpactedServices",
+            "style": "link"
+          },
+          {
+            "id": "4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s",
+            "cellValue": "SelectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "Event Details",
+            "subTarget": "EventDetails",
+            "style": "link"
+          }
+        ]
+      },
+      "name": "links - 1"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "### README - DISCLAIMER\r\n\r\n⚠️ **IMPORTANT: This workbook does NOT represent Service Level Indicators (SLIs), Service Level Objectives (SLOs), or Service Level Agreement (SLA) compliance metrics.**\r\n\r\n#### What This Report Shows\r\n\r\nThis workbook displays the **% of time without events** metric, which represents the percentage of time that customer Azure resources were **not affected** by:\r\n- Service Issue events (Azure platform incidents)\r\n- Planned Maintenance events\r\n\r\n#### What This Report Does NOT Show\r\n\r\n- **Not an SLI**: These metrics are not Service Level Indicators. They do not measure actual service availability, performance, or quality.\r\n- **Not SLO/SLA Compliance**: This data does not reflect whether services met their Service Level Objectives or Service Level Agreement commitments.\r\n- **Not Service Availability**: A resource showing 100% time without events does not mean it was available 100% of the time. It only means it was not impacted by reported Service Health events.\r\n- **Not All Outages**: This only tracks Azure Service Health events. It does not include:\r\n  - Application-level failures\r\n  - Customer-caused outages\r\n  - Network connectivity issues outside Azure\r\n  - Issues not reported through Service Health\r\n\r\n#### How to Interpret the Data\r\n\r\nThe **% of time without events** metric is calculated based on:\r\n1. Resolved Service Health events (Service Issues and Planned Maintenance) within the selected time range\r\n2. The duration each event impacted specific Azure resources\r\n3. Resources with no Service Health impact show 100%\r\n\r\n**Use this workbook to:**\r\n- Understand which resource types were most frequently affected by Azure Service Health events\r\n- Identify patterns in service disruptions across subscriptions and regions\r\n- Assess the impact of Azure platform events on your resources\r\n\r\n**Do NOT use this workbook to:**\r\n- Measure actual service availability or uptime\r\n- Validate SLA compliance\r\n- Make decisions based solely on these metrics without considering actual service performance data\r\n\r\n---\r\n\r\n#### Support Disclaimer\r\n\r\n**This sample workbook is not supported under any Microsoft standard support program or service.** This sample workbook and scripts are provided AS IS without warranty of any kind. Microsoft further disclaims all implied warranties including, without limitation, any implied warranties of merchantability or of fitness for a particular purpose. The entire risk arising out of the use or performance of the sample scripts and documentation remains with you. In no event shall Microsoft, its authors, or anyone else involved in the creation, production, or delivery of the scripts be liable for any damages whatsoever (including, without limitation, damages for loss of business profits, business interruption, loss of business information, or other pecuniary loss) arising out of the use of or inability to use the sample scripts or documentation, even if Microsoft has been advised of the possibility of such damages."
+            },
+            "name": "text - 0"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "SelectedTab",
+        "comparison": "isEqualTo",
+        "value": "Readme"
+      },
+      "name": "ReadmeGroup",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "servicehealthresources\r\n| where type =~ 'Microsoft.ResourceHealth/events' and properties.Status == 'Resolved'\r\n  and (properties.EventType == 'ServiceIssue' or properties.EventType == 'PlannedMaintenance')\r\n| extend\r\n    eventTrackingId   = tostring(id),\r\n    eventType         = tostring(properties.EventType),\r\n    status            = tostring(properties.Status),\r\n    subscriptionId    = tostring(subscriptionId),\r\n    impactStart       = todatetime(tostring(properties.ImpactStartTime)),\r\n    impactMitigation  = todatetime(tostring(properties.ImpactMitigationTime)),\r\n    impacts           = todynamic(properties.Impact),\r\n    summary           = tostring(properties.Summary)\r\n| extend duration = impactMitigation - impactStart\r\n| extend durationHours = round(duration / 1h, 3)\r\n| extend percentageOfTimeWithoutEvents = round((2160 - durationHours) * 100 / 2160, 3)\r\n// --- expand by service, then by region\r\n| mv-expand ImpactItem = impacts\r\n| extend\r\n    impactedService = tostring(ImpactItem.ImpactedService),\r\n    ImpactedRegions = todynamic(ImpactItem.ImpactedRegions)\r\n| mv-expand RegionItem = ImpactedRegions\r\n| extend\r\n    impactedRegion = tostring(RegionItem.ImpactedRegion),\r\n    regionStatus   = tostring(RegionItem.Status)\r\n| extend normRegion = tolower(replace(\" \", \"\", impactedRegion))\r\n| join kind=innerunique   (\r\nservicehealthresources\r\n| where type == 'microsoft.resourcehealth/events/impactedresources'\r\n| extend eventTrackingId = split(id, \"/impactedResources/\")[0]\r\n| extend p = parse_json(properties)\r\n| project\r\n    eventTrackingId = tostring(eventTrackingId),\r\n    targetResourceId = tostring(p.targetResourceId),\r\n    targetResourceType = tostring(p.targetResourceType),\r\n    resourceName     = tostring(p.resourceName),\r\n    resourceGroup    = tostring(p.resourceGroup),\r\n    targetRegion = tostring(p.targetRegion)\r\n) on $left.eventTrackingId == $right.eventTrackingId\r\n| project\r\n    eventTrackingId,\r\n    eventType,\r\n    status,\r\n    subscriptionId,\r\n    impactStart,\r\n    impactMitigation,\r\n    summary,\r\n    impactedService,\r\n    impactedRegion,\r\n    regionStatus,\r\n    duration,\r\n    durationHours,\r\n    percentageOfTimeWithoutEvents,\r\n    targetRegion,\r\n    targetResourceId,\r\n    targetResourceType\r\n| order by impactStart desc, subscriptionId asc, impactedRegion asc, impactedService asc\r\n| union\r\n(resources\r\n| project subscriptionId, location, id, name,type\r\n| distinct subscriptionId, location, id, name,type\r\n| join kind=leftouter  (\r\nservicehealthresources\r\n| where type == 'microsoft.resourcehealth/events/impactedresources'\r\n| extend eventTrackingId = tostring(split(id, \"/impactedResources/\")[0])\r\n| extend p = parse_json(properties)\r\n| project\r\n    id = tostring(p.targetResourceId)\r\n| distinct id\r\n) on $left.id == $right.id\r\n| where id1 == \"\"\r\n| project \r\n    subscriptionId= tostring(subscriptionId),\r\n    durationHours= toreal(0),\r\n    percentageOfTimeWithoutEvents= toreal(100),\r\n    targetRegion= tostring(location),\r\n    targetResourceId= tostring(id),\r\n    targetResourceType = tostring(type)\r\n)\r\n| summarize events=dcountif(eventTrackingId, eventTrackingId<>\"\"), AffectedResources=dcountif(targetResourceId,percentageOfTimeWithoutEvents<100), percentageOfTimeWithoutEvents=round(avg(percentageOfTimeWithoutEvents),2) by targetResourceType\r\n| order by percentageOfTimeWithoutEvents asc, targetResourceType asc\r\n\r\n \r\n \r\n \r\n \r\n ",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Percentage by resource type",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resources/tenants",
+              "crossComponentResources": [
+                "value::tenant"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "targetResourceType",
+                    "formatter": 16,
+                    "formatOptions": {
+                      "showIcon": true,
+                      "customColumnWidthSetting": "45ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "events",
+                    "formatter": 4,
+                    "formatOptions": {
+                      "palette": "lightBlue",
+                      "customColumnWidthSetting": "20ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "AffectedResources",
+                    "formatter": 0,
+                    "formatOptions": {
+                      "customColumnWidthSetting": "25ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "percentageOfTimeWithoutEvents",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "min": 75,
+                      "palette": "redGreen",
+                      "compositeBarSettings": {
+                        "labelText": "",
+                        "columnSettings": []
+                      },
+                      "customColumnWidthSetting": "30ch"
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal"
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "targetRegion",
+                    "formatter": 17,
+                    "formatOptions": {
+                      "customColumnWidthSetting": "20ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "affectedResources",
+                    "formatter": 4,
+                    "formatOptions": {
+                      "palette": "turquoise",
+                      "customColumnWidthSetting": "30ch"
+                    }
+                  }
+                ],
+                "rowLimit": 500,
+                "labelSettings": [
+                  {
+                    "columnId": "targetResourceType",
+                    "label": "Resource type"
+                  },
+                  {
+                    "columnId": "events",
+                    "label": "Events"
+                  },
+                  {
+                    "columnId": "AffectedResources",
+                    "label": "Affected resources"
+                  },
+                  {
+                    "columnId": "percentageOfTimeWithoutEvents",
+                    "label": "% of time without events"
+                  }
+                ]
+              }
+            },
+            "name": "query - 0 - Copy",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "servicehealthresources\r\n| where type =~ 'Microsoft.ResourceHealth/events' and properties.Status == 'Resolved'\r\n  and (properties.EventType == 'ServiceIssue' or properties.EventType == 'PlannedMaintenance')\r\n| extend\r\n    eventTrackingId   = tostring(id),\r\n    eventType         = tostring(properties.EventType),\r\n    status            = tostring(properties.Status),\r\n    subscriptionId    = tostring(subscriptionId),\r\n    impactStart       = todatetime(tostring(properties.ImpactStartTime)),\r\n    impactMitigation  = todatetime(tostring(properties.ImpactMitigationTime)),\r\n    impacts           = todynamic(properties.Impact),\r\n    summary           = tostring(properties.Summary)\r\n| extend duration = impactMitigation - impactStart\r\n| extend durationHours = round(duration / 1h, 3)\r\n| extend percentageOfTimeWithoutEvents = round((2160 - durationHours) * 100 / 2160, 3)\r\n// --- expand by service, then by region\r\n| mv-expand ImpactItem = impacts\r\n| extend\r\n    impactedService = tostring(ImpactItem.ImpactedService),\r\n    ImpactedRegions = todynamic(ImpactItem.ImpactedRegions)\r\n| mv-expand RegionItem = ImpactedRegions\r\n| extend\r\n    impactedRegion = tostring(RegionItem.ImpactedRegion),\r\n    regionStatus   = tostring(RegionItem.Status)\r\n| extend normRegion = tolower(replace(\" \", \"\", impactedRegion))\r\n| join kind=innerunique   (\r\nservicehealthresources\r\n| where type == 'microsoft.resourcehealth/events/impactedresources'\r\n| extend eventTrackingId = split(id, \"/impactedResources/\")[0]\r\n| extend p = parse_json(properties)\r\n| project\r\n    eventTrackingId = tostring(eventTrackingId),\r\n    targetResourceId = tostring(p.targetResourceId),\r\n    targetResourceType = tostring(p.targetResourceType),\r\n    resourceName     = tostring(p.resourceName),\r\n    resourceGroup    = tostring(p.resourceGroup),\r\n    targetRegion = tostring(p.targetRegion)\r\n) on $left.eventTrackingId == $right.eventTrackingId\r\n| project\r\n    eventTrackingId,\r\n    eventType,\r\n    status,\r\n    subscriptionId,\r\n    impactStart,\r\n    impactMitigation,\r\n    summary,\r\n    impactedService,\r\n    impactedRegion,\r\n    regionStatus,\r\n    duration,\r\n    durationHours,\r\n    percentageOfTimeWithoutEvents,\r\n    targetRegion,\r\n    targetResourceId,\r\n    targetResourceType\r\n| order by impactStart desc, subscriptionId asc, impactedRegion asc, impactedService asc\r\n| union\r\n(resources\r\n| project subscriptionId, location, id, name,type\r\n| distinct subscriptionId, location, id, name,type\r\n| join kind=leftouter  (\r\nservicehealthresources\r\n| where type == 'microsoft.resourcehealth/events/impactedresources'\r\n| extend eventTrackingId = tostring(split(id, \"/impactedResources/\")[0])\r\n| extend p = parse_json(properties)\r\n| project\r\n    id = tostring(p.targetResourceId)\r\n| distinct id\r\n) on $left.id == $right.id\r\n| where id1 == \"\"\r\n| project \r\n    subscriptionId= tostring(subscriptionId),\r\n    durationHours= toreal(0),\r\n    percentageOfTimeWithoutEvents= toreal(100),\r\n    targetRegion= tostring(location),\r\n    targetResourceId= tostring(id),\r\n    targetResourceType = tostring(type)\r\n)\r\n| summarize percentageOfTimeWithoutEvents=round(avg(percentageOfTimeWithoutEvents),2), events=dcountif(eventTrackingId, eventTrackingId<>\"\"), affectedResources=dcountif(targetResourceId,percentageOfTimeWithoutEvents<100) by subscriptionId, targetRegion, targetResourceType\r\n// | summarize Incidents=dcountif(eventTrackingId, eventTrackingId<>\"\"), AffectedResources=dcountif(targetResourceId,percentageOfTimeWithoutEvents<100), avg(percentageOfTimeWithoutEvents) by targetResourceType\r\n| order by ['percentageOfTimeWithoutEvents'] asc, targetResourceType asc\r\n \r\n \r\n \r\n \r\n ",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Percentage by subscription, region and resource type",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resources/tenants",
+              "crossComponentResources": [
+                "value::tenant"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "targetRegion",
+                    "formatter": 17,
+                    "formatOptions": {
+                      "customColumnWidthSetting": "20ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "targetResourceType",
+                    "formatter": 16,
+                    "formatOptions": {
+                      "showIcon": true,
+                      "customColumnWidthSetting": "30ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "percentageOfTimeWithoutEvents",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "min": 75,
+                      "palette": "redGreen",
+                      "compositeBarSettings": {
+                        "labelText": "",
+                        "columnSettings": []
+                      },
+                      "customColumnWidthSetting": "30ch"
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal"
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "events",
+                    "formatter": 4,
+                    "formatOptions": {
+                      "palette": "lightBlue",
+                      "customColumnWidthSetting": "25ch"
+                    }
+                  },
+                  {
+                    "columnMatch": "affectedResources",
+                    "formatter": 4,
+                    "formatOptions": {
+                      "palette": "turquoise",
+                      "customColumnWidthSetting": "30ch"
+                    }
+                  }
+                ],
+                "rowLimit": 500,
+                "labelSettings": [
+                  {
+                    "columnId": "subscriptionId",
+                    "label": "Subscription"
+                  },
+                  {
+                    "columnId": "targetRegion",
+                    "label": "Region"
+                  },
+                  {
+                    "columnId": "targetResourceType",
+                    "label": "Resource type"
+                  },
+                  {
+                    "columnId": "percentageOfTimeWithoutEvents",
+                    "label": "% of time without events"
+                  },
+                  {
+                    "columnId": "events",
+                    "label": "Events"
+                  },
+                  {
+                    "columnId": "affectedResources",
+                    "label": "Affected resources"
+                  }
+                ]
+              }
+            },
+            "name": "query - 0",
+            "styleSettings": {
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "SelectedTab",
+        "comparison": "isEqualTo",
+        "value": "ImpactedServices"
+      },
+      "name": "ImpactedServicesGroup",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "servicehealthresources\r\n| where type =~ 'Microsoft.ResourceHealth/events' and properties.Status == 'Resolved'\r\n  and (properties.EventType == 'ServiceIssue' or properties.EventType == 'PlannedMaintenance')\r\n| extend\r\n    eventTrackingId   = tostring(id),\r\n    eventType         = tostring(properties.EventType),\r\n    status            = tostring(properties.Status),\r\n    subscriptionId    = tostring(subscriptionId),\r\n    impactStart       = todatetime(tostring(properties.ImpactStartTime)),\r\n    impactMitigation  = todatetime(tostring(properties.ImpactMitigationTime)),\r\n    impacts           = todynamic(properties.Impact),\r\n    summary           = tostring(properties.Summary)\r\n| extend duration = impactMitigation - impactStart\r\n| extend durationHours = round(duration / 1h, 3)\r\n| extend percentageOfTimeWithoutEvents = round((2160 - durationHours) * 100 / 2160, 3)\r\n// --- expand by service, then by region\r\n| mv-expand ImpactItem = impacts\r\n| extend\r\n    impactedService = tostring(ImpactItem.ImpactedService),\r\n    ImpactedRegions = todynamic(ImpactItem.ImpactedRegions)\r\n| mv-expand RegionItem = ImpactedRegions\r\n| extend\r\n    impactedRegion = tostring(RegionItem.ImpactedRegion),\r\n    regionStatus   = tostring(RegionItem.Status)\r\n| extend normRegion = tolower(replace(\" \", \"\", impactedRegion))\r\n| join kind=innerunique   (\r\nservicehealthresources\r\n| where type == 'microsoft.resourcehealth/events/impactedresources'\r\n| extend eventTrackingId = split(id, \"/impactedResources/\")[0]\r\n| extend p = parse_json(properties)\r\n| project\r\n    eventTrackingId = tostring(eventTrackingId),\r\n    targetResourceId = tostring(p.targetResourceId),\r\n    targetResourceType = tostring(p.targetResourceType),\r\n    resourceName     = tostring(p.resourceName),\r\n    resourceGroup    = tostring(p.resourceGroup),\r\n    targetRegion = tostring(p.targetRegion)\r\n) on $left.eventTrackingId == $right.eventTrackingId\r\n| project\r\n    eventTrackingId,\r\n    eventType,\r\n    status,\r\n    subscriptionId,\r\n    impactStart,\r\n    impactMitigation,\r\n    summary,\r\n    durationHours,\r\n    percentageOfTimeWithoutEvents,\r\n    targetRegion,\r\n    targetResourceId,\r\n    targetResourceType\r\n| order by impactStart desc, subscriptionId asc, targetRegion asc, targetResourceType asc\r\n",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Service Health Events - Impacted Resources",
+              "showExportToExcel": true,
+              "queryType": 1,
+              "resourceType": "microsoft.resources/tenants",
+              "crossComponentResources": [
+                "value::tenant"
+              ],
+              "gridSettings": {
+                "formatters": [
+                  {
+                    "columnMatch": "eventType",
+                    "formatter": 18,
+                    "formatOptions": {
+                      "thresholdsOptions": "icons",
+                      "thresholdsGrid": [
+                        {
+                          "operator": "==",
+                          "thresholdValue": "ServiceIssue",
+                          "representation": "warning",
+                          "text": "Service Issue"
+                        },
+                        {
+                          "operator": "==",
+                          "thresholdValue": "PlannedMaintenance",
+                          "representation": "info",
+                          "text": "Planned Maintenance"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "columnMatch": "subscriptionId",
+                    "formatter": 15,
+                    "formatOptions": {
+                      "linkTarget": null,
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "impactStart",
+                    "formatter": 6
+                  },
+                  {
+                    "columnMatch": "impactMitigation",
+                    "formatter": 6
+                  },
+                  {
+                    "columnMatch": "summary",
+                    "formatter": 7,
+                    "formatOptions": {
+                      "linkTarget": "CellDetails",
+                      "linkLabel": "View Summary"
+                    }
+                  },
+                  {
+                    "columnMatch": "durationHours",
+                    "formatter": 0,
+                    "numberFormat": {
+                      "unit": 26,
+                      "options": {
+                        "style": "decimal",
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "percentageOfTimeWithoutEvents",
+                    "formatter": 8,
+                    "formatOptions": {
+                      "min": 75,
+                      "palette": "redGreen",
+                      "compositeBarSettings": {
+                        "labelText": "",
+                        "columnSettings": []
+                      }
+                    },
+                    "numberFormat": {
+                      "unit": 1,
+                      "options": {
+                        "style": "decimal",
+                        "maximumFractionDigits": 2
+                      }
+                    }
+                  },
+                  {
+                    "columnMatch": "targetResourceId",
+                    "formatter": 13,
+                    "formatOptions": {
+                      "linkTarget": "Resource",
+                      "showIcon": true
+                    }
+                  },
+                  {
+                    "columnMatch": "targetResourceType",
+                    "formatter": 16,
+                    "formatOptions": {
+                      "showIcon": true
+                    }
+                  }
+                ],
+                "rowLimit": 1000,
+                "filter": true,
+                "labelSettings": [
+                  {
+                    "columnId": "eventType",
+                    "label": "Event Type"
+                  },
+                  {
+                    "columnId": "status",
+                    "label": "Status"
+                  },
+                  {
+                    "columnId": "subscriptionId",
+                    "label": "Subscription"
+                  },
+                  {
+                    "columnId": "targetRegion",
+                    "label": "Resource Region"
+                  },
+                  {
+                    "columnId": "targetResourceType",
+                    "label": "Resource Type"
+                  },
+                  {
+                    "columnId": "impactStart",
+                    "label": "Impact Start"
+                  },
+                  {
+                    "columnId": "impactMitigation",
+                    "label": "Impact Mitigation"
+                  },
+                  {
+                    "columnId": "durationHours",
+                    "label": "Duration"
+                  },
+                  {
+                    "columnId": "percentageOfTimeWithoutEvents",
+                    "label": "% Time without Events (Event)"
+                  },
+                  {
+                    "columnId": "targetResourceId",
+                    "label": "Resource ID"
+                  },
+                  {
+                    "columnId": "summary",
+                    "label": "Summary"
+                  }
+                ]
+              }
+            },
+            "name": "query - event details",
+            "styleSettings": {
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "SelectedTab",
+        "comparison": "isEqualTo",
+        "value": "EventDetails"
+      },
+      "name": "EventDetailsGroup",
+      "styleSettings": {
+        "showBorder": true
+      }
+    }
+  ],
+  "fallbackResourceIds": [
+    "Azure Monitor"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
