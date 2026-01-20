@@ -2323,7 +2323,7 @@
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Rout Table SLA",
+		"recommendation": "Route Table SLA",
 		"recommendationId": "udr-003",
 		"resourceType": "Microsoft.Network/routeTables"
 	},
@@ -2331,7 +2331,7 @@
 		"category": "Governance",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Rout Table Name should comply with naming conventions",
+		"recommendation": "Route Table Name should comply with naming conventions",
 		"recommendationId": "udr-006",
 		"resourceType": "Microsoft.Network/routeTables"
 	},
@@ -2339,7 +2339,7 @@
 		"category": "Governance",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Rout Table should have tags",
+		"recommendation": "Route Table should have tags",
 		"recommendationId": "udr-007",
 		"resourceType": "Microsoft.Network/routeTables"
 	},
