@@ -17,7 +17,7 @@ func (a *RouteTableScanner) GetRecommendations() map[string]models.AzqrRecommend
 			RecommendationID:   "udr-003",
 			ResourceType:       "Microsoft.Network/routeTables",
 			Category:           models.CategoryHighAvailability,
-			Recommendation:     "Rout Table SLA",
+			Recommendation:     "Route Table SLA",
 			RecommendationType: models.TypeSLA,
 			Impact:             models.ImpactHigh,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
@@ -29,7 +29,7 @@ func (a *RouteTableScanner) GetRecommendations() map[string]models.AzqrRecommend
 			RecommendationID: "udr-006",
 			ResourceType:     "Microsoft.Network/routeTables",
 			Category:         models.CategoryGovernance,
-			Recommendation:   "Rout Table Name should comply with naming conventions",
+			Recommendation:   "Route Table Name should comply with naming conventions",
 			Impact:           models.ImpactLow,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.RouteTable)
@@ -42,7 +42,7 @@ func (a *RouteTableScanner) GetRecommendations() map[string]models.AzqrRecommend
 			RecommendationID: "udr-007",
 			ResourceType:     "Microsoft.Network/routeTables",
 			Category:         models.CategoryGovernance,
-			Recommendation:   "Rout Table should have tags",
+			Recommendation:   "Route Table should have tags",
 			Impact:           models.ImpactLow,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				c := target.(*armnetwork.RouteTable)
