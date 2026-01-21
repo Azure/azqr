@@ -23,17 +23,6 @@ func getPluginDirs() []string {
 func LoadAll() error {
 	registry := GetRegistry()
 
-	// Discover internal plugins (registered at init time)
-	internalPlugins := discoverInternalPlugins()
-	for _, plugin := range internalPlugins {
-		if err := registry.Register(plugin); err != nil {
-			log.Warn().
-				Err(err).
-				Str("plugin", plugin.Metadata.Name).
-				Msg("Failed to register internal plugin")
-		}
-	}
-
 	// Discover YAML plugins
 	yamlPlugins, err := discoverYamlPlugins(getPluginDirs())
 	if err != nil {

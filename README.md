@@ -277,11 +277,9 @@ You can compare two azqr scan reports to identify differences in recommendations
 
 ## Advanced Features
 
-Azure Quick Review includes optional **internal plugins** that provide advanced analytics beyond standard compliance recommendations. These plugins are disabled by default and must be explicitly enabled.
+Azure Quick Review includes optional **internal plugins** that provide advanced analytics beyond standard recommendations. Plugins can be run as standalone commands for faster execution or integrated with full scans.
 
 ### OpenAI Throttling Monitor
-
-**Flag**: `--openai-throttling`
 
 Monitors Azure OpenAI and Cognitive Services accounts for throttling (HTTP 429 errors) to identify capacity constraints.
 
@@ -292,13 +290,14 @@ Monitors Azure OpenAI and Cognitive Services accounts for throttling (HTTP 429 e
 **Use Cases**: Capacity planning, troubleshooting throttling, optimizing deployment configuration
 
 ```bash
-# Monitor OpenAI throttling across subscriptions
-./azqr scan --openai-throttling
+# Run as standalone command (fast, plugin-only mode)
+./azqr openai-throttling
+
+# Or integrate with full scan
+./azqr scan --plugin openai-throttling
 ```
 
 ### Carbon Emissions Tracking
-
-**Flag**: `--carbon-emissions`
 
 Analyzes carbon emissions by Azure resource type to support sustainability reporting and optimization.
 
@@ -309,13 +308,14 @@ Analyzes carbon emissions by Azure resource type to support sustainability repor
 **Use Cases**: Sustainability reporting, compliance, environmental impact analysis
 
 ```bash
-# Generate carbon emissions report
-./azqr scan --carbon-emissions
+# Run as standalone command (fast, plugin-only mode)
+./azqr carbon-emissions
+
+# Or integrate with full scan
+./azqr scan --plugin carbon-emissions
 ```
 
 ### Zone Mapping
-
-**Flag**: `--zone-mapping`
 
 Retrieves logical-to-physical availability zone mappings for all Azure regions in each subscription.
 
@@ -326,11 +326,14 @@ Retrieves logical-to-physical availability zone mappings for all Azure regions i
 **Use Cases**: Multi-subscription architecture design, DR planning with zone awareness, zone alignment
 
 ```bash
-# Get zone mappings for all subscriptions
-./azqr scan --zone-mapping
+# Run as standalone command (fast, plugin-only mode)
+./azqr zone-mapping
 
 # Compare mappings across subscriptions
-./azqr scan --subscription-id sub1 --subscription-id sub2 --zone-mapping
+./azqr zone-mapping --subscription-id sub1 --subscription-id sub2
+
+# Or integrate with full scan
+./azqr scan --plugin zone-mapping
 ```
 
 [📖 Full Documentation](https://azure.github.io/azqr/docs/plugins/zone-mapping/)
@@ -338,17 +341,22 @@ Retrieves logical-to-physical availability zone mappings for all Azure regions i
 ### Combining Features
 
 ```bash
-# Run multiple plugins together
+# Run multiple plugins as standalone commands (fastest)
+./azqr openai-throttling
+./azqr carbon-emissions
+./azqr zone-mapping
+
+# Or run multiple plugins with a full scan
 ./azqr scan --subscription-id <sub-id> \
-  --openai-throttling \
-  --carbon-emissions \
-  --zone-mapping \
+  --plugin openai-throttling \
+  --plugin carbon-emissions \
+  --plugin zone-mapping \
   --output-name comprehensive-analysis
 ```
 
 Results from all enabled plugins are included in the Excel, JSON, or CSV output.
 
-> 💡 **Tip**: Plugin results appear in dedicated sheets (Excel) or sections (JSON/CSV). Use `azqr plugins list` to see all available plugins.
+> 💡 **Tip**: Plugin commands (e.g., `azqr openai-throttling`) run in optimized plugin-only mode for faster execution, skipping resource and APRL scanning. Use `azqr plugins list` to see all available plugins.
 
 [📖 Internal Plugins Documentation](https://azure.github.io/azqr/docs/plugins/internal-plugins/)
 

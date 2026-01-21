@@ -14,7 +14,7 @@ import (
 func renderAdvisor(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.AdvisorEnabled {
-		log.Info().Msg("Skipping Advisor. Feature is disabled")
+		log.Debug().Msg("Skipping Advisor. Feature is disabled")
 		return
 	}
 

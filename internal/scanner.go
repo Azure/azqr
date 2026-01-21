@@ -19,6 +19,8 @@ import (
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -144,67 +146,35 @@ func NewScanParams() *ScanParams {
 	}
 }
 
-func (sc Scanner) Scan(params *ScanParams) string {
-	startTime := time.Now()
-	// Default level for this example is info, unless debug flag is present
+// initializeLogLevel sets the global log level based on debug flag
+func (sc Scanner) initializeLogLevel(debug bool) {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if params.Debug {
+	if debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		log.Debug().Msg("Debug logging enabled")
 	}
+}
+
+func (sc Scanner) Scan(params *ScanParams) string {
+	startTime := time.Now()
+	sc.initializeLogLevel(params.Debug)
 
 	// generate output file name
 	outputFile := sc.generateOutputFileName(params.OutputName)
 
-	// load filters
-	filters := params.Filters
+	// validate and prepare filters
+	sc.validateAndPrepareFilters(params)
 
-	// validate input
-	if len(params.ManagementGroups) > 0 && (len(params.Subscriptions) > 0 || len(params.ResourceGroups) > 0) {
-		log.Fatal().Msg("Management Group name cannot be used with a Subscription Id or Resource Group name")
-	}
+	serviceScanners := params.Filters.Azqr.Scanners
 
-	if len(params.Subscriptions) < 1 && len(params.ResourceGroups) > 0 {
-		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
-	}
-
-	if len(params.Subscriptions) > 1 && len(params.ResourceGroups) > 0 {
-		log.Fatal().Msg("Resource Group name can only be used with 1 Subscription Id")
-	}
-
-	if len(params.Subscriptions) > 0 {
-		for _, sub := range params.Subscriptions {
-			filters.Azqr.AddSubscription(sub)
-		}
-	}
-
-	if len(params.ResourceGroups) > 0 {
-		for _, rg := range params.ResourceGroups {
-			filters.Azqr.AddResourceGroup(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", params.Subscriptions[0], rg))
-		}
-	}
-
-	serviceScanners := filters.Azqr.Scanners
-
-	// create Azure credentials
+	// create Azure credentials and context
 	cred := az.NewAzureCredential()
-
-	// create a cancelable context
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	// create ARM client options with standard retry and throttling configuration
 	clientOptions := az.NewDefaultClientOptions()
 
-	// list subscriptions. Key is subscription ID, value is subscription name
-	var subscriptions map[string]string
-	if len(params.ManagementGroups) > 0 {
-		managementGroupScanner := scanners.ManagementGroupsScanner{}
-		subscriptions = managementGroupScanner.ListSubscriptions(ctx, cred, params.ManagementGroups, filters, clientOptions)
-	} else {
-		subscriptionScanner := scanners.SubcriptionScanner{}
-		subscriptions = subscriptionScanner.ListSubscriptions(ctx, cred, params.Subscriptions, filters, clientOptions)
-	}
+	// list subscriptions
+	subscriptions := sc.listSubscriptions(ctx, cred, params, clientOptions)
 
 	// initialize scanners
 	defenderScanner := scanners.DefenderScanner{}
@@ -218,10 +188,10 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	diagResults := map[string]bool{}
 
 	// initialize report data
-	reportData := renderers.NewReportData(outputFile, params.Mask, params.Policy, params.Arc, params.Defender, params.Advisor, params.Cost)
+	reportData := renderers.NewReportData(outputFile, params.Mask, params.Policy, params.Arc, params.Defender, params.Advisor, params.Cost, true)
 
 	resourceScanner := scanners.ResourceScanner{}
-	reportData.Resources, reportData.ExludedResources = resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)
+	reportData.Resources, reportData.ExludedResources = resourceScanner.GetAllResources(ctx, cred, subscriptions, params.Filters)
 
 	// Check if the number of resources exceeds Excel's row limit (1,048,576 rows) - 10 rows reserved for headers
 	const excelMaxRows = 1048566
@@ -229,7 +199,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 		log.Fatal().Msgf("Number of resources (%d) exceeds Excel's maximum row limit (%d). Aborting scan.", len(reportData.Resources), excelMaxRows)
 	}
 
-	aprlScanner := graph.NewAprlScanner(serviceScanners, filters, subscriptions)
+	aprlScanner := graph.NewAprlScanner(serviceScanners, params.Filters, subscriptions)
 
 	// Register YAML plugin recommendations with the APRL scanner
 	yamlPluginRegistry := plugins.GetRegistry()
@@ -247,7 +217,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 	reportData.Recommendations, _ = aprlScanner.ListRecommendations()
 
-	resourceTypes := resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, filters)
+	resourceTypes := resourceScanner.GetCountPerResourceType(ctx, cred, subscriptions, params.Filters)
 
 	// Filter service scanners to include only those with resource types present across all subscriptions
 	filteredServiceScanners := sc.buildFilteredServiceScanners(serviceScanners, resourceTypes)
@@ -255,21 +225,19 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	// Get plugin scanners - they will be executed separately
 	pluginRegistry := plugins.GetRegistry()
 	registeredPlugins := pluginRegistry.List()
-	log.Info().Msgf("Found %d registered plugins", len(registeredPlugins))
-	var internalPluginScanners []plugins.InternalPluginScanner
+	log.Debug().Msgf("Found %d registered plugins", len(registeredPlugins))
 	for _, plugin := range registeredPlugins {
 		if plugin.InternalScanner != nil {
-			log.Info().
+			log.Debug().
 				Str("plugin", plugin.Metadata.Name).
 				Str("type", "internal").
 				Str("version", plugin.Metadata.Version).
 				Msg("Internal plugin ready for execution")
-			internalPluginScanners = append(internalPluginScanners, plugin.InternalScanner)
 		}
 	}
 
 	// get the APRL scan results (built-in APRL recommendations only)
-	aprlScanner = graph.NewAprlScanner(filteredServiceScanners, filters, subscriptions)
+	aprlScanner = graph.NewAprlScanner(filteredServiceScanners, params.Filters, subscriptions)
 
 	// Register YAML plugin recommendations with the APRL scanner
 	for _, plugin := range yamlPluginRegistry.List() {
@@ -282,55 +250,11 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 	reportData.Aprl = aprlScanner.Scan(ctx, cred)
 
-	// Execute internal plugin scanners (only if enabled)
-	if len(internalPluginScanners) > 0 {
-		for _, internalScanner := range internalPluginScanners {
-			pluginName := internalScanner.GetMetadata().Name
-			// Check if plugin is enabled (default: false)
-			enabled := false
-			if params.EnabledInternalPlugins != nil {
-				enabled = params.EnabledInternalPlugins[pluginName]
-			}
-
-			if !enabled {
-				log.Info().
-					Str("plugin", pluginName).
-					Msg("Internal plugin skipped (not enabled)")
-				continue
-			}
-
-			log.Info().
-				Str("plugin", pluginName).
-				Str("type", "internal").
-				Str("version", internalScanner.GetMetadata().Version).
-				Msg("Executing internal plugin")
-
-			output, err := internalScanner.Scan(ctx, cred, subscriptions, filters)
-			if err != nil {
-				log.Error().
-					Err(err).
-					Str("plugin", pluginName).
-					Msg("Internal plugin execution failed")
-				continue
-			}
-
-			// Add internal plugin results to report data
-			reportData.PluginResults = append(reportData.PluginResults, renderers.PluginResult{
-				PluginName:  pluginName,
-				SheetName:   output.SheetName,
-				Description: output.Description,
-				Table:       output.Table,
-			})
-
-			log.Info().
-				Str("plugin", pluginName).
-				Int("rows", len(output.Table)-1).
-				Msg("Internal plugin completed")
-		}
-	}
+	// Execute internal plugin scanners
+	reportData.PluginResults = sc.executePlugins(ctx, cred, subscriptions, params)
 
 	// get the count of resources per resource type
-	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceTypeAndSubscription(ctx, cred, subscriptions, reportData.Recommendations, filters)
+	reportData.ResourceTypeCount = resourceScanner.GetCountPerResourceTypeAndSubscription(ctx, cred, subscriptions, reportData.Recommendations, params.Filters)
 
 	// Build a map of subscription ID -> resource type -> count for efficient lookup
 	subscriptionResourceTypeMap := sc.buildSubscriptionResourceTypeMap(reportData.ResourceTypeCount, subscriptions)
@@ -339,7 +263,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	if params.UseAzqrRecommendations {
 		for _, s := range serviceScanners {
 			for i, r := range s.GetRecommendations() {
-				if filters.Azqr.IsRecommendationExcluded(r.RecommendationID) {
+				if params.Filters.Azqr.IsRecommendationExcluded(r.RecommendationID) {
 					continue
 				}
 
@@ -397,7 +321,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 
 			// initialize scan context
 			scanContext := models.ScanContext{
-				Filters:             filters,
+				Filters:             params.Filters,
 				PrivateEndpoints:    peResults,
 				DiagnosticsSettings: diagResults,
 				PublicIPs:           pips,
@@ -449,7 +373,7 @@ func (sc Scanner) Scan(params *ScanParams) string {
 			for res := range results {
 				for _, r := range res {
 					// check if the resource is excluded
-					if filters.Azqr.IsServiceExcluded(r.ResourceID()) {
+					if params.Filters.Azqr.IsServiceExcluded(r.ResourceID()) {
 						continue
 					}
 					reportData.Azqr = append(reportData.Azqr, r)
@@ -465,44 +389,26 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	}
 
 	// scan advisor
-	reportData.Advisor = append(reportData.Advisor, advisorScanner.Scan(ctx, params.Defender, cred, subscriptions, filters)...)
+	reportData.Advisor = append(reportData.Advisor, advisorScanner.Scan(ctx, params.Defender, cred, subscriptions, params.Filters)...)
 
 	// scan Azure Policy
 	if params.Policy {
-		reportData.AzurePolicy = append(reportData.AzurePolicy, azurePolicyScanner.Scan(ctx, cred, subscriptions, filters)...)
+		reportData.AzurePolicy = append(reportData.AzurePolicy, azurePolicyScanner.Scan(ctx, cred, subscriptions, params.Filters)...)
 	}
 
 	// scan Arc-enabled SQL Server
 	if params.Arc {
-		reportData.ArcSQL = append(reportData.ArcSQL, arcSQLScanner.Scan(ctx, cred, subscriptions, filters)...)
+		reportData.ArcSQL = append(reportData.ArcSQL, arcSQLScanner.Scan(ctx, cred, subscriptions, params.Filters)...)
 	}
 
 	// scan defender
-	reportData.Defender = append(reportData.Defender, defenderScanner.Scan(ctx, params.Defender, cred, subscriptions, filters)...)
+	reportData.Defender = append(reportData.Defender, defenderScanner.Scan(ctx, params.Defender, cred, subscriptions, params.Filters)...)
 
 	// get the defender recommendations
-	reportData.DefenderRecommendations = append(reportData.DefenderRecommendations, defenderScanner.GetRecommendations(ctx, params.Defender, cred, subscriptions, filters)...)
+	reportData.DefenderRecommendations = append(reportData.DefenderRecommendations, defenderScanner.GetRecommendations(ctx, params.Defender, cred, subscriptions, params.Filters)...)
 
-	if params.Xlsx {
-		// render excel report
-		excel.CreateExcelReport(&reportData)
-	}
-
-	// render json report
-	if params.Json {
-		json.CreateJsonReport(&reportData)
-	}
-
-	// render csv reports
-	if params.Csv {
-		csv.CreateCsvReport(&reportData)
-	}
-
-	// Write the JSON output to stdout
-	outputJson := json.CreateJsonOutput(&reportData)
-	if params.Stdout {
-		fmt.Println(outputJson)
-	}
+	// Render reports
+	outputJson := sc.renderReports(&reportData, params)
 
 	elapsedTime := time.Since(startTime)
 	// Format the elapsed time as HH:MM:SS and log the scan completion time
@@ -510,6 +416,45 @@ func (sc Scanner) Scan(params *ScanParams) string {
 	minutes := int(elapsedTime.Minutes()) % 60
 	seconds := int(elapsedTime.Seconds()) % 60
 	log.Info().Msgf("Scan completed in %02d:%02d:%02d", hours, minutes, seconds)
+
+	return outputJson
+}
+
+// ScanPlugins performs a fast plugin-only scan without resource or APRL scanning
+func (sc Scanner) ScanPlugins(params *ScanParams, startTime time.Time) string {
+	sc.initializeLogLevel(params.Debug)
+
+	log.Info().Msg("Running in plugin-only mode: skipping resource and APRL scanning")
+
+	// generate output file name
+	outputFile := sc.generateOutputFileName(params.OutputName)
+
+	// validate and prepare filters
+	sc.validateAndPrepareFilters(params)
+
+	// create Azure credentials and context
+	cred := az.NewAzureCredential()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	clientOptions := az.NewDefaultClientOptions()
+
+	// list subscriptions
+	subscriptions := sc.listSubscriptions(ctx, cred, params, clientOptions)
+
+	// initialize minimal report data for plugin-only mode
+	reportData := renderers.NewReportData(outputFile, params.Mask, false, false, false, false, false, false)
+
+	// Execute plugins and collect results
+	reportData.PluginResults = sc.executePlugins(ctx, cred, subscriptions, params)
+
+	// Render reports
+	outputJson := sc.renderReports(&reportData, params)
+
+	elapsedTime := time.Since(startTime)
+	hours := int(elapsedTime.Hours())
+	minutes := int(elapsedTime.Minutes()) % 60
+	seconds := int(elapsedTime.Seconds()) % 60
+	log.Info().Msgf("Plugin-only scan completed in %02d:%02d:%02d", hours, minutes, seconds)
 
 	return outputJson
 }
@@ -597,6 +542,139 @@ func (sc Scanner) buildFilteredServiceScanners(serviceScanners []models.IAzureSc
 		}
 	}
 	return filteredScanners
+}
+
+// validateAndPrepareFilters validates input parameters and prepares filters
+func (sc Scanner) validateAndPrepareFilters(params *ScanParams) {
+	filters := params.Filters
+
+	// validate input
+	if len(params.ManagementGroups) > 0 && (len(params.Subscriptions) > 0 || len(params.ResourceGroups) > 0) {
+		log.Fatal().Msg("Management Group name cannot be used with a Subscription Id or Resource Group name")
+	}
+
+	if len(params.Subscriptions) < 1 && len(params.ResourceGroups) > 0 {
+		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
+	}
+
+	if len(params.Subscriptions) > 1 && len(params.ResourceGroups) > 0 {
+		log.Fatal().Msg("Resource Group name can only be used with 1 Subscription Id")
+	}
+
+	if len(params.Subscriptions) > 0 {
+		for _, sub := range params.Subscriptions {
+			filters.Azqr.AddSubscription(sub)
+		}
+	}
+
+	if len(params.ResourceGroups) > 0 {
+		for _, rg := range params.ResourceGroups {
+			filters.Azqr.AddResourceGroup(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", params.Subscriptions[0], rg))
+		}
+	}
+}
+
+// listSubscriptions returns subscriptions based on management groups or subscription IDs
+func (sc Scanner) listSubscriptions(ctx context.Context, cred azcore.TokenCredential, params *ScanParams, clientOptions *arm.ClientOptions) map[string]string {
+	if len(params.ManagementGroups) > 0 {
+		managementGroupScanner := scanners.ManagementGroupsScanner{}
+		return managementGroupScanner.ListSubscriptions(ctx, cred, params.ManagementGroups, params.Filters, clientOptions)
+	}
+	subscriptionScanner := scanners.SubcriptionScanner{}
+	return subscriptionScanner.ListSubscriptions(ctx, cred, params.Subscriptions, params.Filters, clientOptions)
+}
+
+// executePlugins executes enabled internal plugins and returns results
+func (sc Scanner) executePlugins(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *ScanParams) []renderers.PluginResult {
+	var pluginResults []renderers.PluginResult
+
+	// Get plugin scanners
+	pluginRegistry := plugins.GetRegistry()
+	registeredPlugins := pluginRegistry.List()
+	log.Debug().Msgf("Found %d registered plugins", len(registeredPlugins))
+
+	var internalPluginScanners []plugins.InternalPluginScanner
+	for _, plugin := range registeredPlugins {
+		if plugin.InternalScanner != nil {
+			log.Debug().
+				Str("plugin", plugin.Metadata.Name).
+				Str("type", "internal").
+				Str("version", plugin.Metadata.Version).
+				Msg("Internal plugin ready for execution")
+			internalPluginScanners = append(internalPluginScanners, plugin.InternalScanner)
+		}
+	}
+
+	// Execute internal plugin scanners (only if enabled)
+	if len(internalPluginScanners) > 0 {
+		for _, internalScanner := range internalPluginScanners {
+			pluginName := internalScanner.GetMetadata().Name
+			// Check if plugin is enabled (default: false)
+			enabled := false
+			if params.EnabledInternalPlugins != nil {
+				enabled = params.EnabledInternalPlugins[pluginName]
+			}
+
+			if !enabled {
+				log.Debug().
+					Str("plugin", pluginName).
+					Msg("Internal plugin skipped (not enabled)")
+				continue
+			}
+
+			log.Info().
+				Str("plugin", pluginName).
+				Str("type", "internal").
+				Str("version", internalScanner.GetMetadata().Version).
+				Msg("Executing internal plugin")
+
+			output, err := internalScanner.Scan(ctx, cred, subscriptions, params.Filters)
+			if err != nil {
+				log.Error().
+					Err(err).
+					Str("plugin", pluginName).
+					Msg("Internal plugin execution failed")
+				continue
+			}
+
+			// Add internal plugin results
+			pluginResults = append(pluginResults, renderers.PluginResult{
+				PluginName:  pluginName,
+				SheetName:   output.SheetName,
+				Description: output.Description,
+				Table:       output.Table,
+			})
+
+			log.Debug().
+				Str("plugin", pluginName).
+				Int("rows", len(output.Table)-1).
+				Msg("Internal plugin completed")
+		}
+	}
+
+	return pluginResults
+}
+
+// renderReports generates all requested output formats
+func (sc Scanner) renderReports(reportData *renderers.ReportData, params *ScanParams) string {
+	if params.Xlsx {
+		excel.CreateExcelReport(reportData)
+	}
+
+	if params.Json {
+		json.CreateJsonReport(reportData)
+	}
+
+	if params.Csv {
+		csv.CreateCsvReport(reportData)
+	}
+
+	outputJson := json.CreateJsonOutput(reportData)
+	if params.Stdout {
+		fmt.Println(outputJson)
+	}
+
+	return outputJson
 }
 
 // buildSubscriptionFilteredScanners filters service scanners based on resource types

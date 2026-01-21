@@ -13,6 +13,12 @@ import (
 
 func renderImpactedResources(f *excelize.File, data *renderers.ReportData) {
 	sheetName := "ImpactedResources"
+
+	if !data.ScanEnabled {
+		log.Debug().Msgf("Skipping %s. Feature is disabled", sheetName)
+		return
+	}
+
 	_, err := f.NewSheet(sheetName)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create APRL sheet")

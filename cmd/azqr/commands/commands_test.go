@@ -49,6 +49,7 @@ func TestScanCommandExists(t *testing.T) {
 	scanCmd := findCommand(rootCmd, "scan")
 	if scanCmd == nil {
 		t.Fatal("scan command should exist")
+		return
 	}
 
 	if scanCmd.Use != "scan" {
@@ -64,6 +65,7 @@ func TestScanCommandHasRequiredFlags(t *testing.T) {
 	scanCmd := findCommand(rootCmd, "scan")
 	if scanCmd == nil {
 		t.Fatal("scan command should exist")
+		return
 	}
 
 	requiredFlags := []struct {
@@ -173,6 +175,7 @@ func TestCompareCommandExists(t *testing.T) {
 	compareCmd := findCommand(rootCmd, "compare")
 	if compareCmd == nil {
 		t.Fatal("compare command should exist")
+		return
 	}
 
 	if compareCmd.Use != "compare" {
@@ -188,6 +191,7 @@ func TestCompareCommandHasRequiredFlags(t *testing.T) {
 	compareCmd := findCommand(rootCmd, "compare")
 	if compareCmd == nil {
 		t.Fatal("compare command should exist")
+		return
 	}
 
 	requiredFlags := []string{"file1", "file2"}
@@ -213,6 +217,7 @@ func TestShowCommandExists(t *testing.T) {
 	showCmd := findCommand(rootCmd, "show")
 	if showCmd == nil {
 		t.Fatal("show command should exist")
+		return
 	}
 
 	if showCmd.Use != "show" {
@@ -240,6 +245,7 @@ func TestRulesCommandExists(t *testing.T) {
 	rulesCmd := findCommand(rootCmd, "rules")
 	if rulesCmd == nil {
 		t.Fatal("rules command should exist")
+		return
 	}
 
 	if rulesCmd.Use != "rules" {
@@ -257,6 +263,7 @@ func TestTypesCommandExists(t *testing.T) {
 	typesCmd := findCommand(rootCmd, "types")
 	if typesCmd == nil {
 		t.Fatal("types command should exist")
+		return
 	}
 
 	if typesCmd.Use != "types" {
@@ -507,6 +514,7 @@ func TestCompareCommandFormatDefault(t *testing.T) {
 	formatFlag := compareCmd.Flags().Lookup("format")
 	if formatFlag == nil {
 		t.Fatal("compare command should have 'format' flag")
+		return
 	}
 
 	if formatFlag.DefValue != "excel" {
@@ -523,6 +531,7 @@ func TestShowCommandPortDefault(t *testing.T) {
 	portFlag := showCmd.Flags().Lookup("port")
 	if portFlag == nil {
 		t.Fatal("show command should have 'port' flag")
+		return
 	}
 
 	if portFlag.DefValue != "8080" {
@@ -532,6 +541,7 @@ func TestShowCommandPortDefault(t *testing.T) {
 	openFlag := showCmd.Flags().Lookup("open")
 	if openFlag == nil {
 		t.Fatal("show command should have 'open' flag")
+		return
 	}
 
 	if openFlag.DefValue != "true" {

@@ -232,6 +232,58 @@ To skip Azure Advisor recommendations:
 azqr scan --advisor=false
 ```
 
+## Internal Plugins
+
+Azure Quick Review includes specialized internal plugins for advanced analytics. Plugins can be run as standalone commands or integrated with full scans.
+
+### Running Plugins as Standalone Commands
+
+For fast, focused analysis, run plugins as top-level commands:
+
+```bash
+# Run OpenAI throttling analysis
+azqr openai-throttling
+
+# Run carbon emissions analysis
+azqr carbon-emissions
+
+# Run zone mapping analysis
+azqr zone-mapping
+
+# With specific subscription
+azqr zone-mapping --subscription-id <sub-id>
+```
+
+**Standalone mode benefits:**
+- ⚡ Faster execution (skips resource scanning)
+- 📊 Cleaner reports (plugin results only)
+- 🎯 Focused analysis
+
+### Integrating Plugins with Full Scans
+
+Run plugins alongside standard scanning:
+
+```bash
+# Single plugin with scan
+azqr scan --plugin openai-throttling
+
+# Multiple plugins with scan
+azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping
+
+# With other options
+azqr scan --subscription-id <sub-id> --plugin zone-mapping
+```
+
+### Listing Available Plugins
+
+View all registered plugins:
+
+```bash
+azqr plugins list
+```
+
+**📖 Learn more:** [Internal Plugins Documentation](../plugins/internal-plugins/)
+
 ## File Outputs
 
 Currently Azure Quick Review supports 3 types of file outputs: `xlsx` (default), `csv`, `json`

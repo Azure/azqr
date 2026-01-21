@@ -15,7 +15,7 @@ import (
 func renderAzurePolicy(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.PolicyEnabled {
-		log.Info().Msg("Skipping Azure Policy. Feature is disabled")
+		log.Debug().Msg("Skipping Azure Policy. Feature is disabled")
 		return
 	}
 

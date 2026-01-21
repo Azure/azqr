@@ -122,6 +122,7 @@ func TestNewClient(t *testing.T) {
 
 	if client == nil {
 		t.Fatal("Expected client to be created, got nil")
+		return
 	}
 
 	if client.cred == nil {
@@ -133,5 +134,6 @@ func TestThrottlingPolicy(t *testing.T) {
 	policy := throttling.NewThrottlingPolicy()
 	if policy == nil {
 		t.Fatal("Expected throttling policy to be created, got nil")
+		return
 	}
 }

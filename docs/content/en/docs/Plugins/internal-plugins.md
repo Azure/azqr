@@ -15,7 +15,8 @@ Internal plugins are disabled by default and must be explicitly enabled using co
 ### 1. OpenAI Throttling
 
 **Plugin Name**: `openai-throttling`  
-**Flag**: `--openai-throttling`  
+**Command**: `azqr openai-throttling`  
+**Flag**: `--plugin openai-throttling`  
 **Version**: 1.0.0
 
 Monitors Azure OpenAI and Cognitive Services accounts for throttling (429 errors) to identify capacity constraints.
@@ -46,7 +47,8 @@ Monitors Azure OpenAI and Cognitive Services accounts for throttling (429 errors
 ### 2. Carbon Emissions
 
 **Plugin Name**: `carbon-emissions`  
-**Flag**: `--carbon-emissions`  
+**Command**: `azqr carbon-emissions`  
+**Flag**: `--plugin carbon-emissions`  
 **Version**: 1.0.0
 
 Analyzes carbon emissions by Azure resource type to support sustainability reporting and optimization.
@@ -79,7 +81,8 @@ Analyzes carbon emissions by Azure resource type to support sustainability repor
 ### 3. Zone Mapping
 
 **Plugin Name**: `zone-mapping`  
-**Flag**: `--zone-mapping`  
+**Command**: `azqr zone-mapping`  
+**Flag**: `--plugin zone-mapping`  
 **Version**: 1.0.0
 
 Retrieves logical-to-physical availability zone mappings for all Azure regions in each subscription.
@@ -109,26 +112,55 @@ Retrieves logical-to-physical availability zone mappings for all Azure regions i
 
 ## Usage
 
-### Enabling Internal Plugins
+### Running Internal Plugins
 
-Internal plugins are opt-in and must be enabled individually using command-line flags:
+Internal plugins can be executed in two ways:
+
+#### 1. Standalone Plugin Commands (Recommended for Fast Execution)
+
+Run plugins as top-level commands for optimized execution. This mode skips resource and APRL scanning, executing only the specified plugin:
 
 ```bash
-# Enable OpenAI throttling plugin
-azqr scan --openai-throttling
+# Run OpenAI throttling plugin
+azqr openai-throttling
 
-# Enable carbon emissions plugin
-azqr scan --carbon-emissions
+# Run carbon emissions plugin
+azqr carbon-emissions
 
-# Enable zone mapping plugin
-azqr scan --zone-mapping
+# Run zone mapping plugin
+azqr zone-mapping
 
-# Enable multiple plugins
-azqr scan --openai-throttling --carbon-emissions --zone-mapping
+# Run with specific subscriptions
+azqr zone-mapping --subscription-id <sub-id>
+
+# Run with custom output name
+azqr openai-throttling --output-name throttling-report
+```
+
+**Benefits of Standalone Mode:**
+- ⚡ **Faster execution** - Skips resource scanning
+- 📊 **Cleaner reports** - Contains only plugin results
+- 🎯 **Focused analysis** - Dedicated to specific plugin output
+
+#### 2. Integrated with Full Scan
+
+Run plugins alongside standard compliance scanning using the `--plugin` flag:
+
+```bash
+# Enable single plugin during scan
+azqr scan --plugin openai-throttling
+
+# Enable multiple plugins during scan
+azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping
 
 # Combine with other scan options
-azqr scan --subscription-id <sub-id> --output-name analysis
+azqr scan --subscription-id <sub-id> --plugin zone-mapping --output-name analysis
 ```
+
+**When to Use Scan Integration:**
+- Need both compliance recommendations and plugin analysis
+- Want consolidated report with all data
+- Running comprehensive assessments
 
 ### Listing Available Plugins
 
@@ -166,7 +198,13 @@ Each internal plugin creates a dedicated worksheet in the Excel workbook:
 - **Carbon Emissions** sheet
 
 ```bash
-azqr scan --openai-throttling --carbon-emissions --zone-mapping
+# Run plugins as standalone commands (fastest)
+azqr openai-throttling
+azqr carbon-emissions
+azqr zone-mapping
+
+# Or run with full scan
+azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping
 # Generates: azqr_action_plan_YYYY_MM_DD_THHMMSS.xlsx
 ```
 
@@ -175,7 +213,11 @@ azqr scan --openai-throttling --carbon-emissions --zone-mapping
 Plugin results are included in the `pluginResults` array:
 
 ```bash
-azqr scan --zone-mapping --json
+# Run as standalone command
+azqr zone-mapping --json
+
+# Or run with full scan
+azqr scan --plugin zone-mapping --json
 ```
 
 **JSON Structure**:
@@ -202,7 +244,11 @@ azqr scan --zone-mapping --json
 Plugin results are exported to separate CSV files:
 
 ```bash
-azqr scan --zone-mapping --csv
+# Run as standalone command
+azqr zone-mapping --csv
+
+# Or run with full scan
+azqr scan --plugin zone-mapping --csv
 # Generates: 
 #   <filename>.zone-mapping.csv
 #   <filename>.recommendations.csv
@@ -215,8 +261,13 @@ azqr scan --zone-mapping --csv
 View plugin results interactively using the `show` command:
 
 ```bash
-# Generate report with plugins
-azqr scan --openai-throttling --carbon-emissions --zone-mapping --output-name analysis
+# Generate report with plugins (standalone commands)
+azqr openai-throttling --output-name analysis
+azqr carbon-emissions --output-name analysis
+azqr zone-mapping --output-name analysis
+
+# Or generate with full scan
+azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --output-name analysis
 
 # Launch interactive viewer
 azqr show -f analysis.xlsx --open
