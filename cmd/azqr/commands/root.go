@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Azure/azqr/internal/models"
 	"github.com/spf13/cobra"
 
 	"github.com/Azure/azqr/internal/plugins"
@@ -37,6 +38,25 @@ func Execute() {
 	// Load all YAML plugins after logger is configured
 	if err := plugins.LoadAll(); err != nil {
 		log.Warn().Err(err).Msg("Failed to load some plugins")
+	}
+
+	// Attach plugin commands as top-level commands and set their Run functions
+	registry := plugins.GetRegistry()
+	for _, plugin := range registry.List() {
+		if plugin.Command != nil {
+			pluginName := plugin.Metadata.Name
+			// Capture pluginName in closure properly
+			pName := pluginName
+			// Set the Run function to enable only this plugin
+			plugin.Command.Run = func(cmd *cobra.Command, args []string) {
+				// Enable only this specific plugin
+				// Note: We can't use Set() for StringArray flags, so we pass it directly to scan
+				scannerKeys, _ := models.GetScanners()
+				// Create a custom scan with this plugin enabled
+				scanWithPlugin(cmd, scannerKeys, pName)
+			}
+			rootCmd.AddCommand(plugin.Command)
+		}
 	}
 
 	cobra.CheckErr(rootCmd.Execute())

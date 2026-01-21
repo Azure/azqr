@@ -12,10 +12,18 @@ import (
 )
 
 func renderResources(f *excelize.File, data *renderers.ReportData) {
+	if !data.ScanEnabled {
+		log.Debug().Msg("Skipping Inventory. Feature is disabled")
+		return
+	}
 	createResourcesSheet(f, "Inventory", data.ResourcesTable())
 }
 
 func renderExcludedResources(f *excelize.File, data *renderers.ReportData) {
+	if !data.ScanEnabled {
+		log.Debug().Msg("Skipping OutOfScope. Feature is disabled")
+		return
+	}
 	createResourcesSheet(f, "OutOfScope", data.ExcludedResourcesTable())
 }
 

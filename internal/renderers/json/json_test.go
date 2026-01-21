@@ -115,6 +115,12 @@ func TestCreateJsonReport(t *testing.T) {
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
 		ResourceTypeCount:       []models.ResourceTypeCount{},
+		ScanEnabled:             true,
+		DefenderEnabled:         true,
+		PolicyEnabled:           true,
+		ArcEnabled:              true,
+		AdvisorEnabled:          true,
+		CostEnabled:             true,
 	}
 
 	// Create the report
@@ -178,6 +184,12 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
 		ResourceTypeCount:       []models.ResourceTypeCount{},
+		ScanEnabled:             false,
+		DefenderEnabled:         false,
+		PolicyEnabled:           false,
+		ArcEnabled:              false,
+		AdvisorEnabled:          false,
+		CostEnabled:             false,
 		PluginResults: []renderers.PluginResult{
 			{
 				PluginName:  "test-plugin",
@@ -209,5 +221,26 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 	// Verify plugin data exists
 	if _, exists := result["externalPlugins"]; !exists {
 		t.Error("Expected 'externalPlugins' key not found in JSON output")
+	}
+
+	// Verify that disabled features are NOT in the output
+	disabledKeys := []string{
+		"recommendations",
+		"impacted",
+		"resourceType",
+		"inventory",
+		"advisor",
+		"azurePolicy",
+		"arcSQL",
+		"defender",
+		"defenderRecommendations",
+		"costs",
+		"outOfScope",
+	}
+
+	for _, key := range disabledKeys {
+		if _, exists := result[key]; exists {
+			t.Errorf("Key %s should not be present when feature is disabled", key)
+		}
 	}
 }

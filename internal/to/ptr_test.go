@@ -13,6 +13,7 @@ func TestPtr(t *testing.T) {
 		ptr := Ptr(val)
 		if ptr == nil {
 			t.Fatal("Ptr() returned nil")
+			return
 		}
 		if *ptr != val {
 			t.Errorf("Ptr() = %v, want %v", *ptr, val)
@@ -24,6 +25,7 @@ func TestPtr(t *testing.T) {
 		ptr := Ptr(val)
 		if ptr == nil {
 			t.Fatal("Ptr() returned nil")
+			return
 		}
 		if *ptr != val {
 			t.Errorf("Ptr() = %v, want %v", *ptr, val)
@@ -35,6 +37,7 @@ func TestPtr(t *testing.T) {
 		ptr := Ptr(val)
 		if ptr == nil {
 			t.Fatal("Ptr() returned nil")
+			return
 		}
 		if *ptr != val {
 			t.Errorf("Ptr() = %v, want %v", *ptr, val)
@@ -50,6 +53,7 @@ func TestPtr(t *testing.T) {
 		ptr := Ptr(val)
 		if ptr == nil {
 			t.Fatal("Ptr() returned nil")
+			return
 		}
 		if ptr.Name != val.Name || ptr.Age != val.Age {
 			t.Errorf("Ptr() = %v, want %v", *ptr, val)
@@ -61,6 +65,7 @@ func TestPtr(t *testing.T) {
 		ptr := Ptr(val)
 		if ptr == nil {
 			t.Fatal("Ptr() returned nil")
+			return
 		}
 		if *ptr != val {
 			t.Errorf("Ptr() = %v, want %v", *ptr, val)
@@ -72,6 +77,7 @@ func TestPtr(t *testing.T) {
 		ptr := Ptr(val)
 		if ptr == nil {
 			t.Fatal("Ptr() returned nil")
+			return
 		}
 		if *ptr != val {
 			t.Errorf("Ptr() = %v, want %v", *ptr, val)

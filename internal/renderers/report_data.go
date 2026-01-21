@@ -33,6 +33,7 @@ type (
 		DefenderEnabled bool
 		AdvisorEnabled  bool
 		CostEnabled     bool
+		ScanEnabled     bool
 	}
 
 	// PluginResult represents data from an external plugin
@@ -360,7 +361,7 @@ func (rd *ReportData) DefenderRecommendationsTable() [][]string {
 	return rows
 }
 
-func NewReportData(outputFile string, mask bool, policyEnabled bool, arcEnabled bool, defenderEnabled bool, advisorEnabled bool, costEnabled bool) ReportData {
+func NewReportData(outputFile string, mask bool, policyEnabled bool, arcEnabled bool, defenderEnabled bool, advisorEnabled bool, costEnabled bool, scanEnabled bool) ReportData {
 	return ReportData{
 		OutputFileName:          outputFile,
 		Mask:                    mask,
@@ -381,6 +382,7 @@ func NewReportData(outputFile string, mask bool, policyEnabled bool, arcEnabled 
 		DefenderEnabled:   defenderEnabled,
 		AdvisorEnabled:    advisorEnabled,
 		CostEnabled:       costEnabled,
+		ScanEnabled:       scanEnabled,
 	}
 }
 

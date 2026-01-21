@@ -119,10 +119,6 @@ func (r *Registry) AttachCommands(parentCmd *cobra.Command) int {
 		if plugin.Command != nil {
 			parentCmd.AddCommand(plugin.Command)
 			attached++
-			log.Debug().
-				Str("plugin", plugin.Metadata.Name).
-				Str("command", plugin.Command.Use).
-				Msg("Plugin command attached")
 		}
 	}
 

@@ -36,6 +36,14 @@ func CreateExcelReport(data *renderers.ReportData) {
 	renderCosts(f, data)
 	renderExternalPlugins(f, data)
 
+	// Delete the default "Sheet1" if other sheets were created
+	sheets := f.GetSheetList()
+	if len(sheets) > 1 {
+		if err := f.DeleteSheet("Sheet1"); err != nil {
+			log.Warn().Err(err).Msg("Failed to delete default sheet")
+		}
+	}
+
 	if err := f.SaveAs(filename); err != nil {
 		log.Fatal().Err(err).Msg("Failed to save Excel file")
 	}

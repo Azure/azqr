@@ -18,7 +18,7 @@ func TestCreateCsvReport(t *testing.T) {
 	// Create temporary directory for test output
 	tmpDir := t.TempDir()
 
-	// Create test data with proper initialization
+	// Create test data with proper initialization and feature flags enabled
 	data := &renderers.ReportData{
 		OutputFileName:          filepath.Join(tmpDir, "test_report"),
 		Aprl:                    []*models.AprlResult{},
@@ -32,6 +32,13 @@ func TestCreateCsvReport(t *testing.T) {
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
 		ResourceTypeCount:       []models.ResourceTypeCount{},
+		// Enable all features for testing
+		ScanEnabled:     true,
+		DefenderEnabled: true,
+		PolicyEnabled:   true,
+		ArcEnabled:      true,
+		AdvisorEnabled:  true,
+		CostEnabled:     true,
 	}
 
 	// Create the report
@@ -79,6 +86,13 @@ func TestCreateCsvReportWithPlugins(t *testing.T) {
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
 		ResourceTypeCount:       []models.ResourceTypeCount{},
+		// Disable standard features for plugin-only test
+		ScanEnabled:     false,
+		DefenderEnabled: false,
+		PolicyEnabled:   false,
+		ArcEnabled:      false,
+		AdvisorEnabled:  false,
+		CostEnabled:     false,
 		PluginResults: []renderers.PluginResult{
 			{
 				PluginName:  "test-plugin",

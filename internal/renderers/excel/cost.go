@@ -14,7 +14,7 @@ import (
 func renderCosts(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.CostEnabled {
-		log.Info().Msg("Skipping Costs. Feature is disabled")
+		log.Debug().Msg("Skipping Costs. Feature is disabled")
 		return
 	}
 

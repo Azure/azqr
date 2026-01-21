@@ -14,7 +14,7 @@ import (
 func renderDefender(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.DefenderEnabled {
-		log.Info().Msg("Skipping Defender. Feature is disabled")
+		log.Debug().Msg("Skipping Defender. Feature is disabled")
 		return
 	}
 
@@ -53,7 +53,7 @@ func renderDefender(f *excelize.File, data *renderers.ReportData) {
 func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.DefenderEnabled {
-		log.Info().Msg("Skipping DefenderRecommendations. Feature is disabled")
+		log.Debug().Msg("Skipping DefenderRecommendations. Feature is disabled")
 		return
 	}
 

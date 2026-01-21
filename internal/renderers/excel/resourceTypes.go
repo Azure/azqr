@@ -13,6 +13,12 @@ import (
 
 func renderResourceTypes(f *excelize.File, data *renderers.ReportData) {
 	sheetName := "ResourceTypes"
+
+	if !data.ScanEnabled {
+		log.Debug().Msgf("Skipping %s. Feature is disabled", sheetName)
+		return
+	}
+
 	_, err := f.NewSheet(sheetName)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to create %s sheet", sheetName)

@@ -146,6 +146,7 @@ func TestCompareExcelFiles_BasicComparison(t *testing.T) {
 	// Test Recommendations sheet
 	if recsComparison == nil {
 		t.Fatal("Recommendations sheet comparison not found")
+		return
 	}
 	if recsComparison.OldRowCount != 6 {
 		t.Errorf("Recommendations OldRowCount: expected 6, got %d", recsComparison.OldRowCount)
@@ -160,6 +161,7 @@ func TestCompareExcelFiles_BasicComparison(t *testing.T) {
 	// Test Inventory sheet
 	if invComparison == nil {
 		t.Fatal("Inventory sheet comparison not found")
+		return
 	}
 	if invComparison.OldRowCount != 5 {
 		t.Errorf("Inventory OldRowCount: expected 5, got %d", invComparison.OldRowCount)
@@ -171,6 +173,7 @@ func TestCompareExcelFiles_BasicComparison(t *testing.T) {
 	// Test new sheet (only in file2)
 	if newSheetComparison == nil {
 		t.Fatal("NewSheet comparison not found")
+		return
 	}
 	if newSheetComparison.OldRowCount != 0 {
 		t.Errorf("NewSheet OldRowCount: expected 0, got %d", newSheetComparison.OldRowCount)
@@ -215,6 +218,7 @@ func TestCompareExcelFiles_DuplicateDetection(t *testing.T) {
 
 	if testSheetComparison == nil {
 		t.Fatal("TestSheet comparison not found")
+		return
 	}
 
 	// Check duplicate detection
@@ -268,6 +272,7 @@ func TestCompareExcelFiles_NoDuplicates(t *testing.T) {
 
 	if testSheetComparison == nil {
 		t.Fatal("TestSheet comparison not found")
+		return
 	}
 
 	// Check no duplicates detected

@@ -15,7 +15,7 @@ import (
 func renderArcSQL(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.ArcEnabled {
-		log.Info().Msg("Skipping Arc SQL. Feature is disabled")
+		log.Debug().Msg("Skipping Arc SQL. Feature is disabled")
 		return
 	}
 

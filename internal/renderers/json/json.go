@@ -17,18 +17,53 @@ func CreateJsonReport(data *renderers.ReportData) {
 	log.Info().Msgf("Generating Report: %s", filename)
 
 	// Build consolidated JSON structure
-	consolidatedReport := map[string]interface{}{
-		"recommendations":         convertToJSON(data.RecommendationsTable()),
-		"impacted":                convertToJSON(data.ImpactedTable()),
-		"resourceType":            convertToJSON(data.ResourceTypesTable()),
-		"inventory":               convertToJSON(data.ResourcesTable()),
-		"advisor":                 convertToJSON(data.AdvisorTable()),
-		"azurePolicy":             convertToJSON(data.AzurePolicyTable()),
-		"arcSQL":                  convertToJSON(data.ArcSQLTable()),
-		"defender":                convertToJSON(data.DefenderTable()),
-		"defenderRecommendations": convertToJSON(data.DefenderRecommendationsTable()),
-		"costs":                   convertToJSON(data.CostTable()),
-		"outOfScope":              convertToJSON(data.ExcludedResourcesTable()),
+	consolidatedReport := map[string]interface{}{}
+
+	// Only include AZQR-related data if the feature is enabled
+	if data.ScanEnabled {
+		consolidatedReport["recommendations"] = convertToJSON(data.RecommendationsTable())
+		consolidatedReport["impacted"] = convertToJSON(data.ImpactedTable())
+		consolidatedReport["resourceType"] = convertToJSON(data.ResourceTypesTable())
+		consolidatedReport["inventory"] = convertToJSON(data.ResourcesTable())
+		consolidatedReport["outOfScope"] = convertToJSON(data.ExcludedResourcesTable())
+	} else {
+		log.Debug().Msg("Skipping AZQR data in JSON. Feature is disabled")
+	}
+
+	// Only include Advisor data if the feature is enabled
+	if data.AdvisorEnabled {
+		consolidatedReport["advisor"] = convertToJSON(data.AdvisorTable())
+	} else {
+		log.Debug().Msg("Skipping Advisor data in JSON. Feature is disabled")
+	}
+
+	// Only include Azure Policy data if the feature is enabled
+	if data.PolicyEnabled {
+		consolidatedReport["azurePolicy"] = convertToJSON(data.AzurePolicyTable())
+	} else {
+		log.Debug().Msg("Skipping Azure Policy data in JSON. Feature is disabled")
+	}
+
+	// Only include Arc SQL data if the feature is enabled
+	if data.ArcEnabled {
+		consolidatedReport["arcSQL"] = convertToJSON(data.ArcSQLTable())
+	} else {
+		log.Debug().Msg("Skipping Arc SQL data in JSON. Feature is disabled")
+	}
+
+	// Only include Defender data if the feature is enabled
+	if data.DefenderEnabled {
+		consolidatedReport["defender"] = convertToJSON(data.DefenderTable())
+		consolidatedReport["defenderRecommendations"] = convertToJSON(data.DefenderRecommendationsTable())
+	} else {
+		log.Debug().Msg("Skipping Defender data in JSON. Feature is disabled")
+	}
+
+	// Only include Cost data if the feature is enabled
+	if data.CostEnabled {
+		consolidatedReport["costs"] = convertToJSON(data.CostTable())
+	} else {
+		log.Debug().Msg("Skipping Cost data in JSON. Feature is disabled")
 	}
 
 	// Add external plugin results
