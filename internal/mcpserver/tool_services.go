@@ -16,3 +16,8 @@ func handleServiceTypeTool(ctx context.Context, request mcp.CallToolRequest) (*m
 
 	return mcp.NewToolResultText(output), nil
 }
+
+// ExecuteServicesTool is a public wrapper for handleServiceTypeTool that can be called from other packages
+func ExecuteServicesTool(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return handleServiceTypeTool(ctx, request)
+}
