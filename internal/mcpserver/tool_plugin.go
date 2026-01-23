@@ -23,47 +23,55 @@ type PluginScanArgs struct {
 // scanPluginHandler creates a handler for plugin-specific scans
 func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequest, PluginScanArgs) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest, args PluginScanArgs) (*mcp.CallToolResult, error) {
-		currentDir, err := getCurrentFolder(ctx)
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to get current working directory")
-		}
+		return executePluginScan(ctx, pluginName, args)
+	}
+}
 
-		// Use plugin-only mode by setting scannerKeys to the specific plugin
-		scannerKeys := args.Services
-		filters := models.LoadFilters("", scannerKeys)
-		params := internal.NewScanParams()
+// executePluginScan performs the actual plugin scan logic
+func executePluginScan(ctx context.Context, pluginName string, args PluginScanArgs) (*mcp.CallToolResult, error) {
+	currentDir, err := getCurrentFolder(ctx)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to get current working directory")
+	}
 
-		// Plugin-only mode: disable defender, advisor, cost, policy, arc
-		params.Defender = false
-		params.Advisor = false
-		params.Cost = false
-		params.Policy = false
-		params.Arc = false
-		params.Mask = true
+	// Use plugin-only mode by setting scannerKeys to the specific plugin
+	scannerKeys := args.Services
+	filters := models.LoadFilters("", scannerKeys)
+	params := internal.NewScanParams()
 
-		// Override mask if provided
-		if args.Mask != nil {
-			params.Mask = *args.Mask
-		}
+	// Plugin-only mode: disable defender, advisor, cost, policy, arc
+	params.Defender = false
+	params.Advisor = false
+	params.Cost = false
+	params.Policy = false
+	params.Arc = false
+	params.Mask = true
 
-		params.Xlsx = true
-		params.Json = true
-		params.ScannerKeys = scannerKeys
-		params.Filters = filters
-		params.OutputName = fmt.Sprintf("%s/azqr_%s_results", currentDir, pluginName)
+	// Override mask if provided
+	if args.Mask != nil {
+		params.Mask = *args.Mask
+	}
 
-		// Enable the specific plugin for execution
-		params.EnabledInternalPlugins = map[string]bool{
-			pluginName: true,
-		}
+	params.Xlsx = true
+	params.Json = true
+	params.ScannerKeys = scannerKeys
+	params.Filters = filters
+	params.OutputName = fmt.Sprintf("%s/azqr_%s_results", currentDir, pluginName)
 
-		scanner := internal.Scanner{}
-		r := scanner.ScanPlugins(params)
+	// Enable the specific plugin for execution
+	params.EnabledInternalPlugins = map[string]bool{
+		pluginName: true,
+	}
 
-		fileName := params.OutputName + ".xlsx"
-		uri := fmt.Sprintf("file://%s", fileName)
-		uriJSON := fmt.Sprintf("file://%s.json", params.OutputName)
+	scanner := internal.Scanner{}
+	r := scanner.ScanPlugins(params)
 
+	fileName := params.OutputName + ".xlsx"
+	uri := fmt.Sprintf("file://%s", fileName)
+	uriJSON := fmt.Sprintf("file://%s.json", params.OutputName)
+
+	// Only register resources if MCP server is running (s is initialized)
+	if s != nil {
 		// Register the scan results as a resource
 		jsonResults := mcp.NewResource(
 			uriJSON,
@@ -114,9 +122,14 @@ func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequ
 				},
 			}, nil
 		})
-
-		// Return both the scan results and the resource URIs
-		resultText := fmt.Sprintf("%s\n\nScan results saved to:\n- Excel: %s\n- JSON: %s", r, uri, uriJSON)
-		return mcp.NewToolResultText(resultText), nil
 	}
+
+	// Return both the scan results and the resource URIs
+	resultText := fmt.Sprintf("%s\n\nScan results saved to:\n- Excel: %s\n- JSON: %s", r, uri, uriJSON)
+	return mcp.NewToolResultText(resultText), nil
+}
+
+// ExecutePluginScanTool is a public wrapper for plugin scans that can be called from other packages
+func ExecutePluginScanTool(ctx context.Context, pluginName string, args PluginScanArgs) (*mcp.CallToolResult, error) {
+	return executePluginScan(ctx, pluginName, args)
 }

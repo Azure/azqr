@@ -18,3 +18,8 @@ func handleCatalogTool(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 
 	return mcp.NewToolResultText(string(jsonBytes)), nil
 }
+
+// ExecuteCatalogTool is a public wrapper for handleCatalogTool that can be called from other packages
+func ExecuteCatalogTool(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return handleCatalogTool(ctx, request)
+}

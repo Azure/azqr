@@ -134,15 +134,20 @@ func RegisterTools(s *server.MCPServer) {
 	s.AddTool(scan, mcp.NewTypedToolHandler(scanHandler))
 
 	// Tool: Get recommendation catalog
-	catalogTool := mcp.NewTool("get-recommendations-catalog",
-		mcp.WithDescription("Get the complete catalog of AZQR recommendations"),
+	emptySchema := []byte(`{"type": "object", "properties": {}, "required": []}`)
+	catalogTool := mcp.NewToolWithRawSchema(
+		"get-recommendations-catalog",
+		"Get the complete catalog of AZQR recommendations",
+		emptySchema,
 	)
 
 	s.AddTool(catalogTool, handleCatalogTool)
 
 	// Tool: Get supported services
-	servicesTool := mcp.NewTool("get-supported-services",
-		mcp.WithDescription("Get the list of Azure services supported by AZQR"),
+	servicesTool := mcp.NewToolWithRawSchema(
+		"get-supported-services",
+		"Get the list of Azure services supported by AZQR",
+		emptySchema,
 	)
 
 	s.AddTool(servicesTool, handleServiceTypeTool)
