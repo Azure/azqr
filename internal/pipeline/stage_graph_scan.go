@@ -140,16 +140,6 @@ func (s *GraphScanStage) filterServiceScanners(
 		for _, resourceType := range scanner.ResourceTypes() {
 			resourceType = strings.ToLower(resourceType)
 
-			if strings.EqualFold(resourceType, "Microsoft.Resources") {
-				// Always include the generic resource scanner
-				filteredScanners = append(filteredScanners, scanner)
-				add = false
-				log.Info().
-					Str("resourceType", resourceType).
-					Msgf("Including scanner")
-				continue
-			}
-
 			// Check if the resource type exists across any subscription
 			if count, exists := resourceTypes[resourceType]; !exists || count <= 0 {
 				log.Debug().
@@ -165,6 +155,9 @@ func (s *GraphScanStage) filterServiceScanners(
 			}
 		}
 	}
+
+	// Always include the generic resource scanner
+	filteredScanners = append(filteredScanners, models.ScannerList["resource"][0])
 
 	log.Debug().
 		Int("original", len(serviceScanners)).

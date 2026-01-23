@@ -32,7 +32,7 @@ func TestResourceNoTagsViolation(t *testing.T) {
 	result := azqr.RunScan(helpers.ScanParams{
 		SubscriptionID: subscriptionID,
 		ResourceGroup:  resourceGroupName,
-		Services:       []string{"resource", "st"},                        // Scan resources and storage accounts
+		Services:       []string{"st"},                        // Scan resources and storage accounts
 		Stages:         []string{"-diagnostics", "-advisor", "-defender"}, // Skip stages
 	})
 
