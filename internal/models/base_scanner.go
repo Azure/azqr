@@ -10,8 +10,9 @@ type BaseScanner struct {
 }
 
 // NewBaseScanner creates a new base scanner with specified resource types
-func NewBaseScanner(resourceTypes ...string) BaseScanner {
-	return BaseScanner{
+// This returns a ready-to-use IAzureScanner implementation without needing custom wrapper structs
+func NewBaseScanner(resourceTypes ...string) IAzureScanner {
+	return &BaseScanner{
 		resourceTypes: resourceTypes,
 	}
 }

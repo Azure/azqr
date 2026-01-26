@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos"
 )
 
-// GetRecommendations - Returns the rules for the CosmosDBScanner
-func (a *CosmosDBScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations - Returns the rules for the CosmosDB Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"cosmos-001": {
 			RecommendationID: "cosmos-001",

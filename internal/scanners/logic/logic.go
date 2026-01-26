@@ -4,70 +4,49 @@
 package logic
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/logic/armlogic"
 )
 
 func init() {
-	models.ScannerList["logic"] = []models.IAzureScanner{&LogicAppScanner{}}
+	models.ScannerList["logic"] = []models.IAzureScanner{NewLogicAppScanner()}
 }
 
-// LogicAppScanner - Scanner for LogicApp
-type LogicAppScanner struct {
-	config *models.ScannerConfig
-	client *armlogic.WorkflowsClient
-}
+// NewLogicAppScanner creates a new Logic App Scanner
+func NewLogicAppScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armlogic.Workflow, *armlogic.WorkflowsClient]{
+			ResourceTypes: []string{"Microsoft.Logic/workflows"},
 
-// Init - Initializes the LogicAppScanner
-func (c *LogicAppScanner) Init(config *models.ScannerConfig) error {
-	c.config = config
-	var err error
-	c.client, err = armlogic.NewWorkflowsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armlogic.WorkflowsClient, error) {
+				return armlogic.NewWorkflowsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
+			},
 
-// Scan - Scans all LogicApps in a Resource Group
-func (c *LogicAppScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armlogic.WorkflowsClient, ctx context.Context) ([]*armlogic.Workflow, error) {
+				pager := client.NewListBySubscriptionPager(nil)
+				logicApps := make([]*armlogic.Workflow, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					logicApps = append(logicApps, resp.Value...)
+				}
+				return logicApps, nil
+			},
 
-	vnets, err := c.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, w := range vnets {
-		rr := engine.EvaluateRecommendations(rules, w, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
-			ServiceName:      *w.Name,
-			Type:             *w.Type,
-			Location:         *w.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (c *LogicAppScanner) list() ([]*armlogic.Workflow, error) {
-	pager := c.client.NewListBySubscriptionPager(nil)
-
-	logicApps := make([]*armlogic.Workflow, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		logicApps = append(logicApps, resp.Value...)
-	}
-	return logicApps, nil
-}
-
-func (a *LogicAppScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Logic/workflows"}
+			ExtractResourceInfo: func(resource *armlogic.Workflow) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					resource.ID,
+					resource.Name,
+					resource.Location,
+					resource.Type,
+				)
+			},
+		},
+	)
 }

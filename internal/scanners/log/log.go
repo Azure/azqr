@@ -4,70 +4,53 @@
 package log
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights/v2"
 )
 
 func init() {
-	models.ScannerList["log"] = []models.IAzureScanner{&LogAnalyticsScanner{}}
+	models.ScannerList["log"] = []models.IAzureScanner{NewLogAnalyticsScanner()}
 }
 
-// LogAnalyticsScanner - Scanner for Log Analytics workspace
-type LogAnalyticsScanner struct {
-	config *models.ScannerConfig
-	client *armoperationalinsights.WorkspacesClient
-}
+// NewLogAnalyticsScanner - Creates a new Log Analytics scanner
+func NewLogAnalyticsScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armoperationalinsights.Workspace, *armoperationalinsights.WorkspacesClient]{
+			ResourceTypes: []string{"Microsoft.OperationalInsights/workspaces"},
 
-// Init - Initializes the Log Analytics workspace Scanner
-func (a *LogAnalyticsScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armoperationalinsights.NewWorkspacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armoperationalinsights.WorkspacesClient, error) {
+				return armoperationalinsights.NewWorkspacesClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Log Analytics workspace in a Resource Group
-func (c *LogAnalyticsScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armoperationalinsights.WorkspacesClient, ctx context.Context) ([]*armoperationalinsights.Workspace, error) {
+				pager := client.NewListPager(nil)
+				svcs := make([]*armoperationalinsights.Workspace, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					svcs = append(svcs, resp.Value...)
+				}
+				return svcs, nil
+			},
 
-	svcs, err := c.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, w := range svcs {
-		rr := engine.EvaluateRecommendations(rules, w, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
-			ServiceName:      *w.Name,
-			Type:             *w.Type,
-			Location:         *w.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (c *LogAnalyticsScanner) list() ([]*armoperationalinsights.Workspace, error) {
-	pager := c.client.NewListPager(nil)
-
-	svcs := make([]*armoperationalinsights.Workspace, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		svcs = append(svcs, resp.Value...)
-	}
-	return svcs, nil
-}
-
-func (a *LogAnalyticsScanner) ResourceTypes() []string {
-	return []string{"Microsoft.OperationalInsights/workspaces"}
+			ExtractResourceInfo: func(workspace *armoperationalinsights.Workspace) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					workspace.ID,
+					workspace.Name,
+					workspace.Location,
+					workspace.Type,
+				)
+			},
+		},
+	)
 }

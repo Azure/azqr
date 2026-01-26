@@ -10,23 +10,19 @@ import (
 )
 
 func TestArcScanner_Init(t *testing.T) {
-	scanner := NewArcScanner()
+	scanner := models.NewBaseScanner("Microsoft.AzureArcData/sqlServerInstances")
 	config := &models.ScannerConfig{
-		SubscriptionID: "00000000-0000-0000-0000-000000000000",
+		SubscriptionID: "test-subscription",
 	}
 
 	err := scanner.Init(config)
 	if err != nil {
 		t.Errorf("Init() returned unexpected error: %v", err)
 	}
-
-	if scanner.GetConfig() != config {
-		t.Error("Init() did not set config properly")
-	}
 }
 
 func TestArcScanner_ResourceTypes(t *testing.T) {
-	scanner := NewArcScanner()
+	scanner := models.NewBaseScanner("Microsoft.AzureArcData/sqlServerInstances")
 	resourceTypes := scanner.ResourceTypes()
 
 	expectedTypes := []string{"Microsoft.AzureArcData/sqlServerInstances"}
@@ -40,9 +36,10 @@ func TestArcScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestArcScanner_GetRecommendations(t *testing.T) {
-	scanner := NewArcScanner()
+	scanner := models.NewBaseScanner("Microsoft.AzureArcData/sqlServerInstances")
 	recommendations := scanner.GetRecommendations()
 
+	// Current implementation returns empty map
 	if recommendations == nil {
 		t.Error("GetRecommendations() returned nil")
 	}

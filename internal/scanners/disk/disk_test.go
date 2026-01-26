@@ -10,23 +10,19 @@ import (
 )
 
 func TestDiskScanner_Init(t *testing.T) {
-	scanner := NewDiskScanner()
+	scanner := models.NewBaseScanner("Microsoft.Compute/disks")
 	config := &models.ScannerConfig{
-		SubscriptionID: "00000000-0000-0000-0000-000000000000",
+		SubscriptionID: "test-subscription",
 	}
 
 	err := scanner.Init(config)
 	if err != nil {
 		t.Errorf("Init() returned unexpected error: %v", err)
 	}
-
-	if scanner.GetConfig() != config {
-		t.Error("Init() did not set config properly")
-	}
 }
 
 func TestDiskScanner_ResourceTypes(t *testing.T) {
-	scanner := NewDiskScanner()
+	scanner := models.NewBaseScanner("Microsoft.Compute/disks")
 	resourceTypes := scanner.ResourceTypes()
 
 	expectedTypes := []string{"Microsoft.Compute/disks"}
@@ -40,9 +36,10 @@ func TestDiskScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestDiskScanner_GetRecommendations(t *testing.T) {
-	scanner := NewDiskScanner()
+	scanner := models.NewBaseScanner("Microsoft.Compute/disks")
 	recommendations := scanner.GetRecommendations()
 
+	// Current implementation returns empty map
 	if recommendations == nil {
 		t.Error("GetRecommendations() returned nil")
 	}

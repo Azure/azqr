@@ -11,8 +11,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
-// GetRecommendations - Returns the rules for the AKSScanner
-func (a *AKSScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for the AKS Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"aks-001": {
 			RecommendationID: "aks-001",
