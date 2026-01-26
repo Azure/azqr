@@ -34,7 +34,7 @@ func TestAISearchScanner_Rules(t *testing.T) {
 				target: &armsearch.Service{
 					Properties: &armsearch.ServiceProperties{
 						PrivateEndpointConnections: []*armsearch.PrivateEndpointConnection{
-							&armsearch.PrivateEndpointConnection{},
+							{},
 						},
 					},
 				},

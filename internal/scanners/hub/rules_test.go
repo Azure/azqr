@@ -34,7 +34,7 @@ func TestAIFoundryHubScanner_Rules(t *testing.T) {
 				target: &armmachinelearning.Workspace{
 					Properties: &armmachinelearning.WorkspaceProperties{
 						PrivateEndpointConnections: []*armmachinelearning.PrivateEndpointConnection{
-							&armmachinelearning.PrivateEndpointConnection{},
+							{},
 						},
 					},
 				},
