@@ -233,14 +233,25 @@ func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 				s = append(s, scannerList...)
 			}
 		}
+		log.Debug().
+			Strs("resource_types", filters.Azqr.Include.ResourceTypes).
+			Int("scanners", len(s)).
+			Msg("Loaded scanners by resource types")
 	case len(scannerKeys) >= 1:
 		for _, key := range scannerKeys {
 			if scannerList, exists := ScannerList[key]; exists {
 				s = append(s, scannerList...)
 			}
 		}
+		log.Debug().
+			Strs("scanner_keys", scannerKeys).
+			Int("scanners", len(s)).
+			Msg("Loaded scanners by keys")
 	default:
 		_, s = GetScanners()
+		log.Debug().
+			Int("scanners", len(s)).
+			Msg("Loaded all scanners")
 	}
 
 	filters.Azqr.Scanners = s
