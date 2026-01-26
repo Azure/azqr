@@ -8,22 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["gal"] = []models.IAzureScanner{NewGalleryScanner()}
-}
-
-// NewGalleryScanner creates a new GalleryScanner
-func NewGalleryScanner() *GalleryScanner {
-	return &GalleryScanner{
-		BaseScanner: models.NewBaseScanner("Microsoft.Compute/galleries"),
+	models.ScannerList["gal"] = []models.IAzureScanner{
+		models.NewBaseScanner("Microsoft.Compute/galleries"),
 	}
-}
-
-// GalleryScanner - Scanner for Gallery
-type GalleryScanner struct {
-	models.BaseScanner
-}
-
-// Init - Initializes the Gallery Scanner
-func (a *GalleryScanner) Init(config *models.ScannerConfig) error {
-	return a.BaseScanner.Init(config)
 }

@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn"
 )
 
-// GetRules - Returns the rules for the FrontDoorScanner
-func (a *FrontDoorScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations - Returns the rules for the Front Door Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"afd-001": {
 			RecommendationID: "afd-001",

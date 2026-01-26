@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
-// GetRules - Returns the rules for the ContainerRegistryScanner
-func (a *ContainerRegistryScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for the Container Registry Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"cr-001": {
 			RecommendationID: "cr-001",

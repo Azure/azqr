@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/logic/armlogic"
 )
 
-// GetRecommendations - Returns the rules for the LogicAppScanner
-func (a *LogicAppScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for Logic Apps
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"logic-001": {
 			RecommendationID: "logic-001",

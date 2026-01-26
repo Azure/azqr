@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
-// GetRecommendations - Returns the rules for the ApplicationGatewayScanner
-func (a *ApplicationGatewayScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations - Returns the rules for the Application Gateway Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"agw-005": {
 			RecommendationID: "agw-005",

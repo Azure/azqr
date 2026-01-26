@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/search/armsearch"
 )
 
-// GetRecommendations - Returns the rules for the AISearchScanner
-func (a *AISearchScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations - Returns the rules for the AI Search Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"srch-001": {
 			RecommendationID: "srch-001",

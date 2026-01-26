@@ -4,69 +4,53 @@
 package nw
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	models.ScannerList["nw"] = []models.IAzureScanner{&NetworkWatcherScanner{}}
+	models.ScannerList["nw"] = []models.IAzureScanner{NewNetworkWatcherScanner()}
 }
 
-// NetworkWatcherScanner - Scanner for Network Watcher
-type NetworkWatcherScanner struct {
-	config *models.ScannerConfig
-	client *armnetwork.WatchersClient
-}
+// NewNetworkWatcherScanner - Returns a new NetworkWatcherScanner
+func NewNetworkWatcherScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armnetwork.Watcher, *armnetwork.WatchersClient]{
+			ResourceTypes: []string{"Microsoft.Network/networkWatchers"},
 
-// Init - Initializes the Network Watcher Scanner
-func (a *NetworkWatcherScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armnetwork.NewWatchersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armnetwork.WatchersClient, error) {
+				return armnetwork.NewWatchersClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Network Watcher in a Resource Group
-func (c *NetworkWatcherScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armnetwork.WatchersClient, ctx context.Context) ([]*armnetwork.Watcher, error) {
+				pager := client.NewListAllPager(nil)
+				resources := make([]*armnetwork.Watcher, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					resources = append(resources, resp.Value...)
+				}
+				return resources, nil
+			},
 
-	svcs, err := c.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, w := range svcs {
-		rr := engine.EvaluateRecommendations(rules, w, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
-			ServiceName:      *w.Name,
-			Type:             *w.Type,
-			Location:         *w.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (c *NetworkWatcherScanner) list() ([]*armnetwork.Watcher, error) {
-	pager := c.client.NewListAllPager(nil)
-
-	svcs := make([]*armnetwork.Watcher, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		svcs = append(svcs, resp.Value...)
-	}
-	return svcs, nil
-}
-func (a *NetworkWatcherScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/networkWatchers"}
+			ExtractResourceInfo: func(watcher *armnetwork.Watcher) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					watcher.ID,
+					watcher.Name,
+					watcher.Location,
+					watcher.Type,
+				)
+			},
+		},
+	)
 }

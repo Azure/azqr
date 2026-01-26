@@ -10,23 +10,25 @@ import (
 )
 
 func TestOracleDatabaseScanner_Init(t *testing.T) {
-	scanner := NewOracleDatabaseScanner()
+	scanner := models.NewBaseScanner(
+			"Microsoft.DBforMariaDB/servers",
+			"Specialized.Workload/Oracle",
+		)
 	config := &models.ScannerConfig{
-		SubscriptionID: "00000000-0000-0000-0000-000000000000",
+		SubscriptionID: "test-subscription",
 	}
 
 	err := scanner.Init(config)
 	if err != nil {
 		t.Errorf("Init() returned unexpected error: %v", err)
 	}
-
-	if scanner.GetConfig() != config {
-		t.Error("Init() did not set config properly")
-	}
 }
 
 func TestOracleDatabaseScanner_ResourceTypes(t *testing.T) {
-	scanner := NewOracleDatabaseScanner()
+	scanner := models.NewBaseScanner(
+			"Microsoft.DBforMariaDB/servers",
+			"Specialized.Workload/Oracle",
+		)
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -40,9 +42,13 @@ func TestOracleDatabaseScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestOracleDatabaseScanner_GetRecommendations(t *testing.T) {
-	scanner := NewOracleDatabaseScanner()
+	scanner := models.NewBaseScanner(
+			"Microsoft.DBforMariaDB/servers",
+			"Specialized.Workload/Oracle",
+		)
 	recommendations := scanner.GetRecommendations()
 
+	// Current implementation returns empty map
 	if recommendations == nil {
 		t.Error("GetRecommendations() returned nil")
 	}

@@ -4,73 +4,55 @@
 package aks
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v4"
 )
 
 func init() {
-	models.ScannerList["aks"] = []models.IAzureScanner{&AKSScanner{}}
+	models.ScannerList["aks"] = []models.IAzureScanner{NewAKSScanner()}
 }
 
-// AKSScanner - Scanner for AKS Clusters
-type AKSScanner struct {
-	config         *models.ScannerConfig
-	clustersClient *armcontainerservice.ManagedClustersClient
-}
+// NewAKSScanner creates a new AKS scanner using the generic scanner framework
+func NewAKSScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armcontainerservice.ManagedCluster, *armcontainerservice.ManagedClustersClient]{
+			ResourceTypes: []string{"Microsoft.ContainerService/managedClusters"},
 
-// Init - Initializes the AKSScanner
-func (a *AKSScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.clustersClient, err = armcontainerservice.NewManagedClustersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armcontainerservice.ManagedClustersClient, error) {
+				return armcontainerservice.NewManagedClustersClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all AKS Clusters in a Resource Group
-func (a *AKSScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armcontainerservice.ManagedClustersClient, ctx context.Context) ([]*armcontainerservice.ManagedCluster, error) {
+				pager := client.NewListPager(nil)
+				clusters := make([]*armcontainerservice.ManagedCluster, 0)
 
-	clusters, err := a.listClusters()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					clusters = append(clusters, resp.Value...)
+				}
 
-	for _, c := range clusters {
+				return clusters, nil
+			},
 
-		rr := engine.EvaluateRecommendations(rules, c, scanContext)
+			GetRecommendations: getRecommendations,
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*c.ID),
-			Location:         *c.Location,
-			Type:             *c.Type,
-			ServiceName:      *c.Name,
-			Recommendations:  rr,
-		})
-	}
-
-	return results, nil
-}
-
-func (a *AKSScanner) listClusters() ([]*armcontainerservice.ManagedCluster, error) {
-	pager := a.clustersClient.NewListPager(nil)
-
-	clusters := make([]*armcontainerservice.ManagedCluster, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		clusters = append(clusters, resp.Value...)
-	}
-	return clusters, nil
-}
-
-// GetRules - Returns the rules for the AKSScanner
-func (a *AKSScanner) ResourceTypes() []string {
-	return []string{"Microsoft.ContainerService/managedClusters"}
+			ExtractResourceInfo: func(cluster *armcontainerservice.ManagedCluster) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					cluster.ID,
+					cluster.Name,
+					cluster.Location,
+					cluster.Type,
+				)
+			},
+		},
+	)
 }

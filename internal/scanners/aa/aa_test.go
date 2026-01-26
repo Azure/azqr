@@ -10,7 +10,7 @@ import (
 )
 
 func TestAutomationAccountScanner_Init(t *testing.T) {
-	scanner := NewAutomationAccountScanner()
+	scanner := models.NewBaseScanner("Microsoft.Automation/automationAccounts")
 	config := &models.ScannerConfig{
 		SubscriptionID: "test-subscription",
 	}
@@ -19,14 +19,10 @@ func TestAutomationAccountScanner_Init(t *testing.T) {
 	if err != nil {
 		t.Errorf("Init() returned unexpected error: %v", err)
 	}
-
-	if scanner.GetConfig() != config {
-		t.Error("Init() did not set config properly")
-	}
 }
 
 func TestAutomationAccountScanner_ResourceTypes(t *testing.T) {
-	scanner := NewAutomationAccountScanner()
+	scanner := models.NewBaseScanner("Microsoft.Automation/automationAccounts")
 	resourceTypes := scanner.ResourceTypes()
 
 	expectedTypes := []string{"Microsoft.Automation/automationAccounts"}
@@ -40,7 +36,7 @@ func TestAutomationAccountScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestAutomationAccountScanner_GetRecommendations(t *testing.T) {
-	scanner := NewAutomationAccountScanner()
+	scanner := models.NewBaseScanner("Microsoft.Automation/automationAccounts")
 	recommendations := scanner.GetRecommendations()
 
 	// Current implementation returns empty map

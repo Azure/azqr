@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
-// GetRecommendations - Returns the rules for the VirtualNetworkScanner
-func (a *VirtualNetworkScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for the Virtual Network Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"vnet-001": {
 			RecommendationID: "vnet-001",
