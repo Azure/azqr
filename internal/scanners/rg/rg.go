@@ -8,22 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["rg"] = []models.IAzureScanner{NewResourceGroupScanner()}
-}
-
-// NewResourceGroupScanner creates a new ResourceGroupScanner
-func NewResourceGroupScanner() *ResourceGroupScanner {
-	return &ResourceGroupScanner{
-		BaseScanner: models.NewBaseScanner("Microsoft.Resources/resourceGroups"),
+	models.ScannerList["rg"] = []models.IAzureScanner{
+		models.NewBaseScanner("Microsoft.Resources/resourceGroups"),
 	}
-}
-
-// ResourceGroupScanner - Scanner for Resource Groups
-type ResourceGroupScanner struct {
-	models.BaseScanner
-}
-
-// Init - Initializes the Resource Groups Scanner
-func (a *ResourceGroupScanner) Init(config *models.ScannerConfig) error {
-	return a.BaseScanner.Init(config)
 }

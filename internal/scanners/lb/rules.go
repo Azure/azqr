@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
-// GetRecommendations - Returns the rules for the LoadBalancerScanner
-func (a *LoadBalancerScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for the Load Balancer Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"lb-001": {
 			RecommendationID: "lb-001",
