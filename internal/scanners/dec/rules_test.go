@@ -162,8 +162,7 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &DataExplorerScanner{}
-			rules := s.GetRecommendations()
+			rules := getRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,

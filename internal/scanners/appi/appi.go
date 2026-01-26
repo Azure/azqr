@@ -4,73 +4,56 @@
 package appi
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights"
 )
 
 func init() {
-	models.ScannerList["appi"] = []models.IAzureScanner{&AppInsightsScanner{}}
+	models.ScannerList["appi"] = []models.IAzureScanner{NewAppInsightsScanner()}
 }
 
-// AppInsightsScanner - Scanner for Front Door
-type AppInsightsScanner struct {
-	config *models.ScannerConfig
-	client *armapplicationinsights.ComponentsClient
-}
+// NewAppInsightsScanner - Creates a new Application Insights scanner
+func NewAppInsightsScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armapplicationinsights.Component, *armapplicationinsights.ComponentsClient]{
+			ResourceTypes: []string{
+				"Microsoft.Insights/components",
+				"Microsoft.Insights/activityLogAlerts",
+			},
 
-// Init - Initializes the Application Insights Scanner
-func (a *AppInsightsScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armapplicationinsights.NewComponentsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armapplicationinsights.ComponentsClient, error) {
+				return armapplicationinsights.NewComponentsClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Application Insights in a Resource Group
-func (a *AppInsightsScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armapplicationinsights.ComponentsClient, ctx context.Context) ([]*armapplicationinsights.Component, error) {
+				pager := client.NewListPager(nil)
+				results := make([]*armapplicationinsights.Component, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					results = append(results, resp.Value...)
+				}
+				return results, nil
+			},
 
-	gateways, err := a.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, g := range gateways {
-		rr := engine.EvaluateRecommendations(rules, g, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
-			Location:         *g.Location,
-			Type:             *g.Type,
-			ServiceName:      *g.Name,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (a *AppInsightsScanner) list() ([]*armapplicationinsights.Component, error) {
-	pager := a.client.NewListPager(nil)
-
-	services := make([]*armapplicationinsights.Component, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		services = append(services, resp.Value...)
-	}
-	return services, nil
-}
-
-func (a *AppInsightsScanner) ResourceTypes() []string {
-	return []string{
-		"Microsoft.Insights/components",
-		"Microsoft.Insights/activityLogAlerts",
-	}
+			ExtractResourceInfo: func(component *armapplicationinsights.Component) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					component.ID,
+					component.Name,
+					component.Location,
+					component.Type,
+				)
+			},
+		},
+	)
 }

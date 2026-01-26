@@ -8,22 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["ba"] = []models.IAzureScanner{NewBatchAccountScanner()}
-}
-
-// NewBatchAccountScanner creates a new BatchAccountScanner
-func NewBatchAccountScanner() *BatchAccountScanner {
-	return &BatchAccountScanner{
-		BaseScanner: models.NewBaseScanner("Microsoft.Batch/batchAccounts"),
+	models.ScannerList["ba"] = []models.IAzureScanner{
+		models.NewBaseScanner("Microsoft.Batch/batchAccounts"),
 	}
-}
-
-// BatchAccountScanner - Scanner for Batch Account
-type BatchAccountScanner struct {
-	models.BaseScanner
-}
-
-// Init - Initializes the Batch Account Scanner
-func (a *BatchAccountScanner) Init(config *models.ScannerConfig) error {
-	return a.BaseScanner.Init(config)
 }

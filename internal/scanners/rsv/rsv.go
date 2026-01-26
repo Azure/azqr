@@ -8,22 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["rsv"] = []models.IAzureScanner{NewRecoveryServiceScanner()}
-}
-
-// NewRecoveryServiceScanner creates a new RecoveryServiceScanner
-func NewRecoveryServiceScanner() *RecoveryServiceScanner {
-	return &RecoveryServiceScanner{
-		BaseScanner: models.NewBaseScanner("Microsoft.RecoveryServices/vaults"),
+	models.ScannerList["rsv"] = []models.IAzureScanner{
+		models.NewBaseScanner("Microsoft.RecoveryServices/vaults"),
 	}
-}
-
-// RecoveryServiceScanner - Scanner for Recovery Service
-type RecoveryServiceScanner struct {
-	models.BaseScanner
-}
-
-// Init - Initializes the Recovery Service Scanner
-func (a *RecoveryServiceScanner) Init(config *models.ScannerConfig) error {
-	return a.BaseScanner.Init(config)
 }

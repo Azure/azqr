@@ -4,69 +4,55 @@
 package appcs
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
 )
 
 func init() {
-	models.ScannerList["appcs"] = []models.IAzureScanner{&AppConfigurationScanner{}}
+	models.ScannerList["appcs"] = []models.IAzureScanner{NewAppConfigurationScanner()}
 }
 
-// AppConfigurationScanner - Scanner for Container Apps
-type AppConfigurationScanner struct {
-	config *models.ScannerConfig
-	client *armappconfiguration.ConfigurationStoresClient
-}
+// NewAppConfigurationScanner creates a new App Configuration scanner using the generic framework
+func NewAppConfigurationScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armappconfiguration.ConfigurationStore, *armappconfiguration.ConfigurationStoresClient]{
+			ResourceTypes: []string{"Microsoft.AppConfiguration/configurationStores"},
 
-// Init - Initializes the AppConfigurationScanner
-func (a *AppConfigurationScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armappconfiguration.NewConfigurationStoresClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armappconfiguration.ConfigurationStoresClient, error) {
+				return armappconfiguration.NewConfigurationStoresClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all App Configurations in a Resource Group
-func (a *AppConfigurationScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armappconfiguration.ConfigurationStoresClient, ctx context.Context) ([]*armappconfiguration.ConfigurationStore, error) {
+				pager := client.NewListPager(nil)
+				apps := make([]*armappconfiguration.ConfigurationStore, 0)
 
-	apps, err := a.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					apps = append(apps, resp.Value...)
+				}
 
-	for _, app := range apps {
-		rr := engine.EvaluateRecommendations(rules, app, scanContext)
+				return apps, nil
+			},
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*app.ID),
-			ServiceName:      *app.Name,
-			Type:             *app.Type,
-			Location:         *app.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
+			GetRecommendations: getRecommendations,
 
-func (a *AppConfigurationScanner) list() ([]*armappconfiguration.ConfigurationStore, error) {
-	pager := a.client.NewListPager(nil)
-	apps := make([]*armappconfiguration.ConfigurationStore, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		apps = append(apps, resp.Value...)
-	}
-	return apps, nil
-}
-
-func (a *AppConfigurationScanner) ResourceTypes() []string {
-	return []string{"Microsoft.AppConfiguration/configurationStores"}
+			ExtractResourceInfo: func(app *armappconfiguration.ConfigurationStore) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					app.ID,
+					app.Name,
+					app.Location,
+					app.Type,
+				)
+			},
+		},
+	)
 }

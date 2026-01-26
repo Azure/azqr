@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
-// GetRecommendations - Returns the rules for the ContainerAppsEnvironmentScanner
-func (a *ContainerAppsEnvironmentScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations - Returns the rules for the Container Apps Environment Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"cae-001": {
 			RecommendationID: "cae-001",

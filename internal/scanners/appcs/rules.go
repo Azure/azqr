@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appconfiguration/armappconfiguration"
 )
 
-// GetRecommendations - Returns the rules for the AppConfigurationScanner
-func (a *AppConfigurationScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for the App Configuration Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"appcs-001": {
 			RecommendationID: "appcs-001",

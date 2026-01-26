@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 )
 
-// GetRecommendations - Returns the rules for the VirtualMachineScaleSetScanner
-func (a *VirtualMachineScaleSetScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for the Virtual Machine Scale Set Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"vmss-003": {
 			RecommendationID:   "vmss-003",

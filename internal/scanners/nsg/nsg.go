@@ -4,70 +4,55 @@
 package nsg
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	models.ScannerList["nsg"] = []models.IAzureScanner{&NSGScanner{}}
+	models.ScannerList["nsg"] = []models.IAzureScanner{NewNSGScanner()}
 }
 
-// NSGScanner - Scanner for NSG
-type NSGScanner struct {
-	config *models.ScannerConfig
-	client *armnetwork.SecurityGroupsClient
-}
+// NewNSGScanner creates a new Network Security Group scanner using the generic framework
+func NewNSGScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armnetwork.SecurityGroup, *armnetwork.SecurityGroupsClient]{
+			ResourceTypes: []string{"Microsoft.Network/networkSecurityGroups"},
 
-// Init - Initializes the NSG Scanner
-func (a *NSGScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armnetwork.NewSecurityGroupsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armnetwork.SecurityGroupsClient, error) {
+				return armnetwork.NewSecurityGroupsClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all NSG in a Resource Group
-func (c *NSGScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armnetwork.SecurityGroupsClient, ctx context.Context) ([]*armnetwork.SecurityGroup, error) {
+				pager := client.NewListAllPager(nil)
+				svcs := make([]*armnetwork.SecurityGroup, 0)
 
-	svcs, err := c.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					svcs = append(svcs, resp.Value...)
+				}
 
-	for _, w := range svcs {
-		rr := engine.EvaluateRecommendations(rules, w, scanContext)
+				return svcs, nil
+			},
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
-			ServiceName:      *w.Name,
-			Type:             *w.Type,
-			Location:         *w.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
+			GetRecommendations: getRecommendations,
 
-func (c *NSGScanner) list() ([]*armnetwork.SecurityGroup, error) {
-	pager := c.client.NewListAllPager(nil)
-
-	svcs := make([]*armnetwork.SecurityGroup, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		svcs = append(svcs, resp.Value...)
-	}
-	return svcs, nil
-}
-
-func (a *NSGScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/networkSecurityGroups"}
+			ExtractResourceInfo: func(nsg *armnetwork.SecurityGroup) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					nsg.ID,
+					nsg.Name,
+					nsg.Location,
+					nsg.Type,
+				)
+			},
+		},
+	)
 }

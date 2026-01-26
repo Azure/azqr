@@ -4,70 +4,53 @@
 package afw
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	models.ScannerList["afw"] = []models.IAzureScanner{&FirewallScanner{}}
+	models.ScannerList["afw"] = []models.IAzureScanner{NewFirewallScanner()}
 }
 
-// FirewallScanner - Scanner for Azure Firewall
-type FirewallScanner struct {
-	config *models.ScannerConfig
-	client *armnetwork.AzureFirewallsClient
-}
+// NewFirewallScanner - Creates a new Azure Firewall scanner
+func NewFirewallScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armnetwork.AzureFirewall, *armnetwork.AzureFirewallsClient]{
+			ResourceTypes: []string{"Microsoft.Network/azureFirewalls", "Microsoft.Network/ipGroups"},
 
-// Init - Initializes the Azure Firewall
-func (a *FirewallScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armnetwork.NewAzureFirewallsClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armnetwork.AzureFirewallsClient, error) {
+				return armnetwork.NewAzureFirewallsClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Azure Firewall in a Resource Group
-func (a *FirewallScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armnetwork.AzureFirewallsClient, ctx context.Context) ([]*armnetwork.AzureFirewall, error) {
+				pager := client.NewListAllPager(nil)
+				services := make([]*armnetwork.AzureFirewall, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					services = append(services, resp.Value...)
+				}
+				return services, nil
+			},
 
-	gateways, err := a.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, g := range gateways {
-		rr := engine.EvaluateRecommendations(rules, g, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
-			Location:         *g.Location,
-			Type:             *g.Type,
-			ServiceName:      *g.Name,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (a *FirewallScanner) list() ([]*armnetwork.AzureFirewall, error) {
-	pager := a.client.NewListAllPager(nil)
-
-	services := make([]*armnetwork.AzureFirewall, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		services = append(services, resp.Value...)
-	}
-	return services, nil
-}
-
-func (a *FirewallScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/azureFirewalls", "Microsoft.Network/ipGroups"}
+			ExtractResourceInfo: func(firewall *armnetwork.AzureFirewall) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					firewall.ID,
+					firewall.Name,
+					firewall.Location,
+					firewall.Type,
+				)
+			},
+		},
+	)
 }

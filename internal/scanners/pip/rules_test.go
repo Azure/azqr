@@ -5,12 +5,10 @@ package pip
 
 import (
 	"testing"
-
-	"github.com/Azure/azqr/internal/models"
 )
 
 func TestPublicIPScanner_ResourceTypes(t *testing.T) {
-	scanner := &PublicIPScanner{}
+	scanner := NewPublicIPScanner()
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -32,8 +30,7 @@ func TestPublicIPScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestPublicIPScanner_GetRecommendations(t *testing.T) {
-	scanner := &PublicIPScanner{}
-	recommendations := scanner.GetRecommendations()
+	recommendations := getRecommendations()
 
 	if len(recommendations) == 0 {
 		t.Error("Expected recommendations, got none")
@@ -53,26 +50,4 @@ func TestPublicIPScanner_GetRecommendations(t *testing.T) {
 			t.Errorf("Recommendation %s has nil Eval function", id)
 		}
 	}
-}
-
-func TestPublicIPScanner_Init(t *testing.T) {
-	scanner := &PublicIPScanner{}
-
-	config := &models.ScannerConfig{
-		SubscriptionID: "test-subscription",
-		Cred:           nil,
-		ClientOptions:  nil,
-	}
-
-	err := scanner.Init(config)
-	if err != nil {
-		t.Errorf("Init failed: %v", err)
-	}
-	// Config verification removed - scanner doesn't expose GetConfig()
-}
-
-func TestPublicIPScanner_Scan(t *testing.T) {
-	scanner := &PublicIPScanner{}
-	var _ = scanner.Scan
-	t.Log("Scan method signature verified")
 }

@@ -4,70 +4,53 @@
 package sigr
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr"
 )
 
 func init() {
-	models.ScannerList["sigr"] = []models.IAzureScanner{&SignalRScanner{}}
+	models.ScannerList["sigr"] = []models.IAzureScanner{NewSignalRScanner()}
 }
 
-// SignalRScanner - Scanner for SignalR
-type SignalRScanner struct {
-	config        *models.ScannerConfig
-	signalrClient *armsignalr.Client
-}
+// NewSignalRScanner - Creates a new SignalR scanner
+func NewSignalRScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armsignalr.ResourceInfo, *armsignalr.Client]{
+			ResourceTypes: []string{"Microsoft.SignalRService/SignalR"},
 
-// Init - Initializes the SignalRScanner
-func (c *SignalRScanner) Init(config *models.ScannerConfig) error {
-	c.config = config
-	var err error
-	c.signalrClient, err = armsignalr.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armsignalr.Client, error) {
+				return armsignalr.NewClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all SignalR in a Resource Group
-func (c *SignalRScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armsignalr.Client, ctx context.Context) ([]*armsignalr.ResourceInfo, error) {
+				pager := client.NewListBySubscriptionPager(nil)
+				resources := make([]*armsignalr.ResourceInfo, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					resources = append(resources, resp.Value...)
+				}
+				return resources, nil
+			},
 
-	signalr, err := c.listSignalR()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, signalr := range signalr {
-		rr := engine.EvaluateRecommendations(rules, signalr, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*signalr.ID),
-			ServiceName:      *signalr.Name,
-			Type:             *signalr.Type,
-			Location:         *signalr.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (c *SignalRScanner) listSignalR() ([]*armsignalr.ResourceInfo, error) {
-	pager := c.signalrClient.NewListBySubscriptionPager(nil)
-
-	signalrs := make([]*armsignalr.ResourceInfo, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		signalrs = append(signalrs, resp.Value...)
-	}
-	return signalrs, nil
-}
-
-func (a *SignalRScanner) ResourceTypes() []string {
-	return []string{"Microsoft.SignalRService/SignalR"}
+			ExtractResourceInfo: func(signalr *armsignalr.ResourceInfo) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					signalr.ID,
+					signalr.Name,
+					signalr.Location,
+					signalr.Type,
+				)
+			},
+		},
+	)
 }

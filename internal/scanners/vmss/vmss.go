@@ -4,70 +4,55 @@
 package vmss
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 )
 
 func init() {
-	models.ScannerList["vmss"] = []models.IAzureScanner{&VirtualMachineScaleSetScanner{}}
+	models.ScannerList["vmss"] = []models.IAzureScanner{NewVirtualMachineScaleSetScanner()}
 }
 
-// VirtualMachineScaleSetScanner - Scanner for Virtual Machine Scale Sets
-type VirtualMachineScaleSetScanner struct {
-	config *models.ScannerConfig
-	client *armcompute.VirtualMachineScaleSetsClient
-}
+// NewVirtualMachineScaleSetScanner creates a new VMSS scanner using the generic framework
+func NewVirtualMachineScaleSetScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armcompute.VirtualMachineScaleSet, *armcompute.VirtualMachineScaleSetsClient]{
+			ResourceTypes: []string{"Microsoft.Compute/virtualMachineScaleSets"},
 
-// Init - Initializes the VirtualMachineScaleSetScanner
-func (c *VirtualMachineScaleSetScanner) Init(config *models.ScannerConfig) error {
-	c.config = config
-	var err error
-	c.client, err = armcompute.NewVirtualMachineScaleSetsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armcompute.VirtualMachineScaleSetsClient, error) {
+				return armcompute.NewVirtualMachineScaleSetsClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Virtual Machines Scale Sets in a Resource Group
-func (c *VirtualMachineScaleSetScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armcompute.VirtualMachineScaleSetsClient, ctx context.Context) ([]*armcompute.VirtualMachineScaleSet, error) {
+				pager := client.NewListAllPager(nil)
+				vmss := make([]*armcompute.VirtualMachineScaleSet, 0)
 
-	vmss, err := c.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					vmss = append(vmss, resp.Value...)
+				}
 
-	for _, w := range vmss {
-		rr := engine.EvaluateRecommendations(rules, w, scanContext)
+				return vmss, nil
+			},
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
-			ServiceName:      *w.Name,
-			Type:             *w.Type,
-			Location:         *w.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
+			GetRecommendations: getRecommendations,
 
-func (c *VirtualMachineScaleSetScanner) list() ([]*armcompute.VirtualMachineScaleSet, error) {
-	pager := c.client.NewListAllPager(nil)
-
-	vmss := make([]*armcompute.VirtualMachineScaleSet, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		vmss = append(vmss, resp.Value...)
-	}
-	return vmss, nil
-}
-
-func (a *VirtualMachineScaleSetScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Compute/virtualMachineScaleSets"}
+			ExtractResourceInfo: func(vmss *armcompute.VirtualMachineScaleSet) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					vmss.ID,
+					vmss.Name,
+					vmss.Location,
+					vmss.Type,
+				)
+			},
+		},
+	)
 }

@@ -8,24 +8,9 @@ import (
 )
 
 func init() {
-	models.ScannerList["pdnsz"] = []models.IAzureScanner{NewPrivateDNSZoneScanner()}
-}
-
-// NewPrivateDNSZoneScanner creates a new PrivateDNSZoneScanner
-func NewPrivateDNSZoneScanner() *PrivateDNSZoneScanner {
-	return &PrivateDNSZoneScanner{
-		BaseScanner: models.NewBaseScanner("Microsoft.Network/privateDnsZones"),
+	models.ScannerList["pdnsz"] = []models.IAzureScanner{
+		models.NewBaseScanner("Microsoft.Network/privateDnsZones"),
 	}
-}
-
-// PrivateDNSZoneScanner - Scanner for Private DNS Zone
-type PrivateDNSZoneScanner struct {
-	models.BaseScanner
-}
-
-// Init - Initializes the Private DNS Zone Scanner
-func (a *PrivateDNSZoneScanner) Init(config *models.ScannerConfig) error {
-	return a.BaseScanner.Init(config)
 }
 
 // TODO: version 6.1.0 of armentowrk does not allow listing per subscription yet.

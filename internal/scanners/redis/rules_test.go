@@ -106,8 +106,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &RedisScanner{}
-			rules := s.GetRecommendations()
+			rules := getRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
@@ -121,7 +120,7 @@ func TestRedisScanner_Rules(t *testing.T) {
 }
 
 func TestRedisScanner_ResourceTypes(t *testing.T) {
-	scanner := &RedisScanner{}
+	scanner := NewRedisScanner()
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -143,8 +142,7 @@ func TestRedisScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestRedisScanner_GetRecommendations(t *testing.T) {
-	scanner := &RedisScanner{}
-	recommendations := scanner.GetRecommendations()
+	recommendations := getRecommendations()
 
 	if len(recommendations) == 0 {
 		t.Error("Expected recommendations, got none")
@@ -167,7 +165,7 @@ func TestRedisScanner_GetRecommendations(t *testing.T) {
 }
 
 func TestRedisScanner_Init(t *testing.T) {
-	scanner := &RedisScanner{}
+	scanner := NewRedisScanner()
 
 	config := &models.ScannerConfig{
 		SubscriptionID: "test-subscription",
@@ -183,7 +181,7 @@ func TestRedisScanner_Init(t *testing.T) {
 }
 
 func TestRedisScanner_Scan(t *testing.T) {
-	scanner := &RedisScanner{}
+	scanner := NewRedisScanner()
 	var _ = scanner.Scan
 
 	t.Log("Scan method signature verified")

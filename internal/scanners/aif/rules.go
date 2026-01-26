@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices/v2"
 )
 
-// GetRecommendations - Returns the rules for the AIFoundryScanner
-func (a *AIFoundryScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for AI Foundry / Cognitive Services
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"aif-001": {
 			RecommendationID: "aif-001",

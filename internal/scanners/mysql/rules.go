@@ -11,8 +11,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 )
 
-// GetRecommendations - Returns the rules for the MySQLScanner
-func (a *MySQLScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for MySQL servers
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"mysql-001": {
 			RecommendationID: "mysql-001",
@@ -91,8 +91,8 @@ func (a *MySQLScanner) GetRecommendations() map[string]models.AzqrRecommendation
 	}
 }
 
-// GetRecommendations - Returns the rules for the MySQLFlexibleScanner
-func (a *MySQLFlexibleScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getFlexibleRecommendations returns the rules for MySQL flexible servers
+func getFlexibleRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"mysqlf-001": {
 			RecommendationID: "mysqlf-001",

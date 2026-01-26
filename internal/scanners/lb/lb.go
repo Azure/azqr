@@ -4,70 +4,55 @@
 package lb
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	models.ScannerList["lb"] = []models.IAzureScanner{&LoadBalancerScanner{}}
+	models.ScannerList["lb"] = []models.IAzureScanner{NewLoadBalancerScanner()}
 }
 
-// LoadBalancerScanner - Scanner for Loadbalancer
-type LoadBalancerScanner struct {
-	config *models.ScannerConfig
-	client *armnetwork.LoadBalancersClient
-}
+// NewLoadBalancerScanner creates a new Load Balancer scanner using the generic framework
+func NewLoadBalancerScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armnetwork.LoadBalancer, *armnetwork.LoadBalancersClient]{
+			ResourceTypes: []string{"Microsoft.Network/loadBalancers"},
 
-// Init - Initializes the LoadBalancerScanner
-func (c *LoadBalancerScanner) Init(config *models.ScannerConfig) error {
-	c.config = config
-	var err error
-	c.client, err = armnetwork.NewLoadBalancersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armnetwork.LoadBalancersClient, error) {
+				return armnetwork.NewLoadBalancersClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Loadbalancer in a Resource Group
-func (c *LoadBalancerScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armnetwork.LoadBalancersClient, ctx context.Context) ([]*armnetwork.LoadBalancer, error) {
+				pager := client.NewListAllPager(nil)
+				lbs := make([]*armnetwork.LoadBalancer, 0)
 
-	lbs, err := c.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					lbs = append(lbs, resp.Value...)
+				}
 
-	for _, w := range lbs {
-		rr := engine.EvaluateRecommendations(rules, w, scanContext)
+				return lbs, nil
+			},
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
-			ServiceName:      *w.Name,
-			Type:             *w.Type,
-			Location:         *w.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
+			GetRecommendations: getRecommendations,
 
-func (c *LoadBalancerScanner) list() ([]*armnetwork.LoadBalancer, error) {
-	pager := c.client.NewListAllPager(nil)
-
-	lbs := make([]*armnetwork.LoadBalancer, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		lbs = append(lbs, resp.Value...)
-	}
-	return lbs, nil
-}
-
-func (a *LoadBalancerScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/loadBalancers"}
+			ExtractResourceInfo: func(lb *armnetwork.LoadBalancer) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					lb.ID,
+					lb.Name,
+					lb.Location,
+					lb.Type,
+				)
+			},
+		},
+	)
 }

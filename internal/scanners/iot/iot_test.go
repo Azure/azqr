@@ -10,23 +10,19 @@ import (
 )
 
 func TestIoTHubScanner_Init(t *testing.T) {
-	scanner := NewIoTHubScanner()
+	scanner := models.NewBaseScanner("Microsoft.Devices/IotHubs")
 	config := &models.ScannerConfig{
-		SubscriptionID: "00000000-0000-0000-0000-000000000000",
+		SubscriptionID: "test-subscription",
 	}
 
 	err := scanner.Init(config)
 	if err != nil {
 		t.Errorf("Init() returned unexpected error: %v", err)
 	}
-
-	if scanner.GetConfig() != config {
-		t.Error("Init() did not set config properly")
-	}
 }
 
 func TestIoTHubScanner_ResourceTypes(t *testing.T) {
-	scanner := NewIoTHubScanner()
+	scanner := models.NewBaseScanner("Microsoft.Devices/IotHubs")
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -40,9 +36,10 @@ func TestIoTHubScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestIoTHubScanner_GetRecommendations(t *testing.T) {
-	scanner := NewIoTHubScanner()
+	scanner := models.NewBaseScanner("Microsoft.Devices/IotHubs")
 	recommendations := scanner.GetRecommendations()
 
+	// Current implementation returns empty map
 	if recommendations == nil {
 		t.Error("GetRecommendations() returned nil")
 	}

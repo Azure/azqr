@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub"
 )
 
-// GetRecommendations - Returns the rules for the WebPubSubScanner
-func (a *WebPubSubScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for WebPubSub
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"wps-001": {
 			RecommendationID: "wps-001",

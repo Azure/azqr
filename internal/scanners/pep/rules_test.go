@@ -5,12 +5,10 @@ package pep
 
 import (
 	"testing"
-
-	"github.com/Azure/azqr/internal/models"
 )
 
 func TestPrivateEndpointScanner_ResourceTypes(t *testing.T) {
-	scanner := &PrivateEndpointScanner{}
+	scanner := NewPrivateEndpointScanner()
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -32,8 +30,7 @@ func TestPrivateEndpointScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestPrivateEndpointScanner_GetRecommendations(t *testing.T) {
-	scanner := &PrivateEndpointScanner{}
-	recommendations := scanner.GetRecommendations()
+	recommendations := getRecommendations()
 
 	if len(recommendations) == 0 {
 		t.Error("Expected recommendations, got none")
@@ -53,26 +50,4 @@ func TestPrivateEndpointScanner_GetRecommendations(t *testing.T) {
 			t.Errorf("Recommendation %s has nil Eval function", id)
 		}
 	}
-}
-
-func TestPrivateEndpointScanner_Init(t *testing.T) {
-	scanner := &PrivateEndpointScanner{}
-
-	config := &models.ScannerConfig{
-		SubscriptionID: "test-subscription",
-		Cred:           nil,
-		ClientOptions:  nil,
-	}
-
-	err := scanner.Init(config)
-	if err != nil {
-		t.Errorf("Init failed: %v", err)
-	}
-	// Config verification removed - scanner doesn't expose GetConfig()
-}
-
-func TestPrivateEndpointScanner_Scan(t *testing.T) {
-	scanner := &PrivateEndpointScanner{}
-	var _ = scanner.Scan
-	t.Log("Scan method signature verified")
 }

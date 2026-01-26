@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/virtualmachineimagebuilder/armvirtualmachineimagebuilder/v2"
 )
 
-// GetRules - Returns the rules for the ImageTemplateScanner
-func (a *ImageTemplateScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for Image Templates
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"it-006": {
 			RecommendationID: "it-006",

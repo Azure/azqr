@@ -4,70 +4,55 @@
 package redis
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
 func init() {
-	models.ScannerList["redis"] = []models.IAzureScanner{&RedisScanner{}}
+	models.ScannerList["redis"] = []models.IAzureScanner{NewRedisScanner()}
 }
 
-// RedisScanner - Scanner for Redis
-type RedisScanner struct {
-	config      *models.ScannerConfig
-	redisClient *armredis.Client
-}
+// NewRedisScanner creates a new Redis scanner using the generic framework
+func NewRedisScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armredis.ResourceInfo, *armredis.Client]{
+			ResourceTypes: []string{"Microsoft.Cache/Redis"},
 
-// Init - Initializes the RedisScanner
-func (c *RedisScanner) Init(config *models.ScannerConfig) error {
-	c.config = config
-	var err error
-	c.redisClient, err = armredis.NewClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armredis.Client, error) {
+				return armredis.NewClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Redis in a Resource Group
-func (c *RedisScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armredis.Client, ctx context.Context) ([]*armredis.ResourceInfo, error) {
+				pager := client.NewListBySubscriptionPager(nil)
+				redis := make([]*armredis.ResourceInfo, 0)
 
-	redis, err := c.listRedis()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					redis = append(redis, resp.Value...)
+				}
 
-	for _, redis := range redis {
-		rr := engine.EvaluateRecommendations(rules, redis, scanContext)
+				return redis, nil
+			},
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*redis.ID),
-			ServiceName:      *redis.Name,
-			Type:             *redis.Type,
-			Location:         *redis.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
+			GetRecommendations: getRecommendations,
 
-func (c *RedisScanner) listRedis() ([]*armredis.ResourceInfo, error) {
-	pager := c.redisClient.NewListBySubscriptionPager(nil)
-
-	redis := make([]*armredis.ResourceInfo, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		redis = append(redis, resp.Value...)
-	}
-	return redis, nil
-}
-
-func (a *RedisScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Cache/Redis"}
+			ExtractResourceInfo: func(r *armredis.ResourceInfo) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					r.ID,
+					r.Name,
+					r.Location,
+					r.Type,
+				)
+			},
+		},
+	)
 }

@@ -74,8 +74,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &KeyVaultScanner{}
-			rules := s.GetRecommendations()
+			rules := getRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
@@ -89,7 +88,7 @@ func TestKeyVaultScanner_Rules(t *testing.T) {
 }
 
 func TestKeyVaultScanner_ResourceTypes(t *testing.T) {
-	scanner := &KeyVaultScanner{}
+	scanner := NewKeyVaultScanner()
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) != 1 {
@@ -102,8 +101,7 @@ func TestKeyVaultScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestKeyVaultScanner_GetRecommendations(t *testing.T) {
-	scanner := &KeyVaultScanner{}
-	recommendations := scanner.GetRecommendations()
+	recommendations := getRecommendations()
 
 	// Check that we have recommendations
 	if len(recommendations) == 0 {
@@ -139,7 +137,7 @@ func TestKeyVaultScanner_GetRecommendations(t *testing.T) {
 }
 
 func TestKeyVaultScanner_Init(t *testing.T) {
-	scanner := &KeyVaultScanner{}
+	scanner := NewKeyVaultScanner()
 
 	config := &models.ScannerConfig{
 		SubscriptionID: "test-subscription",
@@ -159,7 +157,7 @@ func TestKeyVaultScanner_Init(t *testing.T) {
 }
 
 func TestKeyVaultScanner_Scan(t *testing.T) {
-	scanner := &KeyVaultScanner{}
+	scanner := NewKeyVaultScanner()
 
 	// Note: Scan() requires a properly initialized Azure SDK client
 	// In unit tests, we can't test Scan without mocking the Azure SDK

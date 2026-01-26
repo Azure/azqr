@@ -5,12 +5,10 @@ package log
 
 import (
 	"testing"
-
-	"github.com/Azure/azqr/internal/models"
 )
 
 func TestLogAnalyticsScanner_ResourceTypes(t *testing.T) {
-	scanner := &LogAnalyticsScanner{}
+	scanner := NewLogAnalyticsScanner()
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -32,8 +30,7 @@ func TestLogAnalyticsScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestLogAnalyticsScanner_GetRecommendations(t *testing.T) {
-	scanner := &LogAnalyticsScanner{}
-	recommendations := scanner.GetRecommendations()
+	recommendations := getRecommendations()
 
 	if len(recommendations) == 0 {
 		t.Error("Expected recommendations, got none")
@@ -53,26 +50,4 @@ func TestLogAnalyticsScanner_GetRecommendations(t *testing.T) {
 			t.Errorf("Recommendation %s has nil Eval function", id)
 		}
 	}
-}
-
-func TestLogAnalyticsScanner_Init(t *testing.T) {
-	scanner := &LogAnalyticsScanner{}
-
-	config := &models.ScannerConfig{
-		SubscriptionID: "test-subscription",
-		Cred:           nil,
-		ClientOptions:  nil,
-	}
-
-	err := scanner.Init(config)
-	if err != nil {
-		t.Errorf("Init failed: %v", err)
-	}
-	// Config verification removed - scanner doesn't expose GetConfig()
-}
-
-func TestLogAnalyticsScanner_Scan(t *testing.T) {
-	scanner := &LogAnalyticsScanner{}
-	var _ = scanner.Scan
-	t.Log("Scan method signature verified")
 }

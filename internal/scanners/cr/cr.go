@@ -4,70 +4,55 @@
 package cr
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerregistry/armcontainerregistry"
 )
 
 func init() {
-	models.ScannerList["cr"] = []models.IAzureScanner{&ContainerRegistryScanner{}}
+	models.ScannerList["cr"] = []models.IAzureScanner{NewContainerRegistryScanner()}
 }
 
-// ContainerRegistryScanner - Scanner for Container Registries
-type ContainerRegistryScanner struct {
-	config           *models.ScannerConfig
-	registriesClient *armcontainerregistry.RegistriesClient
-}
+// NewContainerRegistryScanner creates a new Container Registry scanner using the generic framework
+func NewContainerRegistryScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armcontainerregistry.Registry, *armcontainerregistry.RegistriesClient]{
+			ResourceTypes: []string{"Microsoft.ContainerRegistry/registries"},
 
-// Init - Initializes the ContainerRegistryScanner
-func (c *ContainerRegistryScanner) Init(config *models.ScannerConfig) error {
-	c.config = config
-	var err error
-	c.registriesClient, err = armcontainerregistry.NewRegistriesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armcontainerregistry.RegistriesClient, error) {
+				return armcontainerregistry.NewRegistriesClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Container Registries in a Resource Group
-func (c *ContainerRegistryScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armcontainerregistry.RegistriesClient, ctx context.Context) ([]*armcontainerregistry.Registry, error) {
+				pager := client.NewListPager(nil)
+				registries := make([]*armcontainerregistry.Registry, 0)
 
-	regsitries, err := c.listRegistries()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					registries = append(registries, resp.Value...)
+				}
 
-	for _, registry := range regsitries {
-		rr := engine.EvaluateRecommendations(rules, registry, scanContext)
+				return registries, nil
+			},
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*registry.ID),
-			ServiceName:      *registry.Name,
-			Type:             *registry.Type,
-			Location:         *registry.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
+			GetRecommendations: getRecommendations,
 
-func (c *ContainerRegistryScanner) listRegistries() ([]*armcontainerregistry.Registry, error) {
-	pager := c.registriesClient.NewListPager(nil)
-
-	registries := make([]*armcontainerregistry.Registry, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		registries = append(registries, resp.Value...)
-	}
-	return registries, nil
-}
-
-func (a *ContainerRegistryScanner) ResourceTypes() []string {
-	return []string{"Microsoft.ContainerRegistry/registries"}
+			ExtractResourceInfo: func(registry *armcontainerregistry.Registry) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					registry.ID,
+					registry.Name,
+					registry.Location,
+					registry.Type,
+				)
+			},
+		},
+	)
 }

@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/fabric/armfabric"
 )
 
-// GetRecommendations - Returns the rules for the FabricScanner
-func (a *FabricScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for Microsoft Fabric
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"fabric-001": {
 			RecommendationID:   "fabric-001",

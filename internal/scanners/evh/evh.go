@@ -4,70 +4,55 @@
 package evh
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub"
 )
 
 func init() {
-	models.ScannerList["evh"] = []models.IAzureScanner{&EventHubScanner{}}
+	models.ScannerList["evh"] = []models.IAzureScanner{NewEventHubScanner()}
 }
 
-// EventHubScanner - Scanner for Event Hubs
-type EventHubScanner struct {
-	config *models.ScannerConfig
-	client *armeventhub.NamespacesClient
-}
+// NewEventHubScanner creates a new Event Hub scanner using the generic framework
+func NewEventHubScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armeventhub.EHNamespace, *armeventhub.NamespacesClient]{
+			ResourceTypes: []string{"Microsoft.EventHub/namespaces"},
 
-// Init - Initializes the EventHubScanner
-func (a *EventHubScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armeventhub.NewNamespacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armeventhub.NamespacesClient, error) {
+				return armeventhub.NewNamespacesClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Event Hubs in a Resource Group
-func (c *EventHubScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armeventhub.NamespacesClient, ctx context.Context) ([]*armeventhub.EHNamespace, error) {
+				pager := client.NewListPager(nil)
+				namespaces := make([]*armeventhub.EHNamespace, 0)
 
-	eventHubs, err := c.listEventHubs()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					namespaces = append(namespaces, resp.Value...)
+				}
 
-	for _, eventHub := range eventHubs {
-		rr := engine.EvaluateRecommendations(rules, eventHub, scanContext)
+				return namespaces, nil
+			},
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*eventHub.ID),
-			ServiceName:      *eventHub.Name,
-			Type:             *eventHub.Type,
-			Location:         *eventHub.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
+			GetRecommendations: getRecommendations,
 
-func (c *EventHubScanner) listEventHubs() ([]*armeventhub.EHNamespace, error) {
-	pager := c.client.NewListPager(nil)
-
-	namespaces := make([]*armeventhub.EHNamespace, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		namespaces = append(namespaces, resp.Value...)
-	}
-	return namespaces, nil
-}
-
-func (a *EventHubScanner) ResourceTypes() []string {
-	return []string{"Microsoft.EventHub/namespaces"}
+			ExtractResourceInfo: func(ns *armeventhub.EHNamespace) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					ns.ID,
+					ns.Name,
+					ns.Location,
+					ns.Type,
+				)
+			},
+		},
+	)
 }

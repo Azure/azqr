@@ -4,69 +4,53 @@
 package agw
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	models.ScannerList["agw"] = []models.IAzureScanner{&ApplicationGatewayScanner{}}
+	models.ScannerList["agw"] = []models.IAzureScanner{NewApplicationGatewayScanner()}
 }
 
-// ApplicationGatewayScanner - Scanner for Application Gateways
-type ApplicationGatewayScanner struct {
-	config         *models.ScannerConfig
-	gatewaysClient *armnetwork.ApplicationGatewaysClient
-}
+// NewApplicationGatewayScanner - Creates a new Application Gateway scanner
+func NewApplicationGatewayScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armnetwork.ApplicationGateway, *armnetwork.ApplicationGatewaysClient]{
+			ResourceTypes: []string{"Microsoft.Network/applicationGateways"},
 
-// Init - Initializes the ApplicationGatewayAnalyzer
-func (a *ApplicationGatewayScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.gatewaysClient, err = armnetwork.NewApplicationGatewaysClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armnetwork.ApplicationGatewaysClient, error) {
+				return armnetwork.NewApplicationGatewaysClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Application Gateways in a Resource Group
-func (a *ApplicationGatewayScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armnetwork.ApplicationGatewaysClient, ctx context.Context) ([]*armnetwork.ApplicationGateway, error) {
+				pager := client.NewListAllPager(nil)
+				results := []*armnetwork.ApplicationGateway{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					results = append(results, resp.Value...)
+				}
+				return results, nil
+			},
 
-	gateways, err := a.listGateways()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, g := range gateways {
-		rr := engine.EvaluateRecommendations(rules, g, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
-			ServiceName:      *g.Name,
-			Type:             *g.Type,
-			Location:         *g.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (a *ApplicationGatewayScanner) listGateways() ([]*armnetwork.ApplicationGateway, error) {
-	pager := a.gatewaysClient.NewListAllPager(nil)
-	results := []*armnetwork.ApplicationGateway{}
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, resp.Value...)
-	}
-	return results, nil
-}
-
-func (a *ApplicationGatewayScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/applicationGateways"}
+			ExtractResourceInfo: func(gateway *armnetwork.ApplicationGateway) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					gateway.ID,
+					gateway.Name,
+					gateway.Location,
+					gateway.Type,
+				)
+			},
+		},
+	)
 }

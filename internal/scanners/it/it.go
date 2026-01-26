@@ -4,69 +4,49 @@
 package it
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/virtualmachineimagebuilder/armvirtualmachineimagebuilder/v2"
 )
 
 func init() {
-	models.ScannerList["it"] = []models.IAzureScanner{&ImageTemplateScanner{}}
+	models.ScannerList["it"] = []models.IAzureScanner{NewImageTemplateScanner()}
 }
 
-// ImageTemplateScanner - Scanner for Image Template
-type ImageTemplateScanner struct {
-	config *models.ScannerConfig
-	client *armvirtualmachineimagebuilder.VirtualMachineImageTemplatesClient
-}
+// NewImageTemplateScanner creates a new Image Template Scanner
+func NewImageTemplateScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armvirtualmachineimagebuilder.ImageTemplate, *armvirtualmachineimagebuilder.VirtualMachineImageTemplatesClient]{
+			ResourceTypes: []string{"Microsoft.VirtualMachineImages/imageTemplates"},
 
-// Init - Initializes the Image Template Scanner
-func (a *ImageTemplateScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armvirtualmachineimagebuilder.NewVirtualMachineImageTemplatesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armvirtualmachineimagebuilder.VirtualMachineImageTemplatesClient, error) {
+				return armvirtualmachineimagebuilder.NewVirtualMachineImageTemplatesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
+			},
 
-// Scan - Scans all Image Template in a Resource Group
-func (c *ImageTemplateScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armvirtualmachineimagebuilder.VirtualMachineImageTemplatesClient, ctx context.Context) ([]*armvirtualmachineimagebuilder.ImageTemplate, error) {
+				pager := client.NewListPager(nil)
+				svcs := make([]*armvirtualmachineimagebuilder.ImageTemplate, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					svcs = append(svcs, resp.Value...)
+				}
+				return svcs, nil
+			},
 
-	svcs, err := c.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, w := range svcs {
-		rr := engine.EvaluateRecommendations(rules, w, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
-			ServiceName:      *w.Name,
-			Type:             *w.Type,
-			Location:         *w.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (c *ImageTemplateScanner) list() ([]*armvirtualmachineimagebuilder.ImageTemplate, error) {
-	pager := c.client.NewListPager(nil)
-
-	svcs := make([]*armvirtualmachineimagebuilder.ImageTemplate, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		svcs = append(svcs, resp.Value...)
-	}
-	return svcs, nil
-}
-func (a *ImageTemplateScanner) ResourceTypes() []string {
-	return []string{"Microsoft.VirtualMachineImages/imageTemplates"}
+			ExtractResourceInfo: func(resource *armvirtualmachineimagebuilder.ImageTemplate) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					resource.ID,
+					resource.Name,
+					resource.Location,
+					resource.Type,
+				)
+			},
+		},
+	)
 }

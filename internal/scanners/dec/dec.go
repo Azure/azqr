@@ -4,70 +4,53 @@
 package dec
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto"
 )
 
 func init() {
-	models.ScannerList["dec"] = []models.IAzureScanner{&DataExplorerScanner{}}
+	models.ScannerList["dec"] = []models.IAzureScanner{NewDataExplorerScanner()}
 }
 
-// DataExplorerScanner - Scanner for Data Explorer
-type DataExplorerScanner struct {
-	config *models.ScannerConfig
-	client *armkusto.ClustersClient
-}
+// NewDataExplorerScanner - Returns a new DataExplorerScanner
+func NewDataExplorerScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armkusto.Cluster, *armkusto.ClustersClient]{
+			ResourceTypes: []string{"Microsoft.Kusto/clusters"},
 
-// Init - Initializes the FrontDoor Scanner
-func (a *DataExplorerScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armkusto.NewClustersClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armkusto.ClustersClient, error) {
+				return armkusto.NewClustersClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Data Explorers in a Resource Group
-func (a *DataExplorerScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armkusto.ClustersClient, ctx context.Context) ([]*armkusto.Cluster, error) {
+				pager := client.NewListPager(nil)
+				resources := make([]*armkusto.Cluster, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					resources = append(resources, resp.Value...)
+				}
+				return resources, nil
+			},
 
-	kustoclusters, err := a.listClusters()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, g := range kustoclusters {
-		rr := engine.EvaluateRecommendations(rules, g, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
-			Location:         *g.Location,
-			Type:             *g.Type,
-			ServiceName:      *g.Name,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (a *DataExplorerScanner) listClusters() ([]*armkusto.Cluster, error) {
-	pager := a.client.NewListPager(nil)
-
-	kustoclusters := make([]*armkusto.Cluster, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		kustoclusters = append(kustoclusters, resp.Value...)
-	}
-	return kustoclusters, nil
-}
-
-func (a *DataExplorerScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Kusto/clusters"}
+			ExtractResourceInfo: func(cluster *armkusto.Cluster) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					cluster.ID,
+					cluster.Name,
+					cluster.Location,
+					cluster.Type,
+				)
+			},
+		},
+	)
 }

@@ -8,22 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["conn"] = []models.IAzureScanner{NewConnectionScanner()}
-}
-
-// NewConnectionScanner creates a new ConnectionScanner
-func NewConnectionScanner() *ConnectionScanner {
-	return &ConnectionScanner{
-		BaseScanner: models.NewBaseScanner("Microsoft.Network/connections"),
+	models.ScannerList["conn"] = []models.IAzureScanner{
+		models.NewBaseScanner("Microsoft.Network/connections"),
 	}
-}
-
-// ConnectionScanner - Scanner for Connection
-type ConnectionScanner struct {
-	models.BaseScanner
-}
-
-// Init - Initializes the Connection Scanner
-func (a *ConnectionScanner) Init(config *models.ScannerConfig) error {
-	return a.BaseScanner.Init(config)
 }

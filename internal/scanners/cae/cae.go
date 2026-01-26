@@ -4,69 +4,53 @@
 package cae
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v2"
 )
 
 func init() {
-	models.ScannerList["cae"] = []models.IAzureScanner{&ContainerAppsEnvironmentScanner{}}
+	models.ScannerList["cae"] = []models.IAzureScanner{NewContainerAppsEnvironmentScanner()}
 }
 
-// ContainerAppsEnvironmentScanner - Scanner for Container Apps
-type ContainerAppsEnvironmentScanner struct {
-	config     *models.ScannerConfig
-	appsClient *armappcontainers.ManagedEnvironmentsClient
-}
+// NewContainerAppsEnvironmentScanner - Creates a new Container Apps Environment scanner
+func NewContainerAppsEnvironmentScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armappcontainers.ManagedEnvironment, *armappcontainers.ManagedEnvironmentsClient]{
+			ResourceTypes: []string{"Microsoft.App/managedenvironments"},
 
-// Init - Initializes the ContainerAppsEnvironmentScanner
-func (a *ContainerAppsEnvironmentScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.appsClient, err = armappcontainers.NewManagedEnvironmentsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armappcontainers.ManagedEnvironmentsClient, error) {
+				return armappcontainers.NewManagedEnvironmentsClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Container Apps in a Resource Group
-func (a *ContainerAppsEnvironmentScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armappcontainers.ManagedEnvironmentsClient, ctx context.Context) ([]*armappcontainers.ManagedEnvironment, error) {
+				pager := client.NewListBySubscriptionPager(nil)
+				resources := make([]*armappcontainers.ManagedEnvironment, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					resources = append(resources, resp.Value...)
+				}
+				return resources, nil
+			},
 
-	apps, err := a.listApps()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, app := range apps {
-		rr := engine.EvaluateRecommendations(rules, app, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*app.ID),
-			ServiceName:      *app.Name,
-			Type:             *app.Type,
-			Location:         *app.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (a *ContainerAppsEnvironmentScanner) listApps() ([]*armappcontainers.ManagedEnvironment, error) {
-	pager := a.appsClient.NewListBySubscriptionPager(nil)
-	apps := make([]*armappcontainers.ManagedEnvironment, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		apps = append(apps, resp.Value...)
-	}
-	return apps, nil
-}
-
-func (a *ContainerAppsEnvironmentScanner) ResourceTypes() []string {
-	return []string{"Microsoft.App/managedenvironments"}
+			ExtractResourceInfo: func(env *armappcontainers.ManagedEnvironment) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					env.ID,
+					env.Name,
+					env.Location,
+					env.Type,
+				)
+			},
+		},
+	)
 }

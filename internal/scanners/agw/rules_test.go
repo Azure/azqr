@@ -74,22 +74,21 @@ func TestApplicationGatewayScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &ApplicationGatewayScanner{}
-			rules := s.GetRecommendations()
+			rules := getRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
 				result: w,
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ApplicationGatewayScanner Rule.Eval() = %v, want %v", got, tt.want)
+				t.Errorf("ApplicationGateway Rule.Eval() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
 func TestApplicationGatewayScanner_ResourceTypes(t *testing.T) {
-	scanner := &ApplicationGatewayScanner{}
+	scanner := NewApplicationGatewayScanner()
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -111,8 +110,7 @@ func TestApplicationGatewayScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestApplicationGatewayScanner_GetRecommendations(t *testing.T) {
-	scanner := &ApplicationGatewayScanner{}
-	recommendations := scanner.GetRecommendations()
+	recommendations := getRecommendations()
 
 	if len(recommendations) == 0 {
 		t.Error("Expected recommendations, got none")
@@ -132,26 +130,4 @@ func TestApplicationGatewayScanner_GetRecommendations(t *testing.T) {
 			t.Errorf("Recommendation %s has nil Eval function", id)
 		}
 	}
-}
-
-func TestApplicationGatewayScanner_Init(t *testing.T) {
-	scanner := &ApplicationGatewayScanner{}
-
-	config := &models.ScannerConfig{
-		SubscriptionID: "test-subscription",
-		Cred:           nil,
-		ClientOptions:  nil,
-	}
-
-	err := scanner.Init(config)
-	if err != nil {
-		t.Errorf("Init failed: %v", err)
-	}
-	// Config verification removed - scanner doesn't expose GetConfig()
-}
-
-func TestApplicationGatewayScanner_Scan(t *testing.T) {
-	scanner := &ApplicationGatewayScanner{}
-	var _ = scanner.Scan
-	t.Log("Scan method signature verified")
 }

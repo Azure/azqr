@@ -4,70 +4,55 @@
 package kv
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
 
 func init() {
-	models.ScannerList["kv"] = []models.IAzureScanner{&KeyVaultScanner{}}
+	models.ScannerList["kv"] = []models.IAzureScanner{NewKeyVaultScanner()}
 }
 
-// KeyVaultScanner - Scanner for Key Vaults
-type KeyVaultScanner struct {
-	config       *models.ScannerConfig
-	vaultsClient *armkeyvault.VaultsClient
-}
+// NewKeyVaultScanner creates a new Key Vault scanner using the generic framework
+func NewKeyVaultScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armkeyvault.Vault, *armkeyvault.VaultsClient]{
+			ResourceTypes: []string{"Microsoft.KeyVault/vaults"},
 
-// Init - Initializes the KeyVaultScanner
-func (c *KeyVaultScanner) Init(config *models.ScannerConfig) error {
-	c.config = config
-	var err error
-	c.vaultsClient, err = armkeyvault.NewVaultsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armkeyvault.VaultsClient, error) {
+				return armkeyvault.NewVaultsClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Key Vaults in a Resource Group
-func (c *KeyVaultScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armkeyvault.VaultsClient, ctx context.Context) ([]*armkeyvault.Vault, error) {
+				pager := client.NewListBySubscriptionPager(nil)
+				vaults := make([]*armkeyvault.Vault, 0)
 
-	vaults, err := c.listVaults()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					vaults = append(vaults, resp.Value...)
+				}
 
-	for _, vault := range vaults {
-		rr := engine.EvaluateRecommendations(rules, vault, scanContext)
+				return vaults, nil
+			},
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*vault.ID),
-			ServiceName:      *vault.Name,
-			Type:             *vault.Type,
-			Location:         *vault.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
+			GetRecommendations: getRecommendations,
 
-func (c *KeyVaultScanner) listVaults() ([]*armkeyvault.Vault, error) {
-	pager := c.vaultsClient.NewListBySubscriptionPager(nil)
-
-	vaults := make([]*armkeyvault.Vault, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		vaults = append(vaults, resp.Value...)
-	}
-	return vaults, nil
-}
-
-func (a *KeyVaultScanner) ResourceTypes() []string {
-	return []string{"Microsoft.KeyVault/vaults"}
+			ExtractResourceInfo: func(vault *armkeyvault.Vault) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					vault.ID,
+					vault.Name,
+					vault.Location,
+					vault.Type,
+				)
+			},
+		},
+	)
 }

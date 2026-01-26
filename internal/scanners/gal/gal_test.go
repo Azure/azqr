@@ -10,23 +10,19 @@ import (
 )
 
 func TestGalleryScanner_Init(t *testing.T) {
-	scanner := NewGalleryScanner()
+	scanner := models.NewBaseScanner("Microsoft.Compute/galleries")
 	config := &models.ScannerConfig{
-		SubscriptionID: "00000000-0000-0000-0000-000000000000",
+		SubscriptionID: "test-subscription",
 	}
 
 	err := scanner.Init(config)
 	if err != nil {
 		t.Errorf("Init() returned unexpected error: %v", err)
 	}
-
-	if scanner.GetConfig() != config {
-		t.Error("Init() did not set config properly")
-	}
 }
 
 func TestGalleryScanner_ResourceTypes(t *testing.T) {
-	scanner := NewGalleryScanner()
+	scanner := models.NewBaseScanner("Microsoft.Compute/galleries")
 	resourceTypes := scanner.ResourceTypes()
 
 	expectedTypes := []string{"Microsoft.Compute/galleries"}
@@ -40,9 +36,10 @@ func TestGalleryScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestGalleryScanner_GetRecommendations(t *testing.T) {
-	scanner := NewGalleryScanner()
+	scanner := models.NewBaseScanner("Microsoft.Compute/galleries")
 	recommendations := scanner.GetRecommendations()
 
+	// Current implementation returns empty map
 	if recommendations == nil {
 		t.Error("GetRecommendations() returned nil")
 	}
@@ -51,4 +48,3 @@ func TestGalleryScanner_GetRecommendations(t *testing.T) {
 		t.Errorf("GetRecommendations() returned %d recommendations, expected 0", len(recommendations))
 	}
 }
-
