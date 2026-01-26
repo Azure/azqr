@@ -147,7 +147,7 @@ type availabilityZoneMapping struct {
 // fetchZoneMappings retrieves zone mappings for a single subscription using az.HttpClient
 func (s *ZoneMappingScanner) fetchZoneMappings(ctx context.Context, cred azcore.TokenCredential, subscriptionID, subscriptionName string) ([]zoneMappingResult, error) {
 	// Create HTTP client with authentication and retry capabilities
-	httpClient := az.NewHttpClient(cred, 30*time.Second)
+	httpClient := az.NewHttpClient(cred, az.DefaultHttpClientOptions(30*time.Second))
 
 	// Construct the REST API URL
 	// GET /subscriptions/{subscriptionId}/locations?api-version=2022-12-01
@@ -155,7 +155,7 @@ func (s *ZoneMappingScanner) fetchZoneMappings(ctx context.Context, cred azcore.
 
 	// Make the request with authentication (empty string uses default scope)
 	emptyScope := ""
-	body, err := httpClient.Do(ctx, endpoint, &emptyScope, 3)
+	body, err := httpClient.Do(ctx, endpoint, &emptyScope)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch locations: %w", err)
 	}

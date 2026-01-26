@@ -23,14 +23,37 @@ type HttpClient struct {
 	cred     azcore.TokenCredential
 }
 
-// NewHttpClient creates a new Azure HTTP client using Azure SDK's pipeline with built-in retry logic
-func NewHttpClient(cred azcore.TokenCredential, timeout time.Duration) *HttpClient {
-	// Configure retry options - Azure SDK handles exponential backoff automatically
-	retryOptions := policy.RetryOptions{
+// HttpClientOptions configures the HTTP client behavior
+type HttpClientOptions struct {
+	Timeout       time.Duration
+	MaxRetries    int32
+	RetryDelay    time.Duration
+	MaxRetryDelay time.Duration
+}
+
+// DefaultHttpClientOptions returns the default options for production use
+func DefaultHttpClientOptions(timeout time.Duration) *HttpClientOptions {
+	return &HttpClientOptions{
+		Timeout:       timeout,
 		MaxRetries:    3,
-		TryTimeout:    timeout,
 		RetryDelay:    2 * time.Second,
 		MaxRetryDelay: 60 * time.Second,
+	}
+}
+
+// NewHttpClient creates a new Azure HTTP client using Azure SDK's pipeline with built-in retry logic.
+// Pass nil for opts to use default options with the specified timeout.
+func NewHttpClient(cred azcore.TokenCredential, opts *HttpClientOptions) *HttpClient {
+	if opts == nil {
+		opts = DefaultHttpClientOptions(30 * time.Second)
+	}
+
+	// Configure retry options - Azure SDK handles exponential backoff automatically
+	retryOptions := policy.RetryOptions{
+		MaxRetries:    opts.MaxRetries,
+		TryTimeout:    opts.Timeout,
+		RetryDelay:    opts.RetryDelay,
+		MaxRetryDelay: opts.MaxRetryDelay,
 		StatusCodes: []int{
 			http.StatusRequestTimeout,      // 408
 			http.StatusTooManyRequests,     // 429
@@ -44,7 +67,7 @@ func NewHttpClient(cred azcore.TokenCredential, timeout time.Duration) *HttpClie
 	// Create client options
 	clientOpts := &policy.ClientOptions{
 		Retry:     retryOptions,
-		Transport: &http.Client{Timeout: timeout},
+		Transport: &http.Client{Timeout: opts.Timeout},
 	}
 
 	// Create pipeline with authentication and retry policies
@@ -67,7 +90,7 @@ func NewHttpClient(cred azcore.TokenCredential, timeout time.Duration) *HttpClie
 
 // Do performs an HTTP GET request with automatic authentication, throttling, and retries
 // Pass scope as nil to skip authentication, or empty string to use default scope
-func (c *HttpClient) Do(ctx context.Context, url string, scope *string, maxRetries int) ([]byte, error) {
+func (c *HttpClient) Do(ctx context.Context, url string, scope *string) ([]byte, error) {
 	body, _, err := c.doRequest(ctx, http.MethodGet, url, nil, scope)
 	return body, err
 }
