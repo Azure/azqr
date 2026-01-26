@@ -4,71 +4,53 @@
 package srch
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/search/armsearch"
 )
 
 func init() {
-	models.ScannerList["srch"] = []models.IAzureScanner{&AISearchScanner{}}
+	models.ScannerList["srch"] = []models.IAzureScanner{NewAISearchScanner()}
 }
 
-// AISearchScanner - Scanner for Azure AI Search
-type AISearchScanner struct {
-	config *models.ScannerConfig
-	client *armsearch.ServicesClient
-}
+// NewAISearchScanner - Creates a new Azure AI Search scanner
+func NewAISearchScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armsearch.Service, *armsearch.ServicesClient]{
+			ResourceTypes: []string{"Microsoft.Search/searchServices"},
 
-// Init - Initializes the AISearchScanner Scanner
-func (a *AISearchScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, _ = armsearch.NewServicesClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armsearch.ServicesClient, error) {
+				return armsearch.NewServicesClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Azure AI Search
-func (a *AISearchScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armsearch.ServicesClient, ctx context.Context) ([]*armsearch.Service, error) {
+				pager := client.NewListBySubscriptionPager(&armsearch.SearchManagementRequestOptions{}, nil)
+				workspaces := make([]*armsearch.Service, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					workspaces = append(workspaces, resp.Value...)
+				}
+				return workspaces, nil
+			},
 
-	workspaces, err := a.listWorkspaces()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, g := range workspaces {
-		rr := engine.EvaluateRecommendations(rules, g, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
-			Location:         *g.Location,
-			Type:             *g.Type,
-			ServiceName:      *g.Name,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (a *AISearchScanner) listWorkspaces() ([]*armsearch.Service, error) {
-	pager := a.client.NewListBySubscriptionPager(&armsearch.SearchManagementRequestOptions{}, nil)
-
-	workspaces := make([]*armsearch.Service, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		workspaces = append(workspaces, resp.Value...)
-	}
-
-	return workspaces, nil
-}
-
-func (a *AISearchScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Search/searchServices"}
+			ExtractResourceInfo: func(service *armsearch.Service) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					service.ID,
+					service.Name,
+					service.Location,
+					service.Type,
+				)
+			},
+		},
+	)
 }

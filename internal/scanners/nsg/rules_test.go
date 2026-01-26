@@ -10,7 +10,7 @@ import (
 )
 
 func TestNSGScanner_ResourceTypes(t *testing.T) {
-	scanner := &NSGScanner{}
+	scanner := NewNSGScanner()
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -32,8 +32,7 @@ func TestNSGScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestNSGScanner_GetRecommendations(t *testing.T) {
-	scanner := &NSGScanner{}
-	recommendations := scanner.GetRecommendations()
+	recommendations := getRecommendations()
 
 	if len(recommendations) == 0 {
 		t.Error("Expected recommendations, got none")
@@ -56,7 +55,7 @@ func TestNSGScanner_GetRecommendations(t *testing.T) {
 }
 
 func TestNSGScanner_Init(t *testing.T) {
-	scanner := &NSGScanner{}
+	scanner := NewNSGScanner()
 
 	config := &models.ScannerConfig{
 		SubscriptionID: "test-subscription",
@@ -72,7 +71,7 @@ func TestNSGScanner_Init(t *testing.T) {
 }
 
 func TestNSGScanner_Scan(t *testing.T) {
-	scanner := &NSGScanner{}
+	scanner := NewNSGScanner()
 	var _ = scanner.Scan
 	t.Log("Scan method signature verified")
 }

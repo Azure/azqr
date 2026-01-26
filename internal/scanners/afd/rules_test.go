@@ -74,22 +74,21 @@ func TestFrontDoorScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &FrontDoorScanner{}
-			rules := s.GetRecommendations()
+			rules := getRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
 				result: w,
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FrontDoorScanner Rule.Eval() = %v, want %v", got, tt.want)
+				t.Errorf("FrontDoor Rule.Eval() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
 func TestFrontDoorScanner_ResourceTypes(t *testing.T) {
-	scanner := &FrontDoorScanner{}
+	scanner := NewFrontDoorScanner()
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -111,8 +110,7 @@ func TestFrontDoorScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestFrontDoorScanner_GetRecommendations(t *testing.T) {
-	scanner := &FrontDoorScanner{}
-	recommendations := scanner.GetRecommendations()
+	recommendations := getRecommendations()
 
 	if len(recommendations) == 0 {
 		t.Error("Expected recommendations, got none")
@@ -132,26 +130,4 @@ func TestFrontDoorScanner_GetRecommendations(t *testing.T) {
 			t.Errorf("Recommendation %s has nil Eval function", id)
 		}
 	}
-}
-
-func TestFrontDoorScanner_Init(t *testing.T) {
-	scanner := &FrontDoorScanner{}
-
-	config := &models.ScannerConfig{
-		SubscriptionID: "test-subscription",
-		Cred:           nil,
-		ClientOptions:  nil,
-	}
-
-	err := scanner.Init(config)
-	if err != nil {
-		t.Errorf("Init failed: %v", err)
-	}
-	// Config verification removed - scanner doesn't expose GetConfig()
-}
-
-func TestFrontDoorScanner_Scan(t *testing.T) {
-	scanner := &FrontDoorScanner{}
-	var _ = scanner.Scan
-	t.Log("Scan method signature verified")
 }

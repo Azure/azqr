@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/analysisservices/armanalysisservices"
 )
 
-// GetRules - Returns the rules for the AnalysisServicesScanner
-func (a *AnalysisServicesScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations - Returns the rules for the Analysis Services Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"as-001": {
 			RecommendationID: "as-001",

@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault"
 )
 
-// GetRecommendations - Returns the rules for the KeyVaultScanner
-func (a *KeyVaultScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for the Key Vault Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"kv-001": {
 			RecommendationID: "kv-001",

@@ -92,15 +92,14 @@ func TestDataExplorerScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &DataFactoryScanner{}
-			rules := s.GetRecommendations()
+			rules := getRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
 				result: w,
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DataFactoryScanner Rule.Eval() = %v, want %v", got, tt.want)
+				t.Errorf("DataFactory Rule.Eval() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -4,77 +4,53 @@
 package pip
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	models.ScannerList["pip"] = []models.IAzureScanner{&PublicIPScanner{}}
+	models.ScannerList["pip"] = []models.IAzureScanner{NewPublicIPScanner()}
 }
 
-// PublicIPScanner - Scanner for Public IP
-type PublicIPScanner struct {
-	config *models.ScannerConfig
-	client *armnetwork.PublicIPAddressesClient
-}
+// NewPublicIPScanner - Creates a new Public IP scanner
+func NewPublicIPScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armnetwork.PublicIPAddress, *armnetwork.PublicIPAddressesClient]{
+			ResourceTypes: []string{"Microsoft.Network/publicIPAddresses"},
 
-// Init - Initializes the Public IP Scanner
-func (a *PublicIPScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armnetwork.NewPublicIPAddressesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armnetwork.PublicIPAddressesClient, error) {
+				return armnetwork.NewPublicIPAddressesClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Public IP in a Resource Group
-func (c *PublicIPScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armnetwork.PublicIPAddressesClient, ctx context.Context) ([]*armnetwork.PublicIPAddress, error) {
+				pager := client.NewListAllPager(nil)
+				svcs := make([]*armnetwork.PublicIPAddress, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					svcs = append(svcs, resp.Value...)
+				}
+				return svcs, nil
+			},
 
-	svcs, err := c.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, w := range svcs {
-		rr := engine.EvaluateRecommendations(rules, w, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
-			ServiceName:      *w.Name,
-			Type:             parseType(w.Type),
-			Location:         *w.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (c *PublicIPScanner) list() ([]*armnetwork.PublicIPAddress, error) {
-	pager := c.client.NewListAllPager(nil)
-
-	svcs := make([]*armnetwork.PublicIPAddress, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		svcs = append(svcs, resp.Value...)
-	}
-	return svcs, nil
-}
-
-func (a *PublicIPScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/publicIPAddresses"}
-}
-
-func parseType(t *string) string {
-	if t == nil {
-		return "Microsoft.Network/publicIPAddresses"
-	}
-	return *t
+			ExtractResourceInfo: func(publicIP *armnetwork.PublicIPAddress) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					publicIP.ID,
+					publicIP.Name,
+					publicIP.Location,
+					publicIP.Type,
+				)
+			},
+		},
+	)
 }
