@@ -4,70 +4,55 @@
 package apim
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
 
 func init() {
-	models.ScannerList["apim"] = []models.IAzureScanner{&APIManagementScanner{}}
+	models.ScannerList["apim"] = []models.IAzureScanner{NewAPIManagementScanner()}
 }
 
-// APIManagementScanner - Scanner for API Management Services
-type APIManagementScanner struct {
-	config        *models.ScannerConfig
-	serviceClient *armapimanagement.ServiceClient
-}
+// NewAPIManagementScanner creates a new API Management scanner using the generic framework
+func NewAPIManagementScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armapimanagement.ServiceResource, *armapimanagement.ServiceClient]{
+			ResourceTypes: []string{"Microsoft.ApiManagement/service"},
 
-// Init - Initializes the APIManagementScanner
-func (a *APIManagementScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.serviceClient, err = armapimanagement.NewServiceClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armapimanagement.ServiceClient, error) {
+				return armapimanagement.NewServiceClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan -Scans all API Management Services in a Resource Group
-func (a *APIManagementScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armapimanagement.ServiceClient, ctx context.Context) ([]*armapimanagement.ServiceResource, error) {
+				pager := client.NewListPager(nil)
+				services := make([]*armapimanagement.ServiceResource, 0)
 
-	services, err := a.listServices()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					services = append(services, resp.Value...)
+				}
 
-	for _, s := range services {
-		rr := engine.EvaluateRecommendations(rules, s, scanContext)
+				return services, nil
+			},
 
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*s.ID),
-			ServiceName:      *s.Name,
-			Type:             *s.Type,
-			Location:         *s.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
+			GetRecommendations: getRecommendations,
 
-func (a *APIManagementScanner) listServices() ([]*armapimanagement.ServiceResource, error) {
-	pager := a.serviceClient.NewListPager(nil)
-
-	services := make([]*armapimanagement.ServiceResource, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		services = append(services, resp.Value...)
-	}
-	return services, nil
-}
-
-func (a *APIManagementScanner) ResourceTypes() []string {
-	return []string{"Microsoft.ApiManagement/service"}
+			ExtractResourceInfo: func(svc *armapimanagement.ServiceResource) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					svc.ID,
+					svc.Name,
+					svc.Location,
+					svc.Type,
+				)
+			},
+		},
+	)
 }

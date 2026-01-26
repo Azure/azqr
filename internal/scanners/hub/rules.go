@@ -10,8 +10,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/machinelearning/armmachinelearning"
 )
 
-// GetRecommendations - Returns the rules for the AIFoundryHubScanner
-func (a *AIFoundryHubScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations - Returns the rules for the AI Foundry Hub Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"hub-001": {
 			RecommendationID: "hub-001",

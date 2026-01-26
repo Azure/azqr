@@ -8,22 +8,7 @@ import (
 )
 
 func init() {
-	models.ScannerList["aa"] = []models.IAzureScanner{NewAutomationAccountScanner()}
-}
-
-// NewAutomationAccountScanner creates a new AutomationAccountScanner
-func NewAutomationAccountScanner() *AutomationAccountScanner {
-	return &AutomationAccountScanner{
-		BaseScanner: models.NewBaseScanner("Microsoft.Automation/automationAccounts"),
+	models.ScannerList["aa"] = []models.IAzureScanner{
+		models.NewBaseScanner("Microsoft.Automation/automationAccounts"),
 	}
-}
-
-// AutomationAccountScanner - Scanner for Automation Account
-type AutomationAccountScanner struct {
-	models.BaseScanner
-}
-
-// Init - Initializes the Automation Account Scanner
-func (a *AutomationAccountScanner) Init(config *models.ScannerConfig) error {
-	return a.BaseScanner.Init(config)
 }

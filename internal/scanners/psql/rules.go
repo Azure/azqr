@@ -11,8 +11,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
 )
 
-// GetRecommendations - Returns the rules for the PostgreScanner
-func (a *PostgreScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for PostgreSQL servers
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"psql-001": {
 			RecommendationID: "psql-001",
@@ -104,8 +104,8 @@ func (a *PostgreScanner) GetRecommendations() map[string]models.AzqrRecommendati
 	}
 }
 
-// GetRecommendations - Returns the rules for the PostgreFlexibleScanner
-func (a *PostgreFlexibleScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getFlexibleRecommendations returns the rules for PostgreSQL flexible servers
+func getFlexibleRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"psqlf-001": {
 			RecommendationID: "psqlf-001",
