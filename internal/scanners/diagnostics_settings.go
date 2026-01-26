@@ -109,7 +109,7 @@ type DiagnosticSettingsScanner struct {
 func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenCredential, options *arm.ClientOptions) error {
 	d.ctx = ctx
 	// Create HTTP client with built-in retry logic, authentication, and throttling
-	d.httpClient = az.NewHttpClient(cred, 60*time.Second)
+	d.httpClient = az.NewHttpClient(cred, az.DefaultHttpClientOptions(60*time.Second))
 	return nil
 }
 

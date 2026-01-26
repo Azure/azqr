@@ -54,7 +54,7 @@ type QueryResponse struct {
 // NewGraphQuery creates a new GraphQuery using the provided TokenCredential.
 func NewGraphQuery(cred azcore.TokenCredential) *GraphQueryClient {
 	// Create Azure HTTP client with built-in retry and throttling
-	httpClient := az.NewHttpClient(cred, 60*time.Second)
+	httpClient := az.NewHttpClient(cred, az.DefaultHttpClientOptions(60*time.Second))
 
 	resourceManagerEndpoint := az.GetResourceManagerEndpoint()
 

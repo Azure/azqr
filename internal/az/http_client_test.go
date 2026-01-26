@@ -31,6 +31,16 @@ func (m *mockCredential) GetToken(ctx context.Context, opts policy.TokenRequestO
 	}, nil
 }
 
+// testHttpClientOptions returns options optimized for fast test execution
+func testHttpClientOptions() *HttpClientOptions {
+	return &HttpClientOptions{
+		Timeout:       5 * time.Second,
+		MaxRetries:    1,
+		RetryDelay:    10 * time.Millisecond,
+		MaxRetryDelay: 50 * time.Millisecond,
+	}
+}
+
 func TestDo_Success(t *testing.T) {
 	// Create a test server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -41,10 +51,10 @@ func TestDo_Success(t *testing.T) {
 
 	// Create client
 	cred := &mockCredential{token: "test-token"}
-	client := NewHttpClient(cred, 10*time.Second)
+	client := NewHttpClient(cred, testHttpClientOptions())
 
 	// Execute request
-	body, err := client.Do(context.Background(), server.URL, nil, 3)
+	body, err := client.Do(context.Background(), server.URL, nil)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -71,11 +81,11 @@ func TestDo_WithAuth(t *testing.T) {
 
 	// Create client
 	cred := &mockCredential{token: "test-token"}
-	client := NewHttpClient(cred, 10*time.Second)
+	client := NewHttpClient(cred, testHttpClientOptions())
 
 	// Execute request with auth (empty string uses default scope)
 	emptyScope := ""
-	body, err := client.Do(context.Background(), server.URL, &emptyScope, 3)
+	body, err := client.Do(context.Background(), server.URL, &emptyScope)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -95,12 +105,12 @@ func TestDo_HTTPError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	// Create client
+	// Create client with fast retry options for testing
 	cred := &mockCredential{token: "test-token"}
-	client := NewHttpClient(cred, 10*time.Second)
+	client := NewHttpClient(cred, testHttpClientOptions())
 
 	// Execute request
-	_, err := client.Do(context.Background(), server.URL, nil, 1)
+	_, err := client.Do(context.Background(), server.URL, nil)
 
 	if err == nil {
 		t.Fatal("Expected an error, got nil")
@@ -118,7 +128,7 @@ func TestDo_HTTPError(t *testing.T) {
 
 func TestNewClient(t *testing.T) {
 	cred := &mockCredential{token: "test-token"}
-	client := NewHttpClient(cred, 30*time.Second)
+	client := NewHttpClient(cred, testHttpClientOptions())
 
 	if client == nil {
 		t.Fatal("Expected client to be created, got nil")
@@ -127,6 +137,32 @@ func TestNewClient(t *testing.T) {
 
 	if client.cred == nil {
 		t.Fatal("Expected credential to be set, got nil")
+	}
+}
+
+func TestNewClient_NilOptions(t *testing.T) {
+	cred := &mockCredential{token: "test-token"}
+	client := NewHttpClient(cred, nil)
+
+	if client == nil {
+		t.Fatal("Expected client to be created with default options, got nil")
+	}
+}
+
+func TestDefaultHttpClientOptions(t *testing.T) {
+	opts := DefaultHttpClientOptions(45 * time.Second)
+
+	if opts.Timeout != 45*time.Second {
+		t.Errorf("Expected timeout 45s, got %v", opts.Timeout)
+	}
+	if opts.MaxRetries != 3 {
+		t.Errorf("Expected MaxRetries 3, got %d", opts.MaxRetries)
+	}
+	if opts.RetryDelay != 2*time.Second {
+		t.Errorf("Expected RetryDelay 2s, got %v", opts.RetryDelay)
+	}
+	if opts.MaxRetryDelay != 60*time.Second {
+		t.Errorf("Expected MaxRetryDelay 60s, got %v", opts.MaxRetryDelay)
 	}
 }
 
