@@ -4,70 +4,53 @@
 package pep
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 )
 
 func init() {
-	models.ScannerList["pep"] = []models.IAzureScanner{&PrivateEndpointScanner{}}
+	models.ScannerList["pep"] = []models.IAzureScanner{NewPrivateEndpointScanner()}
 }
 
-// PrivateEndpointScanner - Scanner for Private Endpoint
-type PrivateEndpointScanner struct {
-	config *models.ScannerConfig
-	client *armnetwork.PrivateEndpointsClient
-}
+// NewPrivateEndpointScanner - Creates a new Private Endpoint scanner
+func NewPrivateEndpointScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armnetwork.PrivateEndpoint, *armnetwork.PrivateEndpointsClient]{
+			ResourceTypes: []string{"Microsoft.Network/privateEndpoints"},
 
-// Init - Initializes the Private Endpoint Scanner
-func (a *PrivateEndpointScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.client, err = armnetwork.NewPrivateEndpointsClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armnetwork.PrivateEndpointsClient, error) {
+				return armnetwork.NewPrivateEndpointsClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Private Endpoint in a Resource Group
-func (c *PrivateEndpointScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armnetwork.PrivateEndpointsClient, ctx context.Context) ([]*armnetwork.PrivateEndpoint, error) {
+				pager := client.NewListBySubscriptionPager(nil)
+				resources := make([]*armnetwork.PrivateEndpoint, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					resources = append(resources, resp.Value...)
+				}
+				return resources, nil
+			},
 
-	svcs, err := c.list()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, w := range svcs {
-		rr := engine.EvaluateRecommendations(rules, w, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*w.ID),
-			ServiceName:      *w.Name,
-			Type:             *w.Type,
-			Location:         *w.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (c *PrivateEndpointScanner) list() ([]*armnetwork.PrivateEndpoint, error) {
-	pager := c.client.NewListBySubscriptionPager(nil)
-
-	svcs := make([]*armnetwork.PrivateEndpoint, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		svcs = append(svcs, resp.Value...)
-	}
-	return svcs, nil
-}
-
-func (a *PrivateEndpointScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Network/privateEndpoints"}
+			ExtractResourceInfo: func(endpoint *armnetwork.PrivateEndpoint) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					endpoint.ID,
+					endpoint.Name,
+					endpoint.Location,
+					endpoint.Type,
+				)
+			},
+		},
+	)
 }

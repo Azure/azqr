@@ -4,71 +4,53 @@
 package amg
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard"
 )
 
 func init() {
-	models.ScannerList["amg"] = []models.IAzureScanner{&ManagedGrafanaScanner{}}
+	models.ScannerList["amg"] = []models.IAzureScanner{NewManagedGrafanaScanner()}
 }
 
-// ManagedGrafanaScanner - Scanner for Managed Grafana
-type ManagedGrafanaScanner struct {
-	config        *models.ScannerConfig
-	grafanaClient *armdashboard.GrafanaClient
-}
+// NewManagedGrafanaScanner - Returns a new ManagedGrafanaScanner
+func NewManagedGrafanaScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armdashboard.ManagedGrafana, *armdashboard.GrafanaClient]{
+			ResourceTypes: []string{"Microsoft.Dashboard/grafana"},
 
-// Init - Initializes the ManagedGrafanaScanner Scanner
-func (a *ManagedGrafanaScanner) Init(config *models.ScannerConfig) error {
-	a.config = config
-	var err error
-	a.grafanaClient, _ = armdashboard.NewGrafanaClient(config.SubscriptionID, a.config.Cred, a.config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armdashboard.GrafanaClient, error) {
+				return armdashboard.NewGrafanaClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Managed Grafana in a Resource Group
-func (a *ManagedGrafanaScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(a.config.SubscriptionID, a.ResourceTypes()[0])
+			ListResources: func(client *armdashboard.GrafanaClient, ctx context.Context) ([]*armdashboard.ManagedGrafana, error) {
+				pager := client.NewListPager(nil)
+				resources := make([]*armdashboard.ManagedGrafana, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					resources = append(resources, resp.Value...)
+				}
+				return resources, nil
+			},
 
-	workspaces, err := a.listWorkspaces()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := a.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, g := range workspaces {
-		rr := engine.EvaluateRecommendations(rules, g, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   a.config.SubscriptionID,
-			SubscriptionName: a.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*g.ID),
-			Location:         *g.Location,
-			Type:             *g.Type,
-			ServiceName:      *g.Name,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (a *ManagedGrafanaScanner) listWorkspaces() ([]*armdashboard.ManagedGrafana, error) {
-	pager := a.grafanaClient.NewListPager(nil)
-
-	workspaces := make([]*armdashboard.ManagedGrafana, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(a.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		workspaces = append(workspaces, resp.Value...)
-	}
-
-	return workspaces, nil
-}
-
-func (a *ManagedGrafanaScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Dashboard/grafana"}
+			ExtractResourceInfo: func(grafana *armdashboard.ManagedGrafana) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					grafana.ID,
+					grafana.Name,
+					grafana.Location,
+					grafana.Type,
+				)
+			},
+		},
+	)
 }

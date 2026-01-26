@@ -4,70 +4,53 @@
 package dbw
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
 
 func init() {
-	models.ScannerList["dbw"] = []models.IAzureScanner{&DatabricksScanner{}}
+	models.ScannerList["dbw"] = []models.IAzureScanner{NewDatabricksScanner()}
 }
 
-// DatabricksScanner - Scanner for Azure Databricks
-type DatabricksScanner struct {
-	config *models.ScannerConfig
-	client *armdatabricks.WorkspacesClient
-}
+// NewDatabricksScanner - Creates a new Databricks scanner
+func NewDatabricksScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armdatabricks.Workspace, *armdatabricks.WorkspacesClient]{
+			ResourceTypes: []string{"Microsoft.Databricks/workspaces"},
 
-// Init - Initializes the DatabricksScanner
-func (c *DatabricksScanner) Init(config *models.ScannerConfig) error {
-	c.config = config
-	var err error
-	c.client, err = armdatabricks.NewWorkspacesClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armdatabricks.WorkspacesClient, error) {
+				return armdatabricks.NewWorkspacesClient(
+					config.SubscriptionID,
+					config.Cred,
+					config.ClientOptions,
+				)
+			},
 
-// Scan - Scans all Azure Databricks in a Resource Group
-func (c *DatabricksScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armdatabricks.WorkspacesClient, ctx context.Context) ([]*armdatabricks.Workspace, error) {
+				pager := client.NewListBySubscriptionPager(nil)
+				resources := make([]*armdatabricks.Workspace, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					resources = append(resources, resp.Value...)
+				}
+				return resources, nil
+			},
 
-	workspaces, err := c.listWorkspaces()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, ws := range workspaces {
-		rr := engine.EvaluateRecommendations(rules, ws, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*ws.ID),
-			ServiceName:      *ws.Name,
-			Type:             *ws.Type,
-			Location:         *ws.Location,
-			Recommendations:  rr,
-		})
-	}
-	return results, nil
-}
-
-func (c *DatabricksScanner) listWorkspaces() ([]*armdatabricks.Workspace, error) {
-	pager := c.client.NewListBySubscriptionPager(nil)
-
-	registries := make([]*armdatabricks.Workspace, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		registries = append(registries, resp.Value...)
-	}
-	return registries, nil
-}
-
-func (a *DatabricksScanner) ResourceTypes() []string {
-	return []string{"Microsoft.Databricks/workspaces"}
+			ExtractResourceInfo: func(workspace *armdatabricks.Workspace) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					workspace.ID,
+					workspace.Name,
+					workspace.Location,
+					workspace.Type,
+				)
+			},
+		},
+	)
 }

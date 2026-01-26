@@ -11,8 +11,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/apimanagement/armapimanagement"
 )
 
-// GetRules - Returns the rules for the APIManagementScanner
-func (a *APIManagementScanner) GetRecommendations() map[string]models.AzqrRecommendation {
+// getRecommendations returns the rules for the API Management Scanner
+func getRecommendations() map[string]models.AzqrRecommendation {
 	return map[string]models.AzqrRecommendation{
 		"apim-001": {
 			RecommendationID: "apim-001",

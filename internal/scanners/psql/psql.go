@@ -4,71 +4,49 @@
 package psql
 
 import (
+	"context"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql"
 )
 
 func init() {
-	models.ScannerList["psql"] = []models.IAzureScanner{&PostgreScanner{}, &PostgreFlexibleScanner{}}
+	models.ScannerList["psql"] = []models.IAzureScanner{NewPostgreScanner(), NewPostgreFlexibleScanner()}
 }
 
-// PostgreScanner - Scanner for PostgreSQL
-type PostgreScanner struct {
-	config        *models.ScannerConfig
-	postgreClient *armpostgresql.ServersClient
-}
+// NewPostgreScanner creates a new PostgreScanner
+func NewPostgreScanner() models.IAzureScanner {
+	return models.NewGenericScanner(
+		models.GenericScannerConfig[armpostgresql.Server, *armpostgresql.ServersClient]{
+			ResourceTypes: []string{"Microsoft.DBforPostgreSQL/servers"},
 
-// Init - Initializes the PostgreScanner
-func (c *PostgreScanner) Init(config *models.ScannerConfig) error {
-	c.config = config
-	var err error
-	c.postgreClient, err = armpostgresql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
-	return err
-}
+			ClientFactory: func(config *models.ScannerConfig) (*armpostgresql.ServersClient, error) {
+				return armpostgresql.NewServersClient(config.SubscriptionID, config.Cred, config.ClientOptions)
+			},
 
-// Scan - Scans all PostgreSQL in a Resource Group
-func (c *PostgreScanner) Scan(scanContext *models.ScanContext) ([]*models.AzqrServiceResult, error) {
-	models.LogSubscriptionScan(c.config.SubscriptionID, c.ResourceTypes()[0])
+			ListResources: func(client *armpostgresql.ServersClient, ctx context.Context) ([]*armpostgresql.Server, error) {
+				pager := client.NewListPager(nil)
+				servers := make([]*armpostgresql.Server, 0)
+				for pager.More() {
+					resp, err := pager.NextPage(ctx)
+					if err != nil {
+						return nil, err
+					}
+					servers = append(servers, resp.Value...)
+				}
+				return servers, nil
+			},
 
-	postgre, err := c.listPostgre()
-	if err != nil {
-		return nil, err
-	}
-	engine := models.RecommendationEngine{}
-	rules := c.GetRecommendations()
-	results := []*models.AzqrServiceResult{}
+			GetRecommendations: getRecommendations,
 
-	for _, postgre := range postgre {
-		rr := engine.EvaluateRecommendations(rules, postgre, scanContext)
-
-		results = append(results, &models.AzqrServiceResult{
-			SubscriptionID:   c.config.SubscriptionID,
-			SubscriptionName: c.config.SubscriptionName,
-			ResourceGroup:    models.GetResourceGroupFromResourceID(*postgre.ID),
-			ServiceName:      *postgre.Name,
-			Type:             *postgre.Type,
-			Location:         *postgre.Location,
-			Recommendations:  rr,
-		})
-	}
-
-	return results, nil
-}
-
-func (c *PostgreScanner) listPostgre() ([]*armpostgresql.Server, error) {
-	pager := c.postgreClient.NewListPager(nil)
-
-	servers := make([]*armpostgresql.Server, 0)
-	for pager.More() {
-		resp, err := pager.NextPage(c.config.Ctx)
-		if err != nil {
-			return nil, err
-		}
-		servers = append(servers, resp.Value...)
-	}
-	return servers, nil
-}
-
-func (a *PostgreScanner) ResourceTypes() []string {
-	return []string{"Microsoft.DBforPostgreSQL/servers"}
+			ExtractResourceInfo: func(resource *armpostgresql.Server) models.ResourceInfo {
+				return models.ExtractStandardARMResourceInfo(
+					resource.ID,
+					resource.Name,
+					resource.Location,
+					resource.Type,
+				)
+			},
+		},
+	)
 }

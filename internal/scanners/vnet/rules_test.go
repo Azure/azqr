@@ -96,8 +96,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &VirtualNetworkScanner{}
-			rules := s.GetRecommendations()
+			rules := getRecommendations()
 			b, w := rules[tt.fields.rule].Eval(tt.fields.target, tt.fields.scanContext)
 			got := want{
 				broken: b,
@@ -111,7 +110,7 @@ func TestVirtualNetworkScanner_Rules(t *testing.T) {
 }
 
 func TestVirtualNetworkScanner_ResourceTypes(t *testing.T) {
-	scanner := &VirtualNetworkScanner{}
+	scanner := NewVirtualNetworkScanner()
 	resourceTypes := scanner.ResourceTypes()
 
 	if len(resourceTypes) == 0 {
@@ -133,8 +132,7 @@ func TestVirtualNetworkScanner_ResourceTypes(t *testing.T) {
 }
 
 func TestVirtualNetworkScanner_GetRecommendations(t *testing.T) {
-	scanner := &VirtualNetworkScanner{}
-	recommendations := scanner.GetRecommendations()
+	recommendations := getRecommendations()
 
 	if len(recommendations) == 0 {
 		t.Error("Expected recommendations, got none")
@@ -157,7 +155,7 @@ func TestVirtualNetworkScanner_GetRecommendations(t *testing.T) {
 }
 
 func TestVirtualNetworkScanner_Init(t *testing.T) {
-	scanner := &VirtualNetworkScanner{}
+	scanner := NewVirtualNetworkScanner()
 
 	config := &models.ScannerConfig{
 		SubscriptionID: "test-subscription",
@@ -173,7 +171,7 @@ func TestVirtualNetworkScanner_Init(t *testing.T) {
 }
 
 func TestVirtualNetworkScanner_Scan(t *testing.T) {
-	scanner := &VirtualNetworkScanner{}
+	scanner := NewVirtualNetworkScanner()
 	var _ = scanner.Scan
 
 	t.Log("Scan method signature verified")
