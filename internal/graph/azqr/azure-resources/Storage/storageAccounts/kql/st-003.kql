@@ -1,0 +1,35 @@
+// Azure Resource Graph Query
+// Find all Storage Accounts and report their SLA based on SKU and access tier
+// Note: SLAs differentiate between read and write operations
+resources
+| where type =~ "Microsoft.Storage/storageAccounts"
+| extend skuName = tostring(sku.name)
+| extend accessTier = coalesce(tostring(properties.accessTier), "Hot") // Default to Hot if not set
+| extend storageKind = tostring(kind)
+// Determine read and write SLAs
+| extend readSLA = case(
+    skuName contains "RA-GRS" and accessTier =~ "Hot", "99.99%",
+    skuName contains "RA-GZRS" and accessTier =~ "Hot", "99.99%",
+    skuName contains "RA-GRS" and accessTier =~ "Cool", "99.9%",
+    skuName contains "RA-GZRS" and accessTier =~ "Cool", "99.9%",
+    storageKind =~ "BlockBlobStorage", "99.9%",
+    storageKind =~ "FileStorage", "99.9%",
+    skuName contains "LRS" and accessTier =~ "Hot", "99.9%",
+    skuName contains "ZRS" and accessTier =~ "Hot", "99.9%",
+    skuName contains "GRS" and accessTier =~ "Hot", "99.9%",
+    skuName contains "GZRS" and accessTier =~ "Hot", "99.9%",
+    skuName contains "LRS" and accessTier =~ "Cool", "99%",
+    skuName contains "ZRS" and accessTier =~ "Cool", "99%",
+    skuName contains "GRS" and accessTier =~ "Cool", "99%",
+    skuName contains "GZRS" and accessTier =~ "Cool", "99%",
+    "99.9%" // Default to Hot tier SLA
+)
+| extend writeSLA = case(
+    storageKind =~ "BlockBlobStorage", "99.9%",
+    storageKind =~ "FileStorage", "99.9%",
+    accessTier =~ "Hot", "99.9%",
+    accessTier =~ "Cool", "99%",
+    "99.9%" // Default to Hot tier SLA
+)
+| extend slaValue = strcat("Read: ", readSLA, ", Write: ", writeSLA)
+| project recommendationId = "st-003", name, id, tags, param1 = slaValue

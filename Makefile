@@ -35,7 +35,9 @@ help:
 	@echo "  vet          - Run go vet checks"
 	@echo "  tidy         - Tidy up go modules and check for changes"
 	@echo "  json         - Generate JSON recommendations and check for changes"
-	@echo "  test         - Run tests (includes linting)"
+	@echo "  validate-yaml - Validate all recommendation YAML files against schema"
+	@echo "  validate-scanners - Validate APRL recommendations coverage"
+	@echo "  test         - Run tests (includes linting and validation)"
 	@echo "  clean        - Remove built binaries"
 	@echo "  build-image  - Build Docker image with azqr binary"
 	@echo ""
@@ -76,7 +78,14 @@ json:
 	go run ./cmd/azqr/main.go rules --json > ./data/recommendations.json 
 	git diff --exit-code ./data/recommendations.json
 
-test: lint vet tidy json
+validate-yaml:
+	@echo "Validating recommendation YAML files against schema..."
+	@go run ./scripts/validate-recommendations.go ./internal/graph/azqr/azure-resources ./internal/graph/aprl/azure-resources ./internal/graph/azure-orphan-resources
+
+validate-scanners: validate-yaml
+	@./scripts/validate-scanner-coverage.sh
+
+test: lint vet tidy json validate-yaml validate-scanners
 	go test -race ./... -coverprofile=coverage.txt -covermode=atomic ./...
 
 $(TARGET): clean

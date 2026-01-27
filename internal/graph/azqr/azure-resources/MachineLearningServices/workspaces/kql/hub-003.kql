@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find Azure Machine Learning Workspaces and report their SLA
+resources
+| where type =~ 'Microsoft.MachineLearningServices/workspaces'
+| extend slaValue = "99.9%"
+| project recommendationId = "hub-003", name, id, tags, param1 = slaValue

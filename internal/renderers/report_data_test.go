@@ -6,6 +6,8 @@ package renderers
 import (
 	"strings"
 	"testing"
+
+	"github.com/Azure/azqr/internal/models"
 )
 
 func TestNewReportData(t *testing.T) {
@@ -57,16 +59,39 @@ func TestNewReportData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			reportData := NewReportData(
-				tt.outputFile,
-				tt.mask,
-				tt.policy,
-				tt.arc,
-				tt.defender,
-				tt.advisor,
-				tt.cost,
-				tt.azqr,
-			)
+			stages := models.NewStageConfigs()
+			if tt.policy {
+				_ = stages.EnableStage(models.StageNamePolicy)
+			} else {
+				_ = stages.DisableStage(models.StageNamePolicy)
+			}
+			if tt.arc {
+				_ = stages.EnableStage(models.StageNameArc)
+			} else {
+				_ = stages.DisableStage(models.StageNameArc)
+			}
+			if tt.defender {
+				_ = stages.EnableStage(models.StageNameDefender)
+			} else {
+				_ = stages.DisableStage(models.StageNameDefender)
+			}
+			if tt.advisor {
+				_ = stages.EnableStage(models.StageNameAdvisor)
+			} else {
+				_ = stages.DisableStage(models.StageNameAdvisor)
+			}
+			if tt.cost {
+				_ = stages.EnableStage(models.StageNameCost)
+			} else {
+				_ = stages.DisableStage(models.StageNameCost)
+			}
+			if tt.azqr {
+				_ = stages.EnableStage(models.StageNameGraph)
+			} else {
+				_ = stages.DisableStage(models.StageNameGraph)
+			}
+
+			reportData := NewReportData(tt.outputFile, tt.mask, stages)
 
 			if reportData.OutputFileName != tt.outputFile {
 				t.Errorf("Expected OutputFileName %s, got %s", tt.outputFile, reportData.OutputFileName)
@@ -74,23 +99,23 @@ func TestNewReportData(t *testing.T) {
 			if reportData.Mask != tt.mask {
 				t.Errorf("Expected Mask %v, got %v", tt.mask, reportData.Mask)
 			}
-			if reportData.PolicyEnabled != tt.policy {
-				t.Errorf("Expected PolicyEnabled %v, got %v", tt.policy, reportData.PolicyEnabled)
+			if reportData.Stages.IsStageEnabled(models.StageNamePolicy) != tt.policy {
+				t.Errorf("Expected PolicyEnabled %v, got %v", tt.policy, reportData.Stages.IsStageEnabled(models.StageNamePolicy))
 			}
-			if reportData.ArcEnabled != tt.arc {
-				t.Errorf("Expected ArcEnabled %v, got %v", tt.arc, reportData.ArcEnabled)
+			if reportData.Stages.IsStageEnabled(models.StageNameArc) != tt.arc {
+				t.Errorf("Expected ArcEnabled %v, got %v", tt.arc, reportData.Stages.IsStageEnabled(models.StageNameArc))
 			}
-			if reportData.DefenderEnabled != tt.defender {
-				t.Errorf("Expected DefenderEnabled %v, got %v", tt.defender, reportData.DefenderEnabled)
+			if (reportData.Stages.IsStageEnabled(models.StageNameDefender) || reportData.Stages.IsStageEnabled(models.StageNameDefenderRecommendations)) != tt.defender {
+				t.Errorf("Expected DefenderEnabled %v, got %v", tt.defender, (reportData.Stages.IsStageEnabled(models.StageNameDefender) || reportData.Stages.IsStageEnabled(models.StageNameDefenderRecommendations)))
 			}
-			if reportData.AdvisorEnabled != tt.advisor {
-				t.Errorf("Expected AdvisorEnabled %v, got %v", tt.advisor, reportData.AdvisorEnabled)
+			if reportData.Stages.IsStageEnabled(models.StageNameAdvisor) != tt.advisor {
+				t.Errorf("Expected AdvisorEnabled %v, got %v", tt.advisor, reportData.Stages.IsStageEnabled(models.StageNameAdvisor))
 			}
-			if reportData.CostEnabled != tt.cost {
-				t.Errorf("Expected CostEnabled %v, got %v", tt.cost, reportData.CostEnabled)
+			if reportData.Stages.IsStageEnabled(models.StageNameCost) != tt.cost {
+				t.Errorf("Expected CostEnabled %v, got %v", tt.cost, reportData.Stages.IsStageEnabled(models.StageNameCost))
 			}
-			if reportData.ScanEnabled != tt.azqr {
-				t.Errorf("Expected ScanEnabled %v, got %v", tt.azqr, reportData.ScanEnabled)
+			if reportData.Stages.IsStageEnabled(models.StageNameGraph) != tt.azqr {
+				t.Errorf("Expected ScanEnabled %v, got %v", tt.azqr, reportData.Stages.IsStageEnabled(models.StageNameGraph))
 			}
 		})
 	}
@@ -98,30 +123,40 @@ func TestNewReportData(t *testing.T) {
 
 func TestReportDataFeatureFlagsIndependence(t *testing.T) {
 	// Test that each feature flag can be independently set
-	reportData := NewReportData("test", true, true, false, true, false, true, false)
+	stages := models.NewStageConfigs()
+	// Explicitly set all stages to desired state
+	_ = stages.EnableStage(models.StageNamePolicy)
+	_ = stages.EnableStage(models.StageNameDefender)
+	_ = stages.EnableStage(models.StageNameCost)
+	_ = stages.DisableStage(models.StageNameArc)
+	_ = stages.DisableStage(models.StageNameAdvisor)
+	_ = stages.DisableStage(models.StageNameGraph)
 
-	if !reportData.PolicyEnabled {
+	reportData := NewReportData("test", true, stages)
+
+	if !reportData.Stages.IsStageEnabled(models.StageNamePolicy) {
 		t.Error("Expected PolicyEnabled to be true")
 	}
-	if reportData.ArcEnabled {
+	if reportData.Stages.IsStageEnabled(models.StageNameArc) {
 		t.Error("Expected ArcEnabled to be false")
 	}
-	if !reportData.DefenderEnabled {
+	if !reportData.Stages.IsStageEnabled(models.StageNameDefender) && !reportData.Stages.IsStageEnabled(models.StageNameDefenderRecommendations) {
 		t.Error("Expected DefenderEnabled to be true")
 	}
-	if reportData.AdvisorEnabled {
+	if reportData.Stages.IsStageEnabled(models.StageNameAdvisor) {
 		t.Error("Expected AdvisorEnabled to be false")
 	}
-	if !reportData.CostEnabled {
+	if !reportData.Stages.IsStageEnabled(models.StageNameCost) {
 		t.Error("Expected CostEnabled to be true")
 	}
-	if reportData.ScanEnabled {
+	if reportData.Stages.IsStageEnabled(models.StageNameGraph) {
 		t.Error("Expected ScanEnabled to be false")
 	}
 }
 
 func TestReportDataInitializationDefaults(t *testing.T) {
-	reportData := NewReportData("test", true, false, false, false, false, false, false)
+	stages := models.NewStageConfigs()
+	reportData := NewReportData("test", true, stages)
 
 	// Verify basic fields are set
 	if reportData.OutputFileName != "test" {
@@ -161,7 +196,8 @@ func TestPluginResultStructure(t *testing.T) {
 }
 
 func TestReportDataWithPluginResults(t *testing.T) {
-	reportData := NewReportData("test", true, false, false, false, false, false, false)
+	stages := models.NewStageConfigs()
+	reportData := NewReportData("test", true, stages)
 
 	// Add plugin results
 	reportData.PluginResults = []PluginResult{
@@ -220,7 +256,8 @@ func TestReportDataMaskingField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			reportData := NewReportData("test", tt.maskEnabled, false, false, false, false, false, false)
+			stages := models.NewStageConfigs()
+			reportData := NewReportData("test", tt.maskEnabled, stages)
 
 			if reportData.Mask != tt.expectedMask {
 				t.Errorf("Expected Mask %v, got %v", tt.expectedMask, reportData.Mask)
@@ -303,24 +340,56 @@ func TestFeatureFlagsCombinations(t *testing.T) {
 	}
 
 	for i, combo := range combinations {
-		reportData := NewReportData("test", true, combo.policy, combo.arc, combo.defender, combo.advisor, combo.cost, combo.azqr)
+		stages := models.NewStageConfigs()
+		if combo.policy {
+			_ = stages.EnableStage(models.StageNamePolicy)
+		} else {
+			_ = stages.DisableStage(models.StageNamePolicy)
+		}
+		if combo.arc {
+			_ = stages.EnableStage(models.StageNameArc)
+		} else {
+			_ = stages.DisableStage(models.StageNameArc)
+		}
+		if combo.defender {
+			_ = stages.EnableStage(models.StageNameDefender)
+		} else {
+			_ = stages.DisableStage(models.StageNameDefender)
+		}
+		if combo.advisor {
+			_ = stages.EnableStage(models.StageNameAdvisor)
+		} else {
+			_ = stages.DisableStage(models.StageNameAdvisor)
+		}
+		if combo.cost {
+			_ = stages.EnableStage(models.StageNameCost)
+		} else {
+			_ = stages.DisableStage(models.StageNameCost)
+		}
+		if combo.azqr {
+			_ = stages.EnableStage(models.StageNameGraph)
+		} else {
+			_ = stages.DisableStage(models.StageNameGraph)
+		}
 
-		if reportData.PolicyEnabled != combo.policy {
+		reportData := NewReportData("test", true, stages)
+
+		if reportData.Stages.IsStageEnabled(models.StageNamePolicy) != combo.policy {
 			t.Errorf("Combination %d: PolicyEnabled mismatch", i)
 		}
-		if reportData.ArcEnabled != combo.arc {
+		if reportData.Stages.IsStageEnabled(models.StageNameArc) != combo.arc {
 			t.Errorf("Combination %d: ArcEnabled mismatch", i)
 		}
-		if reportData.DefenderEnabled != combo.defender {
+		if (reportData.Stages.IsStageEnabled(models.StageNameDefender) || reportData.Stages.IsStageEnabled(models.StageNameDefenderRecommendations)) != combo.defender {
 			t.Errorf("Combination %d: DefenderEnabled mismatch", i)
 		}
-		if reportData.AdvisorEnabled != combo.advisor {
+		if reportData.Stages.IsStageEnabled(models.StageNameAdvisor) != combo.advisor {
 			t.Errorf("Combination %d: AdvisorEnabled mismatch", i)
 		}
-		if reportData.CostEnabled != combo.cost {
+		if reportData.Stages.IsStageEnabled(models.StageNameCost) != combo.cost {
 			t.Errorf("Combination %d: CostEnabled mismatch", i)
 		}
-		if reportData.ScanEnabled != combo.azqr {
+		if reportData.Stages.IsStageEnabled(models.StageNameGraph) != combo.azqr {
 			t.Errorf("Combination %d: ScanEnabled mismatch", i)
 		}
 	}

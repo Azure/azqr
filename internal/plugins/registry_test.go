@@ -81,7 +81,7 @@ func TestRegistryRegisterDuplicate(t *testing.T) {
 			Name:    "test",
 			Version: "1.0.0",
 		},
-		YamlRecommendations: []models.AprlRecommendation{},
+		YamlRecommendations: []models.GraphRecommendation{},
 	}
 
 	plugin2 := &Plugin{
@@ -89,7 +89,7 @@ func TestRegistryRegisterDuplicate(t *testing.T) {
 			Name:    "test",
 			Version: "2.0.0",
 		},
-		YamlRecommendations: []models.AprlRecommendation{},
+		YamlRecommendations: []models.GraphRecommendation{},
 	}
 
 	err := registry.Register(plugin1)
@@ -115,7 +115,7 @@ func TestRegistryUnregister(t *testing.T) {
 			Name:    "test",
 			Version: "1.0.0",
 		},
-		YamlRecommendations: []models.AprlRecommendation{},
+		YamlRecommendations: []models.GraphRecommendation{},
 	}
 
 	_ = registry.Register(plugin)

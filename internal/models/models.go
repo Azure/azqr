@@ -13,10 +13,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v2"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v6"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 	"github.com/rs/zerolog/log"
 )
 
@@ -33,54 +30,13 @@ type (
 
 	// ScanContext - Struct for Scanner Context
 	ScanContext struct {
-		Filters               *Filters
-		PrivateEndpoints      map[string]bool
-		DiagnosticsSettings   map[string]bool
-		PublicIPs             map[string]*armnetwork.PublicIPAddress
-		SiteConfig            *armappservice.WebAppsClientGetConfigurationResponse
-		BlobServiceProperties *armstorage.BlobServicesClientGetServicePropertiesResponse
+		Filters *Filters
 	}
 
 	// IAzureScanner - Interface for all Azure Scanners
 	IAzureScanner interface {
-		Init(config *ScannerConfig) error
-		GetRecommendations() map[string]AzqrRecommendation
-		Scan(scanContext *ScanContext) ([]*AzqrServiceResult, error)
+		ServiceName() string
 		ResourceTypes() []string
-	}
-
-	// AzqrServiceResult - Struct for all Azure Service Results
-	AzqrServiceResult struct {
-		SubscriptionID   string
-		SubscriptionName string
-		ResourceGroup    string
-		Location         string
-		Type             string
-		ServiceName      string
-		Recommendations  map[string]*AzqrResult
-	}
-
-	AzqrRecommendation struct {
-		RecommendationID   string
-		ResourceType       string
-		Recommendation     string
-		Category           RecommendationCategory
-		Impact             RecommendationImpact
-		RecommendationType RecommendationType
-		LearnMoreUrl       string
-		Eval               func(target interface{}, scanContext *ScanContext) (bool, string)
-	}
-
-	AzqrResult struct {
-		RecommendationID   string
-		ResourceType       string
-		Recommendation     string
-		Category           RecommendationCategory
-		Impact             RecommendationImpact
-		RecommendationType RecommendationType
-		LearnMoreUrl       string
-		NotCompliant       bool
-		Result             string
 	}
 
 	Resource struct {
@@ -102,7 +58,7 @@ type (
 		Count        float64 `json:"Number of Resources"`
 	}
 
-	AprlRecommendation struct {
+	GraphRecommendation struct {
 		RecommendationID    string   `yaml:"aprlGuid"`
 		Recommendation      string   `yaml:"description"`
 		Category            string   `yaml:"recommendationControl"`
@@ -122,7 +78,7 @@ type (
 		Source string
 	}
 
-	AprlResult struct {
+	GraphResult struct {
 		RecommendationID    string
 		ResourceType        string
 		Recommendation      string
@@ -227,77 +183,27 @@ const (
 	CategoryScalability                 RecommendationCategory = "Scalability"
 	CategorySecurity                    RecommendationCategory = "Security"
 	CategoryServiceUpgradeAndRetirement RecommendationCategory = "ServiceUpgradeAndRetirement"
-
-	TypeRecommendation RecommendationType = ""
-	TypeSLA            RecommendationType = "SLA"
+	CategorySLA                         RecommendationCategory = "SLA"
 )
 
-func (r *AzqrRecommendation) ToAzureAprlRecommendation() AprlRecommendation {
-	return AprlRecommendation{
-		RecommendationID:    r.RecommendationID,
-		Recommendation:      r.Recommendation,
-		Category:            string(r.Category),
-		Impact:              string(r.Impact),
-		ResourceType:        r.ResourceType,
-		MetadataState:       "",
-		LongDescription:     r.Recommendation,
-		PotentialBenefits:   "",
-		PgVerified:          false,
-		AutomationAvailable: "",
-		Tags:                nil,
-		GraphQuery:          "",
-		LearnMoreLink: []struct {
-			Name string "yaml:\"name\""
-			Url  string "yaml:\"url\""
-		}{{Name: "Learn More", Url: r.LearnMoreUrl}},
-		Source: "AZQR",
-	}
-}
-
-func (e *RecommendationEngine) EvaluateRecommendations(rules map[string]AzqrRecommendation, target interface{}, scanContext *ScanContext) map[string]*AzqrResult {
-	results := map[string]*AzqrResult{}
-
-	for k, rule := range rules {
-		if scanContext.Filters.Azqr.IsRecommendationExcluded(rule.RecommendationID) {
-			continue
-		}
-
-		result := e.evaluateRecommendation(rule, target, scanContext)
-		results[k] = &result
-	}
-
-	return results
-}
-
-func (e *RecommendationEngine) evaluateRecommendation(rule AzqrRecommendation, target interface{}, scanContext *ScanContext) AzqrResult {
-	broken, result := rule.Eval(target, scanContext)
-
-	return AzqrResult{
-		RecommendationID:   rule.RecommendationID,
-		Category:           rule.Category,
-		Recommendation:     rule.Recommendation,
-		RecommendationType: rule.RecommendationType,
-		Impact:             rule.Impact,
-		LearnMoreUrl:       rule.LearnMoreUrl,
-		Result:             result,
-		NotCompliant:       broken,
-	}
-}
-
-func (r *AzqrServiceResult) ResourceID() string {
-	return strings.ToLower(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/%s/%s", r.SubscriptionID, r.ResourceGroup, r.Type, r.ServiceName))
-}
-
 func LogSubscriptionScan(subscriptionID string, serviceTypeOrName string) {
-	log.Info().Msgf("Scanning subscriptions/...%s for %s", subscriptionID[29:], serviceTypeOrName)
+	log.Info().
+		Str("subscriptionID", subscriptionID[29:]).
+		Str("service", serviceTypeOrName).
+		Msg("Scanning subscription")
 }
 
 func LogResourceTypeScan(serviceType string) {
-	log.Info().Msgf("Scanning subscriptions for %s", serviceType)
+	log.Info().
+		Str("for", serviceType).
+		Msg("Scanning")
 }
 
 func LogGraphRecommendationScan(serviceType, recommendationId string) {
-	log.Info().Msgf("Scanning subscriptions for %s using rule %s", serviceType, recommendationId)
+	log.Info().
+		Str("recommendationId", recommendationId).
+		Str("serviceType", serviceType).
+		Msg("Scanning")
 }
 
 func ShouldSkipError(err error) bool {
@@ -312,6 +218,7 @@ func ShouldSkipError(err error) bool {
 	return false
 }
 
+// ListResourceGroup - List Resource Groups in a Subscription
 func ListResourceGroup(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, options *arm.ClientOptions) ([]*armresources.ResourceGroup, error) {
 	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, options)
 	if err != nil {
@@ -340,11 +247,7 @@ func GetSubscriptionFromResourceID(resourceID string) string {
 	return parts[2]
 }
 
-// GetResourceGroupFromResourceID extracts and returns the resource group name from an Azure resource ID.
-//
-// resourceID: The full Azure resource ID string in the follwoing format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{resourceType}/{resourceName}
-//
-// Returns the resource group name if present, otherwise returns an empty string.
+// GetResourceGroupFromResourceID - Get Resource Group from Resource ID
 func GetResourceGroupFromResourceID(resourceID string) string {
 	parts := strings.Split(resourceID, "/")
 	if len(parts) < 5 {

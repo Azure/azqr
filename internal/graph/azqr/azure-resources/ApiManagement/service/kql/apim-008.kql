@@ -1,0 +1,8 @@
+// Check if API Management uses Managed Identities
+resources
+| where type =~ 'Microsoft.ApiManagement/service'
+| extend identityType = identity.type
+| where isnull(identityType) or identityType == 'None'
+| extend recommendationId = 'apim-008'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

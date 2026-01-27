@@ -48,9 +48,9 @@ type Stage interface {
 	// Returns error if the stage fails critically.
 	Execute(ctx *ScanContext) error
 
-	// CanSkip determines if this stage can be skipped based on context.
-	// For example, skip APRL stage if UseAprlRecommendations is false.
-	CanSkip(ctx *ScanContext) bool
+	// Skip determines if this stage can be skipped based on context.
+	// For example, skip Graph stage if UseGraphRecommendations is false.
+	Skip(ctx *ScanContext) bool
 }
 
 // Pipeline orchestrates the execution of multiple stages in sequence.
@@ -90,7 +90,7 @@ func (p *Pipeline) Execute(ctx *ScanContext) error {
 		stageName := stage.Name()
 
 		// Check if stage can be skipped
-		if stage.CanSkip(ctx) {
+		if stage.Skip(ctx) {
 			log.Debug().
 				Str("stage", stageName).
 				Int("position", i+1).
@@ -189,6 +189,6 @@ func (s *BaseStage) Name() string {
 
 // CanSkip implements Stage.CanSkip().
 // By default, required stages cannot be skipped.
-func (s *BaseStage) CanSkip(ctx *ScanContext) bool {
+func (s *BaseStage) Skip(ctx *ScanContext) bool {
 	return !s.required
 }

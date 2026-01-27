@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find all Azure Managed Grafana instances with zone redundancy disabled
+resources
+| where type =~ "Microsoft.Dashboard/grafana"
+| where properties.zoneRedundancy =~ "Disabled"
+| project recommendationId = "amg-005", name, id, tags, param1 = "Zone redundancy disabled"

@@ -7,6 +7,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/models"
 )
 
@@ -40,9 +41,15 @@ func (b *ScanPipelineBuilder) WithResourceDiscovery() *ScanPipelineBuilder {
 	return b
 }
 
-// WithAprlScan adds the APRL scanning stage.
-func (b *ScanPipelineBuilder) WithAprlScan() *ScanPipelineBuilder {
-	b.stages = append(b.stages, NewAprlScanStage())
+// WithGraphScan adds the APRL scanning stage.
+func (b *ScanPipelineBuilder) WithGraphScan() *ScanPipelineBuilder {
+	b.stages = append(b.stages, NewGraphScanStage())
+	return b
+}
+
+// WithDiagnosticsScan adds the diagnostics scanning stage.
+func (b *ScanPipelineBuilder) WithDiagnosticsScan() *ScanPipelineBuilder {
+	b.stages = append(b.stages, NewDiagnosticsScanStage())
 	return b
 }
 
@@ -52,15 +59,39 @@ func (b *ScanPipelineBuilder) WithPluginExecution() *ScanPipelineBuilder {
 	return b
 }
 
-// WithAzqrScan adds the AZQR service scan stage.
-func (b *ScanPipelineBuilder) WithAzqrScan() *ScanPipelineBuilder {
-	b.stages = append(b.stages, NewAzqrScanStage())
+// WithAdvisor adds the advisor scan stage.
+func (b *ScanPipelineBuilder) WithAdvisor() *ScanPipelineBuilder {
+	b.stages = append(b.stages, NewAdvisorStage())
 	return b
 }
 
-// WithAdvisorDefender adds the advisor and defender scan stage.
-func (b *ScanPipelineBuilder) WithAdvisorDefender() *ScanPipelineBuilder {
-	b.stages = append(b.stages, NewAdvisorDefenderStage())
+// WithDefenderStatus adds the defender status scan stage.
+func (b *ScanPipelineBuilder) WithDefenderStatus() *ScanPipelineBuilder {
+	b.stages = append(b.stages, NewDefenderStatusStage())
+	return b
+}
+
+// WithDefenderRecommendations adds the defender recommendations scan stage.
+func (b *ScanPipelineBuilder) WithDefenderRecommendations() *ScanPipelineBuilder {
+	b.stages = append(b.stages, NewDefenderRecommendationsStage())
+	return b
+}
+
+// WithAzurePolicy adds the Azure Policy scan stage.
+func (b *ScanPipelineBuilder) WithAzurePolicy() *ScanPipelineBuilder {
+	b.stages = append(b.stages, NewAzurePolicyStage())
+	return b
+}
+
+// WithArcSQL adds the Arc-enabled SQL Server scan stage.
+func (b *ScanPipelineBuilder) WithArcSQL() *ScanPipelineBuilder {
+	b.stages = append(b.stages, NewArcSQLStage())
+	return b
+}
+
+// WithCost adds the Cost analysis stage.
+func (b *ScanPipelineBuilder) WithCost() *ScanPipelineBuilder {
+	b.stages = append(b.stages, NewCostStage())
 	return b
 }
 
@@ -94,16 +125,22 @@ func (b *ScanPipelineBuilder) Build() *Pipeline {
 }
 
 // BuildDefault creates a pipeline with all standard stages.
+// Note: The graph stage is mandatory for regular scans and cannot be disabled.
 func (b *ScanPipelineBuilder) BuildDefault() *Pipeline {
 	return b.
 		WithProfiling().
 		WithInitialization().
 		WithSubscriptionDiscovery().
 		WithResourceDiscovery().
-		WithAprlScan().
+		WithGraphScan().
+		WithDiagnosticsScan().
+		WithAdvisor().
+		WithDefenderStatus().
+		WithDefenderRecommendations().
+		WithAzurePolicy().
+		WithArcSQL().
+		WithCost().
 		WithPluginExecution().
-		WithAzqrScan().
-		WithAdvisorDefender().
 		WithReportRendering().
 		WithProfilingCleanup().
 		Build()
@@ -126,19 +163,10 @@ func NewScanContext(params *models.ScanParams) *ScanContext {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &ScanContext{
-		Ctx:       ctx,
-		Cancel:    cancel,
-		StartTime: time.Now(),
-		Params:    params,
-	}
-}
-
-// NewScanContextWithContext creates a scan context with a custom context.
-func NewScanContextWithContext(ctx context.Context, cancel context.CancelFunc, params *models.ScanParams) *ScanContext {
-	return &ScanContext{
-		Ctx:       ctx,
-		Cancel:    cancel,
-		StartTime: time.Now(),
-		Params:    params,
+		Ctx:           ctx,
+		Cancel:        cancel,
+		StartTime:     time.Now(),
+		Params:        params,
+		ClientOptions: az.NewDefaultClientOptions(),
 	}
 }

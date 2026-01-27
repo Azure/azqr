@@ -3,6 +3,7 @@ package json
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Azure/azqr/internal/models"
 	"os"
 
 	"github.com/Azure/azqr/internal/renderers"
@@ -16,7 +17,7 @@ func buildConsolidatedReport(data *renderers.ReportData) map[string]interface{} 
 	consolidatedReport := map[string]interface{}{}
 
 	// Only include AZQR-related data if the feature is enabled
-	if data.ScanEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameGraph) {
 		consolidatedReport["recommendations"] = convertToJSON(data.RecommendationsTable())
 		consolidatedReport["impacted"] = convertToJSON(data.ImpactedTable())
 		consolidatedReport["resourceType"] = convertToJSON(data.ResourceTypesTable())
@@ -27,36 +28,42 @@ func buildConsolidatedReport(data *renderers.ReportData) map[string]interface{} 
 	}
 
 	// Only include Advisor data if the feature is enabled
-	if data.AdvisorEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameAdvisor) {
 		consolidatedReport["advisor"] = convertToJSON(data.AdvisorTable())
 	} else {
 		log.Debug().Msg("Skipping Advisor data in JSON. Feature is disabled")
 	}
 
 	// Only include Azure Policy data if the feature is enabled
-	if data.PolicyEnabled {
+	if data.Stages.IsStageEnabled(models.StageNamePolicy) {
 		consolidatedReport["azurePolicy"] = convertToJSON(data.AzurePolicyTable())
 	} else {
 		log.Debug().Msg("Skipping Azure Policy data in JSON. Feature is disabled")
 	}
 
 	// Only include Arc SQL data if the feature is enabled
-	if data.ArcEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameArc) {
 		consolidatedReport["arcSQL"] = convertToJSON(data.ArcSQLTable())
 	} else {
 		log.Debug().Msg("Skipping Arc SQL data in JSON. Feature is disabled")
 	}
 
 	// Only include Defender data if the feature is enabled
-	if data.DefenderEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameDefender) {
 		consolidatedReport["defender"] = convertToJSON(data.DefenderTable())
-		consolidatedReport["defenderRecommendations"] = convertToJSON(data.DefenderRecommendationsTable())
 	} else {
 		log.Debug().Msg("Skipping Defender data in JSON. Feature is disabled")
 	}
 
+	// Only include Defender Recommendations data if the feature is enabled
+	if data.Stages.IsStageEnabled(models.StageNameDefenderRecommendations) {
+		consolidatedReport["defenderRecommendations"] = convertToJSON(data.DefenderRecommendationsTable())
+	} else {
+		log.Debug().Msg("Skipping Defender Recommendations data in JSON. Feature is disabled")
+	}
+
 	// Only include Cost data if the feature is enabled
-	if data.CostEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameCost) {
 		consolidatedReport["costs"] = convertToJSON(data.CostTable())
 	} else {
 		log.Debug().Msg("Skipping Cost data in JSON. Feature is disabled")

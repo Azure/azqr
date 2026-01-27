@@ -1,0 +1,10 @@
+// Azure Resource Graph Query
+// Find SignalR services and report SLA based on tier
+resources
+| where type =~ 'Microsoft.SignalRService/SignalR'
+| extend skuTier = tostring(sku.tier)
+| extend slaValue = case(
+    skuTier == "Free", "None",
+    "99.9%"
+)
+| project recommendationId = 'sigr-003', name, id, tags, param1 = strcat(slaValue, " (Tier: ", skuTier, ")")

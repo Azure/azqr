@@ -1,0 +1,8 @@
+// Check if App Configuration has private endpoints enabled
+resources
+| where type =~ 'Microsoft.AppConfiguration/configurationStores'
+| extend privateEndpoints = array_length(properties.privateEndpointConnections)
+| where privateEndpoints == 0 or isnull(privateEndpoints)
+| extend recommendationId = 'appcs-004'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

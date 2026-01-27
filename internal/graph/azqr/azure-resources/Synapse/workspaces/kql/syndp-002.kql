@@ -1,0 +1,5 @@
+// Azure Resource Graph Query
+// Find all Synapse Dedicated SQL Pools and report SLA
+resources
+| where type =~ "Microsoft.Synapse/workspaces/sqlPools"
+| project recommendationId = "syndp-002", name, id, tags, param1 = "99.9%"

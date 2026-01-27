@@ -1,0 +1,10 @@
+// Check if AKS Node Pools have MaxSurge set (not default value of 1)
+resources
+| where type =~ 'Microsoft.ContainerService/managedClusters'
+| mv-expand agentPool = properties.agentPoolProfiles
+| extend maxSurge = agentPool.upgradeSettings.maxSurge
+| where isnull(maxSurge) or maxSurge == '1'
+| extend poolName = tostring(agentPool.name)
+| extend recommendationId = 'aks-016'
+| extend param1 = poolName
+| project recommendationId, name, id, tags, param1

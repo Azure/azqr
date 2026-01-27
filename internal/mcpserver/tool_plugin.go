@@ -16,8 +16,9 @@ import (
 )
 
 type PluginScanArgs struct {
-	Mask     *bool    `json:"mask,omitempty"`
-	Services []string `json:"services,omitempty"`
+	Subscriptions  []string `json:"subscriptions,omitempty"`
+	ResourceGroups []string `json:"resourceGroups,omitempty"`
+	Mask           *bool    `json:"mask,omitempty"`
 }
 
 // scanPluginHandler creates a handler for plugin-specific scans
@@ -28,20 +29,15 @@ func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequ
 			log.Fatal().Err(err).Msg("failed to get current working directory")
 		}
 
-		// Use plugin-only mode by setting scannerKeys to the specific plugin
-		scannerKeys := args.Services
+		scannerKeys := []string{}
 		filters := models.LoadFilters("", scannerKeys)
 		params := models.NewScanParams()
 
-		// Plugin-only mode: disable defender, advisor, cost, policy, arc
-		params.Defender = false
-		params.Advisor = false
-		params.Cost = false
-		params.Policy = false
-		params.Arc = false
+		// Plugin-only mode: disable all stages
+		params.Stages = models.NewStageConfigs()
+		params.Subscriptions = args.Subscriptions
+		params.ResourceGroups = args.ResourceGroups
 		params.Mask = true
-
-		// Override mask if provided
 		if args.Mask != nil {
 			params.Mask = *args.Mask
 		}

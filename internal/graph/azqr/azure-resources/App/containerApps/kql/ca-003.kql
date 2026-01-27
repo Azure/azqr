@@ -1,0 +1,21 @@
+// Azure Resource Graph Query
+// Find all Container Apps and report their SLA based on zone redundancy
+// SLA is based on minimum replica count and scale rules configuration
+// Zone redundancy requires minReplicas >= 2 for proper distribution across zones
+resources
+| where type =~ "Microsoft.App/containerApps"
+| extend managedEnvironmentId = tostring(properties.managedEnvironmentId)
+| extend minReplicas = toint(properties.template.scale.minReplicas)
+// Join with Container App Environments to check zone redundancy
+| join kind=leftouter (
+    resources
+    | where type =~ "Microsoft.App/managedEnvironments"
+    | extend zoneRedundant = tobool(properties.zoneRedundant)
+    | project managedEnvironmentId = id, zoneRedundant
+) on managedEnvironmentId
+| extend slaValue = case(
+    zoneRedundant == true and minReplicas >= 2, "99.95%",
+    minReplicas >= 1, "99.9%",
+    "No SLA (scale to zero enabled)"
+)
+| project recommendationId = "ca-003", name, id, tags, param1 = slaValue

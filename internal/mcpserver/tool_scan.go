@@ -16,13 +16,11 @@ import (
 )
 
 type ScanArgs struct {
-	Services []string `json:"services,omitempty"`
-	Defender *bool    `json:"defender,omitempty"`
-	Advisor  *bool    `json:"advisor,omitempty"`
-	Cost     *bool    `json:"cost,omitempty"`
-	Policy   *bool    `json:"policy,omitempty"`
-	Arc      *bool    `json:"arc,omitempty"`
-	Mask     *bool    `json:"mask,omitempty"`
+	Subscriptions  []string `json:"subscriptions,omitempty"`
+	ResourceGroups []string `json:"resourceGroups,omitempty"`
+	Services       []string `json:"services,omitempty"`
+	Stages         []string `json:"stages,omitempty"`
+	Mask           *bool    `json:"mask,omitempty"`
 }
 
 func scanHandler(ctx context.Context, request mcp.CallToolRequest, args ScanArgs) (*mcp.CallToolResult, error) {
@@ -33,28 +31,16 @@ func scanHandler(ctx context.Context, request mcp.CallToolRequest, args ScanArgs
 
 	scannerKeys := args.Services
 	filters := models.LoadFilters("", scannerKeys)
-	params := models.NewScanParams()
 
-	// Override defaults with provided values
-	if args.Defender != nil {
-		params.Defender = *args.Defender
-	}
-	if args.Advisor != nil {
-		params.Advisor = *args.Advisor
-	}
-	if args.Cost != nil {
-		params.Cost = *args.Cost
-	}
-	if args.Policy != nil {
-		params.Policy = *args.Policy
-	}
-	if args.Arc != nil {
-		params.Arc = *args.Arc
-	}
+	params := models.NewScanParams()
+	params.Stages.ConfigureStages(args.Stages)
+
 	if args.Mask != nil {
 		params.Mask = *args.Mask
 	}
 
+	params.Subscriptions = args.Subscriptions
+	params.ResourceGroups = args.ResourceGroups
 	params.Xlsx = true
 	params.Json = true
 	params.ScannerKeys = scannerKeys

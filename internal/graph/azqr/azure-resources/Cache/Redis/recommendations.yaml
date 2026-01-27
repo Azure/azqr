@@ -1,0 +1,47 @@
+- description: Redis Cache SLA
+  aprlGuid: redis-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Cache/Redis
+  recommendationMetadataState: Active
+  longDescription: Redis Cache SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Redis should not enable non SSL ports
+  aprlGuid: redis-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Cache/Redis
+  recommendationMetadataState: Active
+  longDescription: Redis should not enable non SSL ports
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/azure-cache-for-redis/cache-network-isolation'
+
+- description: Redis should enforce TLS >= 1.2
+  aprlGuid: redis-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.Cache/Redis
+  recommendationMetadataState: Active
+  longDescription: Redis should enforce TLS >= 1.2
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/azure-cache-for-redis/cache-remove-tls-10-11'

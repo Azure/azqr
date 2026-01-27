@@ -1,0 +1,8 @@
+// Check if MySQL Flexible Server has private access enabled
+resources
+| where type =~ 'Microsoft.DBforMySQL/flexibleServers'
+| extend publicNetworkAccess = properties.network.publicNetworkAccess
+| where isnull(publicNetworkAccess) or publicNetworkAccess != 'Disabled'
+| extend recommendationId = 'mysqlf-004'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

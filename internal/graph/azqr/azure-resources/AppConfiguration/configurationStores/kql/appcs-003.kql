@@ -1,0 +1,15 @@
+// Azure Resource Graph Query
+// Find App Configuration stores and report SLA based on tier and geo-replication
+resources
+| where type =~ 'Microsoft.AppConfiguration/configurationStores'
+| extend skuName = tostring(sku.name)
+| mv-expand replica = properties.replicas
+| summarize replicaCount = count() by id, name, tostring(tags), skuName
+| extend hasGeoReplication = replicaCount > 1
+| extend slaValue = case(
+    skuName == "Free", "None",
+    skuName == "Premium" and hasGeoReplication, "99.99%",
+    skuName == "Standard" and hasGeoReplication, "99.95%",
+    "99.9%"
+)
+| project recommendationId = 'appcs-003', name, id, tags, param1 = strcat(slaValue, " (SKU: ", skuName, ")")

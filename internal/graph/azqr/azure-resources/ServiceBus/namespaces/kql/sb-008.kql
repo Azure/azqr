@@ -1,0 +1,8 @@
+// Check if Service Bus has local authentication disabled
+resources
+| where type =~ 'Microsoft.ServiceBus/namespaces'
+| extend localAuthDisabled = properties.disableLocalAuth
+| where isnull(localAuthDisabled) or localAuthDisabled == false
+| extend recommendationId = 'sb-008'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1
