@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find all Container Instances without availability zones
+resources
+| where type =~ "Microsoft.ContainerInstance/containerGroups"
+| where isnull(zones) or array_length(zones) == 0
+| project recommendationId = "ci-002", name, id, tags, param1 = "Availability zones not enabled"

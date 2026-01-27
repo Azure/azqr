@@ -20,9 +20,9 @@ func NewResourceDiscoveryStage() *ResourceDiscoveryStage {
 }
 
 func (s *ResourceDiscoveryStage) Execute(ctx *ScanContext) error {
-	resourceScanner := scanners.ResourceScanner{}
+	scanner := scanners.ResourceDiscovery{}
 
-	resources, excludedResources := resourceScanner.GetAllResources(
+	resources, excludedResources := scanner.GetAllResources(
 		ctx.Ctx,
 		ctx.Cred,
 		ctx.Subscriptions,

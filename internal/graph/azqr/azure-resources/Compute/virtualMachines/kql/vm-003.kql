@@ -1,0 +1,11 @@
+// Azure Resource Graph Query
+resources
+| where type =~ "Microsoft.Compute/virtualMachines"
+| extend hasScaleSet = isnotnull(properties.virtualMachineScaleSet.id)
+| extend hasZones = array_length(zones) > 1
+| extend sla = case(
+    hasZones, "99.99%",
+    hasScaleSet and not(hasZones), "99.95%",
+    "99.9%"
+)
+| project recommendationId = "vm-003", name, id, tags, param1 = sla

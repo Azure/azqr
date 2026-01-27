@@ -1,0 +1,47 @@
+- description: Web Pub Sub should have availability zones enabled
+  aprlGuid: wps-002
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.SignalRService/webPubSub
+  recommendationMetadataState: Active
+  longDescription: Web Pub Sub should have availability zones enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/azure-web-pubsub/concept-availability-zones'
+
+- description: Web PubSub SLA
+  aprlGuid: wps-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.SignalRService/webPubSub
+  recommendationMetadataState: Active
+  longDescription: Web PubSub SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Web Pub Sub should have private endpoints enabled
+  aprlGuid: wps-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.SignalRService/webPubSub
+  recommendationMetadataState: Active
+  longDescription: Web Pub Sub should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/azure-web-pubsub/howto-secure-private-endpoints'

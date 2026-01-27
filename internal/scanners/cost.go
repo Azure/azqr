@@ -18,8 +18,7 @@ type CostScanner struct {
 	client *armcostmanagement.QueryClient
 }
 
-// Init - Initializes the Cost Scanner
-func (s *CostScanner) Init(config *models.ScannerConfig) error {
+func (s *CostScanner) init(config *models.ScannerConfig) error {
 	s.config = config
 	var err error
 	s.client, err = armcostmanagement.NewQueryClient(config.Cred, config.ClientOptions)
@@ -85,22 +84,20 @@ func (s *CostScanner) QueryCosts() (*models.CostResult, error) {
 	return &result, nil
 }
 
-func (s *CostScanner) Scan(scan bool, config *models.ScannerConfig) *models.CostResult {
+func (s *CostScanner) Scan(config *models.ScannerConfig) *models.CostResult {
 	costResult := &models.CostResult{
 		Items: []*models.CostResultItem{},
 	}
-	if scan {
-		err := s.Init(config)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to initialize Cost Scanner")
-		}
-		costs, err := s.QueryCosts()
-		if err != nil && !models.ShouldSkipError(err) {
-			log.Fatal().Err(err).Msg("Failed to query costs")
-		}
-		costResult.From = costs.From
-		costResult.To = costs.To
-		costResult.Items = append(costResult.Items, costs.Items...)
+	err := s.init(config)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize Cost Scanner")
 	}
+	costs, err := s.QueryCosts()
+	if err != nil && !models.ShouldSkipError(err) {
+		log.Fatal().Err(err).Msg("Failed to query costs")
+	}
+	costResult.From = costs.From
+	costResult.To = costs.To
+	costResult.Items = append(costResult.Items, costs.Items...)
 	return costResult
 }

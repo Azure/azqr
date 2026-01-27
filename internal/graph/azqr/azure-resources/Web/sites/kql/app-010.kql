@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find App Services that don't have VNET Route All enabled
+resources
+| where type =~ "Microsoft.Web/sites"
+| where kind !contains "function" and kind !contains "workflowapp"
+| where properties.vnetRouteAllEnabled != true
+| project recommendationId = "app-010", name, id, tags, param1 = "VNET Route All is disabled"

@@ -16,13 +16,11 @@ import (
 // AdvisorScanner - Advisor scanner
 type AdvisorScanner struct{}
 
-func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []*models.AdvisorResult {
+func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []*models.AdvisorResult {
 	models.LogResourceTypeScan("Advisor Recommendations")
-	resources := []*models.AdvisorResult{}
 
-	if scan {
-		graphClient := graph.NewGraphQuery(cred)
-		query := `
+	graphClient := graph.NewGraphQuery(cred)
+	query := `
 		AdvisorResources
 		| join kind=inner (
 			resourcecontainers
@@ -36,47 +34,46 @@ func (s *AdvisorScanner) Scan(ctx context.Context, scan bool, cred azcore.TokenC
 			RecommendationTypeId = properties.recommendationTypeId
 		`
 
-		log.Debug().Msg(query)
-		subs := make([]*string, 0, len(subscriptions))
-		for s := range subscriptions {
-			subs = append(subs, to.Ptr(s))
-		}
-		result := graphClient.Query(ctx, query, subs)
-		resources = []*models.AdvisorResult{}
-		seen := make(map[string]bool) // Deduplication map
-		if result.Data != nil {
-			for _, row := range result.Data {
-				m := row.(map[string]interface{})
+	log.Debug().Msg(query)
+	subs := make([]*string, 0, len(subscriptions))
+	for s := range subscriptions {
+		subs = append(subs, to.Ptr(s))
+	}
+	result := graphClient.Query(ctx, query, subs)
+	resources := []*models.AdvisorResult{}
+	seen := make(map[string]bool) // Deduplication map
+	if result.Data != nil {
+		for _, row := range result.Data {
+			m := row.(map[string]interface{})
 
-				if filters.Azqr.IsSubscriptionExcluded(to.String(m["SubscriptionId"])) {
-					continue
-				}
+			if filters.Azqr.IsSubscriptionExcluded(to.String(m["SubscriptionId"])) {
+				continue
+			}
 
-				resourceId := to.String(m["ResourceId"])
-				if filters.Azqr.IsServiceExcluded(resourceId) {
-					continue
-				}
+			resourceId := to.String(m["ResourceId"])
+			if filters.Azqr.IsServiceExcluded(resourceId) {
+				continue
+			}
 
-				rec := &models.AdvisorResult{
-					SubscriptionID:   to.String(m["SubscriptionId"]),
-					SubscriptionName: to.String(m["SubscriptionName"]),
-					Name:             to.String(m["ImpactedValue"]),
-					Type:             to.String(m["ImpactedField"]),
-					ResourceID:       resourceId,
-					Category:         to.String(m["Category"]),
-					Impact:           to.String(m["Impact"]),
-					Description:      to.String(m["Problem"]),
-					RecommendationID: to.String(m["RecommendationTypeId"]),
-				}
+			rec := &models.AdvisorResult{
+				SubscriptionID:   to.String(m["SubscriptionId"]),
+				SubscriptionName: to.String(m["SubscriptionName"]),
+				Name:             to.String(m["ImpactedValue"]),
+				Type:             to.String(m["ImpactedField"]),
+				ResourceID:       resourceId,
+				Category:         to.String(m["Category"]),
+				Impact:           to.String(m["Impact"]),
+				Description:      to.String(m["Problem"]),
+				RecommendationID: to.String(m["RecommendationTypeId"]),
+			}
 
-				// Create unique key from ResourceID + RecommendationID
-				// This combination should uniquely identify an advisor recommendation
-				key := rec.ResourceID + "|" + rec.RecommendationID + "|" + rec.Category
+			// Create unique key from ResourceID + RecommendationID
+			// This combination should uniquely identify an advisor recommendation
+			key := rec.ResourceID + "|" + rec.RecommendationID + "|" + rec.Category
 
-				if !seen[key] {
-					seen[key] = true
-					resources = append(resources, rec)
-				}
+			if !seen[key] {
+				seen[key] = true
+				resources = append(resources, rec)
 			}
 		}
 	}

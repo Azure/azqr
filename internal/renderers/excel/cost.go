@@ -4,6 +4,7 @@
 package excel
 
 import (
+	"github.com/Azure/azqr/internal/models"
 	_ "image/png"
 
 	"github.com/Azure/azqr/internal/renderers"
@@ -13,7 +14,7 @@ import (
 
 func renderCosts(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
-	if !data.CostEnabled {
+	if !data.Stages.IsStageEnabled(models.StageNameCost) {
 		log.Debug().Msg("Skipping Costs. Feature is disabled")
 		return
 	}

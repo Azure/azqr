@@ -1,0 +1,80 @@
+- description: Azure Database for MySQL - Single Server SLA
+  aprlGuid: mysql-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforMySQL/servers
+  recommendationMetadataState: Active
+  longDescription: Azure Database for MySQL - Single Server SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Azure Database for MySQL - Single Server should have private endpoints enabled
+  aprlGuid: mysql-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforMySQL/servers
+  recommendationMetadataState: Active
+  longDescription: Azure Database for MySQL - Single Server should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/mysql/single-server/concepts-data-access-security-private-link'
+
+- description: Azure Database for MySQL - Single Server is on the retirement path
+  aprlGuid: mysql-007
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforMySQL/servers
+  recommendationMetadataState: Active
+  longDescription: Azure Database for MySQL - Single Server is on the retirement path
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/mysql/single-server/whats-happening-to-mysql-single-server'
+
+- description: Azure Database for MySQL - Flexible Server SLA
+  aprlGuid: mysqlf-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforMySQL/flexibleServers
+  recommendationMetadataState: Active
+  longDescription: Azure Database for MySQL - Flexible Server SLA
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/mysql/flexible-server/concepts-high-availability'
+
+- description: Azure Database for MySQL - Flexible Server should have private access enabled
+  aprlGuid: mysqlf-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforMySQL/flexibleServers
+  recommendationMetadataState: Active
+  longDescription: Azure Database for MySQL - Flexible Server should have private access enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/mysql/flexible-server/concepts-networking-vnet'
+

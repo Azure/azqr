@@ -1,0 +1,15 @@
+- description: Azure Firewall SLA
+  aprlGuid: afw-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Network/azureFirewalls
+  recommendationMetadataState: Active
+  longDescription: Azure Firewall SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

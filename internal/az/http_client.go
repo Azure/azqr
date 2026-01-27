@@ -20,24 +20,27 @@ import (
 // HttpClient wraps Azure SDK pipeline for authenticated HTTP requests with built-in retry logic
 type HttpClient struct {
 	pipeline runtime.Pipeline
-	cred     azcore.TokenCredential
 }
 
 // HttpClientOptions configures the HTTP client behavior
 type HttpClientOptions struct {
-	Timeout       time.Duration
-	MaxRetries    int32
-	RetryDelay    time.Duration
-	MaxRetryDelay time.Duration
+	Timeout          time.Duration // Per-attempt timeout
+	MaxRetries       int32
+	OperationTimeout time.Duration      // Total operation timeout including all retries
+	Scope            string             // OAuth scope for authentication
+	Transport        policy.Transporter // Optional custom transport (for testing)
 }
 
 // DefaultHttpClientOptions returns the default options for production use
 func DefaultHttpClientOptions(timeout time.Duration) *HttpClientOptions {
+	resourceManagerEndpoint := GetResourceManagerEndpoint()
+	scope := fmt.Sprintf("%s/.default", resourceManagerEndpoint)
+
 	return &HttpClientOptions{
-		Timeout:       timeout,
-		MaxRetries:    3,
-		RetryDelay:    2 * time.Second,
-		MaxRetryDelay: 60 * time.Second,
+		Timeout:          timeout,
+		MaxRetries:       5,
+		OperationTimeout: timeout * 10, // 10x per-attempt for retries + backoff
+		Scope:            scope,
 	}
 }
 
@@ -49,34 +52,44 @@ func NewHttpClient(cred azcore.TokenCredential, opts *HttpClientOptions) *HttpCl
 	}
 
 	// Configure retry options - Azure SDK handles exponential backoff automatically
+	// Leave StatusCodes as nil to use SDK's internal defaults (408, 429, 500, 502, 503, 504)
+	// This ensures the SDK's retry policy can properly handle response bodies
 	retryOptions := policy.RetryOptions{
 		MaxRetries:    opts.MaxRetries,
 		TryTimeout:    opts.Timeout,
-		RetryDelay:    opts.RetryDelay,
-		MaxRetryDelay: opts.MaxRetryDelay,
-		StatusCodes: []int{
-			http.StatusRequestTimeout,      // 408
-			http.StatusTooManyRequests,     // 429
-			http.StatusInternalServerError, // 500
-			http.StatusBadGateway,          // 502
-			http.StatusServiceUnavailable,  // 503
-			http.StatusGatewayTimeout,      // 504
-		},
+		RetryDelay:    4 * time.Second,  // SDK default, explicit for clarity
+		MaxRetryDelay: 60 * time.Second, // SDK default, explicit for clarity
 	}
 
 	// Create client options
-	clientOpts := &policy.ClientOptions{
-		Retry:     retryOptions,
-		Transport: &http.Client{Timeout: opts.Timeout},
+	// Transport timeout should be slightly longer than per-attempt timeout
+	// to allow the SDK's retry policy to handle timeouts gracefully
+	var transport policy.Transporter
+	if opts.Transport != nil {
+		transport = opts.Transport
+	} else {
+		transport = &http.Client{Timeout: opts.Timeout + (5 * time.Second)}
 	}
 
-	// Create pipeline with authentication and retry policies
+	clientOpts := &policy.ClientOptions{
+		Retry:     retryOptions,
+		Transport: transport,
+	}
+
+	// Create bearer token authentication policy using Azure SDK's built-in implementation
+	// This provides automatic token caching and refresh via TokenCredential
+	authPolicy := runtime.NewBearerTokenPolicy(cred, []string{opts.Scope}, nil)
+
+	// Create pipeline with proper policy ordering
+	// PerCall policies execute once per operation (before retry logic)
+	// PerRetry policies execute on each retry attempt (after retry logic)
 	pipeline := runtime.NewPipeline(
 		"azqr-http-client",
 		"v1.0.0",
 		runtime.PipelineOptions{
 			PerRetry: []policy.Policy{
-				throttling.NewThrottlingPolicy(), // Apply throttling per retry attempt
+				authPolicy,
+				throttling.NewThrottlingPolicy(),
 			},
 		},
 		clientOpts,
@@ -84,25 +97,22 @@ func NewHttpClient(cred azcore.TokenCredential, opts *HttpClientOptions) *HttpCl
 
 	return &HttpClient{
 		pipeline: pipeline,
-		cred:     cred,
 	}
 }
 
 // Do performs an HTTP GET request with automatic authentication, throttling, and retries
-// Pass scope as nil to skip authentication, or empty string to use default scope
-func (c *HttpClient) Do(ctx context.Context, url string, scope *string) ([]byte, error) {
-	body, _, err := c.doRequest(ctx, http.MethodGet, url, nil, scope)
+func (c *HttpClient) Do(ctx context.Context, url string) ([]byte, error) {
+	body, _, err := c.doRequest(ctx, http.MethodGet, url, nil)
 	return body, err
 }
 
 // DoPost performs an HTTP POST request with automatic authentication, throttling, and retries
-// Pass scope as nil to skip authentication, or empty string/specific scope to authenticate
-func (c *HttpClient) DoPost(ctx context.Context, url string, body io.ReadSeekCloser, scope *string) ([]byte, *http.Response, error) {
-	return c.doRequest(ctx, http.MethodPost, url, body, scope)
+func (c *HttpClient) DoPost(ctx context.Context, url string, body io.ReadSeekCloser) ([]byte, *http.Response, error) {
+	return c.doRequest(ctx, http.MethodPost, url, body)
 }
 
 // doRequest is the common implementation for HTTP requests
-func (c *HttpClient) doRequest(ctx context.Context, method, url string, body io.ReadSeekCloser, scope *string) ([]byte, *http.Response, error) {
+func (c *HttpClient) doRequest(ctx context.Context, method, url string, body io.ReadSeekCloser) ([]byte, *http.Response, error) {
 	// Create HTTP request
 	req, err := runtime.NewRequest(ctx, method, url)
 	if err != nil {
@@ -116,22 +126,7 @@ func (c *HttpClient) doRequest(ctx context.Context, method, url string, body io.
 		}
 	}
 
-	// Add authentication if scope is provided (nil means no auth)
-	if scope != nil {
-		scopeVal := *scope
-		if scopeVal == "" {
-			scopeVal = "https://management.azure.com/.default"
-		}
-		token, err := c.cred.GetToken(ctx, policy.TokenRequestOptions{
-			Scopes: []string{scopeVal},
-		})
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to get access token: %w", err)
-		}
-		req.Raw().Header.Set("Authorization", "Bearer "+token.Token)
-	}
-
-	// Send request through pipeline (handles retries automatically)
+	// Send request through pipeline (handles authentication, throttling, and retries automatically)
 	resp, err := c.pipeline.Do(req)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to execute request: %w", err)

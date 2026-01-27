@@ -1,0 +1,16 @@
+// Check if API Management does not accept weak or deprecated ciphers
+resources
+| where type =~ 'Microsoft.ApiManagement/service'
+| extend customProps = properties.customProperties
+| where isnull(customProps) or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168'] == 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA'] == 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA'] == 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA256'] == 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA'] == 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA256'] == 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA'] == 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_GCM_SHA256'] == 'true'
+| extend recommendationId = 'apim-010'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1
