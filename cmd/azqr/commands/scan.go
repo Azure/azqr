@@ -8,6 +8,7 @@ package commands
 import (
 	"github.com/Azure/azqr/internal"
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/profiling"
 
 	"github.com/spf13/cobra"
 )
@@ -30,7 +31,14 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default) (default true)")
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
 	scanCmd.PersistentFlags().BoolP("azqr", "", true, "Scan Azure Quick Review Recommendations (default) (default true)")
-	scanCmd.PersistentFlags().BoolP("debug", "", false, "Set log level to debug")
+
+	// Conditionally add profiling flags if profiling is available and enabled via environment
+	// Build with -tags debug to enable profiling features
+	if profiling.IsProfilingAvailable() {
+		scanCmd.PersistentFlags().StringP("cpu-profile", "", "", "Write CPU profile to file (requires debug build or AZQR_ENABLE_PROFILING=1)")
+		scanCmd.PersistentFlags().StringP("mem-profile", "", "", "Write memory profile to file (requires debug build or AZQR_ENABLE_PROFILING=1)")
+		scanCmd.PersistentFlags().StringP("trace-profile", "", "", "Write execution trace to file (requires debug build or AZQR_ENABLE_PROFILING=1)")
+	}
 
 	rootCmd.AddCommand(scanCmd)
 }
@@ -60,11 +68,18 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	csv, _ := cmd.Flags().GetBool("csv")
 	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
-	debug, _ := cmd.Flags().GetBool("debug")
 	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
 	useAzqr, _ := cmd.Flags().GetBool("azqr")
 	pluginNames, _ := cmd.Flags().GetStringArray("plugin")
+
+	// Get profiling flags if available
+	var cpuProfile, memProfile, traceProfile string
+	if profiling.IsProfilingAvailable() {
+		cpuProfile, _ = cmd.Flags().GetString("cpu-profile")
+		memProfile, _ = cmd.Flags().GetString("mem-profile")
+		traceProfile, _ = cmd.Flags().GetString("trace-profile")
+	}
 
 	// load filters
 	filters := models.LoadFilters(filtersFile, scannerKeys)
@@ -75,7 +90,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		enabledInternalPlugins[pluginName] = true
 	}
 
-	params := internal.ScanParams{
+	params := models.ScanParams{
 		ManagementGroups:       managementGroups,
 		Subscriptions:          subscriptions,
 		ResourceGroups:         resourceGroups,
@@ -89,12 +104,15 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		Json:                   json,
 		Mask:                   mask,
 		Stdout:                 stdout,
-		Debug:                  debug,
 		Policy:                 policy,
 		ScannerKeys:            scannerKeys,
 		Filters:                filters,
 		UseAzqrRecommendations: useAzqr,
+		UseAprlRecommendations: true,
 		EnabledInternalPlugins: enabledInternalPlugins,
+		CPUProfile:             cpuProfile,
+		MemProfile:             memProfile,
+		TraceProfile:           traceProfile,
 	}
 
 	scanner := internal.Scanner{}
@@ -116,6 +134,14 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
 
+	// Get profiling flags if available
+	var cpuProfile, memProfile, traceProfile string
+	if profiling.IsProfilingAvailable() {
+		cpuProfile, _ = cmd.Flags().GetString("cpu-profile")
+		memProfile, _ = cmd.Flags().GetString("mem-profile")
+		traceProfile, _ = cmd.Flags().GetString("trace-profile")
+	}
+
 	// load filters
 	filters := models.LoadFilters(filtersFile, scannerKeys)
 
@@ -124,7 +150,7 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 		pluginName: true,
 	}
 
-	params := internal.ScanParams{
+	params := models.ScanParams{
 		ManagementGroups:       managementGroups,
 		Subscriptions:          subscriptions,
 		ResourceGroups:         resourceGroups,
@@ -144,6 +170,9 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 		Filters:                filters,
 		UseAzqrRecommendations: false,
 		EnabledInternalPlugins: enabledInternalPlugins,
+		CPUProfile:             cpuProfile,
+		MemProfile:             memProfile,
+		TraceProfile:           traceProfile,
 	}
 
 	scanner := internal.Scanner{}

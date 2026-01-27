@@ -33,7 +33,7 @@ func scanHandler(ctx context.Context, request mcp.CallToolRequest, args ScanArgs
 
 	scannerKeys := args.Services
 	filters := models.LoadFilters("", scannerKeys)
-	params := internal.NewScanParams()
+	params := models.NewScanParams()
 
 	// Override defaults with provided values
 	if args.Defender != nil {
