@@ -1,0 +1,5 @@
+resources
+| where type =~ 'Microsoft.CognitiveServices/accounts'
+| extend recommendationId = 'aif-003'
+| extend param1 = '99.9%'
+| project recommendationId, name, id, tags, param1

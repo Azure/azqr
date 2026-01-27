@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find Logic Apps that don't have HTTPS only enabled
+resources
+| where type =~ "Microsoft.Web/sites"
+| where kind contains "workflowapp"
+| where properties.httpsOnly != true
+| project recommendationId = "logics-007", name, id, tags, param1 = "HTTPS Only is disabled"

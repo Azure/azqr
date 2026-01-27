@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Azure Recommendations Schema",
+  "description": "Schema for Azure resource recommendations YAML files",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "description",
+      "aprlGuid",
+      "recommendationControl",
+      "recommendationImpact",
+      "recommendationResourceType",
+      "recommendationMetadataState",
+      "longDescription",
+      "potentialBenefits",
+      "pgVerified",
+      "automationAvailable",
+      "tags",
+      "learnMoreLink"
+    ],
+    "properties": {
+      "description": {
+        "type": "string",
+        "description": "Short description of the recommendation",
+        "minLength": 1
+      },
+      "aprlGuid": {
+        "type": "string",
+        "description": "Unique identifier for the recommendation (full UUID format or short code format like 'vgw-004')",
+        "pattern": "^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[a-z]+-\\d+)$"
+      },
+      "recommendationTypeId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Optional recommendation type identifier"
+      },
+      "recommendationControl": {
+        "type": "string",
+        "description": "Control category for the recommendation",
+        "enum": [
+          "BusinessContinuity",
+          "DisasterRecovery",
+          "Governance",
+          "HighAvailability",
+          "MonitoringAndAlerting",
+          "OtherBestPractices",
+          "Personalized",
+          "Scalability",
+          "Security",
+          "ServiceUpgradeAndRetirement",
+          "SLA"
+        ]
+      },
+      "recommendationImpact": {
+        "type": "string",
+        "description": "Impact level of the recommendation",
+        "enum": [
+          "High",
+          "Medium",
+          "Low"
+        ]
+      },
+      "recommendationResourceType": {
+        "type": "string",
+        "description": "Azure resource type in the format Microsoft.Provider/resourceType or Microsoft.Resources or Oracle.Provider/resourceType",
+        "pattern": "^(Microsoft|Oracle)\\.[A-Za-z0-9]+(/[A-Za-z0-9/]+)?$"
+      },
+      "recommendationMetadataState": {
+        "type": "string",
+        "description": "State of the recommendation metadata",
+        "enum": [
+          "Active",
+          "Deprecated",
+          "Preview",
+          "Disabled"
+        ]
+      },
+      "longDescription": {
+        "type": "string",
+        "description": "Detailed description of the recommendation",
+        "minLength": 1
+      },
+      "potentialBenefits": {
+        "type": "string",
+        "description": "Benefits of implementing the recommendation"
+      },
+      "pgVerified": {
+        "type": "boolean",
+        "description": "Whether the recommendation has been verified by the product group"
+      },
+      "automationAvailable": {
+        "oneOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "string",
+            "enum": [
+              "true",
+              "false"
+            ]
+          }
+        ],
+        "description": "Whether automation is available for this recommendation"
+      },
+      "tags": {
+        "type": "array",
+        "description": "Array of tags for categorization",
+        "items": {
+          "type": "string"
+        },
+        "default": []
+      },
+      "learnMoreLink": {
+        "type": "array",
+        "description": "Links to documentation and learning resources",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": [
+            "name",
+            "url"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Display name for the link",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "description": "URI to the resource",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "graphQuery": {
+        "type": "string",
+        "description": "Optional graph query for automated checking"
+      }
+    },
+    "additionalProperties": false
+  }
+}

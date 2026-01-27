@@ -1,0 +1,85 @@
+- description: Container Apps SLA
+  aprlGuid: ca-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.App/containerApps
+  recommendationMetadataState: Active
+  longDescription: Container Apps SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: ContainerApp should not allow insecure ingress traffic
+  aprlGuid: ca-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.App/containerApps
+  recommendationMetadataState: Active
+  longDescription: |
+    ContainerApps should not allow insecure HTTP traffic. All ingress traffic should use HTTPS to ensure data is encrypted in transit.
+  potentialBenefits: Enhanced security with encrypted traffic
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Container Apps Ingress Configuration
+    url: https://learn.microsoft.com/en-us/azure/container-apps/ingress-how-to?pivots=azure-cli
+
+- description: ContainerApp should use Managed Identities
+  aprlGuid: ca-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.App/containerApps
+  recommendationMetadataState: Active
+  longDescription: |
+    ContainerApps should use Managed Identities to authenticate with Azure services instead of storing credentials in code or configuration.
+  potentialBenefits: Improved security by eliminating credential management
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Managed Identity in Container Apps
+    url: https://learn.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cdotnet
+
+- description: ContainerApp should use Azure Files to persist container data
+  aprlGuid: ca-010
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.App/containerApps
+  recommendationMetadataState: Active
+  longDescription: |
+    ContainerApps should use Azure Files for persistent storage to ensure data durability and availability across container restarts.
+  potentialBenefits: Persistent and durable storage
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Storage Mounts in Container Apps
+    url: https://learn.microsoft.com/en-us/azure/container-apps/storage-mounts?pivots=azure-cli
+
+- description: ContainerApp should avoid using session affinity
+  aprlGuid: ca-011
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.App/containerApps
+  recommendationMetadataState: Active
+  longDescription: |
+    ContainerApps should avoid using sticky sessions (session affinity)
+    as it can impact load distribution and high availability. Design applications
+    to be stateless when possible.
+  potentialBenefits: Better load distribution and scalability
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Sticky Sessions in Container Apps
+    url: https://learn.microsoft.com/en-us/azure/container-apps/sticky-sessions?pivots=azure-portal

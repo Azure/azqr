@@ -1,0 +1,31 @@
+- description: Logic App SLA
+  aprlGuid: logic-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Logic/workflows
+  recommendationMetadataState: Active
+  longDescription: Logic App SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Logic App should limit access to Http Triggers
+  aprlGuid: logic-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Logic/workflows
+  recommendationMetadataState: Active
+  longDescription: Logic App should limit access to Http Triggers
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/logic-apps/logic-apps-securing-a-logic-app'

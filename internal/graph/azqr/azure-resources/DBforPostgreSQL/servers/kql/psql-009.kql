@@ -1,0 +1,8 @@
+// Check if PostgreSQL enforces TLS >= 1.2
+resources
+| where type =~ 'Microsoft.DBforPostgreSQL/servers'
+| extend minTlsVersion = properties.minimalTlsVersion
+| where isnull(minTlsVersion) or minTlsVersion != 'TLS1_2'
+| extend recommendationId = 'psql-009'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

@@ -1,0 +1,47 @@
+- description: Event Grid Domain SLA
+  aprlGuid: evgd-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.EventGrid/domains
+  recommendationMetadataState: Active
+  longDescription: Event Grid Domain SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Event Grid Domain should have private endpoints enabled
+  aprlGuid: evgd-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.EventGrid/domains
+  recommendationMetadataState: Active
+  longDescription: Event Grid Domain should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/event-grid/configure-private-endpoints'
+
+- description: Event Grid Domain should have local authentication disabled
+  aprlGuid: evgd-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.EventGrid/domains
+  recommendationMetadataState: Active
+  longDescription: Event Grid Domain should have local authentication disabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/event-grid/authenticate-with-microsoft-entra-id'

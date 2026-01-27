@@ -1,0 +1,9 @@
+// Check if Traffic Manager HTTP endpoints are monitored using HTTPS
+resources
+| where type =~ 'Microsoft.Network/trafficManagerProfiles'
+| extend monitorPort = properties.monitorConfig.port
+| extend monitorProtocol = properties.monitorConfig.protocol
+| where (monitorPort == 80 or monitorPort == 443) and monitorProtocol != 'HTTPS'
+| extend recommendationId = 'traf-009'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

@@ -14,7 +14,7 @@ import (
 )
 
 // LoadYamlPlugin loads a YAML plugin from a file and converts queries to AprlRecommendation format
-func LoadYamlPlugin(filePath string) (*Plugin, []models.AprlRecommendation, error) {
+func LoadYamlPlugin(filePath string) (*Plugin, []models.GraphRecommendation, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to read YAML plugin file: %w", err)
@@ -63,14 +63,14 @@ func LoadYamlPlugin(filePath string) (*Plugin, []models.AprlRecommendation, erro
 	}
 
 	// Convert YamlPluginQuery to AprlRecommendation format
-	recommendations := make([]models.AprlRecommendation, 0, len(config.Queries))
+	recommendations := make([]models.GraphRecommendation, 0, len(config.Queries))
 	for _, query := range config.Queries {
 		automationAvailable := "false"
 		if query.AutomationAvailable {
 			automationAvailable = "true"
 		}
 
-		recommendation := models.AprlRecommendation{
+		recommendation := models.GraphRecommendation{
 			RecommendationID:    query.AprlGuid,
 			ResourceType:        query.RecommendationResourceType,
 			Recommendation:      query.Description,

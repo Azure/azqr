@@ -1,0 +1,16 @@
+// Azure Resource Graph Query
+// Find Cosmos DB accounts and report their SLA based on regions, multi-write, and zones
+resources
+| where type =~ 'Microsoft.DocumentDB/databaseAccounts'
+| extend locationCount = array_length(properties.locations)
+| extend enableMultipleWriteLocations = tobool(properties.enableMultipleWriteLocations)
+| extend hasZones = array_length(properties.locations) > 0 and 
+    tobool(properties.locations[0].isZoneRedundant)
+| extend slaValue = case(
+    enableMultipleWriteLocations and locationCount > 1, "99.999% (Write), 99.999% (Read)",
+    hasZones and locationCount > 1, "99.999% (Read)",
+    locationCount > 1, "99.999% (Read), 99.99% (Write)",
+    hasZones, "99.995%",
+    "99.99%"
+)
+| project recommendationId = 'cosmos-003', name, id, tags, param1 = slaValue

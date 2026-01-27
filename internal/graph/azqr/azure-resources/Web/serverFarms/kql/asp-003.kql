@@ -1,0 +1,10 @@
+// Azure Resource Graph Query
+// Find all App Service Plans and report their SLA based on SKU tier
+resources
+| where type =~ "Microsoft.Web/serverfarms"
+| extend skuTier = tostring(sku.tier)
+| extend slaValue = case(
+    skuTier in ("Free", "Shared"), "None",
+    "99.95%"
+)
+| project recommendationId = "asp-003", name, id, tags, param1 = slaValue

@@ -1,0 +1,10 @@
+// Azure Resource Graph Query
+// Find Data Explorer clusters and report SLA based on zone redundancy
+resources
+| where type =~ 'Microsoft.Kusto/clusters'
+| extend zones = properties.zones
+| extend slaValue = case(
+    array_length(zones) >= 2, "99.95%",
+    "99.9%"
+)
+| project recommendationId = 'dec-002', name, id, tags, param1 = slaValue

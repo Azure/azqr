@@ -1,0 +1,15 @@
+// Azure Resource Graph Query
+// Find Redis Cache instances and report their SLA based on SKU and zone redundancy
+resources
+| where type =~ 'Microsoft.Cache/Redis'
+| extend skuName = tostring(sku.name)
+| extend zones = properties.zones
+| extend hasZones = isnotnull(zones) and array_length(zones) > 1
+| extend slaValue = case(
+    skuName =~ "Enterprise" and hasZones, "99.99%",
+    skuName =~ "EnterpriseFlash" and hasZones, "99.99%",
+    skuName =~ "Premium" and hasZones, "99.95%",
+    skuName =~ "Basic", "None",
+    "99.9%"
+)
+| project recommendationId = 'redis-003', name, id, tags, param1 = slaValue

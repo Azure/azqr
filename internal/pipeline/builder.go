@@ -42,19 +42,19 @@ func (b *ScanPipelineBuilder) WithResourceDiscovery() *ScanPipelineBuilder {
 
 // WithAprlScan adds the APRL scanning stage.
 func (b *ScanPipelineBuilder) WithAprlScan() *ScanPipelineBuilder {
-	b.stages = append(b.stages, NewAprlScanStage())
+	b.stages = append(b.stages, NewGraphScanStage())
+	return b
+}
+
+// WithDiagnosticsScan adds the diagnostics scanning stage.
+func (b *ScanPipelineBuilder) WithDiagnosticsScan() *ScanPipelineBuilder {
+	b.stages = append(b.stages, NewDiagnosticsScanStage())
 	return b
 }
 
 // WithPluginExecution adds the plugin execution stage.
 func (b *ScanPipelineBuilder) WithPluginExecution() *ScanPipelineBuilder {
 	b.stages = append(b.stages, NewPluginExecutionStage())
-	return b
-}
-
-// WithAzqrScan adds the AZQR service scan stage.
-func (b *ScanPipelineBuilder) WithAzqrScan() *ScanPipelineBuilder {
-	b.stages = append(b.stages, NewAzqrScanStage())
 	return b
 }
 
@@ -102,7 +102,7 @@ func (b *ScanPipelineBuilder) BuildDefault() *Pipeline {
 		WithResourceDiscovery().
 		WithAprlScan().
 		WithPluginExecution().
-		WithAzqrScan().
+		WithDiagnosticsScan().
 		WithAdvisorDefender().
 		WithReportRendering().
 		WithProfilingCleanup().

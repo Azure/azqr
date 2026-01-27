@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find all Container Instances not using private IP addresses
+resources
+| where type =~ "Microsoft.ContainerInstance/containerGroups"
+| where properties.ipAddress.type !~ "Private"
+| project recommendationId = "ci-004", name, id, tags, param1 = "Not using private IP address"

@@ -36,8 +36,6 @@ func testHttpClientOptions() *HttpClientOptions {
 	return &HttpClientOptions{
 		Timeout:       5 * time.Second,
 		MaxRetries:    1,
-		RetryDelay:    10 * time.Millisecond,
-		MaxRetryDelay: 50 * time.Millisecond,
 	}
 }
 
@@ -155,14 +153,8 @@ func TestDefaultHttpClientOptions(t *testing.T) {
 	if opts.Timeout != 45*time.Second {
 		t.Errorf("Expected timeout 45s, got %v", opts.Timeout)
 	}
-	if opts.MaxRetries != 3 {
-		t.Errorf("Expected MaxRetries 3, got %d", opts.MaxRetries)
-	}
-	if opts.RetryDelay != 2*time.Second {
-		t.Errorf("Expected RetryDelay 2s, got %v", opts.RetryDelay)
-	}
-	if opts.MaxRetryDelay != 60*time.Second {
-		t.Errorf("Expected MaxRetryDelay 60s, got %v", opts.MaxRetryDelay)
+	if opts.MaxRetries != 5 {
+		t.Errorf("Expected MaxRetries 5, got %d", opts.MaxRetries)
 	}
 }
 

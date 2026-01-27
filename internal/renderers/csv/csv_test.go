@@ -21,8 +21,7 @@ func TestCreateCsvReport(t *testing.T) {
 	// Create test data with proper initialization and feature flags enabled
 	data := &renderers.ReportData{
 		OutputFileName:          filepath.Join(tmpDir, "test_report"),
-		Aprl:                    []*models.AprlResult{},
-		Azqr:                    []*models.AzqrServiceResult{},
+		Graph:                   []*models.GraphResult{},
 		Defender:                []*models.DefenderResult{},
 		DefenderRecommendations: []*models.DefenderRecommendation{},
 		Advisor:                 []*models.AdvisorResult{},
@@ -75,8 +74,7 @@ func TestCreateCsvReportWithPlugins(t *testing.T) {
 	// Create test data with plugin results and proper initialization
 	data := &renderers.ReportData{
 		OutputFileName:          filepath.Join(tmpDir, "test_report_plugins"),
-		Aprl:                    []*models.AprlResult{},
-		Azqr:                    []*models.AzqrServiceResult{},
+		Graph:                   []*models.GraphResult{},
 		Defender:                []*models.DefenderResult{},
 		DefenderRecommendations: []*models.DefenderRecommendation{},
 		Advisor:                 []*models.AdvisorResult{},

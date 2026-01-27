@@ -1,0 +1,47 @@
+- description: Machine Learning Services SLA
+  aprlGuid: hub-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.MachineLearningServices/workspaces
+  recommendationMetadataState: Active
+  longDescription: Machine Learning Services SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Service should disable public network access
+  aprlGuid: hub-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.MachineLearningServices/workspaces
+  recommendationMetadataState: Active
+  longDescription: Service should disable public network access
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/machine-learning/how-to-configure-private-link'
+
+- description: Service should have private enpoints enabled
+  aprlGuid: hub-005
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.MachineLearningServices/workspaces
+  recommendationMetadataState: Active
+  longDescription: Service should have private enpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/machine-learning/how-to-configure-private-link'

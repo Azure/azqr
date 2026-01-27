@@ -1,0 +1,8 @@
+// Check if AKS integrates authentication with AAD (Managed)
+resources
+| where type =~ 'Microsoft.ContainerService/managedClusters'
+| extend aadManaged = properties.aadProfile.managed
+| where isnull(aadManaged) or aadManaged == false
+| extend recommendationId = 'aks-007'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

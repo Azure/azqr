@@ -1,0 +1,5 @@
+// Azure Resource Graph Query
+// Find all Data Factory instances and report SLA
+resources
+| where type =~ "Microsoft.DataFactory/factories"
+| project recommendationId = "adf-003", name, id, tags, param1 = "99.99%"

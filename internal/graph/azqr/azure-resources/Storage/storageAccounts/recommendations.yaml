@@ -1,0 +1,63 @@
+- description: Storage Account SLA
+  aprlGuid: st-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Storage/storageAccounts
+  recommendationMetadataState: Active
+  longDescription: Storage Account SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Storage Account should use HTTPS only
+  aprlGuid: st-007
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Storage/storageAccounts
+  recommendationMetadataState: Active
+  longDescription: 'Storage Account should require secure transfer (HTTPS) to ensure all data transfers are encrypted in transit.'
+  potentialBenefits: Enhanced data security in transit
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Require secure transfer
+    url: https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer
+
+- description: Storage Account should enforce TLS >= 1.2
+  aprlGuid: st-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.Storage/storageAccounts
+  recommendationMetadataState: Active
+  longDescription: 'Storage Account should enforce minimum TLS version 1.2 to ensure secure communications using modern encryption protocols.'
+  potentialBenefits: Enhanced security with modern TLS
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Configure minimum TLS version
+    url: https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal
+
+- description: Storage Account should have immutable storage versioning enabled
+  aprlGuid: st-010
+  recommendationTypeId: null
+  recommendationControl: DisasterRecovery
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.Storage/storageAccounts
+  recommendationMetadataState: Active
+  longDescription: 'Storage Account should have immutable storage with versioning enabled to protect against accidental or malicious data deletion or modification.'
+  potentialBenefits: Data protection and compliance
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Storage account reliability
+    url: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability

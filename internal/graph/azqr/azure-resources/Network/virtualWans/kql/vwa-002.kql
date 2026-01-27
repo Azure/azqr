@@ -1,0 +1,7 @@
+// Virtual WAN has availability zones enabled by design (always passes)
+resources
+| where type =~ 'Microsoft.Network/virtualWans'
+| where 1 == 0
+| extend recommendationId = 'vwa-002'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

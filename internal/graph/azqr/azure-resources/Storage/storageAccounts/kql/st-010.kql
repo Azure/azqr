@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find Storage Accounts that don't have immutable storage versioning enabled
+resources
+| where type =~ "Microsoft.Storage/storageAccounts"
+| where properties.immutableStorageWithVersioning.enabled != true
+| project recommendationId = "st-010", name, id, tags, param1 = "Immutable storage versioning is not enabled"

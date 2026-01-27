@@ -1,0 +1,9 @@
+// Check if Virtual Network has at least two DNS servers assigned
+resources
+| where type =~ 'Microsoft.Network/virtualNetworks'
+| extend dnsServers = properties.dhcpOptions.dnsServers
+| extend dnsServerCount = array_length(dnsServers)
+| where isnull(dnsServerCount) or dnsServerCount < 2
+| extend recommendationId = 'vnet-009'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

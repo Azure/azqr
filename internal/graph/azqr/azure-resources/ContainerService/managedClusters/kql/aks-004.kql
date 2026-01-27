@@ -1,0 +1,6 @@
+resources
+| where type =~ 'Microsoft.ContainerService/managedClusters'
+| where properties.apiServerAccessProfile.enablePrivateCluster != true
+| extend recommendationId = 'aks-004'
+| extend param1 = 'Public cluster'
+| project recommendationId, name, id, tags, param1

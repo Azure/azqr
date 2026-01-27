@@ -1,0 +1,5 @@
+// Azure Resource Graph Query
+// Find all Route Tables (informational - SLA rule)
+resources
+| where type =~ "Microsoft.Network/routeTables"
+| project recommendationId = "udr-003", name, id, tags, param1 = "99.99%"

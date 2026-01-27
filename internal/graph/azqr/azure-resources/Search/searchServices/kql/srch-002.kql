@@ -1,0 +1,13 @@
+// Azure Resource Graph Query
+// Find Search Services and report SLA based on tier and replica count
+resources
+| where type =~ 'Microsoft.Search/searchServices'
+| extend skuName = tostring(sku.name)
+| extend replicaCount = toint(properties.replicaCount)
+| extend slaValue = case(
+    skuName == "Free", "None",
+    replicaCount >= 3, "99.9% (Read-Write)",
+    replicaCount >= 2, "99.9% (Read-Only)",
+    "None (< 2 replicas)"
+)
+| project recommendationId = 'srch-002', name, id, tags, param1 = strcat(slaValue, " (SKU: ", skuName, ", Replicas: ", replicaCount, ")")

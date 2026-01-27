@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find Storage Accounts that don't enforce TLS 1.2 or higher
+resources
+| where type =~ "Microsoft.Storage/storageAccounts"
+| where properties.minimumTlsVersion != "TLS1_2"
+| project recommendationId = "st-009", name, id, tags, param1 = strcat("Current TLS version: ", tostring(properties.minimumTlsVersion))

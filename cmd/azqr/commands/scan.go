@@ -30,7 +30,6 @@ func init() {
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default) (default true)")
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
-	scanCmd.PersistentFlags().BoolP("azqr", "", true, "Scan Azure Quick Review Recommendations (default) (default true)")
 
 	// Conditionally add profiling flags if profiling is available and enabled via environment
 	// Build with -tags debug to enable profiling features
@@ -70,7 +69,6 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	mask, _ := cmd.Flags().GetBool("mask")
 	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
-	useAzqr, _ := cmd.Flags().GetBool("azqr")
 	pluginNames, _ := cmd.Flags().GetStringArray("plugin")
 
 	// Get profiling flags if available
@@ -91,28 +89,27 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	}
 
 	params := models.ScanParams{
-		ManagementGroups:       managementGroups,
-		Subscriptions:          subscriptions,
-		ResourceGroups:         resourceGroups,
-		OutputName:             outputFileName,
-		Defender:               defender,
-		Advisor:                advisor,
-		Arc:                    arc,
-		Xlsx:                   xlsx,
-		Cost:                   cost,
-		Csv:                    csv,
-		Json:                   json,
-		Mask:                   mask,
-		Stdout:                 stdout,
-		Policy:                 policy,
-		ScannerKeys:            scannerKeys,
-		Filters:                filters,
-		UseAzqrRecommendations: useAzqr,
-		UseAprlRecommendations: true,
-		EnabledInternalPlugins: enabledInternalPlugins,
-		CPUProfile:             cpuProfile,
-		MemProfile:             memProfile,
-		TraceProfile:           traceProfile,
+		ManagementGroups:        managementGroups,
+		Subscriptions:           subscriptions,
+		ResourceGroups:          resourceGroups,
+		OutputName:              outputFileName,
+		Defender:                defender,
+		Advisor:                 advisor,
+		Arc:                     arc,
+		Xlsx:                    xlsx,
+		Cost:                    cost,
+		Csv:                     csv,
+		Json:                    json,
+		Mask:                    mask,
+		Stdout:                  stdout,
+		Policy:                  policy,
+		ScannerKeys:             scannerKeys,
+		Filters:                 filters,
+		UseGraphRecommendations: true,
+		EnabledInternalPlugins:  enabledInternalPlugins,
+		CPUProfile:              cpuProfile,
+		MemProfile:              memProfile,
+		TraceProfile:            traceProfile,
 	}
 
 	scanner := internal.Scanner{}
@@ -168,7 +165,6 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 		Policy:                 false,
 		ScannerKeys:            scannerKeys,
 		Filters:                filters,
-		UseAzqrRecommendations: false,
 		EnabledInternalPlugins: enabledInternalPlugins,
 		CPUProfile:             cpuProfile,
 		MemProfile:             memProfile,

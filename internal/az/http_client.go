@@ -27,17 +27,13 @@ type HttpClient struct {
 type HttpClientOptions struct {
 	Timeout       time.Duration
 	MaxRetries    int32
-	RetryDelay    time.Duration
-	MaxRetryDelay time.Duration
 }
 
 // DefaultHttpClientOptions returns the default options for production use
 func DefaultHttpClientOptions(timeout time.Duration) *HttpClientOptions {
 	return &HttpClientOptions{
 		Timeout:       timeout,
-		MaxRetries:    3,
-		RetryDelay:    2 * time.Second,
-		MaxRetryDelay: 60 * time.Second,
+		MaxRetries:    5,
 	}
 }
 
@@ -49,19 +45,11 @@ func NewHttpClient(cred azcore.TokenCredential, opts *HttpClientOptions) *HttpCl
 	}
 
 	// Configure retry options - Azure SDK handles exponential backoff automatically
+	// Leave StatusCodes as nil to use SDK's internal defaults (408, 429, 500, 502, 503, 504)
+	// This ensures the SDK's retry policy can properly handle response bodies
 	retryOptions := policy.RetryOptions{
 		MaxRetries:    opts.MaxRetries,
 		TryTimeout:    opts.Timeout,
-		RetryDelay:    opts.RetryDelay,
-		MaxRetryDelay: opts.MaxRetryDelay,
-		StatusCodes: []int{
-			http.StatusRequestTimeout,      // 408
-			http.StatusTooManyRequests,     // 429
-			http.StatusInternalServerError, // 500
-			http.StatusBadGateway,          // 502
-			http.StatusServiceUnavailable,  // 503
-			http.StatusGatewayTimeout,      // 504
-		},
 	}
 
 	// Create client options
@@ -71,12 +59,13 @@ func NewHttpClient(cred azcore.TokenCredential, opts *HttpClientOptions) *HttpCl
 	}
 
 	// Create pipeline with authentication and retry policies
+	// PerRetry policies execute BEFORE EACH attempt (including retries)
 	pipeline := runtime.NewPipeline(
 		"azqr-http-client",
 		"v1.0.0",
 		runtime.PipelineOptions{
 			PerRetry: []policy.Policy{
-				throttling.NewThrottlingPolicy(), // Apply throttling per retry attempt
+				throttling.NewThrottlingPolicy(),
 			},
 		},
 		clientOpts,

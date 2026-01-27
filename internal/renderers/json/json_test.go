@@ -74,8 +74,7 @@ func TestConvertToJSON(t *testing.T) {
 func TestCreateJsonOutput(t *testing.T) {
 	// Create test data with proper initialization
 	data := &renderers.ReportData{
-		Aprl:                    []*models.AprlResult{},
-		Azqr:                    []*models.AzqrServiceResult{},
+		Graph:                   []*models.GraphResult{},
 		Defender:                []*models.DefenderResult{},
 		DefenderRecommendations: []*models.DefenderRecommendation{},
 		Advisor:                 []*models.AdvisorResult{},
@@ -104,8 +103,7 @@ func TestCreateJsonReport(t *testing.T) {
 	// Create test data with proper initialization
 	data := &renderers.ReportData{
 		OutputFileName:          filepath.Join(tmpDir, "test_report"),
-		Aprl:                    []*models.AprlResult{},
-		Azqr:                    []*models.AzqrServiceResult{},
+		Graph:                   []*models.GraphResult{},
 		Defender:                []*models.DefenderResult{},
 		DefenderRecommendations: []*models.DefenderRecommendation{},
 		Advisor:                 []*models.AdvisorResult{},
@@ -173,8 +171,7 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 	// Create test data with plugin results and proper initialization
 	data := &renderers.ReportData{
 		OutputFileName:          filepath.Join(tmpDir, "test_report_plugins"),
-		Aprl:                    []*models.AprlResult{},
-		Azqr:                    []*models.AzqrServiceResult{},
+		Graph:                   []*models.GraphResult{},
 		Defender:                []*models.DefenderResult{},
 		DefenderRecommendations: []*models.DefenderRecommendation{},
 		Advisor:                 []*models.AdvisorResult{},

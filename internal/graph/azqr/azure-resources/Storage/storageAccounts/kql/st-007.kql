@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find Storage Accounts that don't have HTTPS only enabled
+resources
+| where type =~ "Microsoft.Storage/storageAccounts"
+| where properties.supportsHttpsTrafficOnly != true
+| project recommendationId = "st-007", name, id, tags, param1 = "Secure transfer (HTTPS only) is disabled"

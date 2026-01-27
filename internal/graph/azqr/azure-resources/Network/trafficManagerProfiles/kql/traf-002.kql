@@ -1,0 +1,7 @@
+// Traffic Manager has availability zones enabled by design (always passes)
+resources
+| where type =~ 'Microsoft.Network/trafficManagerProfiles'
+| where 1 == 0
+| extend recommendationId = 'traf-002'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

@@ -1,0 +1,87 @@
+// Comprehensive naming convention checker for all Azure resources
+// Checks if resource names follow the recommended Cloud Adoption Framework naming conventions
+resources
+| extend expectedPrefix = case(
+    type =~ 'Microsoft.ApiManagement/service', 'apim',
+    type =~ 'Microsoft.App/containerApps', 'ca',
+    type =~ 'Microsoft.App/managedenvironments', 'cae',
+    type =~ 'Microsoft.AppConfiguration/configurationStores', 'appcs',
+    type =~ 'Microsoft.Cache/Redis', 'redis',
+    type =~ 'Microsoft.Cdn/profiles', 'afd',
+    type =~ 'Microsoft.CognitiveServices/accounts', 'aif|oai|cog',
+    type =~ 'Microsoft.Compute/virtualMachines', 'vm',
+    type =~ 'Microsoft.ContainerInstance/containerGroups', 'ci',
+    type =~ 'Microsoft.ContainerRegistry/registries', 'cr',
+    type =~ 'Microsoft.ContainerService/managedClusters', 'aks',
+    type =~ 'Microsoft.Dashboard/grafana', 'amg',
+    type =~ 'Microsoft.DataFactory/factories', 'adf',
+    type =~ 'Microsoft.Databricks/workspaces', 'dbw',
+    type =~ 'Microsoft.DBforMariaDB/servers', 'maria',
+    type =~ 'Microsoft.DBforMariaDB/servers/databases', 'mariadb',
+    type =~ 'Microsoft.DBforMySQL/servers', 'mysql',
+    type =~ 'Microsoft.DBforMySQL/flexibleServers', 'mysql',
+    type =~ 'Microsoft.DBforPostgreSQL/servers', 'psql',
+    type =~ 'Microsoft.DBforPostgreSQL/flexibleServers', 'psqlf',
+    type =~ 'Microsoft.DocumentDB/databaseAccounts', 'cosmos',
+    type =~ 'Microsoft.EventGrid/domains', 'evgd',
+    type =~ 'Microsoft.EventHub/namespaces', 'evh',
+    type =~ 'Microsoft.Fabric/capacities', 'fabric',
+    type =~ 'Microsoft.Insights/components', 'appi',
+    type =~ 'Microsoft.KeyVault/vaults', 'kv',
+    type =~ 'Microsoft.Kusto/clusters', 'dec',
+    type =~ 'Microsoft.Logic/workflows', 'logic',
+    type =~ 'Microsoft.MachineLearningServices/workspaces', 'mlw|aih',
+    type =~ 'Microsoft.Network/applicationGateways', 'agw',
+    type =~ 'Microsoft.Network/azureFirewalls', 'afw',
+    type =~ 'Microsoft.Network/loadBalancers', 'lb',
+    type =~ 'Microsoft.Network/natGateways', 'ng',
+    type =~ 'Microsoft.Network/networkSecurityGroups', 'nsg',
+    type =~ 'Microsoft.Network/networkWatchers', 'nw',
+    type =~ 'Microsoft.Network/privateEndpoints', 'pep',
+    type =~ 'Microsoft.Network/publicIPAddresses', 'pip',
+    type =~ 'Microsoft.Network/routeTables', 'udr',
+    type =~ 'Microsoft.Network/trafficManagerProfiles', 'traf',
+    type =~ 'Microsoft.Network/virtualNetworkGateways', 'vpng|ergw|lgw',
+    type =~ 'Microsoft.Network/virtualNetworks', 'vnet',
+    type =~ 'Microsoft.Network/virtualWans', 'vwa',
+    type =~ 'Microsoft.OperationalInsights/workspaces', 'log',
+    type =~ 'Microsoft.Search/searchServices', 'srch',
+    type =~ 'Microsoft.ServiceBus/namespaces', 'sb',
+    type =~ 'Microsoft.SignalRService/SignalR', 'sigr',
+    type =~ 'Microsoft.SignalRService/webPubSub', 'wps',
+    type =~ 'Microsoft.Sql/servers', 'sql',
+    type =~ 'Microsoft.Sql/servers/databases', 'sqldb',
+    type =~ 'Microsoft.Sql/servers/elasticPools', 'sqlep',
+    type =~ 'Microsoft.Storage/storageAccounts', 'st',
+    type =~ 'Microsoft.Synapse/workspaces', 'synw',
+    type =~ 'Microsoft.Synapse/workspaces/bigDataPools', 'synsp',
+    type =~ 'Microsoft.Synapse/workspaces/sqlPools', 'syndp',
+    type =~ 'Microsoft.VirtualMachineImages/imageTemplates', 'it',
+    type =~ 'Microsoft.Web/serverFarms', 'asp',
+    type =~ 'Microsoft.Web/sites', 'app|func|logic',
+    ''
+)
+| where expectedPrefix != ''
+| extend compliant = case(
+    // Handle resources with multiple valid prefixes - CognitiveServices
+    type =~ 'Microsoft.CognitiveServices/accounts' and name startswith 'aif', true,
+    type =~ 'Microsoft.CognitiveServices/accounts' and name startswith 'oai', true,
+    type =~ 'Microsoft.CognitiveServices/accounts' and name startswith 'cog', true,
+    // Machine Learning Services
+    type =~ 'Microsoft.MachineLearningServices/workspaces' and name startswith 'mlw', true,
+    type =~ 'Microsoft.MachineLearningServices/workspaces' and name startswith 'aih', true,
+    // Virtual Network Gateways
+    type =~ 'Microsoft.Network/virtualNetworkGateways' and name startswith 'vpng', true,
+    type =~ 'Microsoft.Network/virtualNetworkGateways' and name startswith 'ergw', true,
+    type =~ 'Microsoft.Network/virtualNetworkGateways' and name startswith 'lgw', true,
+    // Web sites
+    type =~ 'Microsoft.Web/sites' and name startswith 'app', true,
+    type =~ 'Microsoft.Web/sites' and name startswith 'func', true,
+    type =~ 'Microsoft.Web/sites' and name startswith 'logic', true,
+    // Default: check single prefix for all other resource types
+    name startswith expectedPrefix
+)
+| where compliant == false
+| extend recommendationId = 'resources-002'
+| extend param1 = strcat('Expected prefix: ', expectedPrefix, ', Actual: ', name)
+| project recommendationId, name, id, tags, param1, type
