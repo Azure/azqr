@@ -1,0 +1,8 @@
+// Check if Service Bus has private endpoints enabled
+resources
+| where type =~ 'Microsoft.ServiceBus/namespaces'
+| extend privateEndpoints = array_length(properties.privateEndpointConnections)
+| where privateEndpoints == 0 or isnull(privateEndpoints)
+| extend recommendationId = 'sb-004'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

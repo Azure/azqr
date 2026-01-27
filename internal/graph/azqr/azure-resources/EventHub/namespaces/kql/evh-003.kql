@@ -1,0 +1,12 @@
+// Azure Resource Graph Query
+// Find Event Hub namespaces and report their SLA based on SKU and zone redundancy
+resources
+| where type =~ 'Microsoft.EventHub/namespaces'
+| extend skuTier = tostring(sku.tier)
+| extend zoneRedundant = tobool(properties.zoneRedundant)
+| extend slaValue = case(
+    skuTier =~ "Premium" and zoneRedundant == true, "99.95%",
+    skuTier =~ "Dedicated" and zoneRedundant == true, "99.95%",
+    "99.9%"
+)
+| project recommendationId = 'evh-003', name, id, tags, param1 = slaValue

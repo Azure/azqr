@@ -4,6 +4,7 @@
 package excel
 
 import (
+	"github.com/Azure/azqr/internal/models"
 	_ "image/png"
 
 	"github.com/Azure/azqr/internal/renderers"
@@ -14,7 +15,7 @@ import (
 func renderImpactedResources(f *excelize.File, data *renderers.ReportData) {
 	sheetName := "ImpactedResources"
 
-	if !data.ScanEnabled {
+	if !data.Stages.IsStageEnabled(models.StageNameGraph) {
 		log.Debug().Msgf("Skipping %s. Feature is disabled", sheetName)
 		return
 	}

@@ -23,8 +23,8 @@ func (s *SubscriptionDiscoveryStage) Execute(ctx *ScanContext) error {
 	params := ctx.Params
 
 	if len(params.ManagementGroups) > 0 {
-		managementGroupScanner := scanners.ManagementGroupsScanner{}
-		ctx.Subscriptions = managementGroupScanner.ListSubscriptions(
+		scanner := scanners.ManagementGroupDiscovery{}
+		ctx.Subscriptions = scanner.ListSubscriptions(
 			ctx.Ctx,
 			ctx.Cred,
 			params.ManagementGroups,
@@ -32,8 +32,8 @@ func (s *SubscriptionDiscoveryStage) Execute(ctx *ScanContext) error {
 			ctx.ClientOptions,
 		)
 	} else {
-		subscriptionScanner := scanners.SubcriptionScanner{}
-		ctx.Subscriptions = subscriptionScanner.ListSubscriptions(
+		scanner := scanners.SubcriptionDiscovery{}
+		ctx.Subscriptions = scanner.ListSubscriptions(
 			ctx.Ctx,
 			ctx.Cred,
 			params.Subscriptions,

@@ -34,27 +34,29 @@ func (m *mockCredential) GetToken(ctx context.Context, opts policy.TokenRequestO
 // testHttpClientOptions returns options optimized for fast test execution
 func testHttpClientOptions() *HttpClientOptions {
 	return &HttpClientOptions{
-		Timeout:       5 * time.Second,
-		MaxRetries:    1,
-		RetryDelay:    10 * time.Millisecond,
-		MaxRetryDelay: 50 * time.Millisecond,
+		Timeout:          5 * time.Second,
+		MaxRetries:       1,
+		OperationTimeout: 10 * time.Second, // Enough for test operations
+		Scope:            "https://management.azure.com/.default",
 	}
 }
 
 func TestDo_Success(t *testing.T) {
-	// Create a test server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// Create a test server (TLS required for Azure SDK auth policy)
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"result": "success"}`))
 	}))
 	defer server.Close()
 
-	// Create client
+	// Create client with test server's HTTP client (trusts self-signed cert)
 	cred := &mockCredential{token: "test-token"}
-	client := NewHttpClient(cred, testHttpClientOptions())
+	opts := testHttpClientOptions()
+	opts.Transport = server.Client()
+	client := NewHttpClient(cred, opts)
 
 	// Execute request
-	body, err := client.Do(context.Background(), server.URL, nil)
+	body, err := client.Do(context.Background(), server.URL)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -67,8 +69,8 @@ func TestDo_Success(t *testing.T) {
 }
 
 func TestDo_WithAuth(t *testing.T) {
-	// Create a test server that checks for auth header
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// Create a test server that checks for auth header (TLS required)
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader != "Bearer test-token" {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -79,13 +81,14 @@ func TestDo_WithAuth(t *testing.T) {
 	}))
 	defer server.Close()
 
-	// Create client
+	// Create client with test server's HTTP client (trusts self-signed cert)
 	cred := &mockCredential{token: "test-token"}
-	client := NewHttpClient(cred, testHttpClientOptions())
+	opts := testHttpClientOptions()
+	opts.Transport = server.Client()
+	client := NewHttpClient(cred, opts)
 
 	// Execute request with auth (empty string uses default scope)
-	emptyScope := ""
-	body, err := client.Do(context.Background(), server.URL, &emptyScope)
+	body, err := client.Do(context.Background(), server.URL)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
@@ -98,19 +101,21 @@ func TestDo_WithAuth(t *testing.T) {
 }
 
 func TestDo_HTTPError(t *testing.T) {
-	// Create a test server that returns an error
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// Create a test server that returns an error (TLS required)
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(`{"error": "internal server error"}`))
 	}))
 	defer server.Close()
 
-	// Create client with fast retry options for testing
+	// Create client with fast retry options and test server's client
 	cred := &mockCredential{token: "test-token"}
-	client := NewHttpClient(cred, testHttpClientOptions())
+	opts := testHttpClientOptions()
+	opts.Transport = server.Client()
+	client := NewHttpClient(cred, opts)
 
 	// Execute request
-	_, err := client.Do(context.Background(), server.URL, nil)
+	_, err := client.Do(context.Background(), server.URL)
 
 	if err == nil {
 		t.Fatal("Expected an error, got nil")
@@ -134,10 +139,6 @@ func TestNewClient(t *testing.T) {
 		t.Fatal("Expected client to be created, got nil")
 		return
 	}
-
-	if client.cred == nil {
-		t.Fatal("Expected credential to be set, got nil")
-	}
 }
 
 func TestNewClient_NilOptions(t *testing.T) {
@@ -155,14 +156,14 @@ func TestDefaultHttpClientOptions(t *testing.T) {
 	if opts.Timeout != 45*time.Second {
 		t.Errorf("Expected timeout 45s, got %v", opts.Timeout)
 	}
-	if opts.MaxRetries != 3 {
-		t.Errorf("Expected MaxRetries 3, got %d", opts.MaxRetries)
+	if opts.MaxRetries != 5 {
+		t.Errorf("Expected MaxRetries 5, got %d", opts.MaxRetries)
 	}
-	if opts.RetryDelay != 2*time.Second {
-		t.Errorf("Expected RetryDelay 2s, got %v", opts.RetryDelay)
+	if opts.OperationTimeout != 450*time.Second {
+		t.Errorf("Expected OperationTimeout 450s, got %v", opts.OperationTimeout)
 	}
-	if opts.MaxRetryDelay != 60*time.Second {
-		t.Errorf("Expected MaxRetryDelay 60s, got %v", opts.MaxRetryDelay)
+	if opts.Scope != "https://management.azure.com/.default" {
+		t.Errorf("Expected default ARM scope, got %s", opts.Scope)
 	}
 }
 

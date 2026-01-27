@@ -10,12 +10,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/renderers"
 )
 
 func CreateCsvReport(data *renderers.ReportData) {
 	// Only create AZQR-related CSV files if the feature is enabled
-	if data.ScanEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameGraph) {
 		records := data.RecommendationsTable()
 		writeData(records, data.OutputFileName, "recommendations")
 
@@ -35,18 +36,23 @@ func CreateCsvReport(data *renderers.ReportData) {
 	}
 
 	// Only create Defender CSV files if the feature is enabled
-	if data.DefenderEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameDefender) {
 		records := data.DefenderTable()
 		writeData(records, data.OutputFileName, "defender")
-
-		records = data.DefenderRecommendationsTable()
-		writeData(records, data.OutputFileName, "defenderRecommendations")
 	} else {
 		log.Debug().Msg("Skipping Defender CSV files. Feature is disabled")
 	}
 
+	// Only create Defender Recommendations CSV files if the feature is enabled
+	if data.Stages.IsStageEnabled(models.StageNameDefenderRecommendations) {
+		records := data.DefenderRecommendationsTable()
+		writeData(records, data.OutputFileName, "defenderRecommendations")
+	} else {
+		log.Debug().Msg("Skipping Defender Recommendations CSV files. Feature is disabled")
+	}
+
 	// Only create Azure Policy CSV files if the feature is enabled
-	if data.PolicyEnabled {
+	if data.Stages.IsStageEnabled(models.StageNamePolicy) {
 		records := data.AzurePolicyTable()
 		writeData(records, data.OutputFileName, "azurePolicy")
 	} else {
@@ -54,7 +60,7 @@ func CreateCsvReport(data *renderers.ReportData) {
 	}
 
 	// Only create Arc SQL CSV files if the feature is enabled
-	if data.ArcEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameArc) {
 		records := data.ArcSQLTable()
 		writeData(records, data.OutputFileName, "arcSQL")
 	} else {
@@ -62,7 +68,7 @@ func CreateCsvReport(data *renderers.ReportData) {
 	}
 
 	// Only create Advisor CSV files if the feature is enabled
-	if data.AdvisorEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameAdvisor) {
 		records := data.AdvisorTable()
 		writeData(records, data.OutputFileName, "advisor")
 	} else {
@@ -70,7 +76,7 @@ func CreateCsvReport(data *renderers.ReportData) {
 	}
 
 	// Only create Cost CSV files if the feature is enabled
-	if data.CostEnabled {
+	if data.Stages.IsStageEnabled(models.StageNameCost) {
 		records := data.CostTable()
 		writeData(records, data.OutputFileName, "costs")
 	} else {

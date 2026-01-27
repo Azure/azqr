@@ -1,0 +1,31 @@
+- description: Traffic Manager SLA
+  aprlGuid: traf-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Network/trafficManagerProfiles
+  recommendationMetadataState: Active
+  longDescription: Traffic Manager SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: 'Traffic Manager: HTTP endpoints should be monitored using HTTPS'
+  aprlGuid: traf-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Network/trafficManagerProfiles
+  recommendationMetadataState: Active
+  longDescription: 'Traffic Manager: HTTP endpoints should be monitored using HTTPS'
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/traffic-manager/traffic-manager-monitoring'

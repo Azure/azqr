@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find Logic Apps that don't have VNET integration
+resources
+| where type =~ "Microsoft.Web/sites"
+| where kind contains "workflowapp"
+| where isnull(properties.virtualNetworkSubnetId) or properties.virtualNetworkSubnetId == ""
+| project recommendationId = "logics-009", name, id, tags, param1 = "VNET integration not configured"

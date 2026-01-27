@@ -1,0 +1,95 @@
+- description: Azure Synapse Workspace should have private endpoints enabled
+  aprlGuid: synw-002
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Synapse/workspaces
+  recommendationMetadataState: Active
+  longDescription: 'Azure Synapse Workspace should have private endpoints configured to secure access and prevent exposure to the public internet.'
+  potentialBenefits: Enhanced security through private connectivity
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Synapse Workspace Managed Private Endpoints
+    url: https://learn.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-private-endpoints
+
+- description: Azure Synapse Workspace SLA
+  aprlGuid: synw-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Synapse/workspaces
+  recommendationMetadataState: Active
+  longDescription: Azure Synapse Workspace SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Azure Synapse Workspace should establish network segmentation boundaries
+  aprlGuid: synw-006
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Synapse/workspaces
+  recommendationMetadataState: Active
+  longDescription: 'Azure Synapse Workspace should have managed virtual network enabled to establish proper network segmentation boundaries.'
+  potentialBenefits: Enhanced network security isolation
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Azure Synapse Analytics security baseline
+    url: https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json
+
+- description: Azure Synapse Workspace should disable public network access
+  aprlGuid: synw-007
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Synapse/workspaces
+  recommendationMetadataState: Active
+  longDescription: 'Azure Synapse Workspace should have public network access disabled to prevent unauthorized access from the internet.'
+  potentialBenefits: Enhanced security through network isolation
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Azure Synapse Analytics security baseline
+    url: https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json
+
+- description: Azure Synapse Spark Pool SLA
+  aprlGuid: synsp-002
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Synapse/workspaces/bigDataPools
+  recommendationMetadataState: Active
+  longDescription: Azure Synapse Spark Pool SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Azure Synapse Dedicated SQL Pool SLA
+  aprlGuid: syndp-002
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Synapse/workspaces/sqlPools
+  recommendationMetadataState: Active
+  longDescription: Azure Synapse Dedicated SQL Pool SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

@@ -34,6 +34,10 @@ func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) string 
 
 	var pipeline *pipeline.Pipeline
 	if defaultPipeline {
+		// Ensure graph stage is enabled for regular scans
+		if err := params.Stages.ValidateGraphStageEnabled(); err != nil {
+			log.Fatal().Err(err).Msg("Configuration error")
+		}
 		pipeline = builder.BuildDefault()
 	} else {
 		pipeline = builder.BuildPluginOnly()

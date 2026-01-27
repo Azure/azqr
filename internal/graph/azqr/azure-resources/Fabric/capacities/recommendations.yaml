@@ -1,0 +1,69 @@
+- description: Fabric Capacity SLA
+  aprlGuid: fabric-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Fabric/capacities
+  recommendationMetadataState: Active
+  longDescription: Fabric Capacity SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Fabric Capacity should be in Active state
+  aprlGuid: fabric-004
+  recommendationTypeId: null
+  recommendationControl: OtherBestPractices
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Fabric/capacities
+  recommendationMetadataState: Active
+  longDescription: | 
+    Fabric Capacity should be in Active state to be available for
+    use. Paused capacities are not available for processing workloads.
+  potentialBenefits: Ensures capacity is available for workloads
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Pause and Resume in Fabric
+    url: https://learn.microsoft.com/en-us/fabric/enterprise/pause-resume
+
+- description: Fabric Capacity should have administrators configured
+  aprlGuid: fabric-005
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Fabric/capacities
+  recommendationMetadataState: Active
+  longDescription: |
+    Fabric Capacity should have administrators configured to ensure
+    proper management and security oversight of the capacity.
+  potentialBenefits: Proper administrative oversight
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Fabric Capacity Settings
+    url: https://learn.microsoft.com/en-us/fabric/admin/capacity-settings
+
+- description: Fabric Capacity should use Fabric (F) SKU tier for production workloads
+  aprlGuid: fabric-006
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Fabric/capacities
+  recommendationMetadataState: Active
+  longDescription: | 
+    Fabric Capacity should use the Fabric (F) SKU tier for production
+    workloads to ensure proper performance and support levels.
+  potentialBenefits: Appropriate SKU for production use
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Fabric Licenses
+    url: https://learn.microsoft.com/en-us/fabric/enterprise/licenses

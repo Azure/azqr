@@ -1,0 +1,32 @@
+- description: Resource should have tags
+  aprlGuid: resources-001
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.Resources
+  recommendationMetadataState: Active
+  longDescription: |
+    Resource should have tags applied for proper resource management, cost tracking, and organization. Tags help categorize resources and provide metadata for governance and operational purposes.
+  potentialBenefits: Better resource management and cost tracking
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+    - name: Use tags to organize your Azure resources
+      url: "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json"
+
+- description: Resource should comply with naming conventions
+  aprlGuid: resources-002
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.Resources
+  recommendationMetadataState: Active
+  longDescription: Resource should comply with naming conventions
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Azure Cloud Adoption Framework - Resource Abbreviations
+    url: "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations"

@@ -1,0 +1,8 @@
+// Check if App Configuration has local authentication disabled
+resources
+| where type =~ 'Microsoft.AppConfiguration/configurationStores'
+| extend localAuthDisabled = properties.disableLocalAuth
+| where isnull(localAuthDisabled) or localAuthDisabled == false
+| extend recommendationId = 'appcs-008'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

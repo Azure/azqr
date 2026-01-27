@@ -1,13 +1,6 @@
 ---
 name: azqr-developer
 description: Expert guidance for developing and contributing to Azure Quick Review (azqr) - A Go-based CLI tool for Azure resource compliance analysis
-applyTo:
-  - "**/*.go"
-  - "**/Makefile"
-  - "**/go.mod"
-  - "**/go.sum"
-  - "cmd/**"
-  - "internal/**"
 ---
 
 # Azure Quick Review (azqr) Development Skill

@@ -1,0 +1,8 @@
+// Check if Container Apps Environment has private endpoints enabled (VnetConfiguration.Internal)
+resources
+| where type =~ 'Microsoft.App/managedenvironments'
+| extend vnetInternal = properties.vnetConfiguration.internal
+| where isnull(vnetInternal) or vnetInternal == false
+| extend recommendationId = 'cae-004'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

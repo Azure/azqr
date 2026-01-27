@@ -131,12 +131,8 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 		Reader: bytes.NewReader(body),
 	}
 
-	// Get resource manager endpoint scope
-	resourceManagerEndpoint := az.GetResourceManagerEndpoint()
-	scope := to.Ptr(fmt.Sprintf("%s/.default", resourceManagerEndpoint))
-
 	// Send POST request using HttpClient (handles retries and throttling automatically)
-	respBody, resp, err := q.httpClient.DoPost(ctx, q.endpoint, readSeekCloser, scope)
+	respBody, resp, err := q.httpClient.DoPost(ctx, q.endpoint, readSeekCloser)
 	if err != nil {
 		return nil, err
 	}

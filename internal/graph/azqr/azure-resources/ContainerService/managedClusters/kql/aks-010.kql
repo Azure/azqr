@@ -1,0 +1,8 @@
+// Check if AKS has httpApplicationRouting disabled
+resources
+| where type =~ 'Microsoft.ContainerService/managedClusters'
+| extend httpRoutingEnabled = properties.addonProfiles.httpApplicationRouting.enabled
+| where httpRoutingEnabled == true
+| extend recommendationId = 'aks-010'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1
