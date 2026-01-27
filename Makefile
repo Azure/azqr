@@ -27,9 +27,11 @@ debug: $(TARGET)-debug
 help:
 	@echo "Available targets:"
 	@echo "  all          - Build the azqr binary (default)"
+	@echo "  build        - Build the azqr binary (same as all)"
 	@echo "  $(TARGET)    - Build the azqr binary (production)"
 	@echo "  debug        - Build the azqr binary with profiling support"
 	@echo "  lint         - Run linting checks"
+	@echo "  lint-all     - Run comprehensive linting checks (includes errcheck, gosec, etc.)"
 	@echo "  vet          - Run go vet checks"
 	@echo "  tidy         - Tidy up go modules and check for changes"
 	@echo "  json         - Generate JSON recommendations and check for changes"
