@@ -1,0 +1,47 @@
+- description: Azure AI Search SLA
+  aprlGuid: srch-002
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Search/searchServices
+  recommendationMetadataState: Active
+  longDescription: Azure AI Search SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Azure AI Search should disable public network access
+  aprlGuid: srch-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Search/searchServices
+  recommendationMetadataState: Active
+  longDescription: Azure AI Search should disable public network access
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/search/service-configure-firewall'
+
+- description: Azure AI Search should have private enpoints enabled
+  aprlGuid: srch-005
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Search/searchServices
+  recommendationMetadataState: Active
+  longDescription: Azure AI Search should have private enpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/search/service-create-private-endpoint'

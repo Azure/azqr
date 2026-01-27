@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Maximum queries per second to avoid throttling
+MAX_QUERIES_PER_SECOND=${MAX_QUERIES_PER_SECOND:-2}
+SLEEP_TIME=$(echo "scale=3; 1 / $MAX_QUERIES_PER_SECOND" | bc)
+
+echo "Rate limiting: $MAX_QUERIES_PER_SECOND queries per second (sleeping ${SLEEP_TIME}s between queries)"
+
 # Function to run KQL queries using Azure CLI
 # Arguments:
 #   $1 - The KQL query to run
@@ -10,14 +16,17 @@ runKqlQuery() {
   az graph query -q "$kqlQuery" || { echo "Error running query: $kqlQuery"; exit 1; }
 }
 
-# Find all .kql files in the specified directory
+# Find all .kql files in the internal/graph/azure-orphan-resources directory
 kqlFiles=$(find internal/graph/azure-orphan-resources -type f -name "*.kql")
 
 # Find all .kql files in the internal/graph/aprl/azure-resources directory and append them to kqlFiles
 aprlKqlFiles=$(find internal/graph/aprl/azure-resources -type f -name "*.kql")
 
-# Combine kqlFiles and aprlKqlFiles into a single variable
-kqlFiles="$kqlFiles $aprlKqlFiles"
+# Find all .kql files in the internal/graph/azqr/azure-resources directory and append them to kqlFiles
+azqrKqlFiles=$(find internal/graph/azqr/azure-resources -type f -name "*.kql")
+
+# Combine kqlFiles, aprlKqlFiles, and azqrKqlFiles into a single variable
+kqlFiles="$kqlFiles $aprlKqlFiles $azqrKqlFiles"
 
 # Loop through each .kql file
 for kqlFile in $kqlFiles; do
@@ -37,4 +46,7 @@ for kqlFile in $kqlFiles; do
 
     # Run the KQL query using the Azure CLI
     runKqlQuery "$kqlQuery"
+    
+    # Sleep to avoid throttling
+    sleep "$SLEEP_TIME"
 done

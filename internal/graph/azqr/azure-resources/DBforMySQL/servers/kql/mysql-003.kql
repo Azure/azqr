@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find MySQL servers (Single Server) and report their SLA
+// Note: Single Server has fixed SLA of 99.99%
+resources
+| where type =~ 'Microsoft.DBforMySQL/servers'
+| project recommendationId = 'mysql-003', name, id, tags, param1 = "99.99%"

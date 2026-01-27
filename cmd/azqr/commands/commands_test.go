@@ -75,18 +75,14 @@ func TestScanCommandHasRequiredFlags(t *testing.T) {
 		{"management-group-id", "stringArray"},
 		{"subscription-id", "stringArray"},
 		{"resource-group", "stringArray"},
-		{"defender", "bool"},
-		{"advisor", "bool"},
-		{"costs", "bool"},
-		{"policy", "bool"},
-		{"arc", "bool"},
+		{"stages", "stringArray"},
+		{"plugin", "stringArray"},
 		{"xlsx", "bool"},
 		{"json", "bool"},
 		{"csv", "bool"},
 		{"output-name", "string"},
 		{"mask", "bool"},
 		{"filters", "string"},
-		{"azqr", "bool"},
 	}
 
 	for _, rf := range requiredFlags {
@@ -113,16 +109,10 @@ func TestScanCommandFlagDefaults(t *testing.T) {
 		flagName      string
 		expectedValue string
 	}{
-		{"defender", "true"},
-		{"advisor", "true"},
-		{"costs", "true"},
-		{"policy", "false"},
-		{"arc", "true"},
 		{"xlsx", "true"},
 		{"json", "false"},
 		{"csv", "false"},
 		{"mask", "true"},
-		{"azqr", "true"},
 	}
 
 	for _, tt := range tests {
@@ -479,10 +469,6 @@ func TestScanCommandShortcutFlags(t *testing.T) {
 	}{
 		{"subscription-id", "s"},
 		{"resource-group", "g"},
-		{"defender", "d"},
-		{"advisor", "a"},
-		{"costs", "c"},
-		{"policy", "p"},
 		{"output-name", "o"},
 		{"mask", "m"},
 		{"filters", "e"},

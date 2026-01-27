@@ -1,0 +1,95 @@
+- description: AKS SLA
+  aprlGuid: aks-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ContainerService/managedClusters
+  recommendationMetadataState: Active
+  longDescription: AKS SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: AKS Cluster should be private
+  aprlGuid: aks-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ContainerService/managedClusters
+  recommendationMetadataState: Active
+  longDescription: AKS Cluster should be private
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/aks/private-clusters'
+
+- description: AKS should integrate authentication with AAD (Managed)
+  aprlGuid: aks-007
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.ContainerService/managedClusters
+  recommendationMetadataState: Active
+  longDescription: AKS should integrate authentication with AAD (Managed)
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/aks/managed-azure-ad'
+
+- description: AKS should have httpApplicationRouting disabled
+  aprlGuid: aks-010
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.ContainerService/managedClusters
+  recommendationMetadataState: Active
+  longDescription: AKS should have httpApplicationRouting disabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/aks/http-application-routing'
+
+- description: AKS should have outbound type set to user defined routing
+  aprlGuid: aks-012
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ContainerService/managedClusters
+  recommendationMetadataState: Active
+  longDescription: AKS should have outbound type set to user defined routing
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/aks/limit-egress-traffic'
+
+- description: AKS Node Pools should have MaxSurge set
+  aprlGuid: aks-016
+  recommendationTypeId: null
+  recommendationControl: Scalability
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.ContainerService/managedClusters
+  recommendationMetadataState: Active
+  longDescription: AKS Node Pools should have MaxSurge set
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/aks/upgrade-aks-cluster'

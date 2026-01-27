@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find Microsoft Fabric Capacities and report their SLA
+resources
+| where type =~ 'Microsoft.Fabric/capacities'
+| extend slaValue = "99.9%"
+| project recommendationId = "fabric-003", name, id, tags, param1 = slaValue

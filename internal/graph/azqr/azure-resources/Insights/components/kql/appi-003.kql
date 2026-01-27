@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find Application Insights components and report their SLA
+resources
+| where type =~ 'Microsoft.Insights/components'
+| extend slaValue = "99.9%"
+| project recommendationId = "appi-003", name, id, tags, param1 = slaValue

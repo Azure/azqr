@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find Synapse Workspaces without managed virtual network enabled
+resources
+| where type =~ "Microsoft.Synapse/workspaces"
+| where tolower(tostring(properties.managedVirtualNetwork)) != "default"
+| project recommendationId = "synw-006", name, id, tags, param1 = "Managed virtual network not enabled"

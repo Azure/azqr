@@ -1,2565 +1,5 @@
 [
 	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
-		"recommendation": "Azure Data Factory should have diagnostic settings enabled",
-		"recommendationId": "adf-001",
-		"resourceType": "Microsoft.DataFactory/factories"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "",
-		"recommendation": "Azure Data Factory should have private endpoints enabled",
-		"recommendationId": "adf-002",
-		"resourceType": "Microsoft.DataFactory/factories"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure Data Factory SLA",
-		"recommendationId": "adf-003",
-		"resourceType": "Microsoft.DataFactory/factories"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Data Factory Name should comply with naming conventions",
-		"recommendationId": "adf-004",
-		"resourceType": "Microsoft.DataFactory/factories"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Data Factory should have tags",
-		"recommendationId": "adf-005",
-		"resourceType": "Microsoft.DataFactory/factories"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
-		"recommendation": "Azure FrontDoor should have diagnostic settings enabled",
-		"recommendationId": "afd-001",
-		"resourceType": "Microsoft.Cdn/profiles"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/cdn/",
-		"recommendation": "Azure FrontDoor SLA",
-		"recommendationId": "afd-003",
-		"resourceType": "Microsoft.Cdn/profiles"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure FrontDoor Name should comply with naming conventions",
-		"recommendationId": "afd-006",
-		"resourceType": "Microsoft.Cdn/profiles"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure FrontDoor should have tags",
-		"recommendationId": "afd-007",
-		"resourceType": "Microsoft.Cdn/profiles"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://docs.microsoft.com/en-us/azure/firewall/logs-and-metrics",
-		"recommendation": "Azure Firewall should have diagnostic settings enabled",
-		"recommendationId": "afw-001",
-		"resourceType": "Microsoft.Network/azureFirewalls"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure Firewall SLA",
-		"recommendationId": "afw-003",
-		"resourceType": "Microsoft.Network/azureFirewalls"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Firewall Name should comply with naming conventions",
-		"recommendationId": "afw-006",
-		"resourceType": "Microsoft.Network/azureFirewalls"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Firewall should have tags",
-		"recommendationId": "afw-007",
-		"resourceType": "Microsoft.Network/azureFirewalls"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
-		"recommendation": "Application Gateway: Monitor and Log the configurations and traffic",
-		"recommendationId": "agw-005",
-		"resourceType": "Microsoft.Network/applicationGateways"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/application-gateway/",
-		"recommendation": "Application Gateway SLA",
-		"recommendationId": "agw-103",
-		"resourceType": "Microsoft.Network/applicationGateways"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Application Gateway Name should comply with naming conventions",
-		"recommendationId": "agw-105",
-		"resourceType": "Microsoft.Network/applicationGateways"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Application Gateway should have tags",
-		"recommendationId": "agw-106",
-		"resourceType": "Microsoft.Network/applicationGateways"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
-		"recommendation": "Service should have diagnostic settings enabled",
-		"recommendationId": "aif-001",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-		"recommendation": "Service should have a SLA",
-		"recommendationId": "aif-003",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cognitive-services/cognitive-services-virtual-networks",
-		"recommendation": "Service should have private endpoints enabled",
-		"recommendationId": "aif-004",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Service Name should comply with naming conventions",
-		"recommendationId": "aif-006",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Service should have tags",
-		"recommendationId": "aif-007",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/ai-services/policy-reference#azure-ai-services",
-		"recommendation": "Service should have local authentication disabled",
-		"recommendationId": "aif-008",
-		"resourceType": "Microsoft.CognitiveServices/accounts"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
-		"recommendation": "AKS Cluster should have diagnostic settings enabled",
-		"recommendationId": "aks-001",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers#uptime-sla-terms-and-conditions",
-		"recommendation": "AKS Cluster should have an SLA",
-		"recommendationId": "aks-003",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/aks/private-clusters",
-		"recommendation": "AKS Cluster should be private",
-		"recommendationId": "aks-004",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "AKS Name should comply with naming conventions",
-		"recommendationId": "aks-006",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/aks/managed-azure-ad",
-		"recommendation": "AKS should integrate authentication with AAD (Managed)",
-		"recommendationId": "aks-007",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/http-application-routing",
-		"recommendation": "AKS should have httpApplicationRouting disabled",
-		"recommendationId": "aks-010",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
-		"recommendation": "AKS should have outbound type set to user defined routing",
-		"recommendationId": "aks-012",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "AKS should have tags",
-		"recommendationId": "aks-015",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Scalability",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-at-scale#cluster-upgrade-considerations-and-best-practices",
-		"recommendation": "AKS Node Pools should have MaxSurge set",
-		"recommendationId": "aks-016",
-		"resourceType": "Microsoft.ContainerService/managedClusters"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Managed Grafana name should comply with naming conventions",
-		"recommendationId": "amg-001",
-		"resourceType": "Microsoft.Dashboard/managedGrafana"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure Managed Grafana SLA",
-		"recommendationId": "amg-002",
-		"resourceType": "Microsoft.Dashboard/managedGrafana"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Managed Grafana should have tags",
-		"recommendationId": "amg-003",
-		"resourceType": "Microsoft.Dashboard/managedGrafana"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
-		"recommendation": "Azure Managed Grafana should disable public network access",
-		"recommendationId": "amg-004",
-		"resourceType": "Microsoft.Dashboard/managedGrafana"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/managed-grafana/high-availability",
-		"recommendation": "Azure Managed Grafana should have availability zones enabled",
-		"recommendationId": "amg-005",
-		"resourceType": "Microsoft.Dashboard/managedGrafana"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
-		"recommendation": "APIM should have diagnostic settings enabled",
-		"recommendationId": "apim-001",
-		"resourceType": "Microsoft.ApiManagement/service"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/api-management/",
-		"recommendation": "APIM should have a SLA",
-		"recommendationId": "apim-003",
-		"resourceType": "Microsoft.ApiManagement/service"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/api-management/private-endpoint",
-		"recommendation": "APIM should have private endpoints enabled",
-		"recommendationId": "apim-004",
-		"resourceType": "Microsoft.ApiManagement/service"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "APIM should comply with naming conventions",
-		"recommendationId": "apim-006",
-		"resourceType": "Microsoft.ApiManagement/service"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "APIM should have tags",
-		"recommendationId": "apim-007",
-		"resourceType": "Microsoft.ApiManagement/service"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-managed-service-identity",
-		"recommendation": "APIM should use Managed Identities",
-		"recommendationId": "apim-008",
-		"resourceType": "Microsoft.ApiManagement/service"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
-		"recommendation": "APIM should only accept a minimum of TLS 1.2",
-		"recommendationId": "apim-009",
-		"resourceType": "Microsoft.ApiManagement/service"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-manage-protocols-ciphers",
-		"recommendation": "APIM should should not accept weak or deprecated ciphers.",
-		"recommendationId": "apim-010",
-		"resourceType": "Microsoft.ApiManagement/service"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/api-management/configure-custom-domain?tabs=custom",
-		"recommendation": "APIM: Renew expiring certificates",
-		"recommendationId": "apim-011",
-		"resourceType": "Microsoft.ApiManagement/service"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
-		"recommendation": "App Service should have diagnostic settings enabled",
-		"recommendationId": "app-001",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/networking/private-endpoint",
-		"recommendation": "App Service should have private endpoints enabled",
-		"recommendationId": "app-004",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "App Service Name should comply with naming conventions",
-		"recommendationId": "app-006",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
-		"recommendation": "App Service should use HTTPS only",
-		"recommendationId": "app-007",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "App Service should have tags",
-		"recommendationId": "app-008",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
-		"recommendation": "App Service should use VNET integration",
-		"recommendationId": "app-009",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
-		"recommendation": "App Service should have VNET Route all enabled for VNET integration",
-		"recommendationId": "app-010",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-tls",
-		"recommendation": "App Service should use TLS 1.2",
-		"recommendationId": "app-011",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
-		"recommendation": "App Service remote debugging should be disabled",
-		"recommendationId": "app-012",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/deploy-ftp?tabs=portal",
-		"recommendation": "App Service should not allow insecure FTP",
-		"recommendationId": "app-013",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Scalability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/configure-common?tabs=portal",
-		"recommendation": "App Service should have Always On enabled",
-		"recommendationId": "app-014",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
-		"recommendation": "App Service should avoid using Client Affinity",
-		"recommendationId": "app-015",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
-		"recommendation": "App Service should use Managed Identities",
-		"recommendationId": "app-016",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
-		"recommendation": "AppConfiguration should have diagnostic settings enabled",
-		"recommendationId": "appcs-001",
-		"resourceType": "Microsoft.AppConfiguration/configurationStores"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/app-configuration/",
-		"recommendation": "AppConfiguration should have a SLA",
-		"recommendationId": "appcs-003",
-		"resourceType": "Microsoft.AppConfiguration/configurationStores"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-private-endpoint",
-		"recommendation": "AppConfiguration should have private endpoints enabled",
-		"recommendationId": "appcs-004",
-		"resourceType": "Microsoft.AppConfiguration/configurationStores"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "AppConfiguration Name should comply with naming conventions",
-		"recommendationId": "appcs-006",
-		"resourceType": "Microsoft.AppConfiguration/configurationStores"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "AppConfiguration should have tags",
-		"recommendationId": "appcs-007",
-		"resourceType": "Microsoft.AppConfiguration/configurationStores"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/howto-disable-access-key-authentication?tabs=portal#disable-access-key-authentication",
-		"recommendation": "AppConfiguration should have local authentication disabled",
-		"recommendationId": "appcs-008",
-		"resourceType": "Microsoft.AppConfiguration/configurationStores"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/application-insights/index.html",
-		"recommendation": "Azure Application Insights SLA",
-		"recommendationId": "appi-001",
-		"resourceType": "Microsoft.Insights/components"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Application Insights Name should comply with naming conventions",
-		"recommendationId": "appi-002",
-		"resourceType": "Microsoft.Insights/components"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Application Insights should have tags",
-		"recommendationId": "appi-003",
-		"resourceType": "Microsoft.Insights/components"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/analysis-services/analysis-services-logging",
-		"recommendation": "Azure Analysis Service should have diagnostic settings enabled",
-		"recommendationId": "as-001",
-		"resourceType": "Microsoft.AnalysisServices/servers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure Analysis Service should have a SLA",
-		"recommendationId": "as-002",
-		"resourceType": "Microsoft.AnalysisServices/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Analysis Service Name should comply with naming conventions",
-		"recommendationId": "as-004",
-		"resourceType": "Microsoft.AnalysisServices/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Analysis Service should have tags",
-		"recommendationId": "as-005",
-		"resourceType": "Microsoft.AnalysisServices/servers"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "",
-		"recommendation": "Plan should have diagnostic settings enabled",
-		"recommendationId": "asp-001",
-		"resourceType": "Microsoft.Web/serverfarms"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/app-service/",
-		"recommendation": "Plan should have a SLA",
-		"recommendationId": "asp-003",
-		"resourceType": "Microsoft.Web/serverfarms"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Plan Name should comply with naming conventions",
-		"recommendationId": "asp-006",
-		"resourceType": "Microsoft.Web/serverfarms"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Plan should have tags",
-		"recommendationId": "asp-007",
-		"resourceType": "Microsoft.Web/serverfarms"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
-		"recommendation": "ContainerApp should have a SLA",
-		"recommendationId": "ca-003",
-		"resourceType": "Microsoft.App/containerApps"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "ContainerApp Name should comply with naming conventions",
-		"recommendationId": "ca-006",
-		"resourceType": "Microsoft.App/containerApps"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "ContainerApp should have tags",
-		"recommendationId": "ca-007",
-		"resourceType": "Microsoft.App/containerApps"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/ingress-how-to?pivots=azure-cli",
-		"recommendation": "ContainerApp should not allow insecure ingress traffic",
-		"recommendationId": "ca-008",
-		"resourceType": "Microsoft.App/containerApps"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cdotnet",
-		"recommendation": "ContainerApp should use Managed Identities",
-		"recommendationId": "ca-009",
-		"resourceType": "Microsoft.App/containerApps"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/storage-mounts?pivots=azure-cli",
-		"recommendation": "ContainerApp should use Azure Files to persist container data",
-		"recommendationId": "ca-010",
-		"resourceType": "Microsoft.App/containerApps"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/sticky-sessions?pivots=azure-portal",
-		"recommendation": "ContainerApp should avoid using session affinity",
-		"recommendationId": "ca-011",
-		"resourceType": "Microsoft.App/containerApps"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/log-options#diagnostic-settings",
-		"recommendation": "Container Apps Environment should have diagnostic settings enabled",
-		"recommendationId": "cae-001",
-		"resourceType": "Microsoft.App/managedenvironments"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://azure.microsoft.com/en-us/support/legal/sla/container-apps/v1_0/",
-		"recommendation": "Container Apps Environment should have a SLA",
-		"recommendationId": "cae-003",
-		"resourceType": "Microsoft.App/managedenvironments"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/vnet-custom-internal?tabs=bash\u0026pivots=azure-portal",
-		"recommendation": "Container Apps Environment should have private endpoints enabled",
-		"recommendationId": "cae-004",
-		"resourceType": "Microsoft.App/managedenvironments"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Container Apps Environment Name should comply with naming conventions",
-		"recommendationId": "cae-006",
-		"resourceType": "Microsoft.App/managedenvironments"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Container Apps Environment should have tags",
-		"recommendationId": "cae-007",
-		"resourceType": "Microsoft.App/managedenvironments"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-instances/availability-zones",
-		"recommendation": "ContainerInstance should have availability zones enabled",
-		"recommendationId": "ci-002",
-		"resourceType": "Microsoft.ContainerInstance/containerGroups"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/container-instances/v1_0/index.html",
-		"recommendation": "ContainerInstance should have a SLA",
-		"recommendationId": "ci-003",
-		"resourceType": "Microsoft.ContainerInstance/containerGroups"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "",
-		"recommendation": "ContainerInstance should use private IP addresses",
-		"recommendationId": "ci-004",
-		"resourceType": "Microsoft.ContainerInstance/containerGroups"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "ContainerInstance Name should comply with naming conventions",
-		"recommendationId": "ci-006",
-		"resourceType": "Microsoft.ContainerInstance/containerGroups"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "ContainerInstance should have tags",
-		"recommendationId": "ci-007",
-		"resourceType": "Microsoft.ContainerInstance/containerGroups"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
-		"recommendation": "CosmosDB should have diagnostic settings enabled",
-		"recommendationId": "cosmos-001",
-		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cosmos-db/high-availability#slas",
-		"recommendation": "CosmosDB should have a SLA",
-		"recommendationId": "cosmos-003",
-		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-configure-private-endpoints",
-		"recommendation": "CosmosDB should have private endpoints enabled",
-		"recommendationId": "cosmos-004",
-		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "CosmosDB Name should comply with naming conventions",
-		"recommendationId": "cosmos-006",
-		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "CosmosDB should have tags",
-		"recommendationId": "cosmos-007",
-		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-setup-rbac#disable-local-auth",
-		"recommendation": "CosmosDB should have local authentication disabled",
-		"recommendationId": "cosmos-008",
-		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cosmos-db/role-based-access-control#set-via-arm-template",
-		"recommendation": "CosmosDB: disable write operations on metadata resources (databases, containers, throughput) via account keys",
-		"recommendationId": "cosmos-009",
-		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
-		"recommendation": "ContainerRegistry should have diagnostic settings enabled",
-		"recommendationId": "cr-001",
-		"resourceType": "Microsoft.ContainerRegistry/registries"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/container-registry/",
-		"recommendation": "ContainerRegistry should have a SLA",
-		"recommendationId": "cr-003",
-		"resourceType": "Microsoft.ContainerRegistry/registries"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-private-link",
-		"recommendation": "ContainerRegistry should have private endpoints enabled",
-		"recommendationId": "cr-004",
-		"resourceType": "Microsoft.ContainerRegistry/registries"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "ContainerRegistry Name should comply with naming conventions",
-		"recommendationId": "cr-006",
-		"resourceType": "Microsoft.ContainerRegistry/registries"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-authentication-managed-identity",
-		"recommendation": "ContainerRegistry should have the Administrator account disabled",
-		"recommendationId": "cr-008",
-		"resourceType": "Microsoft.ContainerRegistry/registries"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "ContainerRegistry should have tags",
-		"recommendationId": "cr-009",
-		"resourceType": "Microsoft.ContainerRegistry/registries"
-	},
-	{
-		"category": "Governance",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-registry/container-registry-retention-policy",
-		"recommendation": "ContainerRegistry should use retention policies",
-		"recommendationId": "cr-010",
-		"resourceType": "Microsoft.ContainerRegistry/registries"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/account-settings/audit-log-delivery",
-		"recommendation": "Azure Databricks should have diagnostic settings enabled",
-		"recommendationId": "dbw-001",
-		"resourceType": "Microsoft.Databricks/workspaces"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure Databricks should have a SLA",
-		"recommendationId": "dbw-003",
-		"resourceType": "Microsoft.Databricks/workspaces"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/cloud-configurations/azure/private-link",
-		"recommendation": "Azure Databricks should have private endpoints enabled",
-		"recommendationId": "dbw-004",
-		"resourceType": "Microsoft.Databricks/workspaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Databricks Name should comply with naming conventions",
-		"recommendationId": "dbw-006",
-		"resourceType": "Microsoft.Databricks/workspaces"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/databricks/security/network/secure-cluster-connectivity",
-		"recommendation": "Azure Databricks should have the Public IP disabled",
-		"recommendationId": "dbw-007",
-		"resourceType": "Microsoft.Databricks/workspaces"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
-		"recommendation": "Azure Data Explorer should have diagnostic settings enabled",
-		"recommendationId": "dec-001",
-		"resourceType": "Microsoft.Kusto/clusters"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure Data Explorer SLA",
-		"recommendationId": "dec-002",
-		"resourceType": "Microsoft.Kusto/clusters"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-explorer/manage-cluster-choose-sku",
-		"recommendation": "Azure Data Explorer Production Cluster should not use Dev SKU",
-		"recommendationId": "dec-003",
-		"resourceType": "Microsoft.Kusto/clusters"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint",
-		"recommendation": "Azure Data Explorer should have private endpoints enabled",
-		"recommendationId": "dec-004",
-		"resourceType": "Microsoft.Kusto/clusters"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Data Explorer should have tags",
-		"recommendationId": "dec-005",
-		"resourceType": "Microsoft.Kusto/clusters"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Data Explorer Name should comply with naming conventions",
-		"recommendationId": "dec-006",
-		"resourceType": "Microsoft.Kusto/clusters"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-explorer/cluster-encryption-overview",
-		"recommendation": "Azure Data Explorer should use Disk Encryption",
-		"recommendationId": "dec-008",
-		"resourceType": "Microsoft.Kusto/clusters"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-explorer/configure-managed-identities-cluster?tabs=portal",
-		"recommendation": "Azure Data Explorer should use Managed Identities",
-		"recommendationId": "dec-009",
-		"resourceType": "Microsoft.Kusto/clusters"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
-		"recommendation": "Event Grid Domain should have diagnostic settings enabled",
-		"recommendationId": "evgd-001",
-		"resourceType": "Microsoft.EventGrid/domains"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/event-grid/",
-		"recommendation": "Event Grid Domain should have a SLA",
-		"recommendationId": "evgd-003",
-		"resourceType": "Microsoft.EventGrid/domains"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-grid/configure-private-endpoints",
-		"recommendation": "Event Grid Domain should have private endpoints enabled",
-		"recommendationId": "evgd-004",
-		"resourceType": "Microsoft.EventGrid/domains"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Event Grid Domain Name should comply with naming conventions",
-		"recommendationId": "evgd-006",
-		"resourceType": "Microsoft.EventGrid/domains"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Event Grid Domain should have tags",
-		"recommendationId": "evgd-007",
-		"resourceType": "Microsoft.EventGrid/domains"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-grid/authenticate-with-access-keys-shared-access-signatures",
-		"recommendation": "Event Grid Domain should have local authentication disabled",
-		"recommendationId": "evgd-008",
-		"resourceType": "Microsoft.EventGrid/domains"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
-		"recommendation": "Event Hub Namespace should have diagnostic settings enabled",
-		"recommendationId": "evh-001",
-		"resourceType": "Microsoft.EventHub/namespaces"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/event-hubs/",
-		"recommendation": "Event Hub Namespace should have a SLA",
-		"recommendationId": "evh-003",
-		"resourceType": "Microsoft.EventHub/namespaces"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/network-security",
-		"recommendation": "Event Hub Namespace should have private endpoints enabled",
-		"recommendationId": "evh-004",
-		"resourceType": "Microsoft.EventHub/namespaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Event Hub Namespace Name should comply with naming conventions",
-		"recommendationId": "evh-006",
-		"resourceType": "Microsoft.EventHub/namespaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Event Hub should have tags",
-		"recommendationId": "evh-007",
-		"resourceType": "Microsoft.EventHub/namespaces"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/authorize-access-event-hubs#shared-access-signatures",
-		"recommendation": "Event Hub should have local authentication disabled",
-		"recommendationId": "evh-008",
-		"resourceType": "Microsoft.EventHub/namespaces"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Fabric Capacity should have a SLA",
-		"recommendationId": "fabric-001",
-		"resourceType": "Microsoft.Fabric/capacities"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Fabric Capacity Name should comply with naming conventions",
-		"recommendationId": "fabric-002",
-		"resourceType": "Microsoft.Fabric/capacities"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources",
-		"recommendation": "Fabric Capacity should have tags defined",
-		"recommendationId": "fabric-003",
-		"resourceType": "Microsoft.Fabric/capacities"
-	},
-	{
-		"category": "OtherBestPractices",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/fabric/enterprise/pause-resume",
-		"recommendation": "Fabric Capacity should be in Active state",
-		"recommendationId": "fabric-004",
-		"resourceType": "Microsoft.Fabric/capacities"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/fabric/admin/capacity-settings",
-		"recommendation": "Fabric Capacity should have administrators configured",
-		"recommendationId": "fabric-005",
-		"resourceType": "Microsoft.Fabric/capacities"
-	},
-	{
-		"category": "Governance",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/fabric/enterprise/licenses",
-		"recommendation": "Fabric Capacity should use Fabric (F) SKU tier for production workloads",
-		"recommendationId": "fabric-006",
-		"resourceType": "Microsoft.Fabric/capacities"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-monitor-log-analytics?tabs=csharp",
-		"recommendation": "Function should have diagnostic settings enabled",
-		"recommendationId": "func-001",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-functions/functions-create-vnet",
-		"recommendation": "Function should have private endpoints enabled",
-		"recommendationId": "func-004",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Function Name should comply with naming conventions",
-		"recommendationId": "func-006",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
-		"recommendation": "Function should use HTTPS only",
-		"recommendationId": "func-007",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Function should have tags",
-		"recommendationId": "func-008",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
-		"recommendation": "Function should use VNET integration",
-		"recommendationId": "func-009",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
-		"recommendation": "Function should have VNET Route all enabled for VNET integration",
-		"recommendationId": "func-010",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-tls",
-		"recommendation": "Function should use TLS 1.2",
-		"recommendationId": "func-011",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
-		"recommendation": "Function remote debugging should be disabled",
-		"recommendationId": "func-012",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
-		"recommendation": "Function should avoid using Client Affinity",
-		"recommendationId": "func-013",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
-		"recommendation": "Function should use Managed Identities",
-		"recommendationId": "func-014",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Service name should comply with naming conventions",
-		"recommendationId": "hub-001",
-		"resourceType": "Microsoft.MachineLearningServices/workspaces"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Service SLA",
-		"recommendationId": "hub-002",
-		"resourceType": "Microsoft.MachineLearningServices/workspaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Service should have tags",
-		"recommendationId": "hub-003",
-		"resourceType": "Microsoft.MachineLearningServices/workspaces"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/machine-learning/how-to-managed-network?view=azureml-api-2",
-		"recommendation": "Service should disable public network access",
-		"recommendationId": "hub-004",
-		"resourceType": "Microsoft.MachineLearningServices/workspaces"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/machine-learning/how-to-configure-private-link?view=azureml-api-2\u0026tabs=cli",
-		"recommendation": "Service should have private enpoints enabled",
-		"recommendationId": "hub-005",
-		"resourceType": "Microsoft.MachineLearningServices/workspaces"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
-		"recommendation": "Service should have diagnostic settings enabled",
-		"recommendationId": "hub-006",
-		"resourceType": "Microsoft.MachineLearningServices/workspaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Image Template Name should comply with naming conventions",
-		"recommendationId": "it-006",
-		"resourceType": "Microsoft.VirtualMachineImages/imageTemplates"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Image Template should have tags",
-		"recommendationId": "it-007",
-		"resourceType": "Microsoft.VirtualMachineImages/imageTemplates"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
-		"recommendation": "Key Vault should have diagnostic settings enabled",
-		"recommendationId": "kv-001",
-		"resourceType": "Microsoft.KeyVault/vaults"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/key-vault/",
-		"recommendation": "Key Vault should have a SLA",
-		"recommendationId": "kv-003",
-		"resourceType": "Microsoft.KeyVault/vaults"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Key Vault Name should comply with naming conventions",
-		"recommendationId": "kv-006",
-		"resourceType": "Microsoft.KeyVault/vaults"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Key Vault should have tags",
-		"recommendationId": "kv-007",
-		"resourceType": "Microsoft.KeyVault/vaults"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
-		"recommendation": "Load Balancer should have diagnostic settings enabled",
-		"recommendationId": "lb-001",
-		"resourceType": "Microsoft.Network/loadBalancers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/load-balancer/skus",
-		"recommendation": "Load Balancer should have a SLA",
-		"recommendationId": "lb-003",
-		"resourceType": "Microsoft.Network/loadBalancers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Load Balancer Name should comply with naming conventions",
-		"recommendationId": "lb-006",
-		"resourceType": "Microsoft.Network/loadBalancers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Load Balancer should have tags",
-		"recommendationId": "lb-007",
-		"resourceType": "Microsoft.Network/loadBalancers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Log Analytics Workspace SLA",
-		"recommendationId": "log-003",
-		"resourceType": "Microsoft.OperationalInsights/workspaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Log Analytics Workspace Name should comply with naming conventions",
-		"recommendationId": "log-006",
-		"resourceType": "Microsoft.OperationalInsights/workspaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Log Analytics Workspace should have tags",
-		"recommendationId": "log-007",
-		"resourceType": "Microsoft.OperationalInsights/workspaces"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
-		"recommendation": "Logic App should have diagnostic settings enabled",
-		"recommendationId": "logic-001",
-		"resourceType": "Microsoft.Logic/workflows"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-		"recommendation": "Logic App should have a SLA",
-		"recommendationId": "logic-003",
-		"resourceType": "Microsoft.Logic/workflows"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-securing-a-logic-app?tabs=azure-portal#restrict-access-by-ip-address-range",
-		"recommendation": "Logic App should limit access to Http Triggers",
-		"recommendationId": "logic-004",
-		"resourceType": "Microsoft.Logic/workflows"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Logic App Name should comply with naming conventions",
-		"recommendationId": "logic-006",
-		"resourceType": "Microsoft.Logic/workflows"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Logic App should have tags",
-		"recommendationId": "logic-007",
-		"resourceType": "Microsoft.Logic/workflows"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
-		"recommendation": "Logic App should have diagnostic settings enabled",
-		"recommendationId": "logics-001",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/logic-apps/secure-single-tenant-workflow-virtual-network-private-endpoint",
-		"recommendation": "Logic App should have private endpoints enabled",
-		"recommendationId": "logics-004",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Logic App Name should comply with naming conventions",
-		"recommendationId": "logics-006",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
-		"recommendation": "Logic App should use HTTPS only",
-		"recommendationId": "logics-007",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Logic App should have tags",
-		"recommendationId": "logics-008",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
-		"recommendation": "Logic App should use VNET integration",
-		"recommendationId": "logics-009",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
-		"recommendation": "Logic App should have VNET Route all enabled for VNET integration",
-		"recommendationId": "logics-010",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-tls",
-		"recommendation": "Logic App should use TLS 1.2",
-		"recommendationId": "logics-011",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/visualstudio/debugger/remote-debugging-azure-app-service?view=vs-2022#enable-remote-debugging",
-		"recommendation": "Logic App remote debugging should be disabled",
-		"recommendationId": "logics-012",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
-		"recommendation": "Logic App should avoid using Client Affinity",
-		"recommendationId": "logics-013",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp",
-		"recommendation": "Logic App should use Managed Identities",
-		"recommendationId": "logics-014",
-		"resourceType": "Microsoft.Web/sites"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "",
-		"recommendation": "MariaDB should have diagnostic settings enabled",
-		"recommendationId": "maria-001",
-		"resourceType": "Microsoft.DBforMariaDB/servers"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "",
-		"recommendation": "MariaDB should have private endpoints enabled",
-		"recommendationId": "maria-002",
-		"resourceType": "Microsoft.DBforMariaDB/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "MariaDB server Name should comply with naming conventions",
-		"recommendationId": "maria-003",
-		"resourceType": "Microsoft.DBforMariaDB/servers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "",
-		"recommendation": "MariaDB server should have a SLA",
-		"recommendationId": "maria-004",
-		"resourceType": "Microsoft.DBforMariaDB/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "MariaDB should have tags",
-		"recommendationId": "maria-005",
-		"resourceType": "Microsoft.DBforMariaDB/servers"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/mariadb/howto-tls-configurations",
-		"recommendation": "MariaDB should enforce TLS \u003e= 1.2",
-		"recommendationId": "maria-006",
-		"resourceType": "Microsoft.DBforMariaDB/servers"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-monitoring#server-logs",
-		"recommendation": "Azure Database for MySQL - Single Server should have diagnostic settings enabled",
-		"recommendationId": "mysql-001",
-		"resourceType": "Microsoft.DBforMySQL/servers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/mysql/",
-		"recommendation": "Azure Database for MySQL - Single Server should have a SLA",
-		"recommendationId": "mysql-003",
-		"resourceType": "Microsoft.DBforMySQL/servers"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-data-access-security-private-link",
-		"recommendation": "Azure Database for MySQL - Single Server should have private endpoints enabled",
-		"recommendationId": "mysql-004",
-		"resourceType": "Microsoft.DBforMySQL/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Database for MySQL - Single Server Name should comply with naming conventions",
-		"recommendationId": "mysql-006",
-		"resourceType": "Microsoft.DBforMySQL/servers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/mysql/single-server/whats-happening-to-mysql-single-server",
-		"recommendation": "Azure Database for MySQL - Single Server is on the retirement path",
-		"recommendationId": "mysql-007",
-		"resourceType": "Microsoft.DBforMySQL/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Database for MySQL - Single Server should have tags",
-		"recommendationId": "mysql-008",
-		"resourceType": "Microsoft.DBforMySQL/servers"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
-		"recommendation": "Azure Database for MySQL - Flexible Server should have diagnostic settings enabled",
-		"recommendationId": "mysqlf-001",
-		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "hhttps://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-		"recommendation": "Azure Database for MySQL - Flexible Server should have a SLA",
-		"recommendationId": "mysqlf-003",
-		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-virtual-network-cli",
-		"recommendation": "Azure Database for MySQL - Flexible Server should have private access enabled",
-		"recommendationId": "mysqlf-004",
-		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Database for MySQL - Flexible Server Name should comply with naming conventions",
-		"recommendationId": "mysqlf-006",
-		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Database for MySQL - Flexible Server should have tags",
-		"recommendationId": "mysqlf-007",
-		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/nat-gateway/nat-metrics",
-		"recommendation": "NAT Gateway should have diagnostic settings enabled",
-		"recommendationId": "ng-001",
-		"resourceType": "Microsoft.Network/natGateways"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "NAT Gateway SLA",
-		"recommendationId": "ng-003",
-		"resourceType": "Microsoft.Network/natGateways"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "NAT Gateway Name should comply with naming conventions",
-		"recommendationId": "ng-006",
-		"resourceType": "Microsoft.Network/natGateways"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "NAT Gateway should have tags",
-		"recommendationId": "ng-007",
-		"resourceType": "Microsoft.Network/natGateways"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-nsg-manage-log",
-		"recommendation": "NSG should have diagnostic settings enabled",
-		"recommendationId": "nsg-001",
-		"resourceType": "Microsoft.Network/networkSecurityGroups"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "NSG SLA",
-		"recommendationId": "nsg-003",
-		"resourceType": "Microsoft.Network/networkSecurityGroups"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "NSG Name should comply with naming conventions",
-		"recommendationId": "nsg-006",
-		"resourceType": "Microsoft.Network/networkSecurityGroups"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "NSG should have tags",
-		"recommendationId": "nsg-007",
-		"resourceType": "Microsoft.Network/networkSecurityGroups"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Network Watcher SLA",
-		"recommendationId": "nw-003",
-		"resourceType": "Microsoft.Network/networkWatchers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Network Watcher Name should comply with naming conventions",
-		"recommendationId": "nw-006",
-		"resourceType": "Microsoft.Network/networkWatchers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Network Watcher should have tags",
-		"recommendationId": "nw-007",
-		"resourceType": "Microsoft.Network/networkWatchers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Private Endpoint SLA",
-		"recommendationId": "pep-003",
-		"resourceType": "Microsoft.Network/privateEndpoints"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Private Endpoint Name should comply with naming conventions",
-		"recommendationId": "pep-006",
-		"resourceType": "Microsoft.Network/privateEndpoints"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Private Endpoint should have tags",
-		"recommendationId": "pep-007",
-		"resourceType": "Microsoft.Network/privateEndpoints"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Public IP SLA",
-		"recommendationId": "pip-003",
-		"resourceType": "Microsoft.Network/publicIPAddresses"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Public IP Name should comply with naming conventions",
-		"recommendationId": "pip-006",
-		"resourceType": "Microsoft.Network/publicIPAddresses"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Public IP should have tags",
-		"recommendationId": "pip-007",
-		"resourceType": "Microsoft.Network/publicIPAddresses"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-server-logs#resource-logs",
-		"recommendation": "PostgreSQL should have diagnostic settings enabled",
-		"recommendationId": "psql-001",
-		"resourceType": "Microsoft.DBforPostgreSQL/servers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/postgresql/",
-		"recommendation": "PostgreSQL should have a SLA",
-		"recommendationId": "psql-003",
-		"resourceType": "Microsoft.DBforPostgreSQL/servers"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-data-access-and-security-private-link",
-		"recommendation": "PostgreSQL should have private endpoints enabled",
-		"recommendationId": "psql-004",
-		"resourceType": "Microsoft.DBforPostgreSQL/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "PostgreSQL Name should comply with naming conventions",
-		"recommendationId": "psql-006",
-		"resourceType": "Microsoft.DBforPostgreSQL/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "PostgreSQL should have tags",
-		"recommendationId": "psql-007",
-		"resourceType": "Microsoft.DBforPostgreSQL/servers"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-ssl-connection-security#enforcing-tls-connections",
-		"recommendation": "PostgreSQL should enforce SSL",
-		"recommendationId": "psql-008",
-		"resourceType": "Microsoft.DBforPostgreSQL/servers"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/single-server/how-to-tls-configurations",
-		"recommendation": "PostgreSQL should enforce TLS \u003e= 1.2",
-		"recommendationId": "psql-009",
-		"resourceType": "Microsoft.DBforPostgreSQL/servers"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
-		"recommendation": "PostgreSQL should have diagnostic settings enabled",
-		"recommendationId": "psqlf-001",
-		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server",
-		"recommendation": "PostgreSQL should have a SLA",
-		"recommendationId": "psqlf-003",
-		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking#private-access-vnet-integration",
-		"recommendation": "PostgreSQL should have private access enabled",
-		"recommendationId": "psqlf-004",
-		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "PostgreSQL Name should comply with naming conventions",
-		"recommendationId": "psqlf-006",
-		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "PostgreSQL should have tags",
-		"recommendationId": "psqlf-007",
-		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-monitor-diagnostic-settings",
-		"recommendation": "Redis should have diagnostic settings enabled",
-		"recommendationId": "redis-001",
-		"resourceType": "Microsoft.Cache/Redis"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-		"recommendation": "Redis should have a SLA",
-		"recommendationId": "redis-003",
-		"resourceType": "Microsoft.Cache/Redis"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Redis Name should comply with naming conventions",
-		"recommendationId": "redis-006",
-		"resourceType": "Microsoft.Cache/Redis"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Redis should have tags",
-		"recommendationId": "redis-007",
-		"resourceType": "Microsoft.Cache/Redis"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-configure#access-ports",
-		"recommendation": "Redis should not enable non SSL ports",
-		"recommendationId": "redis-008",
-		"resourceType": "Microsoft.Cache/Redis"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-remove-tls-10-11",
-		"recommendation": "Redis should enforce TLS \u003e= 1.2",
-		"recommendationId": "redis-009",
-		"resourceType": "Microsoft.Cache/Redis"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
-		"recommendation": "Service Bus should have diagnostic settings enabled",
-		"recommendationId": "sb-001",
-		"resourceType": "Microsoft.ServiceBus/namespaces"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/service-bus/",
-		"recommendation": "Service Bus should have a SLA",
-		"recommendationId": "sb-003",
-		"resourceType": "Microsoft.ServiceBus/namespaces"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/network-security",
-		"recommendation": "Service Bus should have private endpoints enabled",
-		"recommendationId": "sb-004",
-		"resourceType": "Microsoft.ServiceBus/namespaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Service Bus Name should comply with naming conventions",
-		"recommendationId": "sb-006",
-		"resourceType": "Microsoft.ServiceBus/namespaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Service Bus should have tags",
-		"recommendationId": "sb-007",
-		"resourceType": "Microsoft.ServiceBus/namespaces"
-	},
-	{
-		"category": "Security",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-sas",
-		"recommendation": "Service Bus should have local authentication disabled",
-		"recommendationId": "sb-008",
-		"resourceType": "Microsoft.ServiceBus/namespaces"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-howto-diagnostic-logs",
-		"recommendation": "SignalR should have diagnostic settings enabled",
-		"recommendationId": "sigr-001",
-		"resourceType": "Microsoft.SignalRService/SignalR"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/signalr-service/",
-		"recommendation": "SignalR should have a SLA",
-		"recommendationId": "sigr-003",
-		"resourceType": "Microsoft.SignalRService/SignalR"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-signalr/howto-private-endpoints",
-		"recommendation": "SignalR should have private endpoints enabled",
-		"recommendationId": "sigr-004",
-		"resourceType": "Microsoft.SignalRService/SignalR"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "SignalR Name should comply with naming conventions",
-		"recommendationId": "sigr-006",
-		"resourceType": "Microsoft.SignalRService/SignalR"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "SignalR should have tags",
-		"recommendationId": "sigr-007",
-		"resourceType": "Microsoft.SignalRService/SignalR"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "",
-		"recommendation": "SQL should have private endpoints enabled",
-		"recommendationId": "sql-004",
-		"resourceType": "Microsoft.Sql/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "SQL Name should comply with naming conventions",
-		"recommendationId": "sql-006",
-		"resourceType": "Microsoft.Sql/servers"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "SQL should have tags",
-		"recommendationId": "sql-007",
-		"resourceType": "Microsoft.Sql/servers"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-sql/database/connectivity-settings?view=azuresql\u0026tabs=azure-portal#minimal-tls-version",
-		"recommendation": "SQL should enforce TLS \u003e= 1.2",
-		"recommendationId": "sql-008",
-		"resourceType": "Microsoft.Sql/servers"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "",
-		"recommendation": "SQL Database should have diagnostic settings enabled",
-		"recommendationId": "sqldb-001",
-		"resourceType": "Microsoft.Sql/servers/databases"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "",
-		"recommendation": "SQL Database should have a SLA",
-		"recommendationId": "sqldb-003",
-		"resourceType": "Microsoft.Sql/servers/databases"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "SQL Database Name should comply with naming conventions",
-		"recommendationId": "sqldb-006",
-		"resourceType": "Microsoft.Sql/servers/databases"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "SQL Database should have tags",
-		"recommendationId": "sqldb-007",
-		"resourceType": "Microsoft.Sql/servers/databases"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "SQL Elastic Pool Name should comply with naming conventions",
-		"recommendationId": "sqlep-002",
-		"resourceType": "Microsoft.Sql/servers/elasticPools"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "SQL Elastic Pool should have tags",
-		"recommendationId": "sqlep-003",
-		"resourceType": "Microsoft.Sql/servers/elasticPools"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure AI Search name should comply with naming conventions",
-		"recommendationId": "srch-001",
-		"resourceType": "Microsoft.Search/searchServices"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure AI Search SLA",
-		"recommendationId": "srch-002",
-		"resourceType": "Microsoft.Search/searchServices"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure AI Search should have tags",
-		"recommendationId": "srch-003",
-		"resourceType": "Microsoft.Search/searchServices"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/search/service-configure-firewall#when-to-configure-network-access",
-		"recommendation": "Azure AI Search should disable public network access",
-		"recommendationId": "srch-004",
-		"resourceType": "Microsoft.Search/searchServices"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/search/service-create-private-endpoint",
-		"recommendation": "Azure AI Search should have private enpoints enabled",
-		"recommendationId": "srch-005",
-		"resourceType": "Microsoft.Search/searchServices"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/search/search-monitor-enable-logging",
-		"recommendation": "Azure AI Search should have diagnostic settings enabled",
-		"recommendationId": "srch-006",
-		"resourceType": "Microsoft.Search/searchServices"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
-		"recommendation": "Storage should have diagnostic settings enabled",
-		"recommendationId": "st-001",
-		"resourceType": "Microsoft.Storage/storageAccounts"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/storage/",
-		"recommendation": "Storage should have a SLA",
-		"recommendationId": "st-003",
-		"resourceType": "Microsoft.Storage/storageAccounts"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Storage Name should comply with naming conventions",
-		"recommendationId": "st-006",
-		"resourceType": "Microsoft.Storage/storageAccounts"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer",
-		"recommendation": "Storage Account should use HTTPS only",
-		"recommendationId": "st-007",
-		"resourceType": "Microsoft.Storage/storageAccounts"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Storage Account should have tags",
-		"recommendationId": "st-008",
-		"resourceType": "Microsoft.Storage/storageAccounts"
-	},
-	{
-		"category": "Security",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal",
-		"recommendation": "Storage Account should enforce TLS \u003e= 1.2",
-		"recommendationId": "st-009",
-		"resourceType": "Microsoft.Storage/storageAccounts"
-	},
-	{
-		"category": "DisasterRecovery",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
-		"recommendation": "Storage Account should have inmutable storage versioning enabled",
-		"recommendationId": "st-010",
-		"resourceType": "Microsoft.Storage/storageAccounts"
-	},
-	{
-		"category": "DisasterRecovery",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
-		"recommendation": "Storage Account should have soft delete enabled",
-		"recommendationId": "st-011",
-		"resourceType": "Microsoft.Storage/storageAccounts"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Synapse Dedicated SQL Pool Name should comply with naming conventions",
-		"recommendationId": "syndp-001",
-		"resourceType": "Microsoft.Synapse/workspaces/sqlPools"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure Synapse Dedicated SQL Pool SLA",
-		"recommendationId": "syndp-002",
-		"resourceType": "Microsoft.Synapse/workspaces/sqlPools"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Synapse Dedicated SQL Pool should have tags",
-		"recommendationId": "syndp-003",
-		"resourceType": "Microsoft.Synapse/workspaces/sqlPools"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Synapse Spark Pool Name should comply with naming conventions",
-		"recommendationId": "synsp-001",
-		"resourceType": "Microsoft.Synapse workspaces/bigDataPools"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure Synapse Spark Pool SLA",
-		"recommendationId": "synsp-002",
-		"resourceType": "Microsoft.Synapse workspaces/bigDataPools"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Synapse Spark Pool should have tags",
-		"recommendationId": "synsp-003",
-		"resourceType": "Microsoft.Synapse workspaces/bigDataPools"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
-		"recommendation": "Azure Synapse Workspace should have diagnostic settings enabled",
-		"recommendationId": "synw-001",
-		"resourceType": "Microsoft.Synapse/workspaces"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-private-endpoints",
-		"recommendation": "Azure Synapse Workspace should have private endpoints enabled",
-		"recommendationId": "synw-002",
-		"resourceType": "Microsoft.Synapse/workspaces"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Azure Synapse Workspace SLA",
-		"recommendationId": "synw-003",
-		"resourceType": "Microsoft.Synapse/workspaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Azure Synapse Workspace Name should comply with naming conventions",
-		"recommendationId": "synw-004",
-		"resourceType": "Microsoft.Synapse/workspaces"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Azure Synapse Workspace should have tags",
-		"recommendationId": "synw-005",
-		"resourceType": "Microsoft.Synapse/workspaces"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
-		"recommendation": "Azure Synapse Workspace should establish network segmentation boundaries",
-		"recommendationId": "synw-006",
-		"resourceType": "Microsoft.Synapse/workspaces"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
-		"recommendation": "Azure Synapse Workspace should disable public network access",
-		"recommendationId": "synw-007",
-		"resourceType": "Microsoft.Synapse/workspaces"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-diagnostic-logs",
-		"recommendation": "Traffic Manager should have diagnostic settings enabled",
-		"recommendationId": "traf-001",
-		"resourceType": "Microsoft.Network/trafficManagerProfiles"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/architecture/high-availability/reference-architecture-traffic-manager-application-gateway",
-		"recommendation": "Traffic Manager should have availability zones enabled",
-		"recommendationId": "traf-002",
-		"resourceType": "Microsoft.Network/trafficManagerProfiles"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.azure.cn/en-us/support/sla/traffic-manager/",
-		"recommendation": "Traffic Manager should have a SLA",
-		"recommendationId": "traf-003",
-		"resourceType": "Microsoft.Network/trafficManagerProfiles"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Traffic Manager Name should comply with naming conventions",
-		"recommendationId": "traf-006",
-		"resourceType": "Microsoft.Network/trafficManagerProfiles"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Traffic Manager should have tags",
-		"recommendationId": "traf-007",
-		"resourceType": "Microsoft.Network/trafficManagerProfiles"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-monitoring",
-		"recommendation": "Traffic Manager: HTTP endpoints should be monitored using HTTPS",
-		"recommendationId": "traf-009",
-		"resourceType": "Microsoft.Network/trafficManagerProfiles"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Route Table SLA",
-		"recommendationId": "udr-003",
-		"resourceType": "Microsoft.Network/routeTables"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Route Table Name should comply with naming conventions",
-		"recommendationId": "udr-006",
-		"resourceType": "Microsoft.Network/routeTables"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Route Table should have tags",
-		"recommendationId": "udr-007",
-		"resourceType": "Microsoft.Network/routeTables"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/vpn-gateway/monitor-vpn-gateway",
-		"recommendation": "Virtual Network Gateway should have diagnostic settings enabled",
-		"recommendationId": "vgw-001",
-		"resourceType": "Microsoft.Network/virtualNetworkGateways"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Virtual Network Gateway Name should comply with naming conventions",
-		"recommendationId": "vgw-002",
-		"resourceType": "Microsoft.Network/virtualNetworkGateways"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Virtual Network Gateway should have tags",
-		"recommendationId": "vgw-003",
-		"resourceType": "Microsoft.Network/virtualNetworkGateways"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Virtual Network Gateway should have a SLA",
-		"recommendationId": "vgw-004",
-		"resourceType": "Microsoft.Network/virtualNetworkGateways"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/vpn-gateway/create-zone-redundant-vnet-gateway",
-		"recommendation": "Virtual Network Gateway should have availability zones enabled",
-		"recommendationId": "vgw-005",
-		"resourceType": "Microsoft.Network/virtualNetworkGateways"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-		"recommendation": "Virtual Machine should have a SLA",
-		"recommendationId": "vm-003",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Virtual Machine Name should comply with naming conventions",
-		"recommendationId": "vm-006",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Virtual Machine should have tags",
-		"recommendationId": "vm-007",
-		"resourceType": "Microsoft.Compute/virtualMachines"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services?lang=1",
-		"recommendation": "Virtual Machine should have a SLA",
-		"recommendationId": "vmss-003",
-		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Virtual Machine Scale Set Name should comply with naming conventions",
-		"recommendationId": "vmss-004",
-		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Virtual Machine Scale Set should have tags",
-		"recommendationId": "vmss-005",
-		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
-		"recommendation": "Virtual Network should have diagnostic settings enabled",
-		"recommendationId": "vnet-001",
-		"resourceType": "Microsoft.Network/virtualNetworks"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Virtual Network Name should comply with naming conventions",
-		"recommendationId": "vnet-006",
-		"resourceType": "Microsoft.Network/virtualNetworks"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Virtual Network should have tags",
-		"recommendationId": "vnet-007",
-		"resourceType": "Microsoft.Network/virtualNetworks"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances?tabs=redhat#specify-dns-servers",
-		"recommendation": "Virtual Network should have at least two DNS servers assigned",
-		"recommendationId": "vnet-009",
-		"resourceType": "Microsoft.Network/virtualNetworks"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Medium",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-wan/monitor-virtual-wan",
-		"recommendation": "Virtual WAN should have diagnostic settings enabled",
-		"recommendationId": "vwa-001",
-		"resourceType": "Microsoft.Network/virtualWans"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-are-availability-zones-and-resiliency-handled-in-virtual-wan",
-		"recommendation": "Virtual WAN should have availability zones enabled",
-		"recommendationId": "vwa-002",
-		"resourceType": "Microsoft.Network/virtualWans"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-faq#how-is-virtual-wan-sla-calculated",
-		"recommendation": "Virtual WAN should have a SLA",
-		"recommendationId": "vwa-003",
-		"resourceType": "Microsoft.Network/virtualWans"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-wan/virtual-wan-about#basicstandard",
-		"recommendation": "Virtual WAN Type",
-		"recommendationId": "vwa-005",
-		"resourceType": "Microsoft.Network/virtualWans"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Virtual WAN Name should comply with naming conventions",
-		"recommendationId": "vwa-006",
-		"resourceType": "Microsoft.Network/virtualWans"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Virtual WAN should have tags",
-		"recommendationId": "vwa-007",
-		"resourceType": "Microsoft.Network/virtualWans"
-	},
-	{
-		"category": "MonitoringAndAlerting",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
-		"recommendation": "Web Pub Sub should have diagnostic settings enabled",
-		"recommendationId": "wps-001",
-		"resourceType": "Microsoft.SignalRService/webPubSub"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/concept-availability-zones",
-		"recommendation": "Web Pub Sub should have availability zones enabled",
-		"recommendationId": "wps-002",
-		"resourceType": "Microsoft.SignalRService/webPubSub"
-	},
-	{
-		"category": "HighAvailability",
-		"impact": "High",
-		"learnMoreUrl": "https://azure.microsoft.com/en-gb/support/legal/sla/web-pubsub/",
-		"recommendation": "Web Pub Sub should have a SLA",
-		"recommendationId": "wps-003",
-		"resourceType": "Microsoft.SignalRService/webPubSub"
-	},
-	{
-		"category": "Security",
-		"impact": "High",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-secure-private-endpoints",
-		"recommendation": "Web Pub Sub should have private endpoints enabled",
-		"recommendationId": "wps-004",
-		"resourceType": "Microsoft.SignalRService/webPubSub"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
-		"recommendation": "Web Pub Sub Name should comply with naming conventions",
-		"recommendationId": "wps-006",
-		"resourceType": "Microsoft.SignalRService/webPubSub"
-	},
-	{
-		"category": "Governance",
-		"impact": "Low",
-		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
-		"recommendation": "Web Pub Sub should have tags",
-		"recommendationId": "wps-007",
-		"resourceType": "Microsoft.SignalRService/webPubSub"
-	},
-	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/well-architected/service-guides/azure-kubernetes-service#design-checklist",
@@ -2574,6 +14,14 @@
 		"recommendation": "Monitor Memory Utilization to ensure sufficient resources for workloads",
 		"recommendationId": "029208c8-5186-4a76-8ee8-6e3445fef4dd",
 		"resourceType": "Microsoft.AVS/privateClouds"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-wan/disaster-recovery-design#multi-link-topology",
+		"recommendation": "Configure diverse VPN Site links to different VPN concentrators on-premises",
+		"recommendationId": "02bdbdb8-d138-4090-951c-23e45b8700f7",
+		"resourceType": "Microsoft.Network/vpnSites"
 	},
 	{
 		"category": "OtherBestPractices",
@@ -2598,6 +46,14 @@
 		"recommendation": "Enable Virtual Network Flow Logs",
 		"recommendationId": "06b77be9-56a3-4d41-b362-8b295c5a283d",
 		"resourceType": "Microsoft.Network/virtualNetworks"
+	},
+	{
+		"category": "Governance",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/ddos-protection/ddos-protection-overview",
+		"recommendation": "DDoS protection without protected resources",
+		"recommendationId": "0b1c2d3e-4f5a-6b7c-8d9e-0f1a2b3c4d5e",
+		"resourceType": "Microsoft.Network/ddosProtectionPlans"
 	},
 	{
 		"category": "OtherBestPractices",
@@ -2666,10 +122,26 @@
 	{
 		"category": "DisasterRecovery",
 		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-sql/managed-instance/automated-backups-overview?view=azuresql-mi\u0026preserve-view=true#backup-storage-redundancy",
+		"recommendation": "Use Zone-redundant or Geo-zone-redundant Backup storage redundancy",
+		"recommendationId": "15e2712c-f3ea-4a8d-9081-11e822b1ccfb",
+		"resourceType": "Microsoft.Sql/managedInstances"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/site-recovery/azure-to-azure-tutorial-dr-drill#run-a-test-failover",
 		"recommendation": "Validate VM functionality with a Site Recovery test failover to check performance at target",
 		"recommendationId": "17e877f7-3a89-4205-8a24-0670de54ddcd",
 		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-wan/monitoring-best-practices#expressroute-gateway",
+		"recommendation": "Monitor health for ExpressRoute gateway",
+		"recommendationId": "17e8d380-e4b4-41a1-9b37-2e4df9fd5125",
+		"resourceType": "Microsoft.Network/expressRouteGateways"
 	},
 	{
 		"category": "DisasterRecovery",
@@ -2838,6 +310,14 @@
 		"recommendation": "Reserve Compute Capacity for critical workloads",
 		"recommendationId": "302fda08-ee65-4fbe-a916-6dc0b33169c4",
 		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-wan/monitoring-best-practices#virtual-hub",
+		"recommendation": "Monitor health for v-Hubs",
+		"recommendationId": "30ec8a5e-46de-4323-87e9-a7c56b72813b",
+		"resourceType": "Microsoft.Network/virtualHubs"
 	},
 	{
 		"category": "DisasterRecovery",
@@ -3033,6 +513,14 @@
 	},
 	{
 		"category": "HighAvailability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://techcommunity.microsoft.com/t5/azure-networking-blog/customisation-controls-for-connectivity-between-virtual-networks/ba-p/4147722",
+		"recommendation": "Avoid using ExpressRoute circuits for VNet to VNet communication",
+		"recommendationId": "560a76a7-8f64-4ce3-ad27-d174468861a1",
+		"resourceType": "Microsoft.Network/expressRouteGateways"
+	},
+	{
+		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-cache-for-redis/cache-how-to-zone-redundancy",
 		"recommendation": "Enable zone redundancy for Azure Cache for Redis",
@@ -3078,6 +566,14 @@
 		"recommendation": "Upgrade Basic SKU public IP addresses to Standard SKU",
 		"recommendationId": "5cea1501-6fe4-4ec4-ac8f-f72320eb18d3",
 		"resourceType": "Microsoft.Network/publicIPAddresses"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/stream-analytics/stream-analytics-streaming-unit-consumption",
+		"recommendation": "Migrate Stream Analytics jobs to StandardV2 SKU",
+		"recommendationId": "5d40d3d4-179d-4cf5-ac24-901210f512e7",
+		"resourceType": "Microsoft.StreamAnalytics/streamingjobs"
 	},
 	{
 		"category": "Governance",
@@ -3384,6 +880,14 @@
 		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
 	},
 	{
+		"category": "MonitoringAndAlerting",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/service-health/alerts-activity-log-service-notifications-portal",
+		"recommendation": "Configure Service Health Alerts",
+		"recommendationId": "9729c89d-8118-41b4-a39b-e12468fa872b",
+		"resourceType": "Microsoft.Subscription/Subscriptions"
+	},
+	{
 		"category": "OtherBestPractices",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-desktop/scheduled-agent-updates",
@@ -3456,6 +960,14 @@
 		"resourceType": "Microsoft.Web/sites"
 	},
 	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/entra/identity/domain-services/tutorial-create-replica-set",
+		"recommendation": "Use replica sets for resiliency or geolocation in Microsoft Entra Domain Services",
+		"recommendationId": "a3058909-fcf8-4450-88b5-499f57449178",
+		"resourceType": "Microsoft.AAD/domainServices"
+	},
+	{
 		"category": "Scalability",
 		"impact": "Medium",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/concepts-storage#ephemeral-os-disk",
@@ -3478,6 +990,358 @@
 		"recommendation": "Migrate VMs using availability sets to VMSS Flex",
 		"recommendationId": "a8d25876-7951-b646-b4e8-880c9031596b",
 		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
+		"recommendation": "Azure Data Factory should have diagnostic settings enabled",
+		"recommendationId": "adf-001",
+		"resourceType": "microsoft.datafactory/factories"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Data Factory SLA",
+		"recommendationId": "adf-003",
+		"resourceType": "Microsoft.DataFactory/factories"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
+		"recommendation": "Azure FrontDoor should have diagnostic settings enabled",
+		"recommendationId": "afd-001",
+		"resourceType": "microsoft.cdn/profiles"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure FrontDoor SLA",
+		"recommendationId": "afd-003",
+		"resourceType": "Microsoft.Cdn/profiles"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://docs.microsoft.com/en-us/azure/firewall/logs-and-metrics",
+		"recommendation": "Azure Firewall should have diagnostic settings enabled",
+		"recommendationId": "afw-001",
+		"resourceType": "microsoft.network/azurefirewalls"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Firewall SLA",
+		"recommendationId": "afw-003",
+		"resourceType": "Microsoft.Network/azureFirewalls"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
+		"recommendation": "Application Gateway: Monitor and Log the configurations and traffic",
+		"recommendationId": "agw-005",
+		"resourceType": "microsoft.network/applicationgateways"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Application Gateway SLA",
+		"recommendationId": "agw-103",
+		"resourceType": "Microsoft.Network/applicationGateways"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+		"recommendation": "Service should have diagnostic settings enabled",
+		"recommendationId": "aif-001",
+		"resourceType": "microsoft.cognitiveservices/accounts"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Cognitive Services SLA",
+		"recommendationId": "aif-003",
+		"resourceType": "Microsoft.CognitiveServices/accounts"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/ai-services/cognitive-services-virtual-networks",
+		"recommendation": "Service should have private endpoints enabled",
+		"recommendationId": "aif-004",
+		"resourceType": "Microsoft.CognitiveServices/accounts"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/ai-services/disable-local-auth",
+		"recommendation": "Service should have local authentication disabled",
+		"recommendationId": "aif-008",
+		"resourceType": "Microsoft.CognitiveServices/accounts"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
+		"recommendation": "AKS Cluster should have diagnostic settings enabled",
+		"recommendationId": "aks-001",
+		"resourceType": "microsoft.containerservice/managedclusters"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "AKS SLA",
+		"recommendationId": "aks-003",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/private-clusters",
+		"recommendation": "AKS Cluster should be private",
+		"recommendationId": "aks-004",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/managed-azure-ad",
+		"recommendation": "AKS should integrate authentication with AAD (Managed)",
+		"recommendationId": "aks-007",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/http-application-routing",
+		"recommendation": "AKS should have httpApplicationRouting disabled",
+		"recommendationId": "aks-010",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/limit-egress-traffic",
+		"recommendation": "AKS should have outbound type set to user defined routing",
+		"recommendationId": "aks-012",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "Scalability",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/upgrade-aks-cluster",
+		"recommendation": "AKS Node Pools should have MaxSurge set",
+		"recommendationId": "aks-016",
+		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Managed Grafana SLA",
+		"recommendationId": "amg-002",
+		"resourceType": "Microsoft.Dashboard/grafana"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
+		"recommendation": "Azure Managed Grafana should disable public network access",
+		"recommendationId": "amg-004",
+		"resourceType": "Microsoft.Dashboard/grafana"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/managed-grafana/high-availability",
+		"recommendation": "Azure Managed Grafana should have availability zones enabled",
+		"recommendationId": "amg-005",
+		"resourceType": "Microsoft.Dashboard/grafana"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
+		"recommendation": "APIM should have diagnostic settings enabled",
+		"recommendationId": "apim-001",
+		"resourceType": "microsoft.apimanagement/service"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "API Management SLA",
+		"recommendationId": "apim-003",
+		"resourceType": "Microsoft.ApiManagement/service"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/api-management/private-endpoint",
+		"recommendation": "APIM should have private endpoints enabled",
+		"recommendationId": "apim-004",
+		"resourceType": "Microsoft.ApiManagement/service"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/api-management/api-management-howto-use-managed-service-identity",
+		"recommendation": "APIM should use Managed Identities",
+		"recommendationId": "apim-008",
+		"resourceType": "Microsoft.ApiManagement/service"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/api-management/api-management-howto-manage-protocols-ciphers",
+		"recommendation": "APIM should only accept a minimum of TLS 1.2",
+		"recommendationId": "apim-009",
+		"resourceType": "Microsoft.ApiManagement/service"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/api-management/api-management-howto-manage-protocols-ciphers",
+		"recommendation": "APIM should should not accept weak or deprecated ciphers.",
+		"recommendationId": "apim-010",
+		"resourceType": "Microsoft.ApiManagement/service"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/api-management/configure-custom-domain",
+		"recommendation": "APIM: Renew expiring certificates",
+		"recommendationId": "apim-011",
+		"resourceType": "Microsoft.ApiManagement/service"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
+		"recommendation": "App should have diagnostic settings enabled",
+		"recommendationId": "app-001",
+		"resourceType": "microsoft.web/sites"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "App Service SLA",
+		"recommendationId": "app-003",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
+		"recommendation": "App Service should use HTTPS only",
+		"recommendationId": "app-007",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		"recommendation": "App Service should use VNET integration",
+		"recommendationId": "app-009",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		"recommendation": "App Service should have VNET Route all enabled for VNET integration",
+		"recommendationId": "app-010",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
+		"recommendation": "App Service should avoid using Client Affinity",
+		"recommendationId": "app-015",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
+		"recommendation": "AppConfiguration should have diagnostic settings enabled",
+		"recommendationId": "appcs-001",
+		"resourceType": "microsoft.appconfiguration/configurationstores"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "App Configuration SLA",
+		"recommendationId": "appcs-003",
+		"resourceType": "Microsoft.AppConfiguration/configurationStores"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-app-configuration/concept-private-endpoint",
+		"recommendation": "AppConfiguration should have private endpoints enabled",
+		"recommendationId": "appcs-004",
+		"resourceType": "Microsoft.AppConfiguration/configurationStores"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-app-configuration/howto-disable-access-key-authentication",
+		"recommendation": "AppConfiguration should have local authentication disabled",
+		"recommendationId": "appcs-008",
+		"resourceType": "Microsoft.AppConfiguration/configurationStores"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Application Insights SLA",
+		"recommendationId": "appi-003",
+		"resourceType": "Microsoft.Insights/components"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/analysis-services/analysis-services-logging",
+		"recommendation": "Azure Analysis Service should have diagnostic settings enabled",
+		"recommendationId": "as-001",
+		"resourceType": "microsoft.analysisservices/servers"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Analysis Services SLA",
+		"recommendationId": "as-002",
+		"resourceType": "Microsoft.AnalysisServices/servers"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "",
+		"recommendation": "Plan should have diagnostic settings enabled",
+		"recommendationId": "asp-001",
+		"resourceType": "microsoft.web/serverfarms"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "App Service Plan SLA",
+		"recommendationId": "asp-003",
+		"resourceType": "Microsoft.Web/serverfarms"
 	},
 	{
 		"category": "OtherBestPractices",
@@ -3570,6 +1434,14 @@
 	{
 		"category": "HighAvailability",
 		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/entra/identity/domain-services/tutorial-create-replica-set",
+		"recommendation": "Use at least the Enterprise SKU",
+		"recommendationId": "bb6deb9d-24fa-4ee8-bc23-ac3ebc7fdf8e",
+		"resourceType": "Microsoft.AAD/domainServices"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/expressroute/expressroute-about-virtual-network-gateways#zrgw",
 		"recommendation": "Use Zone-redundant ExpressRoute gateway SKUs",
 		"recommendationId": "bbe668b7-eb5c-c746-8b82-70afdedf0cae",
@@ -3582,6 +1454,22 @@
 		"recommendation": "Enable zone redundancy for Azure SQL Database to achieve high availability and resiliency",
 		"recommendationId": "c0085c32-84c0-c247-bfa9-e70977cbf108",
 		"resourceType": "Microsoft.Sql/servers/databases"
+	},
+	{
+		"category": "OtherBestPractices",
+		"impact": "High",
+		"learnMoreUrl": "https://docs.citrix.com/en-us/citrix-daas-azure/limits",
+		"recommendation": "Do not create more than 4000 Citrix VDA servers per subscription",
+		"recommendationId": "c041d596-6c97-4c5f-b4b3-9cd37628f2e2",
+		"resourceType": "Microsoft.Subscription/Subscriptions"
+	},
+	{
+		"category": "Scalability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-sql/managed-instance/connection-types-overview?view=azuresql#connection-types",
+		"recommendation": "Use Redirect connection type to accelerate application access",
+		"recommendationId": "c14de326-2729-4be7-a91f-4ea185d24b10",
+		"resourceType": "Microsoft.Sql/managedInstances"
 	},
 	{
 		"category": "Scalability",
@@ -3640,12 +1528,76 @@
 		"resourceType": "Microsoft.Network/applicationGateways"
 	},
 	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Container Apps SLA",
+		"recommendationId": "ca-003",
+		"resourceType": "Microsoft.App/containerApps"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/ingress-how-to?pivots=azure-cli",
+		"recommendation": "ContainerApp should not allow insecure ingress traffic",
+		"recommendationId": "ca-008",
+		"resourceType": "Microsoft.App/containerApps"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/managed-identity?tabs=portal%2Cdotnet",
+		"recommendation": "ContainerApp should use Managed Identities",
+		"recommendationId": "ca-009",
+		"resourceType": "Microsoft.App/containerApps"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/storage-mounts?pivots=azure-cli",
+		"recommendation": "ContainerApp should use Azure Files to persist container data",
+		"recommendationId": "ca-010",
+		"resourceType": "Microsoft.App/containerApps"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/sticky-sessions?pivots=azure-portal",
+		"recommendation": "ContainerApp should avoid using session affinity",
+		"recommendationId": "ca-011",
+		"resourceType": "Microsoft.App/containerApps"
+	},
+	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-high-availability",
 		"recommendation": "Enable HA with zone redundancy",
 		"recommendationId": "ca87914f-aac4-4783-ab67-82a6f936f194",
 		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-apps/log-options#diagnostic-settings",
+		"recommendation": "Container Apps Environment should have diagnostic settings enabled",
+		"recommendationId": "cae-001",
+		"resourceType": "microsoft.app/managedenvironments"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Container Apps Environment SLA",
+		"recommendationId": "cae-003",
+		"resourceType": "Microsoft.App/managedenvironments"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/container-apps/networking",
+		"recommendation": "Container Apps Environment should have private endpoints enabled",
+		"recommendationId": "cae-004",
+		"resourceType": "Microsoft.App/managedenvironments"
 	},
 	{
 		"category": "ServiceUpgradeAndRetirement",
@@ -3662,6 +1614,110 @@
 		"recommendation": "Replicate VMs using Azure Site Recovery",
 		"recommendationId": "cfe22a65-b1db-fd41-9e8e-d573922709ae",
 		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-instances/availability-zones",
+		"recommendation": "ContainerInstance should have availability zones enabled",
+		"recommendationId": "ci-002",
+		"resourceType": "Microsoft.ContainerInstance/containerGroups"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Container Instance SLA",
+		"recommendationId": "ci-003",
+		"resourceType": "Microsoft.ContainerInstance/containerGroups"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-instances/container-instances-vnet",
+		"recommendation": "ContainerInstance should use private IP addresses",
+		"recommendationId": "ci-004",
+		"resourceType": "Microsoft.ContainerInstance/containerGroups"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
+		"recommendation": "CosmosDB should have diagnostic settings enabled",
+		"recommendationId": "cosmos-001",
+		"resourceType": "microsoft.documentdb/databaseaccounts"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Cosmos DB SLA",
+		"recommendationId": "cosmos-003",
+		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints",
+		"recommendation": "CosmosDB should have private endpoints enabled",
+		"recommendationId": "cosmos-004",
+		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/cosmos-db/how-to-setup-rbac",
+		"recommendation": "CosmosDB should have local authentication disabled",
+		"recommendationId": "cosmos-008",
+		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/cosmos-db/how-to-setup-rbac",
+		"recommendation": "CosmosDB: disable write operations on metadata resources (databases, containers, throughput) via account keys",
+		"recommendationId": "cosmos-009",
+		"resourceType": "Microsoft.DocumentDB/databaseAccounts"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
+		"recommendation": "ContainerRegistry should have diagnostic settings enabled",
+		"recommendationId": "cr-001",
+		"resourceType": "microsoft.containerregistry/registries"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Container Registry SLA",
+		"recommendationId": "cr-003",
+		"resourceType": "Microsoft.ContainerRegistry/registries"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-private-link",
+		"recommendation": "ContainerRegistry should have private endpoints enabled",
+		"recommendationId": "cr-004",
+		"resourceType": "Microsoft.ContainerRegistry/registries"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-authentication-managed-identity",
+		"recommendation": "ContainerRegistry should have the Administrator account disabled",
+		"recommendationId": "cr-008",
+		"resourceType": "Microsoft.ContainerRegistry/registries"
+	},
+	{
+		"category": "Governance",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/container-registry/container-registry-retention-policy",
+		"recommendation": "ContainerRegistry should use retention policies",
+		"recommendationId": "cr-010",
+		"resourceType": "Microsoft.ContainerRegistry/registries"
 	},
 	{
 		"category": "HighAvailability",
@@ -3689,11 +1745,91 @@
 	},
 	{
 		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/account-settings/audit-log-delivery",
+		"recommendation": "Azure Databricks should have diagnostic settings enabled",
+		"recommendationId": "dbw-001",
+		"resourceType": "microsoft.databricks/workspaces"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Databricks SLA",
+		"recommendationId": "dbw-003",
+		"resourceType": "Microsoft.Databricks/workspaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/databricks/security/network/classic/private-link",
+		"recommendation": "Azure Databricks should have private endpoints enabled",
+		"recommendationId": "dbw-004",
+		"resourceType": "Microsoft.Databricks/workspaces"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/databricks/security/network/classic/secure-cluster-connectivity",
+		"recommendation": "Azure Databricks should have the Public IP disabled",
+		"recommendationId": "dbw-007",
+		"resourceType": "Microsoft.Databricks/workspaces"
+	},
+	{
+		"category": "MonitoringAndAlerting",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/aks/monitor-aks",
 		"recommendation": "Enable AKS Monitoring",
 		"recommendationId": "dcaf8128-94bd-4d53-9235-3a0371df6b74",
 		"resourceType": "Microsoft.ContainerService/managedClusters"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
+		"recommendation": "Azure Data Explorer should have diagnostic settings enabled",
+		"recommendationId": "dec-001",
+		"resourceType": "microsoft.kusto/clusters"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Data Explorer SLA",
+		"recommendationId": "dec-002",
+		"resourceType": "Microsoft.Kusto/clusters"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/data-explorer/manage-cluster-choose-sku",
+		"recommendation": "Azure Data Explorer Production Cluster should not use Dev SKU",
+		"recommendationId": "dec-003",
+		"resourceType": "Microsoft.Kusto/clusters"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/data-explorer/security-network-private-endpoint",
+		"recommendation": "Azure Data Explorer should have private endpoints enabled",
+		"recommendationId": "dec-004",
+		"resourceType": "Microsoft.Kusto/clusters"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/data-explorer/manage-cluster-security",
+		"recommendation": "Azure Data Explorer should use Disk Encryption",
+		"recommendationId": "dec-008",
+		"resourceType": "Microsoft.Kusto/clusters"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/data-explorer/managed-identities",
+		"recommendation": "Azure Data Explorer should use Managed Identities",
+		"recommendationId": "dec-009",
+		"resourceType": "Microsoft.Kusto/clusters"
 	},
 	{
 		"category": "Scalability",
@@ -3718,6 +1854,14 @@
 		"recommendation": "Azure API Management platform version should be stv2",
 		"recommendationId": "e35cf148-8eee-49d1-a1c9-956160f99e0b",
 		"resourceType": "Microsoft.ApiManagement/service"
+	},
+	{
+		"category": "Scalability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/stream-analytics/cluster-overview",
+		"recommendation": "Run jobs in your own dedicated Stream Analytics cluster for increased reliability and security",
+		"recommendationId": "e48a7227-5ec7-463a-b955-ee7cb598ded4",
+		"resourceType": "Microsoft.StreamAnalytics/streamingjobs"
 	},
 	{
 		"category": "DisasterRecovery",
@@ -3784,6 +1928,70 @@
 		"resourceType": "Microsoft.Devices/IotHubs"
 	},
 	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
+		"recommendation": "Event Grid Domain should have diagnostic settings enabled",
+		"recommendationId": "evgd-001",
+		"resourceType": "microsoft.eventgrid/domains"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Event Grid Domain SLA",
+		"recommendationId": "evgd-003",
+		"resourceType": "Microsoft.EventGrid/domains"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/event-grid/configure-private-endpoints",
+		"recommendation": "Event Grid Domain should have private endpoints enabled",
+		"recommendationId": "evgd-004",
+		"resourceType": "Microsoft.EventGrid/domains"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/event-grid/authenticate-with-microsoft-entra-id",
+		"recommendation": "Event Grid Domain should have local authentication disabled",
+		"recommendationId": "evgd-008",
+		"resourceType": "Microsoft.EventGrid/domains"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+		"recommendation": "Event Hub Namespace should have diagnostic settings enabled",
+		"recommendationId": "evh-001",
+		"resourceType": "microsoft.eventhub/namespaces"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Event Hub Namespace SLA",
+		"recommendationId": "evh-003",
+		"resourceType": "Microsoft.EventHub/namespaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/event-hubs/private-link-service",
+		"recommendation": "Event Hub Namespace should have private endpoints enabled",
+		"recommendationId": "evh-004",
+		"resourceType": "Microsoft.EventHub/namespaces"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/event-hubs/authenticate-application",
+		"recommendation": "Event Hub should have local authentication disabled",
+		"recommendationId": "evh-008",
+		"resourceType": "Microsoft.EventHub/namespaces"
+	},
+	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/traffic-manager/traffic-manager-monitoring",
@@ -3798,6 +2006,22 @@
 		"recommendation": "Configure the minimum TLS version for Service Bus namespaces to TLS v1.2 or higher",
 		"recommendationId": "f075a1bd-de9e-4819-9a1d-1ac41037a74f",
 		"resourceType": "Microsoft.ServiceBus/namespaces"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-wan/monitoring-best-practices#virtual-wan-gateways",
+		"recommendation": "Monitor gateway for Site-to-site v-Hub's VPN gateway",
+		"recommendationId": "f0d4f766-ac19-48c4-b228-4601cc038baa",
+		"resourceType": "Microsoft.Network/vpnGateways"
+	},
+	{
+		"category": "ServiceUpgradeAndRetirement",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-wan/upgrade-virtual-wan",
+		"recommendation": "Migrate from Basic to Standard Virtual WAN",
+		"recommendationId": "f29e56a1-6a80-4295-a663-1cce0ea2b10a",
+		"resourceType": "Microsoft.Network/virtualHubs"
 	},
 	{
 		"category": "HighAvailability",
@@ -3825,11 +2049,51 @@
 	},
 	{
 		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-sql/managed-instance/high-availability-sla-local-zone-redundancy?view=azuresql-mi#zone-redundant-availability",
+		"recommendation": "Enable zone redundancy for Azure SQL Managed Instance to improve high availability and resiliency",
+		"recommendationId": "f8f834a9-c761-4e84-b2cb-ac55494d0c37",
+		"resourceType": "Microsoft.Sql/managedInstances"
+	},
+	{
+		"category": "HighAvailability",
 		"impact": "Medium",
 		"learnMoreUrl": "https://aka.ms/zrsdisksdoc",
 		"recommendation": "Use Azure Disks with Zone Redundant Storage for higher resiliency and availability",
 		"recommendationId": "fa0cf4f5-0b21-47b7-89a9-ee936f193ce1",
 		"resourceType": "Microsoft.Compute/disks"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Fabric Capacity SLA",
+		"recommendationId": "fabric-003",
+		"resourceType": "Microsoft.Fabric/capacities"
+	},
+	{
+		"category": "OtherBestPractices",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/fabric/enterprise/pause-resume",
+		"recommendation": "Fabric Capacity should be in Active state",
+		"recommendationId": "fabric-004",
+		"resourceType": "Microsoft.Fabric/capacities"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/fabric/admin/capacity-settings",
+		"recommendation": "Fabric Capacity should have administrators configured",
+		"recommendationId": "fabric-005",
+		"resourceType": "Microsoft.Fabric/capacities"
+	},
+	{
+		"category": "Governance",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/fabric/enterprise/licenses",
+		"recommendation": "Fabric Capacity should use Fabric (F) SKU tier for production workloads",
+		"recommendationId": "fabric-006",
+		"resourceType": "Microsoft.Fabric/capacities"
 	},
 	{
 		"category": "Scalability",
@@ -3846,5 +2110,749 @@
 		"recommendation": "Enable Health check for App Services",
 		"recommendationId": "fd049c28-ae6d-48f0-a641-cc3ba1a3fe1d",
 		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-wan/monitoring-best-practices#point-to-site-vpn-gateway",
+		"recommendation": "Monitor health for v-Hub's Point-to-Site VPN gateways",
+		"recommendationId": "fd43ea32-2ccf-49a8-ada4-9a78794e3ff1",
+		"resourceType": "Microsoft.Network/p2sVpnGateways"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
+		"recommendation": "Function should use HTTPS only",
+		"recommendationId": "func-007",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		"recommendation": "Function should use VNET integration",
+		"recommendationId": "func-009",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		"recommendation": "Function should have VNET Route all enabled for VNET integration",
+		"recommendationId": "func-010",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
+		"recommendation": "Function should avoid using Client Affinity",
+		"recommendationId": "func-013",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Machine Learning Services SLA",
+		"recommendationId": "hub-003",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/machine-learning/how-to-configure-private-link",
+		"recommendation": "Service should disable public network access",
+		"recommendationId": "hub-004",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/machine-learning/how-to-configure-private-link",
+		"recommendation": "Service should have private enpoints enabled",
+		"recommendationId": "hub-005",
+		"resourceType": "Microsoft.MachineLearningServices/workspaces"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+		"recommendation": "Service should have diagnostic settings enabled",
+		"recommendationId": "hub-006",
+		"resourceType": "microsoft.machinelearningservices/workspaces"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
+		"recommendation": "Key Vault should have diagnostic settings enabled",
+		"recommendationId": "kv-001",
+		"resourceType": "microsoft.keyvault/vaults"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Key Vault SLA",
+		"recommendationId": "kv-003",
+		"resourceType": "Microsoft.KeyVault/vaults"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
+		"recommendation": "Load Balancer should have diagnostic settings enabled",
+		"recommendationId": "lb-001",
+		"resourceType": "microsoft.network/loadbalancers"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Load Balancer SLA",
+		"recommendationId": "lb-003",
+		"resourceType": "Microsoft.Network/loadBalancers"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Log Analytics Workspace SLA",
+		"recommendationId": "log-003",
+		"resourceType": "Microsoft.OperationalInsights/workspaces"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
+		"recommendation": "Logic App should have diagnostic settings enabled",
+		"recommendationId": "logic-001",
+		"resourceType": "microsoft.logic/workflows"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Logic App SLA",
+		"recommendationId": "logic-003",
+		"resourceType": "Microsoft.Logic/workflows"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/logic-apps/logic-apps-securing-a-logic-app",
+		"recommendation": "Logic App should limit access to Http Triggers",
+		"recommendationId": "logic-004",
+		"resourceType": "Microsoft.Logic/workflows"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https",
+		"recommendation": "Logic App should use HTTPS only",
+		"recommendationId": "logics-007",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		"recommendation": "Logic App should use VNET integration",
+		"recommendationId": "logics-009",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration",
+		"recommendation": "Logic App should have VNET Route all enabled for VNET integration",
+		"recommendationId": "logics-010",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist",
+		"recommendation": "Logic App should avoid using Client Affinity",
+		"recommendationId": "logics-013",
+		"resourceType": "Microsoft.Web/sites"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-monitoring#server-logs",
+		"recommendation": "Azure Database for MySQL - Single Server should have diagnostic settings enabled",
+		"recommendationId": "mysql-001",
+		"resourceType": "microsoft.dbformysql/servers"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Database for MySQL - Single Server SLA",
+		"recommendationId": "mysql-003",
+		"resourceType": "Microsoft.DBforMySQL/servers"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/mysql/single-server/concepts-data-access-security-private-link",
+		"recommendation": "Azure Database for MySQL - Single Server should have private endpoints enabled",
+		"recommendationId": "mysql-004",
+		"resourceType": "Microsoft.DBforMySQL/servers"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/mysql/single-server/whats-happening-to-mysql-single-server",
+		"recommendation": "Azure Database for MySQL - Single Server is on the retirement path",
+		"recommendationId": "mysql-007",
+		"resourceType": "Microsoft.DBforMySQL/servers"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
+		"recommendation": "Azure Database for MySQL - Flexible Server should have diagnostic settings enabled",
+		"recommendationId": "mysqlf-001",
+		"resourceType": "microsoft.dbformysql/flexibleservers"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/mysql/flexible-server/concepts-high-availability",
+		"recommendation": "Azure Database for MySQL - Flexible Server SLA",
+		"recommendationId": "mysqlf-003",
+		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/mysql/flexible-server/concepts-networking-vnet",
+		"recommendation": "Azure Database for MySQL - Flexible Server should have private access enabled",
+		"recommendationId": "mysqlf-004",
+		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/nat-gateway/nat-metrics",
+		"recommendation": "NAT Gateway should have diagnostic settings enabled",
+		"recommendationId": "ng-001",
+		"resourceType": "microsoft.network/natgateways"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "NAT Gateway SLA",
+		"recommendationId": "ng-003",
+		"resourceType": "Microsoft.Network/natGateways"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-nsg-manage-log",
+		"recommendation": "NSG should have diagnostic settings enabled",
+		"recommendationId": "nsg-001",
+		"resourceType": "microsoft.network/networksecuritygroups"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Network Security Group SLA",
+		"recommendationId": "nsg-003",
+		"resourceType": "Microsoft.Network/networkSecurityGroups"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Network Watcher SLA",
+		"recommendationId": "nw-003",
+		"resourceType": "Microsoft.Network/networkWatchers"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Private Endpoint SLA",
+		"recommendationId": "pep-003",
+		"resourceType": "Microsoft.Network/privateEndpoints"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Public IP SLA",
+		"recommendationId": "pip-003",
+		"resourceType": "Microsoft.Network/publicIPAddresses"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-server-logs#resource-logs",
+		"recommendation": "PostgreSQL should have diagnostic settings enabled",
+		"recommendationId": "psql-001",
+		"resourceType": "microsoft.dbforpostgresql/servers"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "PostgreSQL SLA",
+		"recommendationId": "psql-003",
+		"resourceType": "Microsoft.DBforPostgreSQL/servers"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/single-server/concepts-data-access-and-security-private-link",
+		"recommendation": "PostgreSQL should have private endpoints enabled",
+		"recommendationId": "psql-004",
+		"resourceType": "Microsoft.DBforPostgreSQL/servers"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/single-server/concepts-ssl-connection-security",
+		"recommendation": "PostgreSQL should enforce SSL",
+		"recommendationId": "psql-008",
+		"resourceType": "Microsoft.DBforPostgreSQL/servers"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/single-server/concepts-ssl-connection-security",
+		"recommendation": "PostgreSQL should enforce TLS \u003e= 1.2",
+		"recommendationId": "psql-009",
+		"resourceType": "Microsoft.DBforPostgreSQL/servers"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
+		"recommendation": "PostgreSQL should have diagnostic settings enabled",
+		"recommendationId": "psqlf-001",
+		"resourceType": "microsoft.dbforpostgresql/flexibleservers"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "PostgreSQL Flexible Server SLA",
+		"recommendationId": "psqlf-003",
+		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-networking-private-link",
+		"recommendation": "PostgreSQL should have private access enabled",
+		"recommendationId": "psqlf-004",
+		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-monitor-diagnostic-settings",
+		"recommendation": "Redis should have diagnostic settings enabled",
+		"recommendationId": "redis-001",
+		"resourceType": "microsoft.cache/redis"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Redis Cache SLA",
+		"recommendationId": "redis-003",
+		"resourceType": "Microsoft.Cache/Redis"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-cache-for-redis/cache-network-isolation",
+		"recommendation": "Redis should not enable non SSL ports",
+		"recommendationId": "redis-008",
+		"resourceType": "Microsoft.Cache/Redis"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-cache-for-redis/cache-remove-tls-10-11",
+		"recommendation": "Redis should enforce TLS \u003e= 1.2",
+		"recommendationId": "redis-009",
+		"resourceType": "Microsoft.Cache/Redis"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",
+		"recommendation": "Resource should have tags",
+		"recommendationId": "resources-001",
+		"resourceType": "Microsoft.Resources"
+	},
+	{
+		"category": "Governance",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations",
+		"recommendation": "Resource should comply with naming conventions",
+		"recommendationId": "resources-002",
+		"resourceType": "Microsoft.Resources"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
+		"recommendation": "Service Bus should have diagnostic settings enabled",
+		"recommendationId": "sb-001",
+		"resourceType": "microsoft.servicebus/namespaces"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Service Bus SLA",
+		"recommendationId": "sb-003",
+		"resourceType": "Microsoft.ServiceBus/namespaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/service-bus-messaging/private-link-service",
+		"recommendation": "Service Bus should have private endpoints enabled",
+		"recommendationId": "sb-004",
+		"resourceType": "Microsoft.ServiceBus/namespaces"
+	},
+	{
+		"category": "Security",
+		"impact": "Medium",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/service-bus-messaging/disable-local-authentication",
+		"recommendation": "Service Bus should have local authentication disabled",
+		"recommendationId": "sb-008",
+		"resourceType": "Microsoft.ServiceBus/namespaces"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-howto-diagnostic-logs",
+		"recommendation": "SignalR should have diagnostic settings enabled",
+		"recommendationId": "sigr-001",
+		"resourceType": "microsoft.signalrservice/signalr"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "SignalR SLA",
+		"recommendationId": "sigr-003",
+		"resourceType": "Microsoft.SignalRService/SignalR"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-signalr/howto-private-endpoints",
+		"recommendation": "SignalR should have private endpoints enabled",
+		"recommendationId": "sigr-004",
+		"resourceType": "Microsoft.SignalRService/SignalR"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-sql/database/private-endpoint-overview",
+		"recommendation": "SQL should have private endpoints enabled",
+		"recommendationId": "sql-004",
+		"resourceType": "Microsoft.Sql/servers"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-sql/database/connectivity-settings?view=azuresql\u0026tabs=azure-portal#minimal-tls-version",
+		"recommendation": "SQL should enforce TLS \u003e= 1.2",
+		"recommendationId": "sql-008",
+		"resourceType": "Microsoft.Sql/servers"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "",
+		"recommendation": "SQL Database should have diagnostic settings enabled",
+		"recommendationId": "sqldb-001",
+		"resourceType": "microsoft.sql/servers/databases"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "SQL Database SLA",
+		"recommendationId": "sqldb-003",
+		"resourceType": "Microsoft.Sql/servers/databases"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure AI Search SLA",
+		"recommendationId": "srch-002",
+		"resourceType": "Microsoft.Search/searchServices"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/search/service-configure-firewall",
+		"recommendation": "Azure AI Search should disable public network access",
+		"recommendationId": "srch-004",
+		"resourceType": "Microsoft.Search/searchServices"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/search/service-create-private-endpoint",
+		"recommendation": "Azure AI Search should have private enpoints enabled",
+		"recommendationId": "srch-005",
+		"resourceType": "Microsoft.Search/searchServices"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/search/search-monitor-enable-logging",
+		"recommendation": "Azure AI Search should have diagnostic settings enabled",
+		"recommendationId": "srch-006",
+		"resourceType": "microsoft.search/searchservices"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
+		"recommendation": "Storage should have diagnostic settings enabled",
+		"recommendationId": "st-001",
+		"resourceType": "microsoft.storage/storageaccounts"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Storage Account SLA",
+		"recommendationId": "st-003",
+		"resourceType": "Microsoft.Storage/storageAccounts"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer",
+		"recommendation": "Storage Account should use HTTPS only",
+		"recommendationId": "st-007",
+		"resourceType": "Microsoft.Storage/storageAccounts"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal",
+		"recommendation": "Storage Account should enforce TLS \u003e= 1.2",
+		"recommendationId": "st-009",
+		"resourceType": "Microsoft.Storage/storageAccounts"
+	},
+	{
+		"category": "DisasterRecovery",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/well-architected/service-guides/storage-accounts/reliability",
+		"recommendation": "Storage Account should have immutable storage versioning enabled",
+		"recommendationId": "st-010",
+		"resourceType": "Microsoft.Storage/storageAccounts"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Synapse Dedicated SQL Pool SLA",
+		"recommendationId": "syndp-002",
+		"resourceType": "Microsoft.Synapse/workspaces/sqlPools"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Synapse Spark Pool SLA",
+		"recommendationId": "synsp-002",
+		"resourceType": "Microsoft.Synapse/workspaces/bigDataPools"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
+		"recommendation": "Azure Synapse Workspace should have diagnostic settings enabled",
+		"recommendationId": "synw-001",
+		"resourceType": "microsoft.synapse/workspaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/synapse-analytics/security/synapse-workspace-managed-private-endpoints",
+		"recommendation": "Azure Synapse Workspace should have private endpoints enabled",
+		"recommendationId": "synw-002",
+		"resourceType": "Microsoft.Synapse/workspaces"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Synapse Workspace SLA",
+		"recommendationId": "synw-003",
+		"resourceType": "Microsoft.Synapse/workspaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
+		"recommendation": "Azure Synapse Workspace should establish network segmentation boundaries",
+		"recommendationId": "synw-006",
+		"resourceType": "Microsoft.Synapse/workspaces"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json",
+		"recommendation": "Azure Synapse Workspace should disable public network access",
+		"recommendationId": "synw-007",
+		"resourceType": "Microsoft.Synapse/workspaces"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-diagnostic-logs",
+		"recommendation": "Traffic Manager should have diagnostic settings enabled",
+		"recommendationId": "traf-001",
+		"resourceType": "microsoft.network/trafficmanagerprofiles"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Traffic Manager SLA",
+		"recommendationId": "traf-003",
+		"resourceType": "Microsoft.Network/trafficManagerProfiles"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/traffic-manager/traffic-manager-monitoring",
+		"recommendation": "Traffic Manager: HTTP endpoints should be monitored using HTTPS",
+		"recommendationId": "traf-009",
+		"resourceType": "Microsoft.Network/trafficManagerProfiles"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Route Table SLA",
+		"recommendationId": "udr-003",
+		"resourceType": "Microsoft.Network/routeTables"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/vpn-gateway/monitor-vpn-gateway",
+		"recommendation": "Virtual Network Gateway should have diagnostic settings enabled",
+		"recommendationId": "vgw-001",
+		"resourceType": "microsoft.network/virtualnetworkgateways"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Virtual Network Gateway SLA",
+		"recommendationId": "vgw-004",
+		"resourceType": "Microsoft.Network/virtualNetworkGateways"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/vpn-gateway/create-zone-redundant-vnet-gateway",
+		"recommendation": "Virtual Network Gateway should have availability zones enabled",
+		"recommendationId": "vgw-005",
+		"resourceType": "Microsoft.Network/virtualNetworkGateways"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Virtual Machine SLA",
+		"recommendationId": "vm-003",
+		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Virtual Machine Scale Set SLA",
+		"recommendationId": "vmss-003",
+		"resourceType": "Microsoft.Compute/virtualMachineScaleSets"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
+		"recommendation": "Virtual Network should have diagnostic settings enabled",
+		"recommendationId": "vnet-001",
+		"resourceType": "microsoft.network/virtualnetworks"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances",
+		"recommendation": "Virtual Network should have at least two DNS servers assigned",
+		"recommendationId": "vnet-009",
+		"resourceType": "Microsoft.Network/virtualNetworks"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/virtual-wan/monitor-virtual-wan",
+		"recommendation": "Virtual WAN should have diagnostic settings enabled",
+		"recommendationId": "vwa-001",
+		"resourceType": "microsoft.network/virtualwans"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Virtual WAN SLA",
+		"recommendationId": "vwa-003",
+		"resourceType": "Microsoft.Network/virtualWans"
+	},
+	{
+		"category": "MonitoringAndAlerting",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
+		"recommendation": "Web Pub Sub should have diagnostic settings enabled",
+		"recommendationId": "wps-001",
+		"resourceType": "microsoft.signalrservice/webpubsub"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-web-pubsub/concept-availability-zones",
+		"recommendation": "Web Pub Sub should have availability zones enabled",
+		"recommendationId": "wps-002",
+		"resourceType": "Microsoft.SignalRService/webPubSub"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Web PubSub SLA",
+		"recommendationId": "wps-003",
+		"resourceType": "Microsoft.SignalRService/webPubSub"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/azure-web-pubsub/howto-secure-private-endpoints",
+		"recommendation": "Web Pub Sub should have private endpoints enabled",
+		"recommendationId": "wps-004",
+		"resourceType": "Microsoft.SignalRService/webPubSub"
 	}
 ]

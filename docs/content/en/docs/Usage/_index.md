@@ -146,7 +146,7 @@ export AZURE_RESOURCE_MANAGER_AUDIENCE='https://management.core.custom.azure.com
 
 > **Note:** When custom endpoints are provided (both `AZURE_AUTHORITY_HOST` and `AZURE_RESOURCE_MANAGER_ENDPOINT`), they take priority over the `AZURE_CLOUD` setting.
 
-## Scan Azure Resources
+## Scan Azure Resources with default settings
 
 * Scan All Resources
 
@@ -170,6 +170,18 @@ export AZURE_RESOURCE_MANAGER_AUDIENCE='https://management.core.custom.azure.com
 
   ```console
   azqr scan --subscription-id <subscription_id> --resource-group <resource_group_name>
+  ```
+
+* Scan Multiple Subscriptions
+
+  ```console
+  azqr scan --subscription-id <sub_id_1>, <sub_id_2>
+  ```
+
+* Scan Multiple Resource Groups
+
+  ```console
+  azqr scan --subscription-id <sub_id> --resource-group <rg_1>, <rg_2>
   ```
 
 ## Advanced Filtering
@@ -206,31 +218,35 @@ Then run the scan with the `--filters` flag:
 
 > Check the [overview](https://azure.github.io/azqr/docs/overview/) to get the resource type abbreviations.
 
-## Optional Scans
+## Controlling Scan Stages
 
-### Disabling Cost Analysis
+Azure Quick Review allows you to control which scan stages are executed. By default, `diagnostics`, `advisor`, and `defender` stages are enabled.
 
-If you encounter permission issues with cost analysis or want to skip it, use the `-c=false` or `--costs=false` flag:
+### Available Stages
 
-```bash
-azqr scan -c=false
-```
+- **advisor**: Azure Advisor recommendations
+- **defender**: Microsoft Defender for Cloud status
+- **defender-recommendations**: Microsoft Defender for Cloud recommendations
+- **arc**: Azure Arc-enabled SQL Server instances
+- **policy**: Azure Policy compliance states
+- **cost**: Cost analysis for the last 3 months
+- **diagnostics**: Diagnostic settings scan
 
-### Disabling Defender Scanning
-
-To skip Microsoft Defender for Cloud scanning:
-
-```bash
-azqr scan --defender=false
-```
-
-### Disabling Azure Advisor Scanning
-
-To skip Azure Advisor recommendations:
+### Stage Control Examples
 
 ```bash
-azqr scan --advisor=false
+# Enable specific stages (replaces defaults)
+azqr scan --stages cost,policy
+
+# Disable specific stages (keeps other defaults)
+azqr scan --stages -diagnostics
+
+# Enable all stages
+azqr scan --stages advisor,defender,defender-recommendations,arc,policy,cost,diagnostics
+
 ```
+
+> **Note**: Use stage names with the `-` prefix to disable specific stages (e.g., `-diagnostics`).
 
 ## Internal Plugins
 
@@ -253,11 +269,6 @@ azqr zone-mapping
 # With specific subscription
 azqr zone-mapping --subscription-id <sub-id>
 ```
-
-**Standalone mode benefits:**
-- ⚡ Faster execution (skips resource scanning)
-- 📊 Cleaner reports (plugin results only)
-- 🎯 Focused analysis
 
 ### Integrating Plugins with Full Scans
 
@@ -282,7 +293,17 @@ View all registered plugins:
 azqr plugins list
 ```
 
-**📖 Learn more:** [Internal Plugins Documentation](../plugins/internal-plugins/)
+## View All Recommendations
+
+You can list all available recommendations in markdown or JSON format:
+
+```bash
+# List recommendations as markdown table
+azqr rules
+
+# List recommendations as JSON
+azqr rules --json
+```
 
 ## File Outputs
 
@@ -304,22 +325,6 @@ Example:
 azqr scan --csv
 ```
 
-The scan will generate 11 `csv` files:
-
-```
-<file-name>.advisor.csv
-<file-name>.arcSQL.csv
-<file-name>.azurePolicy.csv
-<file-name>.costs.csv
-<file-name>.defender.csv
-<file-name>.defenderRecommendations.csv
-<file-name>.impacted.csv
-<file-name>.inventory.csv
-<file-name>.outofscope.csv
-<file-name>.recommendations.csv
-<file-name>.resourceType.csv
-```
-
 ### - json
 
 By default `azqr` will create an xlsx document, However if you need to export to `json` you can use the following flag: `--json`
@@ -336,54 +341,74 @@ The scan will generate a single consolidated `json` file:
 <file-name>.json
 ```
 
-The JSON file contains all data sections in a single consolidated structure:
-
-```json
-{
-    "recommendations": [...],
-    "impacted": [...],
-    "resourceType": [...],
-    "inventory": [...],
-    "advisor": [...],
-    "azurePolicy": [...],
-    "arcSQL": [...],
-    "defender": [...],
-    "defenderRecommendations": [...],
-    "costs": [...],
-    "outOfScope": [...]
-}
-```
-
 ### Changing the Output File Name
 
-You can change the output file name by using the `--output-file` or `-o` flag:
+You can change the output file name by using the `--output-name` or `-o` flag:
 
 Powershell:
 
 ```powershell
 $timestamp = Get-Date -Format 'yyyyMMddHHmmss'
-azqr scan --output-file "azqr_action_plan_$timestamp"
+azqr scan --output-name "azqr_action_plan_$timestamp"
 ```
 
 Bash:
 
 ```bash
 timestamp=$(date '+%Y%m%d%H%M%S')
-azqr scan --output-file "azqr_action_plan_$timestamp"
+azqr scan --output-name "azqr_action_plan_$timestamp"
 ```
 
 > By default, the output file name is `azqr_action_plan_YYYY_MM_DD_THHMMSS`.
 
-## Compare Scan Reports (compare command)
+### Output to STDOUT
 
-You can compare two azqr scan reports to identify differences in recommendations using the `compare` command:
+You can output JSON results directly to stdout:
 
 ```bash
-# Compare two Excel reports
-./azqr compare --file1 scan_before.xlsx --file2 scan_after.xlsx
+# Output JSON to stdout
+azqr scan --json --stdout
+```
 
-# Save comparison results to a file
-./azqr compare --file1 scan1.xlsx --file2 scan2.xlsx --output comparison.txt
+### Masking Subscription IDs
+
+By default, Azure Quick Review masks subscription IDs in reports for security. You can control this behavior:
+
+```bash
+# Disable masking (show full subscription IDs)
+azqr scan --mask=false
+
+# Enable masking explicitly (default)
+azqr scan --mask=true
+```
+
+## Interactive Dashboard (show command)
+
+You can explore your scan results with a lightweight embedded web UI using the `show` command. The dashboard supports both Excel and JSON report formats.
+
+### Usage
+
+1. Generate a report (Excel or JSON):
+
+```bash
+# Excel format (default)
+azqr scan --subscription-id <subscription_id> --output-name report
+
+# JSON format
+azqr scan --subscription-id <subscription_id> --output-name report --json
+```
+
+2. Launch the dashboard:
+
+```bash
+# With Excel file
+azqr show --file report.xlsx --open
+
+# With JSON file
+azqr show --file report.json --open
+
+# On custom port
+azqr show --file report.xlsx --port 3000
 ```
 
 ## MCP Server (Model Context Protocol)
@@ -416,20 +441,42 @@ azqr mcp --mode http --addr :3000
 azqr mcp --mode http --addr localhost:9090
 ```
 
-**HTTP/SSE Mode Features:**
-- 🌐 Remote access via HTTP
-- 🔌 Web-based tool integrations
-- 📡 Server-Sent Events for real-time updates
-- 🔧 RESTful API access to azqr tools
+## Debugging and Troubleshooting
 
-**Endpoints:**
-When running in HTTP mode, the MCP server exposes SSE endpoints at the configured address. Clients can connect to these endpoints to interact with azqr's scanning capabilities, prompts, and tools.
+### Debug Mode
 
-**Example Use Cases:**
-- Integrate azqr with web-based AI assistants
-- Build custom dashboards that leverage azqr scanning
-- Create CI/CD pipelines with HTTP-based azqr integration
-- Enable remote team access to azqr capabilities
+Azure Quick Review supports a global `--debug` flag for troubleshooting. This flag is available for all commands:
+
+```bash
+# Enable debug logging for scan
+azqr scan --debug
+
+# Enable debug logging for plugins
+azqr zone-mapping --debug
+azqr openai-throttling --debug
+
+# Combine with other flags
+azqr scan --subscription-id <sub-id> --debug --stages cost
+```
+
+### Full Diagnostic Output
+
+For comprehensive troubleshooting, combine environment variables with the debug flag:
+
+```bash
+# Enable full debugging output
+export AZURE_SDK_GO_LOGGING=all
+azqr scan --debug
+```
+
+### Common Issues
+
+If you encounter any issue while using **Azure Quick Review (azqr)**:
+
+1. Enable debug mode with `--debug` flag
+2. Set `AZURE_SDK_GO_LOGGING=all` environment variable
+3. Run the command and capture the output
+4. Share the console output by filing a new [issue](https://github.com/Azure/azqr/issues)
 
 ## Help
 

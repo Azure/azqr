@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find all Fabric Capacities without administrators configured
+resources
+| where type =~ "Microsoft.Fabric/capacities"
+| where isnull(properties.administration.members) or array_length(properties.administration.members) == 0
+| project recommendationId = "fabric-005", name, id, tags, param1 = "No administrators configured"

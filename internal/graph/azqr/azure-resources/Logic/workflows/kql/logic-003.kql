@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find Logic Apps and report SLA (Consumption and Standard tiers have 99.9%, others may vary)
+resources
+| where type =~ 'Microsoft.Logic/workflows'
+| extend workflowKind = tolower(tostring(properties.kind))
+| extend slaValue = "99.9%"
+| project recommendationId = 'logic-003', name, id, tags, param1 = slaValue

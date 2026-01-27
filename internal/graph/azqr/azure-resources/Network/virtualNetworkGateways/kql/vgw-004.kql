@@ -1,0 +1,10 @@
+// Azure Resource Graph Query
+// Find Virtual Network Gateways and report their SLA based on SKU tier
+resources
+| where type =~ "Microsoft.Network/virtualNetworkGateways"
+| extend skuTier = tostring(properties.sku.tier)
+| extend slaValue = case(
+    skuTier == "Basic", "99.9%",
+    "99.95%"
+)
+| project recommendationId = "vgw-004", name, id, tags, param1 = strcat(slaValue, " (SKU: ", skuTier, ")")

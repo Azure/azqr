@@ -17,103 +17,316 @@ import (
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/rs/zerolog/log"
 )
 
-var typesWithDiagnosticSettingsSupport = map[string]*bool{
-	// Resource types from all scanners' ResourceTypes()
-	"microsoft.network/networkinterfaces":                       to.Ptr(true),
-	"microsoft.keyvault/vaults":                                 to.Ptr(true),
-	"microsoft.network/trafficmanagerprofiles":                  to.Ptr(true),
-	"microsoft.network/applicationgateways":                     to.Ptr(true),
-	"microsoft.network/routetables":                             to.Ptr(true),
-	"microsoft.recoveryservices/vaults":                         to.Ptr(true),
-	"specialized.workload/avd":                                  to.Ptr(true),
-	"microsoft.compute/virtualmachines":                         to.Ptr(true),
-	"microsoft.network/virtualwans":                             to.Ptr(true),
-	"microsoft.network/virtualnetworks":                         to.Ptr(true),
-	"microsoft.network/virtualnetworks/subnets":                 to.Ptr(true),
-	"specialized.workload/hpc":                                  to.Ptr(true),
-	"microsoft.automation/automationaccounts":                   to.Ptr(true),
-	"microsoft.machinelearningservices/workspaces":              to.Ptr(true),
-	"microsoft.containerservice/managedclusters":                to.Ptr(true),
-	"microsoft.dbforpostgresql/flexibleservers":                 to.Ptr(true),
-	"microsoft.dbforpostgresql/servers":                         to.Ptr(true),
-	"microsoft.network/loadbalancers":                           to.Ptr(true),
-	"microsoft.signalrservice/signalr":                          to.Ptr(true),
-	"specialized.workload/sap":                                  to.Ptr(true),
-	"microsoft.dashboard/grafana":                               to.Ptr(true),
-	"microsoft.containerregistry/registries":                    to.Ptr(true),
-	"microsoft.virtualmachineimages/imagetemplates":             to.Ptr(true),
-	"microsoft.devices/iothubs":                                 to.Ptr(true),
-	"microsoft.dbformysql/servers":                              to.Ptr(true),
-	"microsoft.dbformysql/flexibleservers":                      to.Ptr(true),
-	"microsoft.eventgrid/domains":                               to.Ptr(true),
-	"microsoft.compute/disks":                                   to.Ptr(true),
-	"microsoft.network/connections":                             to.Ptr(true),
-	"microsoft.app/containerapps":                               to.Ptr(true),
-	"microsoft.network/virtualnetworkgateways":                  to.Ptr(true),
-	"microsoft.network/frontdoorwebapplicationfirewallpolicies": to.Ptr(true),
-	"microsoft.batch/batchaccounts":                             to.Ptr(true),
-	"microsoft.search/searchservices":                           to.Ptr(true),
-	"microsoft.network/publicipaddresses":                       to.Ptr(true),
-	"microsoft.signalrservice/webpubsub":                        to.Ptr(true),
-	"microsoft.sql/servers":                                     to.Ptr(true),
-	"microsoft.sql/servers/databases":                           to.Ptr(true),
-	"microsoft.sql/servers/elasticpools":                        to.Ptr(true),
-	"microsoft.network/natgateways":                             to.Ptr(true),
-	"microsoft.operationalinsights/workspaces":                  to.Ptr(true),
-	"microsoft.analysisservices/servers":                        to.Ptr(true),
-	"microsoft.insights/components":                             to.Ptr(true),
-	"microsoft.datafactory/factories":                           to.Ptr(true),
-	"microsoft.cognitiveservices/accounts":                      to.Ptr(true),
-	"microsoft.kusto/clusters":                                  to.Ptr(true),
-	"microsoft.app/managedenvironments":                         to.Ptr(true),
-	"microsoft.compute/virtualmachinescalesets":                 to.Ptr(true),
-	"microsoft.storage/storageaccounts":                         to.Ptr(true),
-	"microsoft.network/privateendpoints":                        to.Ptr(true),
-	"microsoft.containerinstance/containergroups":               to.Ptr(true),
-	"microsoft.resources/resourcegroups":                        to.Ptr(true),
-	"microsoft.servicebus/namespaces":                           to.Ptr(true),
-	"microsoft.network/azurefirewalls":                          to.Ptr(true),
-	"microsoft.network/ipgroups":                                to.Ptr(true),
-	"microsoft.cache/redis":                                     to.Ptr(true),
-	"microsoft.network/networksecuritygroups":                   to.Ptr(true),
-	"microsoft.eventhub/namespaces":                             to.Ptr(true),
-	"microsoft.documentdb/databaseaccounts":                     to.Ptr(true),
-	"microsoft.compute/galleries":                               to.Ptr(true),
-	"microsoft.appconfiguration/configurationstores":            to.Ptr(true),
-	"microsoft.cdn/profiles":                                    to.Ptr(true),
-	"microsoft.logic/workflows":                                 to.Ptr(true),
-	"microsoft.databricks/workspaces":                           to.Ptr(true),
-	"microsoft.network/privatednszones":                         to.Ptr(true),
-	"microsoft.network/networkwatchers":                         to.Ptr(true),
-	"microsoft.compute/availabilitysets":                        to.Ptr(true),
-	"microsoft.web/serverfarms":                                 to.Ptr(true),
-	"microsoft.web/sites":                                       to.Ptr(true),
-	"microsoft.web/connections":                                 to.Ptr(true),
-	"microsoft.web/certificates":                                to.Ptr(true),
+// DiagnosticSettingRecommendation holds the metadata for diagnostic settings recommendations
+// extracted from each service scanner's rules.go file
+type DiagnosticSettingRecommendation struct {
+	RecommendationID string // The unique ID for this recommendation (e.g., "vwa-001")
+	Recommendation   string // The recommendation text to display
+	LearnMoreUrl     string // URL to documentation for more information
+}
+
+// typesWithDiagnosticSettingsSupport maps Azure resource types (lowercase) to their diagnostic settings recommendations.
+// Resources with nil values support diagnostic settings but don't have dedicated scanner rules (legacy/system resources).
+var typesWithDiagnosticSettingsSupport = map[string]*DiagnosticSettingRecommendation{
+	"microsoft.datafactory/factories": {
+		RecommendationID: "adf-001",
+		Recommendation:   "Azure Data Factory should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
+	},
+	"microsoft.cdn/profiles": {
+		RecommendationID: "afd-001",
+		Recommendation:   "Azure FrontDoor should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/frontdoor/standard-premium/how-to-logs",
+	},
+	"microsoft.network/azurefirewalls": {
+		RecommendationID: "afw-001",
+		Recommendation:   "Azure Firewall should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://docs.microsoft.com/en-us/azure/firewall/logs-and-metrics",
+	},
+	"microsoft.network/applicationgateways": {
+		RecommendationID: "agw-005",
+		Recommendation:   "Application Gateway: Monitor and Log the configurations and traffic",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/application-gateway/application-gateway-diagnostics#diagnostic-logging",
+	},
+	"microsoft.cognitiveservices/accounts": {
+		RecommendationID: "aif-001",
+		Recommendation:   "Service should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+	},
+	"microsoft.containerservice/managedclusters": {
+		RecommendationID: "aks-001",
+		Recommendation:   "AKS Cluster should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/aks/monitor-aks#collect-resource-logs",
+	},
+	"microsoft.apimanagement/service": {
+		RecommendationID: "apim-001",
+		Recommendation:   "APIM should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-use-azure-monitor#resource-logs",
+	},
+	"microsoft.appconfiguration/configurationstores": {
+		RecommendationID: "appcs-001",
+		Recommendation:   "AppConfiguration should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal",
+	},
+	"microsoft.analysisservices/servers": {
+		RecommendationID: "as-001",
+		Recommendation:   "Azure Analysis Service should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/analysis-services/analysis-services-logging",
+	},
+	"microsoft.web/serverfarms": {
+		RecommendationID: "asp-001",
+		Recommendation:   "Plan should have diagnostic settings enabled",
+		LearnMoreUrl:     "",
+	},
+	"microsoft.web/sites": {
+		RecommendationID: "app-001",
+		Recommendation:   "App should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/app-service/troubleshoot-diagnostic-logs#send-logs-to-azure-monitor",
+	},
+	"microsoft.app/managedenvironments": {
+		RecommendationID: "cae-001",
+		Recommendation:   "Container Apps Environment should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/container-apps/log-options#diagnostic-settings",
+	},
+	"microsoft.documentdb/databaseaccounts": {
+		RecommendationID: "cosmos-001",
+		Recommendation:   "CosmosDB should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/cosmos-db/monitor-resource-logs",
+	},
+	"microsoft.containerregistry/registries": {
+		RecommendationID: "cr-001",
+		Recommendation:   "ContainerRegistry should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/container-registry/monitor-service",
+	},
+	"microsoft.databricks/workspaces": {
+		RecommendationID: "dbw-001",
+		Recommendation:   "Azure Databricks should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/databricks/administration-guide/account-settings/audit-log-delivery",
+	},
+	"microsoft.kusto/clusters": {
+		RecommendationID: "dec-001",
+		Recommendation:   "Azure Data Explorer should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
+	},
+	"microsoft.eventgrid/domains": {
+		RecommendationID: "evgd-001",
+		Recommendation:   "Event Grid Domain should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
+	},
+	"microsoft.eventhub/namespaces": {
+		RecommendationID: "evh-001",
+		Recommendation:   "Event Hub Namespace should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+	},
+	"microsoft.machinelearningservices/workspaces": {
+		RecommendationID: "hub-006",
+		Recommendation:   "Service should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/event-hubs/monitor-event-hubs#collection-and-routing",
+	},
+	"microsoft.keyvault/vaults": {
+		RecommendationID: "kv-001",
+		Recommendation:   "Key Vault should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
+	},
+	"microsoft.network/loadbalancers": {
+		RecommendationID: "lb-001",
+		Recommendation:   "Load Balancer should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/load-balancer/monitor-load-balancer#creating-a-diagnostic-setting",
+	},
+	"microsoft.logic/workflows": {
+		RecommendationID: "logic-001",
+		Recommendation:   "Logic App should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/logic-apps/monitor-workflows-collect-diagnostic-data",
+	},
+	"microsoft.dbformariadb/servers": {
+		RecommendationID: "maria-001",
+		Recommendation:   "MariaDB should have diagnostic settings enabled",
+		LearnMoreUrl:     "",
+	},
+	"microsoft.dbformysql/servers": {
+		RecommendationID: "mysql-001",
+		Recommendation:   "Azure Database for MySQL - Single Server should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/mysql/single-server/concepts-monitoring#server-logs",
+	},
+	"microsoft.dbformysql/flexibleservers": {
+		RecommendationID: "mysqlf-001",
+		Recommendation:   "Azure Database for MySQL - Flexible Server should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/mysql/flexible-server/tutorial-query-performance-insights#set-up-diagnostics",
+	},
+	"microsoft.network/natgateways": {
+		RecommendationID: "ng-001",
+		Recommendation:   "NAT Gateway should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/nat-gateway/nat-metrics",
+	},
+	"microsoft.network/networksecuritygroups": {
+		RecommendationID: "nsg-001",
+		Recommendation:   "NSG should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-nsg-manage-log",
+	},
+	"microsoft.dbforpostgresql/servers": {
+		RecommendationID: "psql-001",
+		Recommendation:   "PostgreSQL should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-server-logs#resource-logs",
+	},
+	"microsoft.dbforpostgresql/flexibleservers": {
+		RecommendationID: "psqlf-001",
+		Recommendation:   "PostgreSQL should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/howto-configure-and-access-logs",
+	},
+	"microsoft.cache/redis": {
+		RecommendationID: "redis-001",
+		Recommendation:   "Redis should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/cache-monitor-diagnostic-settings",
+	},
+	"microsoft.servicebus/namespaces": {
+		RecommendationID: "sb-001",
+		Recommendation:   "Service Bus should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
+	},
+	"microsoft.signalrservice/signalr": {
+		RecommendationID: "sigr-001",
+		Recommendation:   "SignalR should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-howto-diagnostic-logs",
+	},
+	"microsoft.sql/servers/databases": {
+		RecommendationID: "sqldb-001",
+		Recommendation:   "SQL Database should have diagnostic settings enabled",
+		LearnMoreUrl:     "",
+	},
+	"microsoft.search/searchservices": {
+		RecommendationID: "srch-006",
+		Recommendation:   "Azure AI Search should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/search/search-monitor-enable-logging",
+	},
+	"microsoft.storage/storageaccounts": {
+		RecommendationID: "st-001",
+		Recommendation:   "Storage should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage",
+	},
+	"microsoft.synapse/workspaces": {
+		RecommendationID: "synw-001",
+		Recommendation:   "Azure Synapse Workspace should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
+	},
+	"microsoft.network/trafficmanagerprofiles": {
+		RecommendationID: "traf-001",
+		Recommendation:   "Traffic Manager should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/traffic-manager/traffic-manager-diagnostic-logs",
+	},
+	"microsoft.network/virtualnetworkgateways": {
+		RecommendationID: "vgw-001",
+		Recommendation:   "Virtual Network Gateway should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/vpn-gateway/monitor-vpn-gateway",
+	},
+	"microsoft.network/virtualnetworks": {
+		RecommendationID: "vnet-001",
+		Recommendation:   "Virtual Network should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/virtual-network/monitor-virtual-network#collection-and-routing",
+	},
+	"microsoft.network/virtualwans": {
+		RecommendationID: "vwa-001",
+		Recommendation:   "Virtual WAN should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/virtual-wan/monitor-virtual-wan",
+	},
+	"microsoft.signalrservice/webpubsub": {
+		RecommendationID: "wps-001",
+		Recommendation:   "Web Pub Sub should have diagnostic settings enabled",
+		LearnMoreUrl:     "https://learn.microsoft.com/en-us/azure/azure-web-pubsub/howto-troubleshoot-resource-logs",
+	},
+	// Legacy/system resource types that support diagnostic settings but don't have dedicated scanners with rules
+	"microsoft.network/networkinterfaces":                       nil,
+	"microsoft.network/routetables":                             nil,
+	"microsoft.recoveryservices/vaults":                         nil,
+	"specialized.workload/avd":                                  nil,
+	"microsoft.compute/virtualmachines":                         nil,
+	"microsoft.network/virtualnetworks/subnets":                 nil,
+	"specialized.workload/hpc":                                  nil,
+	"microsoft.automation/automationaccounts":                   nil,
+	"microsoft.dashboard/grafana":                               nil,
+	"microsoft.virtualmachineimages/imagetemplates":             nil,
+	"microsoft.devices/iothubs":                                 nil,
+	"microsoft.compute/disks":                                   nil,
+	"microsoft.network/connections":                             nil,
+	"microsoft.app/containerapps":                               nil,
+	"microsoft.network/frontdoorwebapplicationfirewallpolicies": nil,
+	"microsoft.batch/batchaccounts":                             nil,
+	"microsoft.network/publicipaddresses":                       nil,
+	"microsoft.sql/servers":                                     nil,
+	"microsoft.sql/servers/elasticpools":                        nil,
+	"microsoft.operationalinsights/workspaces":                  nil,
+	"microsoft.insights/components":                             nil,
+	"microsoft.compute/virtualmachinescalesets":                 nil,
+	"microsoft.network/privateendpoints":                        nil,
+	"microsoft.containerinstance/containergroups":               nil,
+	"microsoft.resources/resourcegroups":                        nil,
+	"microsoft.network/ipgroups":                                nil,
+	"microsoft.compute/galleries":                               nil,
+	"microsoft.network/privatednszones":                         nil,
+	"microsoft.network/networkwatchers":                         nil,
+	"microsoft.compute/availabilitysets":                        nil,
+	"microsoft.web/connections":                                 nil,
+	"microsoft.web/certificates":                                nil,
+	"specialized.workload/sap":                                  nil,
 }
 
 // DiagnosticSettingsScanner - scanner for diagnostic settings
 type DiagnosticSettingsScanner struct {
-	ctx        context.Context
-	httpClient *az.HttpClient
+	ctx         context.Context
+	httpClient  *az.HttpClient
+	scanContext *models.ScanParams
+}
+
+// GetRecommendations returns all diagnostic settings recommendations in the format expected by the scanner system
+// grouped by resource type. This allows other scanners to use diagnostic settings checks dynamically.
+func GetRecommendations() map[string]map[string]models.GraphRecommendation {
+	recommendations := make(map[string]map[string]models.GraphRecommendation)
+
+	for resourceType, rec := range typesWithDiagnosticSettingsSupport {
+		if rec == nil {
+			continue // Skip legacy resource types without recommendation metadata
+		}
+
+		if recommendations[resourceType] == nil {
+			recommendations[resourceType] = make(map[string]models.GraphRecommendation)
+		}
+
+		recommendations[resourceType][rec.RecommendationID] = models.GraphRecommendation{
+			RecommendationID: rec.RecommendationID,
+			ResourceType:     resourceType,
+			Category:         string(models.CategoryMonitoringAndAlerting),
+			Recommendation:   rec.Recommendation,
+			Impact:           string(models.ImpactLow),
+			LearnMoreLink: []struct {
+				Name string `yaml:"name"`
+				Url  string `yaml:"url"`
+			}{
+				{
+					Name: "Diagnostic Settings",
+					Url:  rec.LearnMoreUrl,
+				},
+			},
+			Source: "AZQR",
+		}
+	}
+
+	return recommendations
 }
 
 // Init - Initializes the DiagnosticSettingsScanner
-func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenCredential, options *arm.ClientOptions) error {
+func (d *DiagnosticSettingsScanner) Init(ctx context.Context, cred azcore.TokenCredential, scanCtx *models.ScanParams) error {
 	d.ctx = ctx
+	d.scanContext = scanCtx
 	// Create HTTP client with built-in retry logic, authentication, and throttling
 	d.httpClient = az.NewHttpClient(cred, az.DefaultHttpClientOptions(60*time.Second))
 	return nil
 }
 
-// ListResourcesWithDiagnosticSettings - Lists all resources with diagnostic settings
+// ListResourcesWithDiagnosticSettings returns a map of resource IDs that have diagnostic settings enabled
 func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resources []*models.Resource) (map[string]bool, error) {
 	res := map[string]bool{}
 
@@ -251,11 +464,8 @@ func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds [
 		Reader: bytes.NewReader(bodyBytes),
 	}
 
-	// Use default scope for Azure Management API
-	scope := ""
-
 	// Send POST request using HttpClient (handles auth, throttling, and retries)
-	respBody, resp, err := d.httpClient.DoPost(ctx, batchURL, readSeekCloser, &scope)
+	respBody, resp, err := d.httpClient.DoPost(ctx, batchURL, readSeekCloser)
 	if err != nil {
 		return nil, fmt.Errorf("batch request failed: %w", err)
 	}
@@ -316,7 +526,8 @@ type (
 	}
 )
 
-func (d *DiagnosticSettingsScanner) Scan(resources []*models.Resource) map[string]bool {
+func (d *DiagnosticSettingsScanner) Scan(resources []*models.Resource) []*models.GraphResult {
+	// Get diagnostic settings status for all resources
 	diagResults, err := d.ListResourcesWithDiagnosticSettings(resources)
 	if err != nil {
 		if models.ShouldSkipError(err) {
@@ -325,5 +536,57 @@ func (d *DiagnosticSettingsScanner) Scan(resources []*models.Resource) map[strin
 			log.Fatal().Err(err).Msg("Failed to list resources with Diagnostic Settings")
 		}
 	}
-	return diagResults
+
+	// Get recommendations for all resource types
+	recommendations := GetRecommendations()
+
+	// Build results for resources WITHOUT diagnostic settings
+	var results []*models.GraphResult
+	for _, resource := range resources {
+		resourceID := strings.ToLower(resource.ID)
+		resourceType := strings.ToLower(resource.Type)
+
+		// Skip resources that already have diagnostic settings enabled
+		if diagResults[resourceID] {
+			continue
+		}
+
+		if d.scanContext.Filters.Azqr.IsServiceExcluded(resource.ID) {
+			continue
+		}
+
+		// Get the recommendation for this resource type
+		recs, hasRecs := recommendations[resourceType]
+		if !hasRecs {
+			continue // Skip resource types without diagnostic settings recommendations
+		}
+
+		// Create a GraphResult for each recommendation (typically just one per resource type)
+		for _, rec := range recs {
+			// Extract learn more URL from LearnMoreLink
+			learnURL := ""
+			if len(rec.LearnMoreLink) > 0 {
+				learnURL = rec.LearnMoreLink[0].Url
+			}
+
+			results = append(results, &models.GraphResult{
+				RecommendationID:    rec.RecommendationID,
+				ResourceType:        resource.Type,
+				Recommendation:      rec.Recommendation,
+				LongDescription:     rec.LongDescription,
+				PotentialBenefits:   rec.PotentialBenefits,
+				ResourceID:          resource.ID,
+				SubscriptionID:      resource.SubscriptionID,
+				ResourceGroup:       resource.ResourceGroup,
+				Name:                resource.Name,
+				Category:            models.CategoryMonitoringAndAlerting,
+				Impact:              models.ImpactLow,
+				Learn:               learnURL,
+				AutomationAvailable: rec.AutomationAvailable,
+				Source:              rec.Source,
+			})
+		}
+	}
+
+	return results
 }
