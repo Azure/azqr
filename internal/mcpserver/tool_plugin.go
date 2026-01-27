@@ -31,7 +31,7 @@ func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequ
 		// Use plugin-only mode by setting scannerKeys to the specific plugin
 		scannerKeys := args.Services
 		filters := models.LoadFilters("", scannerKeys)
-		params := internal.NewScanParams()
+		params := models.NewScanParams()
 
 		// Plugin-only mode: disable defender, advisor, cost, policy, arc
 		params.Defender = false
