@@ -6,6 +6,8 @@ package excel
 import (
 	_ "image/png"
 
+	"github.com/Azure/azqr/internal/models"
+
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
@@ -13,7 +15,7 @@ import (
 
 func renderDefender(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
-	if !data.DefenderEnabled {
+	if !data.Stages.IsStageEnabled(models.StageNameDefender) {
 		log.Debug().Msg("Skipping Defender. Feature is disabled")
 		return
 	}
@@ -52,7 +54,7 @@ func renderDefender(f *excelize.File, data *renderers.ReportData) {
 // renderDefenderRecommendations renders the Defender recommendations to the Excel sheet.
 func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
-	if !data.DefenderEnabled {
+	if !data.Stages.IsStageEnabled(models.StageNameDefenderRecommendations) {
 		log.Debug().Msg("Skipping DefenderRecommendations. Feature is disabled")
 		return
 	}

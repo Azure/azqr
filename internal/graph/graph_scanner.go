@@ -24,15 +24,19 @@ import (
 //go:embed aprl/azure-specialized-workloads/**/kql/*.kql
 //go:embed azure-orphan-resources/**/*.yaml
 //go:embed azure-orphan-resources/**/kql/*.kql
+//go:embed azqr/azure-resources/**/*.yaml
+//go:embed azqr/azure-resources/**/kql/*.kql
+//go:embed azqr/azure-resources/**/**/*.yaml
+//go:embed azqr/azure-resources/**/**/kql/*.kql
 var embededFiles embed.FS
 
 type (
-	AprlScanner struct {
+	GraphScanner struct {
 		scanType        []ScanType
 		serviceScanners []models.IAzureScanner
 		filters         *models.Filters
 		subscriptions   map[string]string
-		externalQueries map[string]map[string]models.AprlRecommendation // External YAML plugin queries by resource type
+		externalQueries map[string]map[string]models.GraphRecommendation // External YAML plugin queries by resource type
 	}
 
 	ScanType string
@@ -41,45 +45,53 @@ type (
 const (
 	AprlScanType   ScanType = "aprl/azure-resources"
 	OrphanScanType ScanType = "azure-orphan-resources"
+	AzqrScanType   ScanType = "azqr/azure-resources"
 	bucketCapacity          = 14
 )
 
-// create a new APRL scanner
-func NewAprlScanner(serviceScanners []models.IAzureScanner, filters *models.Filters, subscriptions map[string]string) AprlScanner {
-	return AprlScanner{
+// create a new Graph scanner
+func NewScanner(serviceScanners []models.IAzureScanner, filters *models.Filters, subscriptions map[string]string) GraphScanner {
+	return GraphScanner{
 		scanType: []ScanType{
 			AprlScanType,
 			OrphanScanType,
+			AzqrScanType,
 		},
 		serviceScanners: serviceScanners,
 		filters:         filters,
 		subscriptions:   subscriptions,
-		externalQueries: make(map[string]map[string]models.AprlRecommendation),
+		externalQueries: make(map[string]map[string]models.GraphRecommendation),
 	}
 }
 
 // RegisterExternalQuery adds an external YAML plugin query to the scanner
-func (a *AprlScanner) RegisterExternalQuery(resourceType string, recommendation models.AprlRecommendation) {
+func (a *GraphScanner) RegisterExternalQuery(resourceType string, recommendation models.GraphRecommendation) {
 	resourceType = strings.ToLower(resourceType)
 	if a.externalQueries[resourceType] == nil {
-		a.externalQueries[resourceType] = make(map[string]models.AprlRecommendation)
+		a.externalQueries[resourceType] = make(map[string]models.GraphRecommendation)
 	}
 	a.externalQueries[resourceType][recommendation.RecommendationID] = recommendation
 }
 
-// GetAprlRecommendations returns a map with all APRL recommendations
-func (a AprlScanner) GetAprlRecommendations() map[string]map[string]models.AprlRecommendation {
-	recommendations := map[string]map[string]models.AprlRecommendation{}
+// GetRecommendations returns a map with all Graph recommendations
+func (a GraphScanner) GetRecommendations() map[string]map[string]models.GraphRecommendation {
+	recommendations := map[string]map[string]models.GraphRecommendation{}
 	for _, t := range a.scanType {
-		source := "APRL"
-		if t == OrphanScanType {
+		var source string
+		switch t {
+		case OrphanScanType:
 			source = "AOR"
+		case AzqrScanType:
+			source = "AZQR"
+		default:
+			source = "APRL"
 		}
-		rs := a.getAprlRecommendations(string(t))
+
+		rs := a.getRecommendations(string(t))
 		for t, r := range rs {
 			for _, r := range r {
 				if recommendations[t] == nil {
-					recommendations[t] = map[string]models.AprlRecommendation{}
+					recommendations[t] = map[string]models.GraphRecommendation{}
 				}
 				r.Source = source
 				recommendations[t][r.RecommendationID] = r
@@ -89,8 +101,8 @@ func (a AprlScanner) GetAprlRecommendations() map[string]map[string]models.AprlR
 	return recommendations
 }
 
-func (a AprlScanner) getAprlRecommendations(path string) map[string]map[string]models.AprlRecommendation {
-	r := map[string]map[string]models.AprlRecommendation{}
+func (a GraphScanner) getRecommendations(path string) map[string]map[string]models.GraphRecommendation {
+	r := map[string]map[string]models.GraphRecommendation{}
 
 	fsys, err := fs.Sub(embededFiles, path)
 	if err != nil {
@@ -127,7 +139,7 @@ func (a AprlScanner) getAprlRecommendations(path string) map[string]map[string]m
 				return err
 			}
 
-			var recommendations []models.AprlRecommendation
+			var recommendations []models.GraphRecommendation
 			err = yaml.Unmarshal(content, &recommendations)
 			if err != nil {
 				return err
@@ -136,7 +148,7 @@ func (a AprlScanner) getAprlRecommendations(path string) map[string]map[string]m
 			for _, recommendation := range recommendations {
 				t := strings.ToLower(recommendation.ResourceType)
 				if _, ok := r[t]; !ok {
-					r[t] = map[string]models.AprlRecommendation{}
+					r[t] = map[string]models.GraphRecommendation{}
 				}
 
 				if i, ok := q[recommendation.RecommendationID]; ok {
@@ -156,23 +168,22 @@ func (a AprlScanner) getAprlRecommendations(path string) map[string]map[string]m
 	return r
 }
 
-func (a AprlScanner) ListRecommendations() (map[string]map[string]models.AprlRecommendation, []models.AprlRecommendation) {
-	recommendations := map[string]map[string]models.AprlRecommendation{}
-	rules := []models.AprlRecommendation{}
+func (a GraphScanner) ListRecommendations() (map[string]map[string]models.GraphRecommendation, []models.GraphRecommendation) {
+	recommendations := map[string]map[string]models.GraphRecommendation{}
+	rules := []models.GraphRecommendation{}
 
-	// get APRL recommendations
-	aprl := a.GetAprlRecommendations()
+	rec := a.GetRecommendations()
 
 	for _, s := range a.serviceScanners {
 		for _, t := range s.ResourceTypes() {
-			gr := a.getGraphRules(t, aprl)
+			gr := a.getGraphRules(t, rec)
 			for _, r := range gr {
 				rules = append(rules, r)
 			}
 
 			for i, r := range gr {
 				if recommendations[strings.ToLower(t)] == nil {
-					recommendations[strings.ToLower(t)] = map[string]models.AprlRecommendation{}
+					recommendations[strings.ToLower(t)] = map[string]models.GraphRecommendation{}
 				}
 				recommendations[strings.ToLower(t)][i] = r
 			}
@@ -181,9 +192,9 @@ func (a AprlScanner) ListRecommendations() (map[string]map[string]models.AprlRec
 	return recommendations, rules
 }
 
-// AprlScan scans Azure resources using Azure Proactive Resiliency Library v2 (APRL)
-func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*models.AprlResult {
-	results := []*models.AprlResult{}
+// Scan scans Azure resources using Graph queries
+func (a GraphScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*models.GraphResult {
+	results := []*models.GraphResult{}
 	graph := NewGraphQuery(cred)
 
 	_, rules := a.ListRecommendations()
@@ -197,8 +208,8 @@ func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*m
 	log.Debug().Msgf("Using %d rules to scan in %d batches", len(rules), batches)
 
 	// Buffer the jobs and results channels to the number of rules to avoid deadlocks.
-	jobs := make(chan models.AprlRecommendation, len(rules))
-	ch := make(chan []*models.AprlResult, len(rules))
+	jobs := make(chan models.GraphRecommendation, len(rules))
+	ch := make(chan []*models.GraphResult, len(rules))
 
 	var wg sync.WaitGroup
 
@@ -239,8 +250,8 @@ func (a AprlScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*m
 	return results
 }
 
-func (a *AprlScanner) worker(ctx context.Context, graph *GraphQueryClient, subscriptions map[string]string, jobs <-chan models.AprlRecommendation, results chan<- []*models.AprlResult, wg *sync.WaitGroup) {
-	// worker processes batches of APRL recommendations from the jobs channel
+func (a *GraphScanner) worker(ctx context.Context, graph *GraphQueryClient, subscriptions map[string]string, jobs <-chan models.GraphRecommendation, results chan<- []*models.GraphResult, wg *sync.WaitGroup) {
+	// worker processes batches of Graph recommendations from the jobs channel
 	for r := range jobs {
 		models.LogGraphRecommendationScan(r.ResourceType, r.RecommendationID)
 		res, err := a.graphScan(ctx, graph, r, subscriptions)
@@ -252,8 +263,8 @@ func (a *AprlScanner) worker(ctx context.Context, graph *GraphQueryClient, subsc
 	}
 }
 
-func (a AprlScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule models.AprlRecommendation, subscriptions map[string]string) ([]*models.AprlResult, error) {
-	results := []*models.AprlResult{}
+func (a GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule models.GraphRecommendation, subscriptions map[string]string) ([]*models.GraphResult, error) {
+	results := []*models.GraphResult{}
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
 		subs = append(subs, to.Ptr(s))
@@ -279,11 +290,16 @@ func (a AprlScanner) graphScan(ctx context.Context, graphClient *GraphQueryClien
 					subscriptionName = ""
 				}
 
-				results = append(results, &models.AprlResult{
+				resourceType := models.GetResourceTypeFromResourceID(m["id"].(string))
+				if resourceType == "" {
+					resourceType = rule.ResourceType
+				}
+
+				results = append(results, &models.GraphResult{
 					RecommendationID:    rule.RecommendationID,
 					Category:            models.RecommendationCategory(rule.Category),
 					Recommendation:      rule.Recommendation,
-					ResourceType:        rule.ResourceType,
+					ResourceType:        resourceType,
 					LongDescription:     rule.LongDescription,
 					PotentialBenefits:   rule.PotentialBenefits,
 					Impact:              models.RecommendationImpact(rule.Impact),
@@ -309,11 +325,11 @@ func (a AprlScanner) graphScan(ctx context.Context, graphClient *GraphQueryClien
 	return results, nil
 }
 
-func (a AprlScanner) getGraphRules(service string, aprl map[string]map[string]models.AprlRecommendation) map[string]models.AprlRecommendation {
-	r := map[string]models.AprlRecommendation{}
+func (a GraphScanner) getGraphRules(service string, rec map[string]map[string]models.GraphRecommendation) map[string]models.GraphRecommendation {
+	r := map[string]models.GraphRecommendation{}
 
-	// Add embedded APRL recommendations
-	if i, ok := aprl[strings.ToLower(service)]; ok {
+	// Add embedded recommendations
+	if i, ok := rec[strings.ToLower(service)]; ok {
 		for _, recommendation := range i {
 			if a.filters.Azqr.IsRecommendationExcluded(recommendation.RecommendationID) ||
 				strings.Contains(recommendation.GraphQuery, "cannot-be-validated-with-arg") ||

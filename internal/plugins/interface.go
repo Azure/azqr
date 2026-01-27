@@ -47,7 +47,7 @@ type Plugin struct {
 	// InternalScanner is the internal plugin scanner (for internal plugins)
 	InternalScanner InternalPluginScanner
 	// YamlRecommendations holds APRL recommendations for YAML plugins
-	YamlRecommendations []models.AprlRecommendation
+	YamlRecommendations []models.GraphRecommendation
 	// Command is the Cobra command for this plugin (optional)
 	Command *cobra.Command
 }

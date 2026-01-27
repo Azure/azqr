@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find all Container Apps that allow insecure ingress traffic
+resources
+| where type =~ "Microsoft.App/containerApps"
+| where properties.configuration.ingress.allowInsecure == true
+| project recommendationId = "ca-008", name, id, tags, param1 = "Insecure ingress traffic allowed"

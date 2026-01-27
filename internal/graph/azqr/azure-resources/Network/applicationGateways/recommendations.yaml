@@ -1,0 +1,15 @@
+- description: Application Gateway SLA
+  aprlGuid: agw-103
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Network/applicationGateways
+  recommendationMetadataState: Active
+  longDescription: Application Gateway SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

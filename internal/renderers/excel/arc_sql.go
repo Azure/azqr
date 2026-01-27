@@ -4,6 +4,7 @@
 package excel
 
 import (
+	"github.com/Azure/azqr/internal/models"
 	_ "image/png"
 
 	"github.com/Azure/azqr/internal/renderers"
@@ -14,7 +15,7 @@ import (
 // renderArcSQL creates and populates the Arc SQL sheet in the Excel report.
 func renderArcSQL(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
-	if !data.ArcEnabled {
+	if !data.Stages.IsStageEnabled(models.StageNameArc) {
 		log.Debug().Msg("Skipping Arc SQL. Feature is disabled")
 		return
 	}

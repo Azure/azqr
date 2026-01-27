@@ -1,0 +1,6 @@
+// MySQL Single Server is on the retirement path - always breaks the rule
+resources
+| where type =~ 'Microsoft.DBforMySQL/servers'
+| extend recommendationId = 'mysql-007'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

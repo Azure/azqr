@@ -1,0 +1,47 @@
+- description: Service Bus SLA
+  aprlGuid: sb-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ServiceBus/namespaces
+  recommendationMetadataState: Active
+  longDescription: Service Bus SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Service Bus should have private endpoints enabled
+  aprlGuid: sb-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ServiceBus/namespaces
+  recommendationMetadataState: Active
+  longDescription: Service Bus should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/service-bus-messaging/private-link-service'
+
+- description: Service Bus should have local authentication disabled
+  aprlGuid: sb-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.ServiceBus/namespaces
+  recommendationMetadataState: Active
+  longDescription: Service Bus should have local authentication disabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/service-bus-messaging/disable-local-authentication'

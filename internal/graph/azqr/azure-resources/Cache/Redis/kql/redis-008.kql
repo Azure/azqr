@@ -1,0 +1,8 @@
+// Check if Redis does not enable non-SSL ports
+resources
+| where type =~ 'Microsoft.Cache/Redis'
+| extend nonSslEnabled = properties.enableNonSslPort
+| where nonSslEnabled == true
+| extend recommendationId = 'redis-008'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

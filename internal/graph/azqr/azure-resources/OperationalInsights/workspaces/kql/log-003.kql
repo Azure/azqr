@@ -1,0 +1,5 @@
+// Azure Resource Graph Query
+// Find all Log Analytics Workspaces (informational - SLA rule)
+resources
+| where type =~ "Microsoft.OperationalInsights/workspaces"
+| project recommendationId = "log-003", name, id, tags, param1 = "99.9%"

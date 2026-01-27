@@ -1,0 +1,8 @@
+// Check if Azure AI Search disables public network access
+resources
+| where type =~ 'Microsoft.Search/searchServices'
+| extend publicNetworkAccess = properties.publicNetworkAccess
+| where isnull(publicNetworkAccess) or tolower(tostring(publicNetworkAccess)) == 'enabled'
+| extend recommendationId = 'srch-004'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

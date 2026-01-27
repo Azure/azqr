@@ -1,0 +1,15 @@
+- description: Azure Analysis Services SLA
+  aprlGuid: as-002
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.AnalysisServices/servers
+  recommendationMetadataState: Active
+  longDescription: Azure Analysis Services SLA
+  potentialBenefits: ''
+  pgVerified: false
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

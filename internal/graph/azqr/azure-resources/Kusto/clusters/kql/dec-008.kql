@@ -1,0 +1,8 @@
+// Check if Azure Data Explorer uses Disk Encryption
+resources
+| where type =~ 'Microsoft.Kusto/clusters'
+| extend diskEncryption = properties.enableDiskEncryption
+| where isnull(diskEncryption) or diskEncryption == false
+| extend recommendationId = 'dec-008'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

@@ -14,26 +14,19 @@ type (
 	ReportData struct {
 		OutputFileName          string
 		Mask                    bool
-		Azqr                    []*models.AzqrServiceResult
-		Aprl                    []*models.AprlResult
+		Graph                   []*models.GraphResult
 		Defender                []*models.DefenderResult
 		DefenderRecommendations []*models.DefenderRecommendation
 		Advisor                 []*models.AdvisorResult
 		AzurePolicy             []*models.AzurePolicyResult
 		ArcSQL                  []*models.ArcSQLResult
 		Cost                    *models.CostResult
-		Recommendations         map[string]map[string]models.AprlRecommendation
+		Recommendations         map[string]map[string]models.GraphRecommendation
 		Resources               []*models.Resource
 		ExludedResources        []*models.Resource
 		ResourceTypeCount       []models.ResourceTypeCount
 		PluginResults           []PluginResult // Results from external plugins
-		// Feature flags to differentiate between disabled features and no data
-		PolicyEnabled   bool
-		ArcEnabled      bool
-		DefenderEnabled bool
-		AdvisorEnabled  bool
-		CostEnabled     bool
-		ScanEnabled     bool
+		Stages                  *models.StageConfigs
 	}
 
 	// PluginResult represents data from an external plugin
@@ -64,7 +57,12 @@ func (rd *ReportData) ImpactedTable() [][]string {
 	seen := make(map[string]bool)
 	rows := [][]string{}
 
-	for _, r := range rd.Aprl {
+	for _, r := range rd.Graph {
+
+		if skipCategory(string(r.Category)) {
+			continue
+		}
+
 		// Create composite key for deduplication
 		key := r.ResourceID + "|" + r.RecommendationID
 		if seen[key] {
@@ -93,41 +91,6 @@ func (rd *ReportData) ImpactedTable() [][]string {
 			r.Learn,
 		}
 		rows = append(rows, row)
-	}
-
-	for _, d := range rd.Azqr {
-		for _, r := range d.Recommendations {
-			if r.NotCompliant {
-				// Create composite key for deduplication
-				key := d.ResourceID() + "|" + r.RecommendationID
-				if seen[key] {
-					continue // Skip duplicate
-				}
-				seen[key] = true
-
-				row := []string{
-					"Azure Resource Manager",
-					"AZQR",
-					string(r.Category),
-					string(r.Impact),
-					d.Type,
-					r.Recommendation,
-					r.RecommendationID,
-					MaskSubscriptionID(d.SubscriptionID, rd.Mask),
-					d.SubscriptionName,
-					d.ResourceGroup,
-					d.ServiceName,
-					MaskSubscriptionIDInResourceID(d.ResourceID(), rd.Mask),
-					r.Result,
-					"",
-					"",
-					"",
-					"",
-					r.LearnMoreUrl,
-				}
-				rows = append(rows, row)
-			}
-		}
 	}
 
 	rows = append([][]string{headers}, rows...)
@@ -258,16 +221,8 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 		}
 	}
 
-	for _, r := range rd.Aprl {
+	for _, r := range rd.Graph {
 		counter[r.RecommendationID]++
-	}
-
-	for _, d := range rd.Azqr {
-		for _, r := range d.Recommendations {
-			if r.NotCompliant {
-				counter[r.RecommendationID]++
-			}
-		}
 	}
 
 	headers := []string{"Implemented", "Number of Impacted Resources", "Azure Service / Well-Architected", "Recommendation Source",
@@ -276,17 +231,23 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 	rows := [][]string{}
 	for _, rt := range rd.Recommendations {
 		for _, r := range rt {
-			implemented := "N/A"
+			if skipCategory(r.Category) {
+				continue
+			}
 			typeIsDeployed := false
 			for _, resType := range rd.ResourceTypeCount {
-				if strings.EqualFold(resType.ResourceType, r.ResourceType) {
+				if strings.EqualFold(resType.ResourceType, r.ResourceType) ||
+					strings.EqualFold(r.ResourceType, "Microsoft.Resources") {
 					typeIsDeployed = true
 					break
 				}
 			}
-			if typeIsDeployed && counter[r.RecommendationID] == 0 {
+
+			implemented := "N/A"
+			switch {
+			case typeIsDeployed && counter[r.RecommendationID] == 0:
 				implemented = "true"
-			} else if typeIsDeployed && counter[r.RecommendationID] > 0 {
+			case typeIsDeployed && counter[r.RecommendationID] > 0:
 				implemented = "false"
 			}
 
@@ -361,13 +322,12 @@ func (rd *ReportData) DefenderRecommendationsTable() [][]string {
 	return rows
 }
 
-func NewReportData(outputFile string, mask bool, policyEnabled bool, arcEnabled bool, defenderEnabled bool, advisorEnabled bool, costEnabled bool, scanEnabled bool) ReportData {
+func NewReportData(outputFile string, mask bool, stages *models.StageConfigs) ReportData {
 	return ReportData{
 		OutputFileName:          outputFile,
 		Mask:                    mask,
-		Recommendations:         map[string]map[string]models.AprlRecommendation{},
-		Azqr:                    []*models.AzqrServiceResult{},
-		Aprl:                    []*models.AprlResult{},
+		Recommendations:         map[string]map[string]models.GraphRecommendation{},
+		Graph:                   []*models.GraphResult{},
 		Defender:                []*models.DefenderResult{},
 		DefenderRecommendations: []*models.DefenderRecommendation{},
 		Advisor:                 []*models.AdvisorResult{},
@@ -377,12 +337,7 @@ func NewReportData(outputFile string, mask bool, policyEnabled bool, arcEnabled 
 			Items: []*models.CostResultItem{},
 		},
 		ResourceTypeCount: []models.ResourceTypeCount{},
-		PolicyEnabled:     policyEnabled,
-		ArcEnabled:        arcEnabled,
-		DefenderEnabled:   defenderEnabled,
-		AdvisorEnabled:    advisorEnabled,
-		CostEnabled:       costEnabled,
-		ScanEnabled:       scanEnabled,
+		Stages:            stages,
 	}
 }
 
@@ -421,13 +376,10 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 	for _, r := range resources {
 		sla := ""
 
-		for _, a := range rd.Azqr {
-			if strings.EqualFold(strings.ToLower(a.ResourceID()), strings.ToLower(r.ID)) {
-				for _, rc := range a.Recommendations {
-					if rc.RecommendationType == models.TypeSLA {
-						sla = rc.Result
-						break
-					}
+		for _, a := range rd.Graph {
+			if strings.EqualFold(strings.ToLower(a.ResourceID), strings.ToLower(r.ID)) {
+				if a.Category == models.CategorySLA {
+					sla = a.Param1
 				}
 				if sla != "" {
 					break
@@ -452,4 +404,8 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 
 	rows = append([][]string{headers}, rows...)
 	return rows
+}
+
+func skipCategory(category string) bool {
+	return category == string(models.CategorySLA)
 }

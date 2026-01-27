@@ -55,12 +55,7 @@ func (s *InitializationStage) Execute(ctx *ScanContext) error {
 	reportData := renderers.NewReportData(
 		outputFile,
 		ctx.Params.Mask,
-		ctx.Params.Policy,
-		ctx.Params.Arc,
-		ctx.Params.Defender,
-		ctx.Params.Advisor,
-		ctx.Params.Cost,
-		ctx.Params.UseAprlRecommendations,
+		ctx.Params.Stages,
 	)
 	ctx.ReportData = &reportData
 

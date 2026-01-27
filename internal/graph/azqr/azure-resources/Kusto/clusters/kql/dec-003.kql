@@ -1,0 +1,8 @@
+// Check if Azure Data Explorer Production Cluster is not using Dev SKU
+resources
+| where type =~ 'Microsoft.Kusto/clusters'
+| extend skuName = tostring(sku.name)
+| where skuName startswith 'Dev'
+| extend recommendationId = 'dec-003'
+| extend param1 = skuName
+| project recommendationId, name, id, tags, param1

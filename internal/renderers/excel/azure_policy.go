@@ -4,6 +4,7 @@
 package excel
 
 import (
+	"github.com/Azure/azqr/internal/models"
 	_ "image/png"
 
 	"github.com/Azure/azqr/internal/renderers"
@@ -14,7 +15,7 @@ import (
 // renderAzurePolicy creates and populates the Azure Policy sheet in the Excel report.
 func renderAzurePolicy(f *excelize.File, data *renderers.ReportData) {
 	// Skip creating the sheet if the feature is disabled
-	if !data.PolicyEnabled {
+	if !data.Stages.IsStageEnabled(models.StageNamePolicy) {
 		log.Debug().Msg("Skipping Azure Policy. Feature is disabled")
 		return
 	}

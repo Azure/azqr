@@ -1,0 +1,48 @@
+- description: SQL should have private endpoints enabled
+  aprlGuid: sql-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Sql/servers
+  recommendationMetadataState: Active
+  longDescription: 'SQL servers should have private endpoints enabled to secure database access and prevent exposure to the public internet.'
+  potentialBenefits: Enhanced security through private connectivity
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Private Link for Azure SQL Database
+    url: https://learn.microsoft.com/en-us/azure/azure-sql/database/private-endpoint-overview
+
+- description: SQL should enforce TLS >= 1.2
+  aprlGuid: sql-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.Sql/servers
+  recommendationMetadataState: Active
+  longDescription: 'SQL servers should enforce TLS 1.2 or higher to ensure secure encrypted connections to the database.'
+  potentialBenefits: Enhanced connection security
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Minimal TLS version
+    url: https://learn.microsoft.com/en-us/azure/azure-sql/database/connectivity-settings?view=azuresql&tabs=azure-portal#minimal-tls-version
+
+- description: SQL Database SLA
+  aprlGuid: sqldb-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Sql/servers/databases
+  recommendationMetadataState: Active
+  longDescription: SQL Database SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+

@@ -74,8 +74,7 @@ func TestConvertToJSON(t *testing.T) {
 func TestCreateJsonOutput(t *testing.T) {
 	// Create test data with proper initialization
 	data := &renderers.ReportData{
-		Aprl:                    []*models.AprlResult{},
-		Azqr:                    []*models.AzqrServiceResult{},
+		Graph:                   []*models.GraphResult{},
 		Defender:                []*models.DefenderResult{},
 		DefenderRecommendations: []*models.DefenderRecommendation{},
 		Advisor:                 []*models.AdvisorResult{},
@@ -85,6 +84,7 @@ func TestCreateJsonOutput(t *testing.T) {
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
 		ResourceTypeCount:       []models.ResourceTypeCount{},
+		Stages:                  models.NewStageConfigs(),
 	}
 
 	// Test that it returns valid JSON
@@ -102,10 +102,18 @@ func TestCreateJsonReport(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create test data with proper initialization
+	stages := models.NewStageConfigs()
+	_ = stages.EnableStage(models.StageNameGraph)
+	_ = stages.EnableStage(models.StageNameDefender)
+	_ = stages.EnableStage(models.StageNameDefenderRecommendations)
+	_ = stages.EnableStage(models.StageNamePolicy)
+	_ = stages.EnableStage(models.StageNameArc)
+	_ = stages.EnableStage(models.StageNameAdvisor)
+	_ = stages.EnableStage(models.StageNameCost)
+
 	data := &renderers.ReportData{
 		OutputFileName:          filepath.Join(tmpDir, "test_report"),
-		Aprl:                    []*models.AprlResult{},
-		Azqr:                    []*models.AzqrServiceResult{},
+		Graph:                   []*models.GraphResult{},
 		Defender:                []*models.DefenderResult{},
 		DefenderRecommendations: []*models.DefenderRecommendation{},
 		Advisor:                 []*models.AdvisorResult{},
@@ -115,12 +123,7 @@ func TestCreateJsonReport(t *testing.T) {
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
 		ResourceTypeCount:       []models.ResourceTypeCount{},
-		ScanEnabled:             true,
-		DefenderEnabled:         true,
-		PolicyEnabled:           true,
-		ArcEnabled:              true,
-		AdvisorEnabled:          true,
-		CostEnabled:             true,
+		Stages:                  stages,
 	}
 
 	// Create the report
@@ -171,10 +174,18 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Create test data with plugin results and proper initialization
+	stages := models.NewStageConfigs()
+	_ = stages.DisableStage(models.StageNameGraph)
+	_ = stages.DisableStage(models.StageNameDefender)
+	_ = stages.DisableStage(models.StageNameDefenderRecommendations)
+	_ = stages.DisableStage(models.StageNamePolicy)
+	_ = stages.DisableStage(models.StageNameArc)
+	_ = stages.DisableStage(models.StageNameAdvisor)
+	_ = stages.DisableStage(models.StageNameCost)
+
 	data := &renderers.ReportData{
 		OutputFileName:          filepath.Join(tmpDir, "test_report_plugins"),
-		Aprl:                    []*models.AprlResult{},
-		Azqr:                    []*models.AzqrServiceResult{},
+		Graph:                   []*models.GraphResult{},
 		Defender:                []*models.DefenderResult{},
 		DefenderRecommendations: []*models.DefenderRecommendation{},
 		Advisor:                 []*models.AdvisorResult{},
@@ -184,12 +195,7 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
 		ResourceTypeCount:       []models.ResourceTypeCount{},
-		ScanEnabled:             false,
-		DefenderEnabled:         false,
-		PolicyEnabled:           false,
-		ArcEnabled:              false,
-		AdvisorEnabled:          false,
-		CostEnabled:             false,
+		Stages:                  stages,
 		PluginResults: []renderers.PluginResult{
 			{
 				PluginName:  "test-plugin",

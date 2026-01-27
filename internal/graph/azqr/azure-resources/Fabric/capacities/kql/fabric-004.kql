@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find all Fabric Capacities not in Active state
+resources
+| where type =~ "Microsoft.Fabric/capacities"
+| where properties.state !~ "Active"
+| extend state = tostring(properties.state)
+| project recommendationId = "fabric-004", name, id, tags, param1 = strcat("State: ", state)

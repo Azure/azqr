@@ -1,0 +1,12 @@
+// Azure Resource Graph Query
+// Find SQL Databases and report their SLA based on tier and zone redundancy
+resources
+| where type =~ "Microsoft.Sql/servers/databases"
+| where name != "master"
+| extend tier = tostring(sku.tier)
+| extend zoneRedundant = tobool(properties.zoneRedundant)
+| extend slaValue = case(
+    tier == "Premium" and zoneRedundant == true, "99.995%",
+    "99.99%"
+)
+| project recommendationId = "sqldb-003", name, id, tags, param1 = slaValue

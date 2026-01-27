@@ -1,0 +1,79 @@
+- description: Azure Data Explorer SLA
+  aprlGuid: dec-002
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Kusto/clusters
+  recommendationMetadataState: Active
+  longDescription: Azure Data Explorer SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Azure Data Explorer Production Cluster should not use Dev SKU
+  aprlGuid: dec-003
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Kusto/clusters
+  recommendationMetadataState: Active
+  longDescription: Azure Data Explorer Production Cluster should not use Dev SKU
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/data-explorer/manage-cluster-choose-sku'
+
+- description: Azure Data Explorer should have private endpoints enabled
+  aprlGuid: dec-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Kusto/clusters
+  recommendationMetadataState: Active
+  longDescription: Azure Data Explorer should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/data-explorer/security-network-private-endpoint'
+
+- description: Azure Data Explorer should use Disk Encryption
+  aprlGuid: dec-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Kusto/clusters
+  recommendationMetadataState: Active
+  longDescription: Azure Data Explorer should use Disk Encryption
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/data-explorer/manage-cluster-security'
+
+- description: Azure Data Explorer should use Managed Identities
+  aprlGuid: dec-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.Kusto/clusters
+  recommendationMetadataState: Active
+  longDescription: Azure Data Explorer should use Managed Identities
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/data-explorer/managed-identities'

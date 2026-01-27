@@ -1,0 +1,4 @@
+// Azure Resource Graph Query
+resources
+| where type =~ "Microsoft.Network/publicIPAddresses"
+| project recommendationId = "pip-003", name, id, tags, param1 = "99.99%"

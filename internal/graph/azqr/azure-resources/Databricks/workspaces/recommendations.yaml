@@ -1,0 +1,47 @@
+- description: Azure Databricks SLA
+  aprlGuid: dbw-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Databricks/workspaces
+  recommendationMetadataState: Active
+  longDescription: Azure Databricks SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Azure Databricks should have private endpoints enabled
+  aprlGuid: dbw-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Databricks/workspaces
+  recommendationMetadataState: Active
+  longDescription: Azure Databricks should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/databricks/security/network/classic/private-link'
+
+- description: Azure Databricks should have the Public IP disabled
+  aprlGuid: dbw-007
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Databricks/workspaces
+  recommendationMetadataState: Active
+  longDescription: Azure Databricks should have the Public IP disabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/databricks/security/network/classic/secure-cluster-connectivity'
