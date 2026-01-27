@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find all Azure Managed Grafana instances with their SLA based on SKU
+resources
+| where type =~ "Microsoft.Dashboard/grafana"
+| extend skuName = tolower(tostring(sku.name))
+| extend sla = iff(skuName contains "standard", "99.9%", "None")
+| project recommendationId = "amg-002", name, id, tags, param1 = sla

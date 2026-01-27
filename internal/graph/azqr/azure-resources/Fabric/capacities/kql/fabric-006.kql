@@ -1,0 +1,9 @@
+// Azure Resource Graph Query
+// Find Fabric Capacities not using Fabric (F) SKU tier for production workloads
+resources
+| where type =~ "Microsoft.Fabric/capacities"
+| extend skuName = tostring(sku.name)
+| extend skuTier = tostring(sku.tier)
+| where skuTier !~ "Fabric" or not(skuName startswith "F")
+| extend skuInfo = strcat("SKU: ", skuName, " (Tier: ", skuTier, ")")
+| project recommendationId = "fabric-006", name, id, tags, param1 = skuInfo

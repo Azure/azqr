@@ -1,0 +1,51 @@
+- description: ContainerInstance should have availability zones enabled
+  aprlGuid: ci-002
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ContainerInstance/containerGroups
+  recommendationMetadataState: Active
+  longDescription: | 
+    Azure Container Instances should have availability zones enabled
+    to ensure high availability and protect against datacenter failures.
+  potentialBenefits: Improved resilience and availability
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Availability Zones in Container Instances
+    url: https://learn.microsoft.com/en-us/azure/container-instances/availability-zones
+
+- description: Container Instance SLA
+  aprlGuid: ci-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ContainerInstance/containerGroups
+  recommendationMetadataState: Active
+  longDescription: Container Instance SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: ContainerInstance should use private IP addresses
+  aprlGuid: ci-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ContainerInstance/containerGroups
+  recommendationMetadataState: Active
+  longDescription: |
+    Azure Container Instances should use private IP addresses instead
+    of public IPs for enhanced security and to follow network security best practices.
+  potentialBenefits: Enhanced security through private networking
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Azure Container Instances Network Security
+    url: https://learn.microsoft.com/en-us/azure/container-instances/container-instances-vnet

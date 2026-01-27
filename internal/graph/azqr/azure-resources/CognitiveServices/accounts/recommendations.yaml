@@ -1,0 +1,47 @@
+- description: Cognitive Services SLA
+  aprlGuid: aif-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.CognitiveServices/accounts
+  recommendationMetadataState: Active
+  longDescription: Cognitive Services SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Service should have private endpoints enabled
+  aprlGuid: aif-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.CognitiveServices/accounts
+  recommendationMetadataState: Active
+  longDescription: Service should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/ai-services/cognitive-services-virtual-networks'
+
+- description: Service should have local authentication disabled
+  aprlGuid: aif-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.CognitiveServices/accounts
+  recommendationMetadataState: Active
+  longDescription: Service should have local authentication disabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/ai-services/disable-local-auth'

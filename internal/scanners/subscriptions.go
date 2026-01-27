@@ -11,9 +11,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type SubcriptionScanner struct{}
+type SubcriptionDiscovery struct{}
 
-func (sc SubcriptionScanner) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptions []string, filters *models.Filters, options *arm.ClientOptions) map[string]string {
+func (sc SubcriptionDiscovery) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptions []string, filters *models.Filters, options *arm.ClientOptions) map[string]string {
 	client, err := armsubscription.NewSubscriptionsClient(cred, options)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create subscriptions client")

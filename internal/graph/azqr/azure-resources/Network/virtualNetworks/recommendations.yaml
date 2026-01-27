@@ -1,0 +1,15 @@
+- description: Virtual Network should have at least two DNS servers assigned
+  aprlGuid: vnet-009
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Network/virtualNetworks
+  recommendationMetadataState: Active
+  longDescription: Virtual Network should have at least two DNS servers assigned
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances'

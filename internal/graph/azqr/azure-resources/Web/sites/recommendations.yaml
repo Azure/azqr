@@ -1,0 +1,207 @@
+- description: App Service SLA
+  aprlGuid: app-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: App Service SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: App Service should use HTTPS only
+  aprlGuid: app-007
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'App Service should enforce HTTPS-only traffic to ensure all communications are encrypted and secure.'
+  potentialBenefits: Enhanced security through encryption
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Enforce HTTPS
+    url: https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https
+
+- description: App Service should use VNET integration
+  aprlGuid: app-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'App Service should use virtual network integration to securely access resources in Azure virtual networks.'
+  potentialBenefits: Network isolation and security
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Virtual Network integration
+    url: https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration
+
+- description: App Service should have VNET Route all enabled for VNET integration
+  aprlGuid: app-010
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'App Service should have VNET Route All enabled to ensure all outbound traffic goes through the integrated virtual network.'
+  potentialBenefits: Complete traffic routing control
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Virtual Network integration
+    url: https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration
+
+- description: App Service should avoid using Client Affinity
+  aprlGuid: app-015
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'App Service should disable Client Affinity (ARR Affinity) for better scalability and reliability. Client affinity can cause session stickiness issues in multi-instance deployments.'
+  potentialBenefits: Better scalability and reliability
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Reliability checklist
+    url: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist
+
+- description: Function should use HTTPS only
+  aprlGuid: func-007
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'Function App should enforce HTTPS-only traffic to ensure all communications are encrypted and secure.'
+  potentialBenefits: Enhanced security through encryption
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Enforce HTTPS
+    url: https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https
+
+- description: Function should use VNET integration
+  aprlGuid: func-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'Function App should use virtual network integration to securely access resources in Azure virtual networks.'
+  potentialBenefits: Network isolation and security
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Virtual Network integration
+    url: https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration
+
+- description: Function should have VNET Route all enabled for VNET integration
+  aprlGuid: func-010
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'Function App should have VNET Route All enabled to ensure all outbound traffic goes through the integrated virtual network.'
+  potentialBenefits: Complete traffic routing control
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Virtual Network integration
+    url: https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration
+
+- description: Function should avoid using Client Affinity
+  aprlGuid: func-013
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'Function App should disable Client Affinity (ARR Affinity) for better scalability and reliability. Client affinity is generally not needed for Function Apps.'
+  potentialBenefits: Better scalability and reliability
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Reliability checklist
+    url: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist
+
+- description: Logic App should use HTTPS only
+  aprlGuid: logics-007
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'Logic App should enforce HTTPS-only traffic to ensure all communications are encrypted and secure.'
+  potentialBenefits: Enhanced security through encryption
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Enforce HTTPS
+    url: https://learn.microsoft.com/azure/app-service/configure-ssl-bindings#enforce-https
+
+- description: Logic App should use VNET integration
+  aprlGuid: logics-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'Logic App should use virtual network integration to securely access resources in Azure virtual networks.'
+  potentialBenefits: Network isolation and security
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Virtual Network integration
+    url: https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration
+
+- description: Logic App should have VNET Route all enabled for VNET integration
+  aprlGuid: logics-010
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'Logic App should have VNET Route All enabled to ensure all outbound traffic goes through the integrated virtual network.'
+  potentialBenefits: Complete traffic routing control
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Virtual Network integration
+    url: https://learn.microsoft.com/en-us/azure/app-service/overview-vnet-integration
+
+- description: Logic App should avoid using Client Affinity
+  aprlGuid: logics-013
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Web/sites
+  recommendationMetadataState: Active
+  longDescription: 'Logic App should disable Client Affinity (ARR Affinity) for better scalability and reliability.'
+  potentialBenefits: Better scalability and reliability
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Reliability checklist
+    url: https://learn.microsoft.com/en-us/azure/well-architected/service-guides/azure-app-service/reliability#checklist

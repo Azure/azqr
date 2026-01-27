@@ -1,0 +1,15 @@
+- description: Virtual Machine Scale Set SLA
+  aprlGuid: vmss-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Compute/virtualMachineScaleSets
+  recommendationMetadataState: Active
+  longDescription: Virtual Machine Scale Set SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

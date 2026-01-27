@@ -1,0 +1,31 @@
+- description: Container Apps Environment SLA
+  aprlGuid: cae-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.App/managedenvironments
+  recommendationMetadataState: Active
+  longDescription: Container Apps Environment SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Container Apps Environment should have private endpoints enabled
+  aprlGuid: cae-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.App/managedenvironments
+  recommendationMetadataState: Active
+  longDescription: Container Apps Environment should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/container-apps/networking'

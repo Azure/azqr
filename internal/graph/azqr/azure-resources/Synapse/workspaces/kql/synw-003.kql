@@ -1,0 +1,5 @@
+// Azure Resource Graph Query
+// Find all Synapse Workspaces and report SLA
+resources
+| where type =~ "Microsoft.Synapse/workspaces"
+| project recommendationId = "synw-003", name, id, tags, param1 = "99.9%"

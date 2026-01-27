@@ -1,0 +1,95 @@
+- description: PostgreSQL SLA
+  aprlGuid: psql-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforPostgreSQL/servers
+  recommendationMetadataState: Active
+  longDescription: PostgreSQL SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: PostgreSQL should have private endpoints enabled
+  aprlGuid: psql-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforPostgreSQL/servers
+  recommendationMetadataState: Active
+  longDescription: PostgreSQL should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/postgresql/single-server/concepts-data-access-and-security-private-link'
+
+- description: PostgreSQL should enforce SSL
+  aprlGuid: psql-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforPostgreSQL/servers
+  recommendationMetadataState: Active
+  longDescription: PostgreSQL should enforce SSL
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/postgresql/single-server/concepts-ssl-connection-security'
+
+- description: PostgreSQL should enforce TLS >= 1.2
+  aprlGuid: psql-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.DBforPostgreSQL/servers
+  recommendationMetadataState: Active
+  longDescription: PostgreSQL should enforce TLS >= 1.2
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/postgresql/single-server/concepts-ssl-connection-security'
+
+- description: PostgreSQL Flexible Server SLA
+  aprlGuid: psqlf-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforPostgreSQL/flexibleServers
+  recommendationMetadataState: Active
+  longDescription: PostgreSQL Flexible Server SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: PostgreSQL should have private access enabled
+  aprlGuid: psqlf-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforPostgreSQL/flexibleServers
+  recommendationMetadataState: Active
+  longDescription: PostgreSQL should have private access enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-networking-private-link'

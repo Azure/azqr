@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find all Container Apps using sticky sessions
+resources
+| where type =~ "Microsoft.App/containerApps"
+| where properties.configuration.ingress.stickySessions.affinity =~ "sticky"
+| project recommendationId = "ca-011", name, id, tags, param1 = "Using sticky sessions"

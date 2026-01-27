@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find all Container Apps without Managed Identity
+resources
+| where type =~ "Microsoft.App/containerApps"
+| where isnull(identity) or identity.type =~ "None"
+| project recommendationId = "ca-009", name, id, tags, param1 = "Managed Identity not configured"

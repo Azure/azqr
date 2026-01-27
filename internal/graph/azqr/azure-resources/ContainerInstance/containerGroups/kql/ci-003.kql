@@ -1,0 +1,5 @@
+// Azure Resource Graph Query
+// Find all Container Instances (informational - SLA rule)
+resources
+| where type =~ "Microsoft.ContainerInstance/containerGroups"
+| project recommendationId = "ci-003", name, id, tags, param1 = "99.9%"

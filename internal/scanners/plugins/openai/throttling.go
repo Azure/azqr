@@ -62,7 +62,7 @@ func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredentia
 	}
 
 	// Use Resource Graph to get all Cognitive Services/OpenAI accounts efficiently
-	resourceScanner := scanners.ResourceScanner{}
+	resourceScanner := scanners.ResourceDiscovery{}
 	allResources, _ := resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)
 	log.Debug().Msgf("Found %d total resources", len(allResources))
 

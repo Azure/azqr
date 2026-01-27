@@ -1,0 +1,8 @@
+// Virtual WAN Type - informational only (always passes, returns the type)
+resources
+| where type =~ 'Microsoft.Network/virtualWans'
+| extend wanType = tostring(properties.type)
+| where 1 == 0
+| extend recommendationId = 'vwa-005'
+| extend param1 = wanType
+| project recommendationId, name, id, tags, param1

@@ -1,0 +1,4 @@
+// Azure Resource Graph Query
+resources
+| where type =~ "Microsoft.Network/networkWatchers"
+| project recommendationId = "nw-003", name, id, tags, param1 = "99.9%"

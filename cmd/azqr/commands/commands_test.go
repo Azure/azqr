@@ -86,7 +86,6 @@ func TestScanCommandHasRequiredFlags(t *testing.T) {
 		{"output-name", "string"},
 		{"mask", "bool"},
 		{"filters", "string"},
-		{"azqr", "bool"},
 	}
 
 	for _, rf := range requiredFlags {
@@ -122,7 +121,6 @@ func TestScanCommandFlagDefaults(t *testing.T) {
 		{"json", "false"},
 		{"csv", "false"},
 		{"mask", "true"},
-		{"azqr", "true"},
 	}
 
 	for _, tt := range tests {

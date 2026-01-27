@@ -1,0 +1,63 @@
+- description: Container Registry SLA
+  aprlGuid: cr-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ContainerRegistry/registries
+  recommendationMetadataState: Active
+  longDescription: Container Registry SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: ContainerRegistry should have private endpoints enabled
+  aprlGuid: cr-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ContainerRegistry/registries
+  recommendationMetadataState: Active
+  longDescription: ContainerRegistry should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/container-registry/container-registry-private-link'
+
+- description: ContainerRegistry should have the Administrator account disabled
+  aprlGuid: cr-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.ContainerRegistry/registries
+  recommendationMetadataState: Active
+  longDescription: ContainerRegistry should have the Administrator account disabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/container-registry/container-registry-authentication-managed-identity'
+
+- description: ContainerRegistry should use retention policies
+  aprlGuid: cr-010
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.ContainerRegistry/registries
+  recommendationMetadataState: Active
+  longDescription: ContainerRegistry should use retention policies
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/container-registry/container-registry-retention-policy'

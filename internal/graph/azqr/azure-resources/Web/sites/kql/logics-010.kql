@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find Logic Apps that don't have VNET Route All enabled
+resources
+| where type =~ "Microsoft.Web/sites"
+| where kind contains "workflowapp"
+| where properties.vnetRouteAllEnabled != true
+| project recommendationId = "logics-010", name, id, tags, param1 = "VNET Route All is disabled"

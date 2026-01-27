@@ -1,0 +1,6 @@
+resources
+| where type =~ 'Microsoft.ApiManagement/service'
+| where todatetime(properties.certificate.expirationDate) < now() + 30d
+| extend recommendationId = 'apim-011'
+| extend param1 = tostring(properties.certificate.expirationDate)
+| project recommendationId, name, id, tags, param1

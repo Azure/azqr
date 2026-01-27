@@ -1,0 +1,53 @@
+- description: Azure Managed Grafana SLA
+  aprlGuid: amg-002
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Dashboard/grafana
+  recommendationMetadataState: Active
+  longDescription: Azure Managed Grafana SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Azure Managed Grafana should disable public network access
+  aprlGuid: amg-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Dashboard/grafana
+  recommendationMetadataState: Active
+  longDescription: | 
+    Azure Managed Grafana should have public network access disabled
+    to improve security. Use private endpoints or other secure connectivity methods
+    instead.
+  potentialBenefits: Enhanced security by restricting public access
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Azure Synapse Analytics Security Baseline
+    url: https://learn.microsoft.com/en-us/security/benchmark/azure/baselines/azure-synapse-analytics-security-baseline?toc=%2Fazure%2Fsynapse-analytics%2Ftoc.json
+
+- description: Azure Managed Grafana should have availability zones enabled
+  aprlGuid: amg-005
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Dashboard/grafana
+  recommendationMetadataState: Active
+  longDescription: | 
+    Azure Managed Grafana should have zone redundancy enabled to ensure
+    high availability. Zone redundancy provides automatic replication across availability
+    zones for better resilience.
+  potentialBenefits: Improved resilience and high availability
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: High availability in Azure Managed Grafana
+    url: https://learn.microsoft.com/en-us/azure/managed-grafana/high-availability

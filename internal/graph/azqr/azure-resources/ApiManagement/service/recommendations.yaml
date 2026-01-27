@@ -1,0 +1,95 @@
+- description: API Management SLA
+  aprlGuid: apim-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ApiManagement/service
+  recommendationMetadataState: Active
+  longDescription: API Management SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: APIM should have private endpoints enabled
+  aprlGuid: apim-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ApiManagement/service
+  recommendationMetadataState: Active
+  longDescription: APIM should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/api-management/private-endpoint'
+
+- description: APIM should use Managed Identities
+  aprlGuid: apim-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.ApiManagement/service
+  recommendationMetadataState: Active
+  longDescription: APIM should use Managed Identities
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/api-management/api-management-howto-use-managed-service-identity'
+
+- description: APIM should only accept a minimum of TLS 1.2
+  aprlGuid: apim-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ApiManagement/service
+  recommendationMetadataState: Active
+  longDescription: APIM should only accept a minimum of TLS 1.2
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/api-management/api-management-howto-manage-protocols-ciphers'
+
+- description: APIM should should not accept weak or deprecated ciphers.
+  aprlGuid: apim-010
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ApiManagement/service
+  recommendationMetadataState: Active
+  longDescription: APIM should should not accept weak or deprecated ciphers.
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/api-management/api-management-howto-manage-protocols-ciphers'
+
+- description: 'APIM: Renew expiring certificates'
+  aprlGuid: apim-011
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.ApiManagement/service
+  recommendationMetadataState: Active
+  longDescription: 'APIM: Renew expiring certificates'
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/api-management/configure-custom-domain'

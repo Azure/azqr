@@ -1,0 +1,13 @@
+// Azure Resource Graph Query
+// Find AKS clusters and report their SLA based on pricing tier and zones
+resources
+| where type =~ 'Microsoft.ContainerService/managedClusters'
+| extend skuTier = tostring(sku.tier)
+| extend hasZones = array_length(properties.agentPoolProfiles) > 0 and 
+    array_length(todynamic(tostring(properties.agentPoolProfiles[0].availabilityZones))) > 0
+| extend slaValue = case(
+    skuTier =~ "Free", "None",
+    hasZones, "99.95%",
+    "99.9%"
+)
+| project recommendationId = 'aks-003', name, id, tags, param1 = slaValue

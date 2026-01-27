@@ -60,7 +60,7 @@ func (s *InitializationStage) Execute(ctx *ScanContext) error {
 		ctx.Params.Defender,
 		ctx.Params.Advisor,
 		ctx.Params.Cost,
-		ctx.Params.UseAprlRecommendations,
+		ctx.Params.UseGraphRecommendations,
 	)
 	ctx.ReportData = &reportData
 

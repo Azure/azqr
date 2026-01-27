@@ -1,0 +1,15 @@
+- description: Azure Data Factory SLA
+  aprlGuid: adf-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DataFactory/factories
+  recommendationMetadataState: Active
+  longDescription: Azure Data Factory SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

@@ -1,0 +1,8 @@
+// Check if API Management has private endpoints enabled
+resources
+| where type =~ 'Microsoft.ApiManagement/service'
+| extend privateEndpoints = array_length(properties.privateEndpointConnections)
+| where privateEndpoints == 0 or isnull(privateEndpoints)
+| extend recommendationId = 'apim-004'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

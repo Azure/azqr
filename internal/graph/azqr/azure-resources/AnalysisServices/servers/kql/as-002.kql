@@ -1,0 +1,5 @@
+resources
+| where type =~ 'Microsoft.AnalysisServices/servers'
+| extend recommendationId = 'as-002'
+| extend param1 = '99.9%'
+| project recommendationId, name, id, tags, param1

@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find App Services that don't have VNET integration
+resources
+| where type =~ "Microsoft.Web/sites"
+| where kind !contains "function" and kind !contains "workflowapp"
+| where isnull(properties.virtualNetworkSubnetId) or properties.virtualNetworkSubnetId == ""
+| project recommendationId = "app-009", name, id, tags, param1 = "VNET integration not configured"

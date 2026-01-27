@@ -1,0 +1,47 @@
+- description: Event Hub Namespace SLA
+  aprlGuid: evh-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.EventHub/namespaces
+  recommendationMetadataState: Active
+  longDescription: Event Hub Namespace SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Event Hub Namespace should have private endpoints enabled
+  aprlGuid: evh-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.EventHub/namespaces
+  recommendationMetadataState: Active
+  longDescription: Event Hub Namespace should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/event-hubs/private-link-service'
+
+- description: Event Hub should have local authentication disabled
+  aprlGuid: evh-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.EventHub/namespaces
+  recommendationMetadataState: Active
+  longDescription: Event Hub should have local authentication disabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/event-hubs/authenticate-application'

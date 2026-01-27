@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find all Container Apps with volumes not using Azure Files
+resources
+| where type =~ "Microsoft.App/containerApps"
+| mv-expand volume = properties.template.volumes
+| where volume.storageType !~ "AzureFile"
+| project recommendationId = "ca-010", name, id, tags, param1 = "Non-Azure Files storage type found"

@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find all Azure Managed Grafana instances with public network access enabled
+resources
+| where type =~ "Microsoft.Dashboard/grafana"
+| where properties.publicNetworkAccess =~ "Enabled"
+| project recommendationId = "amg-004", name, id, tags, param1 = "Public network access enabled"

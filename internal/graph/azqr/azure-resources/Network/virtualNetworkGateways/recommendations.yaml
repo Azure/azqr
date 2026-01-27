@@ -1,0 +1,31 @@
+- description: Virtual Network Gateway SLA
+  aprlGuid: vgw-004
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Network/virtualNetworkGateways
+  recommendationMetadataState: Active
+  longDescription: Virtual Network Gateway SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: Virtual Network Gateway should have availability zones enabled
+  aprlGuid: vgw-005
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Network/virtualNetworkGateways
+  recommendationMetadataState: Active
+  longDescription: 'Virtual Network Gateway should use zone-redundant SKUs (SKUs ending with "AZ") to provide high availability across availability zones.'
+  potentialBenefits: Enhanced availability through zone redundancy
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Create zone-redundant VNet gateway
+    url: https://learn.microsoft.com/en-us/azure/vpn-gateway/create-zone-redundant-vnet-gateway

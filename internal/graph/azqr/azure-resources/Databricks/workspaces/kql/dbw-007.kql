@@ -1,0 +1,8 @@
+// Check if Azure Databricks has Public IP disabled
+resources
+| where type =~ 'Microsoft.Databricks/workspaces'
+| extend noPublicIP = properties.parameters.enableNoPublicIp.value
+| where isnull(noPublicIP) or noPublicIP == false
+| extend recommendationId = 'dbw-007'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1
