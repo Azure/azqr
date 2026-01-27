@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find Virtual Network Gateways that don't have availability zones enabled (SKU doesn't end with "AZ")
+resources
+| where type =~ "Microsoft.Network/virtualNetworkGateways"
+| extend skuName = tolower(tostring(properties.sku.name))
+| where skuName !endswith "az"
+| project recommendationId = "vgw-005", name, id, tags, param1 = "Availability zones not enabled (SKU doesn't end with 'AZ')"

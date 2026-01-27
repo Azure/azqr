@@ -1,0 +1,8 @@
+// Check if Redis enforces TLS >= 1.2
+resources
+| where type =~ 'Microsoft.Cache/Redis'
+| extend minTlsVersion = properties.minimumTlsVersion
+| where isnull(minTlsVersion) or minTlsVersion != '1.2'
+| extend recommendationId = 'redis-009'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

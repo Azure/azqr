@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/Azure/azqr/internal/models"
-	"github.com/spf13/cobra"
-
 	"github.com/Azure/azqr/internal/plugins"
+	azlog "github.com/Azure/azure-sdk-for-go/sdk/azcore/log"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -46,6 +46,11 @@ func init() {
 func InitializeLogLevel(debug bool) {
 	if debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		azlog.SetListener(func(event azlog.Event, msg string) {
+			log.Debug().
+				Str("event", string(event)).
+				Msg(msg)
+		})
 		log.Debug().Msg("Debug logging enabled")
 		return
 	}

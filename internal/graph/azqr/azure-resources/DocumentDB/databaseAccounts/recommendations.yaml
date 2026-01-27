@@ -1,0 +1,65 @@
+- description: Cosmos DB SLA
+  aprlGuid: cosmos-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DocumentDB/databaseAccounts
+  recommendationMetadataState: Active
+  longDescription: Cosmos DB SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
+
+- description: CosmosDB should have private endpoints enabled
+  aprlGuid: cosmos-004
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DocumentDB/databaseAccounts
+  recommendationMetadataState: Active
+  longDescription: CosmosDB should have private endpoints enabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints'
+
+- description: CosmosDB should have local authentication disabled
+  aprlGuid: cosmos-008
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DocumentDB/databaseAccounts
+  recommendationMetadataState: Active
+  longDescription: CosmosDB should have local authentication disabled
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/cosmos-db/how-to-setup-rbac'
+
+- description: 'CosmosDB: disable write operations on metadata resources (databases,
+    containers, throughput) via account keys'
+  aprlGuid: cosmos-009
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DocumentDB/databaseAccounts
+  recommendationMetadataState: Active
+  longDescription: 'CosmosDB: disable write operations on metadata resources (databases,
+    containers, throughput) via account keys'
+  potentialBenefits: See recommendation details
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/azure/cosmos-db/how-to-setup-rbac'

@@ -1,0 +1,16 @@
+// Check if Logic App HTTP Triggers have IP access restrictions
+// This is complex logic checking for HTTP triggers without IP restrictions
+resources
+| where type =~ 'Microsoft.Logic/workflows'
+| extend definition = properties.definition
+| extend triggers = definition.triggers
+| where isnotnull(triggers)
+| mv-expand trigger = triggers
+| where trigger.type == 'Request' and trigger.kind == 'Http'
+| extend allowedIPs = properties.accessControl.triggers.allowedCallerIpAddresses
+| extend ipCount = array_length(allowedIPs)
+| where isnull(ipCount) or ipCount == 0
+| extend triggerName = tostring(trigger.name)
+| extend recommendationId = 'logic-004'
+| extend param1 = triggerName
+| project recommendationId, name, id, tags, param1

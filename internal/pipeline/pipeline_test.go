@@ -198,34 +198,7 @@ func TestBaseStage_CanSkip(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			stage := NewBaseStage("test", tt.required)
 			ctx := &ScanContext{}
-			result := stage.CanSkip(ctx)
-
-			if result != tt.expected {
-				t.Errorf("Expected %v, got %v", tt.expected, result)
-			}
-		})
-	}
-}
-
-func TestAprlScanStage_CanSkip(t *testing.T) {
-	tests := []struct {
-		name                   string
-		useAprlRecommendations bool
-		expected               bool
-	}{
-		{"Execute when APRL enabled", true, false},
-		{"Skip when APRL disabled", false, true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			stage := NewAprlScanStage()
-			ctx := &ScanContext{
-				Params: &models.ScanParams{
-					UseAprlRecommendations: tt.useAprlRecommendations,
-				},
-			}
-			result := stage.CanSkip(ctx)
+			result := stage.Skip(ctx)
 
 			if result != tt.expected {
 				t.Errorf("Expected %v, got %v", tt.expected, result)
@@ -253,34 +226,7 @@ func TestPluginExecutionStage_CanSkip(t *testing.T) {
 					EnabledInternalPlugins: tt.enabledPlugins,
 				},
 			}
-			result := stage.CanSkip(ctx)
-
-			if result != tt.expected {
-				t.Errorf("Expected %v, got %v", tt.expected, result)
-			}
-		})
-	}
-}
-
-func TestAzqrScanStage_CanSkip(t *testing.T) {
-	tests := []struct {
-		name                   string
-		useAzqrRecommendations bool
-		expected               bool
-	}{
-		{"Skip when AZQR disabled", false, true},
-		{"Execute when AZQR enabled", true, false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			stage := NewAzqrScanStage()
-			ctx := &ScanContext{
-				Params: &models.ScanParams{
-					UseAzqrRecommendations: tt.useAzqrRecommendations,
-				},
-			}
-			result := stage.CanSkip(ctx)
+			result := stage.Skip(ctx)
 
 			if result != tt.expected {
 				t.Errorf("Expected %v, got %v", tt.expected, result)
@@ -299,10 +245,14 @@ func TestPipeline_Integration(t *testing.T) {
 		NewInitializationStage(),
 		NewSubscriptionDiscoveryStage(),
 		NewResourceDiscoveryStage(),
-		NewAprlScanStage(),
+		NewGraphScanStage(),
 		NewPluginExecutionStage(),
-		NewAzqrScanStage(),
-		NewAdvisorDefenderStage(),
+		NewAdvisorStage(),
+		NewDefenderStatusStage(),
+		NewDefenderRecommendationsStage(),
+		NewAzurePolicyStage(),
+		NewArcSQLStage(),
+		NewCostStage(),
 		NewReportRenderingStage(),
 	)
 
@@ -310,9 +260,9 @@ func TestPipeline_Integration(t *testing.T) {
 	if pipeline == nil {
 		t.Fatal("Expected non-nil pipeline")
 	}
-	if len(pipeline.stages) != 8 {
-		t.Errorf("Expected 8 stages, got %d", len(pipeline.stages))
+	if len(pipeline.stages) != 12 {
+		t.Errorf("Expected 12 stages, got %d", len(pipeline.stages))
 	}
 
-	t.Log("Pipeline created with 8 stages")
+	t.Logf("Pipeline created with %d stages", len(pipeline.stages))
 }

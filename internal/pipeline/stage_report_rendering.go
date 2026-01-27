@@ -29,8 +29,7 @@ func (s *ReportRenderingStage) Execute(ctx *ScanContext) error {
 	// Log data summary before rendering
 	log.Debug().
 		Int("recommendation_types", len(ctx.ReportData.Recommendations)).
-		Int("aprl_impacted_resources", len(ctx.ReportData.Aprl)).
-		Int("azqr_scanned_resources", len(ctx.ReportData.Azqr)).
+		Int("aprl_impacted_resources", len(ctx.ReportData.Graph)).
 		Int("resources", len(ctx.ReportData.Resources)).
 		Int("advisor_results", len(ctx.ReportData.Advisor)).
 		Int("defender_results", len(ctx.ReportData.Defender)).

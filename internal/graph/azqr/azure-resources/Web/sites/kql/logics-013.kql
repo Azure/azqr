@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find Logic Apps that have Client Affinity enabled
+resources
+| where type =~ "Microsoft.Web/sites"
+| where kind contains "workflowapp"
+| where properties.clientAffinityEnabled == true
+| project recommendationId = "logics-013", name, id, tags, param1 = "Client Affinity is enabled"

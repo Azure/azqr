@@ -20,7 +20,7 @@ func NewPluginExecutionStage() *PluginExecutionStage {
 	}
 }
 
-func (s *PluginExecutionStage) CanSkip(ctx *ScanContext) bool {
+func (s *PluginExecutionStage) Skip(ctx *ScanContext) bool {
 	return len(ctx.Params.EnabledInternalPlugins) == 0
 }
 

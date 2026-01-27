@@ -1,0 +1,12 @@
+// Azure Resource Graph Query
+// Find PostgreSQL Flexible Servers and report their SLA based on HA configuration
+resources
+| where type =~ 'Microsoft.DBforPostgreSQL/flexibleServers'
+| extend haMode = tostring(properties.highAvailability.mode)
+| extend haState = tostring(properties.highAvailability.state)
+| extend slaValue = case(
+    haMode =~ "ZoneRedundant" and haState =~ "Healthy", "99.99%",
+    haMode =~ "SameZone" and haState =~ "Healthy", "99.95%",
+    "99.9%"
+)
+| project recommendationId = 'psqlf-003', name, id, tags, param1 = slaValue

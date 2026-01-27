@@ -1,0 +1,8 @@
+// Check if Container Registry has Administrator account disabled
+resources
+| where type =~ 'Microsoft.ContainerRegistry/registries'
+| extend adminEnabled = properties.adminUserEnabled
+| where adminEnabled == true
+| extend recommendationId = 'cr-008'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

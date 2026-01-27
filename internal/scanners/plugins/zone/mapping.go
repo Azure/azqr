@@ -153,9 +153,8 @@ func (s *ZoneMappingScanner) fetchZoneMappings(ctx context.Context, cred azcore.
 	// GET /subscriptions/{subscriptionId}/locations?api-version=2022-12-01
 	endpoint := fmt.Sprintf("https://management.azure.com/subscriptions/%s/locations?api-version=2022-12-01", subscriptionID)
 
-	// Make the request with authentication (empty string uses default scope)
-	emptyScope := ""
-	body, err := httpClient.Do(ctx, endpoint, &emptyScope)
+	// Make the request with authentication
+	body, err := httpClient.Do(ctx, endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch locations: %w", err)
 	}

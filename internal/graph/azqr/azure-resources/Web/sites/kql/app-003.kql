@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find App Service Web Apps and report their SLA
+resources
+| where type =~ 'Microsoft.Web/sites'
+| extend slaValue = "99.95%"
+| project recommendationId = "app-003", name, id, tags, param1 = slaValue

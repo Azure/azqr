@@ -4,6 +4,7 @@
 package excel
 
 import (
+	"github.com/Azure/azqr/internal/models"
 	_ "image/png"
 
 	"github.com/Azure/azqr/internal/renderers"
@@ -12,7 +13,7 @@ import (
 )
 
 func renderResources(f *excelize.File, data *renderers.ReportData) {
-	if !data.ScanEnabled {
+	if !data.Stages.IsStageEnabled(models.StageNameGraph) {
 		log.Debug().Msg("Skipping Inventory. Feature is disabled")
 		return
 	}
@@ -20,7 +21,7 @@ func renderResources(f *excelize.File, data *renderers.ReportData) {
 }
 
 func renderExcludedResources(f *excelize.File, data *renderers.ReportData) {
-	if !data.ScanEnabled {
+	if !data.Stages.IsStageEnabled(models.StageNameGraph) {
 		log.Debug().Msg("Skipping OutOfScope. Feature is disabled")
 		return
 	}

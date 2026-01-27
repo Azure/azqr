@@ -1,0 +1,12 @@
+// Azure Resource Graph Query
+// Find API Management services and report SLA based on tier and zone redundancy
+resources
+| where type =~ 'Microsoft.ApiManagement/service'
+| extend skuName = tostring(sku.name)
+| extend zones = properties.zones
+| extend slaValue = case(
+    skuName == "Developer", "None",
+    (skuName in ("Premium", "Premium_v2")) and array_length(zones) >= 2, "99.95%",
+    "99.9%"
+)
+| project recommendationId = 'apim-003', name, id, tags, param1 = strcat(slaValue, " (SKU: ", skuName, ")")

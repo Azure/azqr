@@ -1,0 +1,8 @@
+// Check if Web Pub Sub has availability zones enabled (Premium SKU)
+resources
+| where type =~ 'Microsoft.SignalRService/webPubSub'
+| extend skuName = tostring(sku.name)
+| where skuName !contains 'Premium'
+| extend recommendationId = 'wps-002'
+| extend param1 = ''
+| project recommendationId, name, id, tags, param1

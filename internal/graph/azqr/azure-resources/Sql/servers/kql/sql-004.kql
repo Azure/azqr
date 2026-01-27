@@ -1,0 +1,6 @@
+// Azure Resource Graph Query
+// Find SQL servers that don't have private endpoints enabled
+resources
+| where type =~ "Microsoft.Sql/servers"
+| where array_length(properties.privateEndpointConnections) == 0
+| project recommendationId = "sql-004", name, id, tags, param1 = "No private endpoints configured"
