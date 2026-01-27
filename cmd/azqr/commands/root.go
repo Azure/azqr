@@ -25,9 +25,31 @@ var rootCmd = &cobra.Command{
 	Long:    `Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group`,
 	Args:    cobra.NoArgs,
 	Version: version,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// Initialize log level based on --debug flag
+		// This runs before any command executes, making debug logging available globally
+		debug, _ := cmd.Flags().GetBool("debug")
+		InitializeLogLevel(debug)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Usage()
 	},
+}
+
+func init() {
+	// Add global --debug flag to root command (available to all subcommands)
+	rootCmd.PersistentFlags().BoolP("debug", "", false, "Enable debug logging")
+}
+
+// InitializeLogLevel sets the global log level based on debug flag
+// This is exported so it can be called from the root command to set logging early
+func InitializeLogLevel(debug bool) {
+	if debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.Debug().Msg("Debug logging enabled")
+		return
+	}
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 }
 
 func Execute() {
