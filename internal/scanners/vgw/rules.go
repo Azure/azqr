@@ -84,7 +84,7 @@ func (a *VirtualNetworkGatewayScanner) GetVirtualNetworkGatewayRules() map[strin
 			RecommendationID: "vgw-005",
 			ResourceType:     "Microsoft.Network/virtualNetworkGateways",
 			Category:         models.CategoryHighAvailability,
-			Recommendation:   "Storage should have availability zones enabled",
+			Recommendation:   "Virtual Network Gateways should have availability zones enabled",
 			Impact:           models.ImpactHigh,
 			Eval: func(target interface{}, scanContext *models.ScanContext) (bool, string) {
 				g := target.(*armnetwork.VirtualNetworkGateway)

@@ -2379,7 +2379,7 @@
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/vpn-gateway/create-zone-redundant-vnet-gateway",
-		"recommendation": "Storage should have availability zones enabled",
+		"recommendation": "Virtual Network Gateways should have availability zones enabled",
 		"recommendationId": "vgw-005",
 		"resourceType": "Microsoft.Network/virtualNetworkGateways"
 	},
