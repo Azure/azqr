@@ -27,7 +27,7 @@ func (s *CostStage) Execute(ctx *ScanContext) error {
 	costScanner := scanners.CostScanner{}
 
 	// Scan costs for all subscriptions
-	var allCostItems []*models.CostResultItem
+	var allCosts []*models.CostResult
 	for subid := range ctx.Subscriptions {
 		scannerConfig := &models.ScannerConfig{
 			Ctx:            ctx.Ctx,
@@ -36,15 +36,13 @@ func (s *CostStage) Execute(ctx *ScanContext) error {
 			SubscriptionID: subid,
 		}
 		result := costScanner.Scan(scannerConfig)
-		if result != nil && result.Items != nil {
-			allCostItems = append(allCostItems, result.Items...)
+		if len(result) > 0 {
+			allCosts = append(allCosts, result...)
 		}
 	}
 
 	// Aggregate all cost items into report data
-	ctx.ReportData.Cost = &models.CostResult{
-		Items: allCostItems,
-	}
+	ctx.ReportData.Cost = allCosts
 
 	return nil
 }
