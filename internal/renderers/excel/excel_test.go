@@ -22,7 +22,7 @@ func TestCreateExcelReport(t *testing.T) {
 			name: "empty report",
 			data: &renderers.ReportData{
 				OutputFileName: "test_empty",
-				Cost:           &models.CostResult{},
+				Cost:           []*models.CostResult{},
 				Stages:         models.NewStageConfigs(),
 			},
 			checkErr: false,
@@ -31,7 +31,7 @@ func TestCreateExcelReport(t *testing.T) {
 			name: "report with APRL data",
 			data: &renderers.ReportData{
 				OutputFileName: "test_aprl",
-				Cost:           &models.CostResult{},
+				Cost:           []*models.CostResult{},
 				Stages:         models.NewStageConfigs(),
 				Graph: []*models.GraphResult{
 					{
