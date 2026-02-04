@@ -7,9 +7,9 @@ import (
 )
 
 // ARMLimiter rate limits Azure Resource Manager API calls
-// Allows 3 operations per second with burst capacity of 100
+// Allows 20 operations per second with burst capacity of 30
 // https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/request-limits-and-throttling#regional-throttling-and-token-bucket-algorithm
-var ARMLimiter = rate.NewLimiter(rate.Limit(3), 100)
+var ARMLimiter = rate.NewLimiter(rate.Limit(20), 30)
 
 // GraphLimiter rate limits Azure Resource Graph API calls
 // Allows 3 operations per second with burst capacity of 10

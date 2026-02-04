@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/rs/zerolog/log"
 )
 
 // ThrottlingPolicy implements policy.Policy to apply rate limiting
@@ -23,11 +24,16 @@ func (p *ThrottlingPolicy) Do(req *policy.Request) (*http.Response, error) {
 	var err error
 	switch {
 	case strings.Contains(url, "prices.azure.com"):
+		log.Debug().
+			Msg("Applying Price API throttling limiter")
 		err = WaitGraph(req.Raw().Context())
 	case strings.Contains(url, "Microsoft.ResourceGraph/resources"):
-		// Azure Resource Graph API has stricter rate limits
+		log.Debug().
+			Msg("Applying Graph API throttling limiter")
 		err = WaitGraph(req.Raw().Context())
 	default: // Default to ARM throttling
+		log.Debug().
+			Msg("Applying ARM API throttling limiter")
 		err = WaitARM(req.Raw().Context())
 	}
 	if err != nil {
