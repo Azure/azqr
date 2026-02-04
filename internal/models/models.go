@@ -122,15 +122,10 @@ type (
 		SubscriptionID, SubscriptionName, Name, Tier string
 	}
 
-	// CostResult - Cost result
+	// CostResult - Cost result,
 	CostResult struct {
-		From, To time.Time
-		Items    []*CostResultItem
-	}
-
-	// CostResultItem - Cost result,
-	CostResultItem struct {
 		SubscriptionID, SubscriptionName, ServiceName, Value, Currency string
+		From, To time.Time
 	}
 
 	// AdvisorResult - Advisor result
