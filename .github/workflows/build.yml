@@ -221,6 +221,16 @@ jobs:
     outputs:
       release_id: ${{ steps.create_release.outputs.id }}
     steps:
+      - name: Detect preview version
+        id: detect_preview
+        run: |
+          VERSION="${{ needs.calculate-version.outputs.version }}"
+          if [[ $VERSION =~ (preview|alpha|beta|rc|dev) ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create azqr Release
         id: create_release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
@@ -231,6 +241,7 @@ jobs:
           name: ${{ needs.calculate-version.outputs.version }}
           body: ""
           draft: false
+          prerelease: ${{ steps.detect_preview.outputs.is_prerelease }}
 
   publish:
     name: Publish binaries
