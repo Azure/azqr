@@ -92,13 +92,10 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 			ResourceGroupName = tostring(ResourceIdsplit[4]),
 			ResourceType = tostring(ResourceIdsplit[6]),
 			ResourceName = tostring(ResourceIdsplit[8])
-		| join kind=leftouter (resourcecontainers
-			| where type == 'microsoft.resources/subscriptions'
-			| project SubscriptionName = name, subscriptionId) on subscriptionId
-		| project SubscriptionId=subscriptionId, SubscriptionName, ResourceGroupName, ResourceType,
+		| project SubscriptionId=subscriptionId, ResourceGroupName, ResourceType,
 			ResourceName, Category=CategoryString, RecommendationSeverity, RecommendationName, ActionDescription,
 			RemediationDescription, AzPortalLink, ResourceId
-		| distinct SubscriptionId, SubscriptionName, ResourceGroupName, ResourceType, ResourceName, Category, RecommendationSeverity, RecommendationName, ActionDescription, RemediationDescription, AzPortalLink, ResourceId
+		| distinct SubscriptionId, ResourceGroupName, ResourceType, ResourceName, Category, RecommendationSeverity, RecommendationName, ActionDescription, RemediationDescription, AzPortalLink, ResourceId
 	`
 		log.Debug().Msg(query)
 		subs := make([]*string, 0, len(subscriptions))
@@ -116,10 +113,12 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, scan bool, cre
 					continue
 				}
 
+				subscriptionName := subscriptions[to.String(m["SubscriptionId"])]
+
 				// Create a unique key for deduplication based on all fields
 				rec := &models.DefenderRecommendation{
 					SubscriptionId:         to.String(m["SubscriptionId"]),
-					SubscriptionName:       to.String(m["SubscriptionName"]),
+					SubscriptionName:       subscriptionName,
 					ResourceGroupName:      to.String(m["ResourceGroupName"]),
 					ResourceType:           to.String(m["ResourceType"]),
 					ResourceName:           to.String(m["ResourceName"]),
