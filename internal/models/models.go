@@ -125,7 +125,7 @@ type (
 	// CostResult - Cost result,
 	CostResult struct {
 		SubscriptionID, SubscriptionName, ServiceName, Value, Currency string
-		From, To time.Time
+		From, To                                                       time.Time
 	}
 
 	// AdvisorResult - Advisor result
@@ -181,23 +181,23 @@ const (
 	CategorySLA                         RecommendationCategory = "SLA"
 )
 
-func LogSubscriptionScan(subscriptionID string, serviceTypeOrName string) {
+func LogSubscriptionScan(subscriptionID string, source string) {
 	log.Info().
 		Str("subscriptionID", subscriptionID[29:]).
-		Str("service", serviceTypeOrName).
-		Msg("Scanning subscription")
-}
-
-func LogResourceTypeScan(serviceType string) {
-	log.Info().
-		Str("for", serviceType).
+		Str("for", source).
 		Msg("Scanning")
 }
 
-func LogGraphRecommendationScan(serviceType, recommendationId string) {
+func LogResourceTypeScan(source string) {
+	log.Info().
+		Str("for", source).
+		Msg("Scanning")
+}
+
+func LogGraphRecommendationScan(resourceType, recommendationId string) {
 	log.Info().
 		Str("recommendationId", recommendationId).
-		Str("serviceType", serviceType).
+		Str("resourceType", resourceType).
 		Msg("Scanning")
 }
 

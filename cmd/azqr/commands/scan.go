@@ -10,6 +10,7 @@ import (
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/profiling"
 
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,7 @@ func init() {
 	scanCmd.PersistentFlags().StringArrayP("subscription-id", "s", []string{}, "Azure Subscription Id")
 	scanCmd.PersistentFlags().StringArrayP("resource-group", "g", []string{}, "Azure Resource Group (Use with --subscription-id)")
 	scanCmd.PersistentFlags().StringArrayP("stages", "", []string{}, "Control scan stages. Without this flag, defaults are used (enabled: diagnostics,advisor,defender). Specify stages to enable (e.g., --stages cost,policy) or prefix with '-' to disable (e.g., --stages -diagnostics). Available: advisor,defender,defender-recommendations,arc,policy,cost,diagnostics")
+	scanCmd.PersistentFlags().StringArrayP("stage-param", "", []string{}, "Stage options in the form 'stage.key=value' (repeatable)")
 	scanCmd.PersistentFlags().StringArrayP("plugin", "", []string{}, "Enable internal plugins (comma-separated or multiple flags)")
 	scanCmd.PersistentFlags().BoolP("xlsx", "", true, "Create Excel report (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("json", "", false, "Create JSON report files")
@@ -55,6 +57,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	resourceGroups, _ := cmd.Flags().GetStringArray("resource-group")
 	outputFileName, _ := cmd.Flags().GetString("output-name")
 	stageNames, _ := cmd.Flags().GetStringArray("stages")
+	stageParams, _ := cmd.Flags().GetStringArray("stage-param")
 	xlsx, _ := cmd.Flags().GetBool("xlsx")
 	csv, _ := cmd.Flags().GetBool("csv")
 	json, _ := cmd.Flags().GetBool("json")
@@ -83,6 +86,10 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	// Initialize stage configs
 	stageConfigs := models.NewStageConfigsWithDefaults()
 	stageConfigs.ConfigureStages(stageNames)
+
+	if err := stageConfigs.ApplyStageParams(stageParams); err != nil {
+		log.Fatal().Err(err).Msg("failed applying stage parameters")
+	}
 
 	params := models.ScanParams{
 		ManagementGroups:       managementGroups,
