@@ -35,6 +35,7 @@ var allStages = map[string]bool{
 // BaseStageConfig contains configuration for a stage
 type BaseStageConfig struct {
 	Enabled bool
+	Options map[string]any
 }
 
 // StageConfigs manages all stage configurations using a map-based approach
