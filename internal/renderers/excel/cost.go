@@ -29,7 +29,7 @@ func renderCosts(f *excelize.File, data *renderers.ReportData) {
 	createFirstRow(f, "Costs", headers)
 
 	// Skip if no data to render
-	if data.Cost == nil || len(data.Cost.Items) == 0 {
+	if len(data.Cost) == 0 {
 		log.Info().Msg("Skipping Costs. No data to render")
 	}
 

@@ -20,7 +20,7 @@ type (
 		Advisor                 []*models.AdvisorResult
 		AzurePolicy             []*models.AzurePolicyResult
 		ArcSQL                  []*models.ArcSQLResult
-		Cost                    *models.CostResult
+		Cost                    []*models.CostResult
 		Recommendations         map[string]map[string]models.GraphRecommendation
 		Resources               []*models.Resource
 		ExludedResources        []*models.Resource
@@ -101,10 +101,10 @@ func (rd *ReportData) CostTable() [][]string {
 	headers := []string{"From", "To", "Subscription Id", "Subscription Name", "Service Name", "Value", "Currency"}
 
 	rows := [][]string{}
-	for _, r := range rd.Cost.Items {
+	for _, r := range rd.Cost {
 		row := []string{
-			rd.Cost.From.Format("2006-01-02"),
-			rd.Cost.To.Format("2006-01-02"),
+			r.From.Format("2006-01-02"),
+			r.To.Format("2006-01-02"),
 			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
 			r.SubscriptionName,
 			r.ServiceName,
@@ -333,11 +333,9 @@ func NewReportData(outputFile string, mask bool, stages *models.StageConfigs) Re
 		Advisor:                 []*models.AdvisorResult{},
 		AzurePolicy:             []*models.AzurePolicyResult{},
 		ArcSQL:                  []*models.ArcSQLResult{},
-		Cost: &models.CostResult{
-			Items: []*models.CostResultItem{},
-		},
-		ResourceTypeCount: []models.ResourceTypeCount{},
-		Stages:            stages,
+		Cost:                    []*models.CostResult{},
+		ResourceTypeCount:       []models.ResourceTypeCount{},
+		Stages:                  stages,
 	}
 }
 
