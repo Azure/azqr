@@ -20,6 +20,7 @@ type ScanArgs struct {
 	ResourceGroups []string `json:"resourceGroups,omitempty"`
 	Services       []string `json:"services,omitempty"`
 	Stages         []string `json:"stages,omitempty"`
+	StageParams    []string `json:"stageParams,omitempty"`
 	Mask           *bool    `json:"mask,omitempty"`
 }
 
@@ -34,6 +35,10 @@ func scanHandler(ctx context.Context, request mcp.CallToolRequest, args ScanArgs
 
 	params := models.NewScanParams()
 	params.Stages.ConfigureStages(args.Stages)
+
+	if err := params.Stages.ApplyStageParams(args.StageParams); err != nil {
+		log.Fatal().Err(err).Msg("failed applying stage parameters")
+	}
 
 	if args.Mask != nil {
 		params.Mask = *args.Mask
