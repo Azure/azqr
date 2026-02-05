@@ -200,7 +200,7 @@ func TestReportDataWithPluginResults(t *testing.T) {
 	reportData := NewReportData("test", true, stages)
 
 	// Add plugin results
-	reportData.PluginResults = []PluginResult{
+	reportData.PluginResults = []*PluginResult{
 		{
 			PluginName:  "zone-mapping",
 			SheetName:   "Zone Mapping",

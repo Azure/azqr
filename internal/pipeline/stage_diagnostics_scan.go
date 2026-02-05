@@ -44,10 +44,10 @@ func (s *DiagnosticsScanStage) Execute(ctx *ScanContext) error {
 		for _, rec := range recs {
 			// Add GraphRecommendation to report
 			if ctx.ReportData.Recommendations[resourceType] == nil {
-				ctx.ReportData.Recommendations[resourceType] = make(map[string]models.GraphRecommendation)
+				ctx.ReportData.Recommendations[resourceType] = make(map[string]*models.GraphRecommendation)
 			}
 
-			ctx.ReportData.Recommendations[resourceType][rec.RecommendationID] = rec
+			ctx.ReportData.Recommendations[resourceType][rec.RecommendationID] = &rec
 			recommendationCount++
 		}
 	}

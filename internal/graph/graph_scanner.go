@@ -168,9 +168,9 @@ func (a GraphScanner) getRecommendations(path string) map[string]map[string]mode
 	return r
 }
 
-func (a GraphScanner) ListRecommendations() (map[string]map[string]models.GraphRecommendation, []models.GraphRecommendation) {
-	recommendations := map[string]map[string]models.GraphRecommendation{}
-	rules := []models.GraphRecommendation{}
+func (a GraphScanner) ListRecommendations() (map[string]map[string]*models.GraphRecommendation, []*models.GraphRecommendation) {
+	recommendations := map[string]map[string]*models.GraphRecommendation{}
+	rules := []*models.GraphRecommendation{}
 
 	rec := a.GetRecommendations()
 
@@ -178,14 +178,14 @@ func (a GraphScanner) ListRecommendations() (map[string]map[string]models.GraphR
 		for _, t := range s.ResourceTypes() {
 			gr := a.getGraphRules(t, rec)
 			for _, r := range gr {
-				rules = append(rules, r)
+				rules = append(rules, &r)
 			}
 
 			for i, r := range gr {
 				if recommendations[strings.ToLower(t)] == nil {
-					recommendations[strings.ToLower(t)] = map[string]models.GraphRecommendation{}
+					recommendations[strings.ToLower(t)] = map[string]*models.GraphRecommendation{}
 				}
-				recommendations[strings.ToLower(t)][i] = r
+				recommendations[strings.ToLower(t)][i] = &r
 			}
 		}
 	}
@@ -199,16 +199,13 @@ func (a GraphScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*
 
 	_, rules := a.ListRecommendations()
 
-	// Staggering queries to avoid throttling. Max 15 queries each 5 seconds.
-	// Use 10 workers to match burst capacity and fully utilize the 5-second window
-	// https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
 	batchSize := bucketCapacity
 	batches := int(math.Ceil(float64(len(rules)) / float64(batchSize)))
 
 	log.Debug().Msgf("Using %d rules to scan in %d batches", len(rules), batches)
 
 	// Buffer the jobs and results channels to the number of rules to avoid deadlocks.
-	jobs := make(chan models.GraphRecommendation, len(rules))
+	jobs := make(chan *models.GraphRecommendation, len(rules))
 	ch := make(chan []*models.GraphResult, len(rules))
 
 	var wg sync.WaitGroup
@@ -250,7 +247,7 @@ func (a GraphScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*
 	return results
 }
 
-func (a *GraphScanner) worker(ctx context.Context, graph *GraphQueryClient, subscriptions map[string]string, jobs <-chan models.GraphRecommendation, results chan<- []*models.GraphResult, wg *sync.WaitGroup) {
+func (a *GraphScanner) worker(ctx context.Context, graph *GraphQueryClient, subscriptions map[string]string, jobs <-chan *models.GraphRecommendation, results chan<- []*models.GraphResult, wg *sync.WaitGroup) {
 	// worker processes batches of Graph recommendations from the jobs channel
 	for r := range jobs {
 		models.LogGraphRecommendationScan(r.ResourceType, r.RecommendationID)
@@ -263,7 +260,7 @@ func (a *GraphScanner) worker(ctx context.Context, graph *GraphQueryClient, subs
 	}
 }
 
-func (a GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule models.GraphRecommendation, subscriptions map[string]string) ([]*models.GraphResult, error) {
+func (a GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule *models.GraphRecommendation, subscriptions map[string]string) ([]*models.GraphResult, error) {
 	results := []*models.GraphResult{}
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {

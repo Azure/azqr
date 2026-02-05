@@ -83,7 +83,7 @@ func TestCreateJsonOutput(t *testing.T) {
 		Cost:                    []*models.CostResult{},
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
-		ResourceTypeCount:       []models.ResourceTypeCount{},
+		ResourceTypeCount:       []*models.ResourceTypeCount{},
 		Stages:                  models.NewStageConfigs(),
 	}
 
@@ -122,7 +122,7 @@ func TestCreateJsonReport(t *testing.T) {
 		Cost:                    []*models.CostResult{},
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
-		ResourceTypeCount:       []models.ResourceTypeCount{},
+		ResourceTypeCount:       []*models.ResourceTypeCount{},
 		Stages:                  stages,
 	}
 
@@ -194,9 +194,9 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 		Cost:                    []*models.CostResult{},
 		Resources:               []*models.Resource{},
 		ExludedResources:        []*models.Resource{},
-		ResourceTypeCount:       []models.ResourceTypeCount{},
+		ResourceTypeCount:       []*models.ResourceTypeCount{},
 		Stages:                  stages,
-		PluginResults: []renderers.PluginResult{
+		PluginResults: []*renderers.PluginResult{
 			{
 				PluginName:  "test-plugin",
 				Description: "Test Plugin",
