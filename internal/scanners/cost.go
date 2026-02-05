@@ -29,11 +29,11 @@ func (s *CostScanner) init(config *models.ScannerConfig) error {
 }
 
 // QueryCosts - Query Costs.
-func (s *CostScanner) QueryCosts(previousMonth bool) ([]*models.CostResult, error) {
+func (s *CostScanner) QueryCosts() ([]*models.CostResult, error) {
 	models.LogSubscriptionScan(s.config.SubscriptionID, "Costs")
 	timeframeType := armcostmanagement.TimeframeTypeCustom
 	etype := armcostmanagement.ExportTypeActualCost
-	fromTime, toTime := costTimeRange(time.Now().UTC(), previousMonth)
+	fromTime, toTime := costTimeRange(time.Now().UTC())
 	sum := armcostmanagement.FunctionTypeSum
 	dimension := armcostmanagement.QueryColumnTypeDimension
 	qd := armcostmanagement.QueryDefinition{
@@ -81,13 +81,13 @@ func (s *CostScanner) QueryCosts(previousMonth bool) ([]*models.CostResult, erro
 	return result, nil
 }
 
-func (s *CostScanner) Scan(config *models.ScannerConfig, previousMonth bool) []*models.CostResult {
+func (s *CostScanner) Scan(config *models.ScannerConfig) []*models.CostResult {
 	costResult := []*models.CostResult{}
 	err := s.init(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize Cost Scanner")
 	}
-	costs, err := s.QueryCosts(previousMonth)
+	costs, err := s.QueryCosts()
 	if err != nil && !models.ShouldSkipError(err) {
 		log.Fatal().Err(err).Msg("Failed to query costs")
 	}
@@ -95,13 +95,8 @@ func (s *CostScanner) Scan(config *models.ScannerConfig, previousMonth bool) []*
 	return costResult
 }
 
-func costTimeRange(now time.Time, previousMonth bool) (time.Time, time.Time) {
-	if previousMonth {
-		start := time.Date(now.Year(), now.Month()-1, 1, 0, 0, 0, 0, time.UTC)
-		end := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC).Add(-time.Nanosecond)
-		return start, end
-	}
-
-	start := time.Date(now.Year(), now.Month()-3, 1, 0, 0, 0, 0, time.UTC)
-	return start, now
+func costTimeRange(now time.Time) (time.Time, time.Time) {
+	start := time.Date(now.Year(), now.Month()-1, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC).Add(-time.Nanosecond)
+	return start, end
 }
