@@ -13,7 +13,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func renderDefender(f *excelize.File, data *renderers.ReportData) {
+func renderDefender(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.Stages.IsStageEnabled(models.StageNameDefender) {
 		log.Debug().Msg("Skipping Defender. Feature is disabled")
@@ -27,32 +27,27 @@ func renderDefender(f *excelize.File, data *renderers.ReportData) {
 
 	records := data.DefenderTable()
 	headers := records[0]
-	createFirstRow(f, "Defender", headers)
+	createFirstRow(f, "Defender", headers, styles)
 
 	// Skip if no data to render
 	if len(data.Defender) == 0 {
 		log.Info().Msg("Skipping Defender. No data to render")
+		return
 	}
 
 	records = records[1:]
-	currentRow := 4
-	for _, row := range records {
-		currentRow += 1
-		cell, err := excelize.CoordinatesToCellName(1, currentRow)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get cell")
-		}
-		err = f.SetSheetRow("Defender", cell, &row)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to set row")
-		}
+
+	// Use optimized batch writing for better performance
+	currentRow, err := writeRowsOptimized(f, "Defender", records, 4)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to write rows")
 	}
 
-	configureSheet(f, "Defender", headers, currentRow)
+	configureSheet(f, "Defender", headers, currentRow, styles)
 }
 
 // renderDefenderRecommendations renders the Defender recommendations to the Excel sheet.
-func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData) {
+func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.Stages.IsStageEnabled(models.StageNameDefenderRecommendations) {
 		log.Debug().Msg("Skipping DefenderRecommendations. Feature is disabled")
@@ -67,7 +62,7 @@ func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData)
 
 	records := data.DefenderRecommendationsTable()
 	headers := records[0]
-	createFirstRow(f, sheetName, headers)
+	createFirstRow(f, sheetName, headers, styles)
 
 	// Skip if no data to render
 	if len(data.DefenderRecommendations) == 0 {
@@ -76,19 +71,17 @@ func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData)
 	}
 
 	records = records[1:]
-	currentRow := 4
-	for _, row := range records {
-		currentRow += 1
-		cell, err := excelize.CoordinatesToCellName(1, currentRow)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get cell")
-		}
-		err = f.SetSheetRow(sheetName, cell, &row)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to set row")
-		}
-		setHyperLink(f, sheetName, 11, currentRow)
+
+	// Use optimized batch writing for better performance
+	currentRow, err := writeRowsOptimized(f, sheetName, records, 4)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to write rows")
 	}
 
-	configureSheet(f, sheetName, headers, currentRow)
+	// Apply hyperlinks to AzPortal Link column
+	for i := 5; i <= currentRow; i++ {
+		setHyperLink(f, sheetName, 11, i)
+	}
+
+	configureSheet(f, sheetName, headers, currentRow, styles)
 }

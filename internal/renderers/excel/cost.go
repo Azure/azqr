@@ -4,15 +4,16 @@
 package excel
 
 import (
-	"github.com/Azure/azqr/internal/models"
 	_ "image/png"
+
+	"github.com/Azure/azqr/internal/models"
 
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
-func renderCosts(f *excelize.File, data *renderers.ReportData) {
+func renderCosts(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.Stages.IsStageEnabled(models.StageNameCost) {
 		log.Debug().Msg("Skipping Costs. Feature is disabled")
@@ -26,26 +27,21 @@ func renderCosts(f *excelize.File, data *renderers.ReportData) {
 
 	records := data.CostTable()
 	headers := records[0]
-	createFirstRow(f, "Costs", headers)
+	createFirstRow(f, "Costs", headers, styles)
 
 	// Skip if no data to render
 	if len(data.Cost) == 0 {
 		log.Info().Msg("Skipping Costs. No data to render")
+		return
 	}
 
 	records = records[1:]
-	currentRow := 4
-	for _, row := range records {
-		currentRow += 1
-		cell, err := excelize.CoordinatesToCellName(1, currentRow)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get cell")
-		}
-		err = f.SetSheetRow("Costs", cell, &row)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to set row")
-		}
+
+	// Use optimized batch writing for better performance
+	currentRow, err := writeRowsOptimized(f, "Costs", records, 4)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to write rows")
 	}
 
-	configureSheet(f, "Costs", headers, currentRow)
+	configureSheet(f, "Costs", headers, currentRow, styles)
 }
