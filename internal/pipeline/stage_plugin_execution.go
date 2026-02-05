@@ -42,7 +42,7 @@ func (s *PluginExecutionStage) Execute(ctx *ScanContext) error {
 	}
 
 	// Execute plugins and collect results
-	results := []renderers.PluginResult{}
+	results := []*renderers.PluginResult{}
 	for _, pluginScanner := range internalPluginScanners {
 		result, err := pluginScanner.Scan(ctx.Ctx, ctx.Cred, ctx.Subscriptions, ctx.Params.Filters)
 		if err != nil {
@@ -56,7 +56,7 @@ func (s *PluginExecutionStage) Execute(ctx *ScanContext) error {
 			Description: result.Description,
 			Table:       result.Table,
 		}
-		results = append(results, pluginResult)
+		results = append(results, &pluginResult)
 	}
 
 	ctx.ReportData.PluginResults = results

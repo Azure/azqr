@@ -4,15 +4,16 @@
 package excel
 
 import (
-	"github.com/Azure/azqr/internal/models"
 	_ "image/png"
+
+	"github.com/Azure/azqr/internal/models"
 
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
-func renderAdvisor(f *excelize.File, data *renderers.ReportData) {
+func renderAdvisor(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.Stages.IsStageEnabled(models.StageNameAdvisor) {
 		log.Debug().Msg("Skipping Advisor. Feature is disabled")
@@ -26,26 +27,21 @@ func renderAdvisor(f *excelize.File, data *renderers.ReportData) {
 
 	records := data.AdvisorTable()
 	headers := records[0]
-	createFirstRow(f, "Advisor", headers)
+	createFirstRow(f, "Advisor", headers, styles)
 
 	// Skip if no data to render
 	if len(data.Advisor) == 0 {
 		log.Info().Msg("Skipping Advisor. No data to render")
+		return
 	}
 
 	records = records[1:]
-	currentRow := 4
-	for _, row := range records {
-		currentRow += 1
-		cell, err := excelize.CoordinatesToCellName(1, currentRow)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get cell")
-		}
-		err = f.SetSheetRow("Advisor", cell, &row)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to set row")
-		}
+
+	// Use optimized batch writing for better performance
+	currentRow, err := writeRowsOptimized(f, "Advisor", records, 4)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to write rows")
 	}
 
-	configureSheet(f, "Advisor", headers, currentRow)
+	configureSheet(f, "Advisor", headers, currentRow, styles)
 }

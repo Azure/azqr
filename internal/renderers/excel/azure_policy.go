@@ -4,8 +4,9 @@
 package excel
 
 import (
-	"github.com/Azure/azqr/internal/models"
 	_ "image/png"
+
+	"github.com/Azure/azqr/internal/models"
 
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
@@ -13,7 +14,7 @@ import (
 )
 
 // renderAzurePolicy creates and populates the Azure Policy sheet in the Excel report.
-func renderAzurePolicy(f *excelize.File, data *renderers.ReportData) {
+func renderAzurePolicy(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
 	// Skip creating the sheet if the feature is disabled
 	if !data.Stages.IsStageEnabled(models.StageNamePolicy) {
 		log.Debug().Msg("Skipping Azure Policy. Feature is disabled")
@@ -27,26 +28,21 @@ func renderAzurePolicy(f *excelize.File, data *renderers.ReportData) {
 
 	records := data.AzurePolicyTable()
 	headers := records[0]
-	createFirstRow(f, "Azure Policy", headers)
+	createFirstRow(f, "Azure Policy", headers, styles)
 
 	// Skip if no data to render
 	if len(data.AzurePolicy) == 0 {
 		log.Info().Msg("Skipping Azure Policy. No data to render")
+		return
 	}
 
 	records = records[1:]
-	currentRow := 4
-	for _, row := range records {
-		currentRow += 1
-		cell, err := excelize.CoordinatesToCellName(1, currentRow)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get cell")
-		}
-		err = f.SetSheetRow("Azure Policy", cell, &row)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to set row")
-		}
+
+	// Use optimized batch writing for better performance
+	currentRow, err := writeRowsOptimized(f, "Azure Policy", records, 4)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to write rows")
 	}
 
-	configureSheet(f, "Azure Policy", headers, currentRow)
+	configureSheet(f, "Azure Policy", headers, currentRow, styles)
 }
