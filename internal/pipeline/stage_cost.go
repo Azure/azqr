@@ -4,6 +4,8 @@
 package pipeline
 
 import (
+	"sync"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/scanners"
 )
@@ -37,19 +39,59 @@ func (s *CostStage) Execute(ctx *ScanContext) error {
 		}
 	}
 
-	// Scan costs for all subscriptions
+	subCount := len(ctx.Subscriptions)
+	if subCount == 0 {
+		ctx.ReportData.Cost = nil
+		return nil
+	}
+
+	// Worker pool to limit concurrent cost scanner goroutines
+	const numCostWorkers = 10
+	workerCount := numCostWorkers
+	if subCount < workerCount {
+		workerCount = subCount
+	}
+
+	jobs := make(chan string, subCount)
+	results := make(chan []*models.CostResult, subCount)
+
+	// Start worker pool
+	var workerWg sync.WaitGroup
+	for i := 0; i < workerCount; i++ {
+		workerWg.Add(1)
+		go func() {
+			defer workerWg.Done()
+			for subID := range jobs {
+				scannerConfig := &models.ScannerConfig{
+					Ctx:            ctx.Ctx,
+					Cred:           ctx.Cred,
+					ClientOptions:  ctx.ClientOptions,
+					SubscriptionID: subID,
+				}
+				result := costScanner.Scan(scannerConfig, previousMonth)
+				if len(result) > 0 {
+					results <- result
+				}
+			}
+		}()
+	}
+
+	// Send subscription jobs to workers
+	for subID := range ctx.Subscriptions {
+		jobs <- subID
+	}
+	close(jobs)
+
+	// Wait for workers to finish and close results channel
+	go func() {
+		workerWg.Wait()
+		close(results)
+	}()
+
+	// Collect results from all workers
 	var allCosts []*models.CostResult
-	for subid := range ctx.Subscriptions {
-		scannerConfig := &models.ScannerConfig{
-			Ctx:            ctx.Ctx,
-			Cred:           ctx.Cred,
-			ClientOptions:  ctx.ClientOptions,
-			SubscriptionID: subid,
-		}
-		result := costScanner.Scan(scannerConfig, previousMonth)
-		if len(result) > 0 {
-			allCosts = append(allCosts, result...)
-		}
+	for result := range results {
+		allCosts = append(allCosts, result...)
 	}
 
 	// Aggregate all cost items into report data
