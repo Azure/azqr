@@ -18,13 +18,13 @@ type OptionSpec struct {
 
 // StageOptionRegistry defines allowed options for each stage
 var stageOptionRegistry = map[string]map[string]OptionSpec{
-	StageNameCost: {
-		"previousMonth": {
-			Type:        "bool",
-			Default:     false,
-			Description: "Scan costs for the previous calendar month (UTC) instead of default 3-month period",
-		},
-	},
+	// StageNameCost: {
+	// 	"previousMonth": {
+	// 		Type:        "bool",
+	// 		Default:     false,
+	// 		Description: "Scan costs for the previous calendar month (UTC) instead of default 3-month period",
+	// 	},
+	// },
 }
 
 // ParseAndValidateStageParams parses and validates stage parameters against the registry.
