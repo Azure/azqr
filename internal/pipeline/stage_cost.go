@@ -28,17 +28,6 @@ func (s *CostStage) Skip(ctx *ScanContext) bool {
 func (s *CostStage) Execute(ctx *ScanContext) error {
 	costScanner := scanners.CostScanner{}
 
-	// Get cost stage options and extract previousMonth flag (default false)
-	costOpts := ctx.Params.Stages.GetStageOptions(models.StageNameCost)
-	previousMonth := false
-	if costOpts != nil {
-		if val, ok := costOpts["previousMonth"]; ok {
-			if b, ok := val.(bool); ok {
-				previousMonth = b
-			}
-		}
-	}
-
 	subCount := len(ctx.Subscriptions)
 	if subCount == 0 {
 		ctx.ReportData.Cost = nil
@@ -68,7 +57,7 @@ func (s *CostStage) Execute(ctx *ScanContext) error {
 					ClientOptions:  ctx.ClientOptions,
 					SubscriptionID: subID,
 				}
-				result := costScanner.Scan(scannerConfig, previousMonth)
+				result := costScanner.Scan(scannerConfig)
 				if len(result) > 0 {
 					results <- result
 				}
