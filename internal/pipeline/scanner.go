@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package internal
+package pipeline
 
 import (
 	"time"
 
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/renderers/json"
 	"github.com/rs/zerolog/log"
 )
@@ -27,30 +26,30 @@ func (sc Scanner) ScanPlugins(params *models.ScanParams) string {
 // scan executes the scan using the composable pipeline pattern
 func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) string {
 	// Import pipeline package
-	builder := pipeline.NewScanPipelineBuilder()
+	builder := NewScanPipelineBuilder()
 
 	// Create scan context
-	scanCtx := pipeline.NewScanContext(params)
+	scanCtx := NewScanContext(params)
 
-	var pipeline *pipeline.Pipeline
+	var pipe *Pipeline
 	if defaultPipeline {
 		// Ensure graph stage is enabled for regular scans
 		if err := params.Stages.ValidateGraphStageEnabled(); err != nil {
 			log.Fatal().Err(err).Msg("Configuration error")
 		}
-		pipeline = builder.BuildDefault()
+		pipe = builder.BuildDefault()
 	} else {
-		pipeline = builder.BuildPluginOnly()
+		pipe = builder.BuildPluginOnly()
 	}
 
-	err := pipeline.Execute(scanCtx)
+	err := pipe.Execute(scanCtx)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Scan failed")
 	}
 
 	// Log metrics in debug mode
 	if params.Debug {
-		pipeline.LogMetrics()
+		pipe.LogMetrics()
 	}
 
 	// Log final timing
