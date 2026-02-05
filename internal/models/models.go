@@ -205,7 +205,7 @@ func ShouldSkipError(err error) bool {
 	var respErr *azcore.ResponseError
 	if errors.As(err, &respErr) {
 		switch respErr.ErrorCode {
-		case "MissingRegistrationForResourceProvider", "MissingSubscriptionRegistration", "DisallowedOperation":
+		case "MissingRegistrationForResourceProvider", "MissingSubscriptionRegistration", "DisallowedOperation", "NotFound":
 			log.Warn().Msgf("Subscription failed with code: %s. Skipping Scan...", respErr.ErrorCode)
 			return true
 		}
