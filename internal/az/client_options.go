@@ -17,10 +17,9 @@ func NewDefaultClientOptions() *arm.ClientOptions {
 	return &arm.ClientOptions{
 		ClientOptions: policy.ClientOptions{
 			Retry: policy.RetryOptions{
-				// Only if the HTTP response does not contain a Retry-After header
-				RetryDelay:    1 * time.Second, // More aggressive than default (4s)
-				MaxRetries:    3,
-				MaxRetryDelay: 60 * time.Second,
+				RetryDelay:    4 * time.Second,  // SDK default, explicit for clarity
+				MaxRetryDelay: 60 * time.Second, // SDK default, explicit for clarity
+				MaxRetries:    5,
 			},
 			Cloud:            GetCloudConfiguration(),
 			PerRetryPolicies: []policy.Policy{throttling.NewThrottlingPolicy()},
