@@ -4,15 +4,16 @@
 package excel
 
 import (
-	"github.com/Azure/azqr/internal/models"
 	_ "image/png"
+
+	"github.com/Azure/azqr/internal/models"
 
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 	"github.com/xuri/excelize/v2"
 )
 
-func renderImpactedResources(f *excelize.File, data *renderers.ReportData) {
+func renderImpactedResources(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
 	sheetName := "ImpactedResources"
 
 	if !data.Stages.IsStageEnabled(models.StageNameGraph) {
@@ -27,25 +28,23 @@ func renderImpactedResources(f *excelize.File, data *renderers.ReportData) {
 
 	records := data.ImpactedTable()
 	headers := records[0]
-	createFirstRow(f, sheetName, headers)
+	createFirstRow(f, sheetName, headers, styles)
 
 	if len(records) > 0 {
 		records = records[1:]
-		currentRow := 4
-		for _, row := range records {
-			currentRow += 1
-			cell, err := excelize.CoordinatesToCellName(1, currentRow)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to get cell")
-			}
-			err = f.SetSheetRow(sheetName, cell, &row)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to set row")
-			}
-			setHyperLink(f, sheetName, 18, currentRow)
+
+		// Use optimized batch writing for better performance
+		currentRow, err := writeRowsOptimized(f, sheetName, records, 4)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to write rows")
 		}
 
-		configureSheet(f, sheetName, headers, currentRow)
+		// Apply hyperlinks to Learn column
+		for i := 5; i <= currentRow; i++ {
+			setHyperLink(f, sheetName, 18, i)
+		}
+
+		configureSheet(f, sheetName, headers, currentRow, styles)
 	} else {
 		log.Info().Msgf("Skipping %s. No data to render", sheetName)
 	}
