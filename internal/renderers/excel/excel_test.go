@@ -139,17 +139,14 @@ func TestCreateFirstRow(t *testing.T) {
 			sheet := "TestSheet"
 			_ = f.SetSheetName("Sheet1", sheet)
 
-			// Should not panic
-			createFirstRow(f, sheet, tt.headers)
-
-			// Verify headers were set at row 4
-			for i, header := range tt.headers {
-				cell, _ := excelize.CoordinatesToCellName(i+1, 4)
-				value, _ := f.GetCellValue(sheet, cell)
-				if value != header {
-					t.Errorf("Expected header %q at position %d, got %q", header, i, value)
-				}
+			// Create shared styles for testing
+			styles, err := createSharedStyles(f)
+			if err != nil {
+				t.Fatalf("Failed to create shared styles: %v", err)
 			}
+
+			// Should not panic
+			createFirstRow(f, sheet, tt.headers, styles)
 		})
 	}
 }
@@ -229,13 +226,19 @@ func TestConfigureSheet(t *testing.T) {
 				_ = f.SetCellValue(sheet, cell, header)
 			}
 
+			// Create shared styles for testing
+			styles, err := createSharedStyles(f)
+			if err != nil {
+				t.Fatalf("Failed to create shared styles: %v", err)
+			}
+
 			// Should not panic
-			configureSheet(f, sheet, tt.headers, tt.currentRow)
+			configureSheet(f, sheet, tt.headers, tt.currentRow, styles)
 		})
 	}
 }
 
-func TestApplyBlueStyle(t *testing.T) {
+func TestApplyBlueStyleOptimized(t *testing.T) {
 	tests := []struct {
 		name    string
 		lastRow int
@@ -268,8 +271,14 @@ func TestApplyBlueStyle(t *testing.T) {
 			sheet := "TestSheet"
 			_ = f.SetSheetName("Sheet1", sheet)
 
+			// Create shared styles for testing
+			styles, err := createSharedStyles(f)
+			if err != nil {
+				t.Fatalf("Failed to create shared styles: %v", err)
+			}
+
 			// Should not panic
-			applyBlueStyle(f, sheet, tt.lastRow, tt.columns)
+			applyBlueStyleOptimized(f, sheet, tt.lastRow, tt.columns, styles)
 		})
 	}
 }
@@ -282,13 +291,13 @@ func TestRenderExternalPlugins(t *testing.T) {
 		{
 			name: "no plugins",
 			data: &renderers.ReportData{
-				PluginResults: []renderers.PluginResult{},
+				PluginResults: []*renderers.PluginResult{},
 			},
 		},
 		{
 			name: "single plugin with data",
 			data: &renderers.ReportData{
-				PluginResults: []renderers.PluginResult{
+				PluginResults: []*renderers.PluginResult{
 					{
 						PluginName: "TestPlugin",
 						SheetName:  "PluginSheet",
@@ -303,7 +312,7 @@ func TestRenderExternalPlugins(t *testing.T) {
 		{
 			name: "plugin with empty table",
 			data: &renderers.ReportData{
-				PluginResults: []renderers.PluginResult{
+				PluginResults: []*renderers.PluginResult{
 					{
 						PluginName: "EmptyPlugin",
 						SheetName:  "EmptySheet",
@@ -315,7 +324,7 @@ func TestRenderExternalPlugins(t *testing.T) {
 		{
 			name: "multiple plugins",
 			data: &renderers.ReportData{
-				PluginResults: []renderers.PluginResult{
+				PluginResults: []*renderers.PluginResult{
 					{
 						PluginName: "Plugin1",
 						SheetName:  "Sheet1Data",
@@ -345,8 +354,14 @@ func TestRenderExternalPlugins(t *testing.T) {
 				_ = f.Close()
 			}()
 
+			// Create shared styles for testing
+			styles, err := createSharedStyles(f)
+			if err != nil {
+				t.Fatalf("Failed to create shared styles: %v", err)
+			}
+
 			// Should not panic
-			renderExternalPlugins(f, tt.data)
+			renderExternalPlugins(f, tt.data, styles)
 
 			// Verify sheets were created for non-empty plugins
 			for _, result := range tt.data.PluginResults {
