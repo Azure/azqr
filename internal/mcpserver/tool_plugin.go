@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Azure/azqr/internal"
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/rs/zerolog/log"
 )
@@ -53,7 +53,7 @@ func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequ
 			pluginName: true,
 		}
 
-		scanner := internal.Scanner{}
+		scanner := pipeline.Scanner{}
 		r := scanner.ScanPlugins(params)
 
 		fileName := params.OutputName + ".xlsx"
