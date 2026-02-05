@@ -23,13 +23,17 @@ func (p *ThrottlingPolicy) Do(req *policy.Request) (*http.Response, error) {
 	url := req.Raw().URL.String()
 	var err error
 	switch {
-	case strings.Contains(url, "prices.azure.com"):
-		log.Debug().
-			Msg("Applying Price API throttling limiter")
-		err = WaitGraph(req.Raw().Context())
 	case strings.Contains(url, "Microsoft.ResourceGraph/resources"):
 		log.Debug().
 			Msg("Applying Graph API throttling limiter")
+		err = WaitGraph(req.Raw().Context())
+	case strings.Contains(url, "Microsoft.CostManagement/query"):
+		log.Debug().
+			Msg("Applying Cost Management API throttling limiter")
+		err = WaitCost(req.Raw().Context())
+	case strings.Contains(url, "prices.azure.com"):
+		log.Debug().
+			Msg("Applying Price API throttling limiter")
 		err = WaitGraph(req.Raw().Context())
 	default: // Default to ARM throttling
 		log.Debug().
