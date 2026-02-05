@@ -6,8 +6,8 @@
 package commands
 
 import (
-	"github.com/Azure/azqr/internal"
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/profiling"
 
 	"github.com/rs/zerolog/log"
@@ -110,7 +110,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 		TraceProfile:           traceProfile,
 	}
 
-	scanner := internal.Scanner{}
+	scanner := pipeline.Scanner{}
 	scanner.Scan(&params)
 }
 
@@ -167,7 +167,7 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 		TraceProfile:           traceProfile,
 	}
 
-	scanner := internal.Scanner{}
+	scanner := pipeline.Scanner{}
 	// Call ScanPlugins directly for optimized plugin-only execution
 	scanner.ScanPlugins(&params)
 }
