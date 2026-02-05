@@ -19,7 +19,6 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 echo "Validating scanner coverage for APRL services..."
-echo ""
 
 # Create temporary files
 TEMP_DIR=$(mktemp -d)
@@ -84,8 +83,7 @@ missing_count=$(wc -l < "$MISSING_SERVICES")
 present_count=$((total_services - missing_count))
 
 if [ "$missing_count" -eq 0 ]; then
-    echo -e "${GREEN}✓ All APRL services are registered in scanners.go${NC}"
-    echo ""
+    echo -e "✅ All APRL services are registered in scanners.go${NC}"
     echo "Total APRL services with YAML and KQL: $total_services"
     echo "All services are present in scanners.go"
     exit 0
