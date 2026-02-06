@@ -107,7 +107,7 @@ func LoadYamlPlugin(filePath string) (*Plugin, []models.GraphRecommendation, err
 
 // discoverYamlPlugins searches for YAML plugins in configured directories
 func discoverYamlPlugins(dirs []string) ([]*Plugin, error) {
-	plugins := make([]*Plugin, 0)
+	plugins := make([]*Plugin, 0, 16)
 	seen := make(map[string]bool)
 
 	for _, dir := range dirs {

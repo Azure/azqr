@@ -78,28 +78,37 @@ func (rd *ReportData) ImpactedTable() [][]string {
 
 	headers := []string{"Validated Using", "Source", "Category", "Impact", "Resource Type", "Recommendation", "Recommendation Id", "Subscription Id", "Subscription Name", "Resource Group", "Resource Name", "Resource Id", "Param1", "Param2", "Param3", "Param4", "Param5", "Learn"}
 
+	// Composite key type for deduplication - avoids string concatenation allocations
+	type impactedKey struct {
+		resourceID       string
+		recommendationID string
+	}
+
 	// Pre-allocate with estimated capacity (graph length + 1 for headers)
 	// This avoids multiple slice reallocations
 	rows := make([][]string, 1, len(rd.Graph)+1)
 	rows[0] = headers
 
 	// Use struct{} instead of bool to save memory
-	seen := make(map[string]struct{}, len(rd.Graph))
+	seen := make(map[impactedKey]struct{}, len(rd.Graph))
 
 	for _, r := range rd.Graph {
-		if skipCategory(string(r.Category)) {
+		// Cache string conversions once to avoid repeated type conversions
+		category := string(r.Category)
+		if skipCategory(category) {
 			continue
 		}
 
-		// Create composite key for deduplication
-		key := r.ResourceID + "|" + r.RecommendationID
+		// Create composite key - avoids string concatenation
+		key := impactedKey{
+			resourceID:       r.ResourceID,
+			recommendationID: r.RecommendationID,
+		}
 		if _, exists := seen[key]; exists {
 			continue // Skip duplicate
 		}
 		seen[key] = struct{}{}
 
-		// Cache string conversions to avoid repeated type conversions
-		category := string(r.Category)
 		impact := string(r.Impact)
 
 		row := []string{
@@ -309,19 +318,19 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 	rows := make([][]string, 1, estimatedCap)
 	rows[0] = headers
 
+	deployedTypes := make(map[string]bool, len(rd.ResourceTypeCount))
+	for _, resType := range rd.ResourceTypeCount {
+		deployedTypes[strings.ToLower(resType.ResourceType)] = true
+	}
+	// Always consider Microsoft.Resources as deployed
+	deployedTypes["microsoft.resources"] = true
+
 	for _, rt := range rd.Recommendations {
 		for _, r := range rt {
 			if skipCategory(r.Category) {
 				continue
 			}
-			typeIsDeployed := false
-			for _, resType := range rd.ResourceTypeCount {
-				if strings.EqualFold(resType.ResourceType, r.ResourceType) ||
-					strings.EqualFold(r.ResourceType, "Microsoft.Resources") {
-					typeIsDeployed = true
-					break
-				}
-			}
+			typeIsDeployed := deployedTypes[strings.ToLower(r.ResourceType)]
 
 			implemented := "N/A"
 			switch {
@@ -490,19 +499,16 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 	rows := make([][]string, 1, len(resources)+1)
 	rows[0] = headers
 
-	for _, r := range resources {
-		sla := ""
-
-		for _, a := range rd.Graph {
-			if strings.EqualFold(strings.ToLower(a.ResourceID), strings.ToLower(r.ID)) {
-				if a.Category == models.CategorySLA {
-					sla = a.Param1
-				}
-				if sla != "" {
-					break
-				}
-			}
+	slaMap := make(map[string]string, len(rd.Graph))
+	for _, a := range rd.Graph {
+		if a.Category == models.CategorySLA {
+			// Use lowercase for case-insensitive lookup
+			slaMap[strings.ToLower(a.ResourceID)] = a.Param1
 		}
+	}
+
+	for _, r := range resources {
+		sla := slaMap[strings.ToLower(r.ID)]
 
 		row := []string{
 			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
