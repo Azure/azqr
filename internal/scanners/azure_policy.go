@@ -53,9 +53,15 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 	for s := range subscriptions {
 		subs = append(subs, to.Ptr(s))
 	}
+	// Composite key type for deduplication - avoids string concatenation allocations
+	type policyKey struct {
+		resourceID         string
+		policyDefinitionID string
+	}
+
 	result := graphClient.Query(ctx, query, subs)
 	resources := []*models.AzurePolicyResult{}
-	seen := make(map[string]bool) // Deduplication map
+	seen := make(map[policyKey]struct{}, len(result.Data))
 
 	if result.Data != nil {
 		for _, row := range result.Data {
@@ -87,12 +93,14 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 				ComplianceState:      to.String(m["complianceState"]),
 			}
 
-			// Create unique key from ResourceID + PolicyDefinitionID
-			// This combination should uniquely identify a policy compliance state
-			key := rec.ResourceID + "|" + rec.PolicyDefinitionID
+			// Create unique composite key - avoids string concatenation
+			key := policyKey{
+				resourceID:         rec.ResourceID,
+				policyDefinitionID: rec.PolicyDefinitionID,
+			}
 
-			if !seen[key] {
-				seen[key] = true
+			if _, exists := seen[key]; !exists {
+				seen[key] = struct{}{}
 				resources = append(resources, rec)
 			}
 		}

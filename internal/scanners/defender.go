@@ -99,7 +99,7 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 	}
 	result := graphClient.Query(ctx, query, subs)
 	resources := []*models.DefenderRecommendation{}
-	seen := make(map[string]bool) // Deduplication map
+	seen := make(map[string]bool, len(result.Data))
 	if result.Data != nil {
 		for _, row := range result.Data {
 			m := row.(map[string]interface{})

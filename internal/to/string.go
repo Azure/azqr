@@ -2,11 +2,12 @@ package to
 
 import (
 	"encoding/json"
-	"fmt"
+	"strconv"
 
 	"github.com/rs/zerolog/log"
 )
 
+// String converts an interface{} to string efficiently.
 func String(i interface{}) string {
 	if i == nil {
 		return ""
@@ -16,9 +17,9 @@ func String(i interface{}) string {
 	case string:
 		return v
 	case int:
-		return fmt.Sprintf("%d", v)
+		return strconv.Itoa(v)
 	case bool:
-		return fmt.Sprintf("%t", v)
+		return strconv.FormatBool(v)
 	default:
 		jsonStr, err := json.Marshal(i)
 		if err != nil {
