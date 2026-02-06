@@ -39,9 +39,16 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 	for s := range subscriptions {
 		subs = append(subs, to.Ptr(s))
 	}
+	// Composite key type for deduplication - avoids string concatenation allocations
+	type advisorKey struct {
+		resourceID       string
+		recommendationID string
+		category         string
+	}
+
 	result := graphClient.Query(ctx, query, subs)
 	resources := []*models.AdvisorResult{}
-	seen := make(map[string]bool) // Deduplication map
+	seen := make(map[advisorKey]struct{}, len(result.Data))
 	if result.Data != nil {
 		for _, row := range result.Data {
 			m := row.(map[string]interface{})
@@ -67,12 +74,15 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 				RecommendationID: to.String(m["RecommendationTypeId"]),
 			}
 
-			// Create unique key from ResourceID + RecommendationID
-			// This combination should uniquely identify an advisor recommendation
-			key := rec.ResourceID + "|" + rec.RecommendationID + "|" + rec.Category
+			// Create unique composite key - avoids string concatenation
+			key := advisorKey{
+				resourceID:       rec.ResourceID,
+				recommendationID: rec.RecommendationID,
+				category:         rec.Category,
+			}
 
-			if !seen[key] {
-				seen[key] = true
+			if _, exists := seen[key]; !exists {
+				seen[key] = struct{}{}
 				resources = append(resources, rec)
 			}
 		}

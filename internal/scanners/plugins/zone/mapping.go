@@ -57,7 +57,7 @@ func (s *ZoneMappingScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 	// Use parallel processing for performance
 	var mu sync.Mutex
 	var wg sync.WaitGroup
-	results := make([]zoneMappingResult, 0)
+	results := make([]zoneMappingResult, 0, len(subscriptions)*10)
 
 	// Process subscriptions in parallel with worker pool
 	const maxWorkers = 5

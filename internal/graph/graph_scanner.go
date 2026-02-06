@@ -74,7 +74,7 @@ func (a *GraphScanner) RegisterExternalQuery(resourceType string, recommendation
 }
 
 // GetRecommendations returns a map with all Graph recommendations
-func (a GraphScanner) GetRecommendations() map[string]map[string]models.GraphRecommendation {
+func (a *GraphScanner) GetRecommendations() map[string]map[string]models.GraphRecommendation {
 	recommendations := map[string]map[string]models.GraphRecommendation{}
 	for _, t := range a.scanType {
 		var source string
@@ -101,7 +101,7 @@ func (a GraphScanner) GetRecommendations() map[string]map[string]models.GraphRec
 	return recommendations
 }
 
-func (a GraphScanner) getRecommendations(path string) map[string]map[string]models.GraphRecommendation {
+func (a *GraphScanner) getRecommendations(path string) map[string]map[string]models.GraphRecommendation {
 	r := map[string]map[string]models.GraphRecommendation{}
 
 	fsys, err := fs.Sub(embededFiles, path)
@@ -168,7 +168,7 @@ func (a GraphScanner) getRecommendations(path string) map[string]map[string]mode
 	return r
 }
 
-func (a GraphScanner) ListRecommendations() (map[string]map[string]*models.GraphRecommendation, []*models.GraphRecommendation) {
+func (a *GraphScanner) ListRecommendations() (map[string]map[string]*models.GraphRecommendation, []*models.GraphRecommendation) {
 	recommendations := map[string]map[string]*models.GraphRecommendation{}
 	rules := []*models.GraphRecommendation{}
 
@@ -193,7 +193,7 @@ func (a GraphScanner) ListRecommendations() (map[string]map[string]*models.Graph
 }
 
 // Scan scans Azure resources using Graph queries
-func (a GraphScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*models.GraphResult {
+func (a *GraphScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []*models.GraphResult {
 	results := []*models.GraphResult{}
 	graph := NewGraphQuery(cred)
 
@@ -260,7 +260,7 @@ func (a *GraphScanner) worker(ctx context.Context, graph *GraphQueryClient, subs
 	}
 }
 
-func (a GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule *models.GraphRecommendation, subscriptions map[string]string) ([]*models.GraphResult, error) {
+func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule *models.GraphRecommendation, subscriptions map[string]string) ([]*models.GraphResult, error) {
 	results := []*models.GraphResult{}
 	subs := make([]*string, 0, len(subscriptions))
 	for s := range subscriptions {
@@ -322,7 +322,7 @@ func (a GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryClie
 	return results, nil
 }
 
-func (a GraphScanner) getGraphRules(service string, rec map[string]map[string]models.GraphRecommendation) map[string]models.GraphRecommendation {
+func (a *GraphScanner) getGraphRules(service string, rec map[string]map[string]models.GraphRecommendation) map[string]models.GraphRecommendation {
 	r := map[string]models.GraphRecommendation{}
 
 	// Add embedded recommendations

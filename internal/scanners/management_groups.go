@@ -24,7 +24,7 @@ func (sc ManagementGroupDiscovery) ListSubscriptions(ctx context.Context, cred a
 	for _, group := range groups {
 		resultPager := client.NewManagementGroupSubscriptionsClient().NewGetSubscriptionsUnderManagementGroupPager(group, nil)
 
-		subscriptions := make([]*armmanagementgroups.SubscriptionUnderManagementGroup, 0)
+		subscriptions := make([]*armmanagementgroups.SubscriptionUnderManagementGroup, 0, 10)
 		for resultPager.More() {
 			pageResp, err := resultPager.NextPage(ctx)
 			if err != nil {
