@@ -222,7 +222,7 @@ func ListResourceGroup(ctx context.Context, cred azcore.TokenCredential, subscri
 
 	resultPager := resourceGroupClient.NewListPager(nil)
 
-	resourceGroups := make([]*armresources.ResourceGroup, 0)
+	resourceGroups := make([]*armresources.ResourceGroup, 0, 20)
 	for resultPager.More() {
 		pageResp, err := resultPager.NextPage(ctx)
 		if err != nil {
