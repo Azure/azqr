@@ -68,7 +68,7 @@ func NewGraphQuery(cred azcore.TokenCredential) *GraphQueryClient {
 // It handles batching and pagination.
 func (q *GraphQueryClient) Query(ctx context.Context, query string, subscriptions []*string) *GraphResult {
 	result := GraphResult{
-		Data: make([]interface{}, 0),
+		Data: make([]interface{}, 0, 5000),
 	}
 
 	// Convert []*string to []string for serialization

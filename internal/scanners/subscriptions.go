@@ -13,7 +13,7 @@ import (
 
 type SubcriptionDiscovery struct{}
 
-func (sc SubcriptionDiscovery) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptions []string, filters *models.Filters, options *arm.ClientOptions) map[string]string {
+func (sc *SubcriptionDiscovery) ListSubscriptions(ctx context.Context, cred azcore.TokenCredential, subscriptions []string, filters *models.Filters, options *arm.ClientOptions) map[string]string {
 	client, err := armsubscription.NewSubscriptionsClient(cred, options)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create subscriptions client")
@@ -21,7 +21,7 @@ func (sc SubcriptionDiscovery) ListSubscriptions(ctx context.Context, cred azcor
 
 	resultPager := client.NewListPager(nil)
 
-	subs := make([]*armsubscription.Subscription, 0)
+	subs := make([]*armsubscription.Subscription, 0, 10)
 	for resultPager.More() {
 		pageResp, err := resultPager.NextPage(ctx)
 		if err != nil {

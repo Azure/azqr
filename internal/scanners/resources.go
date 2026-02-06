@@ -13,7 +13,7 @@ import (
 
 type ResourceDiscovery struct{}
 
-func (sc ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) ([]*models.Resource, []*models.Resource) {
+func (sc *ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) ([]*models.Resource, []*models.Resource) {
 	models.LogResourceTypeScan("Resources")
 
 	graphClient := graph.NewGraphQuery(cred)
