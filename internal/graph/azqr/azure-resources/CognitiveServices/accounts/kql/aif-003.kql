@@ -1,3 +1,4 @@
+// Cognitive Services SLA
 resources
 | where type =~ 'Microsoft.CognitiveServices/accounts'
 | extend recommendationId = 'aif-003'

@@ -1,3 +1,4 @@
+// Container Registry SLA
 resources
 | where type =~ 'Microsoft.ContainerRegistry/registries'
 | extend recommendationId = 'cr-003'

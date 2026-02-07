@@ -2,5 +2,5 @@
 // Find Synapse Workspaces with public network access enabled
 resources
 | where type =~ "Microsoft.Synapse/workspaces"
-| where properties.publicNetworkAccess == "Enabled"
+| where properties.publicNetworkAccess =~ "Enabled"
 | project recommendationId = "synw-007", name, id, tags, param1 = "Public network access is enabled"

@@ -2,13 +2,12 @@
 resources
 | where type =~ 'Microsoft.ApiManagement/service'
 | extend customProps = properties.customProperties
-| where isnull(customProps) or 
-    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10'] == 'true' or
-    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11'] == 'true' or
-    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30'] == 'true' or
-    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10'] == 'true' or
-    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11'] == 'true' or
-    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30'] == 'true'
+| where customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10'] =~ 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11'] =~ 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30'] =~ 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10'] =~ 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11'] =~ 'true' or
+    customProps['Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30'] =~ 'true'
 | extend recommendationId = 'apim-009'
 | extend param1 = ''
 | project recommendationId, name, id, tags, param1

@@ -1,5 +1,6 @@
+// Virtual WAN SLA
 resources
 | where type =~ 'Microsoft.Network/virtualWans'
 | extend recommendationId = 'vwa-003'
-| extend param1 = '99.9%'
+| extend param1 = '99.95%'
 | project recommendationId, name, id, tags, param1

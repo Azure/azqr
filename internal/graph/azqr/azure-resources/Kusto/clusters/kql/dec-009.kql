@@ -2,7 +2,7 @@
 resources
 | where type =~ 'Microsoft.Kusto/clusters'
 | extend identityType = identity.type
-| where isnull(identityType) or identityType == 'None'
+| where isnull(identityType) or identityType =~ 'None'
 | extend recommendationId = 'dec-009'
 | extend param1 = ''
 | project recommendationId, name, id, tags, param1

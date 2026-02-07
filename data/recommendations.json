@@ -992,6 +992,14 @@
 		"resourceType": "Microsoft.Compute/virtualMachines"
 	},
 	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Automation Account SLA",
+		"recommendationId": "aa-003",
+		"resourceType": "Microsoft.Automation/automationAccounts"
+	},
+	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-factory/monitor-configure-diagnostics",
@@ -1328,6 +1336,14 @@
 		"resourceType": "Microsoft.AnalysisServices/servers"
 	},
 	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Stream Analytics SLA",
+		"recommendationId": "asa-003",
+		"resourceType": "Microsoft.StreamAnalytics/streamingJobs"
+	},
+	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
 		"learnMoreUrl": "",
@@ -1342,6 +1358,14 @@
 		"recommendation": "App Service Plan SLA",
 		"recommendationId": "asp-003",
 		"resourceType": "Microsoft.Web/serverfarms"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure VMware Solution SLA",
+		"recommendationId": "avs-003",
+		"resourceType": "Microsoft.AVS/privateClouds"
 	},
 	{
 		"category": "OtherBestPractices",
@@ -1416,12 +1440,28 @@
 		"resourceType": "Microsoft.Network/privateEndpoints"
 	},
 	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Batch Account SLA",
+		"recommendationId": "ba-003",
+		"resourceType": "Microsoft.Batch/batchAccounts"
+	},
+	{
 		"category": "HighAvailability",
 		"impact": "High",
 		"learnMoreUrl": "https://learn.microsoft.com/azure/api-management/upgrade-and-scale#change-your-api-management-service-tier",
 		"recommendation": "Migrate API Management services to Premium SKU to support Availability Zones",
 		"recommendationId": "baf3bfc0-32a2-4c0c-926d-c9bf0b49808e",
 		"resourceType": "Microsoft.ApiManagement/service"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure Bastion SLA",
+		"recommendationId": "bastion-003",
+		"resourceType": "Microsoft.Network/bastionHosts"
 	},
 	{
 		"category": "OtherBestPractices",
@@ -1784,6 +1824,14 @@
 		"resourceType": "Microsoft.ContainerService/managedClusters"
 	},
 	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure DDoS Protection SLA",
+		"recommendationId": "ddos-003",
+		"resourceType": "Microsoft.Network/ddosProtectionPlans"
+	},
+	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/data-explorer/using-diagnostic-logs",
@@ -1846,6 +1894,30 @@
 		"recommendation": "Enable Accelerated Networking (AccelNet)",
 		"recommendationId": "dfedbeb1-1519-fc47-86a5-52f96cf07105",
 		"resourceType": "Microsoft.Compute/virtualMachines"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure DNS Private Resolver SLA",
+		"recommendationId": "dnsres-003",
+		"resourceType": "Microsoft.Network/dnsResolvers"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure DNS SLA",
+		"recommendationId": "dnsz-003",
+		"resourceType": "Microsoft.Network/dnsZones"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Microsoft Entra Domain Services SLA",
+		"recommendationId": "domain-003",
+		"resourceType": "Microsoft.AAD/domainServices"
 	},
 	{
 		"category": "HighAvailability",
@@ -1928,6 +2000,22 @@
 		"resourceType": "Microsoft.Devices/IotHubs"
 	},
 	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure ExpressRoute Circuit SLA",
+		"recommendationId": "erc-003",
+		"resourceType": "Microsoft.Network/expressRouteCircuits"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure ExpressRoute Gateway SLA",
+		"recommendationId": "erg-003",
+		"resourceType": "Microsoft.Network/expressRouteGateways"
+	},
+	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/event-grid/diagnostic-logs",
@@ -1958,6 +2046,14 @@
 		"recommendation": "Event Grid Domain should have local authentication disabled",
 		"recommendationId": "evgd-008",
 		"resourceType": "Microsoft.EventGrid/domains"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Event Grid Topic SLA",
+		"recommendationId": "evgt-003",
+		"resourceType": "Microsoft.EventGrid/topics"
 	},
 	{
 		"category": "MonitoringAndAlerting",
@@ -2184,6 +2280,14 @@
 		"resourceType": "microsoft.machinelearningservices/workspaces"
 	},
 	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "IoT Hub SLA",
+		"recommendationId": "iot-003",
+		"resourceType": "Microsoft.Devices/IotHubs"
+	},
+	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/key-vault/general/monitor-key-vault",
@@ -2336,6 +2440,14 @@
 		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
 	},
 	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure NetApp Files SLA",
+		"recommendationId": "netapp-003",
+		"resourceType": "Microsoft.NetApp/netAppAccounts"
+	},
+	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/nat-gateway/nat-metrics",
@@ -2363,9 +2475,9 @@
 		"category": "SLA",
 		"impact": "High",
 		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Network Security Group SLA",
-		"recommendationId": "nsg-003",
-		"resourceType": "Microsoft.Network/networkSecurityGroups"
+		"recommendation": "Azure ExpressRoute Traffic Collector SLA",
+		"recommendationId": "ntc-003",
+		"resourceType": "Microsoft.NetworkFunction/azureTrafficCollectors"
 	},
 	{
 		"category": "SLA",
@@ -2382,14 +2494,6 @@
 		"recommendation": "Private Endpoint SLA",
 		"recommendationId": "pep-003",
 		"resourceType": "Microsoft.Network/privateEndpoints"
-	},
-	{
-		"category": "SLA",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Public IP SLA",
-		"recommendationId": "pip-003",
-		"resourceType": "Microsoft.Network/publicIPAddresses"
 	},
 	{
 		"category": "MonitoringAndAlerting",
@@ -2504,6 +2608,14 @@
 		"resourceType": "Microsoft.Resources"
 	},
 	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Recovery Services Vault SLA",
+		"recommendationId": "rsv-003",
+		"resourceType": "Microsoft.RecoveryServices/vaults"
+	},
+	{
 		"category": "MonitoringAndAlerting",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/service-bus-messaging/monitor-service-bus#collection-and-routing",
@@ -2590,6 +2702,14 @@
 		"recommendation": "SQL Database SLA",
 		"recommendationId": "sqldb-003",
 		"resourceType": "Microsoft.Sql/servers/databases"
+	},
+	{
+		"category": "SLA",
+		"impact": "High",
+		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+		"recommendation": "Azure SQL Managed Instance SLA",
+		"recommendationId": "sqlmi-003",
+		"resourceType": "Microsoft.Sql/managedInstances"
 	},
 	{
 		"category": "SLA",
@@ -2742,14 +2862,6 @@
 		"recommendation": "Traffic Manager: HTTP endpoints should be monitored using HTTPS",
 		"recommendationId": "traf-009",
 		"resourceType": "Microsoft.Network/trafficManagerProfiles"
-	},
-	{
-		"category": "SLA",
-		"impact": "High",
-		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
-		"recommendation": "Route Table SLA",
-		"recommendationId": "udr-003",
-		"resourceType": "Microsoft.Network/routeTables"
 	},
 	{
 		"category": "MonitoringAndAlerting",

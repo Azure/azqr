@@ -1,10 +1,12 @@
 // Azure Resource Graph Query
-// Find all App Service Plans and report their SLA based on SKU tier
+// Find all App Service Plans and report their SLA based on SKU tier and zone redundancy
 resources
 | where type =~ "Microsoft.Web/serverfarms"
 | extend skuTier = tostring(sku.tier)
+| extend zoneRedundant = tobool(properties.zoneRedundant)
 | extend slaValue = case(
     skuTier in ("Free", "Shared"), "None",
+    zoneRedundant == true, "99.99%",
     "99.95%"
 )
 | project recommendationId = "asp-003", name, id, tags, param1 = slaValue
