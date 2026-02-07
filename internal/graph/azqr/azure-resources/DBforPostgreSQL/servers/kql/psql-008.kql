@@ -2,7 +2,7 @@
 resources
 | where type =~ 'Microsoft.DBforPostgreSQL/servers'
 | extend sslEnforcement = properties.sslEnforcement
-| where isnull(sslEnforcement) or sslEnforcement == 'Disabled'
+| where isnull(sslEnforcement) or sslEnforcement =~ 'Disabled'
 | extend recommendationId = 'psql-008'
 | extend param1 = ''
 | project recommendationId, name, id, tags, param1

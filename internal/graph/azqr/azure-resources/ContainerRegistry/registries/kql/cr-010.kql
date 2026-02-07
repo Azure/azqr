@@ -2,7 +2,7 @@
 resources
 | where type =~ 'Microsoft.ContainerRegistry/registries'
 | extend retentionPolicyStatus = properties.policies.retentionPolicy.status
-| where isnull(retentionPolicyStatus) or retentionPolicyStatus == 'disabled'
+| where isnull(retentionPolicyStatus) or retentionPolicyStatus =~ 'disabled'
 | extend recommendationId = 'cr-010'
 | extend param1 = ''
 | project recommendationId, name, id, tags, param1

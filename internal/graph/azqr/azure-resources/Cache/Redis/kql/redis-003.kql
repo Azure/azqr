@@ -3,13 +3,10 @@
 resources
 | where type =~ 'Microsoft.Cache/Redis'
 | extend skuName = tostring(sku.name)
-| extend zones = properties.zones
-| extend hasZones = isnotnull(zones) and array_length(zones) > 1
+| extend zoneCount = array_length(zones)
 | extend slaValue = case(
-    skuName =~ "Enterprise" and hasZones, "99.99%",
-    skuName =~ "EnterpriseFlash" and hasZones, "99.99%",
-    skuName =~ "Premium" and hasZones, "99.95%",
     skuName =~ "Basic", "None",
+    skuName in~ ("Enterprise", "EnterpriseFlash") and zoneCount >= 3, "99.99%",
     "99.9%"
 )
 | project recommendationId = 'redis-003', name, id, tags, param1 = slaValue
