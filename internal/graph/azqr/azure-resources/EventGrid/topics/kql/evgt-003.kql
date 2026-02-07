@@ -1,0 +1,6 @@
+// Event Grid Topic SLA
+resources
+| where type =~ 'Microsoft.EventGrid/topics'
+| extend recommendationId = 'evgt-003'
+| extend param1 = '99.99%'
+| project recommendationId, name, id, tags, param1

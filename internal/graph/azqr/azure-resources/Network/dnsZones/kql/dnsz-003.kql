@@ -1,0 +1,6 @@
+// Azure DNS SLA
+resources
+| where type =~ 'Microsoft.Network/dnsZones'
+| extend recommendationId = 'dnsz-003'
+| extend param1 = '99.99%'
+| project recommendationId, name, id, tags, param1

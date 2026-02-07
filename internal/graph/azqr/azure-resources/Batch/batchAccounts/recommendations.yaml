@@ -1,0 +1,15 @@
+- description: Batch Account SLA
+  aprlGuid: ba-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Batch/batchAccounts
+  recommendationMetadataState: Active
+  longDescription: Batch Account SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

@@ -1,0 +1,15 @@
+- description: Azure VMware Solution SLA
+  aprlGuid: avs-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.AVS/privateClouds
+  recommendationMetadataState: Active
+  longDescription: Azure VMware Solution SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

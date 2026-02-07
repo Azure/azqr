@@ -1,0 +1,15 @@
+- description: Azure Stream Analytics SLA
+  aprlGuid: asa-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.StreamAnalytics/streamingJobs
+  recommendationMetadataState: Active
+  longDescription: Azure Stream Analytics SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

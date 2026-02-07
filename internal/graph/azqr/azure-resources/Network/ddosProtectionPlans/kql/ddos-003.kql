@@ -1,0 +1,6 @@
+// Azure DDoS Protection SLA
+resources
+| where type =~ 'Microsoft.Network/ddosProtectionPlans'
+| extend recommendationId = 'ddos-003'
+| extend param1 = '99.99%'
+| project recommendationId, name, id, tags, param1

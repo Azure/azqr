@@ -1,0 +1,11 @@
+// Azure Resource Graph Query
+// Find Azure VMware Solution private clouds and report SLA
+// Standard clusters: 99.9%, Stretched clusters (dual zone): 99.99%
+resources
+| where type =~ 'Microsoft.AVS/privateClouds'
+| extend availabilityStrategy = tostring(properties.availability.strategy)
+| extend slaValue = case(
+    availabilityStrategy =~ 'DualZone', '99.99%',
+    '99.9%'
+)
+| project recommendationId = 'avs-003', name, id, tags, param1 = slaValue

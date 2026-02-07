@@ -6,7 +6,7 @@ resources
 | extend tier = tostring(sku.tier)
 | extend zoneRedundant = tobool(properties.zoneRedundant)
 | extend slaValue = case(
-    tier == "Premium" and zoneRedundant == true, "99.995%",
+    tier in~ ("GeneralPurpose", "BusinessCritical", "Premium", "Hyperscale") and zoneRedundant == true, "99.995%",
     "99.99%"
 )
 | project recommendationId = "sqldb-003", name, id, tags, param1 = slaValue

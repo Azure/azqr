@@ -1,3 +1,4 @@
+// AKS Cluster should be private
 resources
 | where type =~ 'Microsoft.ContainerService/managedClusters'
 | where properties.apiServerAccessProfile.enablePrivateCluster != true

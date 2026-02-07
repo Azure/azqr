@@ -1,0 +1,15 @@
+- description: Azure NetApp Files SLA
+  aprlGuid: netapp-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.NetApp/netAppAccounts
+  recommendationMetadataState: Active
+  longDescription: Azure NetApp Files SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

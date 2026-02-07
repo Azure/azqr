@@ -1,6 +1,9 @@
+// APIM: Renew expiring certificates
 resources
 | where type =~ 'Microsoft.ApiManagement/service'
-| where todatetime(properties.certificate.expirationDate) < now() + 30d
+| mv-expand hc = properties.hostnameConfigurations
+| where isnotnull(hc.certificate)
+| where todatetime(hc.certificate.expiry) < now() + 30d
 | extend recommendationId = 'apim-011'
-| extend param1 = tostring(properties.certificate.expirationDate)
+| extend param1 = strcat(tostring(hc.hostName), ' expires: ', tostring(hc.certificate.expiry))
 | project recommendationId, name, id, tags, param1
