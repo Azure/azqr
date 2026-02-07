@@ -1,0 +1,7 @@
+// Azure Resource Graph Query
+// Find ExpressRoute Circuits and report SLA based on peering location
+resources
+| where type =~ 'Microsoft.Network/expressRouteCircuits'
+| extend recommendationId = 'erc-003'
+| extend param1 = '99.95%'
+| project recommendationId, name, id, tags, param1

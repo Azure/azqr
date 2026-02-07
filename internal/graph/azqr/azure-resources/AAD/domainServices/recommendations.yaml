@@ -1,11 +1,11 @@
-- description: Public IP SLA
-  aprlGuid: pip-003
+- description: Microsoft Entra Domain Services SLA
+  aprlGuid: domain-003
   recommendationTypeId: null
   recommendationControl: SLA
   recommendationImpact: High
-  recommendationResourceType: Microsoft.Network/publicIPAddresses
+  recommendationResourceType: Microsoft.AAD/domainServices
   recommendationMetadataState: Active
-  longDescription: Public IP SLA
+  longDescription: Microsoft Entra Domain Services SLA
   potentialBenefits: ''
   pgVerified: true
   automationAvailable: true

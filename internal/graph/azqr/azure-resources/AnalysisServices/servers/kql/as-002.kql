@@ -1,3 +1,4 @@
+// Azure Analysis Services SLA
 resources
 | where type =~ 'Microsoft.AnalysisServices/servers'
 | extend recommendationId = 'as-002'

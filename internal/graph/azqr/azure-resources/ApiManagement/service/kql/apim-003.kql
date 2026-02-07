@@ -1,12 +1,14 @@
 // Azure Resource Graph Query
-// Find API Management services and report SLA based on tier and zone redundancy
+// Find API Management services and report SLA based on tier and multi-region deployment
 resources
 | where type =~ 'Microsoft.ApiManagement/service'
 | extend skuName = tostring(sku.name)
-| extend zones = properties.zones
+| extend additionalLocations = properties.additionalLocations
+| extend isMultiRegion = isnotnull(additionalLocations) and array_length(additionalLocations) >= 1
 | extend slaValue = case(
-    skuName == "Developer", "None",
-    (skuName in ("Premium", "Premium_v2")) and array_length(zones) >= 2, "99.95%",
-    "99.9%"
+    skuName =~ "Developer", "None",
+    skuName =~ "Premium" and isMultiRegion, "99.99%",
+    skuName in~ ("Consumption", "Basic", "Standard", "Premium"), "99.95%",
+    "99.95%"
 )
 | project recommendationId = 'apim-003', name, id, tags, param1 = strcat(slaValue, " (SKU: ", skuName, ")")

@@ -14,14 +14,8 @@ resources
     skuName contains "RA-GZRS" and accessTier =~ "Cool", "99.9%",
     storageKind =~ "BlockBlobStorage", "99.9%",
     storageKind =~ "FileStorage", "99.9%",
-    skuName contains "LRS" and accessTier =~ "Hot", "99.9%",
-    skuName contains "ZRS" and accessTier =~ "Hot", "99.9%",
-    skuName contains "GRS" and accessTier =~ "Hot", "99.9%",
-    skuName contains "GZRS" and accessTier =~ "Hot", "99.9%",
-    skuName contains "LRS" and accessTier =~ "Cool", "99%",
-    skuName contains "ZRS" and accessTier =~ "Cool", "99%",
-    skuName contains "GRS" and accessTier =~ "Cool", "99%",
-    skuName contains "GZRS" and accessTier =~ "Cool", "99%",
+    accessTier =~ "Hot", "99.9%",
+    accessTier =~ "Cool", "99.9%",
     "99.9%" // Default to Hot tier SLA
 )
 | extend writeSLA = case(

@@ -1,0 +1,15 @@
+- description: Azure DDoS Protection SLA
+  aprlGuid: ddos-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Network/ddosProtectionPlans
+  recommendationMetadataState: Active
+  longDescription: Azure DDoS Protection SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

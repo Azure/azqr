@@ -1,5 +1,6 @@
+// Azure FrontDoor SLA
 resources
 | where type =~ 'Microsoft.Cdn/profiles'
 | extend recommendationId = 'afd-003'
-| extend param1 = '99.9%'
+| extend param1 = '99.99%'
 | project recommendationId, name, id, tags, param1

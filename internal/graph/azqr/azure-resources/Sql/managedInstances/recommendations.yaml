@@ -1,0 +1,15 @@
+- description: Azure SQL Managed Instance SLA
+  aprlGuid: sqlmi-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Sql/managedInstances
+  recommendationMetadataState: Active
+  longDescription: Azure SQL Managed Instance SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

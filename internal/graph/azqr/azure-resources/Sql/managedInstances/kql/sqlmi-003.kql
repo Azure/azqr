@@ -1,0 +1,10 @@
+// Azure Resource Graph Query
+// Find SQL Managed Instances and report SLA based on tier and zone redundancy
+resources
+| where type =~ 'Microsoft.Sql/managedInstances'
+| extend zoneRedundant = tobool(properties.zoneRedundant)
+| extend slaValue = case(
+    zoneRedundant == true, '99.995%',
+    '99.99%'
+)
+| project recommendationId = 'sqlmi-003', name, id, tags, param1 = slaValue

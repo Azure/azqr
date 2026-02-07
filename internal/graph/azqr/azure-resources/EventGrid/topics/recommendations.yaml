@@ -1,0 +1,15 @@
+- description: Event Grid Topic SLA
+  aprlGuid: evgt-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.EventGrid/topics
+  recommendationMetadataState: Active
+  longDescription: Event Grid Topic SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services
