@@ -1,11 +1,11 @@
-- description: Route Table SLA
-  aprlGuid: udr-003
+- description: Azure ExpressRoute Gateway SLA
+  aprlGuid: erg-003
   recommendationTypeId: null
   recommendationControl: SLA
   recommendationImpact: High
-  recommendationResourceType: Microsoft.Network/routeTables
+  recommendationResourceType: Microsoft.Network/expressRouteGateways
   recommendationMetadataState: Active
-  longDescription: Route Table SLA
+  longDescription: Azure ExpressRoute Gateway SLA
   potentialBenefits: ''
   pgVerified: true
   automationAvailable: true

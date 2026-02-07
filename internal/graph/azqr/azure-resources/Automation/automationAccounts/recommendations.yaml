@@ -1,11 +1,11 @@
-- description: Network Security Group SLA
-  aprlGuid: nsg-003
+- description: Automation Account SLA
+  aprlGuid: aa-003
   recommendationTypeId: null
   recommendationControl: SLA
   recommendationImpact: High
-  recommendationResourceType: Microsoft.Network/networkSecurityGroups
+  recommendationResourceType: Microsoft.Automation/automationAccounts
   recommendationMetadataState: Active
-  longDescription: Network Security Group SLA
+  longDescription: Automation Account SLA
   potentialBenefits: ''
   pgVerified: true
   automationAvailable: true

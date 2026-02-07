@@ -1,0 +1,15 @@
+- description: Azure ExpressRoute Circuit SLA
+  aprlGuid: erc-003
+  recommendationTypeId: null
+  recommendationControl: SLA
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Network/expressRouteCircuits
+  recommendationMetadataState: Active
+  longDescription: Azure ExpressRoute Circuit SLA
+  potentialBenefits: ''
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Service Level Agreements (SLA) for Online Services
+    url: https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services

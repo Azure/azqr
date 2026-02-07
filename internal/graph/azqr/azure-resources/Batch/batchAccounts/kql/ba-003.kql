@@ -1,0 +1,6 @@
+// Batch Account SLA
+resources
+| where type =~ 'Microsoft.Batch/batchAccounts'
+| extend recommendationId = 'ba-003'
+| extend param1 = '99.9%'
+| project recommendationId, name, id, tags, param1
