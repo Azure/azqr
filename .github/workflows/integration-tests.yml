@@ -1,0 +1,168 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      subscription_id:
+        description: 'Azure Subscription ID (optional - uses secret if not provided)'
+        required: false
+        type: string
+      location:
+        description: 'Azure region for test resources'
+        required: false
+        default: 'eastus'
+        type: choice
+        options:
+          - eastus
+          - eastus2
+          - westus
+          - westus2
+          - centralus
+      test_pattern:
+        description: 'Test pattern to run (leave empty for all tests)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write  # Required for OIDC authentication
+
+jobs:
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ inputs.subscription_id || secrets.AZURE_TEST_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      TF_VAR_location: ${{ inputs.location || 'eastus' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.5"
+          terraform_wrapper: false
+
+      - name: Authenticate to Azure (OIDC)
+        if: ${{ env.AZURE_CLIENT_ID != '' && env.AZURE_TENANT_ID != '' && env.AZURE_CLIENT_SECRET == '' }}
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Authenticate to Azure (Service Principal)
+        if: ${{ env.AZURE_CLIENT_SECRET != '' }}
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ env.AZURE_CLIENT_ID }}","clientSecret":"${{ env.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ env.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ env.AZURE_TENANT_ID }}"}'
+
+      - name: Verify Azure credentials
+        run: |
+          echo "Verifying Azure authentication..."
+          az account show
+          echo "Current subscription: $(az account show --query name -o tsv)"
+          echo "AZURE_SUBSCRIPTION_ID: ${AZURE_SUBSCRIPTION_ID}"
+
+      - name: Download Go dependencies
+        run: go mod download
+
+      - name: Verify integration test setup
+        run: make test-integration-setup
+
+      - name: Run integration tests
+        id: integration-tests
+        run: |
+          if [ -n "${{ inputs.test_pattern }}" ]; then
+            echo "Running tests matching pattern: ${{ inputs.test_pattern }}"
+            go test -v -tags=integration -timeout 30m ./test/integration/... -run "${{ inputs.test_pattern }}"
+          else
+            echo "Running all integration tests"
+            make test-integration
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: |
+            **/*.log
+            **/test-output
+          retention-days: 7
+
+      - name: Cleanup Azure resources (on failure)
+        if: failure()
+        run: |
+          echo "Cleaning up Azure resources created during tests..."
+          # List all resource groups with test tag
+          RESOURCE_GROUPS=$(az group list --query "[?tags.Purpose=='AZQR Integration Testing'].name" -o tsv)
+          
+          if [ -n "$RESOURCE_GROUPS" ]; then
+            echo "Found test resource groups to clean up:"
+            echo "$RESOURCE_GROUPS"
+            
+            # Delete each resource group
+            for RG in $RESOURCE_GROUPS; do
+              echo "Deleting resource group: $RG"
+              az group delete --name "$RG" --yes --no-wait || echo "Failed to delete $RG"
+            done
+            
+            echo "Cleanup initiated. Resource groups are being deleted in the background."
+          else
+            echo "No test resource groups found to clean up."
+          fi
+
+      - name: Post test summary
+        if: always()
+        run: |
+          if [ "${{ steps.integration-tests.outcome }}" == "success" ]; then
+            echo "✅ Integration tests passed successfully!"
+          else
+            echo "❌ Integration tests failed. Check the logs for details."
+          fi
+          
+          echo "### Integration Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ steps.integration-tests.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Subscription**: ${AZURE_SUBSCRIPTION_ID}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region**: ${{ inputs.location || 'eastus' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Pattern**: ${{ inputs.test_pattern || 'all tests' }}" >> $GITHUB_STEP_SUMMARY
+
+  verify-terraform:
+    name: Verify Terraform Fixtures
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.5"
+
+      - name: Format check Terraform files
+        run: |
+          echo "Checking Terraform formatting..."
+          terraform fmt -check -recursive ./test/fixtures/terraform || {
+            echo "❌ Terraform files are not formatted correctly. Run 'make terraform-fmt' locally."
+            exit 1
+          }
+          echo "✅ All Terraform files are properly formatted"
+
+      - name: Validate Terraform fixtures
+        run: make terraform-validate
