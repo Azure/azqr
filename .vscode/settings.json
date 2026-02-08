@@ -1,0 +1,23 @@
+{
+    // Go Language Server (gopls) settings
+    "gopls": {
+        // Add integration build tag so gopls can analyze integration test files
+        "build.buildFlags": [
+            "-tags=integration"
+        ],
+        // Enable build tags in the environment
+        "env": {
+            "GOFLAGS": "-tags=integration"
+        }
+    },
+    // Go test settings
+    "go.testTags": "integration",
+    "go.buildTags": "integration",
+    // Editor settings for Go files
+    "[go]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    }
+}
