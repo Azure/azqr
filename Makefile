@@ -38,6 +38,10 @@ help:
 	@echo "  validate-yaml - Validate all recommendation YAML files against schema"
 	@echo "  validate-scanners - Validate APRL recommendations coverage"
 	@echo "  test         - Run tests (includes linting and validation)"
+	@echo "  test-integration - Run integration tests (requires Azure credentials)"
+	@echo "  test-integration-setup - Validate prerequisites for running integration tests"
+	@echo "  terraform-fmt - Format all Terraform files"
+	@echo "  terraform-validate - Validate all Terraform fixtures"
 	@echo "  clean        - Remove built binaries"
 	@echo "  build-image  - Build Docker image with azqr binary"
 	@echo ""
@@ -87,6 +91,47 @@ validate-scanners: validate-yaml
 
 test: lint vet tidy json validate-yaml validate-scanners
 	go test -race ./... -coverprofile=coverage.txt -covermode=atomic ./...
+
+# Integration test targets
+test-integration-setup:
+	@echo "Checking integration test prerequisites..."
+	@if [ -z "$$AZURE_SUBSCRIPTION_ID" ]; then \
+		echo "❌ AZURE_SUBSCRIPTION_ID environment variable is not set"; \
+		exit 1; \
+	fi
+	@if [ -z "$$AZURE_TENANT_ID" ]; then \
+		echo "❌ AZURE_TENANT_ID environment variable is not set"; \
+		exit 1; \
+	fi
+	@echo "✓ AZURE_SUBSCRIPTION_ID is set: $$AZURE_SUBSCRIPTION_ID"
+	@echo "✓ AZURE_TENANT_ID is set: $$AZURE_TENANT_ID"
+	@command -v terraform >/dev/null 2>&1 || { echo "❌ terraform is not installed or not in PATH"; exit 1; }
+	@echo "✓ terraform is installed: $$(terraform version -json 2>/dev/null | grep -oP '(?<="version":")[^"]*' || terraform version | head -1)"
+	@echo "✓ Prerequisites check passed!"
+
+test-integration: test-integration-setup
+	@echo "Cleaning terraform state and lock files..."
+	@find ./test/fixtures/terraform -name "terraform.tfstate*" -delete 2>/dev/null || true
+	@find ./test/fixtures/terraform -name ".terraform.lock.hcl" -delete 2>/dev/null || true
+	@echo "✓ Terraform state cleaned"
+	@echo "Running integration tests..."
+	@echo "⚠ This will provision real Azure resources and may incur costs"
+	@echo "📝 Terraform output will be shown during test execution"
+	go test -v -p 1 -tags=integration -timeout 30m ./test/integration/... 2>&1
+
+terraform-fmt:
+	@echo "Formatting Terraform files..."
+	@find ./test/fixtures/terraform -name "*.tf" -exec terraform fmt {} \;
+	@echo "✓ Terraform files formatted"
+
+terraform-validate:
+	@echo "Validating Terraform fixtures..."
+	@for dir in $$(find ./test/fixtures/terraform -type d -name "baseline" -o -name "scenarios" | xargs -I {} find {} -mindepth 1 -maxdepth 1 -type d); do \
+		echo "Validating $$dir..."; \
+		(cd "$$dir" && terraform init -backend=false >/dev/null 2>&1 && terraform validate) || exit 1; \
+	done
+	@echo "✓ All Terraform fixtures validated"
+
 
 $(TARGET): clean
 	CGO_ENABLED=$(if $(CGO_ENABLED),$(CGO_ENABLED),0) go build $(TRIM_PATH) -tags "$(BUILD_TAGS)" -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/azqr/main.go
