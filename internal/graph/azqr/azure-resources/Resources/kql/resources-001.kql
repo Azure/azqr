@@ -1,4 +1,4 @@
 // Resources without tags
 resources
-| where isnull(tags) or array_length(todynamic(tags)) == 0
+| where tags == "{}" or isnull(tags) or array_length(todynamic(tags)) == 0
 | project recommendationId = "resources-001", name, id, tags, param1 = "No tags configured"
