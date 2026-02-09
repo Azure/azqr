@@ -3,5 +3,6 @@
 resources
 | where type =~ "Microsoft.Web/sites"
 | where kind contains "function" and kind !contains "workflowapp"
-| where properties.httpsOnly != true
+| extend httpsOnly = properties.httpsOnly
+| where isnull(httpsOnly) or httpsOnly == false
 | project recommendationId = "func-007", name, id, tags, param1 = "HTTPS Only is disabled"

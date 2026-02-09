@@ -2,5 +2,6 @@
 // Find Synapse Workspaces that don't have private endpoints enabled
 resources
 | where type =~ "Microsoft.Synapse/workspaces"
-| where array_length(properties.privateEndpointConnections) == 0
+| extend privateEndpoints = array_length(properties.privateEndpointConnections)
+| where privateEndpoints == 0 or isnull(privateEndpoints)
 | project recommendationId = "synw-002", name, id, tags, param1 = "No private endpoints configured"
