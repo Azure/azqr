@@ -58,17 +58,6 @@ type aggregatedEmissions struct {
 func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) (*plugins.ExternalPluginOutput, error) {
 	log.Info().Msg("Scanning carbon emissions across subscriptions")
 
-	now := time.Now().UTC()
-	firstOfCurrentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
-	// Determine the "toTime" based on whether we are in the first week of the current month
-	var toTime time.Time
-	if now.Day() <= 7 {
-		toTime = firstOfCurrentMonth.AddDate(0, -2, 0)
-	} else {
-		toTime = firstOfCurrentMonth.AddDate(0, -1, 0)
-	}
-	fromTime := toTime
-
 	// Initialize client options with standard retry and throttling configuration
 	clientOptions := az.NewDefaultClientOptions()
 
@@ -77,6 +66,13 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 	if err != nil {
 		return nil, fmt.Errorf("failed to create carbon optimization client factory: %w", err)
 	}
+
+	// Query the available date range from the API instead of guessing dates
+	fromTime, toTime, err := s.getAvailableDateRange(ctx, clientFactory)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get available date range: %w", err)
+	}
+	log.Info().Msgf("Carbon emissions available date range: %s to %s", fromTime.Format("2006-01-02"), toTime.Format("2006-01-02"))
 
 	// Build subscription list
 	subscriptionList := make([]*string, 0, len(subscriptions))
@@ -89,6 +85,11 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 	aggregatedResults := make(map[string]*aggregatedEmissions)
 
 	for i := 0; i < len(subscriptionList); i += batchSize {
+		// Check for context cancellation between batches
+		if err := ctx.Err(); err != nil {
+			return nil, fmt.Errorf("scan cancelled: %w", err)
+		}
+
 		end := i + batchSize
 		if end > len(subscriptionList) {
 			end = len(subscriptionList)
@@ -208,6 +209,34 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 		Description: "Analysis of carbon emissions by Azure resource type for the previous month",
 		Table:       table,
 	}, nil
+}
+
+// getAvailableDateRange queries the Carbon API for the available date range
+// and returns the end date as both fromTime and toTime to get the latest month's data.
+func (s *EmissionsScanner) getAvailableDateRange(ctx context.Context, clientFactory *armcarbonoptimization.ClientFactory) (time.Time, time.Time, error) {
+	resp, err := clientFactory.NewCarbonServiceClient().QueryCarbonEmissionDataAvailableDateRange(ctx, nil)
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("failed to query available date range: %w", err)
+	}
+
+	if resp.EndDate == nil || resp.StartDate == nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("available date range response missing start or end date")
+	}
+
+	endDate, err := time.Parse("2006-01-02", *resp.EndDate)
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("failed to parse end date %q: %w", *resp.EndDate, err)
+	}
+
+	startDate, err := time.Parse("2006-01-02", *resp.StartDate)
+	if err != nil {
+		return time.Time{}, time.Time{}, fmt.Errorf("failed to parse start date %q: %w", *resp.StartDate, err)
+	}
+
+	log.Debug().Msgf("Carbon emissions available range: %s to %s", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
+
+	// Use the end date (latest available month) for both from and to
+	return endDate, endDate, nil
 }
 
 // init registers the plugin automatically
