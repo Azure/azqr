@@ -7,18 +7,22 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Azure/azqr/internal/az"
+	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/plugins"
-	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/monitor/query/azmetrics"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices/v2"
 	"github.com/rs/zerolog/log"
 )
+
+// maxConcurrentDeploymentFetches limits parallel ARM calls when listing deployments.
+const maxConcurrentDeploymentFetches = 5
 
 // ThrottlingScanner is an internal plugin that monitors OpenAI throttling
 type ThrottlingScanner struct{}
@@ -45,6 +49,10 @@ func (s *ThrottlingScanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "SKU", DataKey: "sku", FilterType: plugins.FilterTypeDropdown},
 			{Name: "Deployment Name", DataKey: "deploymentName", FilterType: plugins.FilterTypeSearch},
 			{Name: "Model Name", DataKey: "modelName", FilterType: plugins.FilterTypeDropdown},
+			{Name: "Model Version", DataKey: "modelVersion", FilterType: plugins.FilterTypeDropdown},
+			{Name: "Model Format", DataKey: "modelFormat", FilterType: plugins.FilterTypeDropdown},
+			{Name: "SKU Capacity", DataKey: "skuCapacity", FilterType: plugins.FilterTypeNone},
+			{Name: "Version Upgrade Option", DataKey: "versionUpgradeOption", FilterType: plugins.FilterTypeDropdown},
 			{Name: "Spillover Enabled", DataKey: "spilloverEnabled", FilterType: plugins.FilterTypeDropdown},
 			{Name: "Spillover Deployment", DataKey: "spilloverDeployment", FilterType: plugins.FilterTypeSearch},
 			{Name: "Hour", DataKey: "hour", FilterType: plugins.FilterTypeSearch},
@@ -54,46 +62,116 @@ func (s *ThrottlingScanner) GetMetadata() plugins.PluginMetadata {
 	}
 }
 
+// deploymentInfo holds pre-extracted deployment metadata to avoid repeated field access.
+type deploymentInfo struct {
+	ModelVersion         string
+	ModelFormat          string
+	SKUCapacity          string
+	VersionUpgradeOption string
+	SpilloverEnabled     string
+	SpilloverDeployment  string
+}
+
+// extractDeploymentInfo pre-computes display values from a Deployment once.
+func extractDeploymentInfo(deployment *armcognitiveservices.Deployment) deploymentInfo {
+	info := deploymentInfo{
+		ModelVersion:         "N/A",
+		ModelFormat:          "N/A",
+		SKUCapacity:          "N/A",
+		VersionUpgradeOption: "N/A",
+		SpilloverEnabled:     "No",
+		SpilloverDeployment:  "N/A",
+	}
+
+	if deployment.Properties != nil {
+		if deployment.Properties.SpilloverDeploymentName != nil {
+			info.SpilloverEnabled = "Yes"
+			info.SpilloverDeployment = *deployment.Properties.SpilloverDeploymentName
+		}
+		if deployment.Properties.Model != nil {
+			if deployment.Properties.Model.Version != nil {
+				info.ModelVersion = *deployment.Properties.Model.Version
+			}
+			if deployment.Properties.Model.Format != nil {
+				info.ModelFormat = *deployment.Properties.Model.Format
+			}
+		}
+		if deployment.Properties.VersionUpgradeOption != nil {
+			info.VersionUpgradeOption = string(*deployment.Properties.VersionUpgradeOption)
+		}
+	}
+	if deployment.SKU != nil && deployment.SKU.Capacity != nil {
+		info.SKUCapacity = fmt.Sprintf("%d", *deployment.SKU.Capacity)
+	}
+
+	return info
+}
+
 // Scan executes the plugin and returns table data
 func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) (*plugins.ExternalPluginOutput, error) {
 	// Initialize table with headers
 	table := [][]string{
-		{"Subscription", "Resource Group", "Account Name", "Kind", "SKU", "Deployment Name", "Model Name", "Spillover Enabled", "Spillover Deployment", "Hour", "Status Code", "Request Count"},
+		{"Subscription", "Resource Group", "Account Name", "Kind", "SKU", "Deployment Name", "Model Name", "Model Version", "Model Format", "SKU Capacity", "Version Upgrade Option", "Spillover Enabled", "Spillover Deployment", "Hour", "Status Code", "Request Count"},
 	}
 
-	// Use Resource Graph to get all Cognitive Services/OpenAI accounts efficiently
-	resourceScanner := scanners.ResourceDiscovery{}
-	allResources, _ := resourceScanner.GetAllResources(ctx, cred, subscriptions, filters)
-	log.Debug().Msgf("Found %d total resources", len(allResources))
-
-	// Filter for OpenAI and AI Services accounts
-	openAIResources := make([]*models.Resource, 0)
-	for _, resource := range allResources {
-		if strings.EqualFold(resource.Type, "Microsoft.CognitiveServices/accounts") {
-			// Filter by kind if available
-			if resource.Kind != "" {
-				kindLower := strings.ToLower(resource.Kind)
-				if strings.Contains(kindLower, "openai") || strings.Contains(kindLower, "aiservices") {
-					openAIResources = append(openAIResources, resource)
-				}
-			} else {
-				// If no kind info, include it (will be filtered later when getting deployments)
-				openAIResources = append(openAIResources, resource)
-			}
-		}
+	// Use a targeted Resource Graph query instead of fetching all resources.
+	// This avoids downloading the entire resource inventory when only
+	// CognitiveServices/accounts with OpenAI or AI Services kind are needed.
+	openAIResources, err := s.discoverOpenAIResources(ctx, cred, subscriptions, filters)
+	if err != nil {
+		return nil, fmt.Errorf("failed to discover OpenAI resources: %w", err)
 	}
-	log.Debug().Msgf("Filtered to %d OpenAI/AI Services accounts", len(openAIResources))
+	log.Debug().Msgf("Discovered %d OpenAI/AI Services accounts", len(openAIResources))
+
+	if len(openAIResources) == 0 {
+		return &plugins.ExternalPluginOutput{
+			Metadata:    s.GetMetadata(),
+			SheetName:   "OpenAI Throttling",
+			Description: "Analysis of throttling errors for OpenAI/Cognitive Services accounts by hour, model, and status code",
+			Table:       table,
+		}, nil
+	}
 
 	// Group resources by subscription and region for batch processing
 	resourceGroups := s.groupResourcesForBatch(openAIResources)
 	log.Debug().Msgf("Created %d resource batch groups", len(resourceGroups))
 
+	// Create client options once and cache DeploymentsClient per subscription.
+	clientOptions := az.NewDefaultClientOptions()
+	deploymentsClients := make(map[string]*armcognitiveservices.DeploymentsClient)
+
 	// Process each batch group
 	for groupIdx, group := range resourceGroups {
+		// Check for context cancellation between groups
+		if err := ctx.Err(); err != nil {
+			return nil, fmt.Errorf("scan cancelled: %w", err)
+		}
+
 		log.Debug().Int("group", groupIdx+1).Int("total", len(resourceGroups)).Str("subscription", group.SubscriptionID).Str("region", group.Region).Int("resources", len(group.Resources)).Msg("Processing group")
+
+		// Reuse DeploymentsClient for the same subscription across batches/regions
+		deploymentsClient, exists := deploymentsClients[group.SubscriptionID]
+		if !exists {
+			var clientErr error
+			deploymentsClient, clientErr = armcognitiveservices.NewDeploymentsClient(group.SubscriptionID, cred, clientOptions)
+			if clientErr != nil {
+				log.Debug().Err(clientErr).Str("subscription", group.SubscriptionID).Msg("Failed to create deployments client, skipping group")
+				continue
+			}
+			deploymentsClients[group.SubscriptionID] = deploymentsClient
+		}
+
+		subscriptionName := subscriptions[group.SubscriptionID]
+		if subscriptionName == "" {
+			subscriptionName = group.SubscriptionID
+		}
 
 		// Process resources in batches of up to 50
 		for i := 0; i < len(group.Resources); i += 50 {
+			if err := ctx.Err(); err != nil {
+				return nil, fmt.Errorf("scan cancelled: %w", err)
+			}
+
 			end := i + 50
 			if end > len(group.Resources) {
 				end = len(group.Resources)
@@ -102,7 +180,7 @@ func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredentia
 			log.Debug().Int("start", i).Int("end", end).Int("total", len(group.Resources)).Msg("Processing batch")
 
 			// Collect throttling data for batch
-			results, err := s.processBatch(ctx, cred, batch, subscriptions)
+			results, err := s.processBatch(ctx, cred, deploymentsClient, batch, subscriptionName)
 			if err != nil {
 				log.Debug().Err(err).Msg("Error processing batch")
 				continue
@@ -119,6 +197,58 @@ func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredentia
 		Description: "Analysis of throttling errors for OpenAI/Cognitive Services accounts by hour, model, and status code",
 		Table:       table,
 	}, nil
+}
+
+// discoverOpenAIResources queries Azure Resource Graph for CognitiveServices accounts
+// with an OpenAI or AI Services kind, avoiding a full resource inventory download.
+func (s *ThrottlingScanner) discoverOpenAIResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) ([]*models.Resource, error) {
+	graphClient := graph.NewGraphQuery(cred)
+
+	query := `resources
+| where type =~ "Microsoft.CognitiveServices/accounts"
+| where isempty(kind) or kind contains "openai" or kind contains "aiservices"
+| project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind
+| order by subscriptionId, resourceGroup`
+
+	subs := make([]*string, 0, len(subscriptions))
+	for s := range subscriptions {
+		subs = append(subs, to.Ptr(s))
+	}
+
+	result := graphClient.Query(ctx, query, subs)
+
+	resources := make([]*models.Resource, 0, len(result.Data))
+	for _, row := range result.Data {
+		m, ok := row.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		id, _ := m["id"].(string)
+		if filters.Azqr.IsServiceExcluded(id) {
+			continue
+		}
+
+		skuName, _ := m["sku_name"].(string)
+		skuTier, _ := m["sku_tier"].(string)
+		kind, _ := m["kind"].(string)
+		resourceGroup, _ := m["resourceGroup"].(string)
+		location, _ := m["location"].(string)
+
+		resources = append(resources, &models.Resource{
+			ID:             id,
+			SubscriptionID: m["subscriptionId"].(string),
+			ResourceGroup:  resourceGroup,
+			Location:       location,
+			Type:           m["type"].(string),
+			Name:           m["name"].(string),
+			SkuName:        skuName,
+			SkuTier:        skuTier,
+			Kind:           kind,
+		})
+	}
+
+	return resources, nil
 }
 
 // ResourceBatchGroup groups resources by subscription and region for batch processing
@@ -156,27 +286,21 @@ func (s *ThrottlingScanner) groupResourcesForBatch(resources []*models.Resource)
 	return result
 }
 
+// accountDeployments holds the result of a concurrent deployment fetch.
+type accountDeployments struct {
+	ResourceID    string
+	DeploymentMap map[string]deploymentInfo
+	Err           error
+}
+
 // processBatch processes a batch of resources using batch metrics API
-func (s *ThrottlingScanner) processBatch(ctx context.Context, cred azcore.TokenCredential, resources []*models.Resource, subscriptions map[string]string) ([][]string, error) {
+func (s *ThrottlingScanner) processBatch(ctx context.Context, cred azcore.TokenCredential, deploymentsClient *armcognitiveservices.DeploymentsClient, resources []*models.Resource, subscriptionName string) ([][]string, error) {
 	if len(resources) == 0 {
 		return nil, nil
 	}
 
 	subscriptionID := resources[0].SubscriptionID
 	region := resources[0].Location
-	subscriptionName := subscriptions[subscriptionID]
-	if subscriptionName == "" {
-		subscriptionName = subscriptionID
-	}
-
-	// Create client options
-	clientOptions := az.NewDefaultClientOptions()
-
-	// Create Deployments client for getting deployment info
-	deploymentsClient, err := armcognitiveservices.NewDeploymentsClient(subscriptionID, cred, clientOptions)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create deployments client: %w", err)
-	}
 
 	// Build resource ID list for batch query
 	resourceIDs := make([]string, 0, len(resources))
@@ -190,6 +314,63 @@ func (s *ThrottlingScanner) processBatch(ctx context.Context, cred azcore.TokenC
 	batchMetrics, err := s.getBatchMetricsWithStatusCodeSplit(ctx, cred, subscriptionID, region, resourceIDs, 167)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get batch metrics: %w", err)
+	}
+
+	// Fetch deployments concurrently for all resources that have metrics.
+	// Use a semaphore to bound the number of parallel ARM calls.
+	sem := make(chan struct{}, maxConcurrentDeploymentFetches)
+	deploymentsCh := make(chan accountDeployments, len(batchMetrics))
+	var wg sync.WaitGroup
+
+	for resourceID := range batchMetrics {
+		resource, exists := resourceMap[resourceID]
+		if !exists {
+			continue
+		}
+
+		wg.Add(1)
+		go func(res *models.Resource) {
+			defer wg.Done()
+
+			// Acquire semaphore slot
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			deployments, fetchErr := s.getDeployments(ctx, deploymentsClient, res.ResourceGroup, res.Name)
+			result := accountDeployments{ResourceID: res.ID, Err: fetchErr}
+			if fetchErr == nil {
+				result.DeploymentMap = make(map[string]deploymentInfo, len(deployments))
+				for _, d := range deployments {
+					if d.Name != nil {
+						result.DeploymentMap[*d.Name] = extractDeploymentInfo(d)
+					}
+				}
+			}
+			deploymentsCh <- result
+		}(resource)
+	}
+
+	wg.Wait()
+	close(deploymentsCh)
+
+	// Collect deployment maps keyed by resource ID.
+	allDeployments := make(map[string]map[string]deploymentInfo, len(batchMetrics))
+	for ad := range deploymentsCh {
+		if ad.Err != nil {
+			log.Debug().Err(ad.Err).Str("resourceID", ad.ResourceID).Msg("Failed to get deployments")
+			continue
+		}
+		allDeployments[ad.ResourceID] = ad.DeploymentMap
+	}
+
+	// Default deployment info for unmatched deployments.
+	defaultInfo := deploymentInfo{
+		ModelVersion:         "N/A",
+		ModelFormat:          "N/A",
+		SKUCapacity:          "N/A",
+		VersionUpgradeOption: "N/A",
+		SpilloverEnabled:     "No",
+		SpilloverDeployment:  "N/A",
 	}
 
 	var results [][]string
@@ -213,37 +394,21 @@ func (s *ThrottlingScanner) processBatch(ctx context.Context, cred azcore.TokenC
 			skuName = "Unknown"
 		}
 
-		// Get deployments for this account
-		deployments, err := s.getDeployments(ctx, deploymentsClient, resourceGroup, accountName)
-		if err != nil {
-			log.Debug().Err(err).Str("account", accountName).Msg("Failed to get deployments")
-			deployments = []*armcognitiveservices.Deployment{}
-		}
-
-		// Create a map of deployment names to their properties
-		deploymentMap := make(map[string]*armcognitiveservices.Deployment)
-		for _, deployment := range deployments {
-			if deployment.Name != nil {
-				deploymentMap[*deployment.Name] = deployment
-			}
-		}
+		depMap := allDeployments[resourceID] // may be nil if fetch failed
 
 		// Create rows for each hour/deployment/model/status code combination
 		for hourKey, deploymentMetrics := range hourlyMetrics {
-			for metricDeploymentName, models := range deploymentMetrics {
-				for modelName, statusCodes := range models {
+			for metricDeploymentName, mdls := range deploymentMetrics {
+				// Look up deployment metadata once per deployment name, not per metric row.
+				info := defaultInfo
+				if depMap != nil {
+					if di, ok := depMap[metricDeploymentName]; ok {
+						info = di
+					}
+				}
+
+				for modelName, statusCodes := range mdls {
 					for statusCode, count := range statusCodes {
-						// Look up deployment properties
-						spilloverEnabled := "No"
-						spilloverDeployment := "N/A"
-
-						if deployment, exists := deploymentMap[metricDeploymentName]; exists {
-							if deployment.Properties != nil && deployment.Properties.SpilloverDeploymentName != nil {
-								spilloverEnabled = "Yes"
-								spilloverDeployment = *deployment.Properties.SpilloverDeploymentName
-							}
-						}
-
 						results = append(results, []string{
 							subscriptionName,
 							resourceGroup,
@@ -252,8 +417,12 @@ func (s *ThrottlingScanner) processBatch(ctx context.Context, cred azcore.TokenC
 							skuName,
 							metricDeploymentName,
 							modelName,
-							spilloverEnabled,
-							spilloverDeployment,
+							info.ModelVersion,
+							info.ModelFormat,
+							info.SKUCapacity,
+							info.VersionUpgradeOption,
+							info.SpilloverEnabled,
+							info.SpilloverDeployment,
 							hourKey,
 							statusCode,
 							fmt.Sprintf("%.0f", count),

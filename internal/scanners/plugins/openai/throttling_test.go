@@ -8,6 +8,8 @@ import (
 
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/plugins"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices/v2"
 )
 
 func TestNewThrottlingScanner(t *testing.T) {
@@ -59,6 +61,10 @@ func TestThrottlingScanner_GetMetadata_ColumnMetadata(t *testing.T) {
 		{"SKU", "sku", plugins.FilterTypeDropdown},
 		{"Deployment Name", "deploymentName", plugins.FilterTypeSearch},
 		{"Model Name", "modelName", plugins.FilterTypeDropdown},
+		{"Model Version", "modelVersion", plugins.FilterTypeDropdown},
+		{"Model Format", "modelFormat", plugins.FilterTypeDropdown},
+		{"SKU Capacity", "skuCapacity", plugins.FilterTypeNone},
+		{"Version Upgrade Option", "versionUpgradeOption", plugins.FilterTypeDropdown},
 		{"Spillover Enabled", "spilloverEnabled", plugins.FilterTypeDropdown},
 		{"Spillover Deployment", "spilloverDeployment", plugins.FilterTypeSearch},
 		{"Hour", "hour", plugins.FilterTypeSearch},
@@ -292,5 +298,117 @@ func TestPluginRegistration(t *testing.T) {
 	metadata := scanner.GetMetadata()
 	if metadata.Name != "openai-throttling" {
 		t.Errorf("Plugin registration failed or wrong plugin registered")
+	}
+}
+
+func TestExtractDeploymentInfo(t *testing.T) {
+	upgradeOption := armcognitiveservices.DeploymentModelVersionUpgradeOptionOnceNewDefaultVersionAvailable
+
+	tests := []struct {
+		name     string
+		deploy   *armcognitiveservices.Deployment
+		expected deploymentInfo
+	}{
+		{
+			name: "All fields populated",
+			deploy: &armcognitiveservices.Deployment{
+				Properties: &armcognitiveservices.DeploymentProperties{
+					Model: &armcognitiveservices.DeploymentModel{
+						Version: to.Ptr("2024-05-13"),
+						Format:  to.Ptr("OpenAI"),
+					},
+					VersionUpgradeOption:    &upgradeOption,
+					SpilloverDeploymentName: to.Ptr("spillover-deploy"),
+				},
+				SKU: &armcognitiveservices.SKU{
+					Capacity: to.Ptr(int32(120)),
+				},
+			},
+			expected: deploymentInfo{
+				ModelVersion:         "2024-05-13",
+				ModelFormat:          "OpenAI",
+				SKUCapacity:          "120",
+				VersionUpgradeOption: "OnceNewDefaultVersionAvailable",
+				SpilloverEnabled:     "Yes",
+				SpilloverDeployment:  "spillover-deploy",
+			},
+		},
+		{
+			name: "Nil properties",
+			deploy: &armcognitiveservices.Deployment{
+				Properties: nil,
+				SKU:        nil,
+			},
+			expected: deploymentInfo{
+				ModelVersion:         "N/A",
+				ModelFormat:          "N/A",
+				SKUCapacity:          "N/A",
+				VersionUpgradeOption: "N/A",
+				SpilloverEnabled:     "No",
+				SpilloverDeployment:  "N/A",
+			},
+		},
+		{
+			name: "Model without version",
+			deploy: &armcognitiveservices.Deployment{
+				Properties: &armcognitiveservices.DeploymentProperties{
+					Model: &armcognitiveservices.DeploymentModel{
+						Format: to.Ptr("OpenAI"),
+					},
+				},
+				SKU: &armcognitiveservices.SKU{
+					Capacity: to.Ptr(int32(50)),
+				},
+			},
+			expected: deploymentInfo{
+				ModelVersion:         "N/A",
+				ModelFormat:          "OpenAI",
+				SKUCapacity:          "50",
+				VersionUpgradeOption: "N/A",
+				SpilloverEnabled:     "No",
+				SpilloverDeployment:  "N/A",
+			},
+		},
+		{
+			name: "SKU without capacity",
+			deploy: &armcognitiveservices.Deployment{
+				Properties: &armcognitiveservices.DeploymentProperties{},
+				SKU: &armcognitiveservices.SKU{
+					Name: to.Ptr("Standard"),
+				},
+			},
+			expected: deploymentInfo{
+				ModelVersion:         "N/A",
+				ModelFormat:          "N/A",
+				SKUCapacity:          "N/A",
+				VersionUpgradeOption: "N/A",
+				SpilloverEnabled:     "No",
+				SpilloverDeployment:  "N/A",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := extractDeploymentInfo(tt.deploy)
+			if got.ModelVersion != tt.expected.ModelVersion {
+				t.Errorf("ModelVersion = %s, want %s", got.ModelVersion, tt.expected.ModelVersion)
+			}
+			if got.ModelFormat != tt.expected.ModelFormat {
+				t.Errorf("ModelFormat = %s, want %s", got.ModelFormat, tt.expected.ModelFormat)
+			}
+			if got.SKUCapacity != tt.expected.SKUCapacity {
+				t.Errorf("SKUCapacity = %s, want %s", got.SKUCapacity, tt.expected.SKUCapacity)
+			}
+			if got.VersionUpgradeOption != tt.expected.VersionUpgradeOption {
+				t.Errorf("VersionUpgradeOption = %s, want %s", got.VersionUpgradeOption, tt.expected.VersionUpgradeOption)
+			}
+			if got.SpilloverEnabled != tt.expected.SpilloverEnabled {
+				t.Errorf("SpilloverEnabled = %s, want %s", got.SpilloverEnabled, tt.expected.SpilloverEnabled)
+			}
+			if got.SpilloverDeployment != tt.expected.SpilloverDeployment {
+				t.Errorf("SpilloverDeployment = %s, want %s", got.SpilloverDeployment, tt.expected.SpilloverDeployment)
+			}
+		})
 	}
 }
