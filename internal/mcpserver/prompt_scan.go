@@ -21,7 +21,7 @@ Please:
    - Critical and high-severity recommendations
    - Security posture from Microsoft Defender for Cloud
    - Cost optimization opportunities from Azure Advisor
-   - Performance and reliability concerns
+   - Performance, reliability and observability concerns
    - Operational excellence improvements
 3. Provide actionable recommendations for:
    - Highest priority issues to address
