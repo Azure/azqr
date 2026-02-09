@@ -2,5 +2,6 @@
 // Find SQL servers that don't enforce TLS 1.2 or higher
 resources
 | where type =~ "Microsoft.Sql/servers"
-| where properties.minimalTlsVersion != "1.2"
-| project recommendationId = "sql-008", name, id, tags, param1 = strcat("Current TLS version: ", tostring(properties.minimalTlsVersion))
+| extend minimalTlsVersion = properties.minimalTlsVersion
+| where isnull(minimalTlsVersion) or minimalTlsVersion != "1.2"
+| project recommendationId = "sql-008", name, id, tags, param1 = strcat("Current TLS version: ", tostring(minimalTlsVersion))
