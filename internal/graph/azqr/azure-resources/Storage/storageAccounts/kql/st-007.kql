@@ -2,5 +2,6 @@
 // Find Storage Accounts that don't have HTTPS only enabled
 resources
 | where type =~ "Microsoft.Storage/storageAccounts"
-| where properties.supportsHttpsTrafficOnly != true
+| extend supportsHttpsTrafficOnly = properties.supportsHttpsTrafficOnly
+| where isnull(supportsHttpsTrafficOnly) or supportsHttpsTrafficOnly == false
 | project recommendationId = "st-007", name, id, tags, param1 = "Secure transfer (HTTPS only) is disabled"
