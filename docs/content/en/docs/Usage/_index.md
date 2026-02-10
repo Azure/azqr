@@ -409,6 +409,38 @@ azqr show --file report.json --open
 azqr show --file report.xlsx --port 3000
 ```
 
+## Copilot (AI Assistant)
+
+Azure Quick Review includes an interactive AI assistant powered by GitHub Copilot. This command starts a conversational TUI session that connects to GitHub Copilot and exposes azqr tools for natural language interaction.
+
+### Prerequisites
+
+1. [GitHub CLI](https://cli.github.com/) installed
+2. Authenticated: `gh auth login`
+3. Active GitHub Copilot subscription
+
+### Starting the Assistant
+
+```bash
+# Start interactive AI assistant
+azqr copilot
+
+# Use a specific model (default: claude-sonnet-4.5)
+azqr copilot --model claude-sonnet-4.5
+
+# Resume a previous session
+azqr copilot --resume <session-id>
+```
+### Available Tools
+
+The assistant can invoke the following azqr tools:
+
+- **scan** – Run Azure resource compliance scans
+- **get-recommendations-catalog** – View the azqr recommendations catalog
+- **get-supported-services** – List supported Azure services
+
+It also has access to the [Microsoft Learn MCP server](https://learn.microsoft.com/api/mcp) for fetching official Azure documentation.
+
 ## MCP Server (Model Context Protocol)
 
 Azure Quick Review includes a Model Context Protocol (MCP) server that enables AI assistants and tools to interact with azqr functionality. The MCP server can run in two modes:

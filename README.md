@@ -423,6 +423,26 @@ azqr mcp --mode http --addr :8080
 
 > For detailed MCP configuration, see the [Usage documentation](https://azure.github.io/azqr/docs/usage/).
 
+### Copilot (AI Assistant)
+
+Azure Quick Review includes an interactive AI assistant powered by GitHub Copilot for natural language interaction with azqr:
+
+```bash
+# Start interactive AI assistant
+azqr copilot
+
+# Use a specific model
+azqr copilot --model claude-sonnet-4.5
+
+# Resume a previous session
+azqr copilot --resume <session-id>
+```
+
+**Prerequisites:**
+1. [GitHub CLI](https://cli.github.com/) installed
+2. Authenticated: `gh auth login`
+3. Active GitHub Copilot subscription
+
 ## Filtering Recommendations and more
 
 You can configure Azure Quick Review to include or exclude specific subscriptions or resource groups and also exclude services or recommendations. To do so, create a `yaml` file with the following format:
