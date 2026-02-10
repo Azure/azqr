@@ -1,7 +1,5 @@
 package models
 
-import "github.com/rs/zerolog/log"
-
 type (
 	ScanParams struct {
 		ManagementGroups       []string
@@ -28,7 +26,7 @@ type (
 		Subscriptions  []string `json:"subscriptions,omitempty"`
 		ResourceGroups []string `json:"resourceGroups,omitempty"`
 		Services       []string `json:"services,omitempty"`
-		Stages         []string `json:"stages,omitempty"`
+		Stages         []string `json:"stages,omitempty"       jsonschema:"Optional scan stages. Default-on: graph, diagnostics, advisor, defender. Default-off (must be named to enable): policy, defender-recommendations, cost, arc. Use bare name or '+' prefix to enable (e.g. 'policy', '+defender-recommendations'). Use '-' prefix to disable a default-on stage (e.g. '-advisor')."`
 		StageParams    []string `json:"stageParams,omitempty"`
 		Mask           *bool    `json:"mask,omitempty"`
 	}
@@ -40,14 +38,16 @@ type (
 	}
 )
 
-func NewScanParamsWithDefaults(args ScanArgs) *ScanParams {
+func NewScanParamsWithDefaults(args ScanArgs) (*ScanParams, error) {
 	stages := NewStageConfigsWithDefaults()
 	if len(args.Stages) > 0 {
-		stages.ConfigureStages(args.Stages)
+		if err := stages.ConfigureStages(args.Stages); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := stages.ApplyStageParams(args.StageParams); err != nil {
-		log.Fatal().Err(err).Msg("failed applying stage parameters")
+		return nil, err
 	}
 
 	scannerKeys := args.Services
@@ -70,7 +70,7 @@ func NewScanParamsWithDefaults(args ScanArgs) *ScanParams {
 		Debug:            false,
 		ScannerKeys:      args.Services,
 		Filters:          filters,
-	}
+	}, nil
 }
 
 func NewScanParamsForPlugins(args PluginScanArgs) *ScanParams {

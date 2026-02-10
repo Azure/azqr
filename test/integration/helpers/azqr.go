@@ -76,7 +76,10 @@ func initializeLogger() {
 func (h *AZQRHelper) RunScan(args models.ScanArgs) *ScanResult {
 	h.t.Helper()
 
-	scanParams := models.NewScanParamsWithDefaults(args)
+	scanParams, err := models.NewScanParamsWithDefaults(args)
+	if err != nil {
+		h.t.Fatalf("failed to build scan params: %v", err)
+	}
 	scanParams.Mask = true
 
 	h.t.Logf("Running AZQR scan with subscriptions: %v, resource groups: %v, services: %v, enabled stages: %v",
@@ -97,7 +100,7 @@ func (h *AZQRHelper) RunScan(args models.ScanArgs) *ScanResult {
 	}
 
 	pipe := builder.BuildDefault()
-	err := pipe.Execute(scanCtx)
+	err = pipe.Execute(scanCtx)
 
 	result := &ScanResult{
 		Success: err == nil,

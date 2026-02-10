@@ -85,7 +85,9 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 
 	// Initialize stage configs
 	stageConfigs := models.NewStageConfigsWithDefaults()
-	stageConfigs.ConfigureStages(stageNames)
+	if err := stageConfigs.ConfigureStages(stageNames); err != nil {
+		log.Fatal().Err(err).Msg("failed configuring stages")
+	}
 
 	if err := stageConfigs.ApplyStageParams(stageParams); err != nil {
 		log.Fatal().Err(err).Msg("failed applying stage parameters")

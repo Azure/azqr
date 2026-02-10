@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 	"strings"
-
-	"github.com/rs/zerolog/log"
 )
 
 // Stage name constants
@@ -114,7 +112,7 @@ func (sc *StageConfigs) ValidateGraphStageEnabled() error {
 	return nil
 }
 
-func (sc *StageConfigs) ConfigureStages(stageNames []string) {
+func (sc *StageConfigs) ConfigureStages(stageNames []string) error {
 	// If stages are explicitly specified, determine the model to use
 	if len(stageNames) > 0 {
 		// Parse and enable/disable each specified stage
@@ -127,22 +125,22 @@ func (sc *StageConfigs) ConfigureStages(stageNames []string) {
 					continue
 				}
 
-				// Check if stage should be disabled (prefix with '-')
+				// '-name' disables, '+name' or bare 'name' enables
 				if strings.HasPrefix(s, "-") {
-					// Remove the '-' prefix and disable the stage
-					stageName := strings.TrimPrefix(s, "-")
-					if err := sc.DisableStage(stageName); err != nil {
-						log.Fatal().Err(err).Msgf("Invalid stage name: %s", stageName)
+					name := strings.TrimPrefix(s, "-")
+					if err := sc.DisableStage(name); err != nil {
+						return fmt.Errorf("invalid stage name: %s", name)
 					}
 				} else {
-					// Enable the stage
-					if err := sc.EnableStage(s); err != nil {
-						log.Fatal().Err(err).Msgf("Invalid stage name: %s", s)
+					name := strings.TrimPrefix(s, "+")
+					if err := sc.EnableStage(name); err != nil {
+						return fmt.Errorf("invalid stage name: %s", name)
 					}
 				}
 			}
 		}
 	}
+	return nil
 }
 
 // isValidStageName checks if a stage name is valid

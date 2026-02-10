@@ -86,11 +86,13 @@ func RegisterTools(s *server.MCPServer) {
 				- {"services": ["st"]} -> Scan only Storage Accounts (plus costs, advisor, defender)
 				- {"services": ["aks", "vm", "sql"], "stages": ["-diagnostics"]} -> Scan AKS/VM/SQL without diagnostic settings analysis
 				- {"stages": ["-defender", "-advisor"]} -> Scan all resources but skip Defender and Advisor
+				- {"stages": ["policy", "defender-recommendations"]} -> Enable Policy and Defender Recommendations stages
+				- {"stages": ["+cost"]} -> Enable cost stage ('+' prefix is equivalent to no prefix)
 
 				Use get-supported-services tool to see all available service abbreviations.`),
 			mcp.WithArray("stages",
 				mcp.Items(map[string]any{"type": "string"}),
-				mcp.Description("Optional array of scan stages to execute. Available stages: diagnostics, advisor, defender (enabled by default), cost, arc, policy, defender-recommendations (disabled by default). To disable a stage, prefix it with '-' (e.g., ['-diagnostics', '-defender']). Leave empty or omit to run default stages."),
+				mcp.Description("Optional array of scan stages to execute. Available stages: diagnostics, advisor, defender (enabled by default), cost, arc, policy, defender-recommendations (disabled by default). To enable an optional stage, include its bare name or prefix with '+' (e.g., ['policy', '+defender-recommendations']). To disable a stage, prefix it with '-' (e.g., ['-diagnostics']). Leave empty or omit to run default stages."),
 			),
 			mcp.WithArray("stageParams",
 				mcp.Items(map[string]any{"type": "string"}),

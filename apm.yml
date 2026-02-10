@@ -1,0 +1,9 @@
+# apm.yml — ships with your project
+name: my-office
+version: 1.0.0
+dependencies:
+  apm:
+    # Skills from any repository
+    - microsoft/skills/.github/skills/copilot-sdk#c6a6d1a
+    - hmans/beans/.claude/skills/bubbletea#db0ab139
+    - trentkm/go-tui-design#3f5fb091

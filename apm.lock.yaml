@@ -1,0 +1,32 @@
+lockfile_version: '1'
+generated_at: '2026-03-29T12:21:57.356057+00:00'
+apm_version: 0.8.6
+dependencies:
+- repo_url: hmans/beans
+  host: github.com
+  resolved_commit: db0ab1391952754e53861e04419158fcf5d2be83
+  resolved_ref: db0ab139
+  virtual_path: .claude/skills/bubbletea
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .github/skills/bubbletea
+  content_hash: sha256:ce8031d9df4729fe2c8c34a0c6e426503e9be68ccf214bcbca0db5dc6f64ba84
+- repo_url: microsoft/skills
+  host: github.com
+  resolved_commit: c6a6d1a7164ea9ed28648beb8d81d94efe50007f
+  resolved_ref: c6a6d1a
+  virtual_path: .github/skills/copilot-sdk
+  is_virtual: true
+  package_type: claude_skill
+  deployed_files:
+  - .github/skills/copilot-sdk
+  content_hash: sha256:15039abe8fc581014fa58dfe11d111a63c91ba25a622c122a15c18986c1d5d1b
+- repo_url: trentkm/go-tui-design
+  host: github.com
+  resolved_commit: 3f5fb0911005a6ba863eaaf7e582d2d52b8dab46
+  resolved_ref: 3f5fb091
+  package_type: claude_skill
+  deployed_files:
+  - .github/skills/go-tui-design
+  content_hash: sha256:c32c496cfe0aac924877ed49a4e8135dc16b757bbe8f179269d8d205fb4b7236

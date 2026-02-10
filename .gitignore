@@ -101,3 +101,6 @@ terraform.rc
 
 # ignore .terraform.lock.hcl files
 .terraform.lock.hcl
+
+# APM dependencies
+apm_modules/
