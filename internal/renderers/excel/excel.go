@@ -163,11 +163,6 @@ func autofitOptimized(f *excelize.File, sheetName string, maxSampleRows int) err
 	return nil
 }
 
-// autofit is kept for backward compatibility - calls autofitOptimized with default sampling
-func autofit(f *excelize.File, sheetName string) error {
-	return autofitOptimized(f, sheetName, 1000)
-}
-
 func createFirstRow(f *excelize.File, sheet string, headers []string, styles *StyleCache) {
 	currentRow := 4
 	cell, err := excelize.CoordinatesToCellName(1, currentRow)

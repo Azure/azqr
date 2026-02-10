@@ -140,11 +140,6 @@ func (p *Pipeline) Execute(ctx *ScanContext) error {
 	return nil
 }
 
-// GetMetrics returns the pipeline execution metrics.
-func (p *Pipeline) GetMetrics() *PipelineMetrics {
-	return p.metrics
-}
-
 // LogMetrics logs detailed pipeline metrics (for debug mode).
 func (p *Pipeline) LogMetrics() {
 	log.Debug().Msg("=== Scan Performance Metrics ===")
