@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// GraphScanStage executes APRL (Azure Proactive Resiliency Library) scanning.
+// GraphScanStage executes ARG scanning.
 type GraphScanStage struct {
 	*BaseStage
 }
@@ -89,12 +89,12 @@ func (s *GraphScanStage) Execute(ctx *ScanContext) error {
 		return nil
 	}
 
-	// Phase 2: Create new APRL scanner with filtered scanners
+	// Phase 2: Create new ARG scanner with filtered scanners
 	log.Debug().Msg("Graph Phase 2: Creating scanner with filtered scanners")
 	scanner = graph.NewScanner(filteredScanners, ctx.Params.Filters, ctx.Subscriptions)
 	s.registerYamlPlugins(&scanner)
 
-	// Execute APRL scan
+	// Execute ARG scan
 	log.Debug().Msg("Graph Phase 2: Executing scan")
 	ctx.ReportData.Graph = scanner.Scan(ctx.Ctx, ctx.Cred)
 
