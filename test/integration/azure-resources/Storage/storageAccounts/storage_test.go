@@ -5,6 +5,7 @@ package storageAccounts
 import (
 	"testing"
 
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/test/integration/helpers"
 	"github.com/stretchr/testify/require"
 )
@@ -33,9 +34,9 @@ func TestStorageAccountHTTPSViolation(t *testing.T) {
 
 	// Run AZQR scan for storage accounts only
 	azqr := helpers.NewAZQRHelper(t)
-	result := azqr.RunScan(helpers.ScanParams{
-		SubscriptionID: subscriptionID,
-		ResourceGroup:  resourceGroupName,
+	result := azqr.RunScan(models.ScanArgs{
+		Subscriptions:  []string{subscriptionID},
+		ResourceGroups: []string{resourceGroupName},
 		Services:       []string{"st"},                                    // Only scan storage accounts
 		Stages:         []string{"-diagnostics", "-advisor", "-defender"}, // Skip stages
 	})
@@ -88,9 +89,9 @@ func TestStorageAccountTLSViolation(t *testing.T) {
 
 	// Run AZQR scan for storage accounts only
 	azqr := helpers.NewAZQRHelper(t)
-	result := azqr.RunScan(helpers.ScanParams{
-		SubscriptionID: subscriptionID,
-		ResourceGroup:  resourceGroupName,
+	result := azqr.RunScan(models.ScanArgs{
+		Subscriptions:  []string{subscriptionID},
+		ResourceGroups: []string{resourceGroupName},
 		Services:       []string{"st"},                                    // Only scan storage accounts
 		Stages:         []string{"-diagnostics", "-advisor", "-defender"}, // Skip stages
 	})
@@ -139,9 +140,9 @@ func TestStorageAccountImmutableVersioningViolation(t *testing.T) {
 
 	// Run AZQR scan for storage accounts only
 	azqr := helpers.NewAZQRHelper(t)
-	result := azqr.RunScan(helpers.ScanParams{
-		SubscriptionID: subscriptionID,
-		ResourceGroup:  resourceGroupName,
+	result := azqr.RunScan(models.ScanArgs{
+		Subscriptions:  []string{subscriptionID},
+		ResourceGroups: []string{resourceGroupName},
 		Services:       []string{"st"},                                    // Only scan storage accounts
 		Stages:         []string{"-diagnostics", "-advisor", "-defender"}, // Skip stages
 	})

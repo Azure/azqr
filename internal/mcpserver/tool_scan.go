@@ -15,42 +15,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type ScanArgs struct {
-	Subscriptions  []string `json:"subscriptions,omitempty"`
-	ResourceGroups []string `json:"resourceGroups,omitempty"`
-	Services       []string `json:"services,omitempty"`
-	Stages         []string `json:"stages,omitempty"`
-	StageParams    []string `json:"stageParams,omitempty"`
-	Mask           *bool    `json:"mask,omitempty"`
-}
-
-func scanHandler(ctx context.Context, request mcp.CallToolRequest, args ScanArgs) (*mcp.CallToolResult, error) {
+func scanHandler(ctx context.Context, request mcp.CallToolRequest, args models.ScanArgs) (*mcp.CallToolResult, error) {
 	currentDir, err := getCurrentFolder(ctx)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to get current working directory")
 	}
 
-	scannerKeys := args.Services
-	filters := models.LoadFilters("", scannerKeys)
-
-	params := models.NewScanParams()
-	params.Stages.ConfigureStages(args.Stages)
-
-	if err := params.Stages.ApplyStageParams(args.StageParams); err != nil {
-		log.Fatal().Err(err).Msg("failed applying stage parameters")
-	}
-
-	if args.Mask != nil {
-		params.Mask = *args.Mask
-	}
-
-	params.Subscriptions = args.Subscriptions
-	params.ResourceGroups = args.ResourceGroups
+	params := models.NewScanParamsWithDefaults(args)
 	params.Xlsx = true
 	params.Json = true
-	params.ScannerKeys = scannerKeys
-	params.Filters = filters
 	params.OutputName = currentDir + "/azqr_scan_results"
+
 	scanner := pipeline.Scanner{}
 	r := scanner.Scan(params)
 
