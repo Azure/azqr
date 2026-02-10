@@ -26,8 +26,6 @@ func (s *CostStage) Skip(ctx *ScanContext) bool {
 }
 
 func (s *CostStage) Execute(ctx *ScanContext) error {
-	costScanner := scanners.CostScanner{}
-
 	subCount := len(ctx.Subscriptions)
 	if subCount == 0 {
 		ctx.ReportData.Cost = nil
@@ -50,6 +48,9 @@ func (s *CostStage) Execute(ctx *ScanContext) error {
 		workerWg.Add(1)
 		go func() {
 			defer workerWg.Done()
+			// Create a new CostScanner per worker to avoid race conditions
+			// since CostScanner stores state in struct fields during Scan()
+			workerScanner := scanners.CostScanner{}
 			for subID := range jobs {
 				scannerConfig := &models.ScannerConfig{
 					Ctx:            ctx.Ctx,
@@ -57,7 +58,7 @@ func (s *CostStage) Execute(ctx *ScanContext) error {
 					ClientOptions:  ctx.ClientOptions,
 					SubscriptionID: subID,
 				}
-				result := costScanner.Scan(scannerConfig)
+				result := workerScanner.Scan(scannerConfig)
 				if len(result) > 0 {
 					results <- result
 				}
