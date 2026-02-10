@@ -15,37 +15,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type PluginScanArgs struct {
-	Subscriptions  []string `json:"subscriptions,omitempty"`
-	ResourceGroups []string `json:"resourceGroups,omitempty"`
-	Mask           *bool    `json:"mask,omitempty"`
-}
-
 // scanPluginHandler creates a handler for plugin-specific scans
-func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequest, PluginScanArgs) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest, args PluginScanArgs) (*mcp.CallToolResult, error) {
+func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequest, models.PluginScanArgs) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest, args models.PluginScanArgs) (*mcp.CallToolResult, error) {
 		currentDir, err := getCurrentFolder(ctx)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to get current working directory")
 		}
 
-		scannerKeys := []string{}
-		filters := models.LoadFilters("", scannerKeys)
-		params := models.NewScanParams()
-
-		// Plugin-only mode: disable all stages
-		params.Stages = models.NewStageConfigs()
-		params.Subscriptions = args.Subscriptions
-		params.ResourceGroups = args.ResourceGroups
-		params.Mask = true
-		if args.Mask != nil {
-			params.Mask = *args.Mask
-		}
-
+		params := models.NewScanParamsForPlugins(args)
 		params.Xlsx = true
 		params.Json = true
-		params.ScannerKeys = scannerKeys
-		params.Filters = filters
 		params.OutputName = fmt.Sprintf("%s/azqr_%s_results", currentDir, pluginName)
 
 		// Enable the specific plugin for execution
