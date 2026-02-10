@@ -113,12 +113,6 @@ func (b *ScanPipelineBuilder) WithProfilingCleanup() *ScanPipelineBuilder {
 	return b
 }
 
-// WithCustomStage adds a custom stage to the pipeline.
-func (b *ScanPipelineBuilder) WithCustomStage(stage Stage) *ScanPipelineBuilder {
-	b.stages = append(b.stages, stage)
-	return b
-}
-
 // Build creates the pipeline with all configured stages.
 func (b *ScanPipelineBuilder) Build() *Pipeline {
 	return NewPipeline(b.stages...)

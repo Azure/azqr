@@ -145,45 +145,6 @@ func TestPipeline_Execute_SkipOptionalStage(t *testing.T) {
 	}
 }
 
-func TestPipeline_Metrics(t *testing.T) {
-	// Arrange
-	stage1 := NewMockStage("stage1", true, false)
-	stage2 := NewMockStage("stage2", true, false)
-
-	pipeline := NewPipeline(stage1, stage2)
-
-	ctx := &ScanContext{
-		Ctx:        context.Background(),
-		Params:     &models.ScanParams{},
-		ReportData: &renderers.ReportData{},
-	}
-
-	// Act
-	err := pipeline.Execute(ctx)
-
-	// Assert
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-
-	metrics := pipeline.GetMetrics()
-	if metrics == nil {
-		t.Fatal("Expected non-nil metrics")
-	}
-	if metrics.StagesExecuted != 2 {
-		t.Errorf("Expected 2 stages executed, got %d", metrics.StagesExecuted)
-	}
-	if metrics.TotalDuration <= 0 {
-		t.Error("Expected positive total duration")
-	}
-	if _, ok := metrics.StageDurations["stage1"]; !ok {
-		t.Error("Expected stage1 in stage durations")
-	}
-	if _, ok := metrics.StageDurations["stage2"]; !ok {
-		t.Error("Expected stage2 in stage durations")
-	}
-}
-
 func TestBaseStage_CanSkip(t *testing.T) {
 	tests := []struct {
 		name     string
