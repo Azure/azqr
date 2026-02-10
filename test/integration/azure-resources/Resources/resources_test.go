@@ -5,6 +5,7 @@ package storageAccounts
 import (
 	"testing"
 
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/test/integration/helpers"
 	"github.com/stretchr/testify/require"
 )
@@ -29,10 +30,10 @@ func TestResourceNoTagsViolation(t *testing.T) {
 
 	// Run AZQR scan for storage accounts only
 	azqr := helpers.NewAZQRHelper(t)
-	result := azqr.RunScan(helpers.ScanParams{
-		SubscriptionID: subscriptionID,
-		ResourceGroup:  resourceGroupName,
-		Services:       []string{"st"},                        // Scan resources and storage accounts
+	result := azqr.RunScan(models.ScanArgs{
+		Subscriptions:  []string{subscriptionID},
+		ResourceGroups: []string{resourceGroupName},
+		Services:       []string{"st"},                                    // Scan resources and storage accounts
 		Stages:         []string{"-diagnostics", "-advisor", "-defender"}, // Skip stages
 	})
 

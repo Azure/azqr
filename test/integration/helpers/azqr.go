@@ -28,15 +28,6 @@ type AZQRHelper struct {
 	scanner *pipeline.Scanner
 }
 
-// ScanParams defines parameters for running an AZQR scan
-type ScanParams struct {
-	SubscriptionID string
-	ResourceGroup  string
-	Services       []string // Service keys to scan (e.g., "st", "aks", "vm")
-	Stages         []string // Stages to run (e.g., "diagnostics", "advisor", "defender", "costs")
-	Filters        []string
-}
-
 // ScanResult represents the results from an AZQR scan
 type ScanResult struct {
 	Impacted     []*models.GraphResult
@@ -82,32 +73,10 @@ func initializeLogger() {
 }
 
 // RunScan executes an AZQR scan with the given parameters using direct package imports
-func (h *AZQRHelper) RunScan(params ScanParams) *ScanResult {
+func (h *AZQRHelper) RunScan(args models.ScanArgs) *ScanResult {
 	h.t.Helper()
 
-	// Create scan parameters
-	scanParams := models.NewScanParams()
-
-	if params.SubscriptionID != "" {
-		scanParams.Subscriptions = []string{params.SubscriptionID}
-	}
-
-	if params.ResourceGroup != "" {
-		scanParams.ResourceGroups = []string{params.ResourceGroup}
-	}
-
-	// Load filters with scanner keys to properly initialize resource type filtering
-	// This is critical - LoadFilters populates the filter's resource type map from scanners
-	if len(params.Services) > 0 {
-		scanParams.ScannerKeys = params.Services
-		scanParams.Filters = models.LoadFilters("", params.Services)
-	}
-
-	// Configure stages (enable/disable specific stages)
-	if len(params.Stages) > 0 {
-		scanParams.Stages.ConfigureStages(params.Stages)
-	}
-
+	scanParams := models.NewScanParamsWithDefaults(args)
 	scanParams.Mask = true
 
 	h.t.Logf("Running AZQR scan with subscriptions: %v, resource groups: %v, services: %v, enabled stages: %v",
