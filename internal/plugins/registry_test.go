@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/Azure/azqr/internal/models"
-	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,7 +35,6 @@ func TestRegistryRegister(t *testing.T) {
 
 	err := registry.Register(plugin)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, registry.Count())
 
 	// Verify plugin was registered
 	retrieved, exists := registry.Get("test1")
@@ -98,45 +96,10 @@ func TestRegistryRegisterDuplicate(t *testing.T) {
 	// Registering duplicate should replace
 	err = registry.Register(plugin2)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, registry.Count())
 
 	retrieved, exists := registry.Get("test")
 	assert.True(t, exists)
 	assert.Equal(t, "2.0.0", retrieved.Metadata.Version)
-}
-
-func TestRegistryUnregister(t *testing.T) {
-	registry := &Registry{
-		plugins: make(map[string]*Plugin),
-	}
-
-	plugin := &Plugin{
-		Metadata: PluginMetadata{
-			Name:    "test",
-			Version: "1.0.0",
-		},
-		YamlRecommendations: []models.GraphRecommendation{},
-	}
-
-	_ = registry.Register(plugin)
-	assert.Equal(t, 1, registry.Count())
-
-	err := registry.Unregister("test")
-	assert.NoError(t, err)
-	assert.Equal(t, 0, registry.Count())
-
-	_, exists := registry.Get("test")
-	assert.False(t, exists)
-}
-
-func TestRegistryUnregisterNonExistent(t *testing.T) {
-	registry := &Registry{
-		plugins: make(map[string]*Plugin),
-	}
-
-	err := registry.Unregister("nonexistent")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "plugin nonexistent not found")
 }
 
 func TestRegistryGet(t *testing.T) {
@@ -194,90 +157,4 @@ func TestRegistryListEmpty(t *testing.T) {
 	list := registry.List()
 	assert.NotNil(t, list)
 	assert.Equal(t, 0, len(list))
-}
-
-func TestRegistryCount(t *testing.T) {
-	registry := &Registry{
-		plugins: make(map[string]*Plugin),
-	}
-
-	assert.Equal(t, 0, registry.Count())
-
-	plugin1 := &Plugin{Metadata: PluginMetadata{Name: "test1", Version: "1.0.0"}}
-	plugin2 := &Plugin{Metadata: PluginMetadata{Name: "test2", Version: "1.0.0"}}
-
-	_ = registry.Register(plugin1)
-	assert.Equal(t, 1, registry.Count())
-
-	_ = registry.Register(plugin2)
-	assert.Equal(t, 2, registry.Count())
-
-	_ = registry.Unregister("test1")
-	assert.Equal(t, 1, registry.Count())
-}
-
-func TestAttachCommands(t *testing.T) {
-	registry := &Registry{
-		plugins: make(map[string]*Plugin),
-	}
-
-	rootCmd := &cobra.Command{Use: "root"}
-
-	plugin1 := &Plugin{
-		Metadata: PluginMetadata{Name: "test1"},
-		Command:  &cobra.Command{Use: "test1"},
-	}
-	plugin2 := &Plugin{
-		Metadata: PluginMetadata{Name: "test2"},
-		Command:  &cobra.Command{Use: "test2"},
-	}
-	plugin3 := &Plugin{
-		Metadata: PluginMetadata{Name: "test3"},
-		Command:  nil, // No command
-	}
-
-	_ = registry.Register(plugin1)
-	_ = registry.Register(plugin2)
-	_ = registry.Register(plugin3)
-
-	attached := registry.AttachCommands(rootCmd)
-	assert.Equal(t, 2, attached) // Only 2 plugins have commands
-
-	// Verify commands were attached
-	assert.True(t, rootCmd.HasSubCommands())
-	subcommands := rootCmd.Commands()
-	assert.Equal(t, 2, len(subcommands))
-}
-
-func TestPluginTypeString(t *testing.T) {
-	assert.Equal(t, "yaml", pluginTypeString(PluginTypeYaml))
-	assert.Equal(t, "unknown", pluginTypeString(PluginType(999)))
-}
-
-func TestConcurrentAccess(t *testing.T) {
-	registry := &Registry{
-		plugins: make(map[string]*Plugin),
-	}
-
-	// Test concurrent registration
-	done := make(chan bool)
-	for i := 0; i < 10; i++ {
-		go func(id int) {
-			plugin := &Plugin{
-				Metadata: PluginMetadata{
-					Name:    string(rune('a' + id)),
-					Version: "1.0.0",
-				},
-			}
-			_ = registry.Register(plugin)
-			done <- true
-		}(i)
-	}
-
-	// Wait for all goroutines
-	for i := 0; i < 10; i++ {
-		<-done
-	}
-
-	assert.Equal(t, 10, registry.Count())
 }

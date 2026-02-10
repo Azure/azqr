@@ -13,7 +13,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/rs/zerolog/log"
 )
 
@@ -211,26 +210,6 @@ func ShouldSkipError(err error) bool {
 		}
 	}
 	return false
-}
-
-// ListResourceGroup - List Resource Groups in a Subscription
-func ListResourceGroup(ctx context.Context, cred azcore.TokenCredential, subscriptionID string, options *arm.ClientOptions) ([]*armresources.ResourceGroup, error) {
-	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, options)
-	if err != nil {
-		return nil, err
-	}
-
-	resultPager := resourceGroupClient.NewListPager(nil)
-
-	resourceGroups := make([]*armresources.ResourceGroup, 0, 20)
-	for resultPager.More() {
-		pageResp, err := resultPager.NextPage(ctx)
-		if err != nil {
-			return nil, err
-		}
-		resourceGroups = append(resourceGroups, pageResp.Value...)
-	}
-	return resourceGroups, nil
 }
 
 // GetSubscriptionFromResourceID - Get Subscription ID from Resource ID

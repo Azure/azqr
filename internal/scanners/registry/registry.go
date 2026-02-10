@@ -7,8 +7,6 @@
 package registry
 
 import (
-	"sort"
-
 	"github.com/Azure/azqr/internal/models"
 )
 
@@ -34,22 +32,6 @@ func GetScannerByKey(key string) []models.IAzureScanner {
 // GetScannerCount returns the total number of registered scanner instances
 func GetScannerCount() int {
 	return len(GetAllScanners())
-}
-
-// GetScannersByKeys returns scanners for the specified service abbreviations
-// If keys is empty, returns all scanners
-func GetScannersByKeys(keys []string) []models.IAzureScanner {
-	if len(keys) == 0 {
-		return GetAllScanners()
-	}
-
-	var scanners []models.IAzureScanner
-	for _, key := range keys {
-		if s := GetScannerByKey(key); s != nil {
-			scanners = append(scanners, s...)
-		}
-	}
-	return scanners
 }
 
 // GetScannerInfo returns metadata about all registered scanners
@@ -78,26 +60,4 @@ func ListScannerInfo() []ScannerInfo {
 	}
 
 	return info
-}
-
-// GetResourceTypeToScannerMap returns a map of resource type to scanner keys
-// Useful for finding which scanner handles a specific resource type
-func GetResourceTypeToScannerMap() map[string][]string {
-	resourceTypeMap := make(map[string][]string)
-
-	for _, key := range GetScannerKeys() {
-		scanners := GetScannerByKey(key)
-		if len(scanners) > 0 {
-			for _, resourceType := range scanners[0].ResourceTypes() {
-				resourceTypeMap[resourceType] = append(resourceTypeMap[resourceType], key)
-			}
-		}
-	}
-
-	// Sort the scanner keys for each resource type
-	for resourceType := range resourceTypeMap {
-		sort.Strings(resourceTypeMap[resourceType])
-	}
-
-	return resourceTypeMap
 }

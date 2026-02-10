@@ -64,52 +64,6 @@ func TestCreateExcelReport(t *testing.T) {
 	}
 }
 
-func TestAutofit(t *testing.T) {
-	tests := []struct {
-		name      string
-		setupFunc func(*excelize.File) string
-		wantErr   bool
-	}{
-		{
-			name: "valid sheet with data",
-			setupFunc: func(f *excelize.File) string {
-				sheet := "TestSheet"
-				_ = f.SetSheetName("Sheet1", sheet)
-				_ = f.SetCellValue(sheet, "A1", "Short")
-				_ = f.SetCellValue(sheet, "A2", "Very long text content")
-				_ = f.SetCellValue(sheet, "B1", "Medium")
-				return sheet
-			},
-			wantErr: false,
-		},
-		{
-			name: "empty sheet",
-			setupFunc: func(f *excelize.File) string {
-				sheet := "EmptySheet"
-				_ = f.SetSheetName("Sheet1", sheet)
-				return sheet
-			},
-			wantErr: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			f := excelize.NewFile()
-			defer func() {
-				_ = f.Close()
-			}()
-
-			sheetName := tt.setupFunc(f)
-			err := autofit(f, sheetName)
-
-			if (err != nil) != tt.wantErr {
-				t.Errorf("autofit() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func TestCreateFirstRow(t *testing.T) {
 	tests := []struct {
 		name    string

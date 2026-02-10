@@ -51,15 +51,6 @@ func GetInternalPlugin(name string) (InternalPluginScanner, bool) {
 	return scanner, exists
 }
 
-// ListInternalPlugins returns all registered internal plugins
-func ListInternalPlugins() []string {
-	names := make([]string, 0, len(internalPluginRegistry))
-	for name := range internalPluginRegistry {
-		names = append(names, name)
-	}
-	return names
-}
-
 // createPluginCommand creates a Cobra command for a plugin
 // The actual Run function will be set by the commands package to call scan infrastructure
 func createPluginCommand(name, description string) *cobra.Command {
