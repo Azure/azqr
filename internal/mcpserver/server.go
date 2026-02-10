@@ -19,11 +19,6 @@ const (
 	ModeHTTP  ServerMode = "http"
 )
 
-// Start initializes and starts the MCP server in stdio mode (default)
-func Start() {
-	StartWithMode(ModeStdio, ":8080")
-}
-
 // StartWithMode starts the MCP server with the specified mode and address
 // mode: "stdio" for standard input/output, "http" for HTTP/SSE
 // addr: address to listen on (only used for HTTP mode, e.g., ":8080")
