@@ -14,32 +14,32 @@ type (
 	ReportData struct {
 		OutputFileName          string
 		Mask                    bool
-		Graph                   []*models.GraphResult
-		Defender                []*models.DefenderResult
-		DefenderRecommendations []*models.DefenderRecommendation
-		Advisor                 []*models.AdvisorResult
-		AzurePolicy             []*models.AzurePolicyResult
-		ArcSQL                  []*models.ArcSQLResult
-		Cost                    []*models.CostResult
-		Recommendations         map[string]map[string]*models.GraphRecommendation
-		Resources               []*models.Resource
-		ExludedResources        []*models.Resource
-		ResourceTypeCount       []*models.ResourceTypeCount
-		PluginResults           []*PluginResult // Results from external plugins
-		Stages                  *models.StageConfigs
+		Graph                   []*models.GraphResult                             `json:"graph,omitempty"`
+		Defender                []*models.DefenderResult                          `json:"defender,omitempty"`
+		DefenderRecommendations []*models.DefenderRecommendation                  `json:"defenderRecommendations,omitempty"`
+		Advisor                 []*models.AdvisorResult                           `json:"advisor,omitempty"`
+		AzurePolicy             []*models.AzurePolicyResult                       `json:"azurePolicy,omitempty"`
+		ArcSQL                  []*models.ArcSQLResult                            `json:"arcSQL,omitempty"`
+		Cost                    []*models.CostResult                              `json:"cost,omitempty"`
+		Recommendations         map[string]map[string]*models.GraphRecommendation `json:"-"`
+		Resources               []*models.Resource                                `json:"resources,omitempty"`
+		ExludedResources        []*models.Resource                                `json:"-"`
+		ResourceTypeCount       []*models.ResourceTypeCount                       `json:"resourceTypeCount,omitempty"`
+		PluginResults           []*PluginResult                                   `json:"pluginResults,omitempty"`
+		Stages                  *models.StageConfigs                              `json:"-"`
 
 		// Table caches - populated on first call, reused thereafter
-		cachedImpactedTable                [][]string
-		cachedCostTable                    [][]string
-		cachedDefenderTable                [][]string
-		cachedAdvisorTable                 [][]string
-		cachedAzurePolicyTable             [][]string
-		cachedArcSQLTable                  [][]string
-		cachedRecommendationsTable         [][]string
-		cachedResourceTypesTable           [][]string
-		cachedDefenderRecommendationsTable [][]string
-		cachedResourcesTable               [][]string
-		cachedExcludedResourcesTable       [][]string
+		cachedImpactedTable                [][]string `json:"-"`
+		cachedCostTable                    [][]string `json:"-"`
+		cachedDefenderTable                [][]string `json:"-"`
+		cachedAdvisorTable                 [][]string `json:"-"`
+		cachedAzurePolicyTable             [][]string `json:"-"`
+		cachedArcSQLTable                  [][]string `json:"-"`
+		cachedRecommendationsTable         [][]string `json:"-"`
+		cachedResourceTypesTable           [][]string `json:"-"`
+		cachedDefenderRecommendationsTable [][]string `json:"-"`
+		cachedResourcesTable               [][]string `json:"-"`
+		cachedExcludedResourcesTable       [][]string `json:"-"`
 	}
 
 	// PluginResult represents data from an external plugin
