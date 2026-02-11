@@ -54,8 +54,8 @@ func (s *ReportRenderingStage) Execute(ctx *ScanContext) error {
 	}
 
 	// Generate JSON output for stdout
-	outputJson := json.CreateJsonOutput(ctx.ReportData)
 	if ctx.Params.Stdout {
+		outputJson := json.CreateJsonOutput(ctx.ReportData)
 		fmt.Println(outputJson)
 	}
 
