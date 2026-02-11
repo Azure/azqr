@@ -7,24 +7,24 @@ import (
 	"time"
 
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/renderers/json"
+	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 )
 
 type Scanner struct{}
 
 // Scan performs a full scan using the default pipeline
-func (sc *Scanner) Scan(params *models.ScanParams) string {
+func (sc *Scanner) Scan(params *models.ScanParams) *renderers.ReportData {
 	return sc.scan(params, true)
 }
 
 // ScanPlugins performs a scan using only the plugin execution stage
-func (sc Scanner) ScanPlugins(params *models.ScanParams) string {
+func (sc Scanner) ScanPlugins(params *models.ScanParams) *renderers.ReportData {
 	return sc.scan(params, false)
 }
 
 // scan executes the scan using the composable pipeline pattern
-func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) string {
+func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) *renderers.ReportData {
 	// Import pipeline package
 	builder := NewScanPipelineBuilder()
 
@@ -59,6 +59,5 @@ func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) string 
 	seconds := int(elapsedTime.Seconds()) % 60
 	log.Info().Msgf("Scan completed in %02d:%02d:%02d", hours, minutes, seconds)
 
-	outputJson := json.CreateJsonOutput(scanCtx.ReportData)
-	return outputJson
+	return scanCtx.ReportData
 }

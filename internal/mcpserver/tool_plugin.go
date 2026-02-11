@@ -92,7 +92,8 @@ func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequ
 		})
 
 		// Return both the scan results and the resource URIs
-		resultText := fmt.Sprintf("%s\n\nScan results saved to:\n- Excel: %s\n- JSON: %s", r, uri, uriJSON)
-		return mcp.NewToolResultText(resultText), nil
+		resultText := fmt.Sprintf("Scan results saved to:\n- Excel: %s\n- JSON: %s", uri, uriJSON)
+		result := mcp.NewToolResultStructured(r, resultText)
+		return result, nil
 	}
 }
