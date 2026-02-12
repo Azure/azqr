@@ -8,7 +8,7 @@ weight: 3
 
 **Azure Quick Review (azqr)** requires the following permissions:
 
-* Reader over Subscription or Management Group scope
+* **Reader** over Subscription or Management Group scope (required for all scans)
 
 ## Authentication
 
@@ -18,13 +18,12 @@ weight: 3
 
 ### Credential Chain Configuration
 
-**Azure Quick Review (azqr)** uses the Azure SDK's `DefaultAzureCredential` which automatically selects the most appropriate credential based on your environment. You can customize the credential chain behavior by setting the `AZURE_TOKEN_CREDENTIALS` environment variable.
+**Azure Quick Review (azqr)** uses the Azure SDK's `DefaultAzureCredential` which automatically selects the most appropriate credential based on your environment. By default, it tries credentials in order: environment variables, workload identity, managed identity, Azure CLI, and Azure Developer CLI.
 
-**Development environments:**
-Set `AZURE_TOKEN_CREDENTIALS=dev` to use Azure CLI (`az`) or Azure Developer CLI (`azd`) credentials.
+You can customize this behavior by setting the `AZURE_TOKEN_CREDENTIALS` environment variable:
 
-**Production environments:** 
-Set `AZURE_TOKEN_CREDENTIALS=prod` to use environment variables, workload identity, or managed identity credentials.
+* `dev` - Prioritize Azure CLI (`az`) or Azure Developer CLI (`azd`) credentials (recommended for local development)
+* `prod` - Prioritize environment variables, workload identity, or managed identity (recommended for CI/CD and production)
 
 ### Service Principal Authentication
 
@@ -175,13 +174,13 @@ export AZURE_RESOURCE_MANAGER_AUDIENCE='https://management.core.custom.azure.com
 * Scan Multiple Subscriptions
 
   ```console
-  azqr scan --subscription-id <sub_id_1>, <sub_id_2>
+  azqr scan --subscription-id <sub_id_1> --subscription-id <sub_id_2>
   ```
 
 * Scan Multiple Resource Groups
 
   ```console
-  azqr scan --subscription-id <sub_id> --resource-group <rg_1>, <rg_2>
+  azqr scan --subscription-id <sub_id> --resource-group <rg_1> --resource-group <rg_2>
   ```
 
 ## Advanced Filtering
@@ -381,7 +380,6 @@ azqr scan --mask=false
 # Enable masking explicitly (default)
 azqr scan --mask=true
 ```
-
 ## Interactive Dashboard (show command)
 
 You can explore your scan results with a lightweight embedded web UI using the `show` command. The dashboard supports both Excel and JSON report formats.
