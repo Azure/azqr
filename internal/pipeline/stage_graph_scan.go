@@ -136,23 +136,24 @@ func (s *GraphScanStage) filterServiceScanners(
 	var filteredScanners []models.IAzureScanner
 
 	for _, scanner := range serviceScanners {
-		add := true
 		for _, resourceType := range scanner.ResourceTypes() {
 			resourceType = strings.ToLower(resourceType)
 
 			// Check if the resource type exists across any subscription
-			if count, exists := resourceTypes[resourceType]; !exists || count <= 0 {
+			count, exists := resourceTypes[resourceType]
+			if !exists || count <= 0 {
 				log.Debug().
 					Str("resourceType", resourceType).
 					Msgf("Skipping scanner")
 				continue
-			} else if add {
-				filteredScanners = append(filteredScanners, scanner)
-				add = false
-				log.Info().
-					Str("resourceType", resourceType).
-					Msgf("Scanner will be used")
 			}
+
+			// Found a matching resource type - add scanner and move to next
+			filteredScanners = append(filteredScanners, scanner)
+			log.Info().
+				Str("resourceType", resourceType).
+				Msgf("Scanner will be used")
+			break
 		}
 	}
 

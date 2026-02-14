@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
@@ -66,7 +67,7 @@ func scanHandler(ctx context.Context, request mcp.CallToolRequest, args models.S
 		mcp.WithMIMEType("binary/octet-stream"),
 	)
 
-	fileBlob, err := os.ReadFile(fileName)
+	fileBlob, err := os.ReadFile(filepath.Clean(fileName)) //nolint:gosec // fileName is generated internally by scan
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to read scan results file")
 	}

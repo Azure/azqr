@@ -97,9 +97,17 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 	for s := range subscriptions {
 		subs = append(subs, to.Ptr(s))
 	}
+
+	// Composite key type for deduplication - avoids string concatenation allocations
+	type defenderKey struct {
+		resourceID         string
+		category           string
+		recommendationName string
+	}
+
 	result := graphClient.Query(ctx, query, subs)
 	resources := []*models.DefenderRecommendation{}
-	seen := make(map[string]bool, len(result.Data))
+	seen := make(map[defenderKey]struct{}, len(result.Data))
 	if result.Data != nil {
 		for _, row := range result.Data {
 			m := row.(map[string]interface{})
@@ -113,7 +121,6 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 				subscriptionName = name
 			}
 
-			// Create a unique key for deduplication based on all fields
 			rec := &models.DefenderRecommendation{
 				SubscriptionId:         to.String(m["SubscriptionId"]),
 				SubscriptionName:       subscriptionName,
@@ -129,13 +136,15 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 				ResourceId:             to.String(m["ResourceId"]),
 			}
 
-			// Create unique key from ResourceId + Category + RecommendationName
-			// This combination should uniquely identify a defender recommendation
-			key := fmt.Sprintf("%s|%s|%s", rec.ResourceId, rec.Category, rec.RecommendationName)
+			// Create unique composite key - avoids string concatenation
+			key := defenderKey{
+				resourceID:         rec.ResourceId,
+				category:           rec.Category,
+				recommendationName: rec.RecommendationName,
+			}
 
-			if !seen[key] {
-				seen[key] = true
-				// Create a unique key for deduplication based on all fields
+			if _, exists := seen[key]; !exists {
+				seen[key] = struct{}{}
 				resources = append(resources, rec)
 			}
 		}

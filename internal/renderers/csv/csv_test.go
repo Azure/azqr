@@ -159,7 +159,7 @@ func TestWriteData(t *testing.T) {
 	}
 
 	// Read and verify the data
-	file, err := os.Open(expectedFile)
+	file, err := os.Open(expectedFile) //nolint:gosec // expectedFile is a test-generated path
 	if err != nil {
 		t.Fatalf("Failed to open created file: %v", err)
 	}
@@ -199,7 +199,7 @@ func TestWriteDataEmptyTable(t *testing.T) {
 	}
 
 	// Read and verify the data
-	file, err := os.Open(expectedFile)
+	file, err := os.Open(expectedFile) //nolint:gosec // expectedFile is a test-generated path
 	if err != nil {
 		t.Fatalf("Failed to open created file: %v", err)
 	}

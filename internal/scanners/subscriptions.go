@@ -2,6 +2,7 @@ package scanners
 
 import (
 	"context"
+	"slices"
 
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/to"
@@ -39,9 +40,9 @@ func (sc *SubcriptionDiscovery) ListSubscriptions(ctx context.Context, cred azco
 	result := map[string]string{}
 	for _, s := range subs {
 		sid := *s.SubscriptionID
-		// If subscriptionns is empty run the filter on all subscriptions.
-		// If Subscriptions is not empty exlude all subscriptions except the ones specified.
-		if len(subscriptions) == 0 || containsString(subscriptions, sid) {
+		// If subscriptions is empty run the filter on all subscriptions.
+		// If Subscriptions is not empty exclude all subscriptions except the ones specified.
+		if len(subscriptions) == 0 || slices.Contains(subscriptions, sid) {
 			if filters.Azqr.IsSubscriptionExcluded(sid) {
 				log.Info().Msgf("Skipping subscriptions/...%s", sid[29:])
 				continue
@@ -51,14 +52,4 @@ func (sc *SubcriptionDiscovery) ListSubscriptions(ctx context.Context, cred azco
 	}
 
 	return result
-}
-
-// Chek if string is in slice
-func containsString(slice []string, str string) bool {
-	for _, item := range slice {
-		if item == str {
-			return true
-		}
-	}
-	return false
 }

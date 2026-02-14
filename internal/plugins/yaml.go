@@ -15,7 +15,8 @@ import (
 
 // LoadYamlPlugin loads a YAML plugin from a file and converts queries to AprlRecommendation format
 func LoadYamlPlugin(filePath string) (*Plugin, []models.GraphRecommendation, error) {
-	data, err := os.ReadFile(filePath)
+	cleanPath := filepath.Clean(filePath)
+	data, err := os.ReadFile(cleanPath) //nolint:gosec // filePath comes from plugin discovery in trusted directories
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to read YAML plugin file: %w", err)
 	}
@@ -36,12 +37,11 @@ func LoadYamlPlugin(filePath string) (*Plugin, []models.GraphRecommendation, err
 		return nil, nil, fmt.Errorf("plugin must have at least one query")
 	}
 
-	// Load external query files if specified
-	baseDir := filepath.Dir(filePath)
+	baseDir := filepath.Dir(cleanPath)
 	for i := range config.Queries {
 		if config.Queries[i].QueryFile != "" {
-			queryPath := filepath.Join(baseDir, config.Queries[i].QueryFile)
-			queryData, err := os.ReadFile(queryPath)
+			queryPath := filepath.Clean(filepath.Join(baseDir, config.Queries[i].QueryFile))
+			queryData, err := os.ReadFile(queryPath) //nolint:gosec // queryFile is relative to plugin directory
 			if err != nil {
 				return nil, nil, fmt.Errorf("failed to read query file %s: %w", config.Queries[i].QueryFile, err)
 			}

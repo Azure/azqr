@@ -76,9 +76,9 @@ func (a *GraphScanner) RegisterExternalQuery(resourceType string, recommendation
 // GetRecommendations returns a map with all Graph recommendations
 func (a *GraphScanner) GetRecommendations() map[string]map[string]models.GraphRecommendation {
 	recommendations := map[string]map[string]models.GraphRecommendation{}
-	for _, t := range a.scanType {
+	for _, scanType := range a.scanType {
 		var source string
-		switch t {
+		switch scanType {
 		case OrphanScanType:
 			source = "AOR"
 		case AzqrScanType:
@@ -87,14 +87,14 @@ func (a *GraphScanner) GetRecommendations() map[string]map[string]models.GraphRe
 			source = "APRL"
 		}
 
-		rs := a.getRecommendations(string(t))
-		for t, r := range rs {
-			for _, r := range r {
-				if recommendations[t] == nil {
-					recommendations[t] = map[string]models.GraphRecommendation{}
+		typeRecs := a.getRecommendations(string(scanType))
+		for resourceType, recs := range typeRecs {
+			for _, rec := range recs {
+				if recommendations[resourceType] == nil {
+					recommendations[resourceType] = map[string]models.GraphRecommendation{}
 				}
-				r.Source = source
-				recommendations[t][r.RecommendationID] = r
+				rec.Source = source
+				recommendations[resourceType][rec.RecommendationID] = rec
 			}
 		}
 	}

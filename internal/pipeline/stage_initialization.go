@@ -39,19 +39,10 @@ func (s *InitializationStage) Execute(ctx *ScanContext) error {
 	// Step 4: Create Azure credentials
 	ctx.Cred = az.NewAzureCredential()
 
-	// Step 5: Create context with cancellation
-	scanCtx, cancel := ctx.Ctx, ctx.Cancel
-	if scanCtx == nil {
-		// Only create new context if not provided
-		scanCtx, cancel = ctx.Ctx, ctx.Cancel
-	}
-	ctx.Ctx = scanCtx
-	ctx.Cancel = cancel
-
-	// Step 6: Create client options
+	// Step 5: Create client options
 	ctx.ClientOptions = az.NewDefaultClientOptions()
 
-	// Step 7: Initialize report data
+	// Step 6: Initialize report data
 	reportData := renderers.NewReportData(
 		outputFile,
 		ctx.Params.Mask,
@@ -74,10 +65,7 @@ func (s *InitializationStage) logScannerRegistryInfo() {
 		Msg("Scanner registry initialized")
 
 	// Log sample of registered scanners
-	sampleSize := 5
-	if len(scannerInfo) < sampleSize {
-		sampleSize = len(scannerInfo)
-	}
+	sampleSize := min(5, len(scannerInfo))
 
 	for i := 0; i < sampleSize; i++ {
 		info := scannerInfo[i]

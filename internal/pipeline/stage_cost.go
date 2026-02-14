@@ -34,10 +34,7 @@ func (s *CostStage) Execute(ctx *ScanContext) error {
 
 	// Worker pool to limit concurrent cost scanner goroutines
 	const numCostWorkers = 10
-	workerCount := numCostWorkers
-	if subCount < workerCount {
-		workerCount = subCount
-	}
+	workerCount := min(numCostWorkers, subCount)
 
 	jobs := make(chan string, subCount)
 	results := make(chan []*models.CostResult, subCount)

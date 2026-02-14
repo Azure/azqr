@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 package renderers
 
 import (
@@ -60,19 +63,17 @@ func GetAllRecommendations(md bool) string {
 		}
 	} else {
 		j := []map[string]string{}
-		i := 0
 
 		for _, k := range graphKeys {
 			r := graphRecommendations[k]
-			j = append(j, map[string]string{})
-			j[i] = map[string]string{}
-			j[i]["recommendationId"] = r.RecommendationID
-			j[i]["resourceType"] = r.ResourceType
-			j[i]["category"] = string(r.Category)
-			j[i]["impact"] = string(r.Impact)
-			j[i]["recommendation"] = r.Recommendation
-			j[i]["learnMoreUrl"] = r.LearnMoreLink[0].Url
-			i++
+			j = append(j, map[string]string{
+				"recommendationId": r.RecommendationID,
+				"resourceType":     r.ResourceType,
+				"category":         string(r.Category),
+				"impact":           string(r.Impact),
+				"recommendation":   r.Recommendation,
+				"learnMoreUrl":     r.LearnMoreLink[0].Url,
+			})
 		}
 
 		// print j as json to stdout
