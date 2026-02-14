@@ -5,6 +5,7 @@ package models
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -67,7 +68,7 @@ func (e *AzqrFilter) IsSubscriptionExcluded(subscriptionID string) bool {
 		return false
 	}
 
-	// If not included, but there are included ressubscriptions, then exclude it
+	// If not included, but there are included subscriptions, then exclude it
 	if len(e.iSubscriptions) > 0 {
 		return true
 	}
@@ -163,7 +164,8 @@ func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 	filters := NewFilters()
 
 	if filterFile != "" {
-		data, err := os.ReadFile(filterFile)
+		cleanPath := filepath.Clean(filterFile)
+		data, err := os.ReadFile(cleanPath) //nolint:gosec // filterFile comes from CLI flag
 		if err != nil {
 			log.Fatal().Err(err).Msgf("failed reading data from file: %s", filterFile)
 		}

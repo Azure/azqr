@@ -311,7 +311,8 @@ func TestPortAvailable(t *testing.T) {
 
 func TestPortAvailableWithUsedPort(t *testing.T) {
 	// Start a listener on a port
-	listener, err := net.Listen("tcp", ":0")
+	// Using ":0" lets the OS pick an available port - this is safe for tests
+	listener, err := net.Listen("tcp", "127.0.0.1:0") //nolint:gosec // Using localhost for test safety
 	if err != nil {
 		t.Fatalf("Failed to start test listener: %v", err)
 	}

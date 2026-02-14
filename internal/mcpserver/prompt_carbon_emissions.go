@@ -22,8 +22,7 @@ Please:
 3. Provide actionable insights for reducing carbon footprint
 `
 
-		promptText := prompt
-		promptMessage := mcp.NewPromptMessage(mcp.RoleUser, mcp.NewTextContent(promptText))
+		promptMessage := mcp.NewPromptMessage(mcp.RoleUser, mcp.NewTextContent(prompt))
 
 		return mcp.NewGetPromptResult(
 			"analyze carbon emissions",

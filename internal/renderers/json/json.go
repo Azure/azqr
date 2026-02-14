@@ -1,10 +1,15 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 package json
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Azure/azqr/internal/models"
+
 	"os"
+
+	"github.com/Azure/azqr/internal/models"
 
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/iancoleman/strcase"
@@ -110,26 +115,29 @@ func CreateJsonOutput(data *renderers.ReportData) string {
 
 // writeData writes the consolidated JSON data to a single file
 func writeData(data map[string]interface{}, filename string) {
-	f, err := os.Create(filename)
+	f, err := os.Create(filename) //nolint:gosec // filename is generated from user's output-name flag
 	if err != nil {
 		log.Fatal().Err(err).Msg("error creating json:")
+		return
 	}
 
 	defer func() {
 		// Handle error during file close
 		if cerr := f.Close(); cerr != nil {
-			log.Fatal().Err(cerr).Msg("error closing file:")
+			log.Error().Err(cerr).Msg("error closing file:")
 		}
 	}()
 
 	js, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
-		log.Fatal().Err(err).Msg("error marshaling data:")
+		log.Error().Err(err).Msg("error marshaling data:")
+		return
 	}
 
 	_, err = f.Write(js)
 	if err != nil {
-		log.Fatal().Err(err).Msg("error writing json:")
+		_ = f.Close() // Close the file before exiting to ensure cleanup
+		log.Fatal().Err(err).Msg("error writing json:") //nolint:gocritic // File is explicitly closed above
 	}
 }
 

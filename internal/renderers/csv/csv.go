@@ -96,7 +96,7 @@ func writeData(data [][]string, fileName, extension string) {
 	filename := fmt.Sprintf("%s.%s.csv", fileName, extension)
 	log.Info().Msgf("Generating Report: %s", filename)
 
-	f, err := os.Create(filename)
+	f, err := os.Create(filename) //nolint:gosec // filename is generated from user's output-name flag
 	if err != nil {
 		log.Fatal().Err(err).Msg("error creating csv:")
 	}

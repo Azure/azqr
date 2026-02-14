@@ -19,7 +19,7 @@ func (sc *Scanner) Scan(params *models.ScanParams) *renderers.ReportData {
 }
 
 // ScanPlugins performs a scan using only the plugin execution stage
-func (sc Scanner) ScanPlugins(params *models.ScanParams) *renderers.ReportData {
+func (sc *Scanner) ScanPlugins(params *models.ScanParams) *renderers.ReportData {
 	return sc.scan(params, false)
 }
 

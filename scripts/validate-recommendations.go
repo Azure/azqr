@@ -99,7 +99,8 @@ func validateFile(path string, schemaLoader gojsonschema.JSONLoader) []Validatio
 	errors := []ValidationError{}
 
 	// Read YAML file
-	data, err := os.ReadFile(path)
+	cleanPath := filepath.Clean(path)
+	data, err := os.ReadFile(cleanPath) //nolint:gosec // path comes from filepath.Walk in controlled directory
 	if err != nil {
 		errors = append(errors, ValidationError{
 			File:    path,

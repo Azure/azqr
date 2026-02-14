@@ -23,8 +23,7 @@ Please:
    - Cross-subscription zone alignment considerations
 `
 
-		promptText := prompt
-		promptMessage := mcp.NewPromptMessage(mcp.RoleUser, mcp.NewTextContent(promptText))
+		promptMessage := mcp.NewPromptMessage(mcp.RoleUser, mcp.NewTextContent(prompt))
 
 		return mcp.NewGetPromptResult(
 			"get availability zone mappings",

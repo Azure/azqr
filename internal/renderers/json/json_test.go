@@ -137,7 +137,7 @@ func TestCreateJsonReport(t *testing.T) {
 	}
 
 	// Verify file contains valid JSON
-	fileData, err := os.ReadFile(filename)
+	fileData, err := os.ReadFile(filename) //nolint:gosec // filename is a test-generated path
 	if err != nil {
 		t.Fatalf("Failed to read created file: %v", err)
 	}
@@ -214,7 +214,7 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 
 	// Verify file was created
 	filename := filepath.Join(tmpDir, "test_report_plugins.json")
-	fileData, err := os.ReadFile(filename)
+	fileData, err := os.ReadFile(filename) //nolint:gosec // filename is a test-generated path
 	if err != nil {
 		t.Fatalf("Failed to read created file: %v", err)
 	}

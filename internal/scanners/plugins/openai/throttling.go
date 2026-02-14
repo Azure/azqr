@@ -172,10 +172,7 @@ func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredentia
 				return nil, fmt.Errorf("scan cancelled: %w", err)
 			}
 
-			end := i + 50
-			if end > len(group.Resources) {
-				end = len(group.Resources)
-			}
+			end := min(i+50, len(group.Resources))
 			batch := group.Resources[i:end]
 			log.Debug().Int("start", i).Int("end", end).Int("total", len(group.Resources)).Msg("Processing batch")
 

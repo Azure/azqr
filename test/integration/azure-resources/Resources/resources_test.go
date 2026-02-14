@@ -1,6 +1,6 @@
 //go:build integration
 
-package storageAccounts
+package resources
 
 import (
 	"testing"

@@ -6,6 +6,7 @@ package plugins
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -184,7 +185,7 @@ queries:
 	}
 
 	rec := recommendations[0]
-	if !containsString(rec.GraphQuery, "tags[\"environment\"]") {
+	if !strings.Contains(rec.GraphQuery, "tags[\"environment\"]") {
 		t.Error("Expected query to contain content from external KQL file")
 	}
 }
@@ -392,19 +393,4 @@ queries:
     recommendationResourceType: Microsoft.Test/resources
     query: resources | where type == "microsoft.test/resources"
 `
-}
-
-func containsString(s, substr string) bool {
-	return len(s) > 0 && len(substr) > 0 && (s == substr || len(s) >= len(substr) &&
-		(s[:len(substr)] == substr || s[len(s)-len(substr):] == substr ||
-			len(s) > len(substr) && findSubstring(s, substr)))
-}
-
-func findSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }

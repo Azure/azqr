@@ -332,11 +332,13 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 			}
 			typeIsDeployed := deployedTypes[strings.ToLower(r.ResourceType)]
 
-			implemented := "N/A"
+			var implemented string
 			switch {
-			case typeIsDeployed && counter[r.RecommendationID] == 0:
+			case !typeIsDeployed:
+				implemented = "N/A"
+			case counter[r.RecommendationID] == 0:
 				implemented = "true"
-			case typeIsDeployed && counter[r.RecommendationID] > 0:
+			default:
 				implemented = "false"
 			}
 

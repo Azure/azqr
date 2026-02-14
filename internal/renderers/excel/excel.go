@@ -74,14 +74,15 @@ func CreateExcelReport(data *renderers.ReportData) {
 	f := excelize.NewFile()
 	defer func() {
 		if err := f.Close(); err != nil {
-			log.Fatal().Err(err).Msg("Failed to close Excel file")
+			log.Error().Err(err).Msg("Failed to close Excel file")
 		}
 	}()
 
 	// Create shared styles once for all sheets
 	styles, err := createSharedStyles(f)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create shared styles")
+		log.Error().Err(err).Msg("Failed to create shared styles")
+		return
 	}
 
 	renderRecommendations(f, data, styles)
@@ -106,7 +107,8 @@ func CreateExcelReport(data *renderers.ReportData) {
 	}
 
 	if err := f.SaveAs(filename); err != nil {
-		log.Fatal().Err(err).Msg("Failed to save Excel file")
+		_ = f.Close() // Close the file before exiting to ensure cleanup
+		log.Fatal().Err(err).Msg("Failed to save Excel file") //nolint:gocritic // File is explicitly closed above
 	}
 }
 

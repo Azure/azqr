@@ -82,10 +82,7 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 	// Run the query in batches of 300 subscriptions
 	batchSize := 300
 	for i := 0; i < len(subscriptionIDs); i += batchSize {
-		j := i + batchSize
-		if j > len(subscriptionIDs) {
-			j = len(subscriptionIDs)
-		}
+		j := min(i+batchSize, len(subscriptionIDs))
 
 		format := "objectArray"
 		options := &QueryRequestOptions{

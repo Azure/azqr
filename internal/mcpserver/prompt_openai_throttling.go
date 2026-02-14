@@ -32,8 +32,7 @@ Please:
    - Immediate actions vs. long-term improvements
 `
 
-		promptText := prompt
-		promptMessage := mcp.NewPromptMessage(mcp.RoleUser, mcp.NewTextContent(promptText))
+		promptMessage := mcp.NewPromptMessage(mcp.RoleUser, mcp.NewTextContent(prompt))
 
 		return mcp.NewGetPromptResult(
 			"check OpenAI throttling",
