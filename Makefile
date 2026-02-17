@@ -67,7 +67,7 @@ lint-all: lint-install
 
 lint-install:
 	@if [ ! -f $(GOLANGCI_LINT) ]; then \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.8.0; \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.9.0; \
 	fi
 
 vet:
