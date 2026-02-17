@@ -41,5 +41,5 @@
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
 		"ghcr.io/devcontainers/features/terraform:1": {}
 	},
-	"postCreateCommand": "go mod download"
+	"postCreateCommand": "go mod download && git submodule init && git submodule update"
 }
