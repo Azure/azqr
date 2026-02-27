@@ -107,7 +107,7 @@ jobs:
           tar -czf linux-azqr.tar.gz bin/linux_*
 
       - name: Upload Linux artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: linux-binaries
           path: linux-azqr.tar.gz
@@ -160,7 +160,7 @@ jobs:
           tar -czf windows-azqr.tar.gz bin/windows_*
 
       - name: Upload Windows artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: windows-binaries
           path: windows-azqr.tar.gz
@@ -206,7 +206,7 @@ jobs:
           tar -czf macos-azqr.tar.gz bin/darwin_*
 
       - name: Upload macOS artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: macos-binaries
           path: macos-azqr.tar.gz
