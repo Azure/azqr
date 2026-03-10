@@ -489,7 +489,7 @@ function renderTable(rows, datasetName) {
         'azurePolicy': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'policyDisplayName', 'policyDescription', 'resourceId', 'timeStamp', 'policyDefinitionName', 'policyDefinitionId', 'policyAssignmentName', 'policyAssignmentId', 'complianceState'],
         'arcSQL': ['subscriptionId', 'subscriptionName', 'azureArcServer', 'sqlInstance', 'resourceGroup', 'version', 'build', 'patchLevel', 'edition', 'vCores', 'dpsStatus', 'license', 'telStatus', 'defenderStatus'],
         'recommendations': ['implemented', 'numberOfImpactedResources', 'azureServiceWellArchitected', 'recommendationSource', 'azureServiceCategoryWellArchitectedArea', 'azureServiceWellArchitectedTopic', 'category', 'recommendation', 'impact', 'bestPracticesGuidance', 'readMore', 'recommendationId'],
-        'resourceType': ['subscription', 'resourceType', 'numberOfResources'],
+        'resourceType': ['subscriptionName', 'resourceType', 'numberOfResources'],
         'defenderRecommendations': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'category', 'recommendationSeverity', 'recommendationName', 'actionDescription', 'remediationDescription', 'resourceId'],
         'inventory': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName', 'skuName', 'skuTier', 'kind', 'sla', 'resourceId'],
         'outOfScope': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName', 'resourceId']
@@ -519,7 +519,7 @@ function renderTable(rows, datasetName) {
             'defenderRecommendations': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'category', 'recommendationSeverity'],
             'inventory': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName'],
             'outOfScope': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName'],
-            'resourceType': ['subscription', 'resourceType'],
+            'resourceType': ['subscriptionName', 'resourceType'],
             'advisor': ['subscriptionId', 'subscriptionName', 'resourceType', 'resourceName', 'category', 'impact', 'recommendationId'],
             'impacted': ['source', 'category', 'impact', 'resourceType', 'recommendationId', 'subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceName'],
             'recommendations': ['recommendationId', 'subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceName', 'implemented', 'recommendationSource', 'azureServiceCategoryWellArchitectedArea', 'azureServiceWellArchitectedTopic', 'category', 'impact']
