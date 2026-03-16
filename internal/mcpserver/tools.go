@@ -135,6 +135,8 @@ func withBasicOptions(opts ...mcp.ToolOption) []mcp.ToolOption {
 			mcp.DefaultBool(true),
 			mcp.Description("Mask sensitive data in output (default: true)."),
 		),
+		mcp.WithReadOnlyHintAnnotation(false),
+		mcp.WithDestructiveHintAnnotation(false),
 	}
 	return append(opts, basicOpts...)
 }

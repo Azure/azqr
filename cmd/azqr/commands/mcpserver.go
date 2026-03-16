@@ -36,6 +36,6 @@ Examples:
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		mode := mcpserver.ServerMode(mcpMode)
-		mcpserver.StartWithMode(mode, mcpAddr)
+		mcpserver.StartWithMode(mode, mcpAddr, version)
 	},
 }

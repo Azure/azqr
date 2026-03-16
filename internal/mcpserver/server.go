@@ -22,10 +22,15 @@ const (
 // StartWithMode starts the MCP server with the specified mode and address
 // mode: "stdio" for standard input/output, "http" for HTTP/SSE
 // addr: address to listen on (only used for HTTP mode, e.g., ":8080")
-func StartWithMode(mode ServerMode, addr string) {
+// version: version of the MCP server
+func StartWithMode(mode ServerMode, addr, version string) {
+	if version == "" {
+		version = "dev"
+	}
+	
 	s = server.NewMCPServer(
 		"Azure Quick Review 🚀",
-		"0.1.0",
+		version,
 		server.WithToolCapabilities(true), // Enable tool notifications
 		server.WithResourceCapabilities(true, true),
 		server.WithPromptCapabilities(true),
