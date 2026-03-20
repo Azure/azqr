@@ -9,6 +9,8 @@ github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2 h1:9iefClla7iYpfYWdzPCRDo
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2/go.mod h1:XtLgD3ZD34DAaVIIAyG3objl5DynM3CQ/vMcbBNJZGI=
 github.com/Azure/azure-sdk-for-go/sdk/monitor/query/azmetrics v1.3.0 h1:blbWEpcsg2EFqXe64sRPdWPKnLWm0fPY4iHyo4MoHVM=
 github.com/Azure/azure-sdk-for-go/sdk/monitor/query/azmetrics v1.3.0/go.mod h1:jWOswzu+YEJ01Csz2ZUir7KecMjHJNYwxufLqAYi+ls=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/advisor/armadvisor v1.2.0 h1:3ddjPq/3A/oB2u7LdohEr900EGP5l1MnAiNc3EbY1E4=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/advisor/armadvisor v1.2.0/go.mod h1:oZ73p8dR7aZI+TJo5Ul92oCoVubMYPBo39eTsWa0AiQ=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/carbonoptimization/armcarbonoptimization v1.0.0 h1:3QWZJ2VQpmjuKVdxz9W1uGeuDfJVDbjqJuMD3fJL96g=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/carbonoptimization/armcarbonoptimization v1.0.0/go.mod h1:RKeTr4xYL46aSsglK/ejFymF4/TM4iN0V8gKscCpcT0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices/v2 v2.0.0 h1:pxphC/uRZKNHNPbZ0duDDgKkefju2F03OkG5xF6byHQ=
