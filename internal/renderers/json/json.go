@@ -23,53 +23,53 @@ func buildConsolidatedReport(data *renderers.ReportData) map[string]interface{} 
 
 	// Only include AZQR-related data if the feature is enabled
 	if data.Stages.IsStageEnabled(models.StageNameGraph) {
-		consolidatedReport["recommendations"] = convertToJSON(data.RecommendationsTable())
-		consolidatedReport["impacted"] = convertToJSON(data.ImpactedTable())
-		consolidatedReport["resourceType"] = convertToJSON(data.ResourceTypesTable())
-		consolidatedReport["inventory"] = convertToJSON(data.ResourcesTable())
-		consolidatedReport["outOfScope"] = convertToJSON(data.ExcludedResourcesTable())
+		consolidatedReport["recommendations"] = ConvertToJSON(data.RecommendationsTable())
+		consolidatedReport["impacted"] = ConvertToJSON(data.ImpactedTable())
+		consolidatedReport["resourceType"] = ConvertToJSON(data.ResourceTypesTable())
+		consolidatedReport["inventory"] = ConvertToJSON(data.ResourcesTable())
+		consolidatedReport["outOfScope"] = ConvertToJSON(data.ExcludedResourcesTable())
 	} else {
 		log.Debug().Msg("Skipping AZQR data in JSON. Feature is disabled")
 	}
 
 	// Only include Advisor data if the feature is enabled
 	if data.Stages.IsStageEnabled(models.StageNameAdvisor) {
-		consolidatedReport["advisor"] = convertToJSON(data.AdvisorTable())
+		consolidatedReport["advisor"] = ConvertToJSON(data.AdvisorTable())
 	} else {
 		log.Debug().Msg("Skipping Advisor data in JSON. Feature is disabled")
 	}
 
 	// Only include Azure Policy data if the feature is enabled
 	if data.Stages.IsStageEnabled(models.StageNamePolicy) {
-		consolidatedReport["azurePolicy"] = convertToJSON(data.AzurePolicyTable())
+		consolidatedReport["azurePolicy"] = ConvertToJSON(data.AzurePolicyTable())
 	} else {
 		log.Debug().Msg("Skipping Azure Policy data in JSON. Feature is disabled")
 	}
 
 	// Only include Arc SQL data if the feature is enabled
 	if data.Stages.IsStageEnabled(models.StageNameArc) {
-		consolidatedReport["arcSQL"] = convertToJSON(data.ArcSQLTable())
+		consolidatedReport["arcSQL"] = ConvertToJSON(data.ArcSQLTable())
 	} else {
 		log.Debug().Msg("Skipping Arc SQL data in JSON. Feature is disabled")
 	}
 
 	// Only include Defender data if the feature is enabled
 	if data.Stages.IsStageEnabled(models.StageNameDefender) {
-		consolidatedReport["defender"] = convertToJSON(data.DefenderTable())
+		consolidatedReport["defender"] = ConvertToJSON(data.DefenderTable())
 	} else {
 		log.Debug().Msg("Skipping Defender data in JSON. Feature is disabled")
 	}
 
 	// Only include Defender Recommendations data if the feature is enabled
 	if data.Stages.IsStageEnabled(models.StageNameDefenderRecommendations) {
-		consolidatedReport["defenderRecommendations"] = convertToJSON(data.DefenderRecommendationsTable())
+		consolidatedReport["defenderRecommendations"] = ConvertToJSON(data.DefenderRecommendationsTable())
 	} else {
 		log.Debug().Msg("Skipping Defender Recommendations data in JSON. Feature is disabled")
 	}
 
 	// Only include Cost data if the feature is enabled
 	if data.Stages.IsStageEnabled(models.StageNameCost) {
-		consolidatedReport["costs"] = convertToJSON(data.CostTable())
+		consolidatedReport["costs"] = ConvertToJSON(data.CostTable())
 	} else {
 		log.Debug().Msg("Skipping Cost data in JSON. Feature is disabled")
 	}
@@ -81,7 +81,7 @@ func buildConsolidatedReport(data *renderers.ReportData) map[string]interface{} 
 			pluginData := map[string]interface{}{
 				"description": result.Description,
 				"sheetName":   result.SheetName,
-				"data":        convertToJSON(result.Table),
+				"data":        ConvertToJSON(result.Table),
 			}
 			plugins[result.PluginName] = pluginData
 		}
@@ -136,12 +136,12 @@ func writeData(data map[string]interface{}, filename string) {
 
 	_, err = f.Write(js)
 	if err != nil {
-		_ = f.Close() // Close the file before exiting to ensure cleanup
+		_ = f.Close()                                   // Close the file before exiting to ensure cleanup
 		log.Fatal().Err(err).Msg("error writing json:") //nolint:gocritic // File is explicitly closed above
 	}
 }
 
-func convertToJSON(data [][]string) []map[string]string {
+func ConvertToJSON(data [][]string) []map[string]string {
 	var result []map[string]string
 	headers := data[0]
 
