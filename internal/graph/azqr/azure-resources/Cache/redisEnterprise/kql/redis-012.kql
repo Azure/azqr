@@ -1,0 +1,10 @@
+// Azure Resource Graph Query
+// Find Azure Managed Redis instances that do not have zone redundancy enabled
+// (fewer than 3 availability zones configured)
+resources
+| where type =~ 'Microsoft.Cache/redisEnterprise'
+| extend skuName = tostring(sku.name)
+| where skuName !startswith 'Enterprise_' and skuName !startswith 'EnterpriseFlash_'
+| extend zoneCount = array_length(zones)
+| where isnull(zoneCount) or zoneCount < 3
+| project recommendationId = 'redis-012', name, id, tags, param1 = tostring(zoneCount)

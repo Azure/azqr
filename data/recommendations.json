@@ -2608,6 +2608,46 @@
 		"resourceType": "Microsoft.Cache/Redis"
 	},
 	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/azure/reliability/reliability-managed-redis",
+		"recommendation": "Azure Managed Redis should have zone redundancy enabled",
+		"recommendationId": "redis-012",
+		"resourceType": "Microsoft.Cache/redisEnterprise"
+	},
+	{
+		"category": "HighAvailability",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/redis/best-practices-development#choose-an-appropriate-availability-mode",
+		"recommendation": "Azure Managed Redis should have high availability enabled",
+		"recommendationId": "redis-013",
+		"resourceType": "Microsoft.Cache/redisEnterprise"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/redis/secure-azure-managed-redis#network-security",
+		"recommendation": "Azure Managed Redis should disable public network access",
+		"recommendationId": "redis-014",
+		"resourceType": "Microsoft.Cache/redisEnterprise"
+	},
+	{
+		"category": "Security",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/redis/private-link",
+		"recommendation": "Azure Managed Redis should use private endpoints",
+		"recommendationId": "redis-015",
+		"resourceType": "Microsoft.Cache/redisEnterprise"
+	},
+	{
+		"category": "Security",
+		"impact": "Low",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/redis/how-to-encryption",
+		"recommendation": "Azure Managed Redis should use customer-managed key encryption",
+		"recommendationId": "redis-016",
+		"resourceType": "Microsoft.Cache/redisEnterprise"
+	},
+	{
 		"category": "Governance",
 		"impact": "Low",
 		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources?tabs=json",

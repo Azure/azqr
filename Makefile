@@ -11,6 +11,10 @@ ifeq ($(OS),windows)
   DEBUG_BIN = bin/$(OS)_$(ARCH)$(if $(GOARM),v$(GOARM),)/$(TARGET)-debug.exe
 endif
 GOLANGCI_LINT := ./bin/golangci-lint
+# Integration test timeout. Override on the command line for long-running fixtures
+# (e.g. Azure Managed Redis takes 10-20 min to provision):
+#   make test-integration INTEGRATION_TIMEOUT=90m
+INTEGRATION_TIMEOUT := $(if $(INTEGRATION_TIMEOUT),$(INTEGRATION_TIMEOUT),60m)
 PRODUCT_VERSION	:= $(if $(PRODUCT_VERSION),$(PRODUCT_VERSION),'0.0.0-dev')
 LDFLAGS	:= -s -w -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION)
 DEBUG_LDFLAGS := -X github.com/Azure/azqr/cmd/azqr/commands.version=$(PRODUCT_VERSION)-debug
@@ -38,7 +42,7 @@ help:
 	@echo "  validate-yaml - Validate all recommendation YAML files against schema"
 	@echo "  validate-scanners - Validate APRL recommendations coverage"
 	@echo "  test         - Run tests (includes linting and validation)"
-	@echo "  test-integration - Run integration tests (requires Azure credentials)"
+	@echo "  test-integration - Run integration tests (requires Azure credentials, default timeout 60m)"
 	@echo "  test-integration-setup - Validate prerequisites for running integration tests"
 	@echo "  terraform-fmt - Format all Terraform files"
 	@echo "  terraform-validate - Validate all Terraform fixtures"
@@ -93,7 +97,7 @@ test: lint vet tidy json validate-yaml validate-scanners
 	go test -race ./... -coverprofile=coverage.txt -covermode=atomic ./...
 
 # Integration test targets
-test-integration-setup:
+test-integration-setup: terraform-fmt terraform-validate
 	@echo "Checking integration test prerequisites..."
 	@if [ -z "$$AZURE_SUBSCRIPTION_ID" ]; then \
 		echo "❌ AZURE_SUBSCRIPTION_ID environment variable is not set"; \
@@ -117,7 +121,7 @@ test-integration: test-integration-setup
 	@echo "Running integration tests..."
 	@echo "⚠ This will provision real Azure resources and may incur costs"
 	@echo "📝 Terraform output will be shown during test execution"
-	go test -v -p 1 -tags=integration -timeout 30m ./test/integration/... 2>&1
+	go test -v -p 1 -tags=integration -timeout $(INTEGRATION_TIMEOUT) ./test/integration/... 2>&1
 
 terraform-fmt:
 	@echo "Formatting Terraform files..."

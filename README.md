@@ -132,6 +132,7 @@ pip | Microsoft.Network/publicIPAddresses
 psql | Microsoft.DBforPostgreSQL/servers
 psql | Microsoft.DBforPostgreSQL/flexibleServers
 redis | Microsoft.Cache/Redis
+redis | Microsoft.Cache/redisEnterprise
 resource | Microsoft.Resources
 rg | Microsoft.Resources/resourceGroups
 rsv | Microsoft.RecoveryServices/vaults

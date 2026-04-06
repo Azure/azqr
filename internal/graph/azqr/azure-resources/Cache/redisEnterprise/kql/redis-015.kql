@@ -1,0 +1,9 @@
+// Azure Resource Graph Query
+// Find Azure Managed Redis instances that have no private endpoints configured
+resources
+| where type =~ 'Microsoft.Cache/redisEnterprise'
+| extend skuName = tostring(sku.name)
+| where skuName !startswith 'Enterprise_' and skuName !startswith 'EnterpriseFlash_'
+| extend privateEndpoints = properties.privateEndpointConnections
+| where isnull(privateEndpoints) or array_length(privateEndpoints) == 0
+| project recommendationId = 'redis-015', name, id, tags, param1 = ''

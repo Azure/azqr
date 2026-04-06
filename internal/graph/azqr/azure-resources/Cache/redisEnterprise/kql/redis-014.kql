@@ -1,0 +1,10 @@
+// Azure Resource Graph Query
+// Find Azure Managed Redis instances that have public network access enabled
+// Public network access should be disabled and replaced with private endpoints
+resources
+| where type =~ 'Microsoft.Cache/redisEnterprise'
+| extend skuName = tostring(sku.name)
+| where skuName !startswith 'Enterprise_' and skuName !startswith 'EnterpriseFlash_'
+| extend publicNetworkAccess = tostring(properties.publicNetworkAccess)
+| where publicNetworkAccess =~ 'Enabled'
+| project recommendationId = 'redis-014', name, id, tags, param1 = publicNetworkAccess

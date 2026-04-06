@@ -1,0 +1,9 @@
+// Azure Resource Graph Query
+// Find Azure Managed Redis instances that do not use customer-managed key encryption
+resources
+| where type =~ 'Microsoft.Cache/redisEnterprise'
+| extend skuName = tostring(sku.name)
+| where skuName !startswith 'Enterprise_' and skuName !startswith 'EnterpriseFlash_'
+| extend cmkUrl = tostring(properties.encryption.customerManagedKeyEncryption.keyEncryptionKeyUrl)
+| where cmkUrl == ''
+| project recommendationId = 'redis-016', name, id, tags, param1 = ''

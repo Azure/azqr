@@ -18,3 +18,153 @@
   learnMoreLink:
   - name: Migrate from Redis Enterprise to Azure Managed Redis
     url: https://learn.microsoft.com/en-us/azure/redis/migrate/migrate-redis-enterprise-understand
+
+- description: Azure Managed Redis should have zone redundancy enabled
+  aprlGuid: redis-012
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Cache/redisEnterprise
+  recommendationMetadataState: Active
+  longDescription: |
+    Azure Managed Redis supports zone redundancy by distributing cache nodes across multiple
+    availability zones. Zone redundancy reduces the risk of a datacenter outage making your
+    cache unavailable and is enabled by default on new instances.
+  potentialBenefits: Increased resilience against datacenter failures
+  pgVerified: false
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Reliability in Azure Managed Redis
+    url: https://learn.microsoft.com/azure/reliability/reliability-managed-redis
+
+- description: Azure Managed Redis should have high availability enabled
+  aprlGuid: redis-013
+  recommendationTypeId: null
+  recommendationControl: HighAvailability
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Cache/redisEnterprise
+  recommendationMetadataState: Active
+  longDescription: |
+    When high availability is disabled, the data set is not replicated. This affects the
+    availability SLA and increases the risk of data loss during planned or unplanned maintenance.
+    Only disable high availability for development or test workloads.
+  potentialBenefits: Protect against data loss and ensure SLA compliance
+  pgVerified: false
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Development best practices for Azure Managed Redis
+    url: https://learn.microsoft.com/en-us/azure/redis/best-practices-development#choose-an-appropriate-availability-mode
+
+- description: Azure Managed Redis should disable public network access
+  aprlGuid: redis-014
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Cache/redisEnterprise
+  recommendationMetadataState: Active
+  longDescription: |
+    Public network access exposes the Azure Managed Redis instance to the internet.
+    Disable public access and use Azure Private Link with private endpoints to keep
+    traffic within the Microsoft backbone network.
+  potentialBenefits: Eliminate public internet exposure
+  pgVerified: false
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Secure your Azure Managed Redis deployment
+    url: https://learn.microsoft.com/en-us/azure/redis/secure-azure-managed-redis#network-security
+
+- description: Azure Managed Redis should use private endpoints
+  aprlGuid: redis-015
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Cache/redisEnterprise
+  recommendationMetadataState: Active
+  longDescription: |
+    Azure Managed Redis instances should use Azure Private Link with private endpoints to
+    ensure all traffic stays within the Microsoft backbone network and the instance is not
+    exposed to the public internet.
+  potentialBenefits: Secure network connectivity via private IP
+  pgVerified: false
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Azure Managed Redis with Azure Private Link
+    url: https://learn.microsoft.com/en-us/azure/redis/private-link
+
+- description: Azure Managed Redis should use customer-managed key encryption
+  aprlGuid: redis-016
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: Low
+  recommendationResourceType: Microsoft.Cache/redisEnterprise
+  recommendationMetadataState: Active
+  longDescription: |
+    By default Azure Managed Redis encrypts data at rest using Microsoft-managed keys.
+    For additional control and compliance, configure customer-managed keys (CMK) via
+    Azure Key Vault to wrap the encryption keys.
+  potentialBenefits: Greater control over encryption keys for compliance
+  pgVerified: false
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Configure disk encryption for Azure Managed Redis using customer-managed keys
+    url: https://learn.microsoft.com/en-us/azure/redis/how-to-encryption
+
+- description: Azure Managed Redis database should disable access key authentication
+  aprlGuid: redis-017
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Cache/redisEnterprise/databases
+  recommendationMetadataState: Active
+  longDescription: |
+    Access keys are static credentials that can be compromised if leaked. Disable access key
+    authentication and use Microsoft Entra ID with managed identities instead.
+  potentialBenefits: Eliminate static credential exposure
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+  - name: Disable access key authentication on your cache
+    url: https://learn.microsoft.com/en-us/azure/redis/entra-for-authentication#disable-access-key-authentication-on-your-cache
+
+- description: Azure Managed Redis database should use TLS-encrypted client protocol
+  aprlGuid: redis-018
+  recommendationTypeId: null
+  recommendationControl: Security
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.Cache/redisEnterprise/databases
+  recommendationMetadataState: Active
+  longDescription: |
+    The database client protocol should be set to Encrypted (TLS) rather than Plaintext.
+    Plaintext connections transmit data without encryption, exposing it to interception.
+  potentialBenefits: Ensure all client connections are encrypted
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+  - name: TLS configuration for Azure Managed Redis
+    url: https://learn.microsoft.com/en-us/azure/redis/tls-configuration
+
+- description: Azure Managed Redis database should have data persistence enabled
+  aprlGuid: redis-019
+  recommendationTypeId: null
+  recommendationControl: DisasterRecovery
+  recommendationImpact: Medium
+  recommendationResourceType: Microsoft.Cache/redisEnterprise/databases
+  recommendationMetadataState: Active
+  longDescription: |
+    Enable RDB (snapshot) or AOF (append-only file) persistence to protect against data
+    loss from unexpected hardware failures. Without persistence, all data is lost when the
+    cache restarts.
+  potentialBenefits: Protect cached data from unexpected failures
+  pgVerified: false
+  automationAvailable: false
+  tags: []
+  learnMoreLink:
+  - name: Configure data persistence for Azure Managed Redis
+    url: https://learn.microsoft.com/en-us/azure/redis/how-to-persistence

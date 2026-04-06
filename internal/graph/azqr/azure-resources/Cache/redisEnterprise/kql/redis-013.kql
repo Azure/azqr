@@ -1,0 +1,10 @@
+// Azure Resource Graph Query
+// Find Azure Managed Redis instances that do not have high availability enabled
+// Disabling HA means data is not replicated and risks data loss during maintenance
+resources
+| where type =~ 'Microsoft.Cache/redisEnterprise'
+| extend skuName = tostring(sku.name)
+| where skuName !startswith 'Enterprise_' and skuName !startswith 'EnterpriseFlash_'
+| extend highAvailability = tostring(properties.highAvailability)
+| where highAvailability == '' or highAvailability =~ 'Disabled'
+| project recommendationId = 'redis-013', name, id, tags, param1 = highAvailability
