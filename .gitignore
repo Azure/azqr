@@ -99,5 +99,8 @@ terraform.rc
 # Uncomment the line below if you want to ignore planout files.
 # planout
 
-# ignore .terraform.lock.hcl files
+# Ignore .terraform.lock.hcl files
 .terraform.lock.hcl
+
+# Ignore APM APM – Agent Package Manager modules 
+apm_modules
