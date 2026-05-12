@@ -13,7 +13,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/managementgroups/armmanagementgroups v1.2.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.11.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/subscription/armsubscription v1.2.0
-	github.com/gruntwork-io/terratest v0.56.0
+	github.com/gruntwork-io/terratest v1.0.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mark3labs/mcp-go v0.52.0
 	github.com/rs/zerolog v1.35.1
