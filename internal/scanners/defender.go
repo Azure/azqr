@@ -36,7 +36,11 @@ func (s *DefenderScanner) Scan(ctx context.Context, cred azcore.TokenCredential,
 	for s := range subscriptions {
 		subs = append(subs, to.Ptr(s))
 	}
-	result := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subs)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Defender status")
+		return nil
+	}
 	resources := []*models.DefenderResult{}
 	if result.Data != nil {
 		for _, row := range result.Data {
@@ -105,7 +109,11 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 		recommendationName string
 	}
 
-	result := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subs)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Defender recommendations")
+		return nil
+	}
 	resources := []*models.DefenderRecommendation{}
 	seen := make(map[defenderKey]struct{}, len(result.Data))
 	if result.Data != nil {

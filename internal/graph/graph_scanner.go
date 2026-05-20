@@ -4,8 +4,13 @@
 package graph
 
 import (
+	"bytes"
 	"context"
 	"embed"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"io/fs"
 	"math"
 	"strings"
@@ -253,6 +258,16 @@ func (a *GraphScanner) worker(ctx context.Context, graph *GraphQueryClient, subs
 		models.LogGraphRecommendationScan(r.ResourceType, r.RecommendationID)
 		res, err := a.graphScan(ctx, graph, r, subscriptions)
 		if err != nil {
+			if shouldSkipUnsupportedGraphLogicalTableError(err) {
+				log.Warn().
+					Err(err).
+					Str("recommendationId", r.RecommendationID).
+					Str("resourceType", r.ResourceType).
+					Msg("Skipping recommendation due to unsupported resource graph logical table")
+				results <- []*models.GraphResult{}
+				wg.Done()
+				continue
+			}
 			log.Fatal().Err(err).Msg("Failed to scan")
 		}
 		results <- res
@@ -268,7 +283,11 @@ func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryCli
 	}
 
 	if rule.GraphQuery != "" {
-		result := graphClient.Query(ctx, rule.GraphQuery, subs)
+		result, err := graphClient.Query(ctx, rule.GraphQuery, subs)
+		if err != nil {
+			return nil, fmt.Errorf("recommendation %s query failed: %w", rule.RecommendationID, err)
+		}
+
 		if result.Data != nil {
 			for _, row := range result.Data {
 				m := row.(map[string]interface{})
@@ -351,4 +370,78 @@ func (a *GraphScanner) getGraphRules(service string, rec map[string]map[string]m
 	}
 
 	return r
+}
+
+func shouldSkipUnsupportedGraphLogicalTableError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	var respErr *azcore.ResponseError
+	if !errors.As(err, &respErr) {
+		return isUnsupportedLogicalTableErrorMessage(err.Error())
+	}
+
+	if strings.EqualFold(respErr.ErrorCode, "DisallowedLogicalTableName") {
+		return true
+	}
+
+	errMsg := respErr.Error()
+	if isUnsupportedLogicalTableErrorMessage(errMsg) {
+		return true
+	}
+
+	if respErr.RawResponse == nil || respErr.RawResponse.Body == nil {
+		return false
+	}
+
+	body, readErr := io.ReadAll(respErr.RawResponse.Body)
+	if readErr != nil {
+		return false
+	}
+
+	// Restore body so other consumers can still inspect it.
+	respErr.RawResponse.Body = io.NopCloser(bytes.NewReader(body))
+
+	var payload struct {
+		Error struct {
+			Code    string `json:"code"`
+			Message string `json:"message"`
+			Details []struct {
+				Code    string `json:"code"`
+				Message string `json:"message"`
+			} `json:"details"`
+		} `json:"error"`
+	}
+
+	if unmarshalErr := json.Unmarshal(body, &payload); unmarshalErr != nil {
+		return false
+	}
+
+	if strings.EqualFold(payload.Error.Code, "DisallowedLogicalTableName") {
+		return true
+	}
+
+	for _, detail := range payload.Error.Details {
+		if strings.EqualFold(detail.Code, "DisallowedLogicalTableName") {
+			return true
+		}
+
+		if isUnsupportedLogicalTableErrorMessage(detail.Message) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isUnsupportedLogicalTableErrorMessage(message string) bool {
+	msg := strings.ToLower(message)
+
+	if strings.Contains(msg, "disallowedlogicaltablename") {
+		return true
+	}
+
+	return strings.Contains(msg, "invalid, unsupported or disallowed") &&
+		strings.Contains(msg, "logical table")
 }

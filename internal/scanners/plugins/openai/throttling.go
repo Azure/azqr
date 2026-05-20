@@ -212,7 +212,10 @@ func (s *ThrottlingScanner) discoverOpenAIResources(ctx context.Context, cred az
 		subs = append(subs, to.Ptr(s))
 	}
 
-	result := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query openai resources from resource graph: %w", err)
+	}
 
 	resources := make([]*models.Resource, 0, len(result.Data))
 	for _, row := range result.Data {
