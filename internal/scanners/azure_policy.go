@@ -59,7 +59,11 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 		policyDefinitionID string
 	}
 
-	result := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subs)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Azure Policy non-compliant resources")
+		return nil
+	}
 	resources := []*models.AzurePolicyResult{}
 	seen := make(map[policyKey]struct{}, len(result.Data))
 

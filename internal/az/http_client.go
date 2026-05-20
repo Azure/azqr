@@ -4,6 +4,7 @@
 package az
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -131,25 +132,25 @@ func (c *HttpClient) doRequest(ctx context.Context, method, url string, body io.
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to execute request: %w", err)
 	}
-	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Warn().Err(closeErr).Msg("Failed to close response body")
-		}
-	}()
 
 	// Read response body
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Warn().Err(closeErr).Msg("Failed to close response body")
+		}
 		return nil, nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	if closeErr := resp.Body.Close(); closeErr != nil {
+		log.Warn().Err(closeErr).Msg("Failed to close response body")
 	}
 
 	// Check status code
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return respBody, resp, &HTTPError{
-			StatusCode: resp.StatusCode,
-			Body:       string(respBody),
-			URL:        url,
-		}
+		// Restore body so runtime.NewResponseError can parse error details from payload.
+		resp.Body = io.NopCloser(bytes.NewReader(respBody))
+		return respBody, resp, runtime.NewResponseError(resp)
 	}
 
 	log.Debug().Msgf("Successfully executed %s request to %s (status: %d)", method, url, resp.StatusCode)

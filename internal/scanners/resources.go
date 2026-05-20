@@ -23,7 +23,11 @@ func (sc *ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.To
 	for s := range subscriptions {
 		subs = append(subs, to.Ptr(s))
 	}
-	result := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subs)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for resources")
+		return nil, nil
+	}
 	resources := []*models.Resource{}
 	excludedResources := []*models.Resource{}
 	if result.Data != nil {
@@ -99,7 +103,11 @@ func (sc ResourceDiscovery) GetCountPerResourceTypeAndSubscription(ctx context.C
 	for s := range subscriptions {
 		subs = append(subs, to.Ptr(s))
 	}
-	result := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subs)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for resource counts by subscription and type")
+		return nil
+	}
 	resources := []*models.ResourceTypeCount{}
 	if result.Data != nil {
 		for _, row := range result.Data {
@@ -129,7 +137,11 @@ func (sc ResourceDiscovery) GetCountPerResourceType(ctx context.Context, cred az
 	for s := range subscriptions {
 		subs = append(subs, to.Ptr(s))
 	}
-	result := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subs)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for resource counts by type")
+		return map[string]float64{}
+	}
 	resources := map[string]float64{}
 	if result.Data != nil {
 		for _, row := range result.Data {

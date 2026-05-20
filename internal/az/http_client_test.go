@@ -5,6 +5,7 @@ package az
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -100,11 +101,11 @@ func TestDo_WithAuth(t *testing.T) {
 	}
 }
 
-func TestDo_HTTPError(t *testing.T) {
+func TestDo_ResponseError(t *testing.T) {
 	// Create a test server that returns an error (TLS required)
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(`{"error": "internal server error"}`))
+		_, _ = w.Write([]byte(`{"error": {"code": "InternalError", "message": "internal server error"}}`))
 	}))
 	defer server.Close()
 
@@ -121,13 +122,17 @@ func TestDo_HTTPError(t *testing.T) {
 		t.Fatal("Expected an error, got nil")
 	}
 
-	httpErr, ok := err.(*HTTPError)
-	if !ok {
-		t.Fatalf("Expected HTTPError, got %T", err)
+	var respErr *azcore.ResponseError
+	if !errors.As(err, &respErr) {
+		t.Fatalf("Expected azcore.ResponseError, got %T", err)
 	}
 
-	if httpErr.StatusCode != http.StatusInternalServerError {
-		t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, httpErr.StatusCode)
+	if respErr.StatusCode != http.StatusInternalServerError {
+		t.Errorf("Expected status code %d, got %d", http.StatusInternalServerError, respErr.StatusCode)
+	}
+
+	if respErr.ErrorCode != "InternalError" {
+		t.Errorf("Expected error code InternalError, got %s", respErr.ErrorCode)
 	}
 }
 

@@ -66,7 +66,7 @@ func NewGraphQuery(cred azcore.TokenCredential) *GraphQueryClient {
 
 // Query executes a Resource Graph query for the given subscriptions and query string.
 // It handles batching and pagination.
-func (q *GraphQueryClient) Query(ctx context.Context, query string, subscriptions []*string) *GraphResult {
+func (q *GraphQueryClient) Query(ctx context.Context, query string, subscriptions []*string) (*GraphResult, error) {
 	result := GraphResult{
 		Data: make([]interface{}, 0, 5000),
 	}
@@ -101,18 +101,17 @@ func (q *GraphQueryClient) Query(ctx context.Context, query string, subscription
 			}
 
 			resp, err := q.doRequest(ctx, request)
-			if err == nil {
-				result.Data = append(result.Data, resp.Data...)
-				skipToken = resp.SkipToken
-				log.Debug().Msgf("Graph query batch %d-%d returned %d records, next skipToken: %v", i, j, len(resp.Data), skipToken)
-			} else {
-				log.Fatal().Err(err).Msgf("Failed to run Resource Graph query: %s", query)
-				return nil
+			if err != nil {
+				return nil, fmt.Errorf("failed to run resource graph query: %w", err)
 			}
+
+			result.Data = append(result.Data, resp.Data...)
+			skipToken = resp.SkipToken
+			log.Debug().Msgf("Graph query batch %d-%d returned %d records, next skipToken: %v", i, j, len(resp.Data), skipToken)
 		}
 	}
 	log.Debug().Msgf("Graph query returned %d records", len(result.Data))
-	return &result
+	return &result, nil
 }
 
 // doRequest sends the HTTP request to the Resource Graph API and returns the response.

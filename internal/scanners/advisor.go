@@ -75,7 +75,11 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 		category         string
 	}
 
-	result := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subs)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Advisor recommendations")
+		return nil
+	}
 	resources := []*models.AdvisorResult{}
 	seen := make(map[advisorKey]struct{}, len(result.Data))
 	if result.Data != nil {
