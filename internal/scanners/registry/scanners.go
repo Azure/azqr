@@ -7,565 +7,110 @@ import (
 	"github.com/Azure/azqr/internal/models"
 )
 
-func init() {
-	models.ScannerList["aa"] = []models.IAzureScanner{
-		models.NewBaseScanner("Automation Account", "Microsoft.Automation/automationAccounts"),
-	}
-}
-
-func init() {
-	models.ScannerList["adf"] = []models.IAzureScanner{
-		models.NewBaseScanner("Data Factory", "Microsoft.DataFactory/factories"),
-	}
-}
-
-func init() {
-	models.ScannerList["afd"] = []models.IAzureScanner{
-		models.NewBaseScanner("Front Door", "Microsoft.Cdn/profiles"),
-	}
-}
-
-func init() {
-	models.ScannerList["afw"] = []models.IAzureScanner{
-		models.NewBaseScanner("Azure Firewall", "Microsoft.Network/azureFirewalls", "Microsoft.Network/ipGroups"),
-	}
-}
-
-func init() {
-	models.ScannerList["agw"] = []models.IAzureScanner{
-		models.NewBaseScanner("Application Gateway", "Microsoft.Network/applicationGateways"),
-	}
-}
-
-func init() {
-	models.ScannerList["aif"] = []models.IAzureScanner{
-		models.NewBaseScanner("AI Services", "Microsoft.CognitiveServices/accounts"),
-	}
-}
-
-func init() {
-	models.ScannerList["aks"] = []models.IAzureScanner{
-		models.NewBaseScanner("Azure Kubernetes Service", "Microsoft.ContainerService/managedClusters"),
-	}
-}
-
-func init() {
-	models.ScannerList["amg"] = []models.IAzureScanner{
-		models.NewBaseScanner("Azure Managed Grafana", "Microsoft.Dashboard/grafana"),
-	}
-}
-
-func init() {
-	models.ScannerList["apim"] = []models.IAzureScanner{
-		models.NewBaseScanner("API Management", "Microsoft.ApiManagement/service"),
-	}
-}
-
-func init() {
-	models.ScannerList["appcs"] = []models.IAzureScanner{
-		models.NewBaseScanner("App Configuration", "Microsoft.AppConfiguration/configurationStores"),
-	}
-}
-
-func init() {
-	models.ScannerList["appi"] = []models.IAzureScanner{
-		models.NewBaseScanner(
-			"Application Insights",
-			"Microsoft.Insights/components",
-			"Microsoft.Insights/activityLogAlerts",
-		),
-	}
-}
-
-func init() {
-	models.ScannerList["arc"] = []models.IAzureScanner{
-		models.NewBaseScanner("Azure Arc", "Microsoft.AzureArcData/sqlServerInstances"),
-	}
-}
-
-func init() {
-	models.ScannerList["as"] = []models.IAzureScanner{
-		models.NewBaseScanner("Analysis Services", "Microsoft.AnalysisServices/servers"),
-	}
-}
-
-func init() {
-	models.ScannerList["asp"] = []models.IAzureScanner{
-		models.NewBaseScanner(
-			"App Service Plan",
-			"Microsoft.Web/serverFarms",
-			"Microsoft.Web/sites",
-			"Microsoft.Web/connections",
-			"Microsoft.Web/certificates",
-		),
-	}
-}
-
-func init() {
-	models.ScannerList["avail"] = []models.IAzureScanner{
-		models.NewBaseScanner("Availability Set", "Microsoft.Compute/availabilitySets"),
-	}
-}
-
-func init() {
-	models.ScannerList["avd"] = []models.IAzureScanner{
-		models.NewBaseScanner("Azure Virtual Desktop", "Specialized.Workload/AVD"),
-	}
-}
-
-func init() {
-	models.ScannerList["avs"] = []models.IAzureScanner{
-		models.NewBaseScanner(
-			"Azure VMware Solution",
-			"Microsoft.AVS/privateClouds",
-			"Specialized.Workload/AVS",
-		),
-	}
-}
-
-func init() {
-	models.ScannerList["ba"] = []models.IAzureScanner{
-		models.NewBaseScanner("Batch Account", "Microsoft.Batch/batchAccounts"),
-	}
-}
-
-func init() {
-	models.ScannerList["ca"] = []models.IAzureScanner{
-		models.NewBaseScanner("Container App", "Microsoft.App/containerApps"),
-	}
-}
-
-func init() {
-	models.ScannerList["cae"] = []models.IAzureScanner{
-		models.NewBaseScanner("Container Apps Environment", "Microsoft.App/managedenvironments"),
-	}
-}
-
-func init() {
-	models.ScannerList["ci"] = []models.IAzureScanner{
-		models.NewBaseScanner("Container Instance", "Microsoft.ContainerInstance/containerGroups"),
-	}
-}
-
-func init() {
-	models.ScannerList["con"] = []models.IAzureScanner{
-		models.NewBaseScanner("Connection", "Microsoft.Network/connections"),
-	}
-}
-
-func init() {
-	models.ScannerList["cosmos"] = []models.IAzureScanner{
-		models.NewBaseScanner("Cosmos DB", "Microsoft.DocumentDB/databaseAccounts"),
-	}
-}
-
-func init() {
-	models.ScannerList["cr"] = []models.IAzureScanner{
-		models.NewBaseScanner("Container Registry", "Microsoft.ContainerRegistry/registries"),
-	}
-}
-
-func init() {
-	models.ScannerList["dbw"] = []models.IAzureScanner{
-		models.NewBaseScanner("Databricks Workspace", "Microsoft.Databricks/workspaces"),
-	}
-}
-
-func init() {
-	models.ScannerList["dec"] = []models.IAzureScanner{
-		models.NewBaseScanner("Data Explorer Cluster", "Microsoft.Kusto/clusters"),
-	}
-}
-
-func init() {
-	models.ScannerList["disk"] = []models.IAzureScanner{
-		models.NewBaseScanner("Disk", "Microsoft.Compute/disks"),
-	}
-}
-
-func init() {
-	models.ScannerList["domain"] = []models.IAzureScanner{
-		models.NewBaseScanner("Domain Services", "Microsoft.AAD/domainServices"),
-	}
-}
-
-func init() {
-	models.ScannerList["erc"] = []models.IAzureScanner{
-		models.NewBaseScanner(
-			"ExpressRoute Circuit",
-			"Microsoft.Network/expressRouteCircuits",
-			"Microsoft.Network/ExpressRoutePorts",
-			"Microsoft.Network/expressRouteGateways",
-		),
-	}
-}
-
-func init() {
-	models.ScannerList["evgd"] = []models.IAzureScanner{
-		models.NewBaseScanner("Event Grid Domain", "Microsoft.EventGrid/domains"),
-	}
-}
-
-func init() {
-	models.ScannerList["evgt"] = []models.IAzureScanner{
-		models.NewBaseScanner("Event Grid Topic", "Microsoft.EventGrid/topics"),
-	}
-}
-
-func init() {
-	models.ScannerList["evh"] = []models.IAzureScanner{
-		models.NewBaseScanner("Event Hub", "Microsoft.EventHub/namespaces"),
-	}
-}
-
-func init() {
-	models.ScannerList["fabric"] = []models.IAzureScanner{
-		models.NewBaseScanner("Fabric", "Microsoft.Fabric/capacities"),
-	}
-}
-
-func init() {
-	models.ScannerList["fdfp"] = []models.IAzureScanner{
-		models.NewBaseScanner("Front Door Firewall Policy", "Microsoft.Network/frontdoorWebApplicationFirewallPolicies"),
-	}
-}
-
-func init() {
-	models.ScannerList["gal"] = []models.IAzureScanner{
-		models.NewBaseScanner("Compute Gallery", "Microsoft.Compute/galleries"),
-	}
-}
-
-func init() {
-	models.ScannerList["hpc"] = []models.IAzureScanner{
-		models.NewBaseScanner("HPC", "Specialized.Workload/HPC"),
-	}
-}
-
-func init() {
-	models.ScannerList["hub"] = []models.IAzureScanner{
-		models.NewBaseScanner(
-			"Machine Learning Workspace",
-			"Microsoft.MachineLearningServices/workspaces",
-			"Microsoft.MachineLearningServices/registries",
-		),
-	}
-}
-
-func init() {
-	models.ScannerList["iot"] = []models.IAzureScanner{
-		models.NewBaseScanner("IoT Hub", "Microsoft.Devices/IotHubs"),
-	}
-}
-
-func init() {
-	models.ScannerList["it"] = []models.IAzureScanner{
-		models.NewBaseScanner("Image Template", "Microsoft.VirtualMachineImages/imageTemplates"),
-	}
-}
-
-func init() {
-	models.ScannerList["kv"] = []models.IAzureScanner{
-		models.NewBaseScanner("Key Vault", "Microsoft.KeyVault/vaults"),
-	}
-}
-
-func init() {
-	models.ScannerList["lb"] = []models.IAzureScanner{
-		models.NewBaseScanner("Load Balancer", "Microsoft.Network/loadBalancers"),
-	}
-}
-
-func init() {
-	models.ScannerList["log"] = []models.IAzureScanner{
-		models.NewBaseScanner("Log Analytics Workspace", "Microsoft.OperationalInsights/workspaces"),
-	}
-}
-
-func init() {
-	models.ScannerList["logic"] = []models.IAzureScanner{
-		models.NewBaseScanner("Logic App", "Microsoft.Logic/workflows"),
-	}
-}
-
-func init() {
-	models.ScannerList["mysql"] = []models.IAzureScanner{
-		models.NewBaseScanner("MySQL Database", "Microsoft.DBforMySQL/servers", "Microsoft.DBforMySQL/flexibleServers"),
-	}
-}
-
-func init() {
-	models.ScannerList["netapp"] = []models.IAzureScanner{
-		models.NewBaseScanner("NetApp Account", "Microsoft.NetApp/netAppAccounts"),
-	}
-}
-
-func init() {
-	models.ScannerList["ng"] = []models.IAzureScanner{
-		models.NewBaseScanner("NAT Gateway", "Microsoft.Network/natGateways"),
-	}
-}
-
-func init() {
-	models.ScannerList["nic"] = []models.IAzureScanner{
-		models.NewBaseScanner("Network Interface", "Microsoft.Network/networkInterfaces"),
-	}
-}
-
-func init() {
-	models.ScannerList["nsg"] = []models.IAzureScanner{
-		models.NewBaseScanner("Network Security Group", "Microsoft.Network/networkSecurityGroups"),
-	}
-}
-
-func init() {
-	models.ScannerList["bastion"] = []models.IAzureScanner{
-		models.NewBaseScanner("Bastion Host", "Microsoft.Network/bastionHosts"),
-	}
-}
-
-func init() {
-	models.ScannerList["ddos"] = []models.IAzureScanner{
-		models.NewBaseScanner("DDoS Protection Plan", "Microsoft.Network/ddosProtectionPlans"),
-	}
-}
-
-func init() {
-	models.ScannerList["dnsres"] = []models.IAzureScanner{
-		models.NewBaseScanner("DNS Resolver", "Microsoft.Network/dnsResolvers"),
-	}
-}
-
-func init() {
-	models.ScannerList["dnsz"] = []models.IAzureScanner{
-		models.NewBaseScanner("DNS Zone", "Microsoft.Network/dnsZones"),
-	}
-}
-
-func init() {
-	models.ScannerList["nw"] = []models.IAzureScanner{
-		models.NewBaseScanner("Network Watcher", "Microsoft.Network/networkWatchers"),
-	}
-}
-
-func init() {
-	models.ScannerList["ntc"] = []models.IAzureScanner{
-		models.NewBaseScanner("Azure Traffic Collector", "Microsoft.NetworkFunction/azureTrafficCollectors"),
-	}
-}
-
-func init() {
-	models.ScannerList["odb"] = []models.IAzureScanner{
-		models.NewBaseScanner(
-			"Oracle Database",
-			"Oracle.Database/cloudExadataInfrastructures",
-			"Oracle.Database/cloudVmClusters",
-		),
-	}
-}
-
-func init() {
-	models.ScannerList["p2svpng"] = []models.IAzureScanner{
-		models.NewBaseScanner("P2S VPN Gateway", "Microsoft.Network/p2sVpnGateways"),
-	}
-}
-
-func init() {
-	models.ScannerList["pdnsz"] = []models.IAzureScanner{
-		models.NewBaseScanner("Private DNS Zone", "Microsoft.Network/privateDnsZones"),
-	}
-}
-
-func init() {
-	models.ScannerList["pep"] = []models.IAzureScanner{
-		models.NewBaseScanner("Private Endpoint", "Microsoft.Network/privateEndpoints"),
-	}
-}
-
-func init() {
-	models.ScannerList["pip"] = []models.IAzureScanner{
-		models.NewBaseScanner("Public IP Address", "Microsoft.Network/publicIPAddresses"),
-	}
-}
-
-func init() {
-	models.ScannerList["psql"] = []models.IAzureScanner{
-		models.NewBaseScanner("PostgreSQL Database", "Microsoft.DBforPostgreSQL/servers", "Microsoft.DBforPostgreSQL/flexibleServers"),
-	}
-}
-
-func init() {
-	models.ScannerList["redis"] = []models.IAzureScanner{
-		models.NewBaseScanner("Redis Cache", "Microsoft.Cache/Redis"),
-		models.NewBaseScanner("Redis Enterprise", "Microsoft.Cache/redisEnterprise"),
-	}
-}
-
-func init() {
-	models.ScannerList["resource"] = []models.IAzureScanner{
-		models.NewBaseScanner("Resource", "Microsoft.Resources"),
-	}
-}
-
-func init() {
-	models.ScannerList["rg"] = []models.IAzureScanner{
-		models.NewBaseScanner("Resource Group", "Microsoft.Resources/resourceGroups"),
-	}
-}
-
-func init() {
-	models.ScannerList["rsv"] = []models.IAzureScanner{
-		models.NewBaseScanner("Recovery Services Vault", "Microsoft.RecoveryServices/vaults"),
-	}
-}
-
-func init() {
-	models.ScannerList["rt"] = []models.IAzureScanner{
-		models.NewBaseScanner("Route Table", "Microsoft.Network/routeTables"),
-	}
-}
-
-func init() {
-	models.ScannerList["sap"] = []models.IAzureScanner{
-		models.NewBaseScanner("SAP", "Specialized.Workload/SAP"),
-	}
-}
-
-func init() {
-	models.ScannerList["sb"] = []models.IAzureScanner{
-		models.NewBaseScanner("Service Bus", "Microsoft.ServiceBus/namespaces"),
-	}
-}
-
-func init() {
-	models.ScannerList["sigr"] = []models.IAzureScanner{
-		models.NewBaseScanner("SignalR", "Microsoft.SignalRService/SignalR"),
-	}
-}
-
-func init() {
-	models.ScannerList["sqlmi"] = []models.IAzureScanner{
-		models.NewBaseScanner("SQL Managed Instance", "Microsoft.Sql/managedInstances"),
-	}
-}
-
-func init() {
-	models.ScannerList["sql"] = []models.IAzureScanner{
-		models.NewBaseScanner(
-			"SQL Server",
-			"Microsoft.Sql/servers",
-			"Microsoft.Sql/servers/databases",
-			"Microsoft.Sql/servers/elasticPools",
-		)}
-}
-
-func init() {
-	models.ScannerList["srch"] = []models.IAzureScanner{
-		models.NewBaseScanner("Search Service", "Microsoft.Search/searchServices"),
-	}
-}
-
-func init() {
-	models.ScannerList["st"] = []models.IAzureScanner{
-		models.NewBaseScanner("Storage Account", "Microsoft.Storage/storageAccounts"),
-	}
-}
-
-func init() {
-	models.ScannerList["asa"] = []models.IAzureScanner{
-		models.NewBaseScanner("Stream Analytics Job", "Microsoft.StreamAnalytics/streamingJobs"),
-	}
-}
-
-func init() {
-	models.ScannerList["sub"] = []models.IAzureScanner{
-		models.NewBaseScanner("Subscription", "Microsoft.Subscription/subscriptions"),
-	}
-}
-
-func init() {
-	models.ScannerList["synw"] = []models.IAzureScanner{
-		models.NewBaseScanner(
-			"Synapse Workspace",
-			"Microsoft.Synapse/workspaces",
-			"Microsoft.Synapse/workspaces/bigDataPools",
-			"Microsoft.Synapse/workspaces/sqlPools",
-		)}
-}
-
-func init() {
-	models.ScannerList["traf"] = []models.IAzureScanner{
-		models.NewBaseScanner("Traffic Manager", "Microsoft.Network/trafficManagerProfiles"),
-	}
-}
-
-func init() {
-	models.ScannerList["vdpool"] = []models.IAzureScanner{
-		models.NewBaseScanner(
-			"Virtual Desktop Host Pool",
-			"Microsoft.DesktopVirtualization/hostPools",
-			"Microsoft.DesktopVirtualization/scalingPlans",
-			"Microsoft.DesktopVirtualization/workspaces",
-		),
-	}
-}
-
-func init() {
-	models.ScannerList["vgw"] = []models.IAzureScanner{
-		models.NewBaseScanner("Virtual Network Gateway", "Microsoft.Network/virtualNetworkGateways"),
-	}
-}
-
-func init() {
-	models.ScannerList["vhub"] = []models.IAzureScanner{
-		models.NewBaseScanner("Virtual Hub", "Microsoft.Network/virtualHubs"),
-	}
-}
-
-func init() {
-	models.ScannerList["vrouter"] = []models.IAzureScanner{
-		models.NewBaseScanner("Virtual Router", "Microsoft.Network/virtualRouters"),
-	}
-}
-
-func init() {
-	models.ScannerList["vpng"] = []models.IAzureScanner{
-		models.NewBaseScanner("VPN Gateway", "Microsoft.Network/vpnGateways"),
-	}
-}
-
-func init() {
-	models.ScannerList["vpns"] = []models.IAzureScanner{
-		models.NewBaseScanner("VPN Site", "Microsoft.Network/vpnSites"),
-	}
-}
-
-func init() {
-	models.ScannerList["vm"] = []models.IAzureScanner{
-		models.NewBaseScanner("Virtual Machine", "Microsoft.Compute/virtualMachines"),
-	}
-}
-
-func init() {
-	models.ScannerList["vmss"] = []models.IAzureScanner{
-		models.NewBaseScanner("Virtual Machine Scale Set", "Microsoft.Compute/virtualMachineScaleSets"),
-	}
-}
-
-func init() {
-	models.ScannerList["vnet"] = []models.IAzureScanner{
-		models.NewBaseScanner("Virtual Network", "Microsoft.Network/virtualNetworks", "Microsoft.Network/virtualNetworks/subnets"),
-	}
-}
-
-func init() {
-	models.ScannerList["vwan"] = []models.IAzureScanner{
-		models.NewBaseScanner("Virtual WAN", "Microsoft.Network/virtualWans"),
-	}
-}
-
-func init() {
-	models.ScannerList["wps"] = []models.IAzureScanner{
-		models.NewBaseScanner("Web PubSub", "Microsoft.SignalRService/webPubSub"),
+type scannerSpec struct {
+	name  string
+	types []string
+}
+
+var registry = map[string][]scannerSpec{
+	"aa":      {{"Automation Account", []string{"Microsoft.Automation/automationAccounts"}}},
+	"adf":     {{"Data Factory", []string{"Microsoft.DataFactory/factories"}}},
+	"afd":     {{"Front Door", []string{"Microsoft.Cdn/profiles"}}},
+	"afw":     {{"Azure Firewall", []string{"Microsoft.Network/azureFirewalls", "Microsoft.Network/ipGroups"}}},
+	"agw":     {{"Application Gateway", []string{"Microsoft.Network/applicationGateways"}}},
+	"aif":     {{"AI Services", []string{"Microsoft.CognitiveServices/accounts"}}},
+	"aks":     {{"Azure Kubernetes Service", []string{"Microsoft.ContainerService/managedClusters"}}},
+	"amg":     {{"Azure Managed Grafana", []string{"Microsoft.Dashboard/grafana"}}},
+	"apim":    {{"API Management", []string{"Microsoft.ApiManagement/service"}}},
+	"appcs":   {{"App Configuration", []string{"Microsoft.AppConfiguration/configurationStores"}}},
+	"appi":    {{"Application Insights", []string{"Microsoft.Insights/components", "Microsoft.Insights/activityLogAlerts"}}},
+	"arc":     {{"Azure Arc", []string{"Microsoft.AzureArcData/sqlServerInstances"}}},
+	"as":      {{"Analysis Services", []string{"Microsoft.AnalysisServices/servers"}}},
+	"asa":     {{"Stream Analytics Job", []string{"Microsoft.StreamAnalytics/streamingJobs"}}},
+	"asp":     {{"App Service Plan", []string{"Microsoft.Web/serverFarms", "Microsoft.Web/sites", "Microsoft.Web/connections", "Microsoft.Web/certificates"}}},
+	"avail":   {{"Availability Set", []string{"Microsoft.Compute/availabilitySets"}}},
+	"avd":     {{"Azure Virtual Desktop", []string{"Specialized.Workload/AVD"}}},
+	"avs":     {{"Azure VMware Solution", []string{"Microsoft.AVS/privateClouds", "Specialized.Workload/AVS"}}},
+	"ba":      {{"Batch Account", []string{"Microsoft.Batch/batchAccounts"}}},
+	"bastion": {{"Bastion Host", []string{"Microsoft.Network/bastionHosts"}}},
+	"ca":      {{"Container App", []string{"Microsoft.App/containerApps"}}},
+	"cae":     {{"Container Apps Environment", []string{"Microsoft.App/managedenvironments"}}},
+	"ci":      {{"Container Instance", []string{"Microsoft.ContainerInstance/containerGroups"}}},
+	"con":     {{"Connection", []string{"Microsoft.Network/connections"}}},
+	"cosmos":  {{"Cosmos DB", []string{"Microsoft.DocumentDB/databaseAccounts"}}},
+	"cr":      {{"Container Registry", []string{"Microsoft.ContainerRegistry/registries"}}},
+	"dbw":     {{"Databricks Workspace", []string{"Microsoft.Databricks/workspaces"}}},
+	"ddos":    {{"DDoS Protection Plan", []string{"Microsoft.Network/ddosProtectionPlans"}}},
+	"dec":     {{"Data Explorer Cluster", []string{"Microsoft.Kusto/clusters"}}},
+	"disk":    {{"Disk", []string{"Microsoft.Compute/disks"}}},
+	"dnsres":  {{"DNS Resolver", []string{"Microsoft.Network/dnsResolvers"}}},
+	"dnsz":    {{"DNS Zone", []string{"Microsoft.Network/dnsZones"}}},
+	"domain":  {{"Domain Services", []string{"Microsoft.AAD/domainServices"}}},
+	"erc":     {{"ExpressRoute Circuit", []string{"Microsoft.Network/expressRouteCircuits", "Microsoft.Network/ExpressRoutePorts", "Microsoft.Network/expressRouteGateways"}}},
+	"evgd":    {{"Event Grid Domain", []string{"Microsoft.EventGrid/domains"}}},
+	"evgt":    {{"Event Grid Topic", []string{"Microsoft.EventGrid/topics"}}},
+	"evh":     {{"Event Hub", []string{"Microsoft.EventHub/namespaces"}}},
+	"fabric":  {{"Fabric", []string{"Microsoft.Fabric/capacities"}}},
+	"fdfp":    {{"Front Door Firewall Policy", []string{"Microsoft.Network/frontdoorWebApplicationFirewallPolicies"}}},
+	"gal":     {{"Compute Gallery", []string{"Microsoft.Compute/galleries"}}},
+	"hpc":     {{"HPC", []string{"Specialized.Workload/HPC"}}},
+	"hub":     {{"Machine Learning Workspace", []string{"Microsoft.MachineLearningServices/workspaces", "Microsoft.MachineLearningServices/registries"}}},
+	"iot":     {{"IoT Hub", []string{"Microsoft.Devices/IotHubs"}}},
+	"it":      {{"Image Template", []string{"Microsoft.VirtualMachineImages/imageTemplates"}}},
+	"kv":      {{"Key Vault", []string{"Microsoft.KeyVault/vaults"}}},
+	"lb":      {{"Load Balancer", []string{"Microsoft.Network/loadBalancers"}}},
+	"log":     {{"Log Analytics Workspace", []string{"Microsoft.OperationalInsights/workspaces"}}},
+	"logic":   {{"Logic App", []string{"Microsoft.Logic/workflows"}}},
+	"mysql":   {{"MySQL Database", []string{"Microsoft.DBforMySQL/servers", "Microsoft.DBforMySQL/flexibleServers"}}},
+	"netapp":  {{"NetApp Account", []string{"Microsoft.NetApp/netAppAccounts"}}},
+	"ng":      {{"NAT Gateway", []string{"Microsoft.Network/natGateways"}}},
+	"nic":     {{"Network Interface", []string{"Microsoft.Network/networkInterfaces"}}},
+	"nsg":     {{"Network Security Group", []string{"Microsoft.Network/networkSecurityGroups"}}},
+	"ntc":     {{"Azure Traffic Collector", []string{"Microsoft.NetworkFunction/azureTrafficCollectors"}}},
+	"nw":      {{"Network Watcher", []string{"Microsoft.Network/networkWatchers"}}},
+	"odb":     {{"Oracle Database", []string{"Oracle.Database/cloudExadataInfrastructures", "Oracle.Database/cloudVmClusters"}}},
+	"p2svpng": {{"P2S VPN Gateway", []string{"Microsoft.Network/p2sVpnGateways"}}},
+	"pdnsz":   {{"Private DNS Zone", []string{"Microsoft.Network/privateDnsZones"}}},
+	"pep":     {{"Private Endpoint", []string{"Microsoft.Network/privateEndpoints"}}},
+	"pip":     {{"Public IP Address", []string{"Microsoft.Network/publicIPAddresses"}}},
+	"psql":    {{"PostgreSQL Database", []string{"Microsoft.DBforPostgreSQL/servers", "Microsoft.DBforPostgreSQL/flexibleServers"}}},
+	"redis": {
+		{"Redis Cache", []string{"Microsoft.Cache/Redis"}},
+		{"Redis Enterprise", []string{"Microsoft.Cache/redisEnterprise"}},
+	},
+	"resource": {{"Resource", []string{"Microsoft.Resources"}}},
+	"rg":       {{"Resource Group", []string{"Microsoft.Resources/resourceGroups"}}},
+	"rsv":      {{"Recovery Services Vault", []string{"Microsoft.RecoveryServices/vaults"}}},
+	"rt":       {{"Route Table", []string{"Microsoft.Network/routeTables"}}},
+	"sap":      {{"SAP", []string{"Specialized.Workload/SAP"}}},
+	"sb":       {{"Service Bus", []string{"Microsoft.ServiceBus/namespaces"}}},
+	"sigr":     {{"SignalR", []string{"Microsoft.SignalRService/SignalR"}}},
+	"sql":      {{"SQL Server", []string{"Microsoft.Sql/servers", "Microsoft.Sql/servers/databases", "Microsoft.Sql/servers/elasticPools"}}},
+	"sqlmi":    {{"SQL Managed Instance", []string{"Microsoft.Sql/managedInstances"}}},
+	"srch":     {{"Search Service", []string{"Microsoft.Search/searchServices"}}},
+	"st":       {{"Storage Account", []string{"Microsoft.Storage/storageAccounts"}}},
+	"sub":      {{"Subscription", []string{"Microsoft.Subscription/subscriptions"}}},
+	"synw":     {{"Synapse Workspace", []string{"Microsoft.Synapse/workspaces", "Microsoft.Synapse/workspaces/bigDataPools", "Microsoft.Synapse/workspaces/sqlPools"}}},
+	"traf":     {{"Traffic Manager", []string{"Microsoft.Network/trafficManagerProfiles"}}},
+	"vdpool":   {{"Virtual Desktop Host Pool", []string{"Microsoft.DesktopVirtualization/hostPools", "Microsoft.DesktopVirtualization/scalingPlans", "Microsoft.DesktopVirtualization/workspaces"}}},
+	"vgw":      {{"Virtual Network Gateway", []string{"Microsoft.Network/virtualNetworkGateways"}}},
+	"vhub":     {{"Virtual Hub", []string{"Microsoft.Network/virtualHubs"}}},
+	"vm":       {{"Virtual Machine", []string{"Microsoft.Compute/virtualMachines"}}},
+	"vmss":     {{"Virtual Machine Scale Set", []string{"Microsoft.Compute/virtualMachineScaleSets"}}},
+	"vnet":     {{"Virtual Network", []string{"Microsoft.Network/virtualNetworks", "Microsoft.Network/virtualNetworks/subnets"}}},
+	"vpng":     {{"VPN Gateway", []string{"Microsoft.Network/vpnGateways"}}},
+	"vpns":     {{"VPN Site", []string{"Microsoft.Network/vpnSites"}}},
+	"vrouter":  {{"Virtual Router", []string{"Microsoft.Network/virtualRouters"}}},
+	"vwan":     {{"Virtual WAN", []string{"Microsoft.Network/virtualWans"}}},
+	"wps":      {{"Web PubSub", []string{"Microsoft.SignalRService/webPubSub"}}},
+}
+
+func init() {
+	for key, specs := range registry {
+		list := make([]models.IAzureScanner, 0, len(specs))
+		for _, s := range specs {
+			list = append(list, models.NewBaseScanner(s.name, s.types...))
+		}
+		models.ScannerList[key] = list
 	}
 }
