@@ -412,14 +412,14 @@ func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<-
 		asyncRes := map[string]bool{}
 		for _, response := range resp.Responses {
 			if response.HttpStatusCode == http.StatusOK {
-				// Decode the response content into a DiagnosticSettingsResourceCollection
-				var diagnosticSettings armmonitor.DiagnosticSettingsResourceCollection
+				var diagnosticSettings struct {
+					Value []*armmonitor.ServiceDiagnosticSettingsResource `json:"value"`
+				}
 				contentBytes, err := json.Marshal(response.Content)
 				if err != nil {
 					log.Fatal().Err(err).Msg("Failed to marshal diagnostic settings content")
 					continue
 				}
-				// Unmarshal the JSON bytes into the DiagnosticSettingsResourceCollection struct
 				if err := json.Unmarshal(contentBytes, &diagnosticSettings); err != nil {
 					log.Fatal().Err(err).Msg("Failed to unmarshal diagnostic settings response")
 					continue
