@@ -32,7 +32,6 @@ type (
 		cachedImpactedTable                [][]string `json:"-"`
 		cachedCostTable                    [][]string `json:"-"`
 		cachedDefenderTable                [][]string `json:"-"`
-		cachedAdvisorTable                 [][]string `json:"-"`
 		cachedAzurePolicyTable             [][]string `json:"-"`
 		cachedArcSQLTable                  [][]string `json:"-"`
 		cachedRecommendationsTable         [][]string `json:"-"`
@@ -84,28 +83,65 @@ func (rd *ReportData) ImpactedTable() [][]string {
 		recommendationID string
 	}
 
-	// Pre-allocate with estimated capacity (graph length + 1 for headers)
-	// This avoids multiple slice reallocations
-	rows := make([][]string, 1, len(rd.Graph)+1)
+	// Pre-allocate with estimated capacity (advisor + graph + 1 for headers)
+	rows := make([][]string, 1, len(rd.Advisor)+len(rd.Graph)+1)
 	rows[0] = headers
 
 	// Use struct{} instead of bool to save memory
-	seen := make(map[impactedKey]struct{}, len(rd.Graph))
+	seen := make(map[impactedKey]struct{}, len(rd.Advisor)+len(rd.Graph))
 
+	// Process Advisor results FIRST so they take precedence on duplicate keys
+	for _, d := range rd.Advisor {
+		category := string(models.MapAdvisorCategory(d.Category))
+		if skipCategory(category) {
+			continue
+		}
+
+		key := impactedKey{
+			resourceID:       d.ResourceID,
+			recommendationID: d.RecommendationID,
+		}
+		if _, exists := seen[key]; exists {
+			continue
+		}
+		seen[key] = struct{}{}
+
+		row := []string{
+			"Azure Resource Graph",
+			"Azure Advisor",
+			category,
+			d.Impact,
+			d.Type,
+			d.Description,
+			d.RecommendationID,
+			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			d.SubscriptionName,
+			models.GetResourceGroupFromResourceID(d.ResourceID),
+			d.Name,
+			MaskSubscriptionIDInResourceID(d.ResourceID, rd.Mask),
+			"",
+			"",
+			"",
+			"",
+			"",
+			"",
+		}
+		rows = append(rows, row)
+	}
+
+	// Process Graph results second - duplicates are skipped (Advisor wins)
 	for _, r := range rd.Graph {
-		// Cache string conversions once to avoid repeated type conversions
 		category := string(r.Category)
 		if skipCategory(category) {
 			continue
 		}
 
-		// Create composite key - avoids string concatenation
 		key := impactedKey{
 			resourceID:       r.ResourceID,
 			recommendationID: r.RecommendationID,
 		}
 		if _, exists := seen[key]; exists {
-			continue // Skip duplicate
+			continue // Skip duplicate - Advisor already claimed this key
 		}
 		seen[key] = struct{}{}
 
@@ -191,35 +227,6 @@ func (rd *ReportData) DefenderTable() [][]string {
 	return rows
 }
 
-func (rd *ReportData) AdvisorTable() [][]string {
-	if rd.cachedAdvisorTable != nil {
-		return rd.cachedAdvisorTable
-	}
-
-	headers := []string{"Subscription Id", "Subscription Name", "Resource Type", "Resource Name", "Category", "Impact", "Description", "Resource Id", "Recommendation Id"}
-
-	// Pre-allocate with capacity to avoid reallocations
-	rows := make([][]string, 1, len(rd.Advisor)+1)
-	rows[0] = headers
-
-	for _, d := range rd.Advisor {
-		row := []string{
-			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
-			d.SubscriptionName,
-			d.Type,
-			d.Name,
-			d.Category,
-			d.Impact,
-			d.Description,
-			MaskSubscriptionIDInResourceID(d.ResourceID, rd.Mask),
-			d.RecommendationID,
-		}
-		rows = append(rows, row)
-	}
-
-	rd.cachedAdvisorTable = rows
-	return rows
-}
 
 // AzurePolicyTable returns Azure Policy data formatted as a table with headers and rows for reporting.
 func (rd *ReportData) AzurePolicyTable() [][]string {
@@ -439,7 +446,6 @@ func (rd *ReportData) ClearTableCache() {
 	rd.cachedImpactedTable = nil
 	rd.cachedCostTable = nil
 	rd.cachedDefenderTable = nil
-	rd.cachedAdvisorTable = nil
 	rd.cachedAzurePolicyTable = nil
 	rd.cachedArcSQLTable = nil
 	rd.cachedRecommendationsTable = nil

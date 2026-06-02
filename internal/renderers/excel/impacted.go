@@ -16,7 +16,7 @@ import (
 func renderImpactedResources(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
 	sheetName := "ImpactedResources"
 
-	if !data.Stages.IsStageEnabled(models.StageNameGraph) {
+	if !data.Stages.IsStageEnabled(models.StageNameGraph) && !data.Stages.IsStageEnabled(models.StageNameAdvisor) {
 		log.Debug().Msgf("Skipping %s. Feature is disabled", sheetName)
 		return
 	}

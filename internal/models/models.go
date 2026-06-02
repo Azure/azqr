@@ -180,6 +180,27 @@ const (
 	CategorySLA                         RecommendationCategory = "SLA"
 )
 
+// MapAdvisorCategory maps Azure Advisor category names to azqr RecommendationCategory values.
+// Unknown categories are passed through as-is.
+func MapAdvisorCategory(category string) RecommendationCategory {
+	switch category {
+	case "Cost":
+		return CategoryOtherBestPractices
+	case "Security":
+		return CategorySecurity
+	case "Reliability":
+		return CategoryHighAvailability
+	case "HighAvailability":
+		return CategoryHighAvailability
+	case "OperationalExcellence":
+		return CategoryMonitoringAndAlerting
+	case "Performance":
+		return CategoryScalability
+	default:
+		return RecommendationCategory(category)
+	}
+}
+
 func LogSubscriptionScan(subscriptionID string, source string) {
 	log.Info().
 		Str("subscriptionID", subscriptionID[29:]).
