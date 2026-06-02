@@ -22,7 +22,6 @@ const (
 	DataSetImpacted                = "impacted"
 	DataSetResourceType            = "resourceType"
 	DataSetInventory               = "inventory"
-	DataSetAdvisor                 = "advisor"
 	DataSetAzurePolicy             = "azurePolicy"
 	DataSetArcSQL                  = "arcSQL"
 	DataSetDefender                = "defender"
@@ -244,7 +243,6 @@ func (ds *DataStore) Summary() map[string]interface{} {
 	impacted := ds.Get(DataSetImpacted)
 	resourceTypes := ds.Get(DataSetResourceType)
 	inventory := ds.Get(DataSetInventory)
-	advisor := ds.Get(DataSetAdvisor)
 	policy := ds.Get(DataSetAzurePolicy)
 	arcSQL := ds.Get(DataSetArcSQL)
 	defender := ds.Get(DataSetDefender)
@@ -289,7 +287,6 @@ func (ds *DataStore) Summary() map[string]interface{} {
 		"impactedCount":                 len(impacted),
 		"resourceTypeCount":             len(resourceTypes),
 		"inventoryCount":                len(inventory),
-		"advisorCount":                  len(advisor),
 		"azurePolicyCount":              len(policy),
 		"azurePolicyNonCompliant":       nonCompliantPolicy,
 		"arcSQLCount":                   len(arcSQL),

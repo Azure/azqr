@@ -11,7 +11,6 @@ var sample = &DataStore{Data: map[string][]map[string]string{
 	DataSetImpacted:                {{"recommendationId": "r2", "resourceId": "res1"}},
 	DataSetResourceType:            {{"resourceType": "Microsoft.Compute/virtualMachines"}},
 	DataSetInventory:               {{"resourceType": "Microsoft.Compute/virtualMachines", "resourceName": "vm1"}},
-	DataSetAdvisor:                 {},
 	DataSetAzurePolicy:             {{"complianceState": "NonCompliant"}},
 	DataSetDefender:                {},
 	DataSetDefenderRecommendations: {},
