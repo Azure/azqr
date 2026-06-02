@@ -60,8 +60,7 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 			ResourceGroup = resourceGroup, Category = properties.category, Impact = properties.impact,
 			ImpactedField = properties.impactedField, ImpactedValue = properties.impactedValue,
 			ResourceId = properties.resourceMetadata.resourceId,
-			RecommendationTypeId = properties.recommendationTypeId,
-			LearnMoreLink = properties.learnMoreLink
+			RecommendationTypeId = properties.recommendationTypeId
 		`
 
 	log.Debug().Msg(query)
@@ -102,7 +101,6 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 				Impact:           to.String(m["Impact"]),
 				Description:      recommendationTypes[to.String(m["RecommendationTypeId"])],
 				RecommendationID: to.String(m["RecommendationTypeId"]),
-				LearnMoreLink:    to.String(m["LearnMoreLink"]),
 			}
 
 			// Create unique composite key - avoids string concatenation

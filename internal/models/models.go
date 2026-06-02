@@ -129,7 +129,7 @@ type (
 
 	// AdvisorResult - Advisor result
 	AdvisorResult struct {
-		RecommendationID, SubscriptionID, SubscriptionName, Type, Name, ResourceID, Category, Impact, Description, LearnMoreLink string
+		RecommendationID, SubscriptionID, SubscriptionName, Type, Name, ResourceID, Category, Impact, Description string
 	}
 
 	// AzurePolicyResult - Azure Policy result

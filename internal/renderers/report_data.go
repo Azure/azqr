@@ -124,7 +124,7 @@ func (rd *ReportData) ImpactedTable() [][]string {
 			"",
 			"",
 			"",
-			d.LearnMoreLink,
+			"",
 		}
 		rows = append(rows, row)
 	}
@@ -393,21 +393,19 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 	// Add Advisor recommendations (grouped by recommendation ID)
 	// Advisor only reports non-compliant resources, so implemented is always "false"
 	type advisorRec struct {
-		description   string
-		category      string
-		impact        string
-		resourceType  string
-		learnMoreLink string
+		description  string
+		category     string
+		impact       string
+		resourceType string
 	}
 	advisorRecs := make(map[string]*advisorRec)
 	for _, a := range rd.Advisor {
 		if _, exists := advisorRecs[a.RecommendationID]; !exists {
 			advisorRecs[a.RecommendationID] = &advisorRec{
-				description:   a.Description,
-				category:      a.Category,
-				impact:        a.Impact,
-				resourceType:  a.Type,
-				learnMoreLink: a.LearnMoreLink,
+				description:  a.Description,
+				category:     a.Category,
+				impact:       a.Impact,
+				resourceType: a.Type,
 			}
 		}
 	}
@@ -437,7 +435,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 			rec.description,
 			rec.impact,
 			"",
-			rec.learnMoreLink,
+			"",
 			recID,
 		}
 		rows = append(rows, row)
