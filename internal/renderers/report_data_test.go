@@ -414,6 +414,9 @@ func TestImpactedTableAdvisorMerge(t *testing.T) {
 				Category:         "Cost",
 				Impact:           "High",
 				Description:      "Shut down unused VM",
+				LearnMoreLink:    "https://aka.ms/advisor-cost-vm",
+				LongDescription:  "Consider shutting down VMs that are not being used.",
+				PotentialBenefits: "Reduce costs by shutting down unused VMs",
 			},
 		},
 		Graph: []*models.GraphResult{
@@ -454,6 +457,9 @@ func TestImpactedTableAdvisorMerge(t *testing.T) {
 	}
 	if advisorRow[9] != "rg1" {
 		t.Errorf("Expected ResourceGroup 'rg1', got %s", advisorRow[9])
+	}
+	if advisorRow[17] != "https://aka.ms/advisor-cost-vm" {
+		t.Errorf("Expected Learn 'https://aka.ms/advisor-cost-vm', got %s", advisorRow[17])
 	}
 
 	// Second data row should be Graph
