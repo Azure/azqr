@@ -192,9 +192,12 @@ func (s *AdvisorScanner) fetchMetadata(ctx context.Context, cred azcore.TokenCre
 // urlPattern matches URLs starting with http:// or https://
 var urlPattern = regexp.MustCompile(`https?://[^\s"'<>]+`)
 
-// extractURL extracts the first URL found in the given text.
+// extractURL extracts the last URL found in the given text.
 // Returns empty string if no URL is found.
 func extractURL(text string) string {
-	match := urlPattern.FindString(text)
-	return match
+	matches := urlPattern.FindAllString(text, -1)
+	if len(matches) == 0 {
+		return ""
+	}
+	return matches[len(matches)-1]
 }
