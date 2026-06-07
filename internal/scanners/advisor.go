@@ -167,9 +167,9 @@ func (s *AdvisorScanner) fetchMetadata(ctx context.Context, cred azcore.TokenCre
 		for _, entity := range resp.Value {
 			if entity.Name == "recommendationType" {
 				for _, v := range entity.Properties.SupportedValues {
-					learnLink := v.LearnMoreLink
+					learnLink := sanitizeLearnLink(v.LearnMoreLink)
 					if extracted := extractURL(v.DetailedDescription); extracted != "" {
-						learnLink = extracted
+							learnLink = sanitizeLearnLink(extracted)
 					}
 
 					result[v.ID] = advisorTypeMetadata{
@@ -192,6 +192,11 @@ func (s *AdvisorScanner) fetchMetadata(ctx context.Context, cred azcore.TokenCre
 // urlPattern matches URLs starting with http:// or https://
 var urlPattern = regexp.MustCompile(`https?://[^\s"'<>]+`)
 
+// brokenLinks contains known broken learn more links that should be discarded
+var brokenLinks = map[string]struct{}{
+	"https://aka.ms/aa_securitycenter_learnmore": {},
+}
+
 // extractURL extracts the last URL found in the given text.
 // Returns empty string if no URL is found.
 func extractURL(text string) string {
@@ -200,4 +205,13 @@ func extractURL(text string) string {
 		return ""
 	}
 	return matches[len(matches)-1]
+}
+
+// sanitizeLearnLink returns the link as-is unless it is a known broken URL,
+// in which case it returns an empty string.
+func sanitizeLearnLink(link string) string {
+	if _, broken := brokenLinks[link]; broken {
+		return ""
+	}
+	return link
 }
