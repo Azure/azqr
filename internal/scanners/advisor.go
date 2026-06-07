@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/Azure/azqr/internal/az"
@@ -166,9 +167,14 @@ func (s *AdvisorScanner) fetchMetadata(ctx context.Context, cred azcore.TokenCre
 		for _, entity := range resp.Value {
 			if entity.Name == "recommendationType" {
 				for _, v := range entity.Properties.SupportedValues {
+					learnLink := v.LearnMoreLink
+					if extracted := extractURL(v.DetailedDescription); extracted != "" {
+						learnLink = extracted
+					}
+
 					result[v.ID] = advisorTypeMetadata{
 						DisplayName:         v.DisplayName,
-						LearnMoreLink:       v.LearnMoreLink,
+						LearnMoreLink:       learnLink,
 						DetailedDescription: v.DetailedDescription,
 						PotentialBenefits:   v.PotentialBenefits,
 					}
@@ -181,4 +187,14 @@ func (s *AdvisorScanner) fetchMetadata(ctx context.Context, cred azcore.TokenCre
 
 	log.Debug().Int("recommendation_types", len(result)).Msg("Fetched Advisor metadata")
 	return result
+}
+
+// urlPattern matches URLs starting with http:// or https://
+var urlPattern = regexp.MustCompile(`https?://[^\s"'<>]+`)
+
+// extractURL extracts the first URL found in the given text.
+// Returns empty string if no URL is found.
+func extractURL(text string) string {
+	match := urlPattern.FindString(text)
+	return match
 }
