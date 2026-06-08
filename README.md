@@ -416,6 +416,25 @@ azqr region-selection --target-regions=swedencentral,germanywestcentral,italynor
 azqr scan --plugin region-selection
 ```
 
+### SQL Server ESU Status
+
+Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status across Arc-enabled SQL Server instances and SQL Virtual Machines.
+
+- Detects EOL status dynamically (Expired, ESU Active, Upcoming ESU, Supported)
+- Calculates ESU licensing costs per instance (by edition and core count)
+- Estimates SQL Managed Instance migration savings
+- Covers Arc-enabled SQL (on-prem) and Azure VM (SQL IaaS)
+
+**Use Cases**: ESU cost forecasting, migration planning to SQL MI, compliance reporting, license optimization
+
+```bash
+# Run as standalone command (fast, plugin-only mode)
+azqr sql-esu
+
+# Or integrate with full scan
+azqr scan --plugin sql-esu
+```
+
 [Internal Plugins Documentation](https://azure.github.io/azqr/docs/plugins/internal-plugins/)
 
 ### Combining Features
@@ -426,6 +445,7 @@ azqr scan --subscription-id <sub-id> \
   --plugin carbon-emissions \
   --plugin zone-mapping \
   --plugin region-selection \
+  --plugin sql-esu \
   --output-name comprehensive-analysis
 ```
 
