@@ -103,13 +103,8 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 				continue
 			}
 
-			name := to.String(m["Name"])
-			if filters.Azqr.IsServiceExcluded(name) {
-				continue
-			}
-
 			table = append(table, []string{
-				name,
+				to.String(m["Name"]),
 				to.String(m["ResourceGroup"]),
 				subscription,
 				to.String(m["Location"]),

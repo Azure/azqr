@@ -7,7 +7,7 @@ resources
 | extend SQLVersion = iff(
     type == "microsoft.azurearcdata/sqlserverinstances",
     tostring(properties.version),
-    strcat("SQL Server ", substring(tostring(properties.sqlImageOffer), 3, 4))
+    strcat("SQL Server ", replace_string(extract(@'(?i)sql(\d{4}(?:R2)?)', 1, tostring(properties.sqlImageOffer)), "2008R2", "2008 R2"))
 )
 | extend Edition = iff(
     type == "microsoft.azurearcdata/sqlserverinstances",
@@ -19,14 +19,18 @@ resources
     "Arc-enabled (On-Prem)",
     "Azure VM (SQL IaaS)"
 )
+// For SQL VMs, core count lives on the underlying compute VM — join to retrieve it
 | extend _vmId = iff(type == "microsoft.sqlvirtualmachine/sqlvirtualmachines", tolower(tostring(properties.virtualMachineResourceId)), "")
 | join kind=leftouter (
     resources
     | where type == "microsoft.compute/virtualmachines"
     | project _vmId = tolower(id), _vmSize = tostring(properties.hardwareProfile.vmSize)
 ) on _vmId
+// Arc SQL: properties.vCore  |  SQL MI: sku.capacity  |  SQL VM: case() lookup on VM size SKU
 | extend vCores = case(
+    // Arc SQL instances have direct properties
     type == "microsoft.azurearcdata/sqlserverinstances", coalesce(toint(properties.vCore), 0),
+    // SQL VMs: exact lookup for legacy series (SKU number ≠ vCPU), regex fallback for modern v3/v4/v5/v6
     tolower(_vmSize) == "standard_d1_v2",      1,  tolower(_vmSize) == "standard_d2_v2",      2,
     tolower(_vmSize) == "standard_d3_v2",      4,  tolower(_vmSize) == "standard_d4_v2",      8,
     tolower(_vmSize) == "standard_d5_v2",      16, tolower(_vmSize) == "standard_d11_v2",     2,
@@ -61,8 +65,10 @@ resources
     tolower(_vmSize) == "standard_m32-8ms",    8,  tolower(_vmSize) == "standard_m32-16ms",   16,
     tolower(_vmSize) == "standard_m64-16ms",   16, tolower(_vmSize) == "standard_m64-32ms",   32,
     tolower(_vmSize) == "standard_m128-32ms",  32, tolower(_vmSize) == "standard_m128-64ms",  64,
-    coalesce(toint(extract(@'_[A-Za-z]+(\d+)', 1, _vmSize)), 4)
+    // Modern SKUs: try constrained-vCore pattern first (e.g. E16-8ds_v5 → 8), then standard (e.g. D8s_v5 → 8)
+    coalesce(toint(extract(@'_[A-Za-z]+\d+-(\d+)', 1, _vmSize)), toint(extract(@'_[A-Za-z]+(\d+)', 1, _vmSize)), 4)
 )
+// Use now() so status flips automatically on ESU start/end dates
 | extend _now = now()
 | extend EOLStatus = case(
     SQLVersion == "SQL Server 2008",                                        "Expired",
@@ -76,51 +82,70 @@ resources
     SQLVersion == "SQL Server 2017" and _now >= datetime(2030-10-12),       "Expired",
     SQLVersion == "SQL Server 2017" and _now >= datetime(2027-10-12),       "ESU Active",
     SQLVersion == "SQL Server 2017",                                        "Supported",
+    SQLVersion == "SQL Server 2019" and _now >= datetime(2033-01-08),       "Expired",
+    SQLVersion == "SQL Server 2019" and _now >= datetime(2030-01-08),       "ESU Active",
+    SQLVersion == "SQL Server 2019" and _now >= datetime(2029-07-01),       "Upcoming ESU", // 6 months before ESU start date to allow for planning
     SQLVersion == "SQL Server 2019",                                        "Supported",
+    SQLVersion == "SQL Server 2022" and _now >= datetime(2036-01-11),       "Expired",
+    SQLVersion == "SQL Server 2022" and _now >= datetime(2033-01-11),       "ESU Active",
+    SQLVersion == "SQL Server 2022" and _now >= datetime(2032-07-01),       "Upcoming ESU", // 6 months before ESU start date to allow for planning
     SQLVersion == "SQL Server 2022",                                        "Supported",
     "Unknown"
 )
 | extend MainstreamEndDate = case(
-    SQLVersion == "SQL Server 2008",    datetime(2012-04-12),
-    SQLVersion == "SQL Server 2008 R2", datetime(2014-07-08),
     SQLVersion == "SQL Server 2012",    datetime(2017-07-11),
     SQLVersion == "SQL Server 2014",    datetime(2019-07-09),
     SQLVersion == "SQL Server 2016",    datetime(2021-07-13),
     SQLVersion == "SQL Server 2017",    datetime(2022-10-11),
-    SQLVersion == "SQL Server 2019",    datetime(2025-01-08),
+    SQLVersion == "SQL Server 2019",    datetime(2025-02-28),
     SQLVersion == "SQL Server 2022",    datetime(2028-01-11),
-    datetime(2099-01-01)
+    todatetime('')
 )
 | extend ESUEndDate = case(
-    SQLVersion == "SQL Server 2008",    datetime(2019-07-09),
-    SQLVersion == "SQL Server 2008 R2", datetime(2019-07-09),
     SQLVersion == "SQL Server 2012",    datetime(2025-07-08),
     SQLVersion == "SQL Server 2014",    datetime(2027-07-12),
     SQLVersion == "SQL Server 2016",    datetime(2029-07-14),
     SQLVersion == "SQL Server 2017",    datetime(2030-10-12),
     SQLVersion == "SQL Server 2019",    datetime(2033-01-08),
     SQLVersion == "SQL Server 2022",    datetime(2036-01-11),
-    datetime(2099-01-01)
+    todatetime('')
 )
+// ESUStartDate = date the ESU program begins
+| extend ESUStartDate = case(
+    SQLVersion == "SQL Server 2012",    datetime(2022-07-12),
+    SQLVersion == "SQL Server 2014",    datetime(2024-07-09),
+    SQLVersion == "SQL Server 2016",    datetime(2026-07-14),
+    SQLVersion == "SQL Server 2017",    datetime(2027-10-12),
+    SQLVersion == "SQL Server 2019",    datetime(2030-01-08),
+    SQLVersion == "SQL Server 2022",    datetime(2033-01-11),
+    todatetime('')
+)
+// ESU pricing varies by edition: Enterprise is ~4x Standard; Developer/Express free
+// Standard/Web: $139/core/mo  |  Enterprise: $540.50/core/mo  |  Developer/Express: $0
+| extend _esuVersions = SQLVersion == "SQL Server 2014" or SQLVersion == "SQL Server 2016" or SQLVersion == "SQL Server 2017" or SQLVersion == "SQL Server 2019" or SQLVersion == "SQL Server 2022"
 | extend ESUMonthlyCostPerCore = case(
-    (SQLVersion == "SQL Server 2014" or SQLVersion == "SQL Server 2016" or SQLVersion == "SQL Server 2017")
-        and tolower(Edition) contains "enterprise", 540.5,
-    (SQLVersion == "SQL Server 2014" or SQLVersion == "SQL Server 2016" or SQLVersion == "SQL Server 2017")
-        and tolower(Edition) contains "developer",  0.0,
+    _esuVersions and tolower(Edition) contains "enterprise", 540.5,
+    _esuVersions and tolower(Edition) contains "developer",  0.0,
+    _esuVersions and tolower(Edition) contains "express",    0.0,
     SQLVersion == "SQL Server 2014", 139.0,
     SQLVersion == "SQL Server 2016", 139.0,
     SQLVersion == "SQL Server 2017", 139.0,
+    SQLVersion == "SQL Server 2019", 139.0,
+    SQLVersion == "SQL Server 2022", 139.0,
     0.0
 )
 | extend BillableCores        = iff(vCores < 4, 4, vCores)
-| extend EstimatedMonthlyCost = ESUMonthlyCostPerCore * BillableCores
-| extend _miVCores = iff(vCores < 4, 4, vCores)
+// EstimatedMonthlyCost is non-zero for ESU Active (currently paying) and Upcoming ESU (forecast)
+| extend EstimatedMonthlyCost = iff(EOLStatus in ("ESU Active", "Upcoming ESU"), ESUMonthlyCostPerCore * BillableCores, 0.0)
+// Est. cost if migrated to Azure SQL MI (GP ~$123/vCore, BC ~$367/vCore, min 4 vCores)
 | extend EstSQLMIMonthlyCost = case(
-    tolower(Edition) contains "enterprise", 367.0 * _miVCores,
-    tolower(Edition) contains "developer",   0.0,
-    123.0 * _miVCores
+    tolower(Edition) contains "enterprise", 367.0 * BillableCores,
+    123.0 * BillableCores  // Standard, Web, Express, Developer all → GP tier
 )
+// Patch operations cost: 2h/month × $80/h = $160/month per instance
 | extend PatchOpsMonthlyCost = 160.0
+// Expired/Supported have no ESU cost — saving reflects patch ops avoided by migrating to MI ($160/mo)
+// ESU Active/Upcoming — saving = ESU cost + patch ops − MI cost
 | extend EstSQLMISaving = iff(
     EstimatedMonthlyCost == 0.0,
     PatchOpsMonthlyCost,
@@ -137,6 +162,7 @@ resources
     vCores,
     EOLStatus,
     MainstreamEndDate,
+    ESUStartDate,
     ESUEndDate,
     ESUMonthlyCostPerCore,
     BillableCores,
@@ -144,6 +170,12 @@ resources
     EstimatedAnnualCost = EstimatedMonthlyCost * 12,
     EstimatedThreeYearCost = EstimatedMonthlyCost * 36,
     PatchOpsMonthlyCost,
+    PatchOpsAnnualCost = PatchOpsMonthlyCost * 12,
+    PatchOpsThreeYearCost = PatchOpsMonthlyCost * 36,
     EstSQLMIMonthlyCost,
-    EstSQLMISaving
-| order by EOLStatus asc, SQLVersion asc, Name asc
+    EstSQLMIAnnualCost = EstSQLMIMonthlyCost * 12,
+    EstSQLMIThreeYearCost = EstSQLMIMonthlyCost * 36,
+    EstSQLMISaving,
+    EstSQLMIAnnualSaving = EstSQLMISaving * 12,
+    EstSQLMIThreeYearSaving = EstSQLMISaving * 36
+| order by case(EOLStatus == "Expired", 0, EOLStatus == "ESU Active", 1, EOLStatus == "Upcoming ESU", 2, EOLStatus == "Supported", 3, 4) asc, SQLVersion asc, Name asc
