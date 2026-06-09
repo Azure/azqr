@@ -174,11 +174,12 @@ Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status 
 - Cloud Type (Arc-enabled or Azure VM)
 - SQL Version, Edition, vCores
 - EOL Status (Expired / ESU Active / Upcoming ESU / Supported)
-- Mainstream End Date, ESU End Date
+- Mainstream End Date, ESU Start Date, ESU End Date
 - ESU Monthly Cost/Core, Billable Cores
 - Estimated Monthly/Annual/3-Year Cost
-- Patch Ops Monthly Cost
-- Est SQL MI Monthly Cost, Est SQL MI Monthly Saving
+- Patch Ops Monthly/Annual/3-Year Cost
+- Est SQL MI Monthly/Annual/3-Year Cost
+- Est SQL MI Monthly/Annual/3-Year Saving
 
 ---
 

@@ -31,7 +31,7 @@ func NewScanner() *Scanner {
 func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "sql-esu",
-		Version:     "1.0.0",
+		Version:     "0.1.0-beta",
 		Description: "Analyzes SQL Server End-of-Life and Extended Security Update status",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
@@ -47,6 +47,7 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "vCores", DataKey: "vCores", FilterType: plugins.FilterTypeNone},
 			{Name: "EOL Status", DataKey: "eolStatus", FilterType: plugins.FilterTypeDropdown},
 			{Name: "Mainstream End Date", DataKey: "mainstreamEndDate", FilterType: plugins.FilterTypeNone},
+			{Name: "ESU Start Date", DataKey: "esuStartDate", FilterType: plugins.FilterTypeNone},
 			{Name: "ESU End Date", DataKey: "esuEndDate", FilterType: plugins.FilterTypeNone},
 			{Name: "ESU Monthly Cost/Core", DataKey: "esuMonthlyCostPerCore", FilterType: plugins.FilterTypeNone},
 			{Name: "Billable Cores", DataKey: "billableCores", FilterType: plugins.FilterTypeNone},
@@ -54,29 +55,27 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Estimated Annual Cost", DataKey: "estimatedAnnualCost", FilterType: plugins.FilterTypeNone},
 			{Name: "Estimated 3-Year Cost", DataKey: "estimatedThreeYearCost", FilterType: plugins.FilterTypeNone},
 			{Name: "Patch Ops Monthly Cost", DataKey: "patchOpsMonthlyCost", FilterType: plugins.FilterTypeNone},
+			{Name: "Patch Ops Annual Cost", DataKey: "patchOpsAnnualCost", FilterType: plugins.FilterTypeNone},
+			{Name: "Patch Ops 3-Year Cost", DataKey: "patchOpsThreeYearCost", FilterType: plugins.FilterTypeNone},
 			{Name: "Est SQL MI Monthly Cost", DataKey: "estSqlMiMonthlyCost", FilterType: plugins.FilterTypeNone},
+			{Name: "Est SQL MI Annual Cost", DataKey: "estSqlMiAnnualCost", FilterType: plugins.FilterTypeNone},
+			{Name: "Est SQL MI 3-Year Cost", DataKey: "estSqlMiThreeYearCost", FilterType: plugins.FilterTypeNone},
 			{Name: "Est SQL MI Monthly Saving", DataKey: "estSqlMiSaving", FilterType: plugins.FilterTypeNone},
+			{Name: "Est SQL MI Annual Saving", DataKey: "estSqlMiAnnualSaving", FilterType: plugins.FilterTypeNone},
+			{Name: "Est SQL MI 3-Year Saving", DataKey: "estSqlMiThreeYearSaving", FilterType: plugins.FilterTypeNone},
 		},
 	}
 }
 
 // Scan executes the plugin and returns table data
-func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) (*plugins.ExternalPluginOutput, error) {
+func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
 	models.LogResourceTypeScan("SQL Server EOL/ESU Status")
 
 	graphClient := graph.NewGraphQuery(cred)
 
 	log.Debug().Msg("Executing SQL ESU ARG query")
 
-	subs := make([]*string, 0, len(subscriptions))
-	for subID := range subscriptions {
-		if filters.Azqr.IsSubscriptionExcluded(subID) {
-			continue
-		}
-		subs = append(subs, to.Ptr(subID))
-	}
-
-	result, err := graphClient.Query(ctx, sqlESUQuery, subs)
+	result, err := graphClient.Query(ctx, sqlESUQuery, subscriptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query Azure Resource Graph for SQL ESU resources: %w", err)
 	}
@@ -86,11 +85,12 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 		{
 			"Name", "Resource Group", "Subscription", "Location", "Cloud Type",
 			"SQL Version", "Edition", "vCores", "EOL Status",
-			"Mainstream End Date", "ESU End Date",
+			"Mainstream End Date", "ESU Start Date", "ESU End Date",
 			"ESU Monthly Cost/Core", "Billable Cores",
 			"Estimated Monthly Cost", "Estimated Annual Cost", "Estimated 3-Year Cost",
-			"Patch Ops Monthly Cost",
-			"Est SQL MI Monthly Cost", "Est SQL MI Monthly Saving",
+			"Patch Ops Monthly Cost", "Patch Ops Annual Cost", "Patch Ops 3-Year Cost",
+			"Est SQL MI Monthly Cost", "Est SQL MI Annual Cost", "Est SQL MI 3-Year Cost",
+			"Est SQL MI Monthly Saving", "Est SQL MI Annual Saving", "Est SQL MI 3-Year Saving",
 		},
 	}
 
@@ -99,7 +99,7 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 			m := row.(map[string]interface{})
 
 			subscription := to.String(m["SubscriptionId"])
-			if filters.Azqr.IsSubscriptionExcluded(subscription) {
+			if params.Filters.Azqr.IsSubscriptionExcluded(subscription) {
 				continue
 			}
 
@@ -114,6 +114,7 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 				to.String(m["vCores"]),
 				to.String(m["EOLStatus"]),
 				to.String(m["MainstreamEndDate"]),
+				to.String(m["ESUStartDate"]),
 				to.String(m["ESUEndDate"]),
 				to.String(m["ESUMonthlyCostPerCore"]),
 				to.String(m["BillableCores"]),
@@ -121,20 +122,26 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 				to.String(m["EstimatedAnnualCost"]),
 				to.String(m["EstimatedThreeYearCost"]),
 				to.String(m["PatchOpsMonthlyCost"]),
+				to.String(m["PatchOpsAnnualCost"]),
+				to.String(m["PatchOpsThreeYearCost"]),
 				to.String(m["EstSQLMIMonthlyCost"]),
+				to.String(m["EstSQLMIAnnualCost"]),
+				to.String(m["EstSQLMIThreeYearCost"]),
 				to.String(m["EstSQLMISaving"]),
+				to.String(m["EstSQLMIAnnualSaving"]),
+				to.String(m["EstSQLMIThreeYearSaving"]),
 			})
 		}
 	}
 
 	log.Info().Msgf("SQL ESU scan completed with %d resources", len(table)-1)
 
-	return &plugins.ExternalPluginOutput{
+	return []plugins.ExternalPluginOutput{{
 		Metadata:    s.GetMetadata(),
 		SheetName:   "SQL ESU",
 		Description: "SQL Server End-of-Life and Extended Security Update status with cost analysis",
 		Table:       table,
-	}, nil
+	}}, nil
 }
 
 // init registers the plugin automatically
