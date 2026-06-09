@@ -32,11 +32,7 @@ func (s *DefenderScanner) Scan(ctx context.Context, cred azcore.TokenCredential,
 		| project SubscriptionId = subscriptionId, SubscriptionName = subscriptionName, Name = name, Tier = properties.pricingTier
 		`
 	log.Debug().Msg(query)
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
-	result, err := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subscriptions)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Defender status")
 		return nil
@@ -97,10 +93,6 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 		| distinct SubscriptionId, ResourceGroupName, ResourceType, ResourceName, Category, RecommendationSeverity, RecommendationName, ActionDescription, RemediationDescription, AzPortalLink, ResourceId
 	`
 	log.Debug().Msg(query)
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
 
 	// Composite key type for deduplication - avoids string concatenation allocations
 	type defenderKey struct {
@@ -109,7 +101,7 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 		recommendationName string
 	}
 
-	result, err := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subscriptions)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Defender recommendations")
 		return nil

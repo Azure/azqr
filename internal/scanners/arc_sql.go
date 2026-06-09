@@ -51,11 +51,7 @@ func (s *ArcSQLScanner) Scan(ctx context.Context, cred azcore.TokenCredential, s
 		`
 
 	log.Debug().Msg(query)
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
-	result, err := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subscriptions)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Arc SQL resources")
 		return nil

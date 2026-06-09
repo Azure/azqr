@@ -277,13 +277,8 @@ func (a *GraphScanner) worker(ctx context.Context, graph *GraphQueryClient, subs
 
 func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryClient, rule *models.GraphRecommendation, subscriptions map[string]string) ([]*models.GraphResult, error) {
 	results := []*models.GraphResult{}
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
-
 	if rule.GraphQuery != "" {
-		result, err := graphClient.Query(ctx, rule.GraphQuery, subs)
+		result, err := graphClient.Query(ctx, rule.GraphQuery, subscriptions)
 		if err != nil {
 			return nil, fmt.Errorf("recommendation %s query failed: %w", rule.RecommendationID, err)
 		}

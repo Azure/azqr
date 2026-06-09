@@ -49,17 +49,13 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 		`
 
 	log.Debug().Msg(query)
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
+	result, err := graphClient.Query(ctx, query, subscriptions, graph.QueryOptions{ManagementGroupScope: true})
 	// Composite key type for deduplication - avoids string concatenation allocations
 	type policyKey struct {
 		resourceID         string
 		policyDefinitionID string
 	}
 
-	result, err := graphClient.Query(ctx, query, subs)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Azure Policy non-compliant resources")
 		return nil

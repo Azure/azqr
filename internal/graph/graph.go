@@ -28,6 +28,14 @@ type GraphResult struct {
 	Data []interface{} // Query result data
 }
 
+// QueryOptions controls optional behaviour of a Resource Graph query.
+type QueryOptions struct {
+	// ManagementGroupScope sets AuthorizationScopeFilter to "AtScopeAndAbove",
+	// which traverses management groups. Required for PolicyResources queries;
+	// avoid for all other queries as it significantly increases latency.
+	ManagementGroupScope bool
+}
+
 // QueryRequestOptions represents options for the Resource Graph query.
 type QueryRequestOptions struct {
 	ResultFormat             string  `json:"resultFormat,omitempty"`             // Format of the result
@@ -65,40 +73,43 @@ func NewGraphQuery(cred azcore.TokenCredential) *GraphQueryClient {
 }
 
 // Query executes a Resource Graph query for the given subscriptions and query string.
-// It handles batching and pagination.
-func (q *GraphQueryClient) Query(ctx context.Context, query string, subscriptions []*string) (*GraphResult, error) {
+// It handles batching and pagination. Pass a QueryOptions value to enable optional
+// features such as management-group scope (needed only for PolicyResources queries).
+func (q *GraphQueryClient) Query(ctx context.Context, query string, subscriptions map[string]string, opts ...QueryOptions) (*GraphResult, error) {
 	result := GraphResult{
 		Data: make([]interface{}, 0, 5000),
 	}
 
-	// Convert []*string to []string for serialization
-	subscriptionIDs := make([]string, len(subscriptions))
-	for i, s := range subscriptions {
-		if s != nil {
-			subscriptionIDs[i] = *s
-		}
+	subscriptionIDs := make([]string, 0, len(subscriptions))
+	for s := range subscriptions {
+		subscriptionIDs = append(subscriptionIDs, s)
 	}
 
 	// Run the query in batches of 300 subscriptions
-	batchSize := 300
+	const batchSize = 300
+
+	options := &QueryRequestOptions{
+		ResultFormat: "objectArray",
+		Top:          to.Ptr(int32(5000)),
+	}
+	if len(opts) > 0 && opts[0].ManagementGroupScope {
+		options.AuthorizationScopeFilter = to.Ptr("AtScopeAndAbove")
+	}
+
 	for i := 0; i < len(subscriptionIDs); i += batchSize {
 		j := min(i+batchSize, len(subscriptionIDs))
 
-		format := "objectArray"
-		options := &QueryRequestOptions{
-			ResultFormat:             format,
-			Top:                      to.Ptr(int32(5000)),
-			AuthorizationScopeFilter: to.Ptr("AtScopeAndAbove"), // Include management groups for Azure Policy queries
+		// QueryRequest is hoisted outside the pagination loop: Subscriptions, Query,
+		// and Options do not change per page — only options.SkipToken does (via pointer).
+		request := QueryRequest{
+			Subscriptions: subscriptionIDs[i:j],
+			Query:         query,
+			Options:       options,
 		}
 
-		var skipToken *string = nil
+		var skipToken *string
 		for ok := true; ok; ok = skipToken != nil {
 			options.SkipToken = skipToken
-			request := QueryRequest{
-				Subscriptions: subscriptionIDs[i:j],
-				Query:         query,
-				Options:       options,
-			}
 
 			resp, err := q.doRequest(ctx, request)
 			if err != nil {
