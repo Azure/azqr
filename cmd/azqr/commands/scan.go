@@ -15,12 +15,12 @@ import (
 )
 
 func init() {
-	scanCmd.PersistentFlags().StringArrayP("management-group-id", "", []string{}, "Azure Management Group Id")
-	scanCmd.PersistentFlags().StringArrayP("subscription-id", "s", []string{}, "Azure Subscription Id")
-	scanCmd.PersistentFlags().StringArrayP("resource-group", "g", []string{}, "Azure Resource Group (Use with --subscription-id)")
-	scanCmd.PersistentFlags().StringArrayP("stages", "", []string{}, "Control scan stages. Without this flag, defaults are used (enabled: diagnostics,advisor,defender). Specify stages to enable (e.g., --stages cost,policy) or prefix with '-' to disable (e.g., --stages -diagnostics). Available: advisor,defender,defender-recommendations,arc,policy,cost,diagnostics")
+	scanCmd.PersistentFlags().StringSliceP("management-group-id", "", []string{}, "Azure Management Group Id")
+	scanCmd.PersistentFlags().StringSliceP("subscription-id", "s", []string{}, "Azure Subscription Id")
+	scanCmd.PersistentFlags().StringSliceP("resource-group", "g", []string{}, "Azure Resource Group (Use with --subscription-id)")
+	scanCmd.PersistentFlags().StringSliceP("stages", "", []string{}, "Control scan stages. Without this flag, defaults are used (enabled: diagnostics,advisor,defender). Specify stages to enable (e.g., --stages cost,policy) or prefix with '-' to disable (e.g., --stages -diagnostics). Available: advisor,defender,defender-recommendations,arc,policy,cost,diagnostics")
 	scanCmd.PersistentFlags().StringArrayP("stage-param", "", []string{}, "Stage options in the form 'stage.key=value' (repeatable)")
-	scanCmd.PersistentFlags().StringArrayP("plugin", "", []string{}, "Enable internal plugins (comma-separated or multiple flags)")
+	scanCmd.PersistentFlags().StringSliceP("plugin", "", []string{}, "Enable internal plugins (comma-separated or multiple flags)")
 	scanCmd.PersistentFlags().BoolP("xlsx", "", true, "Create Excel report (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("json", "", false, "Create JSON report files")
 	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create CSV report files")
@@ -52,11 +52,11 @@ var scanCmd = &cobra.Command{
 }
 
 func scan(cmd *cobra.Command, scannerKeys []string) {
-	managementGroups, _ := cmd.Flags().GetStringArray("management-group-id")
-	subscriptions, _ := cmd.Flags().GetStringArray("subscription-id")
-	resourceGroups, _ := cmd.Flags().GetStringArray("resource-group")
+	managementGroups, _ := cmd.Flags().GetStringSlice("management-group-id")
+	subscriptions, _ := cmd.Flags().GetStringSlice("subscription-id")
+	resourceGroups, _ := cmd.Flags().GetStringSlice("resource-group")
 	outputFileName, _ := cmd.Flags().GetString("output-name")
-	stageNames, _ := cmd.Flags().GetStringArray("stages")
+	stageNames, _ := cmd.Flags().GetStringSlice("stages")
 	stageParams, _ := cmd.Flags().GetStringArray("stage-param")
 	xlsx, _ := cmd.Flags().GetBool("xlsx")
 	csv, _ := cmd.Flags().GetBool("csv")
@@ -64,7 +64,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	mask, _ := cmd.Flags().GetBool("mask")
 	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
-	pluginNames, _ := cmd.Flags().GetStringArray("plugin")
+	pluginNames, _ := cmd.Flags().GetStringSlice("plugin")
 
 	// Get profiling flags if available
 	var cpuProfile, memProfile, traceProfile string
@@ -117,9 +117,9 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 // scanWithPlugin is a specialized version of scan that enables a specific plugin
 // and forces plugin-only mode for faster execution by calling ScanPlugins directly
 func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string) {
-	managementGroups, _ := cmd.Flags().GetStringArray("management-group-id")
-	subscriptions, _ := cmd.Flags().GetStringArray("subscription-id")
-	resourceGroups, _ := cmd.Flags().GetStringArray("resource-group")
+	managementGroups, _ := cmd.Flags().GetStringSlice("management-group-id")
+	subscriptions, _ := cmd.Flags().GetStringSlice("subscription-id")
+	resourceGroups, _ := cmd.Flags().GetStringSlice("resource-group")
 	outputFileName, _ := cmd.Flags().GetString("output-name")
 	xlsx, _ := cmd.Flags().GetBool("xlsx")
 	csv, _ := cmd.Flags().GetBool("csv")

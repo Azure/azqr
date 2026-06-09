@@ -72,11 +72,11 @@ func TestScanCommandHasRequiredFlags(t *testing.T) {
 		name         string
 		expectedType string
 	}{
-		{"management-group-id", "stringArray"},
-		{"subscription-id", "stringArray"},
-		{"resource-group", "stringArray"},
-		{"stages", "stringArray"},
-		{"plugin", "stringArray"},
+		{"management-group-id", "stringSlice"},
+		{"subscription-id", "stringSlice"},
+		{"resource-group", "stringSlice"},
+		{"stages", "stringSlice"},
+		{"plugin", "stringSlice"},
 		{"xlsx", "bool"},
 		{"json", "bool"},
 		{"csv", "bool"},

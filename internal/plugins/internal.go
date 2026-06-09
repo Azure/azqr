@@ -62,9 +62,9 @@ func createPluginCommand(name, description string) *cobra.Command {
 	}
 
 	// Add all the standard scan flags to the plugin command
-	cmd.Flags().StringArrayP("management-group-id", "", []string{}, "Azure Management Group Id")
-	cmd.Flags().StringArrayP("subscription-id", "s", []string{}, "Azure Subscription Id")
-	cmd.Flags().StringArrayP("resource-group", "g", []string{}, "Azure Resource Group (Use with --subscription-id)")
+	cmd.Flags().StringSliceP("management-group-id", "", []string{}, "Azure Management Group Id")
+	cmd.Flags().StringSliceP("subscription-id", "s", []string{}, "Azure Subscription Id")
+	cmd.Flags().StringSliceP("resource-group", "g", []string{}, "Azure Resource Group (Use with --subscription-id)")
 	cmd.Flags().BoolP("xlsx", "", true, "Create Excel report (default) (default true)")
 	cmd.Flags().BoolP("json", "", false, "Create JSON report files")
 	cmd.Flags().BoolP("csv", "", false, "Create CSV report files")
