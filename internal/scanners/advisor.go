@@ -27,7 +27,24 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 		return nil
 	}
 
-	pager := mClient.NewListPager(&armadvisor.RecommendationMetadataClientListOptions{})
+	graphClient := graph.NewGraphQuery(cred)
+	query := `
+		AdvisorResources
+		| where type =~ 'microsoft.advisor/recommendations'
+		| where isnotempty(properties.resourceMetadata.resourceId)
+		| where isnull(properties.suppressionIds) or array_length(properties.suppressionIds) == 0
+		| project SubscriptionId=subscriptionId,
+			Category = tostring(properties.category),
+			Impact = tostring(properties.impact),
+			ImpactedValue = tostring(properties.impactedValue),
+			ResourceId = tostring(properties.resourceMetadata.resourceId),
+			RecommendationTypeId = tostring(properties.recommendationTypeId)
+		| summarize take_any(*) by ResourceId, RecommendationTypeId
+		`
+
+	log.Debug().Msg(query)
+
+	pager := mClient.NewListPager(nil)
 	metadata := make([]*armadvisor.MetadataEntity, 0)
 	for pager.More() {
 		resp, err := pager.NextPage(ctx)
@@ -47,46 +64,19 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 		}
 	}
 
-	graphClient := graph.NewGraphQuery(cred)
-	query := `
-		AdvisorResources
-		| where type =~ 'microsoft.advisor/recommendations'
-		| join kind=inner (
-			resourcecontainers
-			| where type =~ 'microsoft.resources/subscriptions'
-			| project subscriptionId, subscriptionName = name)
-		on subscriptionId
-		| project Type=type, SubscriptionId=subscriptionId, SubscriptionName=subscriptionName,
-			ResourceGroup = resourceGroup, Category = properties.category, Impact = properties.impact,
-			ImpactedField = properties.impactedField, ImpactedValue = properties.impactedValue,
-			ResourceId = properties.resourceMetadata.resourceId,
-			RecommendationTypeId = properties.recommendationTypeId
-		`
-
-	log.Debug().Msg(query)
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
-	// Composite key type for deduplication - avoids string concatenation allocations
-	type advisorKey struct {
-		resourceID       string
-		recommendationID string
-		category         string
-	}
-
-	result, err := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subscriptions)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Advisor recommendations")
 		return nil
 	}
 	resources := []*models.AdvisorResult{}
-	seen := make(map[advisorKey]struct{}, len(result.Data))
 	if result.Data != nil {
 		for _, row := range result.Data {
 			m := row.(map[string]interface{})
 
-			if filters.Azqr.IsSubscriptionExcluded(to.String(m["SubscriptionId"])) {
+			subID := to.String(m["SubscriptionId"])
+
+			if filters.Azqr.IsSubscriptionExcluded(subID) {
 				continue
 			}
 
@@ -96,8 +86,8 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 			}
 
 			rec := &models.AdvisorResult{
-				SubscriptionID:   to.String(m["SubscriptionId"]),
-				SubscriptionName: to.String(m["SubscriptionName"]),
+				SubscriptionID:   subID,
+				SubscriptionName: subscriptions[subID],
 				Name:             to.String(m["ImpactedValue"]),
 				Type:             models.GetResourceTypeFromResourceID(resourceId),
 				ResourceID:       resourceId,
@@ -106,18 +96,7 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 				Description:      recommendationTypes[to.String(m["RecommendationTypeId"])],
 				RecommendationID: to.String(m["RecommendationTypeId"]),
 			}
-
-			// Create unique composite key - avoids string concatenation
-			key := advisorKey{
-				resourceID:       rec.ResourceID,
-				recommendationID: rec.RecommendationID,
-				category:         rec.Category,
-			}
-
-			if _, exists := seen[key]; !exists {
-				seen[key] = struct{}{}
-				resources = append(resources, rec)
-			}
+			resources = append(resources, rec)
 		}
 	}
 	return resources

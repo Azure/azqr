@@ -6,7 +6,6 @@ import (
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
@@ -19,11 +18,7 @@ func (sc *ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.To
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind | order by subscriptionId, resourceGroup"
 	log.Debug().Msg(query)
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
-	result, err := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subscriptions)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for resources")
 		return nil, nil
@@ -99,11 +94,8 @@ func (sc ResourceDiscovery) GetCountPerResourceTypeAndSubscription(ctx context.C
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | summarize count() by subscriptionId, type | order by subscriptionId, type"
 	log.Debug().Msg(query)
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
-	result, err := graphClient.Query(ctx, query, subs)
+
+	result, err := graphClient.Query(ctx, query, subscriptions)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for resource counts by subscription and type")
 		return nil
@@ -133,11 +125,8 @@ func (sc ResourceDiscovery) GetCountPerResourceType(ctx context.Context, cred az
 	graphClient := graph.NewGraphQuery(cred)
 	query := "resources | summarize count() by type | order by type"
 	log.Debug().Msg(query)
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
-	result, err := graphClient.Query(ctx, query, subs)
+
+	result, err := graphClient.Query(ctx, query, subscriptions)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for resource counts by type")
 		return map[string]float64{}

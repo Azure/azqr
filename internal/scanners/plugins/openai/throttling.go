@@ -207,12 +207,7 @@ func (s *ThrottlingScanner) discoverOpenAIResources(ctx context.Context, cred az
 | project id, subscriptionId, resourceGroup, location, type, name, sku.name, sku.tier, kind
 | order by subscriptionId, resourceGroup`
 
-	subs := make([]*string, 0, len(subscriptions))
-	for s := range subscriptions {
-		subs = append(subs, to.Ptr(s))
-	}
-
-	result, err := graphClient.Query(ctx, query, subs)
+	result, err := graphClient.Query(ctx, query, subscriptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query openai resources from resource graph: %w", err)
 	}
