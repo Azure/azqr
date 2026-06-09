@@ -16,7 +16,7 @@ import (
 
 func CreateCsvReport(data *renderers.ReportData) {
 	// Only create AZQR-related CSV files if the feature is enabled
-	if data.Stages.IsStageEnabled(models.StageNameGraph) {
+	if data.Stages.IsStageEnabled(models.StageNameGraph) || data.Stages.IsStageEnabled(models.StageNameAdvisor) {
 		records := data.RecommendationsTable()
 		writeData(records, data.OutputFileName, "recommendations")
 
@@ -65,14 +65,6 @@ func CreateCsvReport(data *renderers.ReportData) {
 		writeData(records, data.OutputFileName, "arcSQL")
 	} else {
 		log.Debug().Msg("Skipping Arc SQL CSV file. Feature is disabled")
-	}
-
-	// Only create Advisor CSV files if the feature is enabled
-	if data.Stages.IsStageEnabled(models.StageNameAdvisor) {
-		records := data.AdvisorTable()
-		writeData(records, data.OutputFileName, "advisor")
-	} else {
-		log.Debug().Msg("Skipping Advisor CSV file. Feature is disabled")
 	}
 
 	// Only create Cost CSV files if the feature is enabled

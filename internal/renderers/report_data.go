@@ -32,7 +32,6 @@ type (
 		cachedImpactedTable                [][]string `json:"-"`
 		cachedCostTable                    [][]string `json:"-"`
 		cachedDefenderTable                [][]string `json:"-"`
-		cachedAdvisorTable                 [][]string `json:"-"`
 		cachedAzurePolicyTable             [][]string `json:"-"`
 		cachedArcSQLTable                  [][]string `json:"-"`
 		cachedRecommendationsTable         [][]string `json:"-"`
@@ -84,28 +83,65 @@ func (rd *ReportData) ImpactedTable() [][]string {
 		recommendationID string
 	}
 
-	// Pre-allocate with estimated capacity (graph length + 1 for headers)
-	// This avoids multiple slice reallocations
-	rows := make([][]string, 1, len(rd.Graph)+1)
+	// Pre-allocate with estimated capacity (advisor + graph + 1 for headers)
+	rows := make([][]string, 1, len(rd.Advisor)+len(rd.Graph)+1)
 	rows[0] = headers
 
 	// Use struct{} instead of bool to save memory
-	seen := make(map[impactedKey]struct{}, len(rd.Graph))
+	seen := make(map[impactedKey]struct{}, len(rd.Advisor)+len(rd.Graph))
 
+	// Process Advisor results FIRST so they take precedence on duplicate keys
+	for _, d := range rd.Advisor {
+		category := string(models.MapAdvisorCategory(d.Category))
+		if skipCategory(category) {
+			continue
+		}
+
+		key := impactedKey{
+			resourceID:       d.ResourceID,
+			recommendationID: d.RecommendationID,
+		}
+		if _, exists := seen[key]; exists {
+			continue
+		}
+		seen[key] = struct{}{}
+
+		row := []string{
+			"Azure Resource Graph",
+			"Azure Advisor",
+			category,
+			d.Impact,
+			d.Type,
+			d.Description,
+			d.RecommendationID,
+			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
+			d.SubscriptionName,
+			models.GetResourceGroupFromResourceID(d.ResourceID),
+			d.Name,
+			MaskSubscriptionIDInResourceID(d.ResourceID, rd.Mask),
+			"",
+			"",
+			"",
+			"",
+			"",
+			d.LearnMoreLink,
+		}
+		rows = append(rows, row)
+	}
+
+	// Process Graph results second - duplicates are skipped (Advisor wins)
 	for _, r := range rd.Graph {
-		// Cache string conversions once to avoid repeated type conversions
 		category := string(r.Category)
 		if skipCategory(category) {
 			continue
 		}
 
-		// Create composite key - avoids string concatenation
 		key := impactedKey{
 			resourceID:       r.ResourceID,
 			recommendationID: r.RecommendationID,
 		}
 		if _, exists := seen[key]; exists {
-			continue // Skip duplicate
+			continue // Skip duplicate - Advisor already claimed this key
 		}
 		seen[key] = struct{}{}
 
@@ -191,35 +227,6 @@ func (rd *ReportData) DefenderTable() [][]string {
 	return rows
 }
 
-func (rd *ReportData) AdvisorTable() [][]string {
-	if rd.cachedAdvisorTable != nil {
-		return rd.cachedAdvisorTable
-	}
-
-	headers := []string{"Subscription Id", "Subscription Name", "Resource Type", "Resource Name", "Category", "Impact", "Description", "Resource Id", "Recommendation Id"}
-
-	// Pre-allocate with capacity to avoid reallocations
-	rows := make([][]string, 1, len(rd.Advisor)+1)
-	rows[0] = headers
-
-	for _, d := range rd.Advisor {
-		row := []string{
-			MaskSubscriptionID(d.SubscriptionID, rd.Mask),
-			d.SubscriptionName,
-			d.Type,
-			d.Name,
-			d.Category,
-			d.Impact,
-			d.Description,
-			MaskSubscriptionIDInResourceID(d.ResourceID, rd.Mask),
-			d.RecommendationID,
-		}
-		rows = append(rows, row)
-	}
-
-	rd.cachedAdvisorTable = rows
-	return rows
-}
 
 // AzurePolicyTable returns Azure Policy data formatted as a table with headers and rows for reporting.
 func (rd *ReportData) AzurePolicyTable() [][]string {
@@ -309,12 +316,18 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 		counter[r.RecommendationID]++
 	}
 
+	// Count Advisor impacted resources per recommendation ID
+	advisorCounter := map[string]int{}
+	for _, a := range rd.Advisor {
+		advisorCounter[a.RecommendationID]++
+	}
+
 	headers := []string{"Implemented", "Number of Impacted Resources", "Azure Service / Well-Architected", "Recommendation Source",
 		"Azure Service Category / Well-Architected Area", "Azure Service / Well-Architected Topic", "Category", "Recommendation",
 		"Impact", "Best Practices Guidance", "Read More", "Recommendation Id"}
 
 	// Estimate capacity based on recommendations count
-	estimatedCap := len(counter) + 1
+	estimatedCap := len(counter) + len(advisorCounter) + 1
 	rows := make([][]string, 1, estimatedCap)
 	rows[0] = headers
 
@@ -354,6 +367,11 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 			category := string(r.Category)
 			impact := string(r.Impact)
 
+			learnURL := ""
+			if len(r.LearnMoreLink) > 0 {
+				learnURL = r.LearnMoreLink[0].Url
+			}
+
 			row := []string{
 				implemented,
 				fmt.Sprint(counter[r.RecommendationID]),
@@ -365,11 +383,66 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 				r.Recommendation,
 				impact,
 				r.LongDescription,
-				r.LearnMoreLink[0].Url,
+				learnURL,
 				r.RecommendationID,
 			}
 			rows = append(rows, row)
 		}
+	}
+
+	// Add Advisor recommendations (grouped by recommendation ID)
+	// Advisor only reports non-compliant resources, so implemented is always "false"
+	type advisorRec struct {
+		description     string
+		category        string
+		impact          string
+		resourceType    string
+		learnMoreLink   string
+		longDescription string
+	}
+	advisorRecs := make(map[string]*advisorRec)
+	for _, a := range rd.Advisor {
+		if _, exists := advisorRecs[a.RecommendationID]; !exists {
+			advisorRecs[a.RecommendationID] = &advisorRec{
+				description:     a.Description,
+				category:        a.Category,
+				impact:          a.Impact,
+				resourceType:    a.Type,
+				learnMoreLink:   a.LearnMoreLink,
+				longDescription: a.LongDescription,
+			}
+		}
+	}
+
+	for recID, rec := range advisorRecs {
+		category := string(models.MapAdvisorCategory(rec.category))
+		if skipCategory(category) {
+			continue
+		}
+
+		categoryPart := ""
+		servicePart := ""
+		typeParts := strings.Split(rec.resourceType, "/")
+		categoryPart = typeParts[0]
+		if len(typeParts) > 1 {
+			servicePart = typeParts[1]
+		}
+
+		row := []string{
+			"false",
+			fmt.Sprint(advisorCounter[recID]),
+			"Azure Service",
+			"Azure Advisor",
+			categoryPart,
+			servicePart,
+			category,
+			rec.description,
+			rec.impact,
+			rec.longDescription,
+			rec.learnMoreLink,
+			recID,
+		}
+		rows = append(rows, row)
 	}
 
 	rd.cachedRecommendationsTable = rows
@@ -439,7 +512,6 @@ func (rd *ReportData) ClearTableCache() {
 	rd.cachedImpactedTable = nil
 	rd.cachedCostTable = nil
 	rd.cachedDefenderTable = nil
-	rd.cachedAdvisorTable = nil
 	rd.cachedAzurePolicyTable = nil
 	rd.cachedArcSQLTable = nil
 	rd.cachedRecommendationsTable = nil

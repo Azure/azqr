@@ -98,3 +98,28 @@ func TestRecommendationConstants(t *testing.T) {
 		}
 	}
 }
+
+func TestMapAdvisorCategory(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected RecommendationCategory
+	}{
+		{"Cost", CategoryOtherBestPractices},
+		{"Security", CategorySecurity},
+		{"Reliability", CategoryHighAvailability},
+		{"HighAvailability", CategoryHighAvailability},
+		{"OperationalExcellence", CategoryMonitoringAndAlerting},
+		{"Performance", CategoryScalability},
+		{"UnknownCategory", RecommendationCategory("UnknownCategory")},
+		{"", RecommendationCategory("")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := MapAdvisorCategory(tt.input)
+			if result != tt.expected {
+				t.Errorf("MapAdvisorCategory(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}

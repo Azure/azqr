@@ -22,7 +22,7 @@ func buildConsolidatedReport(data *renderers.ReportData) map[string]interface{} 
 	consolidatedReport := map[string]interface{}{}
 
 	// Only include AZQR-related data if the feature is enabled
-	if data.Stages.IsStageEnabled(models.StageNameGraph) {
+	if data.Stages.IsStageEnabled(models.StageNameGraph) || data.Stages.IsStageEnabled(models.StageNameAdvisor) {
 		consolidatedReport["recommendations"] = convertToJSON(data.RecommendationsTable())
 		consolidatedReport["impacted"] = convertToJSON(data.ImpactedTable())
 		consolidatedReport["resourceType"] = convertToJSON(data.ResourceTypesTable())
@@ -30,13 +30,6 @@ func buildConsolidatedReport(data *renderers.ReportData) map[string]interface{} 
 		consolidatedReport["outOfScope"] = convertToJSON(data.ExcludedResourcesTable())
 	} else {
 		log.Debug().Msg("Skipping AZQR data in JSON. Feature is disabled")
-	}
-
-	// Only include Advisor data if the feature is enabled
-	if data.Stages.IsStageEnabled(models.StageNameAdvisor) {
-		consolidatedReport["advisor"] = convertToJSON(data.AdvisorTable())
-	} else {
-		log.Debug().Msg("Skipping Advisor data in JSON. Feature is disabled")
 	}
 
 	// Only include Azure Policy data if the feature is enabled

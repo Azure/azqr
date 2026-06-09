@@ -56,7 +56,6 @@ func TestCreateCsvReport(t *testing.T) {
 		"test_report.defenderRecommendations.csv",
 		"test_report.azurePolicy.csv",
 		"test_report.arcSQL.csv",
-		"test_report.advisor.csv",
 		"test_report.costs.csv",
 		"test_report.outofscope.csv",
 	}

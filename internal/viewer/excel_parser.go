@@ -158,8 +158,6 @@ func mapSheetToDataset(sheetName string) string {
 		"resourcetypes":            DataSetResourceType,
 		"inventory":                DataSetInventory,
 		"resource inventory":       DataSetInventory,
-		"advisor":                  DataSetAdvisor,
-		"azure advisor":            DataSetAdvisor,
 		"policy":                   DataSetAzurePolicy,
 		"azure policy":             DataSetAzurePolicy,
 		"azurepolicy":              DataSetAzurePolicy,

@@ -394,3 +394,177 @@ func TestFeatureFlagsCombinations(t *testing.T) {
 		}
 	}
 }
+
+func TestImpactedTableAdvisorMerge(t *testing.T) {
+	stages := models.NewStageConfigs()
+	_ = stages.EnableStage(models.StageNameGraph)
+	_ = stages.EnableStage(models.StageNameAdvisor)
+
+	rd := &ReportData{
+		Mask:   false,
+		Stages: stages,
+		Advisor: []*models.AdvisorResult{
+			{
+				RecommendationID: "rec-001",
+				SubscriptionID:   "/subscriptions/00000000-0000-0000-0000-000000000001",
+				SubscriptionName: "TestSub",
+				Type:             "Microsoft.Compute/virtualMachines",
+				Name:             "vm1",
+				ResourceID:       "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1",
+				Category:         "Cost",
+				Impact:           "High",
+				Description:      "Shut down unused VM",
+				LearnMoreLink:    "https://aka.ms/advisor-cost-vm",
+				LongDescription:  "Consider shutting down VMs that are not being used.",
+				PotentialBenefits: "Reduce costs by shutting down unused VMs",
+			},
+		},
+		Graph: []*models.GraphResult{
+			{
+				RecommendationID: "rec-002",
+				ResourceType:     "Microsoft.Compute/virtualMachines",
+				Recommendation:   "Enable availability zones",
+				ResourceID:       "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1",
+				SubscriptionID:   "/subscriptions/00000000-0000-0000-0000-000000000001",
+				SubscriptionName: "TestSub",
+				ResourceGroup:    "rg1",
+				Name:             "vm1",
+				Category:         models.CategoryHighAvailability,
+				Impact:           models.ImpactHigh,
+				Learn:            "https://learn.microsoft.com",
+				Source:           "APRL",
+			},
+		},
+	}
+
+	table := rd.ImpactedTable()
+
+	// Header + 2 data rows (different recommendation IDs)
+	if len(table) != 3 {
+		t.Fatalf("Expected 3 rows (header + 2 data), got %d", len(table))
+	}
+
+	// First data row should be Advisor (processed first)
+	advisorRow := table[1]
+	if advisorRow[1] != "Azure Advisor" {
+		t.Errorf("Expected Source 'Azure Advisor', got %s", advisorRow[1])
+	}
+	if advisorRow[2] != "OtherBestPractices" {
+		t.Errorf("Expected Category 'OtherBestPractices' (mapped from Cost), got %s", advisorRow[2])
+	}
+	if advisorRow[5] != "Shut down unused VM" {
+		t.Errorf("Expected Recommendation 'Shut down unused VM', got %s", advisorRow[5])
+	}
+	if advisorRow[9] != "rg1" {
+		t.Errorf("Expected ResourceGroup 'rg1', got %s", advisorRow[9])
+	}
+	if advisorRow[17] != "https://aka.ms/advisor-cost-vm" {
+		t.Errorf("Expected Learn 'https://aka.ms/advisor-cost-vm', got %s", advisorRow[17])
+	}
+
+	// Second data row should be Graph
+	graphRow := table[2]
+	if graphRow[1] != "APRL" {
+		t.Errorf("Expected Source 'APRL', got %s", graphRow[1])
+	}
+}
+
+func TestImpactedTableAdvisorPrecedence(t *testing.T) {
+	stages := models.NewStageConfigs()
+	_ = stages.EnableStage(models.StageNameGraph)
+	_ = stages.EnableStage(models.StageNameAdvisor)
+
+	// Same resource + same recommendation ID — Advisor should win
+	rd := &ReportData{
+		Mask:   false,
+		Stages: stages,
+		Advisor: []*models.AdvisorResult{
+			{
+				RecommendationID: "shared-rec-id",
+				SubscriptionID:   "/subscriptions/00000000-0000-0000-0000-000000000001",
+				SubscriptionName: "TestSub",
+				Type:             "Microsoft.Compute/virtualMachines",
+				Name:             "vm1",
+				ResourceID:       "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1",
+				Category:         "Security",
+				Impact:           "High",
+				Description:      "Advisor says enable encryption",
+			},
+		},
+		Graph: []*models.GraphResult{
+			{
+				RecommendationID: "shared-rec-id",
+				ResourceType:     "Microsoft.Compute/virtualMachines",
+				Recommendation:   "APRL says enable encryption",
+				ResourceID:       "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1",
+				SubscriptionID:   "/subscriptions/00000000-0000-0000-0000-000000000001",
+				SubscriptionName: "TestSub",
+				ResourceGroup:    "rg1",
+				Name:             "vm1",
+				Category:         models.CategorySecurity,
+				Impact:           models.ImpactHigh,
+				Learn:            "https://learn.microsoft.com",
+				Source:           "APRL",
+			},
+		},
+	}
+
+	table := rd.ImpactedTable()
+
+	// Header + 1 data row (duplicate removed, Advisor wins)
+	if len(table) != 2 {
+		t.Fatalf("Expected 2 rows (header + 1 data), got %d", len(table))
+	}
+
+	row := table[1]
+	if row[1] != "Azure Advisor" {
+		t.Errorf("Expected Advisor to take precedence, got Source=%s", row[1])
+	}
+	if row[5] != "Advisor says enable encryption" {
+		t.Errorf("Expected Advisor recommendation text, got %s", row[5])
+	}
+}
+
+func TestImpactedTableAdvisorMasking(t *testing.T) {
+	stages := models.NewStageConfigs()
+	_ = stages.EnableStage(models.StageNameAdvisor)
+
+	rd := &ReportData{
+		Mask:   true,
+		Stages: stages,
+		Advisor: []*models.AdvisorResult{
+			{
+				RecommendationID: "rec-001",
+				SubscriptionID:   "/subscriptions/00000000-0000-0000-0000-000000000001",
+				SubscriptionName: "TestSub",
+				Type:             "Microsoft.Compute/virtualMachines",
+				Name:             "vm1",
+				ResourceID:       "/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1",
+				Category:         "Reliability",
+				Impact:           "Medium",
+				Description:      "Enable backups",
+			},
+		},
+		Graph: []*models.GraphResult{},
+	}
+
+	table := rd.ImpactedTable()
+
+	if len(table) != 2 {
+		t.Fatalf("Expected 2 rows, got %d", len(table))
+	}
+
+	row := table[1]
+	// Subscription ID should be masked
+	if !strings.Contains(row[7], "xxxx") {
+		t.Errorf("Expected masked subscription ID, got %s", row[7])
+	}
+	// Resource ID should be masked
+	if !strings.Contains(row[11], "xxxx") {
+		t.Errorf("Expected masked resource ID, got %s", row[11])
+	}
+	// Category should be mapped
+	if row[2] != "HighAvailability" {
+		t.Errorf("Expected 'HighAvailability' (mapped from Reliability), got %s", row[2])
+	}
+}

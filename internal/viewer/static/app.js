@@ -1,11 +1,10 @@
-const routes = ['dashboard', 'recommendations', 'impacted', 'resourceType', 'inventory', 'advisor', 'azurePolicy', 'arcSQL', 'defender', 'defenderRecommendations', 'costs', 'outOfScope'];
+const routes = ['dashboard', 'recommendations', 'impacted', 'resourceType', 'inventory', 'azurePolicy', 'arcSQL', 'defender', 'defenderRecommendations', 'costs', 'outOfScope'];
 const routeLabels = {
     'dashboard': 'Overview',
     'recommendations': 'Recommendations',
     'impacted': 'Impacted Resources',
     'resourceType': 'Resource Types',
     'inventory': 'Resource Inventory',
-    'advisor': 'Azure Advisor',
     'azurePolicy': 'Azure Policy',
     'arcSQL': 'Arc SQL Server',
     'defender': 'Microsoft Defender',
@@ -21,8 +20,7 @@ const menuStructure = [
         label: 'Best Practices',
         children: [
             { label: 'Recommendations', route: 'recommendations' },
-            { label: 'Impacted Resources', route: 'impacted' },
-            { label: 'Azure Advisor', route: 'advisor' }
+            { label: 'Impacted Resources', route: 'impacted' }
         ]
     },
     {
@@ -183,7 +181,6 @@ function getMenuIcon(label) {
         'Best Practices': '<i class="bi bi-lightbulb me-1"></i>',
         'Recommendations': '<i class="bi bi-lightbulb me-1"></i>',
         'Impacted Resources': '<i class="bi bi-exclamation-triangle me-1"></i>',
-        'Azure Advisor': '<i class="bi bi-person-check me-1"></i>',
         'Inventory': '<i class="bi bi-archive me-1"></i>',
         'Resource Types': '<i class="bi bi-collection me-1"></i>',
         'Resource Inventory': '<i class="bi bi-box-seam me-1"></i>',
@@ -232,7 +229,7 @@ async function showDashboard() {
     cards.innerHTML = '';
     // Basic summary cards (filter out low-value counts per request)
     const exclude = new Set([
-        'advisorCount', 'azurePolicyCount', 'costItems', 'defenderCount', 'defenderRecommendationsCount',
+        'azurePolicyCount', 'costItems', 'defenderCount', 'defenderRecommendationsCount',
         'impactedCount', 'inventoryCount', 'outOfScopeCount', 'azurePolicyNonCompliant',
         'recommendationsImplemented', 'recommendationsNotImplemented', 'recommendationsTotal',
         'resourceTypeCount', 'totalCost', 'arcSQLCount', 'pluginCounts'
@@ -322,7 +319,6 @@ function getCardIcon(key) {
         'impactedCount': '<i class="bi bi-exclamation-triangle fs-4"></i>',
         'resourceTypeCount': '<i class="bi bi-collection fs-4"></i>',
         'inventoryCount': '<i class="bi bi-box-seam fs-4"></i>',
-        'advisorCount': '<i class="bi bi-person-check fs-4"></i>',
         'azurePolicyCount': '<i class="bi bi-file-earmark-ruled fs-4"></i>',
         'defenderCount': '<i class="bi bi-shield-check fs-4"></i>',
         'costItems': '<i class="bi bi-graph-up fs-4"></i>'
@@ -336,7 +332,6 @@ function getCardColor(key) {
         'impactedCount': 'danger',
         'resourceTypeCount': 'info',
         'inventoryCount': 'success',
-        'advisorCount': 'warning',
         'azurePolicyCount': 'secondary',
         'defenderCount': 'dark',
         'costItems': 'primary'
@@ -485,7 +480,6 @@ function renderTable(rows, datasetName) {
         'impacted': ['validatedUsing', 'source', 'category', 'impact', 'resourceType', 'recommendation', 'recommendationId', 'subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceName', 'resourceId', 'param1', 'param2', 'param3', 'param4', 'param5', 'learn'],
         'costs': ['from', 'to', 'subscriptionId', 'subscriptionName', 'serviceName', 'value', 'currency'],
         'defender': ['subscriptionId', 'subscriptionName', 'name', 'tier'],
-        'advisor': ['subscriptionId', 'subscriptionName', 'resourceType', 'resourceName', 'category', 'impact', 'description', 'resourceId', 'recommendationId'],
         'azurePolicy': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'policyDisplayName', 'policyDescription', 'resourceId', 'timeStamp', 'policyDefinitionName', 'policyDefinitionId', 'policyAssignmentName', 'policyAssignmentId', 'complianceState'],
         'arcSQL': ['subscriptionId', 'subscriptionName', 'azureArcServer', 'sqlInstance', 'resourceGroup', 'version', 'build', 'patchLevel', 'edition', 'vCores', 'dpsStatus', 'license', 'telStatus', 'defenderStatus'],
         'recommendations': ['implemented', 'numberOfImpactedResources', 'azureServiceWellArchitected', 'recommendationSource', 'azureServiceCategoryWellArchitectedArea', 'azureServiceWellArchitectedTopic', 'category', 'recommendation', 'impact', 'bestPracticesGuidance', 'readMore', 'recommendationId'],
@@ -520,14 +514,12 @@ function renderTable(rows, datasetName) {
             'inventory': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName'],
             'outOfScope': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName'],
             'resourceType': ['subscriptionName', 'resourceType'],
-            'advisor': ['subscriptionId', 'subscriptionName', 'resourceType', 'resourceName', 'category', 'impact', 'recommendationId'],
             'impacted': ['source', 'category', 'impact', 'resourceType', 'recommendationId', 'subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceName'],
             'recommendations': ['recommendationId', 'subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceName', 'implemented', 'recommendationSource', 'azureServiceCategoryWellArchitectedArea', 'azureServiceWellArchitectedTopic', 'category', 'impact']
         };
 
         // Define dropdown fields per dataset
         const dropdownConfig = {
-            'advisor': ['resourceType', 'category', 'impact'],
             'impacted': ['source', 'resourceType', 'category', 'impact'],
             'defender': ['tier'],
             'recommendations': ['implemented', 'recommendationSource', 'azureServiceCategoryWellArchitectedArea', 'azureServiceWellArchitectedTopic', 'impact', 'category'],

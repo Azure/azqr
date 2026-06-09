@@ -153,7 +153,6 @@ func TestCreateJsonReport(t *testing.T) {
 		"impacted",
 		"resourceType",
 		"inventory",
-		"advisor",
 		"azurePolicy",
 		"arcSQL",
 		"defender",

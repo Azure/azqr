@@ -129,7 +129,7 @@ type (
 
 	// AdvisorResult - Advisor result
 	AdvisorResult struct {
-		RecommendationID, SubscriptionID, SubscriptionName, Type, Name, ResourceID, Category, Impact, Description string
+		RecommendationID, SubscriptionID, SubscriptionName, Type, Name, ResourceID, Category, Impact, Description, LearnMoreLink, LongDescription, PotentialBenefits string
 	}
 
 	// AzurePolicyResult - Azure Policy result
@@ -179,6 +179,27 @@ const (
 	CategoryServiceUpgradeAndRetirement RecommendationCategory = "ServiceUpgradeAndRetirement"
 	CategorySLA                         RecommendationCategory = "SLA"
 )
+
+// MapAdvisorCategory maps Azure Advisor category names to azqr RecommendationCategory values.
+// Unknown categories are passed through as-is.
+func MapAdvisorCategory(category string) RecommendationCategory {
+	switch category {
+	case "Cost":
+		return CategoryOtherBestPractices
+	case "Security":
+		return CategorySecurity
+	case "Reliability":
+		return CategoryHighAvailability
+	case "HighAvailability":
+		return CategoryHighAvailability
+	case "OperationalExcellence":
+		return CategoryMonitoringAndAlerting
+	case "Performance":
+		return CategoryScalability
+	default:
+		return RecommendationCategory(category)
+	}
+}
 
 func LogSubscriptionScan(subscriptionID string, source string) {
 	log.Info().

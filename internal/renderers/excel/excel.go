@@ -89,7 +89,6 @@ func CreateExcelReport(data *renderers.ReportData) {
 	renderImpactedResources(f, data, styles)
 	renderResourceTypes(f, data, styles)
 	renderResources(f, data, styles)
-	renderAdvisor(f, data, styles)
 	renderAzurePolicy(f, data, styles)
 	renderArcSQL(f, data, styles)
 	renderDefenderRecommendations(f, data, styles)
