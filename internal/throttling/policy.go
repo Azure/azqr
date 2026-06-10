@@ -50,9 +50,14 @@ func (p *ThrottlingPolicy) Do(req *policy.Request) (*http.Response, error) {
 			Msg("Applying Cost Management API throttling limiter")
 		err = costLimiter.Wait(req.Raw().Context())
 	case strings.Contains(url, "prices.azure.com"):
+		// migration-advisor parity: the Retail Prices API gets NO proactive
+		// rate cap. Instead we rely solely on reactive exponential backoff on
+		// HTTP 429 (handled by the SDK retry policy), mirroring
+		// migration-advisor's _get_with_retry. The previous 3 rps graphLimiter
+		// was the dominant bottleneck for the region plugin's pricing phase.
 		log.Debug().
-			Msg("Applying Price API throttling limiter")
-		err = graphLimiter.Wait(req.Raw().Context())
+			Msg("Bypassing proactive throttling for Retail Prices API (reactive 429 backoff only)")
+		return req.Next()
 	default: // Default to ARM throttling
 		log.Debug().
 			Msg("Applying ARM API throttling limiter")
