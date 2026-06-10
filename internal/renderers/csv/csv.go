@@ -84,10 +84,11 @@ func CreateCsvReport(data *renderers.ReportData) {
 	}
 
 	// Render external plugin results
+	// Use SheetName (not PluginName) so that plugins returning multiple sheets
+	// (e.g. region-selection) each get their own CSV file instead of overwriting.
 	for _, result := range data.PluginResults {
 		if len(result.Table) > 0 {
-			// Use plugin name for the CSV filename extension
-			writeData(result.Table, data.OutputFileName, fmt.Sprintf("plugin_%s", result.PluginName))
+			writeData(result.Table, data.OutputFileName, fmt.Sprintf("plugin_%s", result.SheetName))
 		}
 	}
 }

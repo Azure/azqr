@@ -124,8 +124,8 @@ func TestCreateCsvReportWithPlugins(t *testing.T) {
 
 	// Verify plugin CSV files were created
 	expectedPluginFiles := []string{
-		"test_report_plugins.plugin_test-plugin.csv",
-		"test_report_plugins.plugin_another-plugin.csv",
+		"test_report_plugins.plugin_TestSheet.csv",
+		"test_report_plugins.plugin_AnotherSheet.csv",
 	}
 
 	for _, filename := range expectedPluginFiles {

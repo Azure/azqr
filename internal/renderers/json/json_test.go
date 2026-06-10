@@ -206,6 +206,16 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 					{"Value1", "Value2"},
 				},
 			},
+			// Second sheet from the same plugin — ensures multi-sheet plugins are not truncated
+			{
+				PluginName:  "test-plugin",
+				Description: "Test Plugin Sheet 2",
+				SheetName:   "TestSheet2",
+				Table: [][]string{
+					{"ColA", "ColB"},
+					{"Row1A", "Row1B"},
+				},
+			},
 		},
 	}
 
@@ -224,9 +234,37 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 		t.Errorf("Created file contains invalid JSON: %v", err)
 	}
 
-	// Verify plugin data exists
-	if _, exists := result["externalPlugins"]; !exists {
+	// Verify plugin data exists and is a slice containing all sheets
+	rawPlugins, exists := result["externalPlugins"]
+	if !exists {
 		t.Error("Expected 'externalPlugins' key not found in JSON output")
+	}
+	pluginSlice, ok := rawPlugins.([]interface{})
+	if !ok {
+		t.Errorf("externalPlugins should be an array, got %T", rawPlugins)
+	} else if len(pluginSlice) != 2 {
+		t.Errorf("externalPlugins should contain 2 entries (one per sheet), got %d", len(pluginSlice))
+	} else {
+		// Verify each entry uses the camelCased sheet name as the data key (not generic "data")
+		for i, entry := range pluginSlice {
+			entryMap, ok := entry.(map[string]interface{})
+			if !ok {
+				t.Errorf("externalPlugins[%d] should be an object, got %T", i, entry)
+				continue
+			}
+			sheetName, _ := entryMap["sheetName"].(string)
+			// Expect the data key to be the camelCased sheet name, not "data"
+			dataKey := "testSheet"
+			if i == 1 {
+				dataKey = "testSheet2"
+			}
+			if _, hasDataKey := entryMap[dataKey]; !hasDataKey {
+				t.Errorf("externalPlugins[%d] (sheetName=%q) should have key %q, got keys: %v", i, sheetName, dataKey, mapKeys(entryMap))
+			}
+			if _, hasGenericData := entryMap["data"]; hasGenericData {
+				t.Errorf("externalPlugins[%d] should not have generic 'data' key", i)
+			}
+		}
 	}
 
 	// Verify that disabled features are NOT in the output
@@ -249,4 +287,12 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 			t.Errorf("Key %s should not be present when feature is disabled", key)
 		}
 	}
+}
+
+func mapKeys(m map[string]interface{}) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
