@@ -10,6 +10,12 @@ description: Learn how to install Azure Quick Review (azqr)
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/azure/azqr/main/scripts/install.sh)"
 ```
 
+To install the latest preview (pre-release) version:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/azure/azqr/main/scripts/install.sh)" -- --preview
+```
+
 ## Install on Windows
 
 Use `winget`:
@@ -22,6 +28,12 @@ or download the executable file:
 
 ```
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/azure/azqr/main/scripts/install.ps1'))
+```
+
+To install the latest preview (pre-release) version:
+
+```
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex "& { $(iwr -useb 'https://raw.githubusercontent.com/azure/azqr/main/scripts/install.ps1') } -Preview"
 ```
 
 ## Install on Mac
