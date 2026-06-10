@@ -6,6 +6,7 @@ import (
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
@@ -30,17 +31,17 @@ func (sc *ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.To
 			m := row.(map[string]interface{})
 
 			resource := &models.Resource{
-				ID:             getStringField(m, "id"),
-				SubscriptionID: getStringField(m, "subscriptionId"),
-				ResourceGroup:  getStringField(m, "resourceGroup"),
-				Location:       getStringField(m, "location"),
-				Type:           getStringField(m, "type"),
-				Name:           getStringField(m, "name"),
-				SkuName:        getStringField(m, "skuName"),
-				SkuTier:        getStringField(m, "skuTier"),
-				SkuFamily:      getStringField(m, "skuFamily"),
-				SkuCapacity:    getIntField(m, "skuCapacity"),
-				Kind:           getStringField(m, "kind"),
+				ID:             to.String(m["id"]),
+				SubscriptionID: to.String(m["subscriptionId"]),
+				ResourceGroup:  to.String(m["resourceGroup"]),
+				Location:       to.String(m["location"]),
+				Type:           to.String(m["type"]),
+				Name:           to.String(m["name"]),
+				SkuName:        to.String(m["skuName"]),
+				SkuTier:        to.String(m["skuTier"]),
+				SkuFamily:      to.String(m["skuFamily"]),
+				SkuCapacity:    to.Int(m["skuCapacity"]),
+				Kind:           to.String(m["kind"]),
 			}
 
 			if filters != nil && filters.Azqr.IsServiceExcluded(resource.ID) {
@@ -55,33 +56,6 @@ func (sc *ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.To
 		}
 	}
 	return resources, excludedResources
-}
-
-func getStringField(row map[string]interface{}, key string) string {
-	if v, ok := row[key]; ok && v != nil {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-
-	return ""
-}
-
-func getIntField(row map[string]interface{}, key string) int {
-	if v, ok := row[key]; ok && v != nil {
-		switch n := v.(type) {
-		case int:
-			return n
-		case int32:
-			return int(n)
-		case int64:
-			return int(n)
-		case float64:
-			return int(n)
-		}
-	}
-
-	return 0
 }
 
 func (sc ResourceDiscovery) GetCountPerResourceTypeAndSubscription(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]*models.GraphRecommendation, filters *models.Filters) []*models.ResourceTypeCount {
