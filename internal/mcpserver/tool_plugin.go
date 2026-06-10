@@ -29,6 +29,13 @@ func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequ
 		params.Json = true
 		params.OutputName = fmt.Sprintf("%s/azqr_%s_results", currentDir, pluginName)
 
+		// Apply plugin stage options if provided (e.g. target-regions for region-selection)
+		if len(args.Options) > 0 {
+			if err := params.Stages.SetStageOptions(models.StageNamePlugin, args.Options); err != nil {
+				log.Fatal().Err(err).Msg("failed applying plugin stage options")
+			}
+		}
+
 		// Enable the specific plugin for execution
 		params.EnabledInternalPlugins = map[string]bool{
 			pluginName: true,

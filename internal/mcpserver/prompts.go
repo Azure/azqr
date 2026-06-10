@@ -40,4 +40,21 @@ func RegisterPrompts(s *server.MCPServer) {
 	)
 
 	s.AddPrompt(zoneMappingPrompt, handleZoneMappingPrompt())
+
+	// SQL ESU Plugin Prompt
+	sqlESUPrompt := mcp.NewPrompt(
+		"analyze_sql_esu",
+		mcp.WithPromptDescription("Analyze SQL Server End-of-Life and Extended Security Update status with cost analysis"),
+	)
+
+	s.AddPrompt(sqlESUPrompt, handleSQLESUPrompt())
+
+	// Region Selection Plugin Prompt
+	regionSelectionPrompt := mcp.NewPrompt(
+		"analyze_region_selection",
+		mcp.WithPromptDescription("Analyze optimal Azure region selection based on service availability, latency, and cost"),
+		mcp.WithArgument("target_regions", mcp.RequiredArgument(), mcp.ArgumentDescription("One or more target Azure regions to analyze, comma-separated (e.g. eastus,westeurope)")),
+	)
+
+	s.AddPrompt(regionSelectionPrompt, handleRegionSelectionPrompt())
 }
