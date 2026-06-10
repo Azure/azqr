@@ -4,11 +4,11 @@
 
 ## Overview
 
-The `sql-esu.kql` file is an Azure Resource Graph (ARG) query that analyzes SQL Server **End-of-Life (EOL)** and **Extended Security Update (ESU)** status across your Azure environment. It produces lifecycle status and cost projections for every discovered SQL Server instance.
+The [sql-esu.kql](kql/sql-esu.kql) file is an Azure Resource Graph (ARG) query that analyzes SQL Server **End-of-Life (EOL)** and **Extended Security Update (ESU)** status across your Azure environment. It produces lifecycle status and cost projections for every discovered SQL Server instance.
 
 ## What the Query Does
 
-The KQL query (`kql/sql-esu.kql`):
+The KQL query ([sql-esu.kql](kql/sql-esu.kql)):
 
 1. **Discovers** SQL Server instances from two resource types:
    - `microsoft.azurearcdata/sqlserverinstances` (Arc-enabled / on-premises)
