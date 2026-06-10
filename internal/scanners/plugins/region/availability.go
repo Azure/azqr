@@ -162,7 +162,7 @@ func (s *RegionSelectorScanner) fetchAllProviders(ctx context.Context, cred azco
 				if rt.Locations != nil {
 					for _, loc := range rt.Locations {
 						if loc != nil {
-							normalizedLoc := strings.ToLower(strings.ReplaceAll(*loc, " ", ""))
+							normalizedLoc := normalizeRegionName(*loc)
 							locationSet[normalizedLoc] = struct{}{}
 						}
 					}

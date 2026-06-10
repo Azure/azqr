@@ -177,7 +177,8 @@ func (s *RegionSelectorScanner) enrichWithCostData(ctx context.Context, cred azc
 func (s *RegionSelectorScanner) getMeterCostsFromCostManagement(ctx context.Context, cred azcore.TokenCredential, subscriptionID string) ([]meterCostData, error) {
 	// Get date range: last month (like PowerShell script default)
 	now := time.Now()
-	startDate := time.Date(now.Year(), now.Month()-1, 1, 0, 0, 0, 0, time.UTC)
+	prevMonth := now.AddDate(0, -1, 0)
+	startDate := time.Date(prevMonth.Year(), prevMonth.Month(), 1, 0, 0, 0, 0, time.UTC)
 	endDate := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC).Add(-time.Second)
 
 	log.Debug().Msgf("Querying Cost Management for period: %s to %s", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))

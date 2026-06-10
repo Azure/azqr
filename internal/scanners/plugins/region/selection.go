@@ -43,17 +43,6 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 		}
 	}
 
-	// Get target regions from flag if provided
-	if len(s.targetRegions) == 0 && len(targetRegionsFlag) > 0 {
-		for _, r := range targetRegionsFlag {
-			r = normalizeRegionName(r)
-			if r != "" {
-				s.targetRegions = append(s.targetRegions, r)
-			}
-		}
-		log.Info().Msgf("Using target regions from command line: %v", s.targetRegions)
-	}
-
 	if len(s.targetRegions) == 0 {
 		s.targetRegions = []string{"swedencentral"}
 		log.Info().Msg("No target regions specified, defaulting to Sweden Central")
@@ -388,7 +377,7 @@ func (s *RegionSelectorScanner) getAllAzureRegions(ctx context.Context, subscrip
 
 // calculateScores calculates recommendation scores for each region using configurable weights
 func (s *RegionSelectorScanner) calculateScores(results []regionComparison) {
-	// Use default scoring weights (can be made configurable via CLI flags in future)
+	// Use default scoring weights
 	weights := defaultScoringWeights()
 
 	for i := range results {
@@ -607,20 +596,17 @@ func (s *RegionSelectorScanner) buildInventoryForSubscription(subscriptionID str
 		resourceType := strings.ToLower(resource.Type)
 		inventory.resourceTypes[resourceType]++
 
-		// SKU is normalized in resources graph query, including VM size, family, and capacity.
-		sku := skuInfo{
-			Name: resource.SkuName,
-		}
+		skuName := resource.SkuName
 
 		// Normalize location once; reused for both SKU and region tracking.
-		location := strings.ToLower(strings.ReplaceAll(resource.Location, " ", ""))
+		location := normalizeRegionName(resource.Location)
 
 		// Track SKUs by resource type (global)
-		if sku.Name != "" {
+		if skuName != "" {
 			if inventory.skusByType[resourceType] == nil {
 				inventory.skusByType[resourceType] = make(map[string]int)
 			}
-			inventory.skusByType[resourceType][sku.Name]++
+			inventory.skusByType[resourceType][skuName]++
 
 			// Track SKUs by type and region for detailed comparison
 			if inventory.skusByTypeAndRegion[resourceType] == nil {
@@ -629,7 +615,7 @@ func (s *RegionSelectorScanner) buildInventoryForSubscription(subscriptionID str
 			if inventory.skusByTypeAndRegion[resourceType][location] == nil {
 				inventory.skusByTypeAndRegion[resourceType][location] = make(map[string]int)
 			}
-			inventory.skusByTypeAndRegion[resourceType][location][sku.Name]++
+			inventory.skusByTypeAndRegion[resourceType][location][skuName]++
 		}
 
 		// Track locations

@@ -84,9 +84,9 @@ func getRegionLatency(sourceRegion, targetRegion string) float64 {
 	return 0
 }
 
-// normalizeRegionName converts region display names to lowercase identifiers matching the latency matrix
+// normalizeRegionName converts region display names to lowercase identifiers
+// by removing spaces and converting to lowercase. Use this everywhere a region
+// name needs to be compared or stored.
 func normalizeRegionName(region string) string {
-	// Remove spaces and convert to lowercase
-	normalized := strings.ToLower(strings.ReplaceAll(region, " ", ""))
-	return normalized
+	return strings.ToLower(strings.ReplaceAll(region, " ", ""))
 }

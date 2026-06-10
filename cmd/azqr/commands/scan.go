@@ -6,6 +6,8 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/profiling"
@@ -146,6 +148,14 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 	}
 
 	stageConfigs := models.NewStageConfigs()
+
+	// Bridge plugin-specific flags into stage options so plugins can read them
+	// via params.Stages.GetStageOptions without relying on package-level globals.
+	if targetRegions, _ := cmd.Flags().GetStringSlice("target-regions"); len(targetRegions) > 0 {
+		_ = stageConfigs.SetStageOptions(models.StageNamePlugin, map[string]any{
+			"target-regions": strings.Join(targetRegions, ","),
+		})
+	}
 
 	params := models.ScanParams{
 		ManagementGroups:       managementGroups,
