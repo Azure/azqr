@@ -34,9 +34,10 @@ type (
 	}
 
 	PluginScanArgs struct {
-		Subscriptions  []string `json:"subscriptions,omitempty"`
-		ResourceGroups []string `json:"resourceGroups,omitempty"`
-		Mask           *bool    `json:"mask,omitempty"`
+		Subscriptions  []string       `json:"subscriptions,omitempty"`
+		ResourceGroups []string       `json:"resourceGroups,omitempty"`
+		Mask           *bool          `json:"mask,omitempty"`
+		Options        map[string]any `json:"options,omitempty"`
 	}
 )
 

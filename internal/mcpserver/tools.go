@@ -64,6 +64,50 @@ func RegisterTools(s *server.MCPServer) {
 	)
 	s.AddTool(zoneMappingTool, mcp.NewTypedToolHandler(scanPluginHandler("zone-mapping")))
 
+	// Plugin Tools: SQL ESU
+	sqlESUTool := mcp.NewTool("scan-sql-esu",
+		withBasicOptions(
+			mcp.WithDescription(
+				`Analyze SQL Server End-of-Life and Extended Security Update (ESU) status.
+
+				This tool scans SQL Server instances across your Azure subscriptions and provides:
+				- SQL Server version and edition details
+				- End-of-life status and dates
+				- ESU coverage period and costs per core
+				- Estimated monthly, annual, and 3-year ESU costs
+				- Patch operations cost comparison
+				- SQL Managed Instance migration cost estimates and potential savings
+
+				Useful for planning SQL Server modernization and understanding ESU financial impact.
+				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
+		)...,
+	)
+	s.AddTool(sqlESUTool, mcp.NewTypedToolHandler(scanPluginHandler("sql-esu")))
+
+	// Plugin Tools: Region Selection
+	regionSelectionTool := mcp.NewTool("scan-region-selection",
+		withBasicOptions(
+			mcp.WithDescription(
+				`Analyze optimal Azure region selection based on service availability, network latency, and cost.
+
+				This tool evaluates target regions for your workloads and provides:
+				- Resource type availability comparison between source and target regions
+				- SKU availability analysis (available, unavailable, restricted)
+				- Network latency estimates between regions
+				- Cost difference percentages
+				- Recommendation scores with quality indicators
+				- Detailed lists of missing resource types and unavailable SKUs
+
+				Useful for multi-region planning, disaster recovery site selection, and workload migration.
+				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
+			mcp.WithObject("options",
+				mcp.Required(),
+				mcp.Description("Plugin options. Use 'target-regions' (comma-separated string) to specify which Azure regions to analyze (e.g., {\"target-regions\": \"eastus,westeurope\"})."),
+			),
+		)...,
+	)
+	s.AddTool(regionSelectionTool, mcp.NewTypedToolHandler(scanPluginHandler("region-selection")))
+
 	scan := mcp.NewTool("scan",
 		withBasicOptions(
 			mcp.WithDescription(
