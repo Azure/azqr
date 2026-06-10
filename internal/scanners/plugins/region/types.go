@@ -5,12 +5,7 @@ package region
 
 import "strings"
 
-// skuInfo holds detailed SKU information for a resource
-type skuInfo struct {
-	Name     string `json:"name"`
-}
-
-// scoringWeights defines the configurable weights for the scoring algorithm
+// scoringWeights defines the weights for the scoring algorithm
 type scoringWeights struct {
 	ResourceAvailability float64 // Weight for resource type availability (default: 0.35)
 	SKUAvailability      float64 // Weight for SKU-level availability (default: 0.30)

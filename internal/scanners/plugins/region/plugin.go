@@ -60,12 +60,9 @@ func (s *RegionSelectorScanner) GetMetadata() plugins.PluginMetadata {
 	}
 }
 
-// targetRegionsFlag holds the CLI flag value at package level
-var targetRegionsFlag []string
-
 // RegisterFlags registers plugin-specific flags (implements FlagProvider interface)
 func (s *RegionSelectorScanner) RegisterFlags(cmd *cobra.Command) {
-	cmd.Flags().StringSliceVarP(&targetRegionsFlag, "target-regions", "", []string{}, "Target regions to analyze (comma-separated, e.g., eastus,westeurope)")
+	cmd.Flags().StringSlice("target-regions", []string{}, "Target regions to analyze (comma-separated, e.g., eastus,westeurope)")
 }
 
 // init registers the plugin automatically
