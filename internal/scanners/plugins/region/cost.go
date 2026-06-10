@@ -13,8 +13,8 @@ import (
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/renderers"
+	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement"
 	"github.com/rs/zerolog/log"
 )
@@ -298,8 +298,8 @@ func (s *RegionSelectorScanner) getMeterCostsFromCostManagement(ctx context.Cont
 			}
 
 			// Extract values using correct column indices
-			meterID := getString(row[resourceGuidIdx])
-			cost := getFloat(row[costIdx])
+			meterID := to.String(row[resourceGuidIdx])
+			cost := to.Float(row[costIdx])
 
 			if meterID != "" && cost > 0 {
 				meterCost := meterCostData{
@@ -776,38 +776,6 @@ func buildCostDetailsForOutput(meterMetadata []meterCostData, meterPricing map[s
 		"pricemap":  pricemap,
 		"uomErrors": uomErrorsOutput,
 	}
-}
-
-// Helper functions to extract values from Cost Management API response
-func getString(val interface{}) string {
-	if val == nil {
-		return ""
-	}
-	if s, ok := val.(string); ok {
-		return s
-	}
-	return fmt.Sprintf("%v", val)
-}
-
-func getFloat(val interface{}) float64 {
-	if val == nil {
-		return 0
-	}
-	switch v := val.(type) {
-	case float64:
-		return v
-	case float32:
-		return float64(v)
-	case int:
-		return float64(v)
-	case int64:
-		return float64(v)
-	case string:
-		var f float64
-		_, _ = fmt.Sscanf(v, "%f", &f)
-		return f
-	}
-	return 0
 }
 
 // mergeCostData merges src into dst, deduplicating meters by meterID.

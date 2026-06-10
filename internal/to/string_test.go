@@ -84,3 +84,56 @@ func TestString(t *testing.T) {
 		})
 	}
 }
+
+func TestFloat(t *testing.T) {
+	tests := []struct {
+		name  string
+		input interface{}
+		want  float64
+	}{
+		{"nil", nil, 0},
+		{"float64", float64(3.14), 3.14},
+		{"float32", float32(2.5), float64(float32(2.5))},
+		{"int", int(7), 7.0},
+		{"int32", int32(7), 7.0},
+		{"int64", int64(7), 7.0},
+		{"string valid", "1.5", 1.5},
+		{"string invalid", "abc", 0},
+		{"unsupported type", true, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := Float(tt.input)
+			if got != tt.want {
+				t.Errorf("Float() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestInt(t *testing.T) {
+	tests := []struct {
+		name  string
+		input interface{}
+		want  int
+	}{
+		{"nil", nil, 0},
+		{"int", int(5), 5},
+		{"int32", int32(5), 5},
+		{"int64", int64(5), 5},
+		{"float64", float64(5.9), 5},
+		{"float32", float32(3.0), 3},
+		{"unsupported string", "10", 0},
+		{"unsupported bool", true, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := Int(tt.input)
+			if got != tt.want {
+				t.Errorf("Int() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

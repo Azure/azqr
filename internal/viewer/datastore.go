@@ -550,6 +550,11 @@ func first(m map[string][]string, key string) string {
 	}
 	return ""
 }
+
+// toString converts a value to its string representation for viewer output.
+// Intentionally kept separate from internal/to.String: nil here marshals to "null"
+// (via json.Marshal) rather than "", and integer-valued floats are stripped of their
+// decimal (1.0 → "1") to match the plugin dataset display format.
 func toString(v interface{}) string {
 	switch t := v.(type) {
 	case string:
