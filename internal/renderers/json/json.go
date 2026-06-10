@@ -76,16 +76,21 @@ func buildConsolidatedReport(data *renderers.ReportData) map[string]interface{} 
 
 	// Add external plugin results
 	if len(data.PluginResults) > 0 {
-		plugins := make(map[string]interface{})
+		// Use a slice so that plugins returning multiple sheets (e.g. region-selection)
+		// are all preserved. A map keyed by PluginName would silently overwrite
+		// earlier sheets when multiple results share the same plugin name.
+		var pluginsList []interface{}
 		for _, result := range data.PluginResults {
+			dataKey := strcase.ToLowerCamel(result.SheetName)
 			pluginData := map[string]interface{}{
-				"description": result.Description,
+				"pluginName":  result.PluginName,
 				"sheetName":   result.SheetName,
-				"data":        convertToJSON(result.Table),
+				"description": result.Description,
+				dataKey:       convertToJSON(result.Table),
 			}
-			plugins[result.PluginName] = pluginData
+			pluginsList = append(pluginsList, pluginData)
 		}
-		consolidatedReport["externalPlugins"] = plugins
+		consolidatedReport["externalPlugins"] = pluginsList
 	}
 
 	return consolidatedReport
@@ -136,7 +141,7 @@ func writeData(data map[string]interface{}, filename string) {
 
 	_, err = f.Write(js)
 	if err != nil {
-		_ = f.Close() // Close the file before exiting to ensure cleanup
+		_ = f.Close()                                   // Close the file before exiting to ensure cleanup
 		log.Fatal().Err(err).Msg("error writing json:") //nolint:gocritic // File is explicitly closed above
 	}
 }
