@@ -1,6 +1,14 @@
 // SQL Server EOL / ESU Status — Azure Resource Graph query
 // Covers: Arc-enabled SQL (microsoft.azurearcdata/sqlserverinstances)
 //         SQL VMs on Azure (microsoft.sqlvirtualmachine/sqlvirtualmachines)
+//
+// PREMISE: ESU is NOT free on Azure VMs.
+// On Azure VMs (SQL IaaS), ESU is billed at the rates below — there is no free ESU benefit.
+// ESU costs are modelled for all instances (conservative planning estimate).
+// Rates used (blended 3-year planning estimate: Y1=75%, Y2=100%, Y3=125% of license cost):
+//   Standard/Web:  $139/core/month
+//   Enterprise:    $540.50/core/month
+//   Developer/Express/Evaluation/Free: $0 (non-production, no commercial license)
 resources
 | where type == "microsoft.azurearcdata/sqlserverinstances"
     or type == "microsoft.sqlvirtualmachine/sqlvirtualmachines"
@@ -20,12 +28,25 @@ resources
     "Azure VM (SQL IaaS)"
 )
 // For SQL VMs, core count lives on the underlying compute VM — join to retrieve it
-| extend _vmId = iff(type == "microsoft.sqlvirtualmachine/sqlvirtualmachines", tolower(tostring(properties.virtualMachineResourceId)), "")
+| extend _vmId          = iff(type == "microsoft.sqlvirtualmachine/sqlvirtualmachines", tolower(tostring(properties.virtualMachineResourceId)), "")
+| extend _sqlImageOffer = iff(type == "microsoft.sqlvirtualmachine/sqlvirtualmachines", tolower(tostring(properties.sqlImageOffer)), "")
+// SQL Server license type: PAYG = paying hourly license | AHUB = bring-your-own SA license
+| extend SQLLicenseType = case(
+    type == "microsoft.azurearcdata/sqlserverinstances",
+        case(
+            tolower(tostring(properties.licenseType)) == "licenseincluded", "PAYG",
+            "AHUB"
+        ),
+    toupper(tostring(properties.sqlServerLicenseType)) == "PAYG", "PAYG",
+    toupper(tostring(properties.sqlServerLicenseType)) == "DR",   "DR",
+    "AHUB"  // default: AHUB (most enterprise customers have SA)
+)
 | join kind=leftouter (
     resources
     | where type == "microsoft.compute/virtualmachines"
     | project _vmId = tolower(id), _vmSize = tostring(properties.hardwareProfile.vmSize)
 ) on _vmId
+| join kind=leftouter (resourcecontainers | where type =='microsoft.resources/subscriptions' | project SubscriptionName=name, subscriptionId) on subscriptionId
 // Arc SQL: properties.vCore  |  SQL MI: sku.capacity  |  SQL VM: case() lookup on VM size SKU
 | extend vCores = case(
     // Arc SQL instances have direct properties
@@ -92,15 +113,6 @@ resources
     SQLVersion == "SQL Server 2022",                                        "Supported",
     "Unknown"
 )
-| extend MainstreamEndDate = case(
-    SQLVersion == "SQL Server 2012",    datetime(2017-07-11),
-    SQLVersion == "SQL Server 2014",    datetime(2019-07-09),
-    SQLVersion == "SQL Server 2016",    datetime(2021-07-13),
-    SQLVersion == "SQL Server 2017",    datetime(2022-10-11),
-    SQLVersion == "SQL Server 2019",    datetime(2025-02-28),
-    SQLVersion == "SQL Server 2022",    datetime(2028-01-11),
-    todatetime('')
-)
 | extend ESUEndDate = case(
     SQLVersion == "SQL Server 2012",    datetime(2025-07-08),
     SQLVersion == "SQL Server 2014",    datetime(2027-07-12),
@@ -120,62 +132,133 @@ resources
     SQLVersion == "SQL Server 2022",    datetime(2033-01-11),
     todatetime('')
 )
-// ESU pricing varies by edition: Enterprise is ~4x Standard; Developer/Express free
-// Standard/Web: $139/core/mo  |  Enterprise: $540.50/core/mo  |  Developer/Express: $0
+// Edition helpers used throughout the query
+| extend _isFreeEdition       = tolower(Edition) contains "developer" or tolower(Edition) contains "express" or tolower(Edition) contains "evaluation" or tolower(Edition) contains "free"
+| extend _isEnterpriseEdition = tolower(Edition) contains "enterprise"
+| extend _isStandardEdition = tolower(Edition) contains "standard"
+| extend _isWebEdition = tolower(Edition) contains "web"
+| extend _recommendedMITier   = case(_isEnterpriseEdition, "Business Critical", _isFreeEdition, "N/A", "General Purpose")
+| extend MigrationRecommendation = case(
+    tolower(Edition) contains "developer",
+        "Not Recommended - Development edition (non-production use only)",
+    tolower(Edition) contains "express" or tolower(Edition) contains "evaluation" or tolower(Edition) contains "free",
+        "Not Recommended - Free/Express edition (limited capacity, non-production)",
+    EOLStatus == "Expired",
+        strcat("CRITICAL - Migrate now to SQL MI ", _recommendedMITier, " (no security updates, ESU program ended)"),
+    EOLStatus == "ESU Active",
+        strcat("Recommended - Migrate to SQL MI ", _recommendedMITier, " (actively paying ESU surcharge)"),
+    EOLStatus == "Upcoming ESU",
+        strcat("Recommended - Move to SQL MI ", _recommendedMITier, " before ESU charges begin (", format_datetime(ESUStartDate, "yyyy-MM-dd"), ")"),
+    EOLStatus == "Supported",
+        strcat("Optional - Migrate to SQL MI ", _recommendedMITier, " for PaaS benefits (ESU starts ", format_datetime(ESUStartDate, "yyyy-MM-dd"), ")"),
+    "Review - Unknown SQL version or status"
+)
+// ESU pricing varies by edition: Enterprise is ~4x Standard; Developer/Express/Evaluation/Free: $0
+// Standard/Web: $139/core/mo  |  Enterprise: $540.50/core/mo
 | extend _esuVersions = SQLVersion == "SQL Server 2014" or SQLVersion == "SQL Server 2016" or SQLVersion == "SQL Server 2017" or SQLVersion == "SQL Server 2019" or SQLVersion == "SQL Server 2022"
 | extend ESUMonthlyCostPerCore = case(
-    _esuVersions and tolower(Edition) contains "enterprise", 540.5,
-    _esuVersions and tolower(Edition) contains "developer",  0.0,
-    _esuVersions and tolower(Edition) contains "express",    0.0,
-    SQLVersion == "SQL Server 2014", 139.0,
-    SQLVersion == "SQL Server 2016", 139.0,
-    SQLVersion == "SQL Server 2017", 139.0,
-    SQLVersion == "SQL Server 2019", 139.0,
-    SQLVersion == "SQL Server 2022", 139.0,
+    _esuVersions and _isEnterpriseEdition,  540.5,
+    _esuVersions and _isFreeEdition,          0.0,
+    _esuVersions,                            139.0,
     0.0
 )
 | extend BillableCores        = iff(vCores < 4, 4, vCores)
-// EstimatedMonthlyCost is non-zero for ESU Active (currently paying) and Upcoming ESU (forecast)
-| extend EstimatedMonthlyCost = iff(EOLStatus in ("ESU Active", "Upcoming ESU"), ESUMonthlyCostPerCore * BillableCores, 0.0)
-// Est. cost if migrated to Azure SQL MI (GP ~$123/vCore, BC ~$367/vCore, min 4 vCores)
-| extend EstSQLMIMonthlyCost = case(
-    tolower(Edition) contains "enterprise", 367.0 * BillableCores,
-    123.0 * BillableCores  // Standard, Web, Express, Developer all → GP tier
+// Azure VM compute cost per vCore/month (Linux, PAYG, blended — for high-level assessment only)
+// Rates: M-series ~$0.192/hr, E-series ~$0.063/hr, L-series ~$0.078/hr, F-series ~$0.042/hr, General Purpose ~$0.05/hr (×730h)
+| extend VMCostPerCorePerMonth = case(
+    CloudType != "Azure VM (SQL IaaS)",            0.0,   // Arc/on-prem: no Azure VM compute cost
+    tolower(_vmSize) startswith "standard_m",    140.0,  // M-series: memory extreme
+    tolower(_vmSize) startswith "standard_e",     46.0,  // E-series: memory optimized
+    tolower(_vmSize) startswith "standard_l",     57.0,  // L-series: storage optimized
+    tolower(_vmSize) startswith "standard_f",     31.0,  // F-series: compute optimized
+    36.0                                                  // D/B-series and others: general purpose blended
 )
+// OS detection from sqlImageOffer: WS/windows = Windows, ubuntu/rhel/sles = Linux, default Windows (most common for SQL Server)
+| extend VMOSType = case(
+    CloudType != "Azure VM (SQL IaaS)",                                                                   "N/A",
+    _sqlImageOffer contains "ws" or _sqlImageOffer contains "windows",                                    "Windows",
+    _sqlImageOffer contains "ubuntu" or _sqlImageOffer contains "rhel" or _sqlImageOffer contains "sles", "Linux",
+    "Windows"  // default: SQL Server is predominantly Windows
+)
+// Multipliers: Windows ×1.8 over Linux base | West Europe ×1.13 over East US baseline
+| extend VMOSMultiplier    = iff(VMOSType == "Windows", 1.8, 1.0)
+| extend VMRegionMultiplier = iff(tolower(location) == "westeurope", 1.13, 1.0)
+| extend EstVMComputeMonthlyCost = VMCostPerCorePerMonth * vCores * VMOSMultiplier * VMRegionMultiplier
+// SQL Server license cost — always shown at list/PAYG rate for reference (Edition-based, not license-type-based)
+// Standard/Web: ~$73 | Enterprise: ~$274
+| extend SQLLicenseMonthlyCostPerCore = case(
+    _isEnterpriseEdition,  274.0,  // Enterprise list rate
+    _isFreeEdition,          0.0,  // Developer/Express/Evaluation/Free: always free
+    _isStandardEdition,     73.0,  // Standard list rate
+    _isWebEdition,           6.0,  // Web list rate
+    0.0                            // Default: $0 (unknown edition)
+)
+| extend SQLLicenseMonthlyCost = SQLLicenseMonthlyCostPerCore * BillableCores
+// For savings: PAYG customers pay the hourly rate; AHUB/DR is sunk cost (SA), not included in hourly saving
+| extend _sqlLicenseSavingsCost = iff(SQLLicenseType == "PAYG", SQLLicenseMonthlyCost, 0.0)
+// EstESUMonthlyCost is non-zero for ESU Active (currently paying) and Upcoming ESU (forecast)
+| extend EstESUMonthlyCost = iff(EOLStatus in ("ESU Active", "Upcoming ESU"), ESUMonthlyCostPerCore * BillableCores, 0.0)
 // Patch operations cost: 2h/month × $80/h = $160/month per instance
 | extend PatchOpsMonthlyCost = 160.0
-// Expired/Supported have no ESU cost — saving reflects patch ops avoided by migrating to MI ($160/mo)
-// ESU Active/Upcoming — saving = ESU cost + patch ops − MI cost
-| extend EstSQLMISaving = iff(
-    EstimatedMonthlyCost == 0.0,
-    PatchOpsMonthlyCost,
-    EstimatedMonthlyCost + PatchOpsMonthlyCost - EstSQLMIMonthlyCost
+// Current total spend (used in both saving calculations)
+| extend _currentMonthlyCost = EstVMComputeMonthlyCost + _sqlLicenseSavingsCost + EstESUMonthlyCost + PatchOpsMonthlyCost
+// Est. cost if migrated to SQL MI — tier auto-selected by edition:
+//   Enterprise → Business Critical (BC) | Standard/Web/Other → General Purpose (GP)
+//   Developer/Express/Evaluation/Free: $0 — not migration candidates
+| extend EstSQLMIMonthlyCost = case(
+    _isFreeEdition,                                       0.0,
+    _isEnterpriseEdition and SQLLicenseType == "AHUB",  147.0 * BillableCores,   // BC + AHB (~60% off $367)
+    _isEnterpriseEdition,                               367.0 * BillableCores,   // BC PAYG
+    SQLLicenseType == "AHUB",                            49.0 * BillableCores,   // GP + AHB (~60% off $123)
+    123.0 * BillableCores                                                         // GP PAYG
+)
+// Savings: current total − MI target cost ($0 for free editions)
+| extend EstSQLMIMonthlySaving = iff(_isFreeEdition, 0.0, _currentMonthlyCost - EstSQLMIMonthlyCost)
+| extend SQLMIMigrationVerdict = case(
+    _isFreeEdition,                       "N/A",
+    EstSQLMIMonthlySaving > 0,            "Cost Savings",
+    EstSQLMIMonthlySaving < 0,            "Cost Increase (justified by PaaS/security benefits)",
+    "Break Even"
 )
 | project
     Name = name,
     ResourceGroup = resourceGroup,
+    Subscription = SubscriptionName,
     SubscriptionId = subscriptionId,
     Location = location,
     CloudType,
     SQLVersion,
     Edition,
     vCores,
+    BillableCores,
     EOLStatus,
-    MainstreamEndDate,
+    MigrationRecommendation,
+    MigrationTargetTier             = _recommendedMITier,
     ESUStartDate,
     ESUEndDate,
     ESUMonthlyCostPerCore,
-    BillableCores,
-    EstimatedMonthlyCost,
-    EstimatedAnnualCost = EstimatedMonthlyCost * 12,
-    EstimatedThreeYearCost = EstimatedMonthlyCost * 36,
+    SQLLicenseType,
+    SQLLicenseMonthlyCostPerCore,
+    SQLLicenseMonthlyCost           = round(SQLLicenseMonthlyCost, 2),
+    SQLLicenseAnnualCost            = round(SQLLicenseMonthlyCost * 12, 2),
+    VMCostPerCorePerMonth,
+    EstVMComputeMonthlyCost         = round(EstVMComputeMonthlyCost, 2),
+    EstVMComputeAnnualCost          = round(EstVMComputeMonthlyCost * 12, 2),
+    EstVMComputeThreeYearCost       = round(EstVMComputeMonthlyCost * 36, 2),
+    EstESUMonthlyCost               = round(EstESUMonthlyCost, 2),
+    EstESUAnnualCost                = round(EstESUMonthlyCost * 12, 2),
+    EstESUThreeYearCost             = round(EstESUMonthlyCost * 36, 2),
     PatchOpsMonthlyCost,
-    PatchOpsAnnualCost = PatchOpsMonthlyCost * 12,
-    PatchOpsThreeYearCost = PatchOpsMonthlyCost * 36,
-    EstSQLMIMonthlyCost,
-    EstSQLMIAnnualCost = EstSQLMIMonthlyCost * 12,
-    EstSQLMIThreeYearCost = EstSQLMIMonthlyCost * 36,
-    EstSQLMISaving,
-    EstSQLMIAnnualSaving = EstSQLMISaving * 12,
-    EstSQLMIThreeYearSaving = EstSQLMISaving * 36
-| order by case(EOLStatus == "Expired", 0, EOLStatus == "ESU Active", 1, EOLStatus == "Upcoming ESU", 2, EOLStatus == "Supported", 3, 4) asc, SQLVersion asc, Name asc
+    PatchOpsAnnualCost              = round(PatchOpsMonthlyCost * 12, 2),
+    PatchOpsThreeYearCost           = round(PatchOpsMonthlyCost * 36, 2),
+    CurrentMonthlyCost              = round(_currentMonthlyCost, 2),
+    CurrentAnnualCost               = round(_currentMonthlyCost * 12, 2),
+    CurrentThreeYearCost            = round(_currentMonthlyCost * 36, 2),
+    EstSQLMIMonthlyCost             = round(EstSQLMIMonthlyCost, 2),
+    EstSQLMIAnnualCost              = round(EstSQLMIMonthlyCost * 12, 2),
+    EstSQLMIThreeYearCost           = round(EstSQLMIMonthlyCost * 36, 2),
+    EstSQLMIMonthlySaving           = round(EstSQLMIMonthlySaving, 2),
+    EstSQLMIAnnualSaving            = round(EstSQLMIMonthlySaving * 12, 2),
+    EstSQLMIThreeYearSaving         = round(EstSQLMIMonthlySaving * 36, 2),
+    SQLMIMigrationVerdict
+| order by case(EOLStatus == "Expired", 0, EOLStatus == "ESU Active", 1, EOLStatus == "Upcoming ESU", 2, EOLStatus == "Supported", 3, 4) asc, EstSQLMIMonthlySaving desc, SQLVersion asc, Name asc
