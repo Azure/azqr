@@ -1,74 +1,87 @@
-# SQL ESU Azure Resource Graph Query
+# SQL Server ESU Scanner
 
-> **Version: 0.1.0-beta** — This query is in early development. Output schema and cost estimates may change without notice.
+> **Version: 0.2.0-beta**
 
-## Overview
+Scans SQL Server instances (Azure VMs and Arc-enabled) for EOL/ESU lifecycle status, estimates the full current cost of staying on SQL Server IaaS, and calculates monthly/annual/3-year savings from migrating to Azure SQL Managed Instance. The query is implemented in [sql-esu.kql](sql-esu.kql).
 
-The [sql-esu.kql](sql-esu.kql) file is an Azure Resource Graph (ARG) query that analyzes SQL Server **End-of-Life (EOL)** and **Extended Security Update (ESU)** status across your Azure environment. It produces lifecycle status and cost projections for every discovered SQL Server instance.
+> **ESU is no longer free on Azure VMs.** All production editions (Standard, Enterprise, Web) are billed at full ESU rates on Azure VMs.
 
-## What the Query Does
+## What it Does
 
-The KQL query ([sql-esu.kql](sql-esu.kql)):
-
-1. **Discovers** SQL Server instances from two resource types:
-   - `microsoft.azurearcdata/sqlserverinstances` (Arc-enabled / on-premises)
-   - `microsoft.sqlvirtualmachine/sqlvirtualmachines` (SQL VMs on Azure)
-2. **Resolves** the SQL Server version, edition, and vCore count (joining the underlying VM for IaaS instances).
-3. **Classifies** each instance into an EOL status: `Supported`, `Upcoming ESU`, `ESU Active`, or `Expired`.
-4. **Estimates costs** including ESU monthly/annual/3-year costs, maintenance operations overhead, and potential Azure SQL Managed Instance migration savings.
+1. Discovers `microsoft.sqlvirtualmachine/sqlvirtualmachines` and `microsoft.azurearcdata/sqlserverinstances` via Azure Resource Graph.
+2. Resolves vCore count by joining the underlying Azure VM SKU for IaaS instances.
+3. Assigns an `EOLStatus`: `Supported` → `Upcoming ESU` → `ESU Active` → `Expired`.
+4. Generates a `MigrationRecommendation` and auto-selects the SQL MI target tier by edition (Enterprise → Business Critical, Standard/Web → General Purpose).
+5. Calculates current total cost and estimated SQL MI cost, producing monthly/annual/3-year savings and a migration verdict.
 
 ## Assumptions
 
-The following assumptions are built into the KQL query:
+| Area | Value |
+|------|-------|
+| **ESU rates** | Standard/Web: $139/core/month · Enterprise: $540.50/core/month · Developer/Express/Free: $0. Blended 3-year planning estimate (Y1=75%, Y2=100%, Y3=125% of license cost). |
+| **Minimum billable cores** | 4 cores per instance (Microsoft minimum) |
+| **VM compute** | Blended PAYG by family: M-series $140, E-series $46, L-series $57, F-series $31, D/B-series $36 (per vCore/month). Windows multiplier ×1.8, West Europe ×1.13. Arc/on-prem = $0. |
+| **Patch ops** | $160/month per instance (2 hrs × $80/hr operational overhead) |
+| **SQL license cost (PAYG only)** | Enterprise: $274 · Standard: $73 · Web: $6 (per vCore/month). AHUB instances carry no hourly charge — SA is a sunk cost. |
+| **SQL MI target tier** | Auto-selected: Enterprise → Business Critical, Standard/Web → General Purpose. Developer/Express/Free → N/A (not migration candidates). |
+| **SQL MI cost (PAYG)** | GP: $123/vCore/month · BC: $367/vCore/month |
+| **SQL MI cost (AHUB)** | GP: $49/vCore/month · BC: $147/vCore/month |
+| **Savings formula** | `Current (VM compute + SQL license if PAYG + ESU + patch ops) − Est SQL MI cost` |
 
-| Area | Assumption |
-|------|------------|
-| **ESU pricing** | Standard/Web editions: **$139/core/month**. Enterprise: **$540.50/core/month**. Developer/Express: **$0** (free). Prices reflect public list pricing and do not account for EA/CSP discounts. |
-| **Minimum billable cores** | Microsoft bills a minimum of **4 cores** per instance, even if fewer physical/virtual cores are present. |
-| **Maintenance operations cost** | Estimated at **$160/month** per instance (2 hours/month × $80/hour) for manual maintenance overhead. |
-| **SQL MI migration cost** | General Purpose tier: **$123/vCore/month**. Business Critical tier: **$367/vCore/month**. Enterprise editions map to BC; all others to GP. |
-| **VM vCore resolution** | For SQL VMs, vCore counts are derived from the VM size SKU using a lookup table for legacy series and regex extraction for modern v3/v4/v5/v6 SKUs. Unrecognized sizes default to **4 vCores**. |
-| **EOL/ESU dates** | Based on Microsoft's published lifecycle dates as of June 2025. The query uses `now()` so status transitions happen automatically. |
-| **Upcoming ESU window** | Versions are flagged as "Upcoming ESU" **6 months** before their ESU start date to allow planning time. |
-| **Savings calculation** | When ESU status is `Expired` or `Supported` (no ESU cost), the estimated saving from migrating to SQL MI reflects only the patch operations cost avoided ($160/month). For editions with no ESU cost (Developer/Express), the saving similarly reflects only operational overhead, not licensing. |
-| **Scope** | Only resources visible in Azure Resource Graph are scanned. On-premises SQL Servers without Arc enrollment are not discoverable. |
+## Savings by Scenario
+
+| Scenario | VM Compute | SQL License | ESU | Patch Ops | − SQL MI |
+|---|---|---|---|---|---|
+| Azure VM · PAYG · ESU Active/Upcoming | ✅ | ✅ | ✅ | $160 | − MI PAYG |
+| Azure VM · PAYG · Supported/Expired | ✅ | ✅ | $0 | $160 | − MI PAYG |
+| Azure VM · AHUB · ESU Active/Upcoming | ✅ | $0 | ✅ | $160 | − MI AHUB |
+| Azure VM · AHUB · Supported/Expired | ✅ | $0 | $0 | $160 | − MI AHUB |
+| Arc/On-Prem · PAYG · ESU Active/Upcoming | $0 | ✅ | ✅ | $160 | − MI PAYG |
+| Arc/On-Prem · AHUB · ESU Active/Upcoming | $0 | $0 | ✅ | $160 | − MI AHUB |
+| Arc/On-Prem · Supported/Expired | $0 | $0 | $0 | $160 | − MI AHUB |
+| Developer / Express | — | — | — | — | $0 (N/A) |
+
+> A negative saving means SQL MI costs more than the current setup — common for large AHUB instances not yet in ESU. Migration can still be justified by PaaS, security, and operational benefits.
 
 ## Output Columns
 
-The query produces the following columns:
+| Column | Description |
+|--------|-------------|
+| Name / ResourceGroup / Subscription / Location | Resource identity |
+| CloudType | `Azure VM (SQL IaaS)` or `Arc-enabled (On-Prem)` |
+| SQLVersion / Edition / vCores / BillableCores | Instance details |
+| EOLStatus | `Supported` · `Upcoming ESU` · `ESU Active` · `Expired` |
+| MigrationRecommendation | Actionable text guidance based on edition and EOL status |
+| MigrationTargetTier | `General Purpose` · `Business Critical` · `N/A` |
+| ESUStartDate / ESUEndDate | When ESU charges begin and when all support ends |
+| ESUMonthlyCostPerCore | Per-core ESU rate applied in calculations |
+| SQLLicenseType | `PAYG` · `AHUB` · `DR` |
+| SQLLicenseMonthlyCostPerCore / SQLLicenseMonthlyCost / SQLLicenseAnnualCost | SQL license list rate (factored into savings for PAYG only) |
+| VMCostPerCorePerMonth / EstVMComputeMonthlyCost / AnnualCost / ThreeYearCost | VM compute cost estimate ($0 for Arc/on-prem) |
+| EstESUMonthlyCost / AnnualCost / ThreeYearCost | ESU cost projection ($0 if Supported or Expired) |
+| PatchOpsMonthlyCost / AnnualCost / ThreeYearCost | Operational overhead |
+| CurrentMonthlyCost / AnnualCost / ThreeYearCost | Total current spend (all components) |
+| EstSQLMIMonthlyCost / AnnualCost / ThreeYearCost | Estimated SQL MI cost at recommended tier |
+| EstSQLMIMonthlySaving / AnnualSaving / ThreeYearSaving | Saving vs current spend (negative = cost increase) |
+| SQLMIMigrationVerdict | `Cost Savings` · `Break Even` · `Cost Increase (justified by PaaS/security benefits)` |
 
-- **Name** / **Resource Group** / **Subscription** / **Location** — Resource identity
-- **Cloud Type** — `Arc-enabled (On-Prem)` or `Azure VM (SQL IaaS)`
-- **SQL Version** / **Edition** / **vCores** — Instance details
-- **EOL Status** — Lifecycle classification
-- **Mainstream End Date** / **ESU Start Date** / **ESU End Date** — Key dates
-- **ESU Monthly Cost/Core** / **Billable Cores** — Pricing inputs
-- **Estimated Monthly/Annual/3-Year Cost** — Projected ESU spend
-- **Patch Ops Monthly/Annual/3-Year Cost** — Operational overhead
-- **Est SQL MI Monthly/Annual/3-Year Cost** — Migration target cost
-- **Est SQL MI Monthly/Annual/3-Year Saving** — Potential savings from migration
+## Limitations
 
-## Limitations (Beta)
+- Costs reflect public list pricing — EA/CSP discounts are not factored in.
+- VM compute rates are blended family-level estimates (Linux PAYG baseline), not exact billing.
+- SQL MI estimates do not account for reserved capacity pricing or workload-specific sizing.
+- SQL Server inside containers or on non-Arc VMs is not discoverable via Azure Resource Graph.
 
-- Cost estimates use public list pricing and do not reflect negotiated discounts.
-- SQL MI migration estimates are simplified (single GP/BC tier mapping) and do not account for reserved capacity, hybrid benefit, or workload-specific sizing.
-- VM size lookup covers common SKU families but may not include every available Azure VM size.
-- The query does not detect SQL Server instances running inside containers or on non-Azure VMs without Arc enrollment.
-
-## Plugin Integration
-
-This KQL query is used by the `sql-esu` internal plugin in [Azure Quick Review (`azqr`)](https://github.com/Azure/azqr). The plugin executes this query via Azure Resource Graph, processes the results, and outputs them as a dedicated "SQL ESU" sheet in the `azqr` Excel report.
+## Usage
 
 ```bash
-# Run as standalone command (fast, plugin-only mode)
+# Plugin-only mode (fast)
 azqr sql-esu
 
-# Or integrate with a full scan
+# As part of a full scan
 azqr scan --plugin sql-esu
 ```
 
-> Plugin commands (e.g., `azqr sql-esu`) run in optimized plugin-only mode for faster execution, skipping resource and APRL scanning. Use `azqr plugins list` to see all available plugins.
-
 ## License
 
-Licensed under the [MIT License](../../../../LICENSE).
+[MIT](../../../../LICENSE)
