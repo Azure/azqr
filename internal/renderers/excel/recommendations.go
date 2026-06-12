@@ -14,7 +14,7 @@ func renderRecommendations(f *excelize.File, data *renderers.ReportData, styles 
 		stageName:    models.StageNameGraph,
 		sheetName:    "Recommendations",
 		tableFunc:    data.RecommendationsTable,
-		hyperlinkCol: 11,
+		hyperlinkCol: hyperlinkColRecommendations,
 		isFirstSheet: true,
 	}, styles)
 }

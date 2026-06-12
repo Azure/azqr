@@ -23,6 +23,6 @@ func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData,
 		stageName:    models.StageNameDefenderRecommendations,
 		sheetName:    "DefenderRecommendations",
 		tableFunc:    data.DefenderRecommendationsTable,
-		hyperlinkCol: 11,
+		hyperlinkCol: hyperlinkColDefenderRecommendations,
 	}, styles)
 }
