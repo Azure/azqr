@@ -20,6 +20,57 @@ type StyleCache struct {
 	White  int
 }
 
+// sheetConfig defines the configuration for rendering a generic data sheet.
+type sheetConfig struct {
+	stageName    string
+	sheetName    string
+	tableFunc    func() [][]string
+	hyperlinkCol int  // 1-based column index for hyperlinks; 0 means none
+	isFirstSheet bool // rename "Sheet1" instead of creating a new sheet
+}
+
+// renderSheet renders a data sheet using the provided configuration.
+// It handles stage gating, sheet creation, header row, data rows,
+// optional hyperlinks, and sheet formatting in a single place.
+func renderSheet(f *excelize.File, data *renderers.ReportData, cfg sheetConfig, styles *StyleCache) {
+	if !data.Stages.IsStageEnabled(cfg.stageName) {
+		log.Debug().Msgf("Skipping %s. Feature is disabled", cfg.sheetName)
+		return
+	}
+
+	if cfg.isFirstSheet {
+		if err := f.SetSheetName("Sheet1", cfg.sheetName); err != nil {
+			log.Fatal().Err(err).Msgf("Failed to create %s sheet", cfg.sheetName)
+		}
+	} else {
+		if _, err := f.NewSheet(cfg.sheetName); err != nil {
+			log.Fatal().Err(err).Msgf("Failed to create %s sheet", cfg.sheetName)
+		}
+	}
+
+	records := cfg.tableFunc()
+	headers := records[0]
+	createFirstRow(f, cfg.sheetName, headers, styles)
+
+	if len(records) <= 1 {
+		log.Info().Msgf("Skipping %s. No data to render", cfg.sheetName)
+		return
+	}
+
+	currentRow, err := writeRowsOptimized(f, cfg.sheetName, records[1:], 4)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to write rows")
+	}
+
+	if cfg.hyperlinkCol > 0 {
+		for i := 5; i <= currentRow; i++ {
+			setHyperLink(f, cfg.sheetName, cfg.hyperlinkCol, i)
+		}
+	}
+
+	configureSheet(f, cfg.sheetName, headers, currentRow, styles)
+}
+
 // createSharedStyles creates all shared styles once and caches their IDs
 func createSharedStyles(f *excelize.File) (*StyleCache, error) {
 	header, err := f.NewStyle(&excelize.Style{
