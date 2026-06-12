@@ -58,7 +58,7 @@ func (sc *ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.To
 	return resources, excludedResources
 }
 
-func (sc ResourceDiscovery) GetCountPerResourceTypeAndSubscription(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, recommendations map[string]map[string]*models.GraphRecommendation, filters *models.Filters) []*models.ResourceTypeCount {
+func (sc ResourceDiscovery) GetCountPerResourceTypeAndSubscription(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) []*models.ResourceTypeCount {
 	models.LogResourceTypeScan("Resource Count per Subscription and Type")
 
 	graphClient := graph.NewGraphQuery(cred)
