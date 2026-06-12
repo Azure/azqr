@@ -4,6 +4,7 @@
 package excel
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -105,24 +106,35 @@ func TestCreateFirstRow(t *testing.T) {
 	}
 }
 
-func TestSetHyperLink(t *testing.T) {
+func TestSetHyperLinksBatch(t *testing.T) {
 	tests := []struct {
-		name       string
-		cellValue  string
-		col        int
-		currentRow int
+		name string
+		rows [][]string
+		col  int
 	}{
 		{
-			name:       "valid URL",
-			cellValue:  "https://example.com",
-			col:        1,
-			currentRow: 5,
+			name: "single row with valid URL",
+			rows: [][]string{{"https://example.com"}},
+			col:  1,
 		},
 		{
-			name:       "empty URL",
-			cellValue:  "",
-			col:        1,
-			currentRow: 5,
+			name: "single row with empty URL",
+			rows: [][]string{{""}},
+			col:  1,
+		},
+		{
+			name: "multiple rows mixed URLs",
+			rows: [][]string{
+				{"https://example.com/a"},
+				{""},
+				{"https://example.com/b"},
+			},
+			col: 1,
+		},
+		{
+			name: "col index beyond row width",
+			rows: [][]string{{"only-one-col"}},
+			col:  5,
 		},
 	}
 
@@ -136,12 +148,14 @@ func TestSetHyperLink(t *testing.T) {
 			sheet := "TestSheet"
 			_ = f.SetSheetName("Sheet1", sheet)
 
-			// Set cell value
-			cell, _ := excelize.CoordinatesToCellName(tt.col, tt.currentRow)
-			_ = f.SetCellValue(sheet, cell, tt.cellValue)
+			// Write the data rows first (as renderSheet does via writeRowsOptimized)
+			for i, row := range tt.rows {
+				cell, _ := excelize.CoordinatesToCellName(1, i+5)
+				_ = f.SetSheetRow(sheet, cell, &row)
+			}
 
 			// Should not panic
-			setHyperLink(f, sheet, tt.col, tt.currentRow)
+			setHyperLinksBatch(f, sheet, tt.col, tt.rows)
 		})
 	}
 }
@@ -187,7 +201,8 @@ func TestConfigureSheet(t *testing.T) {
 			}
 
 			// Should not panic
-			configureSheet(f, sheet, tt.headers, tt.currentRow, styles)
+			widths := computeWidthsFromRecords([][]string{tt.headers}, 1000)
+			configureSheet(f, sheet, tt.headers, tt.currentRow, widths, styles)
 		})
 	}
 }
@@ -328,4 +343,149 @@ func TestRenderExternalPlugins(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Helper function for benchmarks
+func generateTable(rows, cols int) [][]string {
+	table := make([][]string, rows)
+	for i := 0; i < rows; i++ {
+		table[i] = make([]string, cols)
+		for j := 0; j < cols; j++ {
+			table[i][j] = fmt.Sprintf("Cell_%d_%d_WithSomeLongerText", i, j)
+		}
+	}
+	return table
+}
+
+// BenchmarkRenderExternalPlugins_CellByCell benchmarks current cell-by-cell implementation
+func BenchmarkRenderExternalPlugins_CellByCell(b *testing.B) {
+	data := &renderers.ReportData{
+		PluginResults: []*renderers.PluginResult{
+			{
+				PluginName: "BenchPlugin",
+				SheetName:  "BenchSheet",
+				Table:      generateTable(1000, 10),
+			},
+		},
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		f := excelize.NewFile()
+		styles, _ := createSharedStyles(f)
+		renderExternalPlugins(f, data, styles)
+		_ = f.Close()
+	}
+}
+
+// BenchmarkSetHyperLinksBatch benchmarks the batch hyperlink function
+func BenchmarkSetHyperLinksBatch(b *testing.B) {
+	f := excelize.NewFile()
+	defer func() {
+		_ = f.Close()
+	}()
+
+	sheet := "TestSheet"
+	_ = f.SetSheetName("Sheet1", sheet)
+
+	rows := make([][]string, 1000)
+	for i := range rows {
+		rows[i] = []string{"https://learn.microsoft.com/azure/well-architected"}
+	}
+
+	// Write data first
+	for i, row := range rows {
+		cell, _ := excelize.CoordinatesToCellName(1, i+5)
+		_ = f.SetSheetRow(sheet, cell, &row)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		setHyperLinksBatch(f, sheet, 1, rows)
+	}
+}
+
+// BenchmarkWriteRowsOptimized benchmarks row writing performance
+func BenchmarkWriteRowsOptimized(b *testing.B) {
+	rows := generateTable(1000, 10)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		f := excelize.NewFile()
+		_, _ = writeRowsOptimized(f, "Sheet1", rows, 4)
+		_ = f.Close()
+	}
+}
+
+// BenchmarkWriteRowsOptimized_Large benchmarks row writing with larger dataset
+func BenchmarkWriteRowsOptimized_Large(b *testing.B) {
+	rows := generateTable(5000, 15)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		f := excelize.NewFile()
+		_, _ = writeRowsOptimized(f, "Sheet1", rows, 4)
+		_ = f.Close()
+	}
+}
+
+// BenchmarkComputeWidthsFromRecords benchmarks the in-memory width calculation
+func BenchmarkComputeWidthsFromRecords(b *testing.B) {
+	rows := generateTable(5000, 15)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = computeWidthsFromRecords(rows, 1000)
+	}
+}
+
+// BenchmarkApplyBlueStyle benchmarks alternating row styling
+func BenchmarkApplyBlueStyle(b *testing.B) {
+	f := excelize.NewFile()
+	defer func() {
+		_ = f.Close()
+	}()
+
+	styles, _ := createSharedStyles(f)
+	sheet := "Sheet1"
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		applyBlueStyleOptimized(f, sheet, 1000, 10, styles)
+	}
+}
+
+// BenchmarkApplyBlueStyle_Large benchmarks styling with larger dataset
+func BenchmarkApplyBlueStyle_Large(b *testing.B) {
+	f := excelize.NewFile()
+	defer func() {
+		_ = f.Close()
+	}()
+
+	styles, _ := createSharedStyles(f)
+	sheet := "Sheet1"
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		applyBlueStyleOptimized(f, sheet, 10000, 20, styles)
+	}
+}
+
+// BenchmarkCoordinateConversion benchmarks coordinate conversion overhead
+func BenchmarkCoordinateConversion(b *testing.B) {
+	b.Run("CoordinatesToCellName", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			for row := 1; row <= 1000; row++ {
+				_, _ = excelize.CoordinatesToCellName(1, row)
+			}
+		}
+	})
+
+	b.Run("StringFormatting", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			for row := 1; row <= 1000; row++ {
+				_ = fmt.Sprintf("A%d", row)
+			}
+		}
+	})
 }
