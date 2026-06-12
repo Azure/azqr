@@ -20,6 +20,19 @@ type StyleCache struct {
 	White  int
 }
 
+// Hyperlink column positions (1-based) for sheets that embed a URL column.
+// These match the column index produced by each table's header row in report_data.go.
+const (
+	// hyperlinkColRecommendations is col 11 — "Read More" in RecommendationsTable
+	hyperlinkColRecommendations = 11
+	// hyperlinkColImpacted is col 18 — "Learn" in ImpactedTable
+	hyperlinkColImpacted = 18
+	// hyperlinkColResources is col 12 — beyond the 10-column ResourcesTable (no-op, preserved for parity)
+	hyperlinkColResources = 12
+	// hyperlinkColDefenderRecommendations is col 11 — "AzPortal Link" in DefenderRecommendationsTable
+	hyperlinkColDefenderRecommendations = 11
+)
+
 // sheetConfig defines the configuration for rendering a generic data sheet.
 type sheetConfig struct {
 	stageName    string

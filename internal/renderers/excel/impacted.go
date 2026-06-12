@@ -14,6 +14,6 @@ func renderImpactedResources(f *excelize.File, data *renderers.ReportData, style
 		stageName:    models.StageNameGraph,
 		sheetName:    "ImpactedResources",
 		tableFunc:    data.ImpactedTable,
-		hyperlinkCol: 18,
+		hyperlinkCol: hyperlinkColImpacted,
 	}, styles)
 }

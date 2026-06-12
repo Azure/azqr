@@ -14,7 +14,7 @@ func renderResources(f *excelize.File, data *renderers.ReportData, styles *Style
 		stageName:    models.StageNameGraph,
 		sheetName:    "Inventory",
 		tableFunc:    data.ResourcesTable,
-		hyperlinkCol: 12,
+		hyperlinkCol: hyperlinkColResources,
 	}, styles)
 }
 
@@ -23,6 +23,6 @@ func renderExcludedResources(f *excelize.File, data *renderers.ReportData, style
 		stageName:    models.StageNameGraph,
 		sheetName:    "OutOfScope",
 		tableFunc:    data.ExcludedResourcesTable,
-		hyperlinkCol: 12,
+		hyperlinkCol: hyperlinkColResources,
 	}, styles)
 }
