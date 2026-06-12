@@ -32,8 +32,10 @@ func (s *CostStage) Execute(ctx *ScanContext) error {
 		return nil
 	}
 
-	// Worker pool to limit concurrent cost scanner goroutines
-	const numCostWorkers = 10
+	// Worker count is capped at the costLimiter burst (2) so no worker ever
+	// waits for a token that another worker already holds. More workers than
+	// burst capacity just adds goroutine overhead without increasing throughput.
+	const numCostWorkers = 2
 	workerCount := min(numCostWorkers, subCount)
 
 	jobs := make(chan string, subCount)
