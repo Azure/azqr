@@ -461,16 +461,7 @@ func (s *RegionSelectorScanner) calculateScores(results []regionComparison) {
 //	Avg Latency (ms) | Avg Cost Difference % | Recommendation Score |
 //	Missing Resource Types | Unavailable SKUs | Restricted SKUs
 func (s *RegionSelectorScanner) generateOutputTable(results []regionComparison) [][]string {
-	table := [][]string{
-		{
-			"Subscription", "Source Region", "Target Region",
-			"Source Resource Type Count", "Available Resource Types", "Unavailable Resource Types", "Availability %",
-			"Total SKUs Checked", "Available SKUs", "Unavailable SKUs", "Restricted SKUs", "Unknown SKUs", "SKU Availability %",
-			"Availability Zones",
-			"Avg Latency (ms)", "Avg Cost Difference %", "Recommendation Score", "Score Quality", "Recommendation",
-			"Missing Resource Types", "Unavailable SKUs (detail)", "Restricted SKUs (detail)",
-		},
-	}
+	table := [][]string{s.GetMetadata().HeaderRow()}
 
 	for _, result := range results {
 		costDiffStr := "N/A"

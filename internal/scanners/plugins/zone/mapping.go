@@ -49,10 +49,8 @@ func (s *ZoneMappingScanner) GetMetadata() plugins.PluginMetadata {
 func (s *ZoneMappingScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
 	log.Info().Msg("Scanning availability zone mappings across subscriptions")
 
-	// Initialize table with headers
-	table := [][]string{
-		{"Subscription", "Location", "Display Name", "Logical Zone", "Physical Zone"},
-	}
+	// Build header row from ColumnMetadata (single source of truth).
+	table := [][]string{s.GetMetadata().HeaderRow()}
 
 	// Create a single HTTP client to share across all goroutines.
 	// az.HttpClient is safe for concurrent use.

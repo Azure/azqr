@@ -162,10 +162,8 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 		}
 	}
 
-	// Initialize table with headers
-	table := [][]string{
-		{"Period From", "Period To", "Resource Type", "Latest Month Emissions", "Previous Month Emissions", "Month-over-Month Change Ratio", "Monthly Change Value", "Unit"},
-	}
+	// Build header row from ColumnMetadata (single source of truth).
+	table := [][]string{s.GetMetadata().HeaderRow()}
 
 	// Convert aggregated results to table rows
 	for resourceType, agg := range aggregatedResults {
