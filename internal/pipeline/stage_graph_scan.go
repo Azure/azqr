@@ -48,24 +48,23 @@ func (s *GraphScanStage) Execute(ctx *ScanContext) error {
 		Int("rules_count", len(rules)).
 		Msg("Graph Phase 1: Recommendations listed")
 
-	// Get resource type counts for filtering
+	// Get resource type counts for filtering — fetched once and reused below.
 	resourceScanner := scanners.ResourceDiscovery{}
-	resourceTypes := resourceScanner.GetCountPerResourceType(
+	resourceTypeCount := resourceScanner.GetCountPerResourceTypeAndSubscription(
 		ctx.Ctx,
 		ctx.Cred,
 		ctx.Subscriptions,
 		ctx.Params.Filters,
 	)
+	ctx.ReportData.ResourceTypeCount = resourceTypeCount
 
 	log.Debug().
-		Int("resource_types_count", len(resourceTypes)).
+		Int("resource_types_count", len(resourceTypeCount)).
 		Msg("Graph Phase 1: Resource types retrieved")
 
-	// Normalize resource types to lowercase
-	normalizedResourceTypes := make(map[string]float64)
-	for rt, count := range resourceTypes {
-		normalizedResourceTypes[strings.ToLower(rt)] = count
-	}
+	// Derive per-type totals from the already-fetched per-subscription data.
+	// This avoids a second Azure Resource Graph round-trip.
+	normalizedResourceTypes := deriveResourceTypeTotals(resourceTypeCount)
 
 	// Filter scanners based on resource types
 	filteredScanners := s.filterServiceScanners(serviceScanners, normalizedResourceTypes)
@@ -78,14 +77,6 @@ func (s *GraphScanStage) Execute(ctx *ScanContext) error {
 
 	if len(filteredScanners) == 0 {
 		log.Warn().Msg("Graph: No filtered scanners - returning 0 results")
-		// Still need to get resource type counts
-		ctx.ReportData.ResourceTypeCount = resourceScanner.GetCountPerResourceTypeAndSubscription(
-			ctx.Ctx,
-			ctx.Cred,
-			ctx.Subscriptions,
-			ctx.ReportData.Recommendations,
-			ctx.Params.Filters,
-		)
 		return nil
 	}
 
@@ -101,15 +92,6 @@ func (s *GraphScanStage) Execute(ctx *ScanContext) error {
 	log.Debug().
 		Int("graph_results", len(ctx.ReportData.Graph)).
 		Msg("Graph scan completed")
-
-	// Get resource type counts per subscription
-	ctx.ReportData.ResourceTypeCount = resourceScanner.GetCountPerResourceTypeAndSubscription(
-		ctx.Ctx,
-		ctx.Cred,
-		ctx.Subscriptions,
-		ctx.ReportData.Recommendations,
-		ctx.Params.Filters,
-	)
 
 	return nil
 }
@@ -166,4 +148,15 @@ func (s *GraphScanStage) filterServiceScanners(
 		Msg("Filtered service scanners")
 
 	return filteredScanners
+}
+
+// deriveResourceTypeTotals aggregates per-subscription ResourceTypeCount rows
+// into a lowercase-keyed map of total counts per resource type. This lets the
+// graph scan stage filter available scanners without an extra Azure API call.
+func deriveResourceTypeTotals(counts []*models.ResourceTypeCount) map[string]float64 {
+	totals := make(map[string]float64, len(counts))
+	for _, rtc := range counts {
+		totals[strings.ToLower(rtc.ResourceType)] += rtc.Count
+	}
+	return totals
 }
