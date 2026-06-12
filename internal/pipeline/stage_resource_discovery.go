@@ -4,6 +4,8 @@
 package pipeline
 
 import (
+	"fmt"
+
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/rs/zerolog/log"
 )
@@ -32,12 +34,11 @@ func (s *ResourceDiscoveryStage) Execute(ctx *ScanContext) error {
 	ctx.ReportData.Resources = resources
 	ctx.ReportData.ExludedResources = excludedResources
 
-	// Check Excel row limit
+	// Only enforce the Excel row limit when Excel output is actually requested.
 	const excelMaxRows = 1048566
-	if len(resources) > excelMaxRows {
-		log.Fatal().
-			Msgf("Number of resources (%d) exceeds Excel's maximum row limit (%d). Aborting scan.",
-				len(resources), excelMaxRows)
+	if ctx.Params.Xlsx && len(resources) > excelMaxRows {
+		return fmt.Errorf("resource count (%d) exceeds Excel's maximum row limit (%d); use --csv or --json instead",
+			len(resources), excelMaxRows)
 	}
 
 	log.Info().
