@@ -121,6 +121,18 @@ type FlagProvider interface {
 	RegisterFlags(cmd *cobra.Command)
 }
 
+// HeaderRow returns the ordered list of column display names from ColumnMetadata.
+// Plugins use this as the first row of their Table instead of duplicating the
+// column names as a string literal, keeping ColumnMetadata as the single source
+// of truth.
+func (m PluginMetadata) HeaderRow() []string {
+	headers := make([]string, len(m.ColumnMetadata))
+	for i, col := range m.ColumnMetadata {
+		headers[i] = col.Name
+	}
+	return headers
+}
+
 // ColumnMetadata defines filtering behavior for a column in the viewer
 type ColumnMetadata struct {
 	Name       string     `json:"name"`       // Display name (e.g., "Latest Month Emissions")

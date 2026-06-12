@@ -109,10 +109,8 @@ func extractDeploymentInfo(deployment *armcognitiveservices.Deployment) deployme
 
 // Scan executes the plugin and returns table data
 func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
-	// Initialize table with headers
-	table := [][]string{
-		{"Subscription", "Resource Group", "Account Name", "Kind", "SKU", "Deployment Name", "Model Name", "Model Version", "Model Format", "SKU Capacity", "Version Upgrade Option", "Spillover Enabled", "Spillover Deployment", "Hour", "Status Code", "Request Count"},
-	}
+	// Build header row from ColumnMetadata (single source of truth).
+	table := [][]string{s.GetMetadata().HeaderRow()}
 
 	// Use a targeted Resource Graph query instead of fetching all resources.
 	// This avoids downloading the entire resource inventory when only

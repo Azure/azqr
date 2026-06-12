@@ -93,25 +93,8 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 		return nil, fmt.Errorf("failed to query Azure Resource Graph for SQL ESU resources: %w", err)
 	}
 
-	// Initialize table with headers
-	table := [][]string{
-		{
-			"Name", "Resource Group", "Subscription", "Location", "Cloud Type",
-			"SQL Version", "Edition", "vCores", "Billable Cores", "EOL Status",
-			"Migration Recommendation", "Migration Target Tier",
-			"ESU Start Date", "ESU End Date",
-			"ESU Monthly Cost/Core",
-			"SQL License Type", "SQL License Cost/Core/Month", "SQL License Monthly Cost", "SQL License Annual Cost",
-			"VM Cost/Core/Month",
-			"Est VM Compute Monthly Cost", "Est VM Compute Annual Cost", "Est VM Compute 3-Year Cost",
-			"Est ESU Monthly Cost", "Est ESU Annual Cost", "Est ESU 3-Year Cost",
-			"Patch Ops Monthly Cost", "Patch Ops Annual Cost", "Patch Ops 3-Year Cost",
-			"Current Monthly Cost", "Current Annual Cost", "Current 3-Year Cost",
-			"Est SQL MI Monthly Cost", "Est SQL MI Annual Cost", "Est SQL MI 3-Year Cost",
-			"Est SQL MI Monthly Saving", "Est SQL MI Annual Saving", "Est SQL MI 3-Year Saving",
-			"SQL MI Migration Verdict",
-		},
-	}
+	// Build header row from ColumnMetadata (single source of truth).
+	table := [][]string{s.GetMetadata().HeaderRow()}
 
 	if result.Data != nil {
 		for _, row := range result.Data {
