@@ -5,6 +5,7 @@ package excel
 
 import (
 	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 	"time"
@@ -46,18 +47,18 @@ func cellAt(t *testing.T, f *excelize.File, sheet string, col, row int) string {
 	return v
 }
 
-// cellHasHyperlink reports whether a hyperlink is set on the cell at (col, row).
+// cellHasHyperlink reports whether a =HYPERLINK() formula is set on the cell at (col, row).
 func cellHasHyperlink(t *testing.T, f *excelize.File, sheet string, col, row int) bool {
 	t.Helper()
 	addr, err := excelize.CoordinatesToCellName(col, row)
 	if err != nil {
 		t.Fatalf("CoordinatesToCellName(%d,%d): %v", col, row, err)
 	}
-	hasLink, target, err := f.GetCellHyperLink(sheet, addr)
+	formula, err := f.GetCellFormula(sheet, addr)
 	if err != nil {
-		t.Fatalf("GetCellHyperLink(%s, %s): %v", sheet, addr, err)
+		t.Fatalf("GetCellFormula(%s, %s): %v", sheet, addr, err)
 	}
-	return hasLink && target != ""
+	return len(formula) > 10 && formula[:10] == "HYPERLINK("
 }
 
 // freshFile creates a new excelize file with shared styles, and registers
@@ -71,6 +72,22 @@ func freshFile(t *testing.T) (*excelize.File, *StyleCache) {
 		t.Fatalf("createSharedStyles: %v", err)
 	}
 	return f, styles
+}
+
+// saveAndReopen persists f to a temporary XLSX file and reopens it.
+// Required after StreamWriter Flush because the in-memory cell map is cleared.
+func saveAndReopen(t *testing.T, f *excelize.File) *excelize.File {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "test.xlsx")
+	if err := f.SaveAs(path); err != nil {
+		t.Fatalf("saveAndReopen SaveAs: %v", err)
+	}
+	f2, err := excelize.OpenFile(path)
+	if err != nil {
+		t.Fatalf("saveAndReopen OpenFile: %v", err)
+	}
+	t.Cleanup(func() { _ = f2.Close() })
+	return f2
 }
 
 // staticTable builds a tableFunc that always returns the given header + rows.
@@ -110,6 +127,7 @@ func TestRenderSheet(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q must be created even with no data rows", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Col1" {
 			t.Errorf("header A4 = %q, want Col1", got)
 		}
@@ -128,6 +146,7 @@ func TestRenderSheet(t *testing.T) {
 				[]string{"r2c1", "r2c2", "r2c3"},
 			)}, styles)
 
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Col1" {
 			t.Errorf("header A4 = %q, want Col1", got)
 		}
@@ -150,6 +169,7 @@ func TestRenderSheet(t *testing.T) {
 				[]string{"value", "https://example.com", "value"},
 			)}, styles)
 
+		f = saveAndReopen(t, f)
 		if !cellHasHyperlink(t, f, sheet, hyperlinkCol, 5) {
 			t.Errorf("expected hyperlink at col %d row 5", hyperlinkCol)
 		}
@@ -165,6 +185,7 @@ func TestRenderSheet(t *testing.T) {
 				[]string{"https://example.com", "https://example.com", "val"},
 			)}, styles)
 
+		f = saveAndReopen(t, f)
 		// Neither col 1 nor col 2 should get a hyperlink
 		for col := 1; col <= 3; col++ {
 			if cellHasHyperlink(t, f, sheet, col, 5) {
@@ -236,6 +257,7 @@ func TestRenderAdvisor(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Subscription Id" {
 			t.Errorf("A4 = %q, want %q", got, "Subscription Id")
 		}
@@ -268,6 +290,7 @@ func TestRenderArcSQL(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Subscription Id" {
 			t.Errorf("A4 = %q, want %q", got, "Subscription Id")
 		}
@@ -300,6 +323,7 @@ func TestRenderAzurePolicy(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Subscription Id" {
 			t.Errorf("A4 = %q, want %q", got, "Subscription Id")
 		}
@@ -333,6 +357,7 @@ func TestRenderCosts(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		// CostTable header order: From, To, Subscription Id, Subscription Name, Service Name, Value, Currency
 		if got := cellAt(t, f, sheet, 1, 4); got != "From" {
 			t.Errorf("A4 = %q, want %q", got, "From")
@@ -367,6 +392,7 @@ func TestRenderDefender(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Subscription Id" {
 			t.Errorf("A4 = %q, want %q", got, "Subscription Id")
 		}
@@ -401,6 +427,7 @@ func TestRenderDefenderRecommendations(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Subscription Id" {
 			t.Errorf("A4 = %q, want %q", got, "Subscription Id")
 		}
@@ -417,6 +444,7 @@ func TestRenderDefenderRecommendations(t *testing.T) {
 			},
 		}
 		renderDefenderRecommendations(f, data, styles)
+		f = saveAndReopen(t, f)
 		if !cellHasHyperlink(t, f, sheet, azPortalLinkCol, 5) {
 			t.Errorf("expected hyperlink at col %d (AzPortal Link) row 5", azPortalLinkCol)
 		}
@@ -455,6 +483,7 @@ func TestRenderImpactedResources(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Validated Using" {
 			t.Errorf("A4 = %q, want %q", got, "Validated Using")
 		}
@@ -476,6 +505,7 @@ func TestRenderImpactedResources(t *testing.T) {
 			},
 		}
 		renderImpactedResources(f, data, styles)
+		f = saveAndReopen(t, f)
 		if !cellHasHyperlink(t, f, sheet, learnCol, 5) {
 			t.Errorf("expected hyperlink at col %d (Learn) row 5", learnCol)
 		}
@@ -540,6 +570,7 @@ func TestRenderRecommendations(t *testing.T) {
 			},
 		}
 		renderRecommendations(f, data, styles)
+		f = saveAndReopen(t, f)
 		if !cellHasHyperlink(t, f, sheet, readMoreCol, 5) {
 			t.Errorf("expected hyperlink at col %d (Read More) row 5", readMoreCol)
 		}
@@ -569,6 +600,7 @@ func TestRenderResourceTypes(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Subscription Name" {
 			t.Errorf("A4 = %q, want %q", got, "Subscription Name")
 		}
@@ -603,6 +635,7 @@ func TestRenderResources(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Subscription Id" {
 			t.Errorf("A4 = %q, want %q", got, "Subscription Id")
 		}
@@ -637,6 +670,7 @@ func TestRenderExcludedResources(t *testing.T) {
 		if !hasSheet(f, sheet) {
 			t.Fatalf("sheet %q not created", sheet)
 		}
+		f = saveAndReopen(t, f)
 		if got := cellAt(t, f, sheet, 1, 4); got != "Subscription Id" {
 			t.Errorf("A4 = %q, want %q", got, "Subscription Id")
 		}

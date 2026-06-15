@@ -5,10 +5,10 @@ package scanners
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
@@ -59,40 +59,58 @@ func (s *ArcSQLScanner) Scan(ctx context.Context, cred azcore.TokenCredential, s
 	resources := []*models.ArcSQLResult{}
 
 	if result.Data != nil {
-		for _, row := range result.Data {
-			m := row.(map[string]interface{})
-
-			subscription := to.String(m["subscriptionId"])
-			if filters.Azqr.IsSubscriptionExcluded(subscription) {
+		type arcSQLRow struct {
+			SubscriptionID string `json:"subscriptionId"`
+			Status         string `json:"status"`
+			AzureArcServer string `json:"AzureArcServer"`
+			SQLInstance    string `json:"SQLInstance"`
+			ResourceGroup  string `json:"resourceGroup"`
+			Version        string `json:"version"`
+			Build          string `json:"Build"`
+			PatchLevel     string `json:"patchLevel"`
+			Edition        string `json:"edition"`
+			VCores         string `json:"vcores"`
+			License        string `json:"License"`
+			DPSStatus      string `json:"DPSStatus"`
+			TELStatus      string `json:"TELStatus"`
+			DefenderStatus string `json:"DefenderStatus"`
+		}
+		for _, raw := range result.Data {
+			var r arcSQLRow
+			if err := json.Unmarshal(raw, &r); err != nil {
+				log.Warn().Err(err).Msg("Skipping malformed Arc SQL row")
 				continue
 			}
 
-			sqlInstance := to.String(m["SQLInstance"])
-			if filters.Azqr.IsServiceExcluded(sqlInstance) {
+			if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
 				continue
 			}
 
-			subscriptionName, ok := subscriptions[subscription]
+			if filters.Azqr.IsServiceExcluded(r.SQLInstance) {
+				continue
+			}
+
+			subscriptionName, ok := subscriptions[r.SubscriptionID]
 			if !ok {
 				subscriptionName = ""
 			}
 
 			resources = append(resources, &models.ArcSQLResult{
-				SubscriptionID:   subscription,
+				SubscriptionID:   r.SubscriptionID,
 				SubscriptionName: subscriptionName,
-				Status:           to.String(m["status"]),
-				AzureArcServer:   to.String(m["AzureArcServer"]),
-				SQLInstance:      sqlInstance,
-				ResourceGroup:    to.String(m["resourceGroup"]),
-				Version:          to.String(m["version"]),
-				Build:            to.String(m["Build"]),
-				PatchLevel:       to.String(m["patchLevel"]),
-				Edition:          to.String(m["edition"]),
-				VCores:           to.String(m["vcores"]),
-				License:          to.String(m["License"]),
-				DPSStatus:        to.String(m["DPSStatus"]),
-				TELStatus:        to.String(m["TELStatus"]),
-				DefenderStatus:   to.String(m["DefenderStatus"]),
+				Status:           r.Status,
+				AzureArcServer:   r.AzureArcServer,
+				SQLInstance:      r.SQLInstance,
+				ResourceGroup:    r.ResourceGroup,
+				Version:          r.Version,
+				Build:            r.Build,
+				PatchLevel:       r.PatchLevel,
+				Edition:          r.Edition,
+				VCores:           r.VCores,
+				License:          r.License,
+				DPSStatus:        r.DPSStatus,
+				TELStatus:        r.TELStatus,
+				DefenderStatus:   r.DefenderStatus,
 			})
 		}
 	}

@@ -5,11 +5,11 @@ package scanners
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/advisor/armadvisor"
 	"github.com/rs/zerolog/log"
@@ -71,30 +71,39 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 	}
 	resources := []*models.AdvisorResult{}
 	if result.Data != nil {
-		for _, row := range result.Data {
-			m := row.(map[string]interface{})
-
-			subID := to.String(m["SubscriptionId"])
-
-			if filters.Azqr.IsSubscriptionExcluded(subID) {
+		type advisorRow struct {
+			SubscriptionID       string `json:"SubscriptionId"`
+			ResourceID           string `json:"ResourceId"`
+			ImpactedValue        string `json:"ImpactedValue"`
+			Category             string `json:"Category"`
+			Impact               string `json:"Impact"`
+			RecommendationTypeID string `json:"RecommendationTypeId"`
+		}
+		for _, raw := range result.Data {
+			var r advisorRow
+			if err := json.Unmarshal(raw, &r); err != nil {
+				log.Warn().Err(err).Msg("Skipping malformed Advisor row")
 				continue
 			}
 
-			resourceId := to.String(m["ResourceId"])
-			if filters.Azqr.IsServiceExcluded(resourceId) {
+			if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
+				continue
+			}
+
+			if filters.Azqr.IsServiceExcluded(r.ResourceID) {
 				continue
 			}
 
 			rec := &models.AdvisorResult{
-				SubscriptionID:   subID,
-				SubscriptionName: subscriptions[subID],
-				Name:             to.String(m["ImpactedValue"]),
-				Type:             models.GetResourceTypeFromResourceID(resourceId),
-				ResourceID:       resourceId,
-				Category:         to.String(m["Category"]),
-				Impact:           to.String(m["Impact"]),
-				Description:      recommendationTypes[to.String(m["RecommendationTypeId"])],
-				RecommendationID: to.String(m["RecommendationTypeId"]),
+				SubscriptionID:   r.SubscriptionID,
+				SubscriptionName: subscriptions[r.SubscriptionID],
+				Name:             r.ImpactedValue,
+				Type:             models.GetResourceTypeFromResourceID(r.ResourceID),
+				ResourceID:       r.ResourceID,
+				Category:         r.Category,
+				Impact:           r.Impact,
+				Description:      recommendationTypes[r.RecommendationTypeID],
+				RecommendationID: r.RecommendationTypeID,
 			}
 			resources = append(resources, rec)
 		}

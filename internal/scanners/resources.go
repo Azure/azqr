@@ -2,11 +2,11 @@ package scanners
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
@@ -27,21 +27,38 @@ func (sc *ResourceDiscovery) GetAllResources(ctx context.Context, cred azcore.To
 	resources := []*models.Resource{}
 	excludedResources := []*models.Resource{}
 	if result.Data != nil {
-		for _, row := range result.Data {
-			m := row.(map[string]interface{})
+		type resourceRow struct {
+			ID             string  `json:"id"`
+			SubscriptionID string  `json:"subscriptionId"`
+			ResourceGroup  string  `json:"resourceGroup"`
+			Location       string  `json:"location"`
+			Type           string  `json:"type"`
+			Name           string  `json:"name"`
+			SkuName        string  `json:"skuName"`
+			SkuTier        string  `json:"skuTier"`
+			SkuFamily      string  `json:"skuFamily"`
+			SkuCapacity    int     `json:"skuCapacity"`
+			Kind           string  `json:"kind"`
+		}
+		for _, raw := range result.Data {
+			var r resourceRow
+			if err := json.Unmarshal(raw, &r); err != nil {
+				log.Warn().Err(err).Msg("Skipping malformed resource row")
+				continue
+			}
 
 			resource := &models.Resource{
-				ID:             to.String(m["id"]),
-				SubscriptionID: to.String(m["subscriptionId"]),
-				ResourceGroup:  to.String(m["resourceGroup"]),
-				Location:       to.String(m["location"]),
-				Type:           to.String(m["type"]),
-				Name:           to.String(m["name"]),
-				SkuName:        to.String(m["skuName"]),
-				SkuTier:        to.String(m["skuTier"]),
-				SkuFamily:      to.String(m["skuFamily"]),
-				SkuCapacity:    to.Int(m["skuCapacity"]),
-				Kind:           to.String(m["kind"]),
+				ID:             r.ID,
+				SubscriptionID: r.SubscriptionID,
+				ResourceGroup:  r.ResourceGroup,
+				Location:       r.Location,
+				Type:           r.Type,
+				Name:           r.Name,
+				SkuName:        r.SkuName,
+				SkuTier:        r.SkuTier,
+				SkuFamily:      r.SkuFamily,
+				SkuCapacity:    r.SkuCapacity,
+				Kind:           r.Kind,
 			}
 
 			if filters != nil && filters.Azqr.IsServiceExcluded(resource.ID) {
@@ -72,17 +89,26 @@ func (sc ResourceDiscovery) GetCountPerResourceTypeAndSubscription(ctx context.C
 	}
 	resources := []*models.ResourceTypeCount{}
 	if result.Data != nil {
-		for _, row := range result.Data {
-			m := row.(map[string]interface{})
+		type countBySubRow struct {
+			SubscriptionID string  `json:"subscriptionId"`
+			Type           string  `json:"type"`
+			Count          float64 `json:"count_"`
+		}
+		for _, raw := range result.Data {
+			var r countBySubRow
+			if err := json.Unmarshal(raw, &r); err != nil {
+				log.Warn().Err(err).Msg("Skipping malformed resource count row")
+				continue
+			}
 
-			if filters.Azqr.IsResourceTypeExcluded(strings.ToLower(m["type"].(string))) {
+			if filters.Azqr.IsResourceTypeExcluded(strings.ToLower(r.Type)) {
 				continue
 			}
 
 			resources = append(resources, &models.ResourceTypeCount{
-				Subscription: subscriptions[m["subscriptionId"].(string)],
-				ResourceType: m["type"].(string),
-				Count:        m["count_"].(float64),
+				Subscription: subscriptions[r.SubscriptionID],
+				ResourceType: r.Type,
+				Count:        r.Count,
 			})
 		}
 	}
@@ -103,14 +129,22 @@ func (sc ResourceDiscovery) GetCountPerResourceType(ctx context.Context, cred az
 	}
 	resources := map[string]float64{}
 	if result.Data != nil {
-		for _, row := range result.Data {
-			m := row.(map[string]interface{})
-
-			if filters.Azqr.IsResourceTypeExcluded(strings.ToLower(m["type"].(string))) {
+		type countByTypeRow struct {
+			Type  string  `json:"type"`
+			Count float64 `json:"count_"`
+		}
+		for _, raw := range result.Data {
+			var r countByTypeRow
+			if err := json.Unmarshal(raw, &r); err != nil {
+				log.Warn().Err(err).Msg("Skipping malformed resource type count row")
 				continue
 			}
 
-			resources[m["type"].(string)] = m["count_"].(float64)
+			if filters.Azqr.IsResourceTypeExcluded(strings.ToLower(r.Type)) {
+				continue
+			}
+
+			resources[r.Type] = r.Count
 		}
 	}
 	return resources

@@ -25,7 +25,7 @@ type GraphQueryClient struct {
 
 // GraphResult holds the data returned from a Resource Graph query.
 type GraphResult struct {
-	Data []interface{} // Query result data
+	Data []json.RawMessage // Query result rows as raw JSON; each consumer unmarshals into its own typed struct.
 }
 
 // QueryOptions controls optional behaviour of a Resource Graph query.
@@ -53,8 +53,8 @@ type QueryRequest struct {
 
 // QueryResponse represents the response from the Resource Graph API.
 type QueryResponse struct {
-	Data       []interface{} `json:"data"` // Query result data
-	SkipToken  *string       `json:"$skipToken,omitempty"`
+	Data       []json.RawMessage `json:"data"` // Query result rows; each element is a raw JSON object.
+	SkipToken  *string           `json:"$skipToken,omitempty"`
 	Quota      int           // Value of x-ms-user-quota-remaining header as int
 	RetryAfter time.Duration // Value of x-ms-user-quota-resets-after header as timespan
 }
@@ -77,7 +77,7 @@ func NewGraphQuery(cred azcore.TokenCredential) *GraphQueryClient {
 // features such as management-group scope (needed only for PolicyResources queries).
 func (q *GraphQueryClient) Query(ctx context.Context, query string, subscriptions map[string]string, opts ...QueryOptions) (*GraphResult, error) {
 	result := GraphResult{
-		Data: make([]interface{}, 0, 5000),
+		Data: make([]json.RawMessage, 0, 5000),
 	}
 
 	subscriptionIDs := make([]string, 0, len(subscriptions))
@@ -139,10 +139,15 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 	}
 
 	// Send POST request using HttpClient (handles retries and throttling automatically)
-	respBody, resp, err := q.httpClient.DoPost(ctx, q.endpoint, readSeekCloser)
+	resp, err := q.httpClient.DoPostStream(ctx, q.endpoint, readSeekCloser)
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Warn().Err(closeErr).Msg("Failed to close response body")
+		}
+	}()
 
 	// Parse response JSON
 	queryResp := QueryResponse{}
@@ -170,8 +175,8 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 
 	log.Debug().Msgf("Graph query quota remaining: %d, Retry after: %s", queryResp.Quota, queryResp.RetryAfter)
 
-	// Unmarshal response body
-	if err := json.Unmarshal(respBody, &queryResp); err != nil {
+	// Decode response body directly from the stream
+	if err := json.NewDecoder(resp.Body).Decode(&queryResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 

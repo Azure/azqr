@@ -6,12 +6,12 @@ package sqlesu
 import (
 	"context"
 	_ "embed"
+	"encoding/json"
 	"fmt"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/plugins"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
@@ -97,54 +97,99 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 	table := [][]string{s.GetMetadata().HeaderRow()}
 
 	if result.Data != nil {
-		for _, row := range result.Data {
-			m := row.(map[string]interface{})
+		type sqlESURow struct {
+			SubscriptionID              string `json:"SubscriptionId"`
+			Name                        string `json:"Name"`
+			ResourceGroup               string `json:"ResourceGroup"`
+			Subscription                string `json:"Subscription"`
+			Location                    string `json:"Location"`
+			CloudType                   string `json:"CloudType"`
+			SQLVersion                  string `json:"SQLVersion"`
+			Edition                     string `json:"Edition"`
+			VCores                      string `json:"vCores"`
+			BillableCores               string `json:"BillableCores"`
+			EOLStatus                   string `json:"EOLStatus"`
+			MigrationRecommendation     string `json:"MigrationRecommendation"`
+			MigrationTargetTier         string `json:"MigrationTargetTier"`
+			ESUStartDate                string `json:"ESUStartDate"`
+			ESUEndDate                  string `json:"ESUEndDate"`
+			ESUMonthlyCostPerCore       string `json:"ESUMonthlyCostPerCore"`
+			SQLLicenseType              string `json:"SQLLicenseType"`
+			SQLLicenseMonthlyCostPerCore string `json:"SQLLicenseMonthlyCostPerCore"`
+			SQLLicenseMonthlyCost       string `json:"SQLLicenseMonthlyCost"`
+			SQLLicenseAnnualCost        string `json:"SQLLicenseAnnualCost"`
+			VMCostPerCorePerMonth       string `json:"VMCostPerCorePerMonth"`
+			EstVMComputeMonthlyCost     string `json:"EstVMComputeMonthlyCost"`
+			EstVMComputeAnnualCost      string `json:"EstVMComputeAnnualCost"`
+			EstVMComputeThreeYearCost   string `json:"EstVMComputeThreeYearCost"`
+			EstESUMonthlyCost           string `json:"EstESUMonthlyCost"`
+			EstESUAnnualCost            string `json:"EstESUAnnualCost"`
+			EstESUThreeYearCost         string `json:"EstESUThreeYearCost"`
+			PatchOpsMonthlyCost         string `json:"PatchOpsMonthlyCost"`
+			PatchOpsAnnualCost          string `json:"PatchOpsAnnualCost"`
+			PatchOpsThreeYearCost       string `json:"PatchOpsThreeYearCost"`
+			CurrentMonthlyCost          string `json:"CurrentMonthlyCost"`
+			CurrentAnnualCost           string `json:"CurrentAnnualCost"`
+			CurrentThreeYearCost        string `json:"CurrentThreeYearCost"`
+			EstSQLMIMonthlyCost         string `json:"EstSQLMIMonthlyCost"`
+			EstSQLMIAnnualCost          string `json:"EstSQLMIAnnualCost"`
+			EstSQLMIThreeYearCost       string `json:"EstSQLMIThreeYearCost"`
+			EstSQLMIMonthlySaving       string `json:"EstSQLMIMonthlySaving"`
+			EstSQLMIAnnualSaving        string `json:"EstSQLMIAnnualSaving"`
+			EstSQLMIThreeYearSaving     string `json:"EstSQLMIThreeYearSaving"`
+			SQLMIMigrationVerdict       string `json:"SQLMIMigrationVerdict"`
+		}
+		for _, raw := range result.Data {
+			var r sqlESURow
+			if err := json.Unmarshal(raw, &r); err != nil {
+				log.Warn().Err(err).Msg("Skipping malformed SQL ESU row")
+				continue
+			}
 
-			subscriptionId := to.String(m["SubscriptionId"])
-			if params.Filters.Azqr.IsSubscriptionExcluded(subscriptionId) {
+			if params.Filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
 				continue
 			}
 
 			table = append(table, []string{
-				to.String(m["Name"]),
-				to.String(m["ResourceGroup"]),
-				to.String(m["Subscription"]),
-				to.String(m["Location"]),
-				to.String(m["CloudType"]),
-				to.String(m["SQLVersion"]),
-				to.String(m["Edition"]),
-				to.String(m["vCores"]),
-				to.String(m["BillableCores"]),
-				to.String(m["EOLStatus"]),
-				to.String(m["MigrationRecommendation"]),
-				to.String(m["MigrationTargetTier"]),
-				to.String(m["ESUStartDate"]),
-				to.String(m["ESUEndDate"]),
-				to.String(m["ESUMonthlyCostPerCore"]),
-				to.String(m["SQLLicenseType"]),
-				to.String(m["SQLLicenseMonthlyCostPerCore"]),
-				to.String(m["SQLLicenseMonthlyCost"]),
-				to.String(m["SQLLicenseAnnualCost"]),
-				to.String(m["VMCostPerCorePerMonth"]),
-				to.String(m["EstVMComputeMonthlyCost"]),
-				to.String(m["EstVMComputeAnnualCost"]),
-				to.String(m["EstVMComputeThreeYearCost"]),
-				to.String(m["EstESUMonthlyCost"]),
-				to.String(m["EstESUAnnualCost"]),
-				to.String(m["EstESUThreeYearCost"]),
-				to.String(m["PatchOpsMonthlyCost"]),
-				to.String(m["PatchOpsAnnualCost"]),
-				to.String(m["PatchOpsThreeYearCost"]),
-				to.String(m["CurrentMonthlyCost"]),
-				to.String(m["CurrentAnnualCost"]),
-				to.String(m["CurrentThreeYearCost"]),
-				to.String(m["EstSQLMIMonthlyCost"]),
-				to.String(m["EstSQLMIAnnualCost"]),
-				to.String(m["EstSQLMIThreeYearCost"]),
-				to.String(m["EstSQLMIMonthlySaving"]),
-				to.String(m["EstSQLMIAnnualSaving"]),
-				to.String(m["EstSQLMIThreeYearSaving"]),
-				to.String(m["SQLMIMigrationVerdict"]),
+				r.Name,
+				r.ResourceGroup,
+				r.Subscription,
+				r.Location,
+				r.CloudType,
+				r.SQLVersion,
+				r.Edition,
+				r.VCores,
+				r.BillableCores,
+				r.EOLStatus,
+				r.MigrationRecommendation,
+				r.MigrationTargetTier,
+				r.ESUStartDate,
+				r.ESUEndDate,
+				r.ESUMonthlyCostPerCore,
+				r.SQLLicenseType,
+				r.SQLLicenseMonthlyCostPerCore,
+				r.SQLLicenseMonthlyCost,
+				r.SQLLicenseAnnualCost,
+				r.VMCostPerCorePerMonth,
+				r.EstVMComputeMonthlyCost,
+				r.EstVMComputeAnnualCost,
+				r.EstVMComputeThreeYearCost,
+				r.EstESUMonthlyCost,
+				r.EstESUAnnualCost,
+				r.EstESUThreeYearCost,
+				r.PatchOpsMonthlyCost,
+				r.PatchOpsAnnualCost,
+				r.PatchOpsThreeYearCost,
+				r.CurrentMonthlyCost,
+				r.CurrentAnnualCost,
+				r.CurrentThreeYearCost,
+				r.EstSQLMIMonthlyCost,
+				r.EstSQLMIAnnualCost,
+				r.EstSQLMIThreeYearCost,
+				r.EstSQLMIMonthlySaving,
+				r.EstSQLMIAnnualSaving,
+				r.EstSQLMIThreeYearSaving,
+				r.SQLMIMigrationVerdict,
 			})
 		}
 	}

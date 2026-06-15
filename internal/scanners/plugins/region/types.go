@@ -74,15 +74,14 @@ type resourceTypeLocationData struct {
 }
 
 // isAvailable checks if a resource type is available in a region in O(1).
+// Both resourceType and region must already be lowercase (callers normalise them
+// before building the inventory, so no ToLower is needed here).
 func (rtl *resourceTypeLocationData) isAvailable(resourceType, region string) bool {
-	// Parse resource type (format: Microsoft.Compute/virtualMachines)
-	parts := strings.SplitN(resourceType, "/", 2)
-	if len(parts) != 2 {
+	// Resource type format: "microsoft.compute/virtualmachines" (already lowercase from inventory).
+	namespace, typeName, ok := strings.Cut(resourceType, "/")
+	if !ok {
 		return false
 	}
-
-	namespace := strings.ToLower(parts[0])
-	typeName := strings.ToLower(parts[1])
 
 	locs, exists := rtl.data[namespace][typeName]
 	if !exists {
@@ -91,6 +90,46 @@ func (rtl *resourceTypeLocationData) isAvailable(resourceType, region string) bo
 
 	_, found := locs[region]
 	return found
+}
+
+// skuAPIResponse is the envelope returned by Azure SKU availability REST APIs
+// (e.g. /providers/Microsoft.Compute/skus, /skus for Storage, etc.).
+type skuAPIResponse struct {
+	Value []skuAPIItem `json:"value"`
+}
+
+// skuAPIItem represents one SKU entry in an Azure SKU availability API response.
+// Fields are the union of what Microsoft.Compute/skus, Microsoft.Storage/skus,
+// and similar endpoints return.
+type skuAPIItem struct {
+	Name         string           `json:"name"`
+	Tier         string           `json:"tier"`
+	Size         string           `json:"size"`
+	Locations    []string         `json:"locations"`
+	LocationInfo []skuLocationInfo `json:"locationInfo"`
+	Restrictions []skuRestriction  `json:"restrictions"`
+	Capabilities []skuCapability   `json:"capabilities"`
+}
+
+// skuLocationInfo holds the per-physical-location data returned inside
+// skuAPIItem for Microsoft.Compute SKU responses.
+type skuLocationInfo struct {
+	Location string   `json:"location"`
+	Zones    []string `json:"zones"`
+}
+
+// skuRestriction describes a restriction that may prevent a SKU from being
+// used in a region or zone.
+type skuRestriction struct {
+	Type       string `json:"type"`
+	ReasonCode string `json:"reasonCode"`
+}
+
+// skuCapability is a named capability flag reported by some SKU APIs
+// (e.g. "available": "false").
+type skuCapability struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 // meterCostData holds cost information for a specific meter from Cost Management API

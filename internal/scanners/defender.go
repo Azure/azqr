@@ -5,11 +5,11 @@ package scanners
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
@@ -39,18 +39,28 @@ func (s *DefenderScanner) Scan(ctx context.Context, cred azcore.TokenCredential,
 	}
 	resources := []*models.DefenderResult{}
 	if result.Data != nil {
-		for _, row := range result.Data {
-			m := row.(map[string]interface{})
+		type defenderStatusRow struct {
+			SubscriptionID   string `json:"SubscriptionId"`
+			SubscriptionName string `json:"SubscriptionName"`
+			Name             string `json:"Name"`
+			Tier             string `json:"Tier"`
+		}
+		for _, raw := range result.Data {
+			var r defenderStatusRow
+			if err := json.Unmarshal(raw, &r); err != nil {
+				log.Warn().Err(err).Msg("Skipping malformed Defender status row")
+				continue
+			}
 
-			if filters.Azqr.IsSubscriptionExcluded(to.String(m["SubscriptionId"])) {
+			if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
 				continue
 			}
 
 			resources = append(resources, &models.DefenderResult{
-				SubscriptionID:   to.String(m["SubscriptionId"]),
-				SubscriptionName: to.String(m["SubscriptionName"]),
-				Name:             to.String(m["Name"]),
-				Tier:             to.String(m["Tier"]),
+				SubscriptionID:   r.SubscriptionID,
+				SubscriptionName: r.SubscriptionName,
+				Name:             r.Name,
+				Tier:             r.Tier,
 			})
 		}
 	}
@@ -109,31 +119,48 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 	resources := []*models.DefenderRecommendation{}
 	seen := make(map[defenderKey]struct{}, len(result.Data))
 	if result.Data != nil {
-		for _, row := range result.Data {
-			m := row.(map[string]interface{})
+		type defenderRecRow struct {
+			SubscriptionID         string `json:"SubscriptionId"`
+			ResourceGroupName      string `json:"ResourceGroupName"`
+			ResourceType           string `json:"ResourceType"`
+			ResourceName           string `json:"ResourceName"`
+			Category               string `json:"Category"`
+			RecommendationSeverity string `json:"RecommendationSeverity"`
+			RecommendationName     string `json:"RecommendationName"`
+			ActionDescription      string `json:"ActionDescription"`
+			RemediationDescription string `json:"RemediationDescription"`
+			AzPortalLink           string `json:"AzPortalLink"`
+			ResourceID             string `json:"ResourceId"`
+		}
+		for _, raw := range result.Data {
+			var r defenderRecRow
+			if err := json.Unmarshal(raw, &r); err != nil {
+				log.Warn().Err(err).Msg("Skipping malformed Defender recommendation row")
+				continue
+			}
 
-			if filters.Azqr.IsServiceExcluded(to.String(m["ResourceId"])) {
+			if filters.Azqr.IsServiceExcluded(r.ResourceID) {
 				continue
 			}
 
 			subscriptionName := ""
-			if name, ok := subscriptions[to.String(m["SubscriptionId"])]; ok {
+			if name, ok := subscriptions[r.SubscriptionID]; ok {
 				subscriptionName = name
 			}
 
 			rec := &models.DefenderRecommendation{
-				SubscriptionId:         to.String(m["SubscriptionId"]),
+				SubscriptionId:         r.SubscriptionID,
 				SubscriptionName:       subscriptionName,
-				ResourceGroupName:      to.String(m["ResourceGroupName"]),
-				ResourceType:           to.String(m["ResourceType"]),
-				ResourceName:           to.String(m["ResourceName"]),
-				Category:               to.String(m["Category"]),
-				RecommendationSeverity: to.String(m["RecommendationSeverity"]),
-				RecommendationName:     to.String(m["RecommendationName"]),
-				ActionDescription:      to.String(m["ActionDescription"]),
-				RemediationDescription: to.String(m["RemediationDescription"]),
-				AzPortalLink:           fmt.Sprintf("https://%s", to.String(m["AzPortalLink"])),
-				ResourceId:             to.String(m["ResourceId"]),
+				ResourceGroupName:      r.ResourceGroupName,
+				ResourceType:           r.ResourceType,
+				ResourceName:           r.ResourceName,
+				Category:               r.Category,
+				RecommendationSeverity: r.RecommendationSeverity,
+				RecommendationName:     r.RecommendationName,
+				ActionDescription:      r.ActionDescription,
+				RemediationDescription: r.RemediationDescription,
+				AzPortalLink:           fmt.Sprintf("https://%s", r.AzPortalLink),
+				ResourceId:             r.ResourceID,
 			}
 
 			// Create unique composite key - avoids string concatenation

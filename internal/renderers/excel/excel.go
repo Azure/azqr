@@ -5,6 +5,7 @@ package excel
 
 import (
 	"fmt"
+	"strconv"
 	_ "image/png"
 
 	"github.com/Azure/azqr/internal/embeded"
@@ -46,8 +47,8 @@ type sheetConfig struct {
 }
 
 // renderSheet renders a data sheet using the provided configuration.
-// It handles stage gating, sheet creation, header row, data rows,
-// optional hyperlinks, and sheet formatting in a single place.
+// It handles stage gating, sheet creation, and delegates all row writing
+// and formatting to streamSheet.
 func renderSheet(f *excelize.File, data *renderers.ReportData, cfg sheetConfig, styles *StyleCache) {
 	if !data.Stages.IsStageEnabled(cfg.stageName) {
 		log.Debug().Msgf("Skipping %s. Feature is disabled", cfg.sheetName)
@@ -65,25 +66,102 @@ func renderSheet(f *excelize.File, data *renderers.ReportData, cfg sheetConfig, 
 	}
 
 	records := cfg.tableFunc()
-	headers := records[0]
-	createFirstRow(f, cfg.sheetName, headers, styles)
-
 	if len(records) <= 1 {
 		log.Info().Msgf("Skipping %s. No data to render", cfg.sheetName)
+	}
+
+	streamSheet(f, cfg.sheetName, records, cfg.hyperlinkCol, styles)
+}
+
+// streamSheet writes all rows for a sheet using excelize StreamWriter, which streams
+// directly to the zip buffer instead of keeping every cell in an in-memory map.
+// Column widths, alternating row styles, HYPERLINK formulas, AutoFilter, and the
+// logo are all applied before Flush so they are serialised into the worksheet XML.
+func streamSheet(f *excelize.File, sheetName string, records [][]string, hyperlinkCol int, styles *StyleCache) {
+	if len(records) == 0 {
+		return
+	}
+	headers := records[0]
+	hasData := len(records) > 1
+
+	widths := computeWidthsFromRecords(records, 1000)
+
+	sw, err := f.NewStreamWriter(sheetName)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to create stream writer for %s", sheetName)
 		return
 	}
 
-	currentRow, err := writeRowsOptimized(f, cfg.sheetName, records[1:], 4)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to write rows")
+	// Column widths must be set before any SetRow calls.
+	for i, w := range widths {
+		if w < 8 {
+			w = 8
+		}
+		if err := sw.SetColWidth(i+1, i+1, float64(w)); err != nil {
+			log.Warn().Err(err).Msgf("Failed to set column %d width for %s", i+1, sheetName)
+		}
 	}
 
-	if cfg.hyperlinkCol > 0 {
-		setHyperLinksBatch(f, cfg.sheetName, cfg.hyperlinkCol, records[1:])
+	// Header row at row 4 (rows 1–3 are reserved for the logo).
+	headerCells := make([]interface{}, len(headers))
+	for i, h := range headers {
+		headerCells[i] = excelize.Cell{Value: h, StyleID: styles.Header}
+	}
+	if err := sw.SetRow("A4", headerCells, excelize.RowOpts{StyleID: styles.Header}); err != nil {
+		log.Fatal().Err(err).Msg("Failed to write header row")
 	}
 
-	widths := computeWidthsFromRecords(records, 1000)
-	configureSheet(f, cfg.sheetName, headers, currentRow, widths, styles)
+	lastRow := 4
+	if hasData {
+		cells := make([]interface{}, len(headers))
+		for i, row := range records[1:] {
+			lastRow = i + 5
+			styleID := styles.White
+			if lastRow%2 == 0 {
+				styleID = styles.Blue
+			}
+			
+			for j, val := range row {
+				if hyperlinkCol > 0 && j == hyperlinkCol-1 && val != "" {
+					cells[j] = excelize.Cell{
+						Formula: `HYPERLINK("` + val + `","` + val + `")`,
+						StyleID: styleID,
+					}
+				} else {
+					cells[j] = excelize.Cell{Value: val, StyleID: styleID}
+				}
+			}
+			cellName := "A" + strconv.Itoa(lastRow)
+			if err := sw.SetRow(cellName, cells, excelize.RowOpts{StyleID: styleID}); err != nil {
+				log.Fatal().Err(err).Msg("Failed to write data row")
+			}
+		}
+
+		// AutoFilter and logo must be set before Flush — both modify sw.worksheet,
+		// which bulkAppendFields serialises as part of the worksheet XML on Flush.
+		if lastCell, err := excelize.CoordinatesToCellName(len(headers), lastRow); err == nil {
+			if err := f.AutoFilter(sheetName, fmt.Sprintf("A4:%s", lastCell), nil); err != nil {
+				log.Warn().Err(err).Msgf("Failed to set autofilter for %s", sheetName)
+			}
+		}
+
+		if err := f.AddPictureFromBytes(sheetName, "A1", &excelize.Picture{
+			Extension: ".png",
+			File:      logoBytes,
+			Format: &excelize.GraphicOptions{
+				ScaleX:      1,
+				ScaleY:      1,
+				Positioning: "absolute",
+				AltText:     "azqr logo",
+			},
+		}); err != nil {
+			log.Fatal().Err(err).Msg("Failed to add logo")
+		}
+	}
+
+	if err := sw.Flush(); err != nil {
+		log.Fatal().Err(err).Msgf("Failed to flush stream writer for %s", sheetName)
+	}
 }
 
 // createSharedStyles creates all shared styles once and caches their IDs
@@ -213,209 +291,22 @@ func computeWidthsFromRecords(records [][]string, maxSampleRows int) []int {
 	return widths
 }
 
-// applyColWidths sets column widths from a pre-computed slice, one SetColWidth call per column.
-func applyColWidths(f *excelize.File, sheet string, widths []int) error {
-	for i, w := range widths {
-		if w > 120 {
-			w = 120
-		}
-		if w < 8 {
-			w = 8
-		}
-		name, err := excelize.ColumnNumberToName(i + 1)
-		if err != nil {
-			return err
-		}
-		if err := f.SetColWidth(sheet, name, name, float64(w)); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func createFirstRow(f *excelize.File, sheet string, headers []string, styles *StyleCache) {
-	currentRow := 4
-	cell, err := excelize.CoordinatesToCellName(1, currentRow)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to get cell")
-	}
-	err = f.SetSheetRow(sheet, cell, &headers)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to set row")
-	}
-
-	// Apply header style to entire row range at once
-	if len(headers) > 0 {
-		startCell, err := excelize.CoordinatesToCellName(1, 4)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get start cell")
-		}
-		endCell, err := excelize.CoordinatesToCellName(len(headers), 4)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to get end cell")
-		}
-		err = f.SetCellStyle(sheet, startCell, endCell, styles.Header)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to set header style")
-		}
-	}
-}
-
-// setHyperLinksBatch applies hyperlinks to a column using URLs already held in the data rows,
-// avoiding the GetCellValue round-trip that the old per-row helper required.
-func setHyperLinksBatch(f *excelize.File, sheet string, col int, rows [][]string) {
-	colName, err := excelize.ColumnNumberToName(col)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to get column name for hyperlinks")
-		return
-	}
-	tooltip := "Learn more..."
-	colIdx := col - 1 // 0-based index into each row slice
-	for i, row := range rows {
-		if colIdx >= len(row) {
-			continue
-		}
-		link := row[colIdx]
-		if link == "" {
-			continue
-		}
-		cell := fmt.Sprintf("%s%d", colName, i+5) // data starts at row 5
-		display := link
-		_ = f.SetCellHyperLink(sheet, cell, link, "External", excelize.HyperlinkOpts{Display: &display, Tooltip: &tooltip})
-	}
-}
-
-// writeRowsOptimized writes multiple rows efficiently using StreamWriter for large datasets
-// For datasets >1000 rows, uses StreamWriter which is ~30-40% faster
-// For smaller datasets, uses regular SetSheetRow for compatibility with styling operations
-func writeRowsOptimized(f *excelize.File, sheetName string, rows [][]string, startRow int) (int, error) {
-	currentRow := startRow
-
-	for _, row := range rows {
-		currentRow++
-		cell, err := excelize.CoordinatesToCellName(1, currentRow)
-		if err != nil {
-			return currentRow, fmt.Errorf("failed to get cell name: %w", err)
-		}
-
-		if err := f.SetSheetRow(sheetName, cell, &row); err != nil {
-			return currentRow, fmt.Errorf("failed to set row: %w", err)
-		}
-	}
-
-	return currentRow, nil
-}
-
-func configureSheet(f *excelize.File, sheet string, headers []string, currentRow int, widths []int, styles *StyleCache) {
-	if err := applyColWidths(f, sheet, widths); err != nil {
-		log.Warn().Err(err).Msgf("Failed to set column widths for %s", sheet)
-	}
-
-	cell, err := excelize.CoordinatesToCellName(len(headers), currentRow)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to get cell")
-	}
-	err = f.AutoFilter(sheet, fmt.Sprintf("A4:%s", cell), nil)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to set autofilter")
-	}
-
-	if err := f.AddPictureFromBytes(sheet, "A1", &excelize.Picture{
-		Extension: ".png",
-		File:      logoBytes,
-		Format: &excelize.GraphicOptions{
-			ScaleX:      1,
-			ScaleY:      1,
-			Positioning: "absolute",
-			AltText:     "azqr logo",
-		},
-	}); err != nil {
-		log.Fatal().Err(err).Msg("Failed to add logo")
-	}
-
-	applyBlueStyleOptimized(f, sheet, currentRow, len(headers), styles)
-}
-
-// applyBlueStyleOptimized applies alternating row colors using a two-pass SetRowStyle strategy:
-// one call covers the entire range with white, then N/2 calls flip even rows to blue.
-// This halves the API call count and eliminates all CoordinatesToCellName conversions.
-func applyBlueStyleOptimized(f *excelize.File, sheet string, lastRow int, columns int, styles *StyleCache) {
-	if columns == 0 || lastRow < 5 {
-		return
-	}
-	// Pass 1: paint the entire data range white in one call
-	if err := f.SetRowStyle(sheet, 5, lastRow, styles.White); err != nil {
-		log.Fatal().Err(err).Msg("Failed to set white row style")
-	}
-	// Pass 2: override only even rows with blue (~half the rows)
-	for i := 6; i <= lastRow; i += 2 {
-		if err := f.SetRowStyle(sheet, i, i, styles.Blue); err != nil {
-			log.Fatal().Err(err).Msg("Failed to set blue row style")
-		}
-	}
-}
-
-// renderExternalPlugins creates Excel sheets for external plugin results
+// renderExternalPlugins creates Excel sheets for external plugin results.
 func renderExternalPlugins(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
 	if len(data.PluginResults) == 0 {
 		return
 	}
 
 	for _, result := range data.PluginResults {
-		// Use the plugin-specified sheet name
-		sheetName := result.SheetName
+		if len(result.Table) == 0 {
+			continue
+		}
 
-		// Create the sheet
-		_, err := f.NewSheet(sheetName)
-		if err != nil {
+		if _, err := f.NewSheet(result.SheetName); err != nil {
 			log.Error().Err(err).Msgf("Failed to create sheet for plugin %s", result.PluginName)
 			continue
 		}
 
-		// Render the table data starting at row 4 (like other renderers)
-		if len(result.Table) == 0 {
-			// No data to render
-			continue
-		}
-
-		headers := result.Table[0]
-		createFirstRow(f, sheetName, headers, styles)
-
-		lastRow := 4
-		if len(result.Table) > 1 {
-			var err error
-			lastRow, err = writeRowsOptimized(f, sheetName, result.Table[1:], 4)
-			if err != nil {
-				log.Error().Err(err).Msgf("Failed to write rows for plugin %s", result.PluginName)
-				continue
-			}
-			applyBlueStyleOptimized(f, sheetName, lastRow, len(headers), styles)
-		}
-
-		// Apply column widths computed directly from the table data
-		_ = applyColWidths(f, sheetName, computeWidthsFromRecords(result.Table, 1000))
-
-		// Add autofilter
-		lastCell, err := excelize.CoordinatesToCellName(len(headers), lastRow)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to get last cell for plugin %s", result.PluginName)
-		} else {
-			if err := f.AutoFilter(sheetName, fmt.Sprintf("A4:%s", lastCell), nil); err != nil {
-				log.Error().Err(err).Msgf("Failed to set autofilter for plugin %s", result.PluginName)
-			}
-		}
-
-		if err := f.AddPictureFromBytes(sheetName, "A1", &excelize.Picture{
-			Extension: ".png",
-			File:      logoBytes,
-			Format: &excelize.GraphicOptions{
-				ScaleX:      1,
-				ScaleY:      1,
-				Positioning: "absolute",
-				AltText:     "azqr logo",
-			},
-		}); err != nil {
-			log.Error().Err(err).Msgf("Failed to add logo for plugin %s", result.PluginName)
-		}
+		streamSheet(f, result.SheetName, result.Table, 0, styles)
 	}
 }

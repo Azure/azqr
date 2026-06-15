@@ -6,9 +6,7 @@ package models
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -214,50 +212,84 @@ func ShouldSkipError(err error) bool {
 	return false
 }
 
-// GetSubscriptionFromResourceID - Get Subscription ID from Resource ID
+// nthSlash returns the byte index of the nth '/' in s (1-based).
+// Returns -1 if fewer than n slashes exist.
+func nthSlash(s string, n int) int {
+	count := 0
+	for i := 0; i < len(s); i++ {
+		if s[i] == '/' {
+			count++
+			if count == n {
+				return i
+			}
+		}
+	}
+	return -1
+}
+
+// GetSubscriptionFromResourceID returns the subscription ID extracted from a resource ID.
+// Resource ID format: /subscriptions/{sub}/resourceGroups/{rg}/providers/{ns}/{type}/{name}
 func GetSubscriptionFromResourceID(resourceID string) string {
-	parts := strings.Split(resourceID, "/")
-	if len(parts) < 3 {
+	// Fast path: well-formed ARM resource IDs have /subscriptions/ (15 chars) followed by a
+	// 36-char UUID, so the subscription ID is always at bytes [15:51].
+	if len(resourceID) >= 52 && resourceID[51] == '/' {
+		return resourceID[15:51]
+	}
+	s2 := nthSlash(resourceID, 2)
+	s3 := nthSlash(resourceID, 3)
+	if s2 < 0 || s3 < 0 {
 		return ""
 	}
-	return parts[2]
+	return resourceID[s2+1 : s3]
 }
 
-// GetResourceGroupFromResourceID - Get Resource Group from Resource ID
+// GetResourceGroupFromResourceID returns the resource group name extracted from a resource ID.
 func GetResourceGroupFromResourceID(resourceID string) string {
-	parts := strings.Split(resourceID, "/")
-	if len(parts) < 5 {
+	s4 := nthSlash(resourceID, 4)
+	s5 := nthSlash(resourceID, 5)
+	if s4 < 0 || s5 < 0 {
 		return ""
 	}
-	return parts[4]
+	return resourceID[s4+1 : s5]
 }
 
-// GetResourceGroupIDFromResourceID - Get Resource Group from Resource ID
+// GetResourceGroupIDFromResourceID returns the resource group resource ID extracted from a resource ID.
 func GetResourceGroupIDFromResourceID(resourceID string) string {
-	parts := strings.Split(resourceID, "/")
-	if len(parts) < 5 {
+	s5 := nthSlash(resourceID, 5)
+	if s5 < 0 {
 		return ""
 	}
-
-	return strings.Join(parts[:5], "/")
+	return resourceID[:s5]
 }
 
-// GetResourceNameFromResourceID - Get Resource Type from Resource ID
+// GetResourceTypeFromResourceID returns the resource type (provider/type) extracted from a resource ID.
+// The returned string is a zero-allocation substring of resourceID.
 func GetResourceTypeFromResourceID(resourceID string) string {
-	parts := strings.Split(resourceID, "/")
-	if len(parts) < 8 {
+	s6 := nthSlash(resourceID, 6)
+	s7 := nthSlash(resourceID, 7)
+	if s6 < 0 || s7 < 0 {
 		return ""
 	}
-	return fmt.Sprintf("%s/%s", parts[6], parts[7])
+	// The slash at s7 is already part of the substring, giving "namespace/type" directly.
+	s8 := nthSlash(resourceID, 8)
+	end := len(resourceID)
+	if s8 >= 0 {
+		end = s8
+	}
+	return resourceID[s6+1 : end]
 }
 
-// GetResourceNameFromResourceID - Get Resource Name from Resource ID
+// GetResourceNameFromResourceID returns the resource name extracted from a resource ID.
 func GetResourceNameFromResourceID(resourceID string) string {
-	parts := strings.Split(resourceID, "/")
-	if len(parts) < 9 {
+	s8 := nthSlash(resourceID, 8)
+	if s8 < 0 {
 		return ""
 	}
-	return parts[8]
+	s9 := nthSlash(resourceID, 9)
+	if s9 < 0 {
+		return resourceID[s8+1:]
+	}
+	return resourceID[s8+1 : s9]
 }
 
 // ScannerList is a map of service abbreviation to scanner

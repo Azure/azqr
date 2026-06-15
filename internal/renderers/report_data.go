@@ -325,12 +325,15 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 	// Always consider Microsoft.Resources as deployed
 	deployedTypes["microsoft.resources"] = true
 
-	for _, rt := range rd.Recommendations {
+	// Outer key is already lowercase (set by ListRecommendations).
+	// Hoist the deployedTypes check to the outer loop — one lookup per resource
+	// type instead of one per recommendation, and zero ToLower allocations.
+	for lowerType, rt := range rd.Recommendations {
+		typeIsDeployed := deployedTypes[lowerType]
 		for _, r := range rt {
 			if skipCategory(r.Category) {
 				continue
 			}
-			typeIsDeployed := deployedTypes[strings.ToLower(r.ResourceType)]
 
 			var implemented string
 			switch {
@@ -476,11 +479,13 @@ func MaskSubscriptionID(subscriptionID string, mask bool) string {
 	}
 
 	// Show only last 7 chars of the subscription ID
-	return fmt.Sprintf("xxxxxxxx-xxxx-xxxx-xxxx-xxxxx%s", subscriptionID[29:])
+	return "xxxxxxxx-xxxx-xxxx-xxxx-xxxxx" + subscriptionID[29:]
 }
 
 func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
-	if !strings.HasPrefix(resourceID, "/subscriptions/") {
+	// Resource IDs always start with /subscriptions/{36-char UUID}/...
+	// UUID occupies bytes [15:51]
+	if len(resourceID) < 51 || !strings.HasPrefix(resourceID, "/subscriptions/") {
 		return ""
 	}
 
@@ -488,10 +493,10 @@ func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
 		return resourceID
 	}
 
-	parts := strings.Split(resourceID, "/")
-	parts[2] = MaskSubscriptionID(parts[2], mask)
-
-	return strings.Join(parts, "/")
+	// The subscription ID is 36 chars long. We mask all but the last 7 chars.
+	// So we can just concatenate the fixed prefix with the remaining resourceID.
+	// Offset 44 is where the last 7 chars of the subscription ID start (15 + 29).
+	return "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxx" + resourceID[44:]
 }
 
 func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
@@ -504,13 +509,22 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 	slaMap := make(map[string]string, len(rd.Graph))
 	for _, a := range rd.Graph {
 		if a.Category == models.CategorySLA {
-			// Use lowercase for case-insensitive lookup
 			slaMap[strings.ToLower(a.ResourceID)] = a.Param1
 		}
 	}
 
+	// Pre-build a direct lookup keyed by the original (mixed-case) resource ID so the
+	// main loop below does zero ToLower calls. Only resources that actually have an SLA
+	// entry are added, keeping this map small.
+	slaDirect := make(map[string]string)
 	for _, r := range resources {
-		sla := slaMap[strings.ToLower(r.ID)]
+		if sla, ok := slaMap[strings.ToLower(r.ID)]; ok {
+			slaDirect[r.ID] = sla
+		}
+	}
+
+	for _, r := range resources {
+		sla := slaDirect[r.ID]
 
 		row := []string{
 			MaskSubscriptionID(r.SubscriptionID, rd.Mask),

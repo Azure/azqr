@@ -5,10 +5,10 @@ package scanners
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
@@ -64,33 +64,49 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 	seen := make(map[policyKey]struct{}, len(result.Data))
 
 	if result.Data != nil {
-		for _, row := range result.Data {
-			m := row.(map[string]interface{})
-
-			if filters.Azqr.IsSubscriptionExcluded(to.String(m["subscriptionId"])) {
+		type policyRow struct {
+			SubscriptionID            string `json:"subscriptionId"`
+			SubscriptionName          string `json:"subscriptionName"`
+			ResourceID                string `json:"resourceId"`
+			PolicyDefinitionDisplay   string `json:"policyDefinitionDisplayName"`
+			PolicyDescription         string `json:"policyDescription"`
+			Timestamp                 string `json:"timestamp"`
+			PolicyDefinitionName      string `json:"policyDefinitionName"`
+			PolicyDefinitionID        string `json:"policyDefinitionId"`
+			PolicyAssignmentName      string `json:"policyAssignmentName"`
+			PolicyAssignmentID        string `json:"policyAssignmentId"`
+			ComplianceState           string `json:"complianceState"`
+		}
+		for _, raw := range result.Data {
+			var r policyRow
+			if err := json.Unmarshal(raw, &r); err != nil {
+				log.Warn().Err(err).Msg("Skipping malformed Azure Policy row")
 				continue
 			}
 
-			resourceId := to.String(m["resourceId"])
-			if filters.Azqr.IsServiceExcluded(resourceId) {
+			if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
+				continue
+			}
+
+			if filters.Azqr.IsServiceExcluded(r.ResourceID) {
 				continue
 			}
 
 			rec := &models.AzurePolicyResult{
-				SubscriptionID:       to.String(m["subscriptionId"]),
-				SubscriptionName:     to.String(m["subscriptionName"]),
-				Type:                 models.GetResourceTypeFromResourceID(resourceId),
-				ResourceGroupName:    models.GetResourceGroupFromResourceID(resourceId),
-				Name:                 models.GetResourceNameFromResourceID(resourceId),
-				PolicyDisplayName:    to.String(m["policyDefinitionDisplayName"]),
-				PolicyDescription:    to.String(m["policyDescription"]),
-				ResourceID:           resourceId,
-				TimeStamp:            to.String(m["timestamp"]),
-				PolicyDefinitionName: to.String(m["policyDefinitionName"]),
-				PolicyDefinitionID:   to.String(m["policyDefinitionId"]),
-				PolicyAssignmentName: to.String(m["policyAssignmentName"]),
-				PolicyAssignmentID:   to.String(m["policyAssignmentId"]),
-				ComplianceState:      to.String(m["complianceState"]),
+				SubscriptionID:       r.SubscriptionID,
+				SubscriptionName:     r.SubscriptionName,
+				Type:                 models.GetResourceTypeFromResourceID(r.ResourceID),
+				ResourceGroupName:    models.GetResourceGroupFromResourceID(r.ResourceID),
+				Name:                 models.GetResourceNameFromResourceID(r.ResourceID),
+				PolicyDisplayName:    r.PolicyDefinitionDisplay,
+				PolicyDescription:    r.PolicyDescription,
+				ResourceID:           r.ResourceID,
+				TimeStamp:            r.Timestamp,
+				PolicyDefinitionName: r.PolicyDefinitionName,
+				PolicyDefinitionID:   r.PolicyDefinitionID,
+				PolicyAssignmentName: r.PolicyAssignmentName,
+				PolicyAssignmentID:   r.PolicyAssignmentID,
+				ComplianceState:      r.ComplianceState,
 			}
 
 			// Create unique composite key - avoids string concatenation
