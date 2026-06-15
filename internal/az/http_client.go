@@ -18,6 +18,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// sharedTransport is the single HTTP transport shared by all HttpClient instances.
+// Sharing the transport means all scanners reuse the same TCP/TLS connection pool,
+// eliminating repeated TLS handshakes on every NewHttpClient call.
+// MaxIdleConnsPerHost is raised from Go's default of 2 to allow enough warm
+// connections for concurrent Azure Resource Graph and ARM requests.
+var sharedTransport = &http.Transport{
+	MaxIdleConns:        200,
+	MaxIdleConnsPerHost: 100,
+	IdleConnTimeout:     90 * time.Second,
+	ForceAttemptHTTP2:   true,
+}
+
 // HttpClient wraps Azure SDK pipeline for authenticated HTTP requests with built-in retry logic
 type HttpClient struct {
 	pipeline runtime.Pipeline
@@ -69,7 +81,12 @@ func NewHttpClient(cred azcore.TokenCredential, opts *HttpClientOptions) *HttpCl
 	if opts.Transport != nil {
 		transport = opts.Transport
 	} else {
-		transport = &http.Client{Timeout: opts.Timeout + (5 * time.Second)}
+		// Use the shared transport so all clients reuse the same connection pool.
+		// Each client still has its own Timeout for per-request deadline enforcement.
+		transport = &http.Client{
+			Transport: sharedTransport,
+			Timeout:   opts.Timeout + (5 * time.Second),
+		}
 	}
 
 	clientOpts := &policy.ClientOptions{
@@ -82,16 +99,14 @@ func NewHttpClient(cred azcore.TokenCredential, opts *HttpClientOptions) *HttpCl
 	authPolicy := runtime.NewBearerTokenPolicy(cred, []string{opts.Scope}, nil)
 
 	// Create pipeline with proper policy ordering
-	// PerCall policies execute once per operation (before retry logic)
-	// PerRetry policies execute on each retry attempt (after retry logic)
+	// PerCall policies execute once per logical operation (before retry logic)
+	// PerRetry policies execute on each attempt (auth token must refresh on retry)
 	pipeline := runtime.NewPipeline(
 		"azqr-http-client",
 		"v1.0.0",
 		runtime.PipelineOptions{
-			PerRetry: []policy.Policy{
-				authPolicy,
-				throttling.NewThrottlingPolicy(),
-			},
+			PerCall:  []policy.Policy{throttling.NewThrottlingPolicy()},
+			PerRetry: []policy.Policy{authPolicy},
 		},
 		clientOpts,
 	)
@@ -110,6 +125,42 @@ func (c *HttpClient) Do(ctx context.Context, url string) ([]byte, error) {
 // DoPost performs an HTTP POST request with automatic authentication, throttling, and retries
 func (c *HttpClient) DoPost(ctx context.Context, url string, body io.ReadSeekCloser) ([]byte, *http.Response, error) {
 	return c.doRequest(ctx, http.MethodPost, url, body)
+}
+
+// DoPostStream performs an HTTP POST request and returns the unread response body. The caller must close it.
+func (c *HttpClient) DoPostStream(ctx context.Context, url string, body io.ReadSeekCloser) (*http.Response, error) {
+	req, err := runtime.NewRequest(ctx, http.MethodPost, url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	if body != nil {
+		if err := req.SetBody(body, "application/json"); err != nil {
+			return nil, fmt.Errorf("failed to set request body: %w", err)
+		}
+	}
+
+	resp, err := c.pipeline.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute request: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			if closeErr := resp.Body.Close(); closeErr != nil {
+				log.Warn().Err(closeErr).Msg("Failed to close response body")
+			}
+			return nil, fmt.Errorf("failed to read error response: %w", err)
+		}
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Warn().Err(closeErr).Msg("Failed to close response body")
+		}
+		resp.Body = io.NopCloser(bytes.NewReader(respBody))
+		return resp, runtime.NewResponseError(resp)
+	}
+
+	return resp, nil
 }
 
 // doRequest is the common implementation for HTTP requests

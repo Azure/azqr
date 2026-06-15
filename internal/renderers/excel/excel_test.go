@@ -65,193 +65,6 @@ func TestCreateExcelReport(t *testing.T) {
 	}
 }
 
-func TestCreateFirstRow(t *testing.T) {
-	tests := []struct {
-		name    string
-		headers []string
-	}{
-		{
-			name:    "single header",
-			headers: []string{"Header1"},
-		},
-		{
-			name:    "multiple headers",
-			headers: []string{"Column1", "Column2", "Column3"},
-		},
-		{
-			name:    "empty headers",
-			headers: []string{},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			f := excelize.NewFile()
-			defer func() {
-				_ = f.Close()
-			}()
-
-			sheet := "TestSheet"
-			_ = f.SetSheetName("Sheet1", sheet)
-
-			// Create shared styles for testing
-			styles, err := createSharedStyles(f)
-			if err != nil {
-				t.Fatalf("Failed to create shared styles: %v", err)
-			}
-
-			// Should not panic
-			createFirstRow(f, sheet, tt.headers, styles)
-		})
-	}
-}
-
-func TestSetHyperLinksBatch(t *testing.T) {
-	tests := []struct {
-		name string
-		rows [][]string
-		col  int
-	}{
-		{
-			name: "single row with valid URL",
-			rows: [][]string{{"https://example.com"}},
-			col:  1,
-		},
-		{
-			name: "single row with empty URL",
-			rows: [][]string{{""}},
-			col:  1,
-		},
-		{
-			name: "multiple rows mixed URLs",
-			rows: [][]string{
-				{"https://example.com/a"},
-				{""},
-				{"https://example.com/b"},
-			},
-			col: 1,
-		},
-		{
-			name: "col index beyond row width",
-			rows: [][]string{{"only-one-col"}},
-			col:  5,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			f := excelize.NewFile()
-			defer func() {
-				_ = f.Close()
-			}()
-
-			sheet := "TestSheet"
-			_ = f.SetSheetName("Sheet1", sheet)
-
-			// Write the data rows first (as renderSheet does via writeRowsOptimized)
-			for i, row := range tt.rows {
-				cell, _ := excelize.CoordinatesToCellName(1, i+5)
-				_ = f.SetSheetRow(sheet, cell, &row)
-			}
-
-			// Should not panic
-			setHyperLinksBatch(f, sheet, tt.col, tt.rows)
-		})
-	}
-}
-
-func TestConfigureSheet(t *testing.T) {
-	tests := []struct {
-		name       string
-		headers    []string
-		currentRow int
-	}{
-		{
-			name:       "basic configuration",
-			headers:    []string{"Col1", "Col2", "Col3"},
-			currentRow: 10,
-		},
-		{
-			name:       "single column",
-			headers:    []string{"OnlyColumn"},
-			currentRow: 5,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			f := excelize.NewFile()
-			defer func() {
-				_ = f.Close()
-			}()
-
-			sheet := "TestSheet"
-			_ = f.SetSheetName("Sheet1", sheet)
-
-			// Add some data
-			for i, header := range tt.headers {
-				cell, _ := excelize.CoordinatesToCellName(i+1, 4)
-				_ = f.SetCellValue(sheet, cell, header)
-			}
-
-			// Create shared styles for testing
-			styles, err := createSharedStyles(f)
-			if err != nil {
-				t.Fatalf("Failed to create shared styles: %v", err)
-			}
-
-			// Should not panic
-			widths := computeWidthsFromRecords([][]string{tt.headers}, 1000)
-			configureSheet(f, sheet, tt.headers, tt.currentRow, widths, styles)
-		})
-	}
-}
-
-func TestApplyBlueStyleOptimized(t *testing.T) {
-	tests := []struct {
-		name    string
-		lastRow int
-		columns int
-	}{
-		{
-			name:    "small grid",
-			lastRow: 7,
-			columns: 3,
-		},
-		{
-			name:    "single row",
-			lastRow: 5,
-			columns: 1,
-		},
-		{
-			name:    "multiple rows",
-			lastRow: 20,
-			columns: 5,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			f := excelize.NewFile()
-			defer func() {
-				_ = f.Close()
-			}()
-
-			sheet := "TestSheet"
-			_ = f.SetSheetName("Sheet1", sheet)
-
-			// Create shared styles for testing
-			styles, err := createSharedStyles(f)
-			if err != nil {
-				t.Fatalf("Failed to create shared styles: %v", err)
-			}
-
-			// Should not panic
-			applyBlueStyleOptimized(f, sheet, tt.lastRow, tt.columns, styles)
-		})
-	}
-}
-
 func TestRenderExternalPlugins(t *testing.T) {
 	tests := []struct {
 		name string
@@ -357,8 +170,8 @@ func generateTable(rows, cols int) [][]string {
 	return table
 }
 
-// BenchmarkRenderExternalPlugins_CellByCell benchmarks current cell-by-cell implementation
-func BenchmarkRenderExternalPlugins_CellByCell(b *testing.B) {
+// BenchmarkRenderExternalPlugins benchmarks the StreamWriter-based external plugin renderer.
+func BenchmarkRenderExternalPlugins(b *testing.B) {
 	data := &renderers.ReportData{
 		PluginResults: []*renderers.PluginResult{
 			{
@@ -378,53 +191,28 @@ func BenchmarkRenderExternalPlugins_CellByCell(b *testing.B) {
 	}
 }
 
-// BenchmarkSetHyperLinksBatch benchmarks the batch hyperlink function
-func BenchmarkSetHyperLinksBatch(b *testing.B) {
-	f := excelize.NewFile()
-	defer func() {
-		_ = f.Close()
-	}()
-
-	sheet := "TestSheet"
-	_ = f.SetSheetName("Sheet1", sheet)
-
-	rows := make([][]string, 1000)
-	for i := range rows {
-		rows[i] = []string{"https://learn.microsoft.com/azure/well-architected"}
-	}
-
-	// Write data first
-	for i, row := range rows {
-		cell, _ := excelize.CoordinatesToCellName(1, i+5)
-		_ = f.SetSheetRow(sheet, cell, &row)
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		setHyperLinksBatch(f, sheet, 1, rows)
-	}
-}
-
-// BenchmarkWriteRowsOptimized benchmarks row writing performance
-func BenchmarkWriteRowsOptimized(b *testing.B) {
-	rows := generateTable(1000, 10)
+// BenchmarkStreamSheet benchmarks the StreamWriter-based sheet renderer.
+func BenchmarkStreamSheet(b *testing.B) {
+	records := generateTable(1000, 10)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		f := excelize.NewFile()
-		_, _ = writeRowsOptimized(f, "Sheet1", rows, 4)
+		styles, _ := createSharedStyles(f)
+		streamSheet(f, "Sheet1", records, 0, styles)
 		_ = f.Close()
 	}
 }
 
-// BenchmarkWriteRowsOptimized_Large benchmarks row writing with larger dataset
-func BenchmarkWriteRowsOptimized_Large(b *testing.B) {
-	rows := generateTable(5000, 15)
+// BenchmarkStreamSheet_Large benchmarks the StreamWriter-based renderer with a larger dataset.
+func BenchmarkStreamSheet_Large(b *testing.B) {
+	records := generateTable(5000, 15)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		f := excelize.NewFile()
-		_, _ = writeRowsOptimized(f, "Sheet1", rows, 4)
+		styles, _ := createSharedStyles(f)
+		streamSheet(f, "Sheet1", records, 0, styles)
 		_ = f.Close()
 	}
 }
@@ -436,38 +224,6 @@ func BenchmarkComputeWidthsFromRecords(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = computeWidthsFromRecords(rows, 1000)
-	}
-}
-
-// BenchmarkApplyBlueStyle benchmarks alternating row styling
-func BenchmarkApplyBlueStyle(b *testing.B) {
-	f := excelize.NewFile()
-	defer func() {
-		_ = f.Close()
-	}()
-
-	styles, _ := createSharedStyles(f)
-	sheet := "Sheet1"
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		applyBlueStyleOptimized(f, sheet, 1000, 10, styles)
-	}
-}
-
-// BenchmarkApplyBlueStyle_Large benchmarks styling with larger dataset
-func BenchmarkApplyBlueStyle_Large(b *testing.B) {
-	f := excelize.NewFile()
-	defer func() {
-		_ = f.Close()
-	}()
-
-	styles, _ := createSharedStyles(f)
-	sheet := "Sheet1"
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		applyBlueStyleOptimized(f, sheet, 10000, 20, styles)
 	}
 }
 

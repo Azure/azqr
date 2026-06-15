@@ -5,6 +5,7 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -211,33 +212,37 @@ func (s *ThrottlingScanner) discoverOpenAIResources(ctx context.Context, cred az
 	}
 
 	resources := make([]*models.Resource, 0, len(result.Data))
-	for _, row := range result.Data {
-		m, ok := row.(map[string]interface{})
-		if !ok {
+	type openAIRow struct {
+		ID             string `json:"id"`
+		SubscriptionID string `json:"subscriptionId"`
+		ResourceGroup  string `json:"resourceGroup"`
+		Location       string `json:"location"`
+		Type           string `json:"type"`
+		Name           string `json:"name"`
+		SkuName        string `json:"sku_name"`
+		SkuTier        string `json:"sku_tier"`
+		Kind           string `json:"kind"`
+	}
+	for _, raw := range result.Data {
+		var r openAIRow
+		if err := json.Unmarshal(raw, &r); err != nil {
 			continue
 		}
 
-		id, _ := m["id"].(string)
-		if filters.Azqr.IsServiceExcluded(id) {
+		if filters.Azqr.IsServiceExcluded(r.ID) {
 			continue
 		}
-
-		skuName, _ := m["sku_name"].(string)
-		skuTier, _ := m["sku_tier"].(string)
-		kind, _ := m["kind"].(string)
-		resourceGroup, _ := m["resourceGroup"].(string)
-		location, _ := m["location"].(string)
 
 		resources = append(resources, &models.Resource{
-			ID:             id,
-			SubscriptionID: m["subscriptionId"].(string),
-			ResourceGroup:  resourceGroup,
-			Location:       location,
-			Type:           m["type"].(string),
-			Name:           m["name"].(string),
-			SkuName:        skuName,
-			SkuTier:        skuTier,
-			Kind:           kind,
+			ID:             r.ID,
+			SubscriptionID: r.SubscriptionID,
+			ResourceGroup:  r.ResourceGroup,
+			Location:       r.Location,
+			Type:           r.Type,
+			Name:           r.Name,
+			SkuName:        r.SkuName,
+			SkuTier:        r.SkuTier,
+			Kind:           r.Kind,
 		})
 	}
 

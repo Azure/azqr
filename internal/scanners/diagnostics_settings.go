@@ -281,40 +281,47 @@ type DiagnosticSettingsScanner struct {
 	scanContext *models.ScanParams
 }
 
-// GetRecommendations returns all diagnostic settings recommendations in the format expected by the scanner system
-// grouped by resource type. This allows other scanners to use diagnostic settings checks dynamically.
+var (
+	cachedRecommendations     map[string]map[string]models.GraphRecommendation
+	cachedRecommendationsOnce sync.Once
+)
+
+// GetRecommendations returns all diagnostic settings recommendations grouped by resource type.
+// The result is computed once and cached for the lifetime of the process.
 func GetRecommendations() map[string]map[string]models.GraphRecommendation {
-	recommendations := make(map[string]map[string]models.GraphRecommendation)
+	cachedRecommendationsOnce.Do(func() {
+		recommendations := make(map[string]map[string]models.GraphRecommendation, len(typesWithDiagnosticSettingsSupport))
 
-	for resourceType, rec := range typesWithDiagnosticSettingsSupport {
-		if rec == nil {
-			continue // Skip legacy resource types without recommendation metadata
-		}
+		for resourceType, rec := range typesWithDiagnosticSettingsSupport {
+			if rec == nil {
+				continue // Skip legacy resource types without recommendation metadata
+			}
 
-		if recommendations[resourceType] == nil {
-			recommendations[resourceType] = make(map[string]models.GraphRecommendation)
-		}
+			if recommendations[resourceType] == nil {
+				recommendations[resourceType] = make(map[string]models.GraphRecommendation)
+			}
 
-		recommendations[resourceType][rec.RecommendationID] = models.GraphRecommendation{
-			RecommendationID: rec.RecommendationID,
-			ResourceType:     resourceType,
-			Category:         string(models.CategoryMonitoringAndAlerting),
-			Recommendation:   rec.Recommendation,
-			Impact:           string(models.ImpactLow),
-			LearnMoreLink: []struct {
-				Name string `yaml:"name"`
-				Url  string `yaml:"url"`
-			}{
-				{
-					Name: "Diagnostic Settings",
-					Url:  rec.LearnMoreUrl,
+			recommendations[resourceType][rec.RecommendationID] = models.GraphRecommendation{
+				RecommendationID: rec.RecommendationID,
+				ResourceType:     resourceType,
+				Category:         string(models.CategoryMonitoringAndAlerting),
+				Recommendation:   rec.Recommendation,
+				Impact:           string(models.ImpactLow),
+				LearnMoreLink: []struct {
+					Name string `yaml:"name"`
+					Url  string `yaml:"url"`
+				}{
+					{
+						Name: "Diagnostic Settings",
+						Url:  rec.LearnMoreUrl,
+					},
 				},
-			},
-			Source: "AZQR",
+				Source: "AZQR",
+			}
 		}
-	}
-
-	return recommendations
+		cachedRecommendations = recommendations
+	})
+	return cachedRecommendations
 }
 
 // Init - Initializes the DiagnosticSettingsScanner
@@ -343,20 +350,13 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 		}
 	}
 
-	// if len(filteredResources) > 0 { // Uncomment this block to test with a large number of filteredResources
-	// 	firstResource := filteredResources[0]
-	// 	for len(filteredResources) < 100000 {
-	// 		filteredResources = append(filteredResources, firstResource)
-	// 	}
-	// }
-
+	models.LogResourceTypeScan("Diagnostic Settings")
+	
 	if len(filteredResources) > 5000 {
 		log.Warn().Msgf("%d resources detected. Scan will take longer than usual", len(filteredResources))
 	}
 
 	batches := int(math.Ceil(float64(len(filteredResources)) / 20))
-
-	models.LogResourceTypeScan("Diagnostic Settings")
 
 	if batches == 0 {
 		return res, nil
@@ -415,12 +415,7 @@ func (d *DiagnosticSettingsScanner) worker(jobs <-chan []*string, results chan<-
 				var diagnosticSettings struct {
 					Value []*armmonitor.ServiceDiagnosticSettingsResource `json:"value"`
 				}
-				contentBytes, err := json.Marshal(response.Content)
-				if err != nil {
-					log.Fatal().Err(err).Msg("Failed to marshal diagnostic settings content")
-					continue
-				}
-				if err := json.Unmarshal(contentBytes, &diagnosticSettings); err != nil {
+				if err := json.Unmarshal(response.Content, &diagnosticSettings); err != nil {
 					log.Fatal().Err(err).Msg("Failed to unmarshal diagnostic settings response")
 					continue
 				}
@@ -465,10 +460,15 @@ func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds [
 	}
 
 	// Send POST request using HttpClient (handles auth, throttling, and retries)
-	respBody, resp, err := d.httpClient.DoPost(ctx, batchURL, readSeekCloser)
+	resp, err := d.httpClient.DoPostStream(ctx, batchURL, readSeekCloser)
 	if err != nil {
 		return nil, fmt.Errorf("batch request failed: %w", err)
 	}
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Warn().Err(closeErr).Msg("Failed to close response body")
+		}
+	}()
 
 	// Log quota information if available
 	if quotaStr := resp.Header.Get("x-ms-ratelimit-remaining-tenant-reads"); quotaStr != "" {
@@ -480,9 +480,9 @@ func (d *DiagnosticSettingsScanner) doRequest(ctx context.Context, resourceIds [
 		}
 	}
 
-	// Decode the response body
+	// Decode response body directly from the stream — avoids buffering the full response.
 	var result ArmBatchResponse
-	if err := json.Unmarshal(respBody, &result); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal batch response: %w", err)
 	}
 
@@ -521,8 +521,8 @@ type (
 	}
 
 	ArmBatchResponseItem struct {
-		HttpStatusCode int         `json:"httpStatusCode"` // HTTP status code of the response
-		Content        interface{} `json:"content"`        // armmonitor.DiagnosticSettingsResourceCollection
+		HttpStatusCode int             `json:"httpStatusCode"` // HTTP status code of the response
+		Content        json.RawMessage `json:"content"`        // raw JSON; decoded directly into typed struct
 	}
 )
 

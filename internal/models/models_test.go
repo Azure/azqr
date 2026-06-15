@@ -66,6 +66,110 @@ func TestShouldSkipError(t *testing.T) {
 	}
 }
 
+func TestGetSubscriptionFromResourceID(t *testing.T) {
+	tests := []struct {
+		name       string
+		resourceID string
+		want       string
+	}{
+		{
+			name:       "standard ARM resource ID",
+			resourceID: "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myRG/providers/Microsoft.Compute/virtualMachines/myVM",
+			want:       "12345678-1234-1234-1234-123456789012",
+		},
+		{
+			name:       "empty string",
+			resourceID: "",
+			want:       "",
+		},
+		{
+			name:       "malformed ID",
+			resourceID: "/subscriptions/",
+			want:       "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := GetSubscriptionFromResourceID(tt.resourceID)
+			if got != tt.want {
+				t.Errorf("GetSubscriptionFromResourceID() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetResourceGroupFromResourceID(t *testing.T) {
+	tests := []struct {
+		name       string
+		resourceID string
+		want       string
+	}{
+		{
+			name:       "standard ARM resource ID",
+			resourceID: "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myRG/providers/Microsoft.Compute/virtualMachines/myVM",
+			want:       "myRG",
+		},
+		{
+			name:       "empty string",
+			resourceID: "",
+			want:       "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := GetResourceGroupFromResourceID(tt.resourceID)
+			if got != tt.want {
+				t.Errorf("GetResourceGroupFromResourceID() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetResourceGroupIDFromResourceID(t *testing.T) {
+	resourceID := "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myRG/providers/Microsoft.Compute/virtualMachines/myVM"
+	want := "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myRG"
+	got := GetResourceGroupIDFromResourceID(resourceID)
+	if got != want {
+		t.Errorf("GetResourceGroupIDFromResourceID() = %q, want %q", got, want)
+	}
+}
+
+func TestGetResourceTypeFromResourceID(t *testing.T) {
+	tests := []struct {
+		name       string
+		resourceID string
+		want       string
+	}{
+		{
+			name:       "standard ARM resource ID",
+			resourceID: "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myRG/providers/Microsoft.Compute/virtualMachines/myVM",
+			want:       "Microsoft.Compute/virtualMachines",
+		},
+		{
+			name:       "empty string",
+			resourceID: "",
+			want:       "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := GetResourceTypeFromResourceID(tt.resourceID)
+			if got != tt.want {
+				t.Errorf("GetResourceTypeFromResourceID() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGetResourceNameFromResourceID(t *testing.T) {
+	resourceID := "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myRG/providers/Microsoft.Compute/virtualMachines/myVM"
+	want := "myVM"
+	got := GetResourceNameFromResourceID(resourceID)
+	if got != want {
+		t.Errorf("GetResourceNameFromResourceID() = %q, want %q", got, want)
+	}
+}
+
 func TestRecommendationConstants(t *testing.T) {
 	// Test Impact constants
 	if ImpactHigh != "High" {

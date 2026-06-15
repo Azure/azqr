@@ -17,7 +17,6 @@ import (
 	"sync"
 
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
@@ -54,7 +53,45 @@ const (
 	bucketCapacity          = 14
 )
 
-// create a new Graph scanner
+var (
+	embeddedRecsOnce  sync.Once
+	embeddedRecsCache map[string]map[string]models.GraphRecommendation
+)
+
+// GetRecommendations returns all embedded Graph recommendations grouped by resource type.
+// Results are computed once and cached for the lifetime of the process — the embedded
+// filesystem is immutable so repeated FS walks and YAML parses are pure waste.
+func (a *GraphScanner) GetRecommendations() map[string]map[string]models.GraphRecommendation {
+	embeddedRecsOnce.Do(func() {
+		result := map[string]map[string]models.GraphRecommendation{}
+		for _, scanType := range a.scanType {
+			var source string
+			switch scanType {
+			case OrphanScanType:
+				source = "AOR"
+			case AzqrScanType:
+				source = "AZQR"
+			default:
+				source = "APRL"
+			}
+
+			typeRecs := a.getRecommendations(string(scanType))
+			for resourceType, recs := range typeRecs {
+				for _, rec := range recs {
+					if result[resourceType] == nil {
+						result[resourceType] = map[string]models.GraphRecommendation{}
+					}
+					rec.Source = source
+					result[resourceType][rec.RecommendationID] = rec
+				}
+			}
+		}
+		embeddedRecsCache = result
+	})
+	return embeddedRecsCache
+}
+
+// NewScanner creates a new Graph scanner.
 func NewScanner(serviceScanners []models.IAzureScanner, filters *models.Filters, subscriptions map[string]string) GraphScanner {
 	return GraphScanner{
 		scanType: []ScanType{
@@ -76,34 +113,6 @@ func (a *GraphScanner) RegisterExternalQuery(resourceType string, recommendation
 		a.externalQueries[resourceType] = make(map[string]models.GraphRecommendation)
 	}
 	a.externalQueries[resourceType][recommendation.RecommendationID] = recommendation
-}
-
-// GetRecommendations returns a map with all Graph recommendations
-func (a *GraphScanner) GetRecommendations() map[string]map[string]models.GraphRecommendation {
-	recommendations := map[string]map[string]models.GraphRecommendation{}
-	for _, scanType := range a.scanType {
-		var source string
-		switch scanType {
-		case OrphanScanType:
-			source = "AOR"
-		case AzqrScanType:
-			source = "AZQR"
-		default:
-			source = "APRL"
-		}
-
-		typeRecs := a.getRecommendations(string(scanType))
-		for resourceType, recs := range typeRecs {
-			for _, rec := range recs {
-				if recommendations[resourceType] == nil {
-					recommendations[resourceType] = map[string]models.GraphRecommendation{}
-				}
-				rec.Source = source
-				recommendations[resourceType][rec.RecommendationID] = rec
-			}
-		}
-	}
-	return recommendations
 }
 
 func (a *GraphScanner) getRecommendations(path string) map[string]map[string]models.GraphRecommendation {
@@ -182,15 +191,16 @@ func (a *GraphScanner) ListRecommendations() (map[string]map[string]*models.Grap
 	for _, s := range a.serviceScanners {
 		for _, t := range s.ResourceTypes() {
 			gr := a.getGraphRules(t, rec)
+			lowerT := strings.ToLower(t)
 			for _, r := range gr {
 				rules = append(rules, &r)
 			}
 
 			for i, r := range gr {
-				if recommendations[strings.ToLower(t)] == nil {
-					recommendations[strings.ToLower(t)] = map[string]*models.GraphRecommendation{}
+				if recommendations[lowerT] == nil {
+					recommendations[lowerT] = map[string]*models.GraphRecommendation{}
 				}
-				recommendations[strings.ToLower(t)][i] = &r
+				recommendations[lowerT][i] = &r
 			}
 		}
 	}
@@ -215,8 +225,8 @@ func (a *GraphScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []
 
 	var wg sync.WaitGroup
 
-	// Use 10 workers to match the rate limiter's burst capacity
-	numWorkers := 10
+	// Use workers matching the rate limiter's burst capacity (bucketCapacity)
+	numWorkers := bucketCapacity
 	for w := 0; w < numWorkers; w++ {
 		go a.worker(ctx, graph, a.subscriptions, jobs, ch, &wg)
 	}
@@ -285,22 +295,55 @@ func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryCli
 		}
 
 		if result.Data != nil {
-			for _, row := range result.Data {
-				m := row.(map[string]interface{})
+			// graphScanRow matches the fields returned by APRL/azqr KQL queries.
+			// param1-5 and tags use RawMessage because KQL may project them as objects or primitives.
+			type graphScanRow struct {
+				ID     string          `json:"id"`
+				Name   string          `json:"name"`
+				Tags   json.RawMessage `json:"tags"`
+				Param1 json.RawMessage `json:"param1"`
+				Param2 json.RawMessage `json:"param2"`
+				Param3 json.RawMessage `json:"param3"`
+				Param4 json.RawMessage `json:"param4"`
+				Param5 json.RawMessage `json:"param5"`
+			}
 
-				// Check if "id" is present in the map
-				if _, ok := m["id"]; !ok {
+			// rawToString converts a RawMessage field to a plain string.
+			// Quoted JSON strings are unquoted; objects/arrays keep their JSON form; null → "".
+			rawToString := func(b json.RawMessage) string {
+				if len(b) == 0 || bytes.Equal(b, []byte("null")) {
+					return ""
+				}
+				// If it's a JSON string, unwrap the quotes.
+				if len(b) >= 2 && b[0] == '"' && b[len(b)-1] == '"' {
+					var s string
+					if json.Unmarshal(b, &s) == nil {
+						return s
+					}
+				}
+				// Otherwise (object, array, number, bool) return raw JSON text.
+				return string(b)
+			}
+
+			for _, raw := range result.Data {
+				var r graphScanRow
+				if err := json.Unmarshal(raw, &r); err != nil {
+					log.Warn().Err(err).Msgf("Skipping malformed row for recommendation %s", rule.RecommendationID)
+					continue
+				}
+
+				if r.ID == "" {
 					log.Warn().Msgf("Skipping result: 'id' field is missing in the response for recommendation: %s", rule.RecommendationID)
 					break
 				}
 
-				subscription := models.GetSubscriptionFromResourceID(m["id"].(string))
+				subscription := models.GetSubscriptionFromResourceID(r.ID)
 				subscriptionName, ok := subscriptions[subscription]
 				if !ok {
 					subscriptionName = ""
 				}
 
-				resourceType := models.GetResourceTypeFromResourceID(m["id"].(string))
+				resourceType := models.GetResourceTypeFromResourceID(r.ID)
 				if resourceType == "" {
 					resourceType = rule.ResourceType
 				}
@@ -313,17 +356,17 @@ func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryCli
 					LongDescription:     rule.LongDescription,
 					PotentialBenefits:   rule.PotentialBenefits,
 					Impact:              models.RecommendationImpact(rule.Impact),
-					Name:                to.String(m["name"]),
-					ResourceID:          to.String(m["id"]),
+					Name:                r.Name,
+					ResourceID:          r.ID,
 					SubscriptionID:      subscription,
 					SubscriptionName:    subscriptionName,
-					ResourceGroup:       models.GetResourceGroupFromResourceID(m["id"].(string)),
-					Tags:                to.String(m["tags"]),
-					Param1:              to.String(m["param1"]),
-					Param2:              to.String(m["param2"]),
-					Param3:              to.String(m["param3"]),
-					Param4:              to.String(m["param4"]),
-					Param5:              to.String(m["param5"]),
+					ResourceGroup:       models.GetResourceGroupFromResourceID(r.ID),
+					Tags:                rawToString(r.Tags),
+					Param1:              rawToString(r.Param1),
+					Param2:              rawToString(r.Param2),
+					Param3:              rawToString(r.Param3),
+					Param4:              rawToString(r.Param4),
+					Param5:              rawToString(r.Param5),
 					Learn:               rule.LearnMoreLink[0].Url,
 					AutomationAvailable: rule.AutomationAvailable,
 					Source:              rule.Source,

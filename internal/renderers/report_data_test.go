@@ -318,6 +318,45 @@ func TestMaskSubscriptionID(t *testing.T) {
 	}
 }
 
+func TestMaskSubscriptionIDInResourceID(t *testing.T) {
+	const subID = "12345678-1234-1234-1234-123456789012"
+	const resourceID = "/subscriptions/" + subID + "/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm1"
+
+	t.Run("mask disabled returns original", func(t *testing.T) {
+		got := MaskSubscriptionIDInResourceID(resourceID, false)
+		if got != resourceID {
+			t.Errorf("got %q, want %q", got, resourceID)
+		}
+	})
+
+	t.Run("mask enabled replaces subscription UUID", func(t *testing.T) {
+		got := MaskSubscriptionIDInResourceID(resourceID, true)
+		if strings.Contains(got, subID) {
+			t.Errorf("masked result still contains original subID: %s", got)
+		}
+		if !strings.Contains(got, "xxxxxxxx-xxxx-xxxx-xxxx-xxxxx") {
+			t.Errorf("masked result missing expected mask pattern: %s", got)
+		}
+		// Suffix after the UUID must be preserved exactly
+		const suffix = "/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm1"
+		if !strings.HasSuffix(got, suffix) {
+			t.Errorf("suffix not preserved: %s", got)
+		}
+	})
+
+	t.Run("short string returns empty", func(t *testing.T) {
+		if got := MaskSubscriptionIDInResourceID("/subscriptions/short", true); got != "" {
+			t.Errorf("expected empty for short ID, got %q", got)
+		}
+	})
+
+	t.Run("non-subscription path returns empty", func(t *testing.T) {
+		if got := MaskSubscriptionIDInResourceID("/tenants/abc/something", true); got != "" {
+			t.Errorf("expected empty for non-subscription path, got %q", got)
+		}
+	})
+}
+
 func TestFeatureFlagsCombinations(t *testing.T) {
 	// Test all combinations of feature flags to ensure they work independently
 	combinations := []struct {

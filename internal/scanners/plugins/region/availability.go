@@ -258,7 +258,7 @@ func (s *RegionSelectorScanner) checkRegionAvailability(
 				for skuName := range sourceSKUs {
 					result.totalSKUsChecked++
 					result.unknownSKUs++
-					result.missingSKUs = append(result.missingSKUs, fmt.Sprintf("%s:%s (unknown)", resourceType, skuName))
+					result.missingSKUs = append(result.missingSKUs, resourceType+":"+skuName+" (unknown)")
 				}
 				continue
 			}
@@ -274,7 +274,7 @@ func (s *RegionSelectorScanner) checkRegionAvailability(
 					state = skuUnavailable
 				}
 
-				skuIdentifier := fmt.Sprintf("%s:%s", resourceType, skuName)
+				skuIdentifier := resourceType + ":" + skuName
 				switch state {
 				case skuAvailable:
 					result.availableSKUs++
@@ -332,8 +332,9 @@ func (c *skuAvailabilityCache) getSKUAvailability(
 	resourceType = strings.ToLower(resourceType)
 	targetRegion = normalizeRegionName(targetRegion)
 
-	// Cache key includes subscriptionID because SKU restrictions are subscription-scoped
-	cacheKey := fmt.Sprintf("%s:%s:%s", subscriptionID, resourceType, targetRegion)
+	// Cache key includes subscriptionID because SKU restrictions are subscription-scoped.
+	// Use plain concatenation to avoid the fmt.Sprintf vararg heap alloc on every lookup.
+	cacheKey := subscriptionID + ":" + resourceType + ":" + targetRegion
 
 	// Fast path: already cached
 	c.mu.RLock()
@@ -383,7 +384,7 @@ func (c *skuAvailabilityCache) getSKUAvailability(
 	return v.(map[string]skuAvailabilityState), nil
 }
 
-// querySKUAvailabilityAPI queries Azure SKU availability APIs based on configuration
+// querySKUAvailabilityAPI queries Azure SKU availability APIs based on configuration.
 func (c *skuAvailabilityCache) querySKUAvailabilityAPI(
 	ctx context.Context,
 	subscriptionID string,
@@ -391,210 +392,142 @@ func (c *skuAvailabilityCache) querySKUAvailabilityAPI(
 	config *propertyMapConfig,
 	httpClient *az.HttpClient,
 ) (map[string]skuAvailabilityState, error) {
-	// Build the API URL based on configuration
-	// PowerShell uses {0} for subscription and {1} for location
 	uri := config.URI
 	uri = strings.ReplaceAll(uri, "{0}", subscriptionID)
 	uri = strings.ReplaceAll(uri, "{1}", region)
 
-	// Add base URL if not present
 	if !strings.HasPrefix(uri, "https://") {
 		uri = "https://management.azure.com" + uri
 	}
 
 	log.Debug().Msgf("Querying SKU availability API: %s", uri)
 
-	// Use passed HTTP client (throttling and retries handled internally)
-	body, err := httpClient.Do(ctx, uri) // needsAuth=true, 3 retries
+	body, err := httpClient.Do(ctx, uri)
 	if err != nil {
-		// Return an error so the caller can record these SKUs as unknown rather than
-		// falling back to an optimistic type-level assumption.
 		if httpErr, ok := err.(*az.HTTPError); ok {
 			return nil, fmt.Errorf("SKU availability API HTTP %d for %s: %s", httpErr.StatusCode, uri, httpErr.Body)
 		}
 		return nil, err
 	}
 
-	// Parse response
-	var response map[string]interface{}
+	var response skuAPIResponse
 	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, fmt.Errorf("failed to parse response JSON: %w", err)
 	}
 
-	// Extract SKU availability from response
-	available := c.extractSKUsFromResponse(response, config, region)
-
+	available := c.extractSKUsFromResponse(response.Value, config, region)
 	log.Debug().Msgf("Found %d SKUs available for region %s", len(available), region)
 
 	return available, nil
 }
 
-// extractSKUsFromResponse extracts SKU availability state from API response based on configuration.
-// For global-list endpoints (regionalApi: false), each item is filtered to ensure it applies to
-// targetRegion by checking the locationInfo[].location field (Compute) or locations[] (Storage).
-// Items with no location data are accepted (they represent globally-available SKUs).
+// extractSKUsFromResponse extracts SKU availability state from API response items.
+// For global-list endpoints (regionalApi: false), each item is filtered to ensure
+// it applies to targetRegion by checking locationInfo[].location (Compute) or
+// locations[] (Storage). Items with no location data are accepted as globally available.
 func (c *skuAvailabilityCache) extractSKUsFromResponse(
-	response map[string]interface{},
+	items []skuAPIItem,
 	config *propertyMapConfig,
 	targetRegion string,
 ) map[string]skuAvailabilityState {
 	available := make(map[string]skuAvailabilityState)
 
-	// Navigate to the value array
-	values, ok := response["value"].([]interface{})
-	if !ok {
-		log.Debug().Msg("API response does not contain 'value' array")
-		return available
-	}
+	for i := range items {
+		item := &items[i]
 
-	// Process each item in the response
-	for _, item := range values {
-		itemMap, ok := item.(map[string]interface{})
-		if !ok {
+		if !config.RegionalAPI && !skuAppliesToRegion(item, targetRegion) {
 			continue
 		}
 
-		// For global-list APIs, verify the SKU applies to the target region before accepting it.
-		// Regional APIs are already scoped to the correct region by the URI.
-		if !config.RegionalAPI && !skuAppliesToRegion(itemMap, targetRegion) {
-			continue
-		}
-
-		// Extract SKU name using configured path
-		skuName := c.extractSKUName(itemMap, config)
+		skuName := extractSKUName(item, config)
 		if skuName == "" {
 			continue
 		}
 
-		// Determine availability state from restrictions
-		state := c.checkSKURestrictions(itemMap)
+		state := checkSKURestrictions(item)
 		available[strings.ToLower(skuName)] = state
 	}
 
 	return available
 }
 
-// skuAppliesToRegion returns true if a SKU item from a global-list API applies to the given region.
-// It checks the locationInfo[].location field (Microsoft.Compute/skus) and the locations[] field
-// (Microsoft.Storage/skus). Items that carry neither field are accepted as globally available.
-func skuAppliesToRegion(item map[string]interface{}, targetRegion string) bool {
+// skuAppliesToRegion returns true if a SKU item from a global-list API applies
+// to the given region. It checks locationInfo[].location (Microsoft.Compute/skus)
+// and locations[] (Microsoft.Storage/skus). Items that carry neither field are
+// accepted as globally available.
+func skuAppliesToRegion(item *skuAPIItem, targetRegion string) bool {
 	target := normalizeRegionName(targetRegion)
 
-	// Microsoft.Compute/skus: locationInfo[].location
-	if locationInfo, ok := item["locationInfo"].([]interface{}); ok && len(locationInfo) > 0 {
-		for _, li := range locationInfo {
-			liMap, ok := li.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			if loc, ok := liMap["location"].(string); ok {
-				if normalizeRegionName(loc) == target {
-					return true
-				}
+	if len(item.LocationInfo) > 0 {
+		for _, li := range item.LocationInfo {
+			if normalizeRegionName(li.Location) == target {
+				return true
 			}
 		}
-		return false // locationInfo present but target region not listed
+		return false
 	}
 
-	// Microsoft.Storage/skus: locations[] (array of strings)
-	if locations, ok := item["locations"].([]interface{}); ok && len(locations) > 0 {
-		for _, l := range locations {
-			if loc, ok := l.(string); ok {
-				if normalizeRegionName(loc) == target {
-					return true
-				}
+	if len(item.Locations) > 0 {
+		for _, loc := range item.Locations {
+			if normalizeRegionName(loc) == target {
+				return true
 			}
 		}
-		return false // locations present but target region not listed
+		return false
 	}
 
-	// No location filter fields present — accept as globally available
 	return true
 }
 
-// extractSKUName extracts the SKU name from an API response item
-func (c *skuAvailabilityCache) extractSKUName(
-	item map[string]interface{},
-	config *propertyMapConfig,
-) string {
-	// Check if we need to navigate through startPath first
-	current := interface{}(item)
-
-	if len(config.Properties.StartPath) > 0 {
-		for _, pathPart := range config.Properties.StartPath {
-			if currentMap, ok := current.(map[string]interface{}); ok {
-				current = currentMap[pathPart]
-			} else {
-				return ""
-			}
-		}
-	}
-
-	// Extract name using top-level properties
+// extractSKUName extracts the SKU name from an API response item using the
+// configured property map.
+func extractSKUName(item *skuAPIItem, config *propertyMapConfig) string {
+	// Use configured top-level property name for the SKU name field if set.
 	if config.Properties.TopLevelProperties != nil {
 		if nameProp, exists := config.Properties.TopLevelProperties["name"]; exists {
-			if currentMap, ok := current.(map[string]interface{}); ok {
-				if name, ok := currentMap[nameProp].(string); ok {
-					return name
+			switch nameProp {
+			case "name":
+				if item.Name != "" {
+					return item.Name
+				}
+			case "size":
+				if item.Size != "" {
+					return item.Size
+				}
+			case "tier":
+				if item.Tier != "" {
+					return item.Tier
 				}
 			}
 		}
 	}
 
-	// Fallback: look for common name properties
-	if currentMap, ok := current.(map[string]interface{}); ok {
-		for _, nameField := range []string{"name", "Name", "skuName", "size"} {
-			if name, ok := currentMap[nameField].(string); ok {
-				return name
-			}
-		}
+	// Fallback: use name > size > tier in priority order.
+	if item.Name != "" {
+		return item.Name
 	}
-
-	return ""
+	if item.Size != "" {
+		return item.Size
+	}
+	return item.Tier
 }
 
-// checkSKURestrictions returns the availability state for a SKU based on its restrictions
-// and capability flags. It distinguishes subscription-level restrictions (quota-liftable)
-// from hard region-level blocks.
-func (c *skuAvailabilityCache) checkSKURestrictions(
-	item map[string]interface{},
-) skuAvailabilityState {
-	// Check for 'restrictions' field (common in Azure SKU APIs)
-	if restrictions, ok := item["restrictions"].([]interface{}); ok {
-		for _, restriction := range restrictions {
-			restrictionMap, ok := restriction.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			restrictionType, _ := restrictionMap["type"].(string)
-			if !strings.EqualFold(restrictionType, "Location") {
-				continue
-			}
-			// Distinguish subscription restriction (quota-liftable) from hard block
-			reasonCode, _ := restrictionMap["reasonCode"].(string)
-			if strings.EqualFold(reasonCode, "NotAvailableForSubscription") {
-				return skuRestricted
-			}
-			return skuUnavailable
+// checkSKURestrictions returns the availability state for a SKU based on its
+// restrictions and capability flags.
+func checkSKURestrictions(item *skuAPIItem) skuAvailabilityState {
+	for _, r := range item.Restrictions {
+		if !strings.EqualFold(r.Type, "Location") {
+			continue
 		}
+		if strings.EqualFold(r.ReasonCode, "NotAvailableForSubscription") {
+			return skuRestricted
+		}
+		return skuUnavailable
 	}
 
-	// Check for 'capabilities' field with an explicit available=false flag
-	if capabilities, ok := item["capabilities"].([]interface{}); ok {
-		for _, capability := range capabilities {
-			capMap, ok := capability.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			if name, ok := capMap["name"].(string); ok {
-				if strings.EqualFold(name, "available") {
-					if value, ok := capMap["value"].(string); ok {
-						if !strings.EqualFold(value, "true") {
-							return skuUnavailable
-						}
-					}
-				}
-			}
+	for _, cap := range item.Capabilities {
+		if strings.EqualFold(cap.Name, "available") && !strings.EqualFold(cap.Value, "true") {
+			return skuUnavailable
 		}
 	}
 
