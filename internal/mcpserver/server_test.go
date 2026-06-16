@@ -5,7 +5,6 @@ package mcpserver
 
 import (
 	"testing"
-	"time"
 
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -55,7 +54,7 @@ func TestMCPServerInitialization(t *testing.T) {
 	RegisterTools(testServer)
 }
 
-func TestSSEServerCreation(t *testing.T) {
+func TestStreamableHTTPServerCreation(t *testing.T) {
 	// Create a test MCP server
 	testServer := server.NewMCPServer(
 		"Test Server",
@@ -63,19 +62,9 @@ func TestSSEServerCreation(t *testing.T) {
 		server.WithToolCapabilities(true),
 	)
 
-	// Test that we can create an SSE server instance
-	sseServer := server.NewSSEServer(testServer)
-	if sseServer == nil {
-		t.Fatal("Failed to create SSE server instance")
-	}
-
-	// Test with custom options
-	sseServerWithOpts := server.NewSSEServer(
-		testServer,
-		server.WithKeepAlive(true),
-		server.WithKeepAliveInterval(30*time.Second),
-	)
-	if sseServerWithOpts == nil {
-		t.Fatal("Failed to create SSE server with options")
+	// Test that we can create a Streamable HTTP server instance (MCP 2025-03 spec)
+	httpServer := server.NewStreamableHTTPServer(testServer)
+	if httpServer == nil {
+		t.Fatal("Failed to create Streamable HTTP server instance")
 	}
 }

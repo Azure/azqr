@@ -43,10 +43,10 @@ func StartWithMode(mode ServerMode, addr, version string) {
 
 	switch mode {
 	case ModeHTTP:
-		// Start HTTP/SSE server
-		fmt.Printf("Starting MCP server in HTTP/SSE mode on %s\n", addr)
-		sseServer := server.NewSSEServer(s)
-		if err := sseServer.Start(addr); err != nil {
+		// Start Streamable HTTP server (MCP 2025-03 spec)
+		fmt.Printf("Starting MCP server in Streamable HTTP mode on %s\n", addr)
+		httpServer := server.NewStreamableHTTPServer(s)
+		if err := httpServer.Start(addr); err != nil {
 			fmt.Printf("HTTP server error: %v\n", err)
 		}
 	case ModeStdio:
