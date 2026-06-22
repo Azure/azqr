@@ -97,48 +97,6 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 	table := [][]string{s.GetMetadata().HeaderRow()}
 
 	if result.Data != nil {
-		type sqlESURow struct {
-			SubscriptionID              string `json:"SubscriptionId"`
-			Name                        string `json:"Name"`
-			ResourceGroup               string `json:"ResourceGroup"`
-			Subscription                string `json:"Subscription"`
-			Location                    string `json:"Location"`
-			CloudType                   string `json:"CloudType"`
-			SQLVersion                  string `json:"SQLVersion"`
-			Edition                     string `json:"Edition"`
-			VCores                      string `json:"vCores"`
-			BillableCores               string `json:"BillableCores"`
-			EOLStatus                   string `json:"EOLStatus"`
-			MigrationRecommendation     string `json:"MigrationRecommendation"`
-			MigrationTargetTier         string `json:"MigrationTargetTier"`
-			ESUStartDate                string `json:"ESUStartDate"`
-			ESUEndDate                  string `json:"ESUEndDate"`
-			ESUMonthlyCostPerCore       string `json:"ESUMonthlyCostPerCore"`
-			SQLLicenseType              string `json:"SQLLicenseType"`
-			SQLLicenseMonthlyCostPerCore string `json:"SQLLicenseMonthlyCostPerCore"`
-			SQLLicenseMonthlyCost       string `json:"SQLLicenseMonthlyCost"`
-			SQLLicenseAnnualCost        string `json:"SQLLicenseAnnualCost"`
-			VMCostPerCorePerMonth       string `json:"VMCostPerCorePerMonth"`
-			EstVMComputeMonthlyCost     string `json:"EstVMComputeMonthlyCost"`
-			EstVMComputeAnnualCost      string `json:"EstVMComputeAnnualCost"`
-			EstVMComputeThreeYearCost   string `json:"EstVMComputeThreeYearCost"`
-			EstESUMonthlyCost           string `json:"EstESUMonthlyCost"`
-			EstESUAnnualCost            string `json:"EstESUAnnualCost"`
-			EstESUThreeYearCost         string `json:"EstESUThreeYearCost"`
-			PatchOpsMonthlyCost         string `json:"PatchOpsMonthlyCost"`
-			PatchOpsAnnualCost          string `json:"PatchOpsAnnualCost"`
-			PatchOpsThreeYearCost       string `json:"PatchOpsThreeYearCost"`
-			CurrentMonthlyCost          string `json:"CurrentMonthlyCost"`
-			CurrentAnnualCost           string `json:"CurrentAnnualCost"`
-			CurrentThreeYearCost        string `json:"CurrentThreeYearCost"`
-			EstSQLMIMonthlyCost         string `json:"EstSQLMIMonthlyCost"`
-			EstSQLMIAnnualCost          string `json:"EstSQLMIAnnualCost"`
-			EstSQLMIThreeYearCost       string `json:"EstSQLMIThreeYearCost"`
-			EstSQLMIMonthlySaving       string `json:"EstSQLMIMonthlySaving"`
-			EstSQLMIAnnualSaving        string `json:"EstSQLMIAnnualSaving"`
-			EstSQLMIThreeYearSaving     string `json:"EstSQLMIThreeYearSaving"`
-			SQLMIMigrationVerdict       string `json:"SQLMIMigrationVerdict"`
-		}
 		for _, raw := range result.Data {
 			var r sqlESURow
 			if err := json.Unmarshal(raw, &r); err != nil {
@@ -150,47 +108,7 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 				continue
 			}
 
-			table = append(table, []string{
-				r.Name,
-				r.ResourceGroup,
-				r.Subscription,
-				r.Location,
-				r.CloudType,
-				r.SQLVersion,
-				r.Edition,
-				r.VCores,
-				r.BillableCores,
-				r.EOLStatus,
-				r.MigrationRecommendation,
-				r.MigrationTargetTier,
-				r.ESUStartDate,
-				r.ESUEndDate,
-				r.ESUMonthlyCostPerCore,
-				r.SQLLicenseType,
-				r.SQLLicenseMonthlyCostPerCore,
-				r.SQLLicenseMonthlyCost,
-				r.SQLLicenseAnnualCost,
-				r.VMCostPerCorePerMonth,
-				r.EstVMComputeMonthlyCost,
-				r.EstVMComputeAnnualCost,
-				r.EstVMComputeThreeYearCost,
-				r.EstESUMonthlyCost,
-				r.EstESUAnnualCost,
-				r.EstESUThreeYearCost,
-				r.PatchOpsMonthlyCost,
-				r.PatchOpsAnnualCost,
-				r.PatchOpsThreeYearCost,
-				r.CurrentMonthlyCost,
-				r.CurrentAnnualCost,
-				r.CurrentThreeYearCost,
-				r.EstSQLMIMonthlyCost,
-				r.EstSQLMIAnnualCost,
-				r.EstSQLMIThreeYearCost,
-				r.EstSQLMIMonthlySaving,
-				r.EstSQLMIAnnualSaving,
-				r.EstSQLMIThreeYearSaving,
-				r.SQLMIMigrationVerdict,
-			})
+			table = append(table, r.toRecord())
 		}
 	}
 
@@ -202,6 +120,96 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 		Description: "SQL Server End-of-Life and Extended Security Update status with cost analysis",
 		Table:       table,
 	}}, nil
+}
+
+// sqlESURow is the shape of a single row returned by the SQL ESU ARG query.
+type sqlESURow struct {
+	SubscriptionID               string `json:"SubscriptionId"`
+	Name                         string `json:"Name"`
+	ResourceGroup                string `json:"ResourceGroup"`
+	Subscription                 string `json:"Subscription"`
+	Location                     string `json:"Location"`
+	CloudType                    string `json:"CloudType"`
+	SQLVersion                   string `json:"SQLVersion"`
+	Edition                      string `json:"Edition"`
+	VCores                       string `json:"vCores"`
+	BillableCores                string `json:"BillableCores"`
+	EOLStatus                    string `json:"EOLStatus"`
+	MigrationRecommendation      string `json:"MigrationRecommendation"`
+	MigrationTargetTier          string `json:"MigrationTargetTier"`
+	ESUStartDate                 string `json:"ESUStartDate"`
+	ESUEndDate                   string `json:"ESUEndDate"`
+	ESUMonthlyCostPerCore        string `json:"ESUMonthlyCostPerCore"`
+	SQLLicenseType               string `json:"SQLLicenseType"`
+	SQLLicenseMonthlyCostPerCore string `json:"SQLLicenseMonthlyCostPerCore"`
+	SQLLicenseMonthlyCost        string `json:"SQLLicenseMonthlyCost"`
+	SQLLicenseAnnualCost         string `json:"SQLLicenseAnnualCost"`
+	VMCostPerCorePerMonth        string `json:"VMCostPerCorePerMonth"`
+	EstVMComputeMonthlyCost      string `json:"EstVMComputeMonthlyCost"`
+	EstVMComputeAnnualCost       string `json:"EstVMComputeAnnualCost"`
+	EstVMComputeThreeYearCost    string `json:"EstVMComputeThreeYearCost"`
+	EstESUMonthlyCost            string `json:"EstESUMonthlyCost"`
+	EstESUAnnualCost             string `json:"EstESUAnnualCost"`
+	EstESUThreeYearCost          string `json:"EstESUThreeYearCost"`
+	PatchOpsMonthlyCost          string `json:"PatchOpsMonthlyCost"`
+	PatchOpsAnnualCost           string `json:"PatchOpsAnnualCost"`
+	PatchOpsThreeYearCost        string `json:"PatchOpsThreeYearCost"`
+	CurrentMonthlyCost           string `json:"CurrentMonthlyCost"`
+	CurrentAnnualCost            string `json:"CurrentAnnualCost"`
+	CurrentThreeYearCost         string `json:"CurrentThreeYearCost"`
+	EstSQLMIMonthlyCost          string `json:"EstSQLMIMonthlyCost"`
+	EstSQLMIAnnualCost           string `json:"EstSQLMIAnnualCost"`
+	EstSQLMIThreeYearCost        string `json:"EstSQLMIThreeYearCost"`
+	EstSQLMIMonthlySaving        string `json:"EstSQLMIMonthlySaving"`
+	EstSQLMIAnnualSaving         string `json:"EstSQLMIAnnualSaving"`
+	EstSQLMIThreeYearSaving      string `json:"EstSQLMIThreeYearSaving"`
+	SQLMIMigrationVerdict        string `json:"SQLMIMigrationVerdict"`
+}
+
+// toRecord flattens a sqlESURow into a table row in the same column order as
+// the plugin's ColumnMetadata.
+func (r sqlESURow) toRecord() []string {
+	return []string{
+		r.Name,
+		r.ResourceGroup,
+		r.Subscription,
+		r.Location,
+		r.CloudType,
+		r.SQLVersion,
+		r.Edition,
+		r.VCores,
+		r.BillableCores,
+		r.EOLStatus,
+		r.MigrationRecommendation,
+		r.MigrationTargetTier,
+		r.ESUStartDate,
+		r.ESUEndDate,
+		r.ESUMonthlyCostPerCore,
+		r.SQLLicenseType,
+		r.SQLLicenseMonthlyCostPerCore,
+		r.SQLLicenseMonthlyCost,
+		r.SQLLicenseAnnualCost,
+		r.VMCostPerCorePerMonth,
+		r.EstVMComputeMonthlyCost,
+		r.EstVMComputeAnnualCost,
+		r.EstVMComputeThreeYearCost,
+		r.EstESUMonthlyCost,
+		r.EstESUAnnualCost,
+		r.EstESUThreeYearCost,
+		r.PatchOpsMonthlyCost,
+		r.PatchOpsAnnualCost,
+		r.PatchOpsThreeYearCost,
+		r.CurrentMonthlyCost,
+		r.CurrentAnnualCost,
+		r.CurrentThreeYearCost,
+		r.EstSQLMIMonthlyCost,
+		r.EstSQLMIAnnualCost,
+		r.EstSQLMIThreeYearCost,
+		r.EstSQLMIMonthlySaving,
+		r.EstSQLMIAnnualSaving,
+		r.EstSQLMIThreeYearSaving,
+		r.SQLMIMigrationVerdict,
+	}
 }
 
 // init registers the plugin automatically

@@ -112,3 +112,52 @@ func TestEnrichWithLatencyData_RegionNamesNormalized(t *testing.T) {
 		t.Errorf("expected normalization to yield 85.0 ms, got %.1f", results[0].avgLatencyMs)
 	}
 }
+
+func TestGetRegionLatency(t *testing.T) {
+	defer setTestLatencyMatrix(map[string]map[string]float64{
+		"eastus":     {"westeurope": 85.0},
+		"westeurope": {"swedencentral": 30.0},
+	})()
+
+	tests := []struct {
+		name   string
+		source string
+		target string
+		want   float64
+	}{
+		{name: "same region is zero", source: "eastus", target: "eastus", want: 0},
+		{name: "direct lookup", source: "eastus", target: "westeurope", want: 85.0},
+		{name: "symmetric reverse lookup", source: "westeurope", target: "eastus", want: 85.0},
+		{name: "unknown pair is zero", source: "eastus", target: "brazilsouth", want: 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getRegionLatency(tt.source, tt.target); got != tt.want {
+				t.Errorf("getRegionLatency(%q, %q) = %.1f, want %.1f", tt.source, tt.target, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNormalizeRegionName(t *testing.T) {
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{in: "East US", want: "eastus"},
+		{in: "eastus", want: "eastus"},
+		{in: "West Europe", want: "westeurope"},
+		{in: "AUSTRALIA CENTRAL", want: "australiacentral"},
+		{in: "", want: ""},
+		{in: "  East  US  ", want: "eastus"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			if got := normalizeRegionName(tt.in); got != tt.want {
+				t.Errorf("normalizeRegionName(%q) = %q, want %q", tt.in, got, tt.want)
+			}
+		})
+	}
+}
