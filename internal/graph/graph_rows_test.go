@@ -42,7 +42,14 @@ func TestUnmarshalRows(t *testing.T) {
 			},
 		},
 		{
-			name: "malformed rows are skipped, valid kept",
+			name: "all rows malformed returns empty slice",
+			data: []json.RawMessage{
+				json.RawMessage(`{not json}`),
+				json.RawMessage(`{also not json}`),
+			},
+			expected: []row{},
+		},
+		{
 			data: []json.RawMessage{
 				json.RawMessage(`{"name":"a","count":1}`),
 				json.RawMessage(`{not json}`),
