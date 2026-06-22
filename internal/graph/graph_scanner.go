@@ -307,23 +307,6 @@ func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryCli
 				Param5 json.RawMessage `json:"param5"`
 			}
 
-			// rawToString converts a RawMessage field to a plain string.
-			// Quoted JSON strings are unquoted; objects/arrays keep their JSON form; null → "".
-			rawToString := func(b json.RawMessage) string {
-				if len(b) == 0 || bytes.Equal(b, []byte("null")) {
-					return ""
-				}
-				// If it's a JSON string, unwrap the quotes.
-				if len(b) >= 2 && b[0] == '"' && b[len(b)-1] == '"' {
-					var s string
-					if json.Unmarshal(b, &s) == nil {
-						return s
-					}
-				}
-				// Otherwise (object, array, number, bool) return raw JSON text.
-				return string(b)
-			}
-
 			for _, r := range UnmarshalRows[graphScanRow](result.Data, rule.RecommendationID) {
 				if r.ID == "" {
 					log.Warn().Msgf("Skipping result: 'id' field is missing in the response for recommendation: %s", rule.RecommendationID)
@@ -354,12 +337,12 @@ func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryCli
 					SubscriptionID:      subscription,
 					SubscriptionName:    subscriptionName,
 					ResourceGroup:       models.GetResourceGroupFromResourceID(r.ID),
-					Tags:                rawToString(r.Tags),
-					Param1:              rawToString(r.Param1),
-					Param2:              rawToString(r.Param2),
-					Param3:              rawToString(r.Param3),
-					Param4:              rawToString(r.Param4),
-					Param5:              rawToString(r.Param5),
+					Tags:                rawMessageToString(r.Tags),
+					Param1:              rawMessageToString(r.Param1),
+					Param2:              rawMessageToString(r.Param2),
+					Param3:              rawMessageToString(r.Param3),
+					Param4:              rawMessageToString(r.Param4),
+					Param5:              rawMessageToString(r.Param5),
 					Learn:               rule.LearnMoreLink[0].Url,
 					AutomationAvailable: rule.AutomationAvailable,
 					Source:              rule.Source,
@@ -369,6 +352,23 @@ func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryCli
 	}
 
 	return results, nil
+}
+
+// rawMessageToString converts a RawMessage field to a plain string.
+// Quoted JSON strings are unquoted; objects/arrays keep their JSON form; null → "".
+func rawMessageToString(b json.RawMessage) string {
+	if len(b) == 0 || bytes.Equal(b, []byte("null")) {
+		return ""
+	}
+	// If it's a JSON string, unwrap the quotes.
+	if len(b) >= 2 && b[0] == '"' && b[len(b)-1] == '"' {
+		var s string
+		if json.Unmarshal(b, &s) == nil {
+			return s
+		}
+	}
+	// Otherwise (object, array, number, bool) return raw JSON text.
+	return string(b)
 }
 
 func (a *GraphScanner) getGraphRules(service string, rec map[string]map[string]models.GraphRecommendation) map[string]models.GraphRecommendation {

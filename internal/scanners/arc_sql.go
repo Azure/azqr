@@ -5,6 +5,7 @@ package scanners
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
@@ -55,6 +56,12 @@ func (s *ArcSQLScanner) Scan(ctx context.Context, cred azcore.TokenCredential, s
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Arc SQL resources")
 		return nil
 	}
+	return buildArcSQLResults(result.Data, subscriptions, filters)
+}
+
+// buildArcSQLResults maps raw Arc-enabled SQL rows to ArcSQLResult records,
+// applying subscription and service exclusion filters.
+func buildArcSQLResults(data []json.RawMessage, subscriptions map[string]string, filters *models.Filters) []*models.ArcSQLResult {
 	resources := []*models.ArcSQLResult{}
 
 	type arcSQLRow struct {
@@ -73,7 +80,7 @@ func (s *ArcSQLScanner) Scan(ctx context.Context, cred azcore.TokenCredential, s
 		TELStatus      string `json:"TELStatus"`
 		DefenderStatus string `json:"DefenderStatus"`
 	}
-	for _, r := range graph.UnmarshalRows[arcSQLRow](result.Data, "Arc SQL") {
+	for _, r := range graph.UnmarshalRows[arcSQLRow](data, "Arc SQL") {
 		if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
 			continue
 		}

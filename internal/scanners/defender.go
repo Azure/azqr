@@ -5,6 +5,7 @@ package scanners
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/Azure/azqr/internal/graph"
@@ -36,6 +37,12 @@ func (s *DefenderScanner) Scan(ctx context.Context, cred azcore.TokenCredential,
 		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Defender status")
 		return nil
 	}
+	return buildDefenderResults(result.Data, filters)
+}
+
+// buildDefenderResults maps raw Defender pricing rows to DefenderResult records,
+// applying the subscription exclusion filter.
+func buildDefenderResults(data []json.RawMessage, filters *models.Filters) []*models.DefenderResult {
 	resources := []*models.DefenderResult{}
 	type defenderStatusRow struct {
 		SubscriptionID   string `json:"SubscriptionId"`
@@ -43,7 +50,7 @@ func (s *DefenderScanner) Scan(ctx context.Context, cred azcore.TokenCredential,
 		Name             string `json:"Name"`
 		Tier             string `json:"Tier"`
 	}
-	for _, r := range graph.UnmarshalRows[defenderStatusRow](result.Data, "Defender status") {
+	for _, r := range graph.UnmarshalRows[defenderStatusRow](data, "Defender status") {
 		if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
 			continue
 		}
@@ -95,6 +102,18 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 	`
 	log.Debug().Msg(query)
 
+	result, err := graphClient.Query(ctx, query, subscriptions)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Defender recommendations")
+		return nil
+	}
+	return buildDefenderRecommendations(result.Data, subscriptions, filters)
+}
+
+// buildDefenderRecommendations maps raw Defender assessment rows to
+// DefenderRecommendation records, applying the service exclusion filter and
+// deduplicating by (resourceID, category, recommendationName).
+func buildDefenderRecommendations(data []json.RawMessage, subscriptions map[string]string, filters *models.Filters) []*models.DefenderRecommendation {
 	// Composite key type for deduplication - avoids string concatenation allocations
 	type defenderKey struct {
 		resourceID         string
@@ -102,13 +121,8 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 		recommendationName string
 	}
 
-	result, err := graphClient.Query(ctx, query, subscriptions)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Defender recommendations")
-		return nil
-	}
 	resources := []*models.DefenderRecommendation{}
-	seen := make(map[defenderKey]struct{}, len(result.Data))
+	seen := make(map[defenderKey]struct{}, len(data))
 	type defenderRecRow struct {
 		SubscriptionID         string `json:"SubscriptionId"`
 		ResourceGroupName      string `json:"ResourceGroupName"`
@@ -122,7 +136,7 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 		AzPortalLink           string `json:"AzPortalLink"`
 		ResourceID             string `json:"ResourceId"`
 	}
-	for _, r := range graph.UnmarshalRows[defenderRecRow](result.Data, "Defender recommendation") {
+	for _, r := range graph.UnmarshalRows[defenderRecRow](data, "Defender recommendation") {
 		if filters.Azqr.IsServiceExcluded(r.ResourceID) {
 			continue
 		}
