@@ -5,6 +5,7 @@ package scanners
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
@@ -49,18 +50,25 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 
 	log.Debug().Msg(query)
 	result, err := graphClient.Query(ctx, query, subscriptions, graph.QueryOptions{ManagementGroupScope: true})
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Azure Policy non-compliant resources")
+		return nil
+	}
+	return buildAzurePolicyResults(result.Data, filters)
+}
+
+// buildAzurePolicyResults maps raw policy-state rows to AzurePolicyResult records,
+// applying subscription and service exclusion filters and deduplicating by
+// (resourceID, policyDefinitionID).
+func buildAzurePolicyResults(data []json.RawMessage, filters *models.Filters) []*models.AzurePolicyResult {
 	// Composite key type for deduplication - avoids string concatenation allocations
 	type policyKey struct {
 		resourceID         string
 		policyDefinitionID string
 	}
 
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for Azure Policy non-compliant resources")
-		return nil
-	}
 	resources := []*models.AzurePolicyResult{}
-	seen := make(map[policyKey]struct{}, len(result.Data))
+	seen := make(map[policyKey]struct{}, len(data))
 
 	type policyRow struct {
 		SubscriptionID          string `json:"subscriptionId"`
@@ -75,7 +83,7 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 		PolicyAssignmentID      string `json:"policyAssignmentId"`
 		ComplianceState         string `json:"complianceState"`
 	}
-	for _, r := range graph.UnmarshalRows[policyRow](result.Data, "Azure Policy") {
+	for _, r := range graph.UnmarshalRows[policyRow](data, "Azure Policy") {
 		if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
 			continue
 		}
