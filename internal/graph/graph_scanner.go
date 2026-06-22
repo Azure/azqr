@@ -50,7 +50,7 @@ const (
 	AprlScanType   ScanType = "aprl/azure-resources"
 	OrphanScanType ScanType = "azure-orphan-resources"
 	AzqrScanType   ScanType = "azqr/azure-resources"
-	bucketCapacity          = 14
+	bucketCapacity          = 10 // matches graphLimiter burst in internal/throttling/policy.go
 )
 
 var (
@@ -224,7 +224,8 @@ func (a *GraphScanner) Scan(ctx context.Context, cred azcore.TokenCredential) []
 
 	var wg sync.WaitGroup
 
-	// Use workers matching the rate limiter's burst capacity (bucketCapacity)
+	// Worker count matches graphLimiter burst capacity so no goroutine ever blocks
+	// waiting for a token while another worker is idle.
 	numWorkers := bucketCapacity
 	for w := 0; w < numWorkers; w++ {
 		go a.worker(ctx, graph, a.subscriptions, jobs, ch, &wg)

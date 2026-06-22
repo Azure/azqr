@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strconv"
 	"time"
 
@@ -31,15 +32,26 @@ type GraphResult struct {
 // UnmarshalRows decodes each raw JSON row into a value of type T. Rows that fail
 // to unmarshal are logged and skipped rather than aborting the whole result. The
 // label is used only for the warning message (e.g. "Advisor", "Defender status").
+// If all rows fail (e.g. due to an API schema change) an error-level message is
+// logged so that a silent empty report is clearly visible in logs.
 func UnmarshalRows[T any](data []json.RawMessage, label string) []T {
 	rows := make([]T, 0, len(data))
+	skipped := 0
 	for _, raw := range data {
 		var r T
 		if err := json.Unmarshal(raw, &r); err != nil {
 			log.Warn().Err(err).Msgf("Skipping malformed %s row", label)
+			skipped++
 			continue
 		}
 		rows = append(rows, r)
+	}
+	if skipped > 0 {
+		if skipped == len(data) {
+			log.Error().Msgf("All %d %s rows failed to unmarshal — possible API schema change; results will be empty", skipped, label)
+		} else {
+			log.Warn().Msgf("Skipped %d/%d malformed %s rows", skipped, len(data), label)
+		}
 	}
 	return rows
 }
@@ -191,10 +203,12 @@ func (q *GraphQueryClient) doRequest(ctx context.Context, request QueryRequest) 
 
 	log.Debug().Msgf("Graph query quota remaining: %d, Retry after: %s", queryResp.Quota, queryResp.RetryAfter)
 
-	// Decode response body directly from the stream
+	// Decode response body directly from the stream, then drain the remainder so
+	// the underlying TCP connection is returned to the pool for reuse.
 	if err := json.NewDecoder(resp.Body).Decode(&queryResp); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
+	_, _ = io.Copy(io.Discard, resp.Body)
 
 	return &queryResp, nil
 }
