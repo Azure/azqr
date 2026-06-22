@@ -5,7 +5,6 @@ package scanners
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/Azure/azqr/internal/graph"
@@ -38,31 +37,23 @@ func (s *DefenderScanner) Scan(ctx context.Context, cred azcore.TokenCredential,
 		return nil
 	}
 	resources := []*models.DefenderResult{}
-	if result.Data != nil {
-		type defenderStatusRow struct {
-			SubscriptionID   string `json:"SubscriptionId"`
-			SubscriptionName string `json:"SubscriptionName"`
-			Name             string `json:"Name"`
-			Tier             string `json:"Tier"`
+	type defenderStatusRow struct {
+		SubscriptionID   string `json:"SubscriptionId"`
+		SubscriptionName string `json:"SubscriptionName"`
+		Name             string `json:"Name"`
+		Tier             string `json:"Tier"`
+	}
+	for _, r := range graph.UnmarshalRows[defenderStatusRow](result.Data, "Defender status") {
+		if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
+			continue
 		}
-		for _, raw := range result.Data {
-			var r defenderStatusRow
-			if err := json.Unmarshal(raw, &r); err != nil {
-				log.Warn().Err(err).Msg("Skipping malformed Defender status row")
-				continue
-			}
 
-			if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
-				continue
-			}
-
-			resources = append(resources, &models.DefenderResult{
-				SubscriptionID:   r.SubscriptionID,
-				SubscriptionName: r.SubscriptionName,
-				Name:             r.Name,
-				Tier:             r.Tier,
-			})
-		}
+		resources = append(resources, &models.DefenderResult{
+			SubscriptionID:   r.SubscriptionID,
+			SubscriptionName: r.SubscriptionName,
+			Name:             r.Name,
+			Tier:             r.Tier,
+		})
 	}
 	return resources
 }
@@ -118,62 +109,54 @@ func (s *DefenderScanner) GetRecommendations(ctx context.Context, cred azcore.To
 	}
 	resources := []*models.DefenderRecommendation{}
 	seen := make(map[defenderKey]struct{}, len(result.Data))
-	if result.Data != nil {
-		type defenderRecRow struct {
-			SubscriptionID         string `json:"SubscriptionId"`
-			ResourceGroupName      string `json:"ResourceGroupName"`
-			ResourceType           string `json:"ResourceType"`
-			ResourceName           string `json:"ResourceName"`
-			Category               string `json:"Category"`
-			RecommendationSeverity string `json:"RecommendationSeverity"`
-			RecommendationName     string `json:"RecommendationName"`
-			ActionDescription      string `json:"ActionDescription"`
-			RemediationDescription string `json:"RemediationDescription"`
-			AzPortalLink           string `json:"AzPortalLink"`
-			ResourceID             string `json:"ResourceId"`
+	type defenderRecRow struct {
+		SubscriptionID         string `json:"SubscriptionId"`
+		ResourceGroupName      string `json:"ResourceGroupName"`
+		ResourceType           string `json:"ResourceType"`
+		ResourceName           string `json:"ResourceName"`
+		Category               string `json:"Category"`
+		RecommendationSeverity string `json:"RecommendationSeverity"`
+		RecommendationName     string `json:"RecommendationName"`
+		ActionDescription      string `json:"ActionDescription"`
+		RemediationDescription string `json:"RemediationDescription"`
+		AzPortalLink           string `json:"AzPortalLink"`
+		ResourceID             string `json:"ResourceId"`
+	}
+	for _, r := range graph.UnmarshalRows[defenderRecRow](result.Data, "Defender recommendation") {
+		if filters.Azqr.IsServiceExcluded(r.ResourceID) {
+			continue
 		}
-		for _, raw := range result.Data {
-			var r defenderRecRow
-			if err := json.Unmarshal(raw, &r); err != nil {
-				log.Warn().Err(err).Msg("Skipping malformed Defender recommendation row")
-				continue
-			}
 
-			if filters.Azqr.IsServiceExcluded(r.ResourceID) {
-				continue
-			}
+		subscriptionName := ""
+		if name, ok := subscriptions[r.SubscriptionID]; ok {
+			subscriptionName = name
+		}
 
-			subscriptionName := ""
-			if name, ok := subscriptions[r.SubscriptionID]; ok {
-				subscriptionName = name
-			}
+		rec := &models.DefenderRecommendation{
+			SubscriptionId:         r.SubscriptionID,
+			SubscriptionName:       subscriptionName,
+			ResourceGroupName:      r.ResourceGroupName,
+			ResourceType:           r.ResourceType,
+			ResourceName:           r.ResourceName,
+			Category:               r.Category,
+			RecommendationSeverity: r.RecommendationSeverity,
+			RecommendationName:     r.RecommendationName,
+			ActionDescription:      r.ActionDescription,
+			RemediationDescription: r.RemediationDescription,
+			AzPortalLink:           fmt.Sprintf("https://%s", r.AzPortalLink),
+			ResourceId:             r.ResourceID,
+		}
 
-			rec := &models.DefenderRecommendation{
-				SubscriptionId:         r.SubscriptionID,
-				SubscriptionName:       subscriptionName,
-				ResourceGroupName:      r.ResourceGroupName,
-				ResourceType:           r.ResourceType,
-				ResourceName:           r.ResourceName,
-				Category:               r.Category,
-				RecommendationSeverity: r.RecommendationSeverity,
-				RecommendationName:     r.RecommendationName,
-				ActionDescription:      r.ActionDescription,
-				RemediationDescription: r.RemediationDescription,
-				AzPortalLink:           fmt.Sprintf("https://%s", r.AzPortalLink),
-				ResourceId:             r.ResourceID,
-			}
+		// Create unique composite key - avoids string concatenation
+		key := defenderKey{
+			resourceID:         rec.ResourceId,
+			category:           rec.Category,
+			recommendationName: rec.RecommendationName,
+		}
 
-			// Create unique composite key - avoids string concatenation
-			key := defenderKey{
-				resourceID:         rec.ResourceId,
-				category:           rec.Category,
-				recommendationName: rec.RecommendationName,
-			}
-
-			if _, exists := seen[key]; !exists {
-				seen[key] = struct{}{}
-				resources = append(resources, rec)
-			}
+		if _, exists := seen[key]; !exists {
+			seen[key] = struct{}{}
+			resources = append(resources, rec)
 		}
 	}
 	return resources

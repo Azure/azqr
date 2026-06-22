@@ -5,7 +5,6 @@ package scanners
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/graph"
@@ -70,43 +69,35 @@ func (s *AdvisorScanner) Scan(ctx context.Context, cred azcore.TokenCredential, 
 		return nil
 	}
 	resources := []*models.AdvisorResult{}
-	if result.Data != nil {
-		type advisorRow struct {
-			SubscriptionID       string `json:"SubscriptionId"`
-			ResourceID           string `json:"ResourceId"`
-			ImpactedValue        string `json:"ImpactedValue"`
-			Category             string `json:"Category"`
-			Impact               string `json:"Impact"`
-			RecommendationTypeID string `json:"RecommendationTypeId"`
+	type advisorRow struct {
+		SubscriptionID       string `json:"SubscriptionId"`
+		ResourceID           string `json:"ResourceId"`
+		ImpactedValue        string `json:"ImpactedValue"`
+		Category             string `json:"Category"`
+		Impact               string `json:"Impact"`
+		RecommendationTypeID string `json:"RecommendationTypeId"`
+	}
+	for _, r := range graph.UnmarshalRows[advisorRow](result.Data, "Advisor") {
+		if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
+			continue
 		}
-		for _, raw := range result.Data {
-			var r advisorRow
-			if err := json.Unmarshal(raw, &r); err != nil {
-				log.Warn().Err(err).Msg("Skipping malformed Advisor row")
-				continue
-			}
 
-			if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
-				continue
-			}
-
-			if filters.Azqr.IsServiceExcluded(r.ResourceID) {
-				continue
-			}
-
-			rec := &models.AdvisorResult{
-				SubscriptionID:   r.SubscriptionID,
-				SubscriptionName: subscriptions[r.SubscriptionID],
-				Name:             r.ImpactedValue,
-				Type:             models.GetResourceTypeFromResourceID(r.ResourceID),
-				ResourceID:       r.ResourceID,
-				Category:         r.Category,
-				Impact:           r.Impact,
-				Description:      recommendationTypes[r.RecommendationTypeID],
-				RecommendationID: r.RecommendationTypeID,
-			}
-			resources = append(resources, rec)
+		if filters.Azqr.IsServiceExcluded(r.ResourceID) {
+			continue
 		}
+
+		rec := &models.AdvisorResult{
+			SubscriptionID:   r.SubscriptionID,
+			SubscriptionName: subscriptions[r.SubscriptionID],
+			Name:             r.ImpactedValue,
+			Type:             models.GetResourceTypeFromResourceID(r.ResourceID),
+			ResourceID:       r.ResourceID,
+			Category:         r.Category,
+			Impact:           r.Impact,
+			Description:      recommendationTypes[r.RecommendationTypeID],
+			RecommendationID: r.RecommendationTypeID,
+		}
+		resources = append(resources, rec)
 	}
 	return resources
 }

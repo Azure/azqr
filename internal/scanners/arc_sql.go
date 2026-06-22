@@ -5,7 +5,6 @@ package scanners
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
@@ -58,61 +57,53 @@ func (s *ArcSQLScanner) Scan(ctx context.Context, cred azcore.TokenCredential, s
 	}
 	resources := []*models.ArcSQLResult{}
 
-	if result.Data != nil {
-		type arcSQLRow struct {
-			SubscriptionID string `json:"subscriptionId"`
-			Status         string `json:"status"`
-			AzureArcServer string `json:"AzureArcServer"`
-			SQLInstance    string `json:"SQLInstance"`
-			ResourceGroup  string `json:"resourceGroup"`
-			Version        string `json:"version"`
-			Build          string `json:"Build"`
-			PatchLevel     string `json:"patchLevel"`
-			Edition        string `json:"edition"`
-			VCores         string `json:"vcores"`
-			License        string `json:"License"`
-			DPSStatus      string `json:"DPSStatus"`
-			TELStatus      string `json:"TELStatus"`
-			DefenderStatus string `json:"DefenderStatus"`
+	type arcSQLRow struct {
+		SubscriptionID string `json:"subscriptionId"`
+		Status         string `json:"status"`
+		AzureArcServer string `json:"AzureArcServer"`
+		SQLInstance    string `json:"SQLInstance"`
+		ResourceGroup  string `json:"resourceGroup"`
+		Version        string `json:"version"`
+		Build          string `json:"Build"`
+		PatchLevel     string `json:"patchLevel"`
+		Edition        string `json:"edition"`
+		VCores         string `json:"vcores"`
+		License        string `json:"License"`
+		DPSStatus      string `json:"DPSStatus"`
+		TELStatus      string `json:"TELStatus"`
+		DefenderStatus string `json:"DefenderStatus"`
+	}
+	for _, r := range graph.UnmarshalRows[arcSQLRow](result.Data, "Arc SQL") {
+		if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
+			continue
 		}
-		for _, raw := range result.Data {
-			var r arcSQLRow
-			if err := json.Unmarshal(raw, &r); err != nil {
-				log.Warn().Err(err).Msg("Skipping malformed Arc SQL row")
-				continue
-			}
 
-			if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
-				continue
-			}
-
-			if filters.Azqr.IsServiceExcluded(r.SQLInstance) {
-				continue
-			}
-
-			subscriptionName, ok := subscriptions[r.SubscriptionID]
-			if !ok {
-				subscriptionName = ""
-			}
-
-			resources = append(resources, &models.ArcSQLResult{
-				SubscriptionID:   r.SubscriptionID,
-				SubscriptionName: subscriptionName,
-				Status:           r.Status,
-				AzureArcServer:   r.AzureArcServer,
-				SQLInstance:      r.SQLInstance,
-				ResourceGroup:    r.ResourceGroup,
-				Version:          r.Version,
-				Build:            r.Build,
-				PatchLevel:       r.PatchLevel,
-				Edition:          r.Edition,
-				VCores:           r.VCores,
-				License:          r.License,
-				DPSStatus:        r.DPSStatus,
-				TELStatus:        r.TELStatus,
-				DefenderStatus:   r.DefenderStatus,
-			})
+		if filters.Azqr.IsServiceExcluded(r.SQLInstance) {
+			continue
 		}
+
+		subscriptionName, ok := subscriptions[r.SubscriptionID]
+		if !ok {
+			subscriptionName = ""
+		}
+
+		resources = append(resources, &models.ArcSQLResult{
+			SubscriptionID:   r.SubscriptionID,
+			SubscriptionName: subscriptionName,
+			Status:           r.Status,
+			AzureArcServer:   r.AzureArcServer,
+			SQLInstance:      r.SQLInstance,
+			ResourceGroup:    r.ResourceGroup,
+			Version:          r.Version,
+			Build:            r.Build,
+			PatchLevel:       r.PatchLevel,
+			Edition:          r.Edition,
+			VCores:           r.VCores,
+			License:          r.License,
+			DPSStatus:        r.DPSStatus,
+			TELStatus:        r.TELStatus,
+			DefenderStatus:   r.DefenderStatus,
+		})
 	}
 
 	return resources

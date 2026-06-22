@@ -28,6 +28,22 @@ type GraphResult struct {
 	Data []json.RawMessage // Query result rows as raw JSON; each consumer unmarshals into its own typed struct.
 }
 
+// UnmarshalRows decodes each raw JSON row into a value of type T. Rows that fail
+// to unmarshal are logged and skipped rather than aborting the whole result. The
+// label is used only for the warning message (e.g. "Advisor", "Defender status").
+func UnmarshalRows[T any](data []json.RawMessage, label string) []T {
+	rows := make([]T, 0, len(data))
+	for _, raw := range data {
+		var r T
+		if err := json.Unmarshal(raw, &r); err != nil {
+			log.Warn().Err(err).Msgf("Skipping malformed %s row", label)
+			continue
+		}
+		rows = append(rows, r)
+	}
+	return rows
+}
+
 // QueryOptions controls optional behaviour of a Resource Graph query.
 type QueryOptions struct {
 	// ManagementGroupScope sets AuthorizationScopeFilter to "AtScopeAndAbove",
@@ -55,8 +71,8 @@ type QueryRequest struct {
 type QueryResponse struct {
 	Data       []json.RawMessage `json:"data"` // Query result rows; each element is a raw JSON object.
 	SkipToken  *string           `json:"$skipToken,omitempty"`
-	Quota      int           // Value of x-ms-user-quota-remaining header as int
-	RetryAfter time.Duration // Value of x-ms-user-quota-resets-after header as timespan
+	Quota      int               // Value of x-ms-user-quota-remaining header as int
+	RetryAfter time.Duration     // Value of x-ms-user-quota-resets-after header as timespan
 }
 
 // NewGraphQuery creates a new GraphQuery using the provided TokenCredential.

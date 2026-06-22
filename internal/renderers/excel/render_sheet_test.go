@@ -234,6 +234,52 @@ func TestRenderSheet(t *testing.T) {
 //  (b) stage enabled + data → correct sheet name, correct header at A4, correct data at A5
 //  (c) hyperlink column where applicable
 
+// renderNamedSheet renders the built-in report sheet with the given name through
+// the production rendering path (builtinSheets + renderSheet). The per-renderer
+// shims below use it so each test validates the real sheet config.
+func renderNamedSheet(f *excelize.File, data *renderers.ReportData, styles *StyleCache, sheetName string) {
+	for _, cfg := range builtinSheets(data) {
+		if cfg.sheetName == sheetName {
+			renderSheet(f, data, cfg, styles)
+			return
+		}
+	}
+}
+
+func renderAdvisor(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "Advisor")
+}
+func renderArcSQL(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "Arc SQL")
+}
+func renderAzurePolicy(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "Azure Policy")
+}
+func renderCosts(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "Costs")
+}
+func renderDefender(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "Defender")
+}
+func renderDefenderRecommendations(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "DefenderRecommendations")
+}
+func renderImpactedResources(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "ImpactedResources")
+}
+func renderRecommendations(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "Recommendations")
+}
+func renderResourceTypes(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "ResourceTypes")
+}
+func renderResources(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "Inventory")
+}
+func renderExcludedResources(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
+	renderNamedSheet(f, data, styles, "OutOfScope")
+}
+
 func TestRenderAdvisor(t *testing.T) {
 	const sheet = "Advisor"
 
