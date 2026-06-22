@@ -167,36 +167,7 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 
 	// Convert aggregated results to table rows
 	for resourceType, agg := range aggregatedResults {
-		row := []string{
-			fromTime.Format("2006-01-02"),
-			toTime.Format("2006-01-02"),
-			resourceType,
-			fmt.Sprintf("%.2f", agg.latestMonth),
-		}
-
-		// Add optional fields
-		if agg.previousMonth > 0 {
-			row = append(row, fmt.Sprintf("%.2f", agg.previousMonth))
-		} else {
-			row = append(row, "")
-		}
-
-		if agg.previousMonth != 0 {
-			avgRatio := (agg.latestMonth - agg.previousMonth) / agg.previousMonth
-			row = append(row, fmt.Sprintf("%.2f%%", avgRatio*100))
-		} else {
-			row = append(row, "")
-		}
-
-		if agg.monthlyChangeValue != 0 {
-			row = append(row, fmt.Sprintf("%.2f", agg.monthlyChangeValue))
-		} else {
-			row = append(row, "")
-		}
-
-		row = append(row, "kgCO2e") // kilograms of CO2 equivalent
-
-		table = append(table, row)
+		table = append(table, buildEmissionRow(fromTime, toTime, resourceType, *agg))
 	}
 
 	log.Info().Msgf("Carbon emissions scan completed with %d resource types", len(aggregatedResults))
@@ -207,6 +178,42 @@ func (s *EmissionsScanner) Scan(ctx context.Context, cred azcore.TokenCredential
 		Description: "Analysis of carbon emissions by Azure resource type for the previous month",
 		Table:       table,
 	}}, nil
+}
+
+// buildEmissionRow formats a single aggregated-emissions entry into a table row.
+// Optional values (previous month, change ratio, monthly change) are rendered as
+// empty strings when not available, matching the report's display conventions.
+func buildEmissionRow(fromTime, toTime time.Time, resourceType string, agg aggregatedEmissions) []string {
+	row := []string{
+		fromTime.Format("2006-01-02"),
+		toTime.Format("2006-01-02"),
+		resourceType,
+		fmt.Sprintf("%.2f", agg.latestMonth),
+	}
+
+	// Add optional fields
+	if agg.previousMonth > 0 {
+		row = append(row, fmt.Sprintf("%.2f", agg.previousMonth))
+	} else {
+		row = append(row, "")
+	}
+
+	if agg.previousMonth != 0 {
+		avgRatio := (agg.latestMonth - agg.previousMonth) / agg.previousMonth
+		row = append(row, fmt.Sprintf("%.2f%%", avgRatio*100))
+	} else {
+		row = append(row, "")
+	}
+
+	if agg.monthlyChangeValue != 0 {
+		row = append(row, fmt.Sprintf("%.2f", agg.monthlyChangeValue))
+	} else {
+		row = append(row, "")
+	}
+
+	row = append(row, "kgCO2e") // kilograms of CO2 equivalent
+
+	return row
 }
 
 // getAvailableDateRange queries the Carbon API for the available date range
@@ -221,14 +228,21 @@ func (s *EmissionsScanner) getAvailableDateRange(ctx context.Context, clientFact
 		return time.Time{}, time.Time{}, fmt.Errorf("available date range response missing start or end date")
 	}
 
-	endDate, err := time.Parse("2006-01-02", *resp.EndDate)
+	return parseAvailableDateRange(*resp.StartDate, *resp.EndDate)
+}
+
+// parseAvailableDateRange parses the start/end date strings returned by the
+// Carbon API and returns the end date (latest available month) as both the
+// from and to time, which is what the report queries against.
+func parseAvailableDateRange(startStr, endStr string) (time.Time, time.Time, error) {
+	endDate, err := time.Parse("2006-01-02", endStr)
 	if err != nil {
-		return time.Time{}, time.Time{}, fmt.Errorf("failed to parse end date %q: %w", *resp.EndDate, err)
+		return time.Time{}, time.Time{}, fmt.Errorf("failed to parse end date %q: %w", endStr, err)
 	}
 
-	startDate, err := time.Parse("2006-01-02", *resp.StartDate)
+	startDate, err := time.Parse("2006-01-02", startStr)
 	if err != nil {
-		return time.Time{}, time.Time{}, fmt.Errorf("failed to parse start date %q: %w", *resp.StartDate, err)
+		return time.Time{}, time.Time{}, fmt.Errorf("failed to parse start date %q: %w", startStr, err)
 	}
 
 	log.Debug().Msgf("Carbon emissions available range: %s to %s", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))

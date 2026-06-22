@@ -163,7 +163,13 @@ func (s *ZoneMappingScanner) fetchZoneMappings(ctx context.Context, httpClient *
 		return nil, fmt.Errorf("failed to fetch locations: %w", err)
 	}
 
-	// Parse the response
+	return parseZoneMappings(body, subscriptionID, subscriptionName)
+}
+
+// parseZoneMappings parses a locations REST response body and converts it into
+// zoneMappingResult records. Locations without availability zone mappings are
+// skipped, and nil (optional) fields are normalized to empty strings.
+func parseZoneMappings(body []byte, subscriptionID, subscriptionName string) ([]zoneMappingResult, error) {
 	var locationsResp locationResponse
 	if err := json.Unmarshal(body, &locationsResp); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
