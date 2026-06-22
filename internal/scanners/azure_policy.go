@@ -5,7 +5,6 @@ package scanners
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
@@ -63,62 +62,54 @@ func (s *AzurePolicyScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 	resources := []*models.AzurePolicyResult{}
 	seen := make(map[policyKey]struct{}, len(result.Data))
 
-	if result.Data != nil {
-		type policyRow struct {
-			SubscriptionID            string `json:"subscriptionId"`
-			SubscriptionName          string `json:"subscriptionName"`
-			ResourceID                string `json:"resourceId"`
-			PolicyDefinitionDisplay   string `json:"policyDefinitionDisplayName"`
-			PolicyDescription         string `json:"policyDescription"`
-			Timestamp                 string `json:"timestamp"`
-			PolicyDefinitionName      string `json:"policyDefinitionName"`
-			PolicyDefinitionID        string `json:"policyDefinitionId"`
-			PolicyAssignmentName      string `json:"policyAssignmentName"`
-			PolicyAssignmentID        string `json:"policyAssignmentId"`
-			ComplianceState           string `json:"complianceState"`
+	type policyRow struct {
+		SubscriptionID          string `json:"subscriptionId"`
+		SubscriptionName        string `json:"subscriptionName"`
+		ResourceID              string `json:"resourceId"`
+		PolicyDefinitionDisplay string `json:"policyDefinitionDisplayName"`
+		PolicyDescription       string `json:"policyDescription"`
+		Timestamp               string `json:"timestamp"`
+		PolicyDefinitionName    string `json:"policyDefinitionName"`
+		PolicyDefinitionID      string `json:"policyDefinitionId"`
+		PolicyAssignmentName    string `json:"policyAssignmentName"`
+		PolicyAssignmentID      string `json:"policyAssignmentId"`
+		ComplianceState         string `json:"complianceState"`
+	}
+	for _, r := range graph.UnmarshalRows[policyRow](result.Data, "Azure Policy") {
+		if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
+			continue
 		}
-		for _, raw := range result.Data {
-			var r policyRow
-			if err := json.Unmarshal(raw, &r); err != nil {
-				log.Warn().Err(err).Msg("Skipping malformed Azure Policy row")
-				continue
-			}
 
-			if filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
-				continue
-			}
+		if filters.Azqr.IsServiceExcluded(r.ResourceID) {
+			continue
+		}
 
-			if filters.Azqr.IsServiceExcluded(r.ResourceID) {
-				continue
-			}
+		rec := &models.AzurePolicyResult{
+			SubscriptionID:       r.SubscriptionID,
+			SubscriptionName:     r.SubscriptionName,
+			Type:                 models.GetResourceTypeFromResourceID(r.ResourceID),
+			ResourceGroupName:    models.GetResourceGroupFromResourceID(r.ResourceID),
+			Name:                 models.GetResourceNameFromResourceID(r.ResourceID),
+			PolicyDisplayName:    r.PolicyDefinitionDisplay,
+			PolicyDescription:    r.PolicyDescription,
+			ResourceID:           r.ResourceID,
+			TimeStamp:            r.Timestamp,
+			PolicyDefinitionName: r.PolicyDefinitionName,
+			PolicyDefinitionID:   r.PolicyDefinitionID,
+			PolicyAssignmentName: r.PolicyAssignmentName,
+			PolicyAssignmentID:   r.PolicyAssignmentID,
+			ComplianceState:      r.ComplianceState,
+		}
 
-			rec := &models.AzurePolicyResult{
-				SubscriptionID:       r.SubscriptionID,
-				SubscriptionName:     r.SubscriptionName,
-				Type:                 models.GetResourceTypeFromResourceID(r.ResourceID),
-				ResourceGroupName:    models.GetResourceGroupFromResourceID(r.ResourceID),
-				Name:                 models.GetResourceNameFromResourceID(r.ResourceID),
-				PolicyDisplayName:    r.PolicyDefinitionDisplay,
-				PolicyDescription:    r.PolicyDescription,
-				ResourceID:           r.ResourceID,
-				TimeStamp:            r.Timestamp,
-				PolicyDefinitionName: r.PolicyDefinitionName,
-				PolicyDefinitionID:   r.PolicyDefinitionID,
-				PolicyAssignmentName: r.PolicyAssignmentName,
-				PolicyAssignmentID:   r.PolicyAssignmentID,
-				ComplianceState:      r.ComplianceState,
-			}
+		// Create unique composite key - avoids string concatenation
+		key := policyKey{
+			resourceID:         rec.ResourceID,
+			policyDefinitionID: rec.PolicyDefinitionID,
+		}
 
-			// Create unique composite key - avoids string concatenation
-			key := policyKey{
-				resourceID:         rec.ResourceID,
-				policyDefinitionID: rec.PolicyDefinitionID,
-			}
-
-			if _, exists := seen[key]; !exists {
-				seen[key] = struct{}{}
-				resources = append(resources, rec)
-			}
+		if _, exists := seen[key]; !exists {
+			seen[key] = struct{}{}
+			resources = append(resources, rec)
 		}
 	}
 

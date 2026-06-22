@@ -5,8 +5,8 @@ package excel
 
 import (
 	"fmt"
-	"strconv"
 	_ "image/png"
+	"strconv"
 
 	"github.com/Azure/azqr/internal/embeded"
 	"github.com/Azure/azqr/internal/renderers"
@@ -120,7 +120,7 @@ func streamSheet(f *excelize.File, sheetName string, records [][]string, hyperli
 			if lastRow%2 == 0 {
 				styleID = styles.Blue
 			}
-			
+
 			for j, val := range row {
 				if hyperlinkCol > 0 && j == hyperlinkCol-1 && val != "" {
 					cells[j] = excelize.Cell{
@@ -229,17 +229,9 @@ func CreateExcelReport(data *renderers.ReportData) {
 		return
 	}
 
-	renderRecommendations(f, data, styles)
-	renderImpactedResources(f, data, styles)
-	renderResourceTypes(f, data, styles)
-	renderResources(f, data, styles)
-	renderAdvisor(f, data, styles)
-	renderAzurePolicy(f, data, styles)
-	renderArcSQL(f, data, styles)
-	renderDefenderRecommendations(f, data, styles)
-	renderDefender(f, data, styles)
-	renderExcludedResources(f, data, styles)
-	renderCosts(f, data, styles)
+	for _, cfg := range builtinSheets(data) {
+		renderSheet(f, data, cfg, styles)
+	}
 	renderExternalPlugins(f, data, styles)
 
 	// Delete the default "Sheet1" if other sheets were created
@@ -251,7 +243,7 @@ func CreateExcelReport(data *renderers.ReportData) {
 	}
 
 	if err := f.SaveAs(filename); err != nil {
-		_ = f.Close() // Close the file before exiting to ensure cleanup
+		_ = f.Close()                                         // Close the file before exiting to ensure cleanup
 		log.Fatal().Err(err).Msg("Failed to save Excel file") //nolint:gocritic // File is explicitly closed above
 	}
 }

@@ -192,15 +192,14 @@ func (a *GraphScanner) ListRecommendations() (map[string]map[string]*models.Grap
 		for _, t := range s.ResourceTypes() {
 			gr := a.getGraphRules(t, rec)
 			lowerT := strings.ToLower(t)
-			for _, r := range gr {
-				rules = append(rules, &r)
-			}
+			for id, r := range gr {
+				rule := r
+				rules = append(rules, &rule)
 
-			for i, r := range gr {
 				if recommendations[lowerT] == nil {
 					recommendations[lowerT] = map[string]*models.GraphRecommendation{}
 				}
-				recommendations[lowerT][i] = &r
+				recommendations[lowerT][id] = &rule
 			}
 		}
 	}
@@ -325,13 +324,7 @@ func (a *GraphScanner) graphScan(ctx context.Context, graphClient *GraphQueryCli
 				return string(b)
 			}
 
-			for _, raw := range result.Data {
-				var r graphScanRow
-				if err := json.Unmarshal(raw, &r); err != nil {
-					log.Warn().Err(err).Msgf("Skipping malformed row for recommendation %s", rule.RecommendationID)
-					continue
-				}
-
+			for _, r := range UnmarshalRows[graphScanRow](result.Data, rule.RecommendationID) {
 				if r.ID == "" {
 					log.Warn().Msgf("Skipping result: 'id' field is missing in the response for recommendation: %s", rule.RecommendationID)
 					break
