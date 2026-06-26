@@ -29,8 +29,8 @@ func TestScanner_GetMetadata(t *testing.T) {
 		t.Errorf("Type = %v, want PluginTypeInternal", meta.Type)
 	}
 	// sql-esu exposes a wide table; guard against an accidental large drop in columns.
-	if len(meta.ColumnMetadata) < 30 {
-		t.Errorf("ColumnMetadata len = %d, want >= 30", len(meta.ColumnMetadata))
+	if len(meta.ColumnMetadata) < 20 {
+		t.Errorf("ColumnMetadata len = %d, want >= 20", len(meta.ColumnMetadata))
 	}
 
 	seen := make(map[string]bool, len(meta.ColumnMetadata))
@@ -55,7 +55,8 @@ func TestSQLESURow_Unmarshal(t *testing.T) {
 		"Edition": "Enterprise",
 		"vCores": "8",
 		"EOLStatus": "Out of Support",
-		"SQLMIMigrationVerdict": "Recommended"
+		"SQLMIMigrationVerdict": "Recommended",
+		"ConsolidationRatio": "2"
 	}`)
 
 	var r sqlESURow
@@ -74,6 +75,9 @@ func TestSQLESURow_Unmarshal(t *testing.T) {
 	}
 	if r.SQLMIMigrationVerdict != "Recommended" {
 		t.Errorf("SQLMIMigrationVerdict = %q, want Recommended", r.SQLMIMigrationVerdict)
+	}
+	if r.ConsolidationRatio != "2" {
+		t.Errorf("ConsolidationRatio = %q, want 2", r.ConsolidationRatio)
 	}
 }
 
@@ -99,18 +103,19 @@ func TestSQLESURow_ToRecord(t *testing.T) {
 	}
 
 	// Spot-check ordering against the first columns and the final column.
-	if record[0] != "sql-vm-1" {
-		t.Errorf("record[0] = %q, want sql-vm-1", record[0])
+	if record[0] != "Prod" {
+		t.Errorf("record[0] = %q, want Prod (Subscription)", record[0])
 	}
 	if record[1] != "rg-sql" {
-		t.Errorf("record[1] = %q, want rg-sql", record[1])
+		t.Errorf("record[1] = %q, want rg-sql (Resource Group)", record[1])
 	}
-	if record[2] != "Prod" {
-		t.Errorf("record[2] = %q, want Prod", record[2])
+	if record[2] != "sql-vm-1" {
+		t.Errorf("record[2] = %q, want sql-vm-1 (Name)", record[2])
 	}
 	if record[6] != "Enterprise" {
 		t.Errorf("record[6] = %q, want Enterprise", record[6])
 	}
+	// SQLMIMigrationVerdict is the last column (index 26).
 	if record[len(record)-1] != "Recommended" {
 		t.Errorf("last record = %q, want Recommended", record[len(record)-1])
 	}

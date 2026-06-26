@@ -153,14 +153,14 @@ Availability zone loss/gain applies a multiplicative adjustment to the final sco
 **Plugin Name**: `sql-esu`  
 **Command**: `azqr sql-esu`  
 **Flag**: `--plugin sql-esu`  
-**Version**: 0.1.0-beta
+**Version**: 0.3.0-beta
 
 Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status across Arc-enabled SQL Server instances and SQL Virtual Machines on Azure.
 
 **Key Features**:
 - Detects EOL status dynamically using current date (Expired, ESU Active, Upcoming ESU, Supported)
 - Calculates ESU licensing costs per instance based on edition and vCore count
-- Estimates SQL Managed Instance migration savings
+- Estimates SQL Managed Instance migration savings with 2:1 consolidation model
 - Covers both Arc-enabled SQL (on-prem) and Azure VM (SQL IaaS)
 
 **Use Cases**:
@@ -170,16 +170,22 @@ Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status 
 - License optimization across SQL estates
 
 **Output Columns**:
-- Name, Resource Group, Subscription, Location
+- Subscription, Resource Group, Name, Location
 - Cloud Type (Arc-enabled or Azure VM)
-- SQL Version, Edition, vCores
+- SQL Version, Edition
 - EOL Status (Expired / ESU Active / Upcoming ESU / Supported)
-- Mainstream End Date, ESU Start Date, ESU End Date
-- ESU Monthly Cost/Core, Billable Cores
-- Estimated Monthly/Annual/3-Year Cost
-- Patch Ops Monthly/Annual/3-Year Cost
-- Est SQL MI Monthly/Annual/3-Year Cost
-- Est SQL MI Monthly/Annual/3-Year Saving
+- ESU Start Date, ESU End Date
+- Migration Target Tier (General Purpose / Business Critical / N/A)
+- Migration Recommendation (actionable text)
+- vCores, Billable Cores
+- ESU Monthly Cost/Core
+- SQL License Type, SQL License Cost/Core/Month, SQL License Monthly Cost
+- VM Cost/Core/Month, Est VM Compute Monthly Cost
+- Est ESU Monthly Cost, Patch Ops Monthly Cost
+- Current Monthly Cost (total current spend)
+- Consolidation Ratio (2:1 default)
+- Est SQL MI Monthly Cost, Est SQL MI Monthly Saving
+- SQL MI Migration Verdict (Cost Savings / Break Even / Cost Increase)
 
 ---
 

@@ -2,263 +2,447 @@
 // Covers: Arc-enabled SQL (microsoft.azurearcdata/sqlserverinstances)
 //         SQL VMs on Azure (microsoft.sqlvirtualmachine/sqlvirtualmachines)
 //
-// PREMISE: ESU is NOT free on Azure VMs.
-// On Azure VMs (SQL IaaS), ESU is billed at the rates below — there is no free ESU benefit.
-// ESU costs are modelled for all instances (conservative planning estimate).
-// Rates used (blended 3-year planning estimate: Y1=75%, Y2=100%, Y3=125% of license cost):
-//   Standard/Web:  $139/core/month
-//   Enterprise:    $540.50/core/month
-//   Developer/Express/Evaluation/Free: $0 (non-production, no commercial license)
+// WHAT IT DOES
+//   1. Assigns EOL status per version: Supported → Upcoming ESU → ESU Active → Expired
+//   2. Estimates current monthly cost: VM compute + SQL license (PAYG only) + ESU + patch ops
+//   3. Estimates SQL MI target cost and monthly/annual/3-year savings
+//   4. Repeats savings under a conservative 2:1 consolidation (2 source instances → 1 SQL MI)
+//
+// KEY RATES (all USD, public list pricing — EA/CSP discounts not included)
+//   ESU (blended 3-year estimate: Y1=75%, Y2=100%, Y3=125% of license cost):
+//     Standard/Web:   $139/core/month  |  Enterprise: $540.50/core/month
+//     Developer/Express/Evaluation/Free: $0
+//   SQL MI target cost:
+//     GP  PAYG: $123/vCore/month  |  GP  AHUB: $49/vCore/month
+//     BC  PAYG: $367/vCore/month  |  BC  AHUB: $147/vCore/month
+//
+// MIGRATION TARGET TIER LOGIC
+//   Arc Enterprise AHUB → General Purpose via Unlimited Virtualization Benefit (UVB)
+//     1 on-prem core with SA → up to 4 SQL MI GP vCores; sized at max(4, vCores÷4)
+//     Source: microsoft.com/licensing/faqs/1#92  |  Azure VMs excluded (UVB is on-prem only)
+//   Azure VM Enterprise AHUB/PAYG or Arc Enterprise PAYG → General Purpose
+//   Standard / Web / Other → General Purpose
+//   Developer / Express / Free → N/A (not migration candidates)
 resources
 | where type == "microsoft.azurearcdata/sqlserverinstances"
     or type == "microsoft.sqlvirtualmachine/sqlvirtualmachines"
+// Consolidation model: conservative 2:1 ratio — 2 source SQL Server instances per SQL MI.
+// It is conservative and likely to be higher due to right-sizing (typical SQL Server utilization is 10–30%).
+| extend consolidationRatio = 2.0
+// Force all non-UVB cases to General Purpose pricing for a conservative assessment of SQL MI cost and savings.
+| extend recommendGeneralPurposeOnly = true
 | extend SQLVersion = iff(
-    type == "microsoft.azurearcdata/sqlserverinstances",
-    tostring(properties.version),
-    strcat("SQL Server ", replace_string(extract(@'(?i)sql(\d{4}(?:R2)?)', 1, tostring(properties.sqlImageOffer)), "2008R2", "2008 R2"))
-)
-| extend Edition = iff(
-    type == "microsoft.azurearcdata/sqlserverinstances",
-    tostring(properties.edition),
-    tostring(properties.sqlImageSku)
-)
-| extend CloudType = iff(
-    type == "microsoft.azurearcdata/sqlserverinstances",
-    "Arc-enabled (On-Prem)",
-    "Azure VM (SQL IaaS)"
-)
+                          type == "microsoft.azurearcdata/sqlserverinstances",
+                          tostring(properties.version),
+                          strcat("SQL Server ", replace_string(extract(@'(?i)sql(\d{4}(?:R2)?)', 1, tostring(properties.sqlImageOffer)), "2008R2", "2008 R2"))
+    )
+| extend Edition = iff(type == "microsoft.azurearcdata/sqlserverinstances", tostring(properties.edition), tostring(properties.sqlImageSku))
+| extend CloudType = iff(type == "microsoft.azurearcdata/sqlserverinstances", "Arc-enabled (On-Prem)", "Azure VM (SQL IaaS)")
 // For SQL VMs, core count lives on the underlying compute VM — join to retrieve it
-| extend _vmId          = iff(type == "microsoft.sqlvirtualmachine/sqlvirtualmachines", tolower(tostring(properties.virtualMachineResourceId)), "")
+| extend _vmId = iff(type == "microsoft.sqlvirtualmachine/sqlvirtualmachines", tolower(tostring(properties.virtualMachineResourceId)), "")
 | extend _sqlImageOffer = iff(type == "microsoft.sqlvirtualmachine/sqlvirtualmachines", tolower(tostring(properties.sqlImageOffer)), "")
 // SQL Server license type: PAYG = paying hourly license | AHUB = bring-your-own SA license
 | extend SQLLicenseType = case(
-    type == "microsoft.azurearcdata/sqlserverinstances",
-        case(
-            tolower(tostring(properties.licenseType)) == "licenseincluded", "PAYG",
-            "AHUB"
-        ),
-    toupper(tostring(properties.sqlServerLicenseType)) == "PAYG", "PAYG",
-    toupper(tostring(properties.sqlServerLicenseType)) == "DR",   "DR",
-    "AHUB"  // default: AHUB (most enterprise customers have SA)
-)
-| join kind=leftouter (
+                              type == "microsoft.azurearcdata/sqlserverinstances",
+                              case(tolower(tostring(properties.licenseType)) == "licenseincluded", "PAYG", "AHUB"),
+                              toupper(tostring(properties.sqlServerLicenseType)) == "PAYG",
+                              "PAYG",
+                              toupper(tostring(properties.sqlServerLicenseType)) == "DR",
+                              "DR",
+                              "AHUB"  // default: AHUB (most enterprise customers have SA)
+    )
+| join kind = leftouter (
     resources
     | where type == "microsoft.compute/virtualmachines"
     | project _vmId = tolower(id), _vmSize = tostring(properties.hardwareProfile.vmSize)
-) on _vmId
-| join kind=leftouter (resourcecontainers | where type =='microsoft.resources/subscriptions' | project SubscriptionName=name, subscriptionId) on subscriptionId
-// Arc SQL: properties.vCore  |  SQL MI: sku.capacity  |  SQL VM: case() lookup on VM size SKU
+    )
+    on _vmId
+| join kind = leftouter (
+    resourcecontainers
+    | where type == 'microsoft.resources/subscriptions'
+    | project SubscriptionName = name, subscriptionId
+    )
+    on subscriptionId
+// Arc SQL: properties.vCore | SQL VM: exact lookup for legacy series (SKU ≠ vCPU), regex fallback for modern v3/v4/v5/v6
 | extend vCores = case(
-    // Arc SQL instances have direct properties
-    type == "microsoft.azurearcdata/sqlserverinstances", coalesce(toint(properties.vCore), 0),
-    // SQL VMs: exact lookup for legacy series (SKU number ≠ vCPU), regex fallback for modern v3/v4/v5/v6
-    tolower(_vmSize) == "standard_d1_v2",      1,  tolower(_vmSize) == "standard_d2_v2",      2,
-    tolower(_vmSize) == "standard_d3_v2",      4,  tolower(_vmSize) == "standard_d4_v2",      8,
-    tolower(_vmSize) == "standard_d5_v2",      16, tolower(_vmSize) == "standard_d11_v2",     2,
-    tolower(_vmSize) == "standard_d12_v2",     4,  tolower(_vmSize) == "standard_d13_v2",     8,
-    tolower(_vmSize) == "standard_d14_v2",     16,
-    tolower(_vmSize) == "standard_ds1_v2",     1,  tolower(_vmSize) == "standard_ds2_v2",     2,
-    tolower(_vmSize) == "standard_ds3_v2",     4,  tolower(_vmSize) == "standard_ds4_v2",     8,
-    tolower(_vmSize) == "standard_ds5_v2",     16, tolower(_vmSize) == "standard_ds11_v2",    2,
-    tolower(_vmSize) == "standard_ds11-1_v2",  1,
-    tolower(_vmSize) == "standard_ds12_v2",    4,  tolower(_vmSize) == "standard_ds12-1_v2",  1,
-    tolower(_vmSize) == "standard_ds12-2_v2",  2,
-    tolower(_vmSize) == "standard_ds13_v2",    8,  tolower(_vmSize) == "standard_ds13-2_v2",  2,
-    tolower(_vmSize) == "standard_ds13-4_v2",  4,
-    tolower(_vmSize) == "standard_ds14_v2",    16, tolower(_vmSize) == "standard_ds14-4_v2",  4,
-    tolower(_vmSize) == "standard_ds14-8_v2",  8,  tolower(_vmSize) == "standard_ds15_v2",    20,
-    tolower(_vmSize) == "standard_g1",         2,  tolower(_vmSize) == "standard_g2",         4,
-    tolower(_vmSize) == "standard_g3",         8,  tolower(_vmSize) == "standard_g4",         16,
-    tolower(_vmSize) == "standard_g5",         32,
-    tolower(_vmSize) == "standard_gs1",        2,  tolower(_vmSize) == "standard_gs2",        4,
-    tolower(_vmSize) == "standard_gs3",        8,  tolower(_vmSize) == "standard_gs4",        16,
-    tolower(_vmSize) == "standard_gs4-4",      4,  tolower(_vmSize) == "standard_gs4-8",      8,
-    tolower(_vmSize) == "standard_gs5",        32, tolower(_vmSize) == "standard_gs5-8",      8,
-    tolower(_vmSize) == "standard_gs5-16",     16,
-    tolower(_vmSize) == "standard_m8ms",       8,  tolower(_vmSize) == "standard_m16ms",      16,
-    tolower(_vmSize) == "standard_m32ts",      32, tolower(_vmSize) == "standard_m32ls",      32,
-    tolower(_vmSize) == "standard_m32ms",      32, tolower(_vmSize) == "standard_m64",        64,
-    tolower(_vmSize) == "standard_m64ms",      64, tolower(_vmSize) == "standard_m64ls",      64,
-    tolower(_vmSize) == "standard_m64s",       64, tolower(_vmSize) == "standard_m128ms",     128,
-    tolower(_vmSize) == "standard_m128s",      128,
-    tolower(_vmSize) == "standard_m8-2ms",     2,  tolower(_vmSize) == "standard_m8-4ms",     4,
-    tolower(_vmSize) == "standard_m16-4ms",    4,  tolower(_vmSize) == "standard_m16-8ms",    8,
-    tolower(_vmSize) == "standard_m32-8ms",    8,  tolower(_vmSize) == "standard_m32-16ms",   16,
-    tolower(_vmSize) == "standard_m64-16ms",   16, tolower(_vmSize) == "standard_m64-32ms",   32,
-    tolower(_vmSize) == "standard_m128-32ms",  32, tolower(_vmSize) == "standard_m128-64ms",  64,
-    // Modern SKUs: try constrained-vCore pattern first (e.g. E16-8ds_v5 → 8), then standard (e.g. D8s_v5 → 8)
-    coalesce(toint(extract(@'_[A-Za-z]+\d+-(\d+)', 1, _vmSize)), toint(extract(@'_[A-Za-z]+(\d+)', 1, _vmSize)), 4)
-)
+                      type == "microsoft.azurearcdata/sqlserverinstances",
+                      coalesce(toint(properties.vCore), 0),
+                      // Dv2 / DSv2
+                      tolower(_vmSize) == "standard_d1_v2",
+                      1,
+                      tolower(_vmSize) == "standard_d2_v2",
+                      2,
+                      tolower(_vmSize) == "standard_d3_v2",
+                      4,
+                      tolower(_vmSize) == "standard_d4_v2",
+                      8,
+                      tolower(_vmSize) == "standard_d5_v2",
+                      16,
+                      tolower(_vmSize) == "standard_d11_v2",
+                      2,
+                      tolower(_vmSize) == "standard_d12_v2",
+                      4,
+                      tolower(_vmSize) == "standard_d13_v2",
+                      8,
+                      tolower(_vmSize) == "standard_d14_v2",
+                      16,
+                      tolower(_vmSize) == "standard_ds1_v2",
+                      1,
+                      tolower(_vmSize) == "standard_ds2_v2",
+                      2,
+                      tolower(_vmSize) == "standard_ds3_v2",
+                      4,
+                      tolower(_vmSize) == "standard_ds4_v2",
+                      8,
+                      tolower(_vmSize) == "standard_ds5_v2",
+                      16,
+                      tolower(_vmSize) == "standard_ds11_v2",
+                      2,
+                      tolower(_vmSize) == "standard_ds11-1_v2",
+                      1,
+                      tolower(_vmSize) == "standard_ds12_v2",
+                      4,
+                      tolower(_vmSize) == "standard_ds12-1_v2",
+                      1,
+                      tolower(_vmSize) == "standard_ds12-2_v2",
+                      2,
+                      tolower(_vmSize) == "standard_ds13_v2",
+                      8,
+                      tolower(_vmSize) == "standard_ds13-2_v2",
+                      2,
+                      tolower(_vmSize) == "standard_ds13-4_v2",
+                      4,
+                      tolower(_vmSize) == "standard_ds14_v2",
+                      16,
+                      tolower(_vmSize) == "standard_ds14-4_v2",
+                      4,
+                      tolower(_vmSize) == "standard_ds14-8_v2",
+                      8,
+                      tolower(_vmSize) == "standard_ds15_v2",
+                      20,
+                      // G / GS
+                      tolower(_vmSize) == "standard_g1",
+                      2,
+                      tolower(_vmSize) == "standard_g2",
+                      4,
+                      tolower(_vmSize) == "standard_g3",
+                      8,
+                      tolower(_vmSize) == "standard_g4",
+                      16,
+                      tolower(_vmSize) == "standard_g5",
+                      32,
+                      tolower(_vmSize) == "standard_gs1",
+                      2,
+                      tolower(_vmSize) == "standard_gs2",
+                      4,
+                      tolower(_vmSize) == "standard_gs3",
+                      8,
+                      tolower(_vmSize) == "standard_gs4",
+                      16,
+                      tolower(_vmSize) == "standard_gs4-4",
+                      4,
+                      tolower(_vmSize) == "standard_gs4-8",
+                      8,
+                      tolower(_vmSize) == "standard_gs5",
+                      32,
+                      tolower(_vmSize) == "standard_gs5-8",
+                      8,
+                      tolower(_vmSize) == "standard_gs5-16",
+                      16,
+                      // M-series — constrained vCore variants first, then full-socket
+                      tolower(_vmSize) == "standard_m8-2ms",
+                      2,
+                      tolower(_vmSize) == "standard_m8-4ms",
+                      4,
+                      tolower(_vmSize) == "standard_m16-4ms",
+                      4,
+                      tolower(_vmSize) == "standard_m16-8ms",
+                      8,
+                      tolower(_vmSize) == "standard_m32-8ms",
+                      8,
+                      tolower(_vmSize) == "standard_m32-16ms",
+                      16,
+                      tolower(_vmSize) == "standard_m64-16ms",
+                      16,
+                      tolower(_vmSize) == "standard_m64-32ms",
+                      32,
+                      tolower(_vmSize) == "standard_m128-32ms",
+                      32,
+                      tolower(_vmSize) == "standard_m128-64ms",
+                      64,
+                      tolower(_vmSize) == "standard_m8ms",
+                      8,
+                      tolower(_vmSize) == "standard_m16ms",
+                      16,
+                      tolower(_vmSize) == "standard_m32ts",
+                      32,
+                      tolower(_vmSize) == "standard_m32ls",
+                      32,
+                      tolower(_vmSize) == "standard_m32ms",
+                      32,
+                      tolower(_vmSize) == "standard_m64",
+                      64,
+                      tolower(_vmSize) == "standard_m64ms",
+                      64,
+                      tolower(_vmSize) == "standard_m64ls",
+                      64,
+                      tolower(_vmSize) == "standard_m64s",
+                      64,
+                      tolower(_vmSize) == "standard_m128ms",
+                      128,
+                      tolower(_vmSize) == "standard_m128s",
+                      128,
+                      // Modern SKUs: constrained-vCore pattern first (e.g. E16-8ds_v5 → 8), then standard (e.g. D8s_v5 → 8)
+                      coalesce(toint(extract(@'_[A-Za-z]+\d+-(\d+)', 1, _vmSize)), toint(extract(@'_[A-Za-z]+(\d+)', 1, _vmSize)), 4)
+    )
 // Use now() so status flips automatically on ESU start/end dates
 | extend _now = now()
 | extend EOLStatus = case(
-    SQLVersion == "SQL Server 2008",                                        "Expired",
-    SQLVersion == "SQL Server 2008 R2",                                     "Expired",
-    SQLVersion == "SQL Server 2012",                                        "Expired",
-    SQLVersion == "SQL Server 2014" and _now >= datetime(2027-07-12),       "Expired",
-    SQLVersion == "SQL Server 2014",                                        "ESU Active",
-    SQLVersion == "SQL Server 2016" and _now >= datetime(2029-07-14),       "Expired",
-    SQLVersion == "SQL Server 2016" and _now >= datetime(2026-07-14),       "ESU Active",
-    SQLVersion == "SQL Server 2016",                                        "Upcoming ESU",
-    SQLVersion == "SQL Server 2017" and _now >= datetime(2030-10-12),       "Expired",
-    SQLVersion == "SQL Server 2017" and _now >= datetime(2027-10-12),       "ESU Active",
-    SQLVersion == "SQL Server 2017",                                        "Supported",
-    SQLVersion == "SQL Server 2019" and _now >= datetime(2033-01-08),       "Expired",
-    SQLVersion == "SQL Server 2019" and _now >= datetime(2030-01-08),       "ESU Active",
-    SQLVersion == "SQL Server 2019" and _now >= datetime(2029-07-01),       "Upcoming ESU", // 6 months before ESU start date to allow for planning
-    SQLVersion == "SQL Server 2019",                                        "Supported",
-    SQLVersion == "SQL Server 2022" and _now >= datetime(2036-01-11),       "Expired",
-    SQLVersion == "SQL Server 2022" and _now >= datetime(2033-01-11),       "ESU Active",
-    SQLVersion == "SQL Server 2022" and _now >= datetime(2032-07-01),       "Upcoming ESU", // 6 months before ESU start date to allow for planning
-    SQLVersion == "SQL Server 2022",                                        "Supported",
-    "Unknown"
-)
+                         SQLVersion == "SQL Server 2008",
+                         "Expired",
+                         SQLVersion == "SQL Server 2008 R2",
+                         "Expired",
+                         SQLVersion == "SQL Server 2012",
+                         "Expired",
+                         SQLVersion == "SQL Server 2014" and _now >= datetime(2027-07-12),
+                         "Expired",
+                         SQLVersion == "SQL Server 2014",
+                         "ESU Active",
+                         SQLVersion == "SQL Server 2016" and _now >= datetime(2029-07-14),
+                         "Expired",
+                         SQLVersion == "SQL Server 2016" and _now >= datetime(2026-07-14),
+                         "ESU Active",
+                         SQLVersion == "SQL Server 2016",
+                         "Upcoming ESU",
+                         SQLVersion == "SQL Server 2017" and _now >= datetime(2030-10-12),
+                         "Expired",
+                         SQLVersion == "SQL Server 2017" and _now >= datetime(2027-10-12),
+                         "ESU Active",
+                         SQLVersion == "SQL Server 2017",
+                         "Supported",
+                         SQLVersion == "SQL Server 2019" and _now >= datetime(2033-01-08),
+                         "Expired",
+                         SQLVersion == "SQL Server 2019" and _now >= datetime(2030-01-08),
+                         "ESU Active",
+                         SQLVersion == "SQL Server 2019" and _now >= datetime(2029-07-01),
+                         "Upcoming ESU", // 6 months before ESU start
+                         SQLVersion == "SQL Server 2019",
+                         "Supported",
+                         SQLVersion == "SQL Server 2022" and _now >= datetime(2036-01-11),
+                         "Expired",
+                         SQLVersion == "SQL Server 2022" and _now >= datetime(2033-01-11),
+                         "ESU Active",
+                         SQLVersion == "SQL Server 2022" and _now >= datetime(2032-07-01),
+                         "Upcoming ESU", // 6 months before ESU start
+                         SQLVersion == "SQL Server 2022",
+                         "Supported",
+                         "Unknown"
+    )
 | extend ESUEndDate = case(
-    SQLVersion == "SQL Server 2012",    datetime(2025-07-08),
-    SQLVersion == "SQL Server 2014",    datetime(2027-07-12),
-    SQLVersion == "SQL Server 2016",    datetime(2029-07-14),
-    SQLVersion == "SQL Server 2017",    datetime(2030-10-12),
-    SQLVersion == "SQL Server 2019",    datetime(2033-01-08),
-    SQLVersion == "SQL Server 2022",    datetime(2036-01-11),
-    todatetime('')
-)
+                          SQLVersion == "SQL Server 2012",
+                          datetime(2025-07-08),
+                          SQLVersion == "SQL Server 2014",
+                          datetime(2027-07-12),
+                          SQLVersion == "SQL Server 2016",
+                          datetime(2029-07-14),
+                          SQLVersion == "SQL Server 2017",
+                          datetime(2030-10-12),
+                          SQLVersion == "SQL Server 2019",
+                          datetime(2033-01-08),
+                          SQLVersion == "SQL Server 2022",
+                          datetime(2036-01-11),
+                          todatetime('')
+    )
 // ESUStartDate = date the ESU program begins
 | extend ESUStartDate = case(
-    SQLVersion == "SQL Server 2012",    datetime(2022-07-12),
-    SQLVersion == "SQL Server 2014",    datetime(2024-07-09),
-    SQLVersion == "SQL Server 2016",    datetime(2026-07-14),
-    SQLVersion == "SQL Server 2017",    datetime(2027-10-12),
-    SQLVersion == "SQL Server 2019",    datetime(2030-01-08),
-    SQLVersion == "SQL Server 2022",    datetime(2033-01-11),
-    todatetime('')
-)
+                            SQLVersion == "SQL Server 2012",
+                            datetime(2022-07-12),
+                            SQLVersion == "SQL Server 2014",
+                            datetime(2024-07-09),
+                            SQLVersion == "SQL Server 2016",
+                            datetime(2026-07-14),
+                            SQLVersion == "SQL Server 2017",
+                            datetime(2027-10-12),
+                            SQLVersion == "SQL Server 2019",
+                            datetime(2030-01-08),
+                            SQLVersion == "SQL Server 2022",
+                            datetime(2033-01-11),
+                            todatetime('')
+    )
 // Edition helpers used throughout the query
-| extend _isFreeEdition       = tolower(Edition) contains "developer" or tolower(Edition) contains "express" or tolower(Edition) contains "evaluation" or tolower(Edition) contains "free"
+| extend _isFreeEdition = tolower(Edition) contains "developer" or tolower(Edition) contains "express" or tolower(Edition) contains "evaluation" or tolower(Edition) contains "free"
 | extend _isEnterpriseEdition = tolower(Edition) contains "enterprise"
 | extend _isStandardEdition = tolower(Edition) contains "standard"
 | extend _isWebEdition = tolower(Edition) contains "web"
-| extend _recommendedMITier   = case(_isEnterpriseEdition, "Business Critical", _isFreeEdition, "N/A", "General Purpose")
+| extend _recommendedMITier = case(
+                                  // UVB-eligible Arc Enterprise AHUB → GP is the right tier for highly virtualized on-prem workloads
+                                  _isEnterpriseEdition and SQLLicenseType == "AHUB" and CloudType == "Arc-enabled (On-Prem)",
+                                  "General Purpose",
+                                  _isEnterpriseEdition,
+                                  "General Purpose (Database assessment required. Server had an Enterprise license)",
+                                  _isFreeEdition,
+                                  "N/A",
+                                  "General Purpose"
+    )
 | extend MigrationRecommendation = case(
-    tolower(Edition) contains "developer",
-        "Not Recommended - Development edition (non-production use only)",
-    tolower(Edition) contains "express" or tolower(Edition) contains "evaluation" or tolower(Edition) contains "free",
-        "Not Recommended - Free/Express edition (limited capacity, non-production)",
-    EOLStatus == "Expired",
-        strcat("CRITICAL - Migrate now to SQL MI ", _recommendedMITier, " (no security updates, ESU program ended)"),
-    EOLStatus == "ESU Active",
-        strcat("Recommended - Migrate to SQL MI ", _recommendedMITier, " (actively paying ESU surcharge)"),
-    EOLStatus == "Upcoming ESU",
-        strcat("Recommended - Move to SQL MI ", _recommendedMITier, " before ESU charges begin (", format_datetime(ESUStartDate, "yyyy-MM-dd"), ")"),
-    EOLStatus == "Supported",
-        strcat("Optional - Migrate to SQL MI ", _recommendedMITier, " for PaaS benefits (ESU starts ", format_datetime(ESUStartDate, "yyyy-MM-dd"), ")"),
-    "Review - Unknown SQL version or status"
-)
+                                       tolower(Edition) contains "developer",
+                                       "Not Recommended - Development edition (non-production use only)",
+                                       tolower(Edition) contains "express" or tolower(Edition) contains "evaluation" or tolower(Edition) contains "free",
+                                       "Not Recommended - Free/Express edition (limited capacity, non-production)",
+                                       EOLStatus == "Expired",
+                                       "CRITICAL - Migrate now to SQL MI",
+                                       EOLStatus == "ESU Active",
+                                       "Recommended - Migrate to SQL MI ",
+                                       EOLStatus == "Upcoming ESU",
+                                       "Recommended - Migrate to SQL MI",
+                                       EOLStatus == "Supported",
+                                       "Optional - Migrate to SQL MI",
+                                       "Review - Unknown SQL version or status"
+    )
 // ESU pricing varies by edition: Enterprise is ~4x Standard; Developer/Express/Evaluation/Free: $0
 // Standard/Web: $139/core/mo  |  Enterprise: $540.50/core/mo
 | extend _esuVersions = SQLVersion == "SQL Server 2014" or SQLVersion == "SQL Server 2016" or SQLVersion == "SQL Server 2017" or SQLVersion == "SQL Server 2019" or SQLVersion == "SQL Server 2022"
 | extend ESUMonthlyCostPerCore = case(
-    _esuVersions and _isEnterpriseEdition,  540.5,
-    _esuVersions and _isFreeEdition,          0.0,
-    _esuVersions,                            139.0,
-    0.0
-)
-| extend BillableCores        = iff(vCores < 4, 4, vCores)
+                                     _esuVersions and _isEnterpriseEdition,
+                                     540.5,
+                                     _esuVersions and _isFreeEdition,
+                                     0.0,
+                                     _esuVersions,
+                                     139.0,
+                                     0.0
+    )
+| extend BillableCores = iff(vCores < 4, 4, vCores)
 // Azure VM compute cost per vCore/month (Linux, PAYG, blended — for high-level assessment only)
 // Rates: M-series ~$0.192/hr, E-series ~$0.063/hr, L-series ~$0.078/hr, F-series ~$0.042/hr, General Purpose ~$0.05/hr (×730h)
 | extend VMCostPerCorePerMonth = case(
-    CloudType != "Azure VM (SQL IaaS)",            0.0,   // Arc/on-prem: no Azure VM compute cost
-    tolower(_vmSize) startswith "standard_m",    140.0,  // M-series: memory extreme
-    tolower(_vmSize) startswith "standard_e",     46.0,  // E-series: memory optimized
-    tolower(_vmSize) startswith "standard_l",     57.0,  // L-series: storage optimized
-    tolower(_vmSize) startswith "standard_f",     31.0,  // F-series: compute optimized
-    36.0                                                  // D/B-series and others: general purpose blended
-)
+                                     CloudType != "Azure VM (SQL IaaS)",
+                                     0.0,   // Arc/on-prem: no Azure VM compute cost
+                                     tolower(_vmSize) startswith "standard_m",
+                                     140.0,  // M-series: memory extreme
+                                     tolower(_vmSize) startswith "standard_e",
+                                     46.0,  // E-series: memory optimized
+                                     tolower(_vmSize) startswith "standard_l",
+                                     57.0,  // L-series: storage optimized
+                                     tolower(_vmSize) startswith "standard_f",
+                                     31.0,  // F-series: compute optimized
+                                     36.0                                                  // D/B-series and others: general purpose blended
+    )
 // OS detection from sqlImageOffer: WS/windows = Windows, ubuntu/rhel/sles = Linux, default Windows (most common for SQL Server)
 | extend VMOSType = case(
-    CloudType != "Azure VM (SQL IaaS)",                                                                   "N/A",
-    _sqlImageOffer contains "ws" or _sqlImageOffer contains "windows",                                    "Windows",
-    _sqlImageOffer contains "ubuntu" or _sqlImageOffer contains "rhel" or _sqlImageOffer contains "sles", "Linux",
-    "Windows"  // default: SQL Server is predominantly Windows
-)
+                        CloudType != "Azure VM (SQL IaaS)",
+                        "N/A",
+                        _sqlImageOffer contains "ws" or _sqlImageOffer contains "windows",
+                        "Windows",
+                        _sqlImageOffer contains "ubuntu" or _sqlImageOffer contains "rhel" or _sqlImageOffer contains "sles",
+                        "Linux",
+                        "Windows"  // default: SQL Server is predominantly Windows
+    )
 // Multipliers: Windows ×1.8 over Linux base | West Europe ×1.13 over East US baseline
-| extend VMOSMultiplier    = iff(VMOSType == "Windows", 1.8, 1.0)
+| extend VMOSMultiplier = iff(VMOSType == "Windows", 1.8, 1.0)
 | extend VMRegionMultiplier = iff(tolower(location) == "westeurope", 1.13, 1.0)
 | extend EstVMComputeMonthlyCost = VMCostPerCorePerMonth * vCores * VMOSMultiplier * VMRegionMultiplier
 // SQL Server license cost — always shown at list/PAYG rate for reference (Edition-based, not license-type-based)
 // Standard/Web: ~$73 | Enterprise: ~$274
 | extend SQLLicenseMonthlyCostPerCore = case(
-    _isEnterpriseEdition,  274.0,  // Enterprise list rate
-    _isFreeEdition,          0.0,  // Developer/Express/Evaluation/Free: always free
-    _isStandardEdition,     73.0,  // Standard list rate
-    _isWebEdition,           6.0,  // Web list rate
-    0.0                            // Default: $0 (unknown edition)
-)
+                                            _isEnterpriseEdition,
+                                            274.0,  // Enterprise list rate
+                                            _isFreeEdition,
+                                            0.0,  // Developer/Express/Evaluation/Free: always free
+                                            _isStandardEdition,
+                                            73.0,  // Standard list rate
+                                            _isWebEdition,
+                                            6.0,  // Web list rate
+                                            0.0                            // Default: $0 (unknown edition)
+    )
 | extend SQLLicenseMonthlyCost = SQLLicenseMonthlyCostPerCore * BillableCores
 // For savings: PAYG customers pay the hourly rate; AHUB/DR is sunk cost (SA), not included in hourly saving
 | extend _sqlLicenseSavingsCost = iff(SQLLicenseType == "PAYG", SQLLicenseMonthlyCost, 0.0)
 // EstESUMonthlyCost is non-zero for ESU Active (currently paying) and Upcoming ESU (forecast)
-| extend EstESUMonthlyCost = iff(EOLStatus in ("ESU Active", "Upcoming ESU"), ESUMonthlyCostPerCore * BillableCores, 0.0)
+| extend EstESUMonthlyCost = iff(EOLStatus in("ESU Active", "Upcoming ESU"), ESUMonthlyCostPerCore * BillableCores, 0.0)
 // Patch operations cost: 2h/month × $80/h = $160/month per instance
 | extend PatchOpsMonthlyCost = 160.0
 // Current total spend (used in both saving calculations)
 | extend _currentMonthlyCost = EstVMComputeMonthlyCost + _sqlLicenseSavingsCost + EstESUMonthlyCost + PatchOpsMonthlyCost
-// Est. cost if migrated to SQL MI — tier auto-selected by edition:
-//   Enterprise → Business Critical (BC) | Standard/Web/Other → General Purpose (GP)
+// Est. cost if migrated to SQL MI — tier auto-selected by edition and cloud type:
+//   Arc Enterprise AHUB → GP + UVB: 1 on-prem core with SA → up to 4 SQL MI GP vCores
+//     sized at max(4, vCores÷4) × $49 AHUB. Source: microsoft.com/licensing/faqs/1#92
+//     Azure VMs are excluded — UVB applies to on-prem workloads only.
+//   Azure VM Enterprise AHUB/PAYG or Arc Enterprise PAYG → Business Critical
+//   Standard/Web/Other → General Purpose (AHUB or PAYG)
 //   Developer/Express/Evaluation/Free: $0 — not migration candidates
 | extend EstSQLMIMonthlyCost = case(
-    _isFreeEdition,                                       0.0,
-    _isEnterpriseEdition and SQLLicenseType == "AHUB",  147.0 * BillableCores,   // BC + AHB (~60% off $367)
-    _isEnterpriseEdition,                               367.0 * BillableCores,   // BC PAYG
-    SQLLicenseType == "AHUB",                            49.0 * BillableCores,   // GP + AHB (~60% off $123)
-    123.0 * BillableCores                                                         // GP PAYG
-)
+                                   _isFreeEdition,
+                                   0.0,
+                                   // UVB: Arc-enabled Enterprise AHUB only (already GP — UVB sizing applies regardless of useOnlyGP)
+                                   _isEnterpriseEdition and SQLLicenseType == "AHUB" and CloudType == "Arc-enabled (On-Prem)",
+                                   49.0 * iff(vCores / 4 < 4, 4, vCores / 4),   // GP + UVB + AHUB
+                                   // useOnlyGP=true: force all remaining non-UVB cases to GP pricing
+                                   recommendGeneralPurposeOnly and SQLLicenseType == "AHUB",
+                                   49.0 * BillableCores,   // GP + AHUB (forced)
+                                   recommendGeneralPurposeOnly,
+                                   123.0 * BillableCores,  // GP PAYG (forced)
+                                   // useOnlyGP=false: standard tier selection
+                                   _isEnterpriseEdition and SQLLicenseType == "AHUB",
+                                   147.0 * BillableCores,   // BC + AHUB (~60% off $367) — Azure VM, UVB not applicable
+                                   _isEnterpriseEdition,
+                                   367.0 * BillableCores,   // BC PAYG
+                                   SQLLicenseType == "AHUB",
+                                   49.0 * BillableCores,   // GP + AHUB (~60% off $123)
+                                   123.0 * BillableCores   // GP PAYG
+    )
 // Savings: current total − MI target cost ($0 for free editions)
 | extend EstSQLMIMonthlySaving = iff(_isFreeEdition, 0.0, _currentMonthlyCost - EstSQLMIMonthlyCost)
 | extend SQLMIMigrationVerdict = case(
-    _isFreeEdition,                       "N/A",
-    EstSQLMIMonthlySaving > 0,            "Cost Savings",
-    EstSQLMIMonthlySaving < 0,            "Cost Increase (justified by PaaS/security benefits)",
-    "Break Even"
-)
+                                     _isFreeEdition,
+                                     "N/A",
+                                     EstSQLMIMonthlySaving > 0,
+                                     "Cost Savings",
+                                     EstSQLMIMonthlySaving < 0,
+                                     "Cost Increase (justified by PaaS/security benefits)",
+                                     "Break Even"
+    )
+| extend EstSQLMIMonthlyCostConsolidated = iff(_isFreeEdition, 0.0, EstSQLMIMonthlyCost / consolidationRatio)
+| extend EstSQLMIMonthlySavingConsolidated = iff(_isFreeEdition, 0.0, _currentMonthlyCost - EstSQLMIMonthlyCostConsolidated)
+| extend SQLMIMigrationVerdictConsolidated = case(
+                                                 _isFreeEdition,
+                                                 "N/A",
+                                                 EstSQLMIMonthlySavingConsolidated > 0,
+                                                 "Cost Savings",
+                                                 EstSQLMIMonthlySavingConsolidated < 0,
+                                                 "Cost Increase (justified by PaaS/security benefits)",
+                                                 "Break Even"
+    )
 | project
-    Name = name,
-    ResourceGroup = resourceGroup,
     Subscription = SubscriptionName,
     SubscriptionId = subscriptionId,
+    ResourceGroup = resourceGroup,
+    Name = name,
     Location = location,
     CloudType,
     SQLVersion,
     Edition,
-    vCores,
-    BillableCores,
     EOLStatus,
-    MigrationRecommendation,
-    MigrationTargetTier             = _recommendedMITier,
     ESUStartDate,
     ESUEndDate,
-    ESUMonthlyCostPerCore,
+    MigrationTargetTier = _recommendedMITier,
+    MigrationRecommendation,
+    vCores = tostring(vCores),
+    BillableCores = tostring(BillableCores),
+    ESUMonthlyCostPerCore = tostring(ESUMonthlyCostPerCore),
     SQLLicenseType,
-    SQLLicenseMonthlyCostPerCore,
-    SQLLicenseMonthlyCost           = round(SQLLicenseMonthlyCost, 2),
-    SQLLicenseAnnualCost            = round(SQLLicenseMonthlyCost * 12, 2),
-    VMCostPerCorePerMonth,
-    EstVMComputeMonthlyCost         = round(EstVMComputeMonthlyCost, 2),
-    EstVMComputeAnnualCost          = round(EstVMComputeMonthlyCost * 12, 2),
-    EstVMComputeThreeYearCost       = round(EstVMComputeMonthlyCost * 36, 2),
-    EstESUMonthlyCost               = round(EstESUMonthlyCost, 2),
-    EstESUAnnualCost                = round(EstESUMonthlyCost * 12, 2),
-    EstESUThreeYearCost             = round(EstESUMonthlyCost * 36, 2),
-    PatchOpsMonthlyCost,
-    PatchOpsAnnualCost              = round(PatchOpsMonthlyCost * 12, 2),
-    PatchOpsThreeYearCost           = round(PatchOpsMonthlyCost * 36, 2),
-    CurrentMonthlyCost              = round(_currentMonthlyCost, 2),
-    CurrentAnnualCost               = round(_currentMonthlyCost * 12, 2),
-    CurrentThreeYearCost            = round(_currentMonthlyCost * 36, 2),
-    EstSQLMIMonthlyCost             = round(EstSQLMIMonthlyCost, 2),
-    EstSQLMIAnnualCost              = round(EstSQLMIMonthlyCost * 12, 2),
-    EstSQLMIThreeYearCost           = round(EstSQLMIMonthlyCost * 36, 2),
-    EstSQLMIMonthlySaving           = round(EstSQLMIMonthlySaving, 2),
-    EstSQLMIAnnualSaving            = round(EstSQLMIMonthlySaving * 12, 2),
-    EstSQLMIThreeYearSaving         = round(EstSQLMIMonthlySaving * 36, 2),
+    SQLLicenseMonthlyCostPerCore = tostring(SQLLicenseMonthlyCostPerCore),
+    SQLLicenseMonthlyCost = tostring(round(SQLLicenseMonthlyCost, 2)),
+    VMCostPerCorePerMonth = tostring(VMCostPerCorePerMonth),
+    EstVMComputeMonthlyCost = tostring(round(EstVMComputeMonthlyCost, 2)),
+    EstESUMonthlyCost = tostring(round(EstESUMonthlyCost, 2)),
+    PatchOpsMonthlyCost = tostring(PatchOpsMonthlyCost),
+    CurrentMonthlyCost = tostring(round(_currentMonthlyCost, 2)),
+    ConsolidationRatio = tostring(consolidationRatio),
+    EstSQLMIMonthlyCost = tostring(round(EstSQLMIMonthlyCostConsolidated, 2)),
+    EstSQLMIMonthlySaving = tostring(round(EstSQLMIMonthlySavingConsolidated, 2)),
     SQLMIMigrationVerdict
-| order by case(EOLStatus == "Expired", 0, EOLStatus == "ESU Active", 1, EOLStatus == "Upcoming ESU", 2, EOLStatus == "Supported", 3, 4) asc, EstSQLMIMonthlySaving desc, SQLVersion asc, Name asc
+| order by
+    case(EOLStatus == "Expired", 0, EOLStatus == "ESU Active", 1, EOLStatus == "Upcoming ESU", 2, EOLStatus == "Supported", 3, 4) asc,
+    EstSQLMIMonthlySaving desc,
+    SQLVersion asc,
+    Name asc
