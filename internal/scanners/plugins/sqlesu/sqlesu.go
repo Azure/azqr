@@ -31,50 +31,38 @@ func NewScanner() *Scanner {
 func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "sql-esu",
-		Version:     "0.2.0-beta",
+		Version:     "0.3.0-beta",
 		Description: "Analyzes SQL Server End-of-Life and Extended Security Update status with full cost breakdown (VM compute, SQL license, ESU), migration recommendations with target tier auto-selected by edition (Enterprise→BC, Standard/Web→GP), and unified SQL MI migration savings and verdict",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
 		Type:        plugins.PluginTypeInternal,
 		ColumnMetadata: []plugins.ColumnMetadata{
-			{Name: "Name", DataKey: "name", FilterType: plugins.FilterTypeSearch},
-			{Name: "Resource Group", DataKey: "resourceGroup", FilterType: plugins.FilterTypeDropdown},
 			{Name: "Subscription", DataKey: "subscription", FilterType: plugins.FilterTypeDropdown},
+			{Name: "Resource Group", DataKey: "resourceGroup", FilterType: plugins.FilterTypeDropdown},
+			{Name: "Name", DataKey: "name", FilterType: plugins.FilterTypeSearch},
 			{Name: "Location", DataKey: "location", FilterType: plugins.FilterTypeDropdown},
 			{Name: "Cloud Type", DataKey: "cloudType", FilterType: plugins.FilterTypeDropdown},
 			{Name: "SQL Version", DataKey: "sqlVersion", FilterType: plugins.FilterTypeDropdown},
 			{Name: "Edition", DataKey: "edition", FilterType: plugins.FilterTypeDropdown},
-			{Name: "vCores", DataKey: "vCores", FilterType: plugins.FilterTypeNone},
-			{Name: "Billable Cores", DataKey: "billableCores", FilterType: plugins.FilterTypeNone},
 			{Name: "EOL Status", DataKey: "eolStatus", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Migration Recommendation", DataKey: "migrationRecommendation", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Migration Target Tier", DataKey: "migrationTargetTier", FilterType: plugins.FilterTypeDropdown},
 			{Name: "ESU Start Date", DataKey: "esuStartDate", FilterType: plugins.FilterTypeNone},
 			{Name: "ESU End Date", DataKey: "esuEndDate", FilterType: plugins.FilterTypeNone},
+			{Name: "Migration Target Tier", DataKey: "migrationTargetTier", FilterType: plugins.FilterTypeDropdown},
+			{Name: "Migration Recommendation", DataKey: "migrationRecommendation", FilterType: plugins.FilterTypeDropdown},
+			{Name: "vCores", DataKey: "vCores", FilterType: plugins.FilterTypeNone},
+			{Name: "Billable Cores", DataKey: "billableCores", FilterType: plugins.FilterTypeNone},
 			{Name: "ESU Monthly Cost/Core", DataKey: "esuMonthlyCostPerCore", FilterType: plugins.FilterTypeNone},
 			{Name: "SQL License Type", DataKey: "sqlLicenseType", FilterType: plugins.FilterTypeDropdown},
 			{Name: "SQL License Cost/Core/Month", DataKey: "sqlLicenseMonthlyCostPerCore", FilterType: plugins.FilterTypeNone},
 			{Name: "SQL License Monthly Cost", DataKey: "sqlLicenseMonthlyCost", FilterType: plugins.FilterTypeNone},
-			{Name: "SQL License Annual Cost", DataKey: "sqlLicenseAnnualCost", FilterType: plugins.FilterTypeNone},
 			{Name: "VM Cost/Core/Month", DataKey: "vmCostPerCorePerMonth", FilterType: plugins.FilterTypeNone},
 			{Name: "Est VM Compute Monthly Cost", DataKey: "estVmComputeMonthlyCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Est VM Compute Annual Cost", DataKey: "estVmComputeAnnualCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Est VM Compute 3-Year Cost", DataKey: "estVmComputeThreeYearCost", FilterType: plugins.FilterTypeNone},
 			{Name: "Est ESU Monthly Cost", DataKey: "estEsuMonthlyCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Est ESU Annual Cost", DataKey: "estEsuAnnualCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Est ESU 3-Year Cost", DataKey: "estEsuThreeYearCost", FilterType: plugins.FilterTypeNone},
 			{Name: "Patch Ops Monthly Cost", DataKey: "patchOpsMonthlyCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Patch Ops Annual Cost", DataKey: "patchOpsAnnualCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Patch Ops 3-Year Cost", DataKey: "patchOpsThreeYearCost", FilterType: plugins.FilterTypeNone},
 			{Name: "Current Monthly Cost", DataKey: "currentMonthlyCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Current Annual Cost", DataKey: "currentAnnualCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Current 3-Year Cost", DataKey: "currentThreeYearCost", FilterType: plugins.FilterTypeNone},
+			{Name: "Consolidation Ratio", DataKey: "consolidationRatio", FilterType: plugins.FilterTypeNone},
 			{Name: "Est SQL MI Monthly Cost", DataKey: "estSqlMiMonthlyCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Est SQL MI Annual Cost", DataKey: "estSqlMiAnnualCost", FilterType: plugins.FilterTypeNone},
-			{Name: "Est SQL MI 3-Year Cost", DataKey: "estSqlMiThreeYearCost", FilterType: plugins.FilterTypeNone},
 			{Name: "Est SQL MI Monthly Saving", DataKey: "estSqlMiMonthlySaving", FilterType: plugins.FilterTypeNone},
-			{Name: "Est SQL MI Annual Saving", DataKey: "estSqlMiAnnualSaving", FilterType: plugins.FilterTypeNone},
-			{Name: "Est SQL MI 3-Year Saving", DataKey: "estSqlMiThreeYearSaving", FilterType: plugins.FilterTypeNone},
 			{Name: "SQL MI Migration Verdict", DataKey: "sqlMiMigrationVerdict", FilterType: plugins.FilterTypeDropdown},
 		},
 	}
@@ -143,26 +131,14 @@ type sqlESURow struct {
 	SQLLicenseType               string `json:"SQLLicenseType"`
 	SQLLicenseMonthlyCostPerCore string `json:"SQLLicenseMonthlyCostPerCore"`
 	SQLLicenseMonthlyCost        string `json:"SQLLicenseMonthlyCost"`
-	SQLLicenseAnnualCost         string `json:"SQLLicenseAnnualCost"`
 	VMCostPerCorePerMonth        string `json:"VMCostPerCorePerMonth"`
 	EstVMComputeMonthlyCost      string `json:"EstVMComputeMonthlyCost"`
-	EstVMComputeAnnualCost       string `json:"EstVMComputeAnnualCost"`
-	EstVMComputeThreeYearCost    string `json:"EstVMComputeThreeYearCost"`
 	EstESUMonthlyCost            string `json:"EstESUMonthlyCost"`
-	EstESUAnnualCost             string `json:"EstESUAnnualCost"`
-	EstESUThreeYearCost          string `json:"EstESUThreeYearCost"`
 	PatchOpsMonthlyCost          string `json:"PatchOpsMonthlyCost"`
-	PatchOpsAnnualCost           string `json:"PatchOpsAnnualCost"`
-	PatchOpsThreeYearCost        string `json:"PatchOpsThreeYearCost"`
 	CurrentMonthlyCost           string `json:"CurrentMonthlyCost"`
-	CurrentAnnualCost            string `json:"CurrentAnnualCost"`
-	CurrentThreeYearCost         string `json:"CurrentThreeYearCost"`
+	ConsolidationRatio           string `json:"ConsolidationRatio"`
 	EstSQLMIMonthlyCost          string `json:"EstSQLMIMonthlyCost"`
-	EstSQLMIAnnualCost           string `json:"EstSQLMIAnnualCost"`
-	EstSQLMIThreeYearCost        string `json:"EstSQLMIThreeYearCost"`
 	EstSQLMIMonthlySaving        string `json:"EstSQLMIMonthlySaving"`
-	EstSQLMIAnnualSaving         string `json:"EstSQLMIAnnualSaving"`
-	EstSQLMIThreeYearSaving      string `json:"EstSQLMIThreeYearSaving"`
 	SQLMIMigrationVerdict        string `json:"SQLMIMigrationVerdict"`
 }
 
@@ -170,44 +146,32 @@ type sqlESURow struct {
 // the plugin's ColumnMetadata.
 func (r sqlESURow) toRecord() []string {
 	return []string{
-		r.Name,
-		r.ResourceGroup,
 		r.Subscription,
+		r.ResourceGroup,
+		r.Name,
 		r.Location,
 		r.CloudType,
 		r.SQLVersion,
 		r.Edition,
-		r.VCores,
-		r.BillableCores,
 		r.EOLStatus,
-		r.MigrationRecommendation,
-		r.MigrationTargetTier,
 		r.ESUStartDate,
 		r.ESUEndDate,
+		r.MigrationTargetTier,
+		r.MigrationRecommendation,
+		r.VCores,
+		r.BillableCores,
 		r.ESUMonthlyCostPerCore,
 		r.SQLLicenseType,
 		r.SQLLicenseMonthlyCostPerCore,
 		r.SQLLicenseMonthlyCost,
-		r.SQLLicenseAnnualCost,
 		r.VMCostPerCorePerMonth,
 		r.EstVMComputeMonthlyCost,
-		r.EstVMComputeAnnualCost,
-		r.EstVMComputeThreeYearCost,
 		r.EstESUMonthlyCost,
-		r.EstESUAnnualCost,
-		r.EstESUThreeYearCost,
 		r.PatchOpsMonthlyCost,
-		r.PatchOpsAnnualCost,
-		r.PatchOpsThreeYearCost,
 		r.CurrentMonthlyCost,
-		r.CurrentAnnualCost,
-		r.CurrentThreeYearCost,
+		r.ConsolidationRatio,
 		r.EstSQLMIMonthlyCost,
-		r.EstSQLMIAnnualCost,
-		r.EstSQLMIThreeYearCost,
 		r.EstSQLMIMonthlySaving,
-		r.EstSQLMIAnnualSaving,
-		r.EstSQLMIThreeYearSaving,
 		r.SQLMIMigrationVerdict,
 	}
 }
