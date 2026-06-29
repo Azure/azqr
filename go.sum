@@ -60,8 +60,8 @@ github.com/google/jsonschema-go v0.4.3 h1:/DBOLZTfDow7pe2GmaJNhltueGTtDKICi8V8p+
 github.com/google/jsonschema-go v0.4.3/go.mod h1:r5quNTdLOYEz95Ru18zA0ydNbBuYoo9tgaYcxEYhJVE=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/gruntwork-io/terratest v1.0.0 h1:Zk7VJ5Z9vBSwv8OQ/zzkG5D/tfqyVyjMK+lq2v+Kn/c=
-github.com/gruntwork-io/terratest v1.0.0/go.mod h1:g2XWbOQOvnHBFcIYCt5ryaFBWp69+5L+QMbAwor+CBo=
+github.com/gruntwork-io/terratest v1.0.1 h1:5CCp4Matgw5S42t5VW79mLN3YcaN5cEqNpTprVjuzIQ=
+github.com/gruntwork-io/terratest v1.0.1/go.mod h1:2lK9XvvGJ+GhsvA6tO7LpALWG34nu+1QecgexHKAGZ8=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY2I=
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
