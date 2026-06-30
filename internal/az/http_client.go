@@ -105,8 +105,7 @@ func NewHttpClient(cred azcore.TokenCredential, opts *HttpClientOptions) *HttpCl
 		"azqr-http-client",
 		"v1.0.0",
 		runtime.PipelineOptions{
-			PerCall:  []policy.Policy{throttling.NewThrottlingPolicy()},
-			PerRetry: []policy.Policy{authPolicy},
+			PerRetry: []policy.Policy{authPolicy, throttling.NewThrottlingPolicy()},
 		},
 		clientOpts,
 	)
