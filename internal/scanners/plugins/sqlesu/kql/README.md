@@ -27,6 +27,7 @@ Scans SQL Server instances (Azure VMs and Arc-enabled) for EOL/ESU lifecycle sta
 | **Unlimited Virtualization Benefit (UVB)** | Arc-enabled Enterprise AHUB only. 1 on-prem core with SA → up to 4 SQL MI GP vCores. Sized at `max(4, vCores ÷ 4)` × $49/vCore AHUB. Azure VMs excluded — UVB applies to on-prem workloads only. Source: [microsoft.com/licensing/faqs/1#92](https://www.microsoft.com/licensing/faqs/1#92). |
 | **SQL MI cost (PAYG)** | GP: $123/vCore/month · BC: $367/vCore/month |
 | **SQL MI cost (AHUB)** | GP: $49/vCore/month · BC: $147/vCore/month |
+| **Consolidation ratio** | 2:1 source-to-target. Two source VMs (or Arc instances) are assumed to consolidate onto a single SQL MI, so the estimated SQL MI cost is split equally between both. This conservative ratio reflects typical PaaS consolidation; actual consolidation opportunities should be validated per workload. |
 | **Savings formula** | `Current (VM compute + SQL license if PAYG + ESU + patch ops) − Est SQL MI cost` |
 
 ## Savings by Scenario
