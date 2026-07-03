@@ -41,6 +41,7 @@ help:
 	@echo "  json         - Generate JSON recommendations and check for changes"
 	@echo "  validate-yaml - Validate all recommendation YAML files against schema"
 	@echo "  validate-scanners - Validate APRL recommendations coverage"
+	@echo "  sku          - Generate internal/skus/known_skus.yaml from Azure VM SKUs (requires Azure login)"
 	@echo "  test         - Run tests (includes linting and validation)"
 	@echo "  test-integration - Run integration tests (requires Azure credentials, default timeout 60m)"
 	@echo "  test-integration-setup - Validate prerequisites for running integration tests"
@@ -86,14 +87,17 @@ json:
 	go run ./cmd/azqr/main.go rules --json > ./data/recommendations.json 
 	git diff --exit-code ./data/recommendations.json
 
+sku:
+	go run ./hack/code/sku_gen/main.go
+
 validate-yaml:
 	@echo "Validating recommendation YAML files against schema..."
-	@go run ./scripts/validate-recommendations.go ./internal/graph/azqr/azure-resources ./internal/graph/aprl/azure-resources ./internal/graph/azure-orphan-resources
+	@go run ./hack/code/validate_recommendations/validate-recommendations.go ./internal/graph/azqr/azure-resources ./internal/graph/aprl/azure-resources ./internal/graph/azure-orphan-resources
 
 validate-scanners: validate-yaml
-	@./scripts/validate-scanner-coverage.sh
+	@./hack/scripts/validate-scanner-coverage/validate-scanner-coverage.sh
 
-test: lint vet tidy json validate-yaml validate-scanners
+test: lint vet tidy validate-yaml validate-scanners json 
 	go test -race ./... -coverprofile=coverage.txt -covermode=atomic ./...
 
 # Integration test targets

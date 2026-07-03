@@ -284,6 +284,8 @@ func computeWidthsFromRecords(records [][]string, maxSampleRows int) []int {
 }
 
 // renderExternalPlugins creates Excel sheets for external plugin results.
+// If a sheet with the same name already exists in the workbook (e.g. "Inventory"
+// written by the main scan), that plugin sheet is silently skipped.
 func renderExternalPlugins(f *excelize.File, data *renderers.ReportData, styles *StyleCache) {
 	if len(data.PluginResults) == 0 {
 		return
@@ -291,6 +293,11 @@ func renderExternalPlugins(f *excelize.File, data *renderers.ReportData, styles 
 
 	for _, result := range data.PluginResults {
 		if len(result.Table) == 0 {
+			continue
+		}
+
+		if idx, _ := f.GetSheetIndex(result.SheetName); idx != -1 {
+			log.Debug().Msgf("Skipping plugin sheet %q — already present in workbook", result.SheetName)
 			continue
 		}
 
