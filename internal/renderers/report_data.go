@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/skus"
 )
 
 type (
@@ -500,7 +501,7 @@ func MaskSubscriptionIDInResourceID(resourceID string, mask bool) string {
 }
 
 func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
-	headers := []string{"Subscription Id", "Resource Group", "Location", "Resource Type", "Resource Name", "Sku Name", "Sku Tier", "Kind", "SLA", "Resource Id"}
+	headers := []string{"Subscription Id", "Resource Group", "Location", "Resource Type", "Resource Name", "Sku Name", "Sku Tier", "Capacity", "Kind", "SLA", "Resource Id"}
 
 	// Pre-allocate with capacity to avoid reallocations
 	rows := make([][]string, 1, len(resources)+1)
@@ -526,6 +527,13 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 	for _, r := range resources {
 		sla := slaDirect[r.ID]
 
+		capacity := ""
+		if r.SkuCapacity > 0 {
+			capacity = fmt.Sprint(r.SkuCapacity)
+		} else if v := skus.Lookup(r.SkuName); v > 0 {
+			capacity = fmt.Sprint(v)
+		}
+
 		row := []string{
 			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
 			r.ResourceGroup,
@@ -534,6 +542,7 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 			r.Name,
 			r.SkuName,
 			r.SkuTier,
+			capacity,
 			r.Kind,
 			sla,
 			MaskSubscriptionIDInResourceID(r.ID, rd.Mask),

@@ -491,7 +491,7 @@ function renderTable(rows, datasetName) {
         'recommendations': ['implemented', 'numberOfImpactedResources', 'azureServiceWellArchitected', 'recommendationSource', 'azureServiceCategoryWellArchitectedArea', 'azureServiceWellArchitectedTopic', 'category', 'recommendation', 'impact', 'bestPracticesGuidance', 'readMore', 'recommendationId'],
         'resourceType': ['subscriptionName', 'resourceType', 'numberOfResources'],
         'defenderRecommendations': ['subscriptionId', 'subscriptionName', 'resourceGroup', 'resourceType', 'resourceName', 'category', 'recommendationSeverity', 'recommendationName', 'actionDescription', 'remediationDescription', 'resourceId'],
-        'inventory': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName', 'skuName', 'skuTier', 'kind', 'sla', 'resourceId'],
+        'inventory': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName', 'skuName', 'skuTier', 'capacity', 'kind', 'sla', 'resourceId'],
         'outOfScope': ['subscriptionId', 'resourceGroup', 'location', 'resourceType', 'resourceName', 'resourceId']
     };
 

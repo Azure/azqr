@@ -9,7 +9,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/plugins"
+	"github.com/Azure/azqr/internal/renderers"
+	"github.com/Azure/azqr/internal/skus"
 )
 
 // safeSheetName truncates s to the 31-character maximum allowed by Excel sheet names.
@@ -246,6 +249,44 @@ func buildCostComparisonSheet(costData *CostComparisonData) *plugins.ExternalPlu
 	return &plugins.ExternalPluginOutput{
 		SheetName:   "CostComparison",
 		Description: "Retail price comparison for resource meters across Azure regions",
+		Table:       rows,
+	}
+}
+
+// buildInventorySheet converts a resource list into an Inventory ExternalPluginOutput
+// using the same column layout as the main scan's inventory.csv.
+// When the main scan has already written an "Inventory" sheet to the workbook,
+// renderExternalPlugins will detect the duplicate and skip this sheet.
+func buildInventorySheet(resources []*models.Resource, mask bool) plugins.ExternalPluginOutput {
+	headers := []string{"Subscription Id", "Resource Group", "Location", "Resource Type", "Resource Name", "Sku Name", "Sku Tier", "Capacity", "Kind", "Resource Id"}
+	rows := make([][]string, 0, len(resources)+1)
+	rows = append(rows, headers)
+
+	for _, r := range resources {
+		capacity := ""
+		if r.SkuCapacity > 0 {
+			capacity = fmt.Sprint(r.SkuCapacity)
+		} else if v := skus.Lookup(r.SkuName); v > 0 {
+			capacity = fmt.Sprint(v)
+		}
+
+		rows = append(rows, []string{
+			renderers.MaskSubscriptionID(r.SubscriptionID, mask),
+			r.ResourceGroup,
+			r.Location,
+			r.Type,
+			r.Name,
+			r.SkuName,
+			r.SkuTier,
+			capacity,
+			r.Kind,
+			renderers.MaskSubscriptionIDInResourceID(r.ID, mask),
+		})
+	}
+
+	return plugins.ExternalPluginOutput{
+		SheetName:   "Inventory",
+		Description: "Resource inventory collected during region selection analysis",
 		Table:       rows,
 	}
 }

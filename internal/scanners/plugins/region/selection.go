@@ -257,6 +257,9 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			outputs = append(outputs, *costSheet)
 		}
 	}
+	// Append Inventory sheet last. If an Inventory sheet was already written by
+	// the main scan (azqr scan), renderExternalPlugins will skip this sheet.
+	outputs = append(outputs, buildInventorySheet(allResources, params.Mask))
 
 	log.Info().Msgf("Region selection analysis completed for %d subscriptions",
 		len(subscriptions))
