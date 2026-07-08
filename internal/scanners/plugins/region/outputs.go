@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/cost"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -26,9 +28,9 @@ type outputOptions struct {
 func generateJSONOutputs(
 	opts outputOptions,
 	resources []*models.Resource,
-	inventory *resourceInventory,
-	comparisons []regionComparison,
-	costData *CostComparisonData,
+	inventory *types.ResourceInventory,
+	comparisons []types.RegionComparison,
+	costData *types.CostComparisonData,
 ) error {
 	// Create output directory if it doesn't exist
 	if err := os.MkdirAll(opts.OutputDir, 0755); err != nil {
@@ -90,20 +92,20 @@ func writeResourcesJSON(outputDir string, resources []*models.Resource) error {
 }
 
 // writeSummaryJSON writes the inventory summary to summary.json
-func writeSummaryJSON(outputDir string, inventory *resourceInventory) error {
+func writeSummaryJSON(outputDir string, inventory *types.ResourceInventory) error {
 	// Build summary structure
 	summary := make(map[string]interface{})
 
 	// Add resource type summary
 	resourceTypeSummary := []map[string]interface{}{}
-	for resourceType, count := range inventory.resourceTypes {
+	for resourceType, count := range inventory.ResourceTypes {
 		item := map[string]interface{}{
 			"ResourceType":  resourceType,
 			"ResourceCount": count,
 		}
 
 		// Add SKUs for this resource type
-		if skus, exists := inventory.skusByType[resourceType]; exists {
+		if skus, exists := inventory.SKUsByType[resourceType]; exists {
 			implementedSKUs := []map[string]interface{}{}
 			for skuName, skuCount := range skus {
 				implementedSKUs = append(implementedSKUs, map[string]interface{}{
@@ -120,7 +122,7 @@ func writeSummaryJSON(outputDir string, inventory *resourceInventory) error {
 
 	// Add location summary
 	locationSummary := []map[string]interface{}{}
-	for location, count := range inventory.locationCounts {
+	for location, count := range inventory.LocationCounts {
 		locationSummary = append(locationSummary, map[string]interface{}{
 			"location":      location,
 			"resourceCount": count,
@@ -143,35 +145,35 @@ func writeSummaryJSON(outputDir string, inventory *resourceInventory) error {
 }
 
 // writeAvailabilityMappingJSON writes the availability mapping to Availability_Mapping.json
-func writeAvailabilityMappingJSON(outputDir string, comparisons []regionComparison) error {
+func writeAvailabilityMappingJSON(outputDir string, comparisons []types.RegionComparison) error {
 	// Build availability mapping structure
 	mapping := make(map[string][]map[string]interface{})
 
 	// Group by source region
 	for _, comp := range comparisons {
-		sourceRegion := comp.sourceRegion
+		sourceRegion := comp.SourceRegion
 		if _, exists := mapping[sourceRegion]; !exists {
 			mapping[sourceRegion] = []map[string]interface{}{}
 		}
 
 		entry := map[string]interface{}{
-			"targetRegion":             comp.targetRegion,
-			"availableResourceTypes":   comp.availableTypes,
-			"unavailableResourceTypes": comp.unavailableTypes,
-			"availabilityPercent":      comp.availabilityPercent,
-			"missingResourceTypes":     comp.missingResourceTypes,
-			"totalSKUsChecked":         comp.totalSKUsChecked,
-			"availableSKUs":            comp.availableSKUs,
-			"unavailableSKUs":          comp.unavailableSKUs,
-			"restrictedSKUs":           comp.restrictedSKUs,
-			"unknownSKUs":              comp.unknownSKUs,
-			"skuAvailabilityPercent":   comp.skuAvailabilityPercent,
-			"missingSKUs":              comp.missingSKUs,
-			"sourceZoneCount":           comp.sourceZoneCount,
-			"targetZoneCount":           comp.targetZoneCount,
-			"avgLatencyMs":             comp.avgLatencyMs,
-			"avgCostDifference":        comp.avgCostDifference,
-			"recommendationScore":      comp.score,
+			"targetRegion":             comp.TargetRegion,
+			"availableResourceTypes":   comp.AvailableTypes,
+			"unavailableResourceTypes": comp.UnavailableTypes,
+			"availabilityPercent":      comp.AvailabilityPercent,
+			"missingResourceTypes":     comp.MissingResourceTypes,
+			"totalSKUsChecked":         comp.TotalSKUsChecked,
+			"availableSKUs":            comp.AvailableSKUs,
+			"unavailableSKUs":          comp.UnavailableSKUs,
+			"restrictedSKUs":           comp.RestrictedSKUs,
+			"unknownSKUs":              comp.UnknownSKUs,
+			"skuAvailabilityPercent":   comp.SKUAvailabilityPercent,
+			"missingSKUs":              comp.MissingSKUs,
+			"sourceZoneCount":          comp.SourceZoneCount,
+			"targetZoneCount":          comp.TargetZoneCount,
+			"avgLatencyMs":             comp.AvgLatencyMs,
+			"avgCostDifference":        comp.AvgCostDifference,
+			"recommendationScore":      comp.Score,
 		}
 
 		mapping[sourceRegion] = append(mapping[sourceRegion], entry)
@@ -192,9 +194,9 @@ func writeAvailabilityMappingJSON(outputDir string, comparisons []regionComparis
 }
 
 // writeCostAnalysisJSONs writes cost analysis details to multiple JSON files
-func writeCostAnalysisJSONs(outputDir string, costData *CostComparisonData) error {
+func writeCostAnalysisJSONs(outputDir string, costData *types.CostComparisonData) error {
 	// Reconstruct legacy map format for JSON serialisation
-	costDetails := buildCostDetailsForOutput(costData.MeterInputs, costData.RegionPricing, costData.PriceItems, costData.UomErrors)
+	costDetails := cost.BuildCostDetailsForOutput(costData.MeterInputs, costData.RegionPricing, costData.PriceItems, costData.UomErrors)
 
 	// Write region_comparison_inputs.json (meter metadata)
 	if inputs, ok := costDetails["inputs"]; ok {

@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"math"
 	"os"
 	"sort"
 	"strings"
@@ -19,6 +18,11 @@ import (
 	"github.com/Azure/azqr/internal/plugins"
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/scanners"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/availability"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/cost"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/excel"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/latency"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
 )
@@ -37,7 +41,24 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			if regionsStr, ok := targetRegions.(string); ok && regionsStr != "" {
 				s.targetRegions = strings.Split(regionsStr, ",")
 				for i := range s.targetRegions {
-					s.targetRegions[i] = normalizeRegionName(s.targetRegions[i])
+					s.targetRegions[i] = types.NormalizeRegionName(s.targetRegions[i])
+				}
+			}
+		}
+		if historyMonths, exists := stageOptions["cost-history-months"]; exists {
+			switch v := historyMonths.(type) {
+			case int:
+				if v >= 1 && v <= 12 {
+					s.costHistoryMonths = v
+				} else {
+					log.Warn().Msgf("cost-history-months %d out of range [1–12]; using default 1", v)
+				}
+			case float64:
+				n := int(v)
+				if n >= 1 && n <= 12 {
+					s.costHistoryMonths = n
+				} else {
+					log.Warn().Msgf("cost-history-months %d out of range [1–12]; using default 1", n)
 				}
 			}
 		}
@@ -69,20 +90,25 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 
 	log.Debug().Msgf("Collected %d total resources across all subscriptions", len(allResources))
 
-	// Process each subscription in parallel
-	allResults := []regionComparison{}
-	var resultsMu sync.Mutex
+	// subPhase1Result holds the per-subscription data collected during the parallel phase.
+	type subPhase1Result struct {
+		subID         string
+		subName       string
+		regionResults []types.RegionComparison
+		meterCosts    []types.MeterCostData
+	}
 
-	// Accumulate cost data across all subscriptions for the CostComparison sheet
-	var mergedCostData *CostComparisonData
-	var costDetailsMu sync.Mutex
+	// Phase 1: run availability + Cost Management queries in parallel (per subscription).
+	// Retail API calls are deferred to Phase 2 so they happen only once for all subscriptions.
+	var phase1Results []subPhase1Result
+	var phase1Mu sync.Mutex
 
-	globalInventory := &resourceInventory{
-		resourceTypes:         make(map[string]int),
-		skusByType:            make(map[string]map[string]int),
-		locationCounts:        make(map[string]int),
-		resourceTypesByRegion: make(map[string]map[string]int),
-		skusByTypeAndRegion:   make(map[string]map[string]map[string]int),
+	globalInventory := &types.ResourceInventory{
+		ResourceTypes:         make(map[string]int),
+		SKUsByType:            make(map[string]map[string]int),
+		LocationCounts:        make(map[string]int),
+		ResourceTypesByRegion: make(map[string]map[string]int),
+		SKUsByTypeAndRegion:   make(map[string]map[string]map[string]int),
 	}
 	var globalInventoryMu sync.Mutex
 
@@ -98,7 +124,7 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			// Filter resources for this subscription and build inventory
 			inventory := s.buildInventoryForSubscription(subID, allResources)
 
-			if len(inventory.resourceTypes) == 0 {
+			if len(inventory.ResourceTypes) == 0 {
 				log.Debug().Msgf("No resources found in subscription %s, skipping", renderers.MaskSubscriptionID(subID, true))
 				return
 			}
@@ -109,7 +135,7 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			globalInventoryMu.Unlock()
 
 			log.Debug().Msgf("Subscription %s: Collected %d unique resource types across %d locations",
-				renderers.MaskSubscriptionID(subID, true), len(inventory.resourceTypes), len(inventory.locationCounts))
+				renderers.MaskSubscriptionID(subID, true), len(inventory.ResourceTypes), len(inventory.LocationCounts))
 
 			// Step 2: Get list of all Azure regions for this subscription
 			log.Debug().Msgf("Discovering available Azure regions for subscription %s...", renderers.MaskSubscriptionID(subID, true))
@@ -128,13 +154,13 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 				// Normalize target regions to lowercase for comparison
 				targetRegionMap := make(map[string]bool)
 				for _, r := range s.targetRegions {
-					targetRegionMap[normalizeRegionName(r)] = true
+					targetRegionMap[types.NormalizeRegionName(r)] = true
 				}
 
 				// Filter to only the specified target regions
 				filteredRegions := []string{}
 				for _, region := range allRegions {
-					if targetRegionMap[normalizeRegionName(region)] {
+					if targetRegionMap[types.NormalizeRegionName(region)] {
 						filteredRegions = append(filteredRegions, region)
 					}
 				}
@@ -153,40 +179,80 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			// Step 3: Check availability for each source->target region pair
 			// Source regions come from where resources actually exist
 			log.Debug().Msgf("Checking resource availability from source regions to %d target regions for subscription %s...", len(targetRegions), renderers.MaskSubscriptionID(subID, true))
-			regionResults := s.checkRegionsInParallel(ctx, cred, targetRegions, inventory, subID, subName, regionZoneCount)
-
+			regionResults := availability.CheckRegionsInParallel(ctx, cred, targetRegions, inventory, subID, subName, regionZoneCount, s.skuCache, s.httpClient)
 			log.Debug().Msgf("Completed availability check for subscription %s", renderers.MaskSubscriptionID(subID, true))
 
-			// Step 4: Get cost comparisons for this subscription using meter IDs from inventory
-			log.Debug().Msgf("Querying cost data for subscription %s...", renderers.MaskSubscriptionID(subID, true))
-			costData := s.enrichWithCostData(ctx, cred, subID, regionResults)
-			log.Debug().Msgf("Cost comparison completed for subscription %s", renderers.MaskSubscriptionID(subID, true))
-
-			// Store cost data — merge across all subscriptions (thread-safe)
-			if costData != nil {
-				costDetailsMu.Lock()
-				mergedCostData = mergeCostData(mergedCostData, costData)
-				costDetailsMu.Unlock()
+			// Step 4a: Fetch per-subscription Cost Management data (historical meter costs).
+			// The Retail API call is deferred until after all subscriptions complete (Phase 2).
+			log.Debug().Msgf("Querying Cost Management API for subscription %s...", renderers.MaskSubscriptionID(subID, true))
+			subMeterCosts, err := cost.FetchMeterCosts(ctx, cred, s.httpClient, subID, s.costHistoryMonths)
+			if err != nil {
+				log.Warn().Err(err).Msgf("Failed to get cost data from Cost Management API for subscription %s - cost comparison will use equal weights", renderers.MaskSubscriptionID(subID, true))
 			}
+			log.Debug().Msgf("Cost Management query completed for subscription %s (%d meters)", renderers.MaskSubscriptionID(subID, true), len(subMeterCosts))
 
-			// Step 5: Calculate network latency scores
-			log.Debug().Msgf("Calculating network latency for subscription %s...", renderers.MaskSubscriptionID(subID, true))
-			s.enrichWithLatencyData(regionResults)
-			log.Debug().Msgf("Latency calculation completed for subscription %s", renderers.MaskSubscriptionID(subID, true))
-
-			// Step 6: Calculate scores for this subscription's regions
-			log.Info().Msgf("Calculating recommendation scores for subscription %s", renderers.MaskSubscriptionID(subID, true))
-			s.calculateScores(regionResults)
-
-			// Add results from this subscription to the overall results (thread-safe)
-			resultsMu.Lock()
-			allResults = append(allResults, regionResults...)
-			resultsMu.Unlock()
+			phase1Mu.Lock()
+			phase1Results = append(phase1Results, subPhase1Result{
+				subID:         subID,
+				subName:       subName,
+				regionResults: regionResults,
+				meterCosts:    subMeterCosts,
+			})
+			phase1Mu.Unlock()
 		}(subscriptionID, subscriptionName)
 	}
 
-	// Wait for all subscriptions to complete
+	// Wait for all Phase-1 goroutines (availability + Cost Management) to complete.
 	wg.Wait()
+
+	// Phase 2: build shared Retail API pricing once across all subscriptions.
+	// Deduplicate meter costs by MeterID while summing HistoricalCost across subscriptions
+	// so the Excel report reflects total cross-subscription spend per meter.
+	meterCostByID := make(map[string]float64)
+	allRegionsMap := make(map[string]bool)
+	for _, p1 := range phase1Results {
+		for _, mc := range p1.meterCosts {
+			meterCostByID[mc.MeterID] += mc.HistoricalCost
+		}
+		for _, r := range p1.regionResults {
+			allRegionsMap[types.NormalizeRegionName(r.SourceRegion)] = true
+			allRegionsMap[types.NormalizeRegionName(r.TargetRegion)] = true
+		}
+	}
+
+	allMeterCosts := make([]types.MeterCostData, 0, len(meterCostByID))
+	for meterID, totalCost := range meterCostByID {
+		allMeterCosts = append(allMeterCosts, types.MeterCostData{
+			MeterID:        meterID,
+			HistoricalCost: totalCost,
+		})
+	}
+
+	var sharedCostData *types.CostComparisonData
+	if len(allMeterCosts) > 0 {
+		log.Warn().Msg("Cost comparison uses public PAYG retail prices (USD). Results do not reflect EA/MCA negotiated discounts, Reserved Instances, Savings Plans, or Spot pricing.")
+		log.Debug().Msgf("Fetching Retail API pricing once for %d unique meters across %d subscriptions...", len(allMeterCosts), len(phase1Results))
+		sharedCostData = cost.BuildRetailPricing(ctx, s.httpClient, allMeterCosts, allRegionsMap)
+	}
+
+	// Phase 3: apply shared pricing, calculate latency + scores (sequential — all in-memory).
+	allResults := []types.RegionComparison{}
+	for _, p1 := range phase1Results {
+		// Step 4b: Apply shared cross-region pricing weighted by this subscription's historical costs.
+		cost.ApplyCostDiffs(p1.regionResults, p1.meterCosts, sharedCostData)
+
+		// Step 5: Calculate network latency scores
+		log.Debug().Msgf("Calculating network latency for subscription %s...", renderers.MaskSubscriptionID(p1.subID, true))
+		latency.EnrichWithLatencyData(p1.regionResults)
+
+		// Step 6: Calculate recommendation scores
+		log.Info().Msgf("Calculating recommendation scores for subscription %s", renderers.MaskSubscriptionID(p1.subID, true))
+		s.calculateScores(p1.regionResults)
+
+		allResults = append(allResults, p1.regionResults...)
+	}
+
+	mergedCostData := sharedCostData
 
 	if len(allResults) == 0 {
 		log.Warn().Msg("No resources found in any subscription")
@@ -204,10 +270,10 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 	// Sort all results by score (descending)
 	sort.Slice(allResults, func(i, j int) bool {
 		// First sort by score, then by subscription for consistent ordering
-		if allResults[i].score != allResults[j].score {
-			return allResults[i].score > allResults[j].score
+		if allResults[i].Score != allResults[j].Score {
+			return allResults[i].Score > allResults[j].Score
 		}
-		return allResults[i].subscriptionName < allResults[j].subscriptionName
+		return allResults[i].SubscriptionName < allResults[j].SubscriptionName
 	})
 
 	// Step 7: Generate output table
@@ -251,15 +317,15 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 		Description: "Analysis of optimal Azure region selection based on service availability, network latency, and cost factors",
 		Table:       table,
 	}}
-	outputs = append(outputs, buildSvcAvailSheets(allResults, globalInventory)...)
+	outputs = append(outputs, excel.BuildSvcAvailSheets(allResults, globalInventory)...)
 	if mergedCostData != nil {
-		if costSheet := buildCostComparisonSheet(mergedCostData); costSheet != nil {
+		if costSheet := excel.BuildCostComparisonSheet(mergedCostData); costSheet != nil {
 			outputs = append(outputs, *costSheet)
 		}
 	}
 	// Append Inventory sheet last. If an Inventory sheet was already written by
 	// the main scan (azqr scan), renderExternalPlugins will skip this sheet.
-	outputs = append(outputs, buildInventorySheet(allResources, params.Mask))
+	outputs = append(outputs, excel.BuildInventorySheet(allResources, params.Mask))
 
 	log.Info().Msgf("Region selection analysis completed for %d subscriptions",
 		len(subscriptions))
@@ -379,33 +445,38 @@ func (s *RegionSelectorScanner) getAllAzureRegions(ctx context.Context, subscrip
 }
 
 // calculateScores calculates recommendation scores for each region using configurable weights
-func (s *RegionSelectorScanner) calculateScores(results []regionComparison) {
+func (s *RegionSelectorScanner) calculateScores(results []types.RegionComparison) {
 	// Use default scoring weights
-	weights := defaultScoringWeights()
+	weights := types.DefaultScoringWeights()
 
 	for i := range results {
 		// Resource type availability score (0-100)
-		resourceAvailabilityScore := results[i].availabilityPercent
+		resourceAvailabilityScore := results[i].AvailabilityPercent
 
 		// SKU availability score (0-100).
 		// Denominator excludes unknowns (API errors) so they don't deflate the score.
 		// Restricted SKUs (subscription-level quota) count as 50% — they can be lifted.
 		// When all SKU checks are unknown (confirmedChecked==0), score stays 100 (neutral).
 		skuAvailabilityScore := 100.0
-		confirmedChecked := results[i].totalSKUsChecked - results[i].unknownSKUs
+		confirmedChecked := results[i].TotalSKUsChecked - results[i].UnknownSKUs
 		if confirmedChecked > 0 {
-			effectiveAvailable := float64(results[i].availableSKUs) + float64(len(results[i].restrictedSKUs))*0.5
+			effectiveAvailable := float64(results[i].AvailableSKUs) + float64(len(results[i].RestrictedSKUs))*0.5
 			skuAvailabilityScore = (effectiveAvailable / float64(confirmedChecked)) * 100
 			if skuAvailabilityScore > 100 {
 				skuAvailabilityScore = 100
 			}
 		}
 
-		// Cost component: lower cost difference = higher score
+		// Cost component: lower target-region cost = higher score.
+		// Scale: 0% diff → 100, +50% diff → 0, negative diff (cheaper) → capped at 100.
+		// A ×2 multiplier gives a ±50% range, which covers real inter-region price spreads
+		// without collapsing all large-but-valid deltas to the same zero score.
 		costScore := 100.0
-		if results[i].avgCostDifference != 0 {
-			// Normalize cost: 0% diff = 100 points, +/-20% diff = 0 points
-			costScore = 100 - (math.Abs(results[i].avgCostDifference) * 5)
+		if results[i].HasCostData {
+			costScore = 100 - (results[i].AvgCostDifference * 2)
+			if costScore > 100 {
+				costScore = 100
+			}
 			if costScore < 0 {
 				costScore = 0
 			}
@@ -414,20 +485,20 @@ func (s *RegionSelectorScanner) calculateScores(results []regionComparison) {
 		// Latency component: lower latency = higher score
 		// <50ms = 100 points, >200ms = 0 points, linear interpolation
 		latencyScore := 100.0
-		if results[i].avgLatencyMs > 0 {
-			if results[i].avgLatencyMs < 50 {
+		if results[i].AvgLatencyMs > 0 {
+			if results[i].AvgLatencyMs < 50 {
 				latencyScore = 100.0
-			} else if results[i].avgLatencyMs > 200 {
+			} else if results[i].AvgLatencyMs > 200 {
 				latencyScore = 0.0
 			} else {
 				// Linear interpolation between 50ms and 200ms
-				latencyScore = 100.0 - ((results[i].avgLatencyMs - 50) / 150 * 100)
+				latencyScore = 100.0 - ((results[i].AvgLatencyMs - 50) / 150 * 100)
 			}
 		}
 
 		// Calculate final weighted score with configurable weights
 		// Default: 35% resource availability, 30% SKU availability, 15% cost, 20% latency
-		results[i].score = (resourceAvailabilityScore * weights.ResourceAvailability) +
+		results[i].Score = (resourceAvailabilityScore * weights.ResourceAvailability) +
 			(skuAvailabilityScore * weights.SKUAvailability) +
 			(costScore * weights.Cost) +
 			(latencyScore * weights.Latency)
@@ -440,20 +511,20 @@ func (s *RegionSelectorScanner) calculateScores(results []regionComparison) {
 		// - src=0 (any)  → ×1.000 (no zones to lose)
 		// - tgt > src    → ×1.000 (zone gain is not penalised)
 		const maxZoneFactor = 0.10 // max 10% score reduction for complete zone loss
-		src := results[i].sourceZoneCount
-		tgt := results[i].targetZoneCount
+		src := results[i].SourceZoneCount
+		tgt := results[i].TargetZoneCount
 		if src > 0 && tgt < src {
 			zoneLossFraction := float64(src-tgt) / float64(src)
-			results[i].score *= (1.0 - zoneLossFraction*maxZoneFactor)
+			results[i].Score *= (1.0 - zoneLossFraction*maxZoneFactor)
 		}
 
 		log.Debug().Msgf("Region %s -> %s scores: resource_avail=%.2f (%.0f%%), sku_avail=%.2f (%.0f%%), cost=%.2f (%.0f%%), latency=%.2f (%.0f%%), final=%.2f",
-			results[i].sourceRegion, results[i].targetRegion,
+			results[i].SourceRegion, results[i].TargetRegion,
 			resourceAvailabilityScore, weights.ResourceAvailability*100,
 			skuAvailabilityScore, weights.SKUAvailability*100,
 			costScore, weights.Cost*100,
 			latencyScore, weights.Latency*100,
-			results[i].score)
+			results[i].Score)
 	}
 }
 
@@ -463,28 +534,28 @@ func (s *RegionSelectorScanner) calculateScores(results []regionComparison) {
 //	SKUs (total/available/unavailable/restricted/unknown/%) | Availability Zones |
 //	Avg Latency (ms) | Avg Cost Difference % | Recommendation Score |
 //	Missing Resource Types | Unavailable SKUs | Restricted SKUs
-func (s *RegionSelectorScanner) generateOutputTable(results []regionComparison) [][]string {
+func (s *RegionSelectorScanner) generateOutputTable(results []types.RegionComparison) [][]string {
 	table := [][]string{s.GetMetadata().HeaderRow()}
 
 	for _, result := range results {
 		costDiffStr := "N/A"
-		if result.avgCostDifference != 0 {
-			costDiffStr = fmt.Sprintf("%+.2f%%", result.avgCostDifference)
+		if result.HasCostData {
+			costDiffStr = fmt.Sprintf("%+.2f%%", result.AvgCostDifference)
 		}
 
 		latencyStr := "N/A"
-		if result.avgLatencyMs > 0 {
-			latencyStr = fmt.Sprintf("%.1f", result.avgLatencyMs)
+		if result.AvgLatencyMs > 0 {
+			latencyStr = fmt.Sprintf("%.1f", result.AvgLatencyMs)
 		}
 
 		skuAvailabilityStr := "N/A"
-		if result.totalSKUsChecked > 0 {
-			skuAvailabilityStr = fmt.Sprintf("%.2f%%", result.skuAvailabilityPercent)
+		if result.TotalSKUsChecked > 0 {
+			skuAvailabilityStr = fmt.Sprintf("%.2f%%", result.SKUAvailabilityPercent)
 		}
 
 		// Availability Zones: show count-based summary, e.g. "3 → 2 ⚠", "3 → 0 ✗", "0 → 3 ✓", "3 → 3"
-		src := result.sourceZoneCount
-		tgt := result.targetZoneCount
+		src := result.SourceZoneCount
+		tgt := result.TargetZoneCount
 		var azStr string
 		switch {
 		case src == 0 && tgt == 0:
@@ -499,9 +570,9 @@ func (s *RegionSelectorScanner) generateOutputTable(results []regionComparison) 
 			azStr = fmt.Sprintf("%d → %d", src, tgt) // same or gain
 		}
 
-		missingTypes := strings.Join(result.missingResourceTypes, "; ")
-		unavailSKUs := strings.Join(result.missingSKUs, "; ")
-		restrictedSKUs := strings.Join(result.restrictedSKUs, "; ")
+		missingTypes := strings.Join(result.MissingResourceTypes, "; ")
+		unavailSKUs := strings.Join(result.MissingSKUs, "; ")
+		restrictedSKUs := strings.Join(result.RestrictedSKUs, "; ")
 
 		// Score quality: flag which data dimensions were unavailable during scoring
 		var qualityParts []string
@@ -510,6 +581,8 @@ func (s *RegionSelectorScanner) generateOutputTable(results []regionComparison) 
 		}
 		if latencyStr == "N/A" {
 			qualityParts = append(qualityParts, "no latency data")
+		} else if result.LatencyEstimated {
+			qualityParts = append(qualityParts, "estimated latency")
 		}
 		scoreQuality := "Full"
 		if len(qualityParts) > 0 {
@@ -519,32 +592,32 @@ func (s *RegionSelectorScanner) generateOutputTable(results []regionComparison) 
 		// Recommendation band
 		var recommendation string
 		switch {
-		case result.score >= 80:
+		case result.Score >= 80:
 			recommendation = "Recommended"
-		case result.score >= 60:
+		case result.Score >= 60:
 			recommendation = "Neutral"
 		default:
 			recommendation = "Not Recommended"
 		}
 
 		table = append(table, []string{
-			result.subscriptionName,
-			result.sourceRegion,
-			result.targetRegion,
-			fmt.Sprintf("%d", result.sourceResourceTypeCount),
-			fmt.Sprintf("%d", result.availableTypes),
-			fmt.Sprintf("%d", result.unavailableTypes),
-			fmt.Sprintf("%.2f%%", result.availabilityPercent),
-			fmt.Sprintf("%d", result.totalSKUsChecked),
-			fmt.Sprintf("%d", result.availableSKUs),
-			fmt.Sprintf("%d", result.unavailableSKUs),
-			fmt.Sprintf("%d", len(result.restrictedSKUs)),
-			fmt.Sprintf("%d", result.unknownSKUs),
+			result.SubscriptionName,
+			result.SourceRegion,
+			result.TargetRegion,
+			fmt.Sprintf("%d", result.SourceResourceTypeCount),
+			fmt.Sprintf("%d", result.AvailableTypes),
+			fmt.Sprintf("%d", result.UnavailableTypes),
+			fmt.Sprintf("%.2f%%", result.AvailabilityPercent),
+			fmt.Sprintf("%d", result.TotalSKUsChecked),
+			fmt.Sprintf("%d", result.AvailableSKUs),
+			fmt.Sprintf("%d", result.UnavailableSKUs),
+			fmt.Sprintf("%d", len(result.RestrictedSKUs)),
+			fmt.Sprintf("%d", result.UnknownSKUs),
 			skuAvailabilityStr,
 			azStr,
 			latencyStr,
 			costDiffStr,
-			fmt.Sprintf("%.2f", result.score),
+			fmt.Sprintf("%.2f", result.Score),
 			scoreQuality,
 			recommendation,
 			missingTypes,
@@ -568,13 +641,13 @@ func (s *RegionSelectorScanner) collectAllResources(ctx context.Context, cred az
 }
 
 // buildInventoryForSubscription filters resources by subscription and builds inventory.
-func (s *RegionSelectorScanner) buildInventoryForSubscription(subscriptionID string, allResources []*models.Resource) *resourceInventory {
-	inventory := &resourceInventory{
-		resourceTypes:         make(map[string]int),
-		skusByType:            make(map[string]map[string]int),
-		locationCounts:        make(map[string]int),
-		resourceTypesByRegion: make(map[string]map[string]int),
-		skusByTypeAndRegion:   make(map[string]map[string]map[string]int),
+func (s *RegionSelectorScanner) buildInventoryForSubscription(subscriptionID string, allResources []*models.Resource) *types.ResourceInventory {
+	inventory := &types.ResourceInventory{
+		ResourceTypes:         make(map[string]int),
+		SKUsByType:            make(map[string]map[string]int),
+		LocationCounts:        make(map[string]int),
+		ResourceTypesByRegion: make(map[string]map[string]int),
+		SKUsByTypeAndRegion:   make(map[string]map[string]map[string]int),
 	}
 
 	resourceCount := 0
@@ -588,42 +661,42 @@ func (s *RegionSelectorScanner) buildInventoryForSubscription(subscriptionID str
 
 		// Count resource types (global)
 		resourceType := strings.ToLower(resource.Type)
-		inventory.resourceTypes[resourceType]++
+		inventory.ResourceTypes[resourceType]++
 
 		skuName := resource.SkuName
 
 		// Normalize location once; reused for both SKU and region tracking.
-		location := normalizeRegionName(resource.Location)
+		location := types.NormalizeRegionName(resource.Location)
 
 		// Track SKUs by resource type (global)
 		if skuName != "" {
-			if inventory.skusByType[resourceType] == nil {
-				inventory.skusByType[resourceType] = make(map[string]int)
+			if inventory.SKUsByType[resourceType] == nil {
+				inventory.SKUsByType[resourceType] = make(map[string]int)
 			}
-			inventory.skusByType[resourceType][skuName]++
+			inventory.SKUsByType[resourceType][skuName]++
 
 			// Track SKUs by type and region for detailed comparison
-			if inventory.skusByTypeAndRegion[resourceType] == nil {
-				inventory.skusByTypeAndRegion[resourceType] = make(map[string]map[string]int)
+			if inventory.SKUsByTypeAndRegion[resourceType] == nil {
+				inventory.SKUsByTypeAndRegion[resourceType] = make(map[string]map[string]int)
 			}
-			if inventory.skusByTypeAndRegion[resourceType][location] == nil {
-				inventory.skusByTypeAndRegion[resourceType][location] = make(map[string]int)
+			if inventory.SKUsByTypeAndRegion[resourceType][location] == nil {
+				inventory.SKUsByTypeAndRegion[resourceType][location] = make(map[string]int)
 			}
-			inventory.skusByTypeAndRegion[resourceType][location][skuName]++
+			inventory.SKUsByTypeAndRegion[resourceType][location][skuName]++
 		}
 
 		// Track locations
-		inventory.locationCounts[location]++
+		inventory.LocationCounts[location]++
 
 		// Track resource types per source region
-		if inventory.resourceTypesByRegion[location] == nil {
-			inventory.resourceTypesByRegion[location] = make(map[string]int)
+		if inventory.ResourceTypesByRegion[location] == nil {
+			inventory.ResourceTypesByRegion[location] = make(map[string]int)
 		}
-		inventory.resourceTypesByRegion[location][resourceType]++
+		inventory.ResourceTypesByRegion[location][resourceType]++
 	}
 
 	log.Debug().Msgf("Subscription %s: Processed %d resources from inventory across %d source regions",
-		renderers.MaskSubscriptionID(subscriptionID, true), resourceCount, len(inventory.resourceTypesByRegion))
+		renderers.MaskSubscriptionID(subscriptionID, true), resourceCount, len(inventory.ResourceTypesByRegion))
 
 	return inventory
 }
@@ -631,43 +704,43 @@ func (s *RegionSelectorScanner) buildInventoryForSubscription(subscriptionID str
 // mergeInventory accumulates all data from src into dst.
 // It is called once per subscription (under a mutex) so that globalInventory
 // reflects resources across ALL subscriptions, not just the first one processed.
-func mergeInventory(dst, src *resourceInventory) {
-	for rt, count := range src.resourceTypes {
-		dst.resourceTypes[rt] += count
+func mergeInventory(dst, src *types.ResourceInventory) {
+	for rt, count := range src.ResourceTypes {
+		dst.ResourceTypes[rt] += count
 	}
 
-	for rt, skus := range src.skusByType {
-		if dst.skusByType[rt] == nil {
-			dst.skusByType[rt] = make(map[string]int)
+	for rt, skus := range src.SKUsByType {
+		if dst.SKUsByType[rt] == nil {
+			dst.SKUsByType[rt] = make(map[string]int)
 		}
 		for sku, count := range skus {
-			dst.skusByType[rt][sku] += count
+			dst.SKUsByType[rt][sku] += count
 		}
 	}
 
-	for loc, count := range src.locationCounts {
-		dst.locationCounts[loc] += count
+	for loc, count := range src.LocationCounts {
+		dst.LocationCounts[loc] += count
 	}
 
-	for region, types := range src.resourceTypesByRegion {
-		if dst.resourceTypesByRegion[region] == nil {
-			dst.resourceTypesByRegion[region] = make(map[string]int)
+	for region, types := range src.ResourceTypesByRegion {
+		if dst.ResourceTypesByRegion[region] == nil {
+			dst.ResourceTypesByRegion[region] = make(map[string]int)
 		}
 		for rt, count := range types {
-			dst.resourceTypesByRegion[region][rt] += count
+			dst.ResourceTypesByRegion[region][rt] += count
 		}
 	}
 
-	for rt, regions := range src.skusByTypeAndRegion {
-		if dst.skusByTypeAndRegion[rt] == nil {
-			dst.skusByTypeAndRegion[rt] = make(map[string]map[string]int)
+	for rt, regions := range src.SKUsByTypeAndRegion {
+		if dst.SKUsByTypeAndRegion[rt] == nil {
+			dst.SKUsByTypeAndRegion[rt] = make(map[string]map[string]int)
 		}
 		for region, skus := range regions {
-			if dst.skusByTypeAndRegion[rt][region] == nil {
-				dst.skusByTypeAndRegion[rt][region] = make(map[string]int)
+			if dst.SKUsByTypeAndRegion[rt][region] == nil {
+				dst.SKUsByTypeAndRegion[rt][region] = make(map[string]int)
 			}
 			for sku, count := range skus {
-				dst.skusByTypeAndRegion[rt][region][sku] += count
+				dst.SKUsByTypeAndRegion[rt][region][sku] += count
 			}
 		}
 	}

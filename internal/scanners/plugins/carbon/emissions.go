@@ -20,8 +20,8 @@ import (
 // EmissionsScanner is an internal plugin that scans carbon emissions
 type EmissionsScanner struct{}
 
-// NewEmissionsScanner creates a new carbon emissions scanner
-func NewEmissionsScanner() *EmissionsScanner {
+// NewScanner creates a new carbon emissions scanner
+func NewScanner() *EmissionsScanner {
 	return &EmissionsScanner{}
 }
 
@@ -253,5 +253,5 @@ func parseAvailableDateRange(startStr, endStr string) (time.Time, time.Time, err
 
 // init registers the plugin automatically
 func init() {
-	plugins.RegisterInternalPlugin("carbon-emissions", NewEmissionsScanner())
+	plugins.RegisterInternalPlugin("carbon-emissions", NewScanner())
 }

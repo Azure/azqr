@@ -62,8 +62,8 @@
     },
     {
         "resourceType": "microsoft.compute/disks",
-        "uri": "https://management.azure.com/subscriptions/{0}/providers/Microsoft.Compute/skus?api-version=2023-03-01",
-        "regionalApi": false,
+        "uri": "https://management.azure.com/subscriptions/{0}/providers/Microsoft.Compute/skus?api-version=2023-03-01&$filter=location%20eq%20%27{1}%27",
+        "regionalApi": true,
         "properties": {
             "startPath": [],
             "topLevelProperties": {

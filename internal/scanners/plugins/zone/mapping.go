@@ -21,8 +21,8 @@ import (
 // ZoneMappingScanner is an internal plugin that retrieves availability zone mappings
 type ZoneMappingScanner struct{}
 
-// NewZoneMappingScanner creates a new zone mapping scanner
-func NewZoneMappingScanner() *ZoneMappingScanner {
+// NewScanner creates a new zone mapping scanner
+func NewScanner() *ZoneMappingScanner {
 	return &ZoneMappingScanner{}
 }
 
@@ -231,5 +231,5 @@ func parseZoneMappings(body []byte, subscriptionID, subscriptionName string) ([]
 
 // init registers the plugin automatically
 func init() {
-	plugins.RegisterInternalPlugin("zone-mapping", NewZoneMappingScanner())
+	plugins.RegisterInternalPlugin("zone-mapping", NewScanner())
 }

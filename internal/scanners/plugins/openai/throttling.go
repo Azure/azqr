@@ -28,8 +28,8 @@ const maxConcurrentDeploymentFetches = 5
 // ThrottlingScanner is an internal plugin that monitors OpenAI throttling
 type ThrottlingScanner struct{}
 
-// NewThrottlingScanner creates a new OpenAI throttling scanner
-func NewThrottlingScanner() *ThrottlingScanner {
+// NewScanner creates a new OpenAI throttling scanner
+func NewScanner() *ThrottlingScanner {
 	return &ThrottlingScanner{}
 }
 
@@ -560,6 +560,6 @@ func (s *ThrottlingScanner) getDeployments(ctx context.Context, client *armcogni
 
 // init registers this plugin with the internal plugin registry
 func init() {
-	scanner := NewThrottlingScanner()
+	scanner := NewScanner()
 	plugins.RegisterInternalPlugin("openai-throttling", scanner)
 }

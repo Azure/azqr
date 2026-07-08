@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package region
+package excel
 
 import (
 	"fmt"
@@ -12,6 +12,8 @@ import (
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/plugins"
 	"github.com/Azure/azqr/internal/renderers"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/config"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
 	"github.com/Azure/azqr/internal/skus"
 )
 
@@ -25,10 +27,10 @@ func safeSheetName(s string) string {
 	return s
 }
 
-// buildSvcAvailSheets generates one ExternalPluginOutput per unique target region containing
+// BuildSvcAvailSheets generates one ExternalPluginOutput per unique target region containing
 // per-resource-type and per-SKU availability, mirroring the SvcAvail_<Region> sheets from
 // the AzRegionSelection PowerShell toolkit.
-func buildSvcAvailSheets(allResults []regionComparison, inventory *resourceInventory) []plugins.ExternalPluginOutput {
+func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.ResourceInventory) []plugins.ExternalPluginOutput {
 	if inventory == nil || len(allResults) == 0 {
 		return nil
 	}
@@ -37,16 +39,16 @@ func buildSvcAvailSheets(allResults []regionComparison, inventory *resourceInven
 	seenTargets := map[string]bool{}
 	targetRegions := []string{}
 	for _, r := range allResults {
-		if !seenTargets[r.targetRegion] {
-			seenTargets[r.targetRegion] = true
-			targetRegions = append(targetRegions, r.targetRegion)
+		if !seenTargets[r.TargetRegion] {
+			seenTargets[r.TargetRegion] = true
+			targetRegions = append(targetRegions, r.TargetRegion)
 		}
 	}
 	sort.Strings(targetRegions)
 
 	// Pre-compute: for each resource type, which source regions contain it?
 	implRegionsByType := map[string][]string{}
-	for region, types := range inventory.resourceTypesByRegion {
+	for region, types := range inventory.ResourceTypesByRegion {
 		for rt := range types {
 			implRegionsByType[rt] = append(implRegionsByType[rt], region)
 		}
@@ -62,13 +64,13 @@ func buildSvcAvailSheets(allResults []regionComparison, inventory *resourceInven
 		missingTypeSet := map[string]bool{}
 		missingSKUSet := map[string]bool{}
 		for _, comp := range allResults {
-			if comp.targetRegion != targetRegion {
+			if comp.TargetRegion != targetRegion {
 				continue
 			}
-			for _, t := range comp.missingResourceTypes {
+			for _, t := range comp.MissingResourceTypes {
 				missingTypeSet[strings.ToLower(t)] = true
 			}
-			for _, s := range comp.missingSKUs {
+			for _, s := range comp.MissingSKUs {
 				missingSKUSet[strings.ToLower(s)] = true
 			}
 		}
@@ -85,14 +87,14 @@ func buildSvcAvailSheets(allResults []regionComparison, inventory *resourceInven
 		rows := [][]string{header}
 
 		// Sort resource types for deterministic output
-		sortedTypes := make([]string, 0, len(inventory.resourceTypes))
-		for rt := range inventory.resourceTypes {
+		sortedTypes := make([]string, 0, len(inventory.ResourceTypes))
+		for rt := range inventory.ResourceTypes {
 			sortedTypes = append(sortedTypes, rt)
 		}
 		sort.Strings(sortedTypes)
 
 		for _, rt := range sortedTypes {
-			count := inventory.resourceTypes[rt]
+			count := inventory.ResourceTypes[rt]
 
 			serviceAvail := "Available"
 			if missingTypeSet[strings.ToLower(rt)] {
@@ -102,7 +104,7 @@ func buildSvcAvailSheets(allResults []regionComparison, inventory *resourceInven
 			implRegions := implRegionsByType[strings.ToLower(rt)]
 			implRegionsStr := strings.Join(implRegions, ", ")
 
-			skus := inventory.skusByType[rt]
+			skus := inventory.SKUsByType[rt]
 			skuCount := len(skus)
 
 			if skuCount == 0 {
@@ -134,7 +136,7 @@ func buildSvcAvailSheets(allResults []regionComparison, inventory *resourceInven
 
 			allSKUsAvail := "Available"
 			skuDisplay := strings.Join(skuNames, ", ")
-			if getPropertyMapConfig(rt) == nil {
+			if config.GetPropertyMapConfig(rt) == nil {
 				// No SKU availability API configured for this type — cannot determine SKU status.
 				// Show "N/A" so it is clear the column was not checked, not that SKUs are fine.
 				allSKUsAvail = "N/A"
@@ -165,9 +167,9 @@ func buildSvcAvailSheets(allResults []regionComparison, inventory *resourceInven
 	return sheets
 }
 
-// buildCostComparisonSheet generates a single ExternalPluginOutput with per-meter retail pricing
+// BuildCostComparisonSheet generates a single ExternalPluginOutput with per-meter retail pricing
 // across all regions, mirroring the CostComparison sheet from the AzRegionSelection PowerShell toolkit.
-func buildCostComparisonSheet(costData *CostComparisonData) *plugins.ExternalPluginOutput {
+func BuildCostComparisonSheet(costData *types.CostComparisonData) *plugins.ExternalPluginOutput {
 	if costData == nil || len(costData.MeterInputs) == 0 {
 		return nil
 	}
@@ -196,11 +198,11 @@ func buildCostComparisonSheet(costData *CostComparisonData) *plugins.ExternalPlu
 	metaMap := map[string]meterMeta{}
 	for _, item := range costData.PriceItems {
 		for _, meter := range costData.MeterInputs {
-			if meter.meterName == item.MeterName &&
-				meter.productID == item.ProductID &&
-				meter.skuName == item.SkuName {
-				if _, exists := metaMap[meter.meterID]; !exists {
-					metaMap[meter.meterID] = meterMeta{
+			if meter.MeterName == item.MeterName &&
+				meter.ProductID == item.ProductID &&
+				meter.SkuName == item.SkuName {
+				if _, exists := metaMap[meter.MeterID]; !exists {
+					metaMap[meter.MeterID] = meterMeta{
 						serviceName: item.ServiceName,
 						productName: item.ProductName,
 					}
@@ -219,24 +221,24 @@ func buildCostComparisonSheet(costData *CostComparisonData) *plugins.ExternalPlu
 	rows := [][]string{header}
 
 	// One row per meter (sorted by meterID for determinism)
-	sortedMeters := make([]meterCostData, len(costData.MeterInputs))
+	sortedMeters := make([]types.MeterCostData, len(costData.MeterInputs))
 	copy(sortedMeters, costData.MeterInputs)
 	sort.Slice(sortedMeters, func(i, j int) bool {
-		return sortedMeters[i].meterID < sortedMeters[j].meterID
+		return sortedMeters[i].MeterID < sortedMeters[j].MeterID
 	})
 
 	for _, meter := range sortedMeters {
 		serviceName := ""
 		productName := ""
-		if meta, ok := metaMap[meter.meterID]; ok {
+		if meta, ok := metaMap[meter.MeterID]; ok {
 			serviceName = meta.serviceName
 			productName = meta.productName
 		}
 
-		row := []string{meter.meterID, serviceName, meter.meterName, productName, meter.skuName}
+		row := []string{meter.MeterID, serviceName, meter.MeterName, productName, meter.SkuName}
 		for _, region := range regions {
 			price := ""
-			if pricing, ok := costData.RegionPricing[meter.meterID]; ok {
+			if pricing, ok := costData.RegionPricing[meter.MeterID]; ok {
 				if p, ok := pricing[region]; ok && p > 0 {
 					price = fmt.Sprintf("%.4f", p)
 				}
@@ -253,11 +255,11 @@ func buildCostComparisonSheet(costData *CostComparisonData) *plugins.ExternalPlu
 	}
 }
 
-// buildInventorySheet converts a resource list into an Inventory ExternalPluginOutput
+// BuildInventorySheet converts a resource list into an Inventory ExternalPluginOutput
 // using the same column layout as the main scan's inventory.csv.
 // When the main scan has already written an "Inventory" sheet to the workbook,
 // renderExternalPlugins will detect the duplicate and skip this sheet.
-func buildInventorySheet(resources []*models.Resource, mask bool) plugins.ExternalPluginOutput {
+func BuildInventorySheet(resources []*models.Resource, mask bool) plugins.ExternalPluginOutput {
 	headers := []string{"Subscription Id", "Resource Group", "Location", "Resource Type", "Resource Name", "Sku Name", "Sku Tier", "Capacity", "Kind", "Resource Id"}
 	rows := make([][]string, 0, len(resources)+1)
 	rows = append(rows, headers)
