@@ -46,20 +46,17 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			}
 		}
 		if historyMonths, exists := stageOptions["cost-history-months"]; exists {
+			var n int
 			switch v := historyMonths.(type) {
 			case int:
-				if v >= 1 && v <= 12 {
-					s.costHistoryMonths = v
-				} else {
-					log.Warn().Msgf("cost-history-months %d out of range [1–12]; using default 1", v)
-				}
+				n = v
 			case float64:
-				n := int(v)
-				if n >= 1 && n <= 12 {
-					s.costHistoryMonths = n
-				} else {
-					log.Warn().Msgf("cost-history-months %d out of range [1–12]; using default 1", n)
-				}
+				n = int(v)
+			}
+			if n >= 1 && n <= 12 {
+				s.costHistoryMonths = n
+			} else {
+				log.Warn().Msgf("cost-history-months %d out of range [1–12]; using default 1", n)
 			}
 		}
 	}
@@ -252,8 +249,6 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 		allResults = append(allResults, p1.regionResults...)
 	}
 
-	mergedCostData := sharedCostData
-
 	if len(allResults) == 0 {
 		log.Warn().Msg("No resources found in any subscription")
 		return []plugins.ExternalPluginOutput{{
@@ -289,7 +284,7 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			GenerateResources: true,
 			GenerateSummary:   true,
 			GenerateMapping:   true,
-			GenerateCost:      mergedCostData != nil, // Enable if we have cost data
+			GenerateCost:      sharedCostData != nil, // Enable if we have cost data
 		}
 		// Build inventory for first subscription
 		if len(subscriptions) > 0 && len(allResources) > 0 {
@@ -302,7 +297,7 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 
 			inventory := s.buildInventoryForSubscription(firstSubID, allResources)
 
-			if err := generateJSONOutputs(opts, allResources, inventory, allResults, mergedCostData); err != nil {
+			if err := generateJSONOutputs(opts, allResources, inventory, allResults, sharedCostData); err != nil {
 				log.Warn().Err(err).Msg("Failed to generate JSON outputs")
 			} else {
 				log.Info().Msgf("JSON outputs written to %s", opts.OutputDir)
@@ -318,8 +313,8 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 		Table:       table,
 	}}
 	outputs = append(outputs, excel.BuildSvcAvailSheets(allResults, globalInventory)...)
-	if mergedCostData != nil {
-		if costSheet := excel.BuildCostComparisonSheet(mergedCostData); costSheet != nil {
+	if sharedCostData != nil {
+		if costSheet := excel.BuildCostComparisonSheet(sharedCostData); costSheet != nil {
 			outputs = append(outputs, *costSheet)
 		}
 	}

@@ -198,51 +198,28 @@ func writeCostAnalysisJSONs(outputDir string, costData *types.CostComparisonData
 	// Reconstruct legacy map format for JSON serialisation
 	costDetails := cost.BuildCostDetailsForOutput(costData.MeterInputs, costData.RegionPricing, costData.PriceItems, costData.UomErrors)
 
-	// Write region_comparison_inputs.json (meter metadata)
-	if inputs, ok := costDetails["inputs"]; ok {
-		data, err := json.MarshalIndent(inputs, "", "  ")
-		if err != nil {
-			return fmt.Errorf("failed to marshal cost inputs: %w", err)
-		}
-		filePath := filepath.Join(outputDir, "region_comparison_inputs.json")
-		if err := os.WriteFile(filePath, data, 0644); err != nil {
-			return fmt.Errorf("failed to write cost inputs file: %w", err)
-		}
+	files := []struct {
+		key      string
+		filename string
+		label    string
+	}{
+		{"inputs", "region_comparison_inputs.json", "cost inputs"},
+		{"prices", "region_comparison_prices.json", "cost prices"},
+		{"pricemap", "region_comparison_pricemap.json", "cost pricemap"},
+		{"uomErrors", "region_comparison_uomerrors.json", "UOM errors"},
 	}
 
-	// Write region_comparison_prices.json (full pricing matrix)
-	if prices, ok := costDetails["prices"]; ok {
-		data, err := json.MarshalIndent(prices, "", "  ")
+	for _, f := range files {
+		value, ok := costDetails[f.key]
+		if !ok {
+			continue
+		}
+		data, err := json.MarshalIndent(value, "", "  ")
 		if err != nil {
-			return fmt.Errorf("failed to marshal cost prices: %w", err)
+			return fmt.Errorf("failed to marshal %s: %w", f.label, err)
 		}
-		filePath := filepath.Join(outputDir, "region_comparison_prices.json")
-		if err := os.WriteFile(filePath, data, 0644); err != nil {
-			return fmt.Errorf("failed to write cost prices file: %w", err)
-		}
-	}
-
-	// Write region_comparison_pricemap.json (summary by meter)
-	if pricemap, ok := costDetails["pricemap"]; ok {
-		data, err := json.MarshalIndent(pricemap, "", "  ")
-		if err != nil {
-			return fmt.Errorf("failed to marshal cost pricemap: %w", err)
-		}
-		filePath := filepath.Join(outputDir, "region_comparison_pricemap.json")
-		if err := os.WriteFile(filePath, data, 0644); err != nil {
-			return fmt.Errorf("failed to write cost pricemap file: %w", err)
-		}
-	}
-
-	// Write region_comparison_uomerrors.json (unit of measure errors)
-	if uomErrors, ok := costDetails["uomErrors"]; ok {
-		data, err := json.MarshalIndent(uomErrors, "", "  ")
-		if err != nil {
-			return fmt.Errorf("failed to marshal UOM errors: %w", err)
-		}
-		filePath := filepath.Join(outputDir, "region_comparison_uomerrors.json")
-		if err := os.WriteFile(filePath, data, 0644); err != nil {
-			return fmt.Errorf("failed to write UOM errors file: %w", err)
+		if err := os.WriteFile(filepath.Join(outputDir, f.filename), data, 0644); err != nil {
+			return fmt.Errorf("failed to write %s file: %w", f.label, err)
 		}
 	}
 

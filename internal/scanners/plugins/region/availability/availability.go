@@ -63,17 +63,17 @@ func CheckRegionsInParallel(ctx context.Context, cred azcore.TokenCredential, ta
 
 	// Start worker pool
 	var wg sync.WaitGroup
-	for w := 0; w < numWorkers; w++ {
+	for range numWorkers {
 		wg.Add(1)
-		go func(workerID int) {
+		go func() {
 			defer wg.Done()
 			for pair := range jobs {
-				log.Debug().Msgf("Worker %d checking %s -> %s", workerID, pair.source, pair.target)
+				log.Debug().Msgf("Checking %s -> %s", pair.source, pair.target)
 				// Pass httpClient and skuCache to avoid creating new clients
 				result := checkRegionAvailability(ctx, subscriptionID, pair.source, pair.target, inventory, resourceTypeLocations, httpClient, skuCache, regionZoneCount)
 				results <- result
 			}
-		}(w)
+		}()
 	}
 
 	// Send region pair jobs to workers
