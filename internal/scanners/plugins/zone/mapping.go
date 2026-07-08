@@ -166,6 +166,14 @@ func (s *ZoneMappingScanner) fetchZoneMappings(ctx context.Context, httpClient *
 	return parseZoneMappings(body, subscriptionID, subscriptionName)
 }
 
+// derefStr safely dereferences a *string, returning "" for nil.
+func derefStr(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
 // parseZoneMappings parses a locations REST response body and converts it into
 // zoneMappingResult records. Locations without availability zone mappings are
 // skipped, and nil (optional) fields are normalized to empty strings.
@@ -181,11 +189,7 @@ func parseZoneMappings(body []byte, subscriptionID, subscriptionName string) ([]
 	results := make([]zoneMappingResult, 0, len(locationsResp.Value)*3)
 	locationsWithZones := 0
 	for _, location := range locationsResp.Value {
-		// Debug: log each location
-		locationName := ""
-		if location.Name != nil {
-			locationName = *location.Name
-		}
+		locationName := derefStr(location.Name)
 
 		// Only process locations that have availability zone mappings
 		if len(location.AvailabilityZoneMappings) == 0 {
@@ -196,30 +200,17 @@ func parseZoneMappings(body []byte, subscriptionID, subscriptionName string) ([]
 		locationsWithZones++
 		log.Debug().Msgf("Location %s has %d zone mappings", locationName, len(location.AvailabilityZoneMappings))
 
-		displayName := ""
-		if location.DisplayName != nil {
-			displayName = *location.DisplayName
-		}
+		displayName := derefStr(location.DisplayName)
 
 		// Extract each zone mapping for this location
 		for _, mapping := range location.AvailabilityZoneMappings {
-			logicalZone := ""
-			if mapping.LogicalZone != nil {
-				logicalZone = *mapping.LogicalZone
-			}
-
-			physicalZone := ""
-			if mapping.PhysicalZone != nil {
-				physicalZone = *mapping.PhysicalZone
-			}
-
 			results = append(results, zoneMappingResult{
 				subscriptionID:   subscriptionID,
 				subscriptionName: subscriptionName,
 				location:         locationName,
 				displayName:      displayName,
-				logicalZone:      logicalZone,
-				physicalZone:     physicalZone,
+				logicalZone:      derefStr(mapping.LogicalZone),
+				physicalZone:     derefStr(mapping.PhysicalZone),
 			})
 		}
 	}
