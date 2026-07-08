@@ -13,14 +13,14 @@ import (
 )
 
 func TestNewThrottlingScanner(t *testing.T) {
-	scanner := NewThrottlingScanner()
+	scanner := NewScanner()
 	if scanner == nil {
 		t.Fatal("NewThrottlingScanner() returned nil")
 	}
 }
 
 func TestThrottlingScanner_GetMetadata(t *testing.T) {
-	scanner := NewThrottlingScanner()
+	scanner := NewScanner()
 	metadata := scanner.GetMetadata()
 
 	tests := []struct {
@@ -46,7 +46,7 @@ func TestThrottlingScanner_GetMetadata(t *testing.T) {
 }
 
 func TestThrottlingScanner_GetMetadata_ColumnMetadata(t *testing.T) {
-	scanner := NewThrottlingScanner()
+	scanner := NewScanner()
 	metadata := scanner.GetMetadata()
 
 	expectedColumns := []struct {
@@ -94,7 +94,7 @@ func TestThrottlingScanner_GetMetadata_ColumnMetadata(t *testing.T) {
 }
 
 func TestThrottlingScanner_groupResourcesForBatch(t *testing.T) {
-	scanner := NewThrottlingScanner()
+	scanner := NewScanner()
 
 	tests := []struct {
 		name          string
@@ -237,7 +237,7 @@ func TestThrottlingScanner_groupResourcesForBatch(t *testing.T) {
 }
 
 func TestThrottlingScanner_groupResourcesForBatch_Grouping(t *testing.T) {
-	scanner := NewThrottlingScanner()
+	scanner := NewScanner()
 
 	// Test that resources are correctly grouped
 	resources := []*models.Resource{
@@ -294,7 +294,7 @@ func TestThrottlingScanner_groupResourcesForBatch_Grouping(t *testing.T) {
 func TestPluginRegistration(t *testing.T) {
 	// The init() function should have registered the plugin
 	// This is a basic sanity check that the plugin can be created
-	scanner := NewThrottlingScanner()
+	scanner := NewScanner()
 	metadata := scanner.GetMetadata()
 	if metadata.Name != "openai-throttling" {
 		t.Errorf("Plugin registration failed or wrong plugin registered")

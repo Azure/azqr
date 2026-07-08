@@ -54,15 +54,15 @@ func assertHeaderRowMatchesColumnMetadata(t *testing.T, scanner scannerWithMetad
 }
 
 func TestZonePlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
-	assertHeaderRowMatchesColumnMetadata(t, zone.NewZoneMappingScanner())
+	assertHeaderRowMatchesColumnMetadata(t, zone.NewScanner())
 }
 
 func TestOpenAIThrottlingPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
-	assertHeaderRowMatchesColumnMetadata(t, openai.NewThrottlingScanner())
+	assertHeaderRowMatchesColumnMetadata(t, openai.NewScanner())
 }
 
 func TestCarbonPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
-	assertHeaderRowMatchesColumnMetadata(t, carbon.NewEmissionsScanner())
+	assertHeaderRowMatchesColumnMetadata(t, carbon.NewScanner())
 }
 
 func TestSQLESUPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
@@ -70,7 +70,7 @@ func TestSQLESUPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
 }
 
 func TestRegionPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
-	assertHeaderRowMatchesColumnMetadata(t, regionplugin.NewRegionSelectorScanner())
+	assertHeaderRowMatchesColumnMetadata(t, regionplugin.NewScanner())
 }
 
 // TestAllInternalPlugins_HaveColumnMetadata is a catch-all: every registered
@@ -78,11 +78,11 @@ func TestRegionPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
 // shipping a plugin with an empty metadata definition).
 func TestAllInternalPlugins_HaveColumnMetadata(t *testing.T) {
 	scanners := []scannerWithMetadata{
-		zone.NewZoneMappingScanner(),
-		openai.NewThrottlingScanner(),
-		carbon.NewEmissionsScanner(),
+		zone.NewScanner(),
+		openai.NewScanner(),
+		carbon.NewScanner(),
 		sqlesu.NewScanner(),
-		regionplugin.NewRegionSelectorScanner(),
+		regionplugin.NewScanner(),
 	}
 
 	for _, s := range scanners {

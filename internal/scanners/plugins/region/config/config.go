@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package region
+package config
 
 import (
 	_ "embed"
@@ -26,8 +26,8 @@ type skuConfig struct {
 	ExcludeFromReport                []string `json:"excludeFromReport"`
 }
 
-// propertyMapConfig defines how to query SKU availability for a resource type
-type propertyMapConfig struct {
+// PropertyMapConfig defines how to query SKU availability for a resource type
+type PropertyMapConfig struct {
 	ResourceType string `json:"resourceType"`
 	URI          string `json:"uri"`
 	RegionalAPI  bool   `json:"regionalApi"`
@@ -38,9 +38,9 @@ type propertyMapConfig struct {
 }
 
 var (
-	skuConfigs          []skuConfig
-	propertyMapsConfig  []propertyMapConfig
-	propertyMapsIndex   map[string]*propertyMapConfig // lowercase resourceType -> config
+	skuConfigs         []skuConfig
+	propertyMapsConfig []PropertyMapConfig
+	propertyMapsIndex  map[string]*PropertyMapConfig // lowercase resourceType -> config
 )
 
 // init loads configuration files and builds lookup indexes
@@ -56,14 +56,14 @@ func init() {
 	}
 
 	// Build index for O(1) lookups in getPropertyMapConfig
-	propertyMapsIndex = make(map[string]*propertyMapConfig, len(propertyMapsConfig))
+	propertyMapsIndex = make(map[string]*PropertyMapConfig, len(propertyMapsConfig))
 	for i := range propertyMapsConfig {
 		key := strings.ToLower(propertyMapsConfig[i].ResourceType)
 		propertyMapsIndex[key] = &propertyMapsConfig[i]
 	}
 }
 
-// getPropertyMapConfig returns the property map configuration for a given resource type in O(1).
-func getPropertyMapConfig(resourceType string) *propertyMapConfig {
+// GetPropertyMapConfig returns the property map configuration for a given resource type in O(1).
+func GetPropertyMapConfig(resourceType string) *PropertyMapConfig {
 	return propertyMapsIndex[strings.ToLower(resourceType)]
 }

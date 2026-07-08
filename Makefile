@@ -42,6 +42,7 @@ help:
 	@echo "  validate-yaml - Validate all recommendation YAML files against schema"
 	@echo "  validate-scanners - Validate APRL recommendations coverage"
 	@echo "  sku          - Generate internal/skus/known_skus.yaml from Azure VM SKUs (requires Azure login)"
+	@echo "  latency      - Regenerate zz_generated.latency.go (latency matrix + region clusters) from Microsoft Learn"
 	@echo "  test         - Run tests (includes linting and validation)"
 	@echo "  test-integration - Run integration tests (requires Azure credentials, default timeout 60m)"
 	@echo "  test-integration-setup - Validate prerequisites for running integration tests"
@@ -90,6 +91,9 @@ json:
 sku:
 	go run ./hack/code/sku_gen/main.go
 
+latency:
+	go run ./hack/code/latency_gen/main.go
+	
 validate-yaml:
 	@echo "Validating recommendation YAML files against schema..."
 	@go run ./hack/code/validate_recommendations/validate-recommendations.go ./internal/graph/azqr/azure-resources ./internal/graph/aprl/azure-resources ./internal/graph/azure-orphan-resources

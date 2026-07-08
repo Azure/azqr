@@ -11,13 +11,13 @@ import (
 )
 
 func TestNewEmissionsScanner(t *testing.T) {
-	if NewEmissionsScanner() == nil {
+	if NewScanner() == nil {
 		t.Fatal("NewEmissionsScanner returned nil")
 	}
 }
 
 func TestEmissionsScanner_GetMetadata(t *testing.T) {
-	meta := NewEmissionsScanner().GetMetadata()
+	meta := NewScanner().GetMetadata()
 
 	if meta.Name != "carbon-emissions" {
 		t.Errorf("Name = %q, want carbon-emissions", meta.Name)

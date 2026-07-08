@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package region
+package types
 
 import (
 	"testing"
 )
 
 func TestDefaultScoringWeights(t *testing.T) {
-	w := defaultScoringWeights()
+	w := DefaultScoringWeights()
 
 	if w.ResourceAvailability != 0.35 {
 		t.Errorf("ResourceAvailability = %v, want 0.35", w.ResourceAvailability)
@@ -31,8 +31,8 @@ func TestDefaultScoringWeights(t *testing.T) {
 }
 
 func TestResourceTypeLocationData_IsAvailable(t *testing.T) {
-	rtl := &resourceTypeLocationData{
-		data: map[string]map[string]map[string]struct{}{
+	rtl := &ResourceTypeLocationData{
+		Data: map[string]map[string]map[string]struct{}{
 			"microsoft.compute": {
 				"virtualmachines": {"eastus": {}, "westeurope": {}},
 			},
@@ -79,7 +79,7 @@ func TestResourceTypeLocationData_IsAvailable(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := rtl.isAvailable(tt.resourceType, tt.region); got != tt.want {
+			if got := rtl.IsAvailable(tt.resourceType, tt.region); got != tt.want {
 				t.Errorf("isAvailable(%q, %q) = %v, want %v", tt.resourceType, tt.region, got, tt.want)
 			}
 		})

@@ -6,21 +6,24 @@ package region
 import (
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/plugins"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
 	"github.com/spf13/cobra"
 )
 
 // RegionSelectorScanner is an internal plugin that analyzes optimal Azure region selection
 type RegionSelectorScanner struct {
-	skuCache      *skuAvailabilityCache // Cache for SKU availability queries
-	targetRegions []string              // Optional: specific regions to analyze (if empty, analyze all)
-	httpClient    *az.HttpClient        // Reusable HTTP client with connection pooling and token caching
+	skuCache          *types.SKUAvailabilityCache // Cache for SKU availability queries
+	targetRegions     []string                    // Optional: specific regions to analyze (if empty, analyze all)
+	httpClient        *az.HttpClient              // Reusable HTTP client with connection pooling and token caching
+	costHistoryMonths int                         // Number of full calendar months to include in Cost Management query (default: 1)
 }
 
-// NewRegionSelectorScanner creates a new region selector scanner
-func NewRegionSelectorScanner() *RegionSelectorScanner {
+// NewScanner creates a new region selector scanner
+func NewScanner() *RegionSelectorScanner {
 	return &RegionSelectorScanner{
-		skuCache:      newSKUAvailabilityCache(),
-		targetRegions: []string{}, // Empty means analyze all regions
+		skuCache:          types.NewSKUAvailabilityCache(),
+		targetRegions:     []string{}, // Empty means analyze all regions
+		costHistoryMonths: 1,
 	}
 }
 
@@ -63,9 +66,10 @@ func (s *RegionSelectorScanner) GetMetadata() plugins.PluginMetadata {
 // RegisterFlags registers plugin-specific flags (implements FlagProvider interface)
 func (s *RegionSelectorScanner) RegisterFlags(cmd *cobra.Command) {
 	cmd.Flags().StringSlice("target-regions", []string{}, "Target regions to analyze (comma-separated, e.g., eastus,westeurope)")
+	cmd.Flags().Int("cost-history-months", 1, "Number of full calendar months of Cost Management history to use for pricing weights (1–12, default: 1)")
 }
 
 // init registers the plugin automatically
 func init() {
-	plugins.RegisterInternalPlugin("region-selection", NewRegionSelectorScanner())
+	plugins.RegisterInternalPlugin("region-selection", NewScanner())
 }

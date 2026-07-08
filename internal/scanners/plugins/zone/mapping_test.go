@@ -11,13 +11,13 @@ import (
 )
 
 func TestNewZoneMappingScanner(t *testing.T) {
-	if NewZoneMappingScanner() == nil {
+	if NewScanner() == nil {
 		t.Fatal("NewZoneMappingScanner returned nil")
 	}
 }
 
 func TestZoneMappingScanner_GetMetadata(t *testing.T) {
-	meta := NewZoneMappingScanner().GetMetadata()
+	meta := NewScanner().GetMetadata()
 
 	if meta.Name != "zone-mapping" {
 		t.Errorf("Name = %q, want zone-mapping", meta.Name)
