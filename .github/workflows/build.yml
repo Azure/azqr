@@ -9,6 +9,7 @@ on:
       - main
       - release-*
       - feature-*
+      - fix-*
     tags:
       - v*
   pull_request:

@@ -663,14 +663,14 @@ func (s *RegionSelectorScanner) buildInventoryForSubscription(subscriptionID str
 		// Normalize location once; reused for both SKU and region tracking.
 		location := types.NormalizeRegionName(resource.Location)
 
-		// Track SKUs by resource type (global)
+		// Track SKUs by resource type and by region.
+		// Only presence matters (consumers iterate keys, not values).
 		if skuName != "" {
 			if inventory.SKUsByType[resourceType] == nil {
 				inventory.SKUsByType[resourceType] = make(map[string]int)
 			}
 			inventory.SKUsByType[resourceType][skuName]++
 
-			// Track SKUs by type and region for detailed comparison
 			if inventory.SKUsByTypeAndRegion[resourceType] == nil {
 				inventory.SKUsByTypeAndRegion[resourceType] = make(map[string]map[string]int)
 			}
