@@ -267,7 +267,15 @@ func BuildInventorySheet(resources []*models.Resource, mask bool) plugins.Extern
 	for _, r := range resources {
 		capacity := ""
 		if r.SkuCapacity > 0 {
-			capacity = fmt.Sprint(r.SkuCapacity)
+			if strings.EqualFold(r.Type, "microsoft.compute/virtualmachinescalesets") {
+				if cores := skus.Lookup(r.SkuName); cores > 0 {
+					capacity = fmt.Sprint(r.SkuCapacity * cores)
+				} else {
+					capacity = fmt.Sprint(r.SkuCapacity)
+				}
+			} else {
+				capacity = fmt.Sprint(r.SkuCapacity)
+			}
 		} else if v := skus.Lookup(r.SkuName); v > 0 {
 			capacity = fmt.Sprint(v)
 		}
