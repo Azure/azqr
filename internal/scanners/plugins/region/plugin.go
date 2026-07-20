@@ -7,6 +7,8 @@ import (
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/plugins"
 	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/spf13/cobra"
 )
 
@@ -15,6 +17,8 @@ type RegionSelectorScanner struct {
 	skuCache          *types.SKUAvailabilityCache // Cache for SKU availability queries
 	targetRegions     []string                    // Optional: specific regions to analyze (if empty, analyze all)
 	httpClient        *az.HttpClient              // Reusable HTTP client with connection pooling and token caching
+	cred              azcore.TokenCredential      // Azure credential for typed ARM SDK clients
+	clientOpts        *arm.ClientOptions          // ARM client options shared by all typed SDK clients
 	costHistoryMonths int                         // Number of full calendar months to include in Cost Management query (default: 1)
 }
 
@@ -31,7 +35,7 @@ func NewScanner() *RegionSelectorScanner {
 func (s *RegionSelectorScanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "region-selection",
-		Version:     "0.1.2-beta",
+		Version:     "0.2.0-beta",
 		Description: "Analyzes optimal Azure region selection based on service availability, network latency, and cost comparison",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
@@ -48,9 +52,11 @@ func (s *RegionSelectorScanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Available SKUs", DataKey: "availableSKUs", FilterType: plugins.FilterTypeNone},
 			{Name: "Unavailable SKUs", DataKey: "unavailableSKUs", FilterType: plugins.FilterTypeNone},
 			{Name: "Restricted SKUs", DataKey: "restrictedSKUs", FilterType: plugins.FilterTypeNone},
+			{Name: "Zone-Restricted SKUs", DataKey: "zoneRestrictedSKUs", FilterType: plugins.FilterTypeNone},
 			{Name: "Unknown SKUs", DataKey: "unknownSKUs", FilterType: plugins.FilterTypeNone},
 			{Name: "SKU Availability %", DataKey: "skuAvailabilityPercent", FilterType: plugins.FilterTypeNone},
 			{Name: "Availability Zones", DataKey: "availabilityZones", FilterType: plugins.FilterTypeNone},
+			{Name: "Target AZ Mapping", DataKey: "targetAZMapping", FilterType: plugins.FilterTypeNone},
 			{Name: "Avg Latency (ms)", DataKey: "avgLatency", FilterType: plugins.FilterTypeNone},
 			{Name: "Avg Cost Difference %", DataKey: "avgCostDiff", FilterType: plugins.FilterTypeNone},
 			{Name: "Recommendation Score", DataKey: "score", FilterType: plugins.FilterTypeNone},
@@ -59,6 +65,7 @@ func (s *RegionSelectorScanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Missing Resource Types", DataKey: "missingTypes", FilterType: plugins.FilterTypeSearch},
 			{Name: "Unavailable SKUs (detail)", DataKey: "unavailableSKUsDetail", FilterType: plugins.FilterTypeSearch},
 			{Name: "Restricted SKUs (detail)", DataKey: "restrictedSKUsDetail", FilterType: plugins.FilterTypeSearch},
+			{Name: "Zone-Restricted SKUs (detail)", DataKey: "zoneRestrictedSKUsDetail", FilterType: plugins.FilterTypeSearch},
 		},
 	}
 }

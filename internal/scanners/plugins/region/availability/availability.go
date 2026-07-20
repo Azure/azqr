@@ -197,6 +197,7 @@ func checkRegionAvailability(
 		MissingResourceTypes: []string{},
 		MissingSKUs:          []string{},
 		RestrictedSKUs:       []string{},
+		ZoneRestrictedSKUs:   []string{},
 		SourceZoneCount:      regionZoneCount[sourceRegion],
 		TargetZoneCount:      regionZoneCount[targetRegion],
 	}
@@ -269,19 +270,25 @@ func checkRegionAvailability(
 				result.TotalSKUsChecked++
 
 				normalizedSourceSKU := strings.ToLower(strings.TrimSpace(skuName))
-				state, found := availableSKUsInTarget[normalizedSourceSKU]
+				avail, found := availableSKUsInTarget[normalizedSourceSKU]
 				if !found {
 					// SKU absent from response — treat as unavailable (API is region-filtered)
-					state = types.SKUUnavailable
+					avail = types.SKUAvailability{State: types.SKUUnavailable}
 				}
 
 				skuIdentifier := resourceType + ":" + skuName
-				switch state {
+				switch avail.State {
 				case types.SKUAvailable:
 					result.AvailableSKUs++
+				case types.SKUZoneRestricted:
+					zoneDetail := skuIdentifier
+					if len(avail.BlockedZones) > 0 {
+						zoneDetail += " (zones blocked: " + strings.Join(avail.BlockedZones, ",") + ")"
+					}
+					result.ZoneRestrictedSKUs = append(result.ZoneRestrictedSKUs, zoneDetail)
 				case types.SKURestricted:
 					result.RestrictedSKUs = append(result.RestrictedSKUs, skuIdentifier)
-				default: // skuUnavailable
+				default: // SKUUnavailable
 					result.UnavailableSKUs++
 					result.MissingSKUs = append(result.MissingSKUs, skuIdentifier)
 				}

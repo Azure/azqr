@@ -4,9 +4,9 @@
 package zone
 
 import (
-	"encoding/json"
 	"testing"
 
+	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/plugins"
 )
 
@@ -44,9 +44,8 @@ func TestZoneMappingScanner_GetMetadata(t *testing.T) {
 	}
 }
 
-// TestLocationResponse_Unmarshal verifies the JSON contract that fetchZoneMappings
-// relies on: the locations REST response shape, optional (pointer) fields, and
-// nested availability zone mappings.
+// TestLocationResponse_Unmarshal verifies the JSON contract via az.ParseLocations:
+// the locations REST response shape and nested availability zone mappings.
 func TestLocationResponse_Unmarshal(t *testing.T) {
 	body := []byte(`{
 		"value": [
@@ -65,37 +64,36 @@ func TestLocationResponse_Unmarshal(t *testing.T) {
 		]
 	}`)
 
-	var resp locationResponse
-	if err := json.Unmarshal(body, &resp); err != nil {
-		t.Fatalf("Unmarshal failed: %v", err)
+	locations, err := az.ParseLocations(body)
+	if err != nil {
+		t.Fatalf("ParseLocations failed: %v", err)
+	}
+	if len(locations) != 2 {
+		t.Fatalf("locations len = %d, want 2", len(locations))
 	}
 
-	if len(resp.Value) != 2 {
-		t.Fatalf("Value len = %d, want 2", len(resp.Value))
+	east := locations[0]
+	if east.Name != "eastus" {
+		t.Errorf("locations[0].Name = %q, want eastus", east.Name)
 	}
-
-	east := resp.Value[0]
-	if east.Name == nil || *east.Name != "eastus" {
-		t.Errorf("Value[0].Name = %v, want eastus", east.Name)
-	}
-	if east.DisplayName == nil || *east.DisplayName != "East US" {
-		t.Errorf("Value[0].DisplayName = %v, want East US", east.DisplayName)
+	if east.DisplayName != "East US" {
+		t.Errorf("locations[0].DisplayName = %q, want East US", east.DisplayName)
 	}
 	if len(east.AvailabilityZoneMappings) != 2 {
-		t.Fatalf("Value[0] zone mappings len = %d, want 2", len(east.AvailabilityZoneMappings))
+		t.Fatalf("locations[0] zone mappings len = %d, want 2", len(east.AvailabilityZoneMappings))
 	}
 	m := east.AvailabilityZoneMappings[0]
-	if m.LogicalZone == nil || *m.LogicalZone != "1" {
-		t.Errorf("LogicalZone = %v, want 1", m.LogicalZone)
+	if m.LogicalZone != "1" {
+		t.Errorf("LogicalZone = %q, want 1", m.LogicalZone)
 	}
-	if m.PhysicalZone == nil || *m.PhysicalZone != "eastus-az1" {
-		t.Errorf("PhysicalZone = %v, want eastus-az1", m.PhysicalZone)
+	if m.PhysicalZone != "eastus-az1" {
+		t.Errorf("PhysicalZone = %q, want eastus-az1", m.PhysicalZone)
 	}
 
 	// A region without availabilityZoneMappings must unmarshal to an empty slice,
 	// which fetchZoneMappings skips.
-	if len(resp.Value[1].AvailabilityZoneMappings) != 0 {
-		t.Errorf("Value[1] zone mappings len = %d, want 0", len(resp.Value[1].AvailabilityZoneMappings))
+	if len(locations[1].AvailabilityZoneMappings) != 0 {
+		t.Errorf("locations[1] zone mappings len = %d, want 0", len(locations[1].AvailabilityZoneMappings))
 	}
 }
 
@@ -144,7 +142,7 @@ func TestParseZoneMappings(t *testing.T) {
 		t.Errorf("zones = (%q,%q), want (1, eastus-az1)", first.logicalZone, first.physicalZone)
 	}
 
-	// centralus row has a nil physicalZone, which must normalize to "".
+	// centralus row has no physicalZone in JSON; must normalize to "".
 	last := results[2]
 	if last.location != "centralus" || last.displayName != "" {
 		t.Errorf("centralus row = (%q,%q), want (centralus, \"\")", last.location, last.displayName)
@@ -169,3 +167,4 @@ func TestParseZoneMappings_Empty(t *testing.T) {
 		t.Errorf("results len = %d, want 0", len(results))
 	}
 }
+

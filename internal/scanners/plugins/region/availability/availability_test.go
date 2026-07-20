@@ -158,44 +158,60 @@ func TestExtractSKUName(t *testing.T) {
 func TestCheckSKURestrictions(t *testing.T) {
 	cache := types.NewSKUAvailabilityCache()
 	tests := []struct {
-		name string
-		item types.SKUAPIItem
-		want types.SKUAvailabilityState
+		name          string
+		item          types.SKUAPIItem
+		wantState     types.SKUAvailabilityState
+		wantZoneCount int // expected len(BlockedZones) when zone-restricted
 	}{
 		{
-			name: "no restrictions or capabilities is available",
-			item: types.SKUAPIItem{Name: "sku"},
-			want: types.SKUAvailable,
+			name:      "no restrictions or capabilities is available",
+			item:      types.SKUAPIItem{Name: "sku"},
+			wantState: types.SKUAvailable,
 		},
 		{
-			name: "location restriction NotAvailableForSubscription is restricted",
-			item: types.SKUAPIItem{Restrictions: []types.SKURestriction{{Type: "Location", ReasonCode: "NotAvailableForSubscription"}}},
-			want: types.SKURestricted,
+			name:      "location restriction NotAvailableForSubscription is restricted",
+			item:      types.SKUAPIItem{Restrictions: []types.SKURestriction{{Type: "Location", ReasonCode: "NotAvailableForSubscription"}}},
+			wantState: types.SKURestricted,
 		},
 		{
-			name: "location restriction other reason is unavailable",
-			item: types.SKUAPIItem{Restrictions: []types.SKURestriction{{Type: "Location", ReasonCode: "NotAvailableForRegion"}}},
-			want: types.SKUUnavailable,
+			name:      "location restriction other reason is unavailable",
+			item:      types.SKUAPIItem{Restrictions: []types.SKURestriction{{Type: "Location", ReasonCode: "NotAvailableForRegion"}}},
+			wantState: types.SKUUnavailable,
 		},
 		{
-			name: "restriction type is case-insensitive",
-			item: types.SKUAPIItem{Restrictions: []types.SKURestriction{{Type: "location", ReasonCode: "notavailableforsubscription"}}},
-			want: types.SKURestricted,
+			name:      "restriction type is case-insensitive",
+			item:      types.SKUAPIItem{Restrictions: []types.SKURestriction{{Type: "location", ReasonCode: "notavailableforsubscription"}}},
+			wantState: types.SKURestricted,
 		},
 		{
-			name: "non-location restriction is ignored",
-			item: types.SKUAPIItem{Restrictions: []types.SKURestriction{{Type: "Zone", ReasonCode: "NotAvailableForSubscription"}}},
-			want: types.SKUAvailable,
+			name:          "zone restriction returns zone-restricted with blocked zones",
+			item:          types.SKUAPIItem{Restrictions: []types.SKURestriction{{Type: "Zone", ReasonCode: "NotAvailableForSubscription", RestrictionInfo: types.SKURestrictionInfo{Zones: []string{"1", "2"}}}}},
+			wantState:     types.SKUZoneRestricted,
+			wantZoneCount: 2,
 		},
 		{
-			name: "capability available false is unavailable",
-			item: types.SKUAPIItem{Capabilities: []types.SKUCapability{{Name: "available", Value: "false"}}},
-			want: types.SKUUnavailable,
+			name:          "zone restriction without zone info still zone-restricted",
+			item:          types.SKUAPIItem{Restrictions: []types.SKURestriction{{Type: "Zone", ReasonCode: "NotAvailableForSubscription"}}},
+			wantState:     types.SKUZoneRestricted,
+			wantZoneCount: 0,
 		},
 		{
-			name: "capability available true is available",
-			item: types.SKUAPIItem{Capabilities: []types.SKUCapability{{Name: "available", Value: "true"}}},
-			want: types.SKUAvailable,
+			name:      "location restriction takes precedence over zone restriction",
+			item: types.SKUAPIItem{Restrictions: []types.SKURestriction{
+				{Type: "Location", ReasonCode: "NotAvailableForSubscription"},
+				{Type: "Zone", ReasonCode: "NotAvailableForSubscription", RestrictionInfo: types.SKURestrictionInfo{Zones: []string{"1"}}},
+			}},
+			wantState: types.SKURestricted,
+		},
+		{
+			name:      "capability available false is unavailable",
+			item:      types.SKUAPIItem{Capabilities: []types.SKUCapability{{Name: "available", Value: "false"}}},
+			wantState: types.SKUUnavailable,
+		},
+		{
+			name:      "capability available true is available",
+			item:      types.SKUAPIItem{Capabilities: []types.SKUCapability{{Name: "available", Value: "true"}}},
+			wantState: types.SKUAvailable,
 		},
 		{
 			name: "restriction takes precedence over capabilities",
@@ -203,15 +219,19 @@ func TestCheckSKURestrictions(t *testing.T) {
 				Restrictions: []types.SKURestriction{{Type: "Location", ReasonCode: "NotAvailableForSubscription"}},
 				Capabilities: []types.SKUCapability{{Name: "available", Value: "false"}},
 			},
-			want: types.SKURestricted,
+			wantState: types.SKURestricted,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			item := tt.item
-			if got := cache.CheckSKURestrictions(&item); got != tt.want {
-				t.Errorf("CheckSKURestrictions() = %v, want %v", got, tt.want)
+			got := cache.CheckSKURestrictions(&item)
+			if got.State != tt.wantState {
+				t.Errorf("CheckSKURestrictions().State = %v, want %v", got.State, tt.wantState)
+			}
+			if tt.wantZoneCount > 0 && len(got.BlockedZones) != tt.wantZoneCount {
+				t.Errorf("CheckSKURestrictions().BlockedZones len = %d, want %d", len(got.BlockedZones), tt.wantZoneCount)
 			}
 		})
 	}
@@ -268,8 +288,8 @@ func TestExtractSKUsFromResponse(t *testing.T) {
 			{Name: "Restricted", Restrictions: []types.SKURestriction{{Type: "Location", ReasonCode: "NotAvailableForSubscription"}}},
 		}
 		got := cache.ExtractSKUsFromResponse(items, config, "eastus")
-		if got["restricted"] != types.SKURestricted {
-			t.Errorf("expected types.SKURestricted, got %v", got["restricted"])
+		if got["restricted"].State != types.SKURestricted {
+			t.Errorf("expected types.SKURestricted, got %v", got["restricted"].State)
 		}
 	})
 }

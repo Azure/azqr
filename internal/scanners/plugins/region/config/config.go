@@ -11,20 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-//go:embed modules/sku.json
-var skuConfigData []byte
-
 //go:embed propertymaps/propertyMaps.json
 var propertyMapsData []byte
-
-// skuConfig defines how to extract SKU information for a resource type
-type skuConfig struct {
-	ResourceType                     string   `json:"resourceType"`
-	Property                         string   `json:"property"`
-	Description                      string   `json:"description"`
-	IsContainedInOriginalGraphOutput bool     `json:"isContainedInOriginalGraphOutput"`
-	ExcludeFromReport                []string `json:"excludeFromReport"`
-}
 
 // PropertyMapConfig defines how to query SKU availability for a resource type
 type PropertyMapConfig struct {
@@ -38,18 +26,12 @@ type PropertyMapConfig struct {
 }
 
 var (
-	skuConfigs         []skuConfig
 	propertyMapsConfig []PropertyMapConfig
 	propertyMapsIndex  map[string]*PropertyMapConfig // lowercase resourceType -> config
 )
 
 // init loads configuration files and builds lookup indexes
 func init() {
-	// Load SKU configurations
-	if err := json.Unmarshal(skuConfigData, &skuConfigs); err != nil {
-		log.Fatal().Err(err).Msg("Failed to load SKU configuration from embedded JSON")
-	}
-
 	// Load property maps configurations
 	if err := json.Unmarshal(propertyMapsData, &propertyMapsConfig); err != nil {
 		log.Fatal().Err(err).Msg("Failed to load property maps configuration from embedded JSON")

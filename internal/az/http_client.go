@@ -18,7 +18,15 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// sharedTransport is the single HTTP transport shared by all HttpClient instances.
+// NopReadSeekCloser wraps *bytes.Reader to satisfy io.ReadSeekCloser for DoPost.
+// Use this when constructing a request body from a byte slice.
+type NopReadSeekCloser struct {
+	*bytes.Reader
+}
+
+func (NopReadSeekCloser) Close() error { return nil }
+
+
 // Sharing the transport means all scanners reuse the same TCP/TLS connection pool,
 // eliminating repeated TLS handshakes on every NewHttpClient call.
 // MaxIdleConnsPerHost is raised from Go's default of 2 to allow enough warm

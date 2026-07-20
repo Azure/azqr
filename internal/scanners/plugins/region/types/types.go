@@ -25,14 +25,21 @@ func DefaultScoringWeights() scoringWeights {
 	}
 }
 
-// SKUAvailabilityState is a tri-state result for an individual SKU check.
+// SKUAvailabilityState is the availability state for an individual SKU check.
 type SKUAvailabilityState int
 
 const (
-	SKUAvailable   SKUAvailabilityState = iota // SKU confirmed available in target region
-	SKURestricted                              // SKU exists but restricted for this subscription (NotAvailableForSubscription — quota-liftable)
-	SKUUnavailable                             // SKU not available in target region (hard block)
+	SKUAvailable      SKUAvailabilityState = iota // SKU confirmed available in target region
+	SKURestricted                                 // SKU regionally blocked for this subscription (NotAvailableForSubscription — quota-liftable)
+	SKUUnavailable                                // SKU not available in target region (hard block)
+	SKUZoneRestricted                             // SKU available in region but restricted in one or more zones (zone-liftable)
 )
+
+// SKUAvailability holds the availability state and optional zone-restriction details for one SKU.
+type SKUAvailability struct {
+	State        SKUAvailabilityState
+	BlockedZones []string // logical zones blocked; only populated when State == SKUZoneRestricted
+}
 
 // ResourceInventory holds the current resource inventory
 type ResourceInventory struct {
@@ -59,14 +66,16 @@ type RegionComparison struct {
 	LatencyEstimated        bool    // True when AvgLatencyMs is a cluster-based estimate, not a direct measurement
 	MissingResourceTypes    []string
 	MissingSKUs             []string // Specific SKUs not available in target region (hard block)
-	RestrictedSKUs          []string // SKUs restricted for this subscription (NotAvailableForSubscription — quota-liftable)
+	RestrictedSKUs          []string // SKUs regionally restricted for this subscription (NotAvailableForSubscription — quota-liftable)
+	ZoneRestrictedSKUs      []string // SKUs available in region but restricted in one or more zones (zone-liftable)
 	TotalSKUsChecked        int      // Total number of SKUs checked
 	AvailableSKUs           int      // Number of SKUs confirmed available
 	UnavailableSKUs         int      // Number of SKUs not available (hard block)
 	UnknownSKUs             int      // Number of SKUs where availability could not be determined (API error)
 	SKUAvailabilityPercent  float64  // Percentage of SKUs available (raw; excludes unknowns from denominator)
-	SourceZoneCount         int      // Number of Availability Zones in source region (0 = no AZ support)
-	TargetZoneCount         int      // Number of Availability Zones in target region (0 = no AZ support)
+	SourceZoneCount         int               // Number of Availability Zones in source region (0 = no AZ support)
+	TargetZoneCount         int               // Number of Availability Zones in target region (0 = no AZ support)
+	TargetZoneMappings      map[string]string // Logical → physical AZ mapping for target region (subscription-scoped); nil when unavailable
 	Score                   float64
 }
 
@@ -122,11 +131,18 @@ type SKULocationInfo struct {
 	Zones    []string `json:"zones"`
 }
 
+// SKURestrictionInfo holds location and zone context for a SKU restriction.
+type SKURestrictionInfo struct {
+	Locations []string `json:"locations"`
+	Zones     []string `json:"zones"`
+}
+
 // SKURestriction describes a restriction that may prevent a SKU from being
 // used in a region or zone.
 type SKURestriction struct {
-	Type       string `json:"type"`
-	ReasonCode string `json:"reasonCode"`
+	Type            string             `json:"type"`
+	ReasonCode      string             `json:"reasonCode"`
+	RestrictionInfo SKURestrictionInfo `json:"restrictionInfo"`
 }
 
 // SKUCapability is a named capability flag reported by some SKU APIs
@@ -207,4 +223,35 @@ type CostComparisonData struct {
 // name needs to be compared or stored.
 func NormalizeRegionName(region string) string {
 	return strings.ToLower(strings.ReplaceAll(region, " ", ""))
+}
+
+// nonPhysicalRegions contains Azure meta/logical region identifiers that do not
+// correspond to a deployable physical region. Quota and cost APIs are meaningless for these.
+var nonPhysicalRegions = map[string]bool{
+	"":             true,
+	"unassigned":   true,
+	"global":       true,
+	"europe":       true,
+	"unitedstates": true,
+	"asia":         true,
+	"asiapacific":  true,
+	"australia":    true,
+	"brazil":       true,
+	"canada":       true,
+	"france":       true,
+	"germany":      true,
+	"india":        true,
+	"japan":        true,
+	"korea":        true,
+	"norway":       true,
+	"southafrica":  true,
+	"switzerland":  true,
+	"uae":          true,
+	"uk":           true,
+}
+
+// IsPhysicalRegion returns true when region is a real deployable Azure region
+// (not a meta/logical identifier like "global", "europe", etc.).
+func IsPhysicalRegion(region string) bool {
+	return !nonPhysicalRegions[NormalizeRegionName(region)]
 }

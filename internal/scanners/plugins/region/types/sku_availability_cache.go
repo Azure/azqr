@@ -20,7 +20,7 @@ import (
 // A singleflight.Group ensures that concurrent cache misses for the same key trigger only one
 // HTTP request; all waiters share the result.
 type SKUAvailabilityCache struct {
-	cache map[string]map[string]SKUAvailabilityState // subscriptionID:resourceType:region -> map[skuName]state
+	cache map[string]map[string]SKUAvailability // subscriptionID:resourceType:region -> map[skuName]SKUAvailability
 	mu    sync.RWMutex
 	group singleflight.Group
 }
@@ -28,11 +28,11 @@ type SKUAvailabilityCache struct {
 // NewSKUAvailabilityCache creates a new SKU availability cache
 func NewSKUAvailabilityCache() *SKUAvailabilityCache {
 	return &SKUAvailabilityCache{
-		cache: make(map[string]map[string]SKUAvailabilityState),
+		cache: make(map[string]map[string]SKUAvailability),
 	}
 }
 
-// ExtractSKUsFromResponse extracts SKU availability state from API response items.
+// ExtractSKUsFromResponse extracts SKU availability from API response items.
 // For global-list endpoints (regionalApi: false), each item is filtered to ensure
 // it applies to targetRegion by checking locationInfo[].location (Compute) or
 // locations[] (Storage). Items with no location data are accepted as globally available.
@@ -40,8 +40,8 @@ func (c *SKUAvailabilityCache) ExtractSKUsFromResponse(
 	items []SKUAPIItem,
 	config *config.PropertyMapConfig,
 	targetRegion string,
-) map[string]SKUAvailabilityState {
-	available := make(map[string]SKUAvailabilityState)
+) map[string]SKUAvailability {
+	available := make(map[string]SKUAvailability)
 
 	for i := range items {
 		item := &items[i]
@@ -55,8 +55,8 @@ func (c *SKUAvailabilityCache) ExtractSKUsFromResponse(
 			continue
 		}
 
-		state := c.CheckSKURestrictions(item)
-		available[strings.ToLower(skuName)] = state
+		avail := c.CheckSKURestrictions(item)
+		available[strings.ToLower(skuName)] = avail
 	}
 
 	return available
@@ -123,30 +123,52 @@ func (c *SKUAvailabilityCache) ExtractSKUName(item *SKUAPIItem, config *config.P
 	return item.Tier
 }
 
-// checkSKURestrictions returns the availability state for a SKU based on its
+// CheckSKURestrictions returns the availability detail for a SKU based on its
 // restrictions and capability flags.
-func (c *SKUAvailabilityCache) CheckSKURestrictions(item *SKUAPIItem) SKUAvailabilityState {
+//
+// Priority order (highest severity first):
+//  1. Location restriction → SKUUnavailable (hard block) or SKURestricted (quota-liftable)
+//  2. Zone restriction     → SKUZoneRestricted with blocked zones populated
+//  3. Capability flag      → SKUUnavailable
+//  4. Default              → SKUAvailable
+func (c *SKUAvailabilityCache) CheckSKURestrictions(item *SKUAPIItem) SKUAvailability {
+	// 1. Check for regional (Location) restrictions — most severe.
 	for _, r := range item.Restrictions {
 		if !strings.EqualFold(r.Type, "Location") {
 			continue
 		}
 		if strings.EqualFold(r.ReasonCode, "NotAvailableForSubscription") {
-			return SKURestricted
+			return SKUAvailability{State: SKURestricted}
 		}
-		return SKUUnavailable
+		return SKUAvailability{State: SKUUnavailable}
 	}
 
+	// 2. Check for zone-level restrictions — SKU is usable in region but some zones are blocked.
+	var hasZoneRestriction bool
+	var blockedZones []string
+	for _, r := range item.Restrictions {
+		if !strings.EqualFold(r.Type, "Zone") {
+			continue
+		}
+		hasZoneRestriction = true
+		blockedZones = append(blockedZones, r.RestrictionInfo.Zones...)
+	}
+	if hasZoneRestriction {
+		return SKUAvailability{State: SKUZoneRestricted, BlockedZones: blockedZones}
+	}
+
+	// 3. Check capability flags.
 	for _, cap := range item.Capabilities {
 		if strings.EqualFold(cap.Name, "available") && !strings.EqualFold(cap.Value, "true") {
-			return SKUUnavailable
+			return SKUAvailability{State: SKUUnavailable}
 		}
 	}
 
-	return SKUAvailable
+	return SKUAvailability{State: SKUAvailable}
 }
 
 // GetSKUAvailability checks if SKUs are available in a target region.
-// Returns a map of SKU name to availability state, or an error if the API could not be reached.
+// Returns a map of SKU name to SKUAvailability detail, or an error if the API could not be reached.
 // Concurrent callers with the same key share a single in-flight request; errors are not cached.
 func (c *SKUAvailabilityCache) GetSKUAvailability(
 	ctx context.Context,
@@ -154,7 +176,7 @@ func (c *SKUAvailabilityCache) GetSKUAvailability(
 	resourceType string,
 	targetRegion string,
 	httpClient *az.HttpClient,
-) (map[string]SKUAvailabilityState, error) {
+) (map[string]SKUAvailability, error) {
 	// Normalize resource type and region
 	resourceType = strings.ToLower(resourceType)
 	targetRegion = NormalizeRegionName(targetRegion)
@@ -208,7 +230,7 @@ func (c *SKUAvailabilityCache) GetSKUAvailability(
 		return nil, err
 	}
 
-	return v.(map[string]SKUAvailabilityState), nil
+	return v.(map[string]SKUAvailability), nil
 }
 
 // querySKUAvailabilityAPI queries Azure SKU availability APIs based on configuration.
@@ -218,7 +240,7 @@ func (c *SKUAvailabilityCache) querySKUAvailabilityAPI(
 	region string,
 	config *config.PropertyMapConfig,
 	httpClient *az.HttpClient,
-) (map[string]SKUAvailabilityState, error) {
+) (map[string]SKUAvailability, error) {
 	uri := config.URI
 	uri = strings.ReplaceAll(uri, "{0}", subscriptionID)
 	uri = strings.ReplaceAll(uri, "{1}", region)

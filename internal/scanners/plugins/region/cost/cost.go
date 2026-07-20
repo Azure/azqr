@@ -22,43 +22,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type readSeekNopCloser struct {
-	*bytes.Reader
-}
-
-func (r readSeekNopCloser) Close() error {
-	return nil
-}
-
 // odataEscape escapes a string value for use in an OData $filter expression
 // by replacing single quotes with two single quotes.
 func odataEscape(s string) string {
 	return strings.ReplaceAll(s, "'", "''")
-}
-
-// nonPhysicalRegions contains Azure meta/logical region identifiers that do not
-// correspond to a deployable physical region. Cost diffs are meaningless for these.
-var nonPhysicalRegions = map[string]bool{
-	"":             true,
-	"unassigned":   true,
-	"global":       true,
-	"europe":       true,
-	"unitedstates": true,
-	"asia":         true,
-	"asiapacific":  true,
-	"australia":    true,
-	"brazil":       true,
-	"canada":       true,
-	"france":       true,
-	"germany":      true,
-	"india":        true,
-	"japan":        true,
-	"korea":        true,
-	"norway":       true,
-	"southafrica":  true,
-	"switzerland":  true,
-	"uae":          true,
-	"uk":           true,
 }
 
 // FetchMeterCosts queries the Cost Management API for historical meter costs for one subscription.
@@ -113,10 +80,10 @@ func ApplyCostDiffs(results []types.RegionComparison, subMeterCosts []types.Mete
 		targetRegion := types.NormalizeRegionName(results[i].TargetRegion)
 		sourceRegion := types.NormalizeRegionName(results[i].SourceRegion)
 
-		if nonPhysicalRegions[sourceRegion] {
+		if !types.IsPhysicalRegion(sourceRegion) {
 			continue
 		}
-		if nonPhysicalRegions[targetRegion] {
+		if !types.IsPhysicalRegion(targetRegion) {
 			continue
 		}
 
@@ -321,7 +288,7 @@ func getMeterCostsFromCostManagement(ctx context.Context, cred azcore.TokenCrede
 	}
 
 	for nextLink != "" {
-		responseBody, _, err := httpClient.DoPost(ctx, nextLink, readSeekNopCloser{bytes.NewReader(bodyBytes)})
+		responseBody, _, err := httpClient.DoPost(ctx, nextLink, az.NopReadSeekCloser{Reader: bytes.NewReader(bodyBytes)})
 		if err != nil {
 			return nil, fmt.Errorf("failed to query paginated Cost Management results for subscription %s: %w", renderers.MaskSubscriptionID(subscriptionID, true), err)
 		}

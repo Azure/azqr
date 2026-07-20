@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package excel
+package output
 
 import (
 	"fmt"
@@ -60,9 +60,10 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 	sheets := make([]plugins.ExternalPluginOutput, 0, len(targetRegions))
 
 	for _, targetRegion := range targetRegions {
-		// Aggregate missing resource types and SKUs across ALL comparisons to this target
+		// Aggregate missing, restricted, and zone-restricted resource types/SKUs across all comparisons to this target
 		missingTypeSet := map[string]bool{}
 		missingSKUSet := map[string]bool{}
+		zoneRestrictedSKUSet := map[string]bool{}
 		for _, comp := range allResults {
 			if comp.TargetRegion != targetRegion {
 				continue
@@ -73,6 +74,13 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 			for _, s := range comp.MissingSKUs {
 				missingSKUSet[strings.ToLower(s)] = true
 			}
+			for _, s := range comp.ZoneRestrictedSKUs {
+				// ZoneRestrictedSKUs entries may include zone detail, e.g.
+				// "microsoft.compute/virtualmachines:Standard_D4s_v3 (zones blocked: 1,2)".
+				// Strip the zone detail for set-membership checks.
+				key := strings.ToLower(strings.SplitN(s, " (zones", 2)[0])
+				zoneRestrictedSKUSet[key] = true
+			}
 		}
 
 		header := []string{
@@ -82,6 +90,7 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 			"SKUCount",
 			"SKU",
 			"SKU available",
+			"SKU zone-restricted",
 			"Service available",
 		}
 		rows := [][]string{header}
@@ -115,12 +124,13 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 					"0",
 					"N/A",
 					"N/A",
+					"N/A",
 					serviceAvail,
 				})
 				continue
 			}
 
-			// One row per resource type; only missing SKUs are shown in the SKU column
+			// One row per resource type; only affected SKUs are shown in the SKU column.
 			skuNames := make([]string, 0, skuCount)
 			for s := range skus {
 				skuNames = append(skuNames, s)
@@ -134,16 +144,28 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 				}
 			}
 
+			zoneRestrictedSKUNames := make([]string, 0)
+			for _, skuName := range skuNames {
+				if zoneRestrictedSKUSet[strings.ToLower(rt+":"+skuName)] {
+					zoneRestrictedSKUNames = append(zoneRestrictedSKUNames, skuName)
+				}
+			}
+
 			allSKUsAvail := "Available"
 			skuDisplay := strings.Join(skuNames, ", ")
+			var zoneRestrictedDisplay string
 			if config.GetPropertyMapConfig(rt) == nil {
-				// No SKU availability API configured for this type — cannot determine SKU status.
-				// Show "N/A" so it is clear the column was not checked, not that SKUs are fine.
+				// No SKU availability API configured — cannot determine SKU status.
 				allSKUsAvail = "N/A"
-			} else if len(missingSKUNames) > 0 {
-				allSKUsAvail = "Not available"
-				// Only show the missing SKUs so the reader knows exactly what is unavailable
-				skuDisplay = strings.Join(missingSKUNames, ", ")
+				zoneRestrictedDisplay = "N/A"
+			} else {
+				if len(missingSKUNames) > 0 {
+					allSKUsAvail = "Not available"
+					skuDisplay = strings.Join(missingSKUNames, ", ")
+				}
+				if len(zoneRestrictedSKUNames) > 0 {
+					zoneRestrictedDisplay = strings.Join(zoneRestrictedSKUNames, ", ")
+				}
 			}
 
 			rows = append(rows, []string{
@@ -153,6 +175,7 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 				strconv.Itoa(skuCount),
 				skuDisplay,
 				allSKUsAvail,
+				zoneRestrictedDisplay,
 				serviceAvail,
 			})
 		}
@@ -298,5 +321,83 @@ func BuildInventorySheet(resources []*models.Resource, mask bool) plugins.Extern
 		SheetName:   "Inventory",
 		Description: "Resource inventory collected during region selection analysis",
 		Table:       rows,
+	}
+}
+
+// BuildCRGSheetFromReservations converts crg.ReservationEntry values to the Excel sheet format.
+// Accepts interface{} fields to avoid a direct import of the crg package from the excel package.
+// Callers pass (subscriptionName, location, rg, crgName, reservationName, sku, reserved, allocated, available, status).
+func BuildCRGSheetFromRows(rows [][]string) *plugins.ExternalPluginOutput {
+	if len(rows) == 0 {
+		return nil
+	}
+	headers := []string{
+		"Subscription", "Region", "Resource Group",
+		"CRG Name", "Reservation Name", "SKU",
+		"Reserved", "Allocated", "Available", "Status",
+	}
+	table := make([][]string, 0, len(rows)+1)
+	table = append(table, headers)
+	table = append(table, rows...)
+	return &plugins.ExternalPluginOutput{
+		SheetName:   "Capacity Reservations",
+		Description: "Capacity Reservation Group inventory for migration planning (idle/at-capacity/over-allocated flags)",
+		Table:       table,
+	}
+}
+
+// QuotaSheetRow is one raw quota entry passed from selection.go to avoid importing the quota package here.
+// Fields: Subscription, Region, QuotaType, ResourceName, Current, Limit, Available, HeadroomPct, Status.
+type QuotaSheetRow struct {
+	Subscription string
+	Region       string
+	QuotaType    string
+	ResourceName string
+	Current      int
+	Limit        int
+	Available    int
+	HeadroomPct  float64
+	IsNearLimit  bool
+	IsOverLimit  bool
+}
+
+// BuildQuotaSheet converts collected quota rows into a single "Quota" sheet.
+// Returns nil when rows is empty.
+func BuildQuotaSheet(rows []QuotaSheetRow) *plugins.ExternalPluginOutput {
+	if len(rows) == 0 {
+		return nil
+	}
+
+	headers := []string{
+		"Subscription", "Region", "Quota Type", "Resource",
+		"Current", "Limit", "Available", "Headroom %", "Status",
+	}
+	table := make([][]string, 0, len(rows)+1)
+	table = append(table, headers)
+
+	for _, r := range rows {
+		status := "OK"
+		if r.IsOverLimit {
+			status = "At/Over Limit"
+		} else if r.IsNearLimit {
+			status = "Near Limit"
+		}
+		table = append(table, []string{
+			r.Subscription,
+			r.Region,
+			r.QuotaType,
+			r.ResourceName,
+			strconv.Itoa(r.Current),
+			strconv.Itoa(r.Limit),
+			strconv.Itoa(r.Available),
+			fmt.Sprintf("%.1f%%", r.HeadroomPct),
+			status,
+		})
+	}
+
+	return &plugins.ExternalPluginOutput{
+		SheetName:   "Quota",
+		Description: "VM, network, SQL, App Service, storage, and ARM quota usage per subscription and region",
+		Table:       table,
 	}
 }

@@ -10,9 +10,6 @@ import (
 
 func TestInit_LoadedEmbeddedConfig(t *testing.T) {
 	// The package init() must successfully unmarshal both embedded JSON files.
-	if len(skuConfigs) == 0 {
-		t.Error("expected skuConfigs to be populated from embedded sku.json")
-	}
 	if len(propertyMapsConfig) == 0 {
 		t.Fatal("expected propertyMapsConfig to be populated from embedded propertyMaps.json")
 	}

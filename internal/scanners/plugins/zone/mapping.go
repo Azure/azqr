@@ -5,7 +5,6 @@ package zone
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 	"sync"
@@ -133,90 +132,48 @@ func (s *ZoneMappingScanner) Scan(ctx context.Context, cred azcore.TokenCredenti
 	}}, nil
 }
 
-// locationResponse represents the API response structure
-type locationResponse struct {
-	Value []locationInfo `json:"value"`
-}
-
-// locationInfo represents a single location with zone mappings
-type locationInfo struct {
-	Name                     *string                   `json:"name"`
-	DisplayName              *string                   `json:"displayName"`
-	AvailabilityZoneMappings []availabilityZoneMapping `json:"availabilityZoneMappings"`
-}
-
-// availabilityZoneMapping represents a logical-to-physical zone mapping
-type availabilityZoneMapping struct {
-	LogicalZone  *string `json:"logicalZone"`
-	PhysicalZone *string `json:"physicalZone"`
-}
-
-// fetchZoneMappings retrieves zone mappings for a single subscription using az.HttpClient
+// fetchZoneMappings retrieves zone mappings for a single subscription using az.HttpClient.
+// JSON parsing is delegated to parseZoneMappings (also used by tests).
 func (s *ZoneMappingScanner) fetchZoneMappings(ctx context.Context, httpClient *az.HttpClient, subscriptionID, subscriptionName string) ([]zoneMappingResult, error) {
-	// Construct the REST API URL
-	// GET /subscriptions/{subscriptionId}/locations?api-version=2022-12-01
 	endpoint := fmt.Sprintf("https://management.azure.com/subscriptions/%s/locations?api-version=2022-12-01", subscriptionID)
 
-	// Make the request with authentication
 	body, err := httpClient.Do(ctx, endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch locations: %w", err)
 	}
 
-	return parseZoneMappings(body, subscriptionID, subscriptionName)
-}
-
-// derefStr safely dereferences a *string, returning "" for nil.
-func derefStr(s *string) string {
-	if s == nil {
-		return ""
+	results, err := parseZoneMappings(body, subscriptionID, subscriptionName)
+	if err != nil {
+		return nil, err
 	}
-	return *s
+
+	log.Debug().Msgf("Subscription %s: found %d zone mappings", subscriptionName, len(results))
+	return results, nil
 }
 
-// parseZoneMappings parses a locations REST response body and converts it into
-// zoneMappingResult records. Locations without availability zone mappings are
-// skipped, and nil (optional) fields are normalized to empty strings.
+// parseZoneMappings is a thin testable wrapper around az.ParseLocations that converts
+// the shared LocationInfo slice to zone-plugin-specific zoneMappingResult records.
 func parseZoneMappings(body []byte, subscriptionID, subscriptionName string) ([]zoneMappingResult, error) {
-	var locationsResp locationResponse
-	if err := json.Unmarshal(body, &locationsResp); err != nil {
-		return nil, fmt.Errorf("failed to parse response: %w", err)
+	locations, err := az.ParseLocations(body)
+	if err != nil {
+		return nil, err
 	}
-
-	log.Debug().Msgf("Retrieved %d locations for subscription %s", len(locationsResp.Value), subscriptionName)
-
-	// Process the results
-	results := make([]zoneMappingResult, 0, len(locationsResp.Value)*3)
-	locationsWithZones := 0
-	for _, location := range locationsResp.Value {
-		locationName := derefStr(location.Name)
-
-		// Only process locations that have availability zone mappings
+	results := make([]zoneMappingResult, 0)
+	for _, location := range locations {
 		if len(location.AvailabilityZoneMappings) == 0 {
-			log.Debug().Msgf("Location %s has no zone mappings", locationName)
 			continue
 		}
-
-		locationsWithZones++
-		log.Debug().Msgf("Location %s has %d zone mappings", locationName, len(location.AvailabilityZoneMappings))
-
-		displayName := derefStr(location.DisplayName)
-
-		// Extract each zone mapping for this location
 		for _, mapping := range location.AvailabilityZoneMappings {
 			results = append(results, zoneMappingResult{
 				subscriptionID:   subscriptionID,
 				subscriptionName: subscriptionName,
-				location:         locationName,
-				displayName:      displayName,
-				logicalZone:      derefStr(mapping.LogicalZone),
-				physicalZone:     derefStr(mapping.PhysicalZone),
+				location:         location.Name,
+				displayName:      location.DisplayName,
+				logicalZone:      mapping.LogicalZone,
+				physicalZone:     mapping.PhysicalZone,
 			})
 		}
 	}
-
-	log.Debug().Msgf("Subscription %s: found %d locations with zones, extracted %d zone mappings", subscriptionName, locationsWithZones, len(results))
-
 	return results, nil
 }
 
