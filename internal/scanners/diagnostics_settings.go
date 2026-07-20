@@ -351,7 +351,7 @@ func (d *DiagnosticSettingsScanner) ListResourcesWithDiagnosticSettings(resource
 	}
 
 	models.LogResourceTypeScan("Diagnostic Settings")
-	
+
 	if len(filteredResources) > 5000 {
 		log.Warn().Msgf("%d resources detected. Scan will take longer than usual", len(filteredResources))
 	}
