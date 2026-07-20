@@ -11,7 +11,7 @@ import (
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/renderers"
-	"github.com/Azure/azqr/internal/scanners/plugins/region/config"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/sku"
 	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
@@ -25,7 +25,7 @@ type regionPair struct {
 }
 
 // CheckRegionsInParallel checks availability for multiple source->target region combinations concurrently using a worker pool
-func CheckRegionsInParallel(ctx context.Context, cred azcore.TokenCredential, targetRegions []string, inventory *types.ResourceInventory, subscriptionID, subscriptionName string, regionZoneCount map[string]int, skuCache *types.SKUAvailabilityCache, httpClient *az.HttpClient) []types.RegionComparison {
+func CheckRegionsInParallel(ctx context.Context, cred azcore.TokenCredential, targetRegions []string, inventory *types.ResourceInventory, subscriptionID, subscriptionName string, regionZoneCount map[string]int, skuCache *sku.Cache, httpClient *az.HttpClient) []types.RegionComparison {
 	// First, fetch all provider data once
 	log.Debug().Msg("Fetching all Azure resource providers...")
 	resourceTypeLocations, err := fetchAllProviders(ctx, cred, subscriptionID)
@@ -188,7 +188,7 @@ func checkRegionAvailability(
 	inventory *types.ResourceInventory,
 	resourceTypeLocations *types.ResourceTypeLocationData,
 	httpClient *az.HttpClient,
-	skuCache *types.SKUAvailabilityCache,
+	skuCache *sku.Cache,
 	regionZoneCount map[string]int,
 ) types.RegionComparison {
 	result := types.RegionComparison{
@@ -197,6 +197,7 @@ func checkRegionAvailability(
 		MissingResourceTypes: []string{},
 		MissingSKUs:          []string{},
 		RestrictedSKUs:       []string{},
+		ZoneRestrictedSKUs:   []string{},
 		SourceZoneCount:      regionZoneCount[sourceRegion],
 		TargetZoneCount:      regionZoneCount[targetRegion],
 	}
@@ -230,11 +231,9 @@ func checkRegionAvailability(
 	// Check SKU-level availability for resources in source region
 	if skuCache != nil {
 		for resourceType, regionSKUs := range inventory.SKUsByTypeAndRegion {
-			// Skip resource types that have no SKU availability API configured.
-			// These are types where the SKU is informational only (e.g. Public IP Standard)
-			// and there is no ARM endpoint to query per-region SKU availability.
-			if config.GetPropertyMapConfig(resourceType) == nil {
-				log.Debug().Msgf("No SKU availability API configured for %s, skipping SKU check", resourceType)
+			// Skip resource types that have no registered SKU provider.
+			if sku.Get(resourceType) == nil {
+				log.Debug().Msgf("No SKU provider registered for %s, skipping SKU check", resourceType)
 				continue
 			}
 
@@ -269,19 +268,25 @@ func checkRegionAvailability(
 				result.TotalSKUsChecked++
 
 				normalizedSourceSKU := strings.ToLower(strings.TrimSpace(skuName))
-				state, found := availableSKUsInTarget[normalizedSourceSKU]
+				avail, found := availableSKUsInTarget[normalizedSourceSKU]
 				if !found {
 					// SKU absent from response — treat as unavailable (API is region-filtered)
-					state = types.SKUUnavailable
+					avail = types.SKUAvailability{State: types.SKUUnavailable}
 				}
 
 				skuIdentifier := resourceType + ":" + skuName
-				switch state {
+				switch avail.State {
 				case types.SKUAvailable:
 					result.AvailableSKUs++
+				case types.SKUZoneRestricted:
+					zoneDetail := skuIdentifier
+					if len(avail.BlockedZones) > 0 {
+						zoneDetail += " (zones blocked: " + strings.Join(avail.BlockedZones, ",") + ")"
+					}
+					result.ZoneRestrictedSKUs = append(result.ZoneRestrictedSKUs, zoneDetail)
 				case types.SKURestricted:
 					result.RestrictedSKUs = append(result.RestrictedSKUs, skuIdentifier)
-				default: // skuUnavailable
+				default: // SKUUnavailable
 					result.UnavailableSKUs++
 					result.MissingSKUs = append(result.MissingSKUs, skuIdentifier)
 				}

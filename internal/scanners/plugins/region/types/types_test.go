@@ -36,6 +36,9 @@ func TestResourceTypeLocationData_IsAvailable(t *testing.T) {
 			"microsoft.compute": {
 				"virtualmachines": {"eastus": {}, "westeurope": {}},
 			},
+			"microsoft.network": {
+				"privatednszones": {"global": {}},
+			},
 		},
 	}
 
@@ -74,6 +77,18 @@ func TestResourceTypeLocationData_IsAvailable(t *testing.T) {
 			resourceType: "microsoft.compute",
 			region:       "eastus",
 			want:         false,
+		},
+		{
+			name:         "global service available in any region",
+			resourceType: "microsoft.network/privatednszones",
+			region:       "swedencentral",
+			want:         true,
+		},
+		{
+			name:         "global service available in another region",
+			resourceType: "microsoft.network/privatednszones",
+			region:       "brazilsouth",
+			want:         true,
 		},
 	}
 

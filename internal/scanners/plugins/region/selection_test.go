@@ -211,6 +211,7 @@ func TestCalculateScores_RestrictedSKUsCreditedHalf(t *testing.T) {
 			TotalSKUsChecked:    6,
 			AvailableSKUs:       4,
 			RestrictedSKUs:      []string{"sku-a", "sku-b"},
+			ZoneRestrictedSKUs:  []string{},
 			UnknownSKUs:         0,
 			AvgCostDifference:   0,
 			AvgLatencyMs:        0,
@@ -220,6 +221,30 @@ func TestCalculateScores_RestrictedSKUsCreditedHalf(t *testing.T) {
 	expected := 100*0.35 + (5.0/6.0)*100*0.30 + 100*0.15 + 100*0.20
 	if !approxEqual(results[0].Score, expected, 0.01) {
 		t.Errorf("expected %.4f for restricted SKUs, got %.4f", expected, results[0].Score)
+	}
+}
+
+// TestCalculateScores_ZoneRestrictedSKUsCreditedThreeQuarters: zone-restricted SKUs count as 75%.
+func TestCalculateScores_ZoneRestrictedSKUsCreditedThreeQuarters(t *testing.T) {
+	// 4 avail + 2 zone-restricted (×0.75 = 1.5 credit) out of 6 confirmed = 5.5/6 ≈ 91.67% SKU score
+	// resourceAvail=100, cost=100(neutral), latency=100(neutral)
+	// expected = 100*0.35 + (5.5/6)*100*0.30 + 100*0.15 + 100*0.20
+	results := []types.RegionComparison{
+		{
+			AvailabilityPercent: 100.0,
+			TotalSKUsChecked:    6,
+			AvailableSKUs:       4,
+			RestrictedSKUs:      []string{},
+			ZoneRestrictedSKUs:  []string{"sku-a (zones blocked: 1)", "sku-b (zones blocked: 2)"},
+			UnknownSKUs:         0,
+			AvgCostDifference:   0,
+			AvgLatencyMs:        0,
+		},
+	}
+	NewScanner().calculateScores(results)
+	expected := 100*0.35 + (5.5/6.0)*100*0.30 + 100*0.15 + 100*0.20
+	if !approxEqual(results[0].Score, expected, 0.01) {
+		t.Errorf("expected %.4f for zone-restricted SKUs, got %.4f", expected, results[0].Score)
 	}
 }
 

@@ -5,7 +5,6 @@ package region
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
@@ -20,8 +19,10 @@ import (
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/Azure/azqr/internal/scanners/plugins/region/availability"
 	"github.com/Azure/azqr/internal/scanners/plugins/region/cost"
-	"github.com/Azure/azqr/internal/scanners/plugins/region/excel"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/crg"
 	"github.com/Azure/azqr/internal/scanners/plugins/region/latency"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/output"
+	"github.com/Azure/azqr/internal/scanners/plugins/region/quota"
 	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
@@ -33,6 +34,8 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 
 	// Create HTTP client once for all requests (connection pooling + token caching)
 	s.httpClient = az.NewHttpClient(cred, az.DefaultHttpClientOptions(90*time.Second)) // Use longest timeout needed
+	s.cred = cred
+	s.clientOpts = az.NewDefaultClientOptions()
 
 	// Get target regions from stage options if provided
 	if params != nil && params.Stages != nil {
@@ -89,10 +92,17 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 
 	// subPhase1Result holds the per-subscription data collected during the parallel phase.
 	type subPhase1Result struct {
-		subID         string
-		subName       string
-		regionResults []types.RegionComparison
-		meterCosts    []types.MeterCostData
+		subID                   string
+		subName                 string
+		regionResults           []types.RegionComparison
+		meterCosts              []types.MeterCostData
+		quotaByRegion           map[string][]quota.VMFamilyUsage // targetRegion → VM family quotas
+		networkQuotaByRegion    map[string][]quota.UsageEntry    // targetRegion → network resource quotas
+		sqlQuotaByRegion        map[string][]quota.UsageEntry    // targetRegion → SQL quotas
+		appServiceQuotaByRegion map[string][]quota.UsageEntry    // targetRegion → App Service quotas
+		storageQuotaByRegion    map[string][]quota.UsageEntry    // targetRegion → storage quotas
+		zoneMappingsByRegion    map[string]map[string]string     // region → logicalZone → physicalZone
+		crgEntries              []crg.ReservationEntry           // capacity reservation inventory
 	}
 
 	// Phase 1: run availability + Cost Management queries in parallel (per subscription).
@@ -136,7 +146,7 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 
 			// Step 2: Get list of all Azure regions for this subscription
 			log.Debug().Msgf("Discovering available Azure regions for subscription %s...", renderers.MaskSubscriptionID(subID, true))
-			allRegions, regionZoneCount, err := s.getAllAzureRegions(ctx, subID)
+			allRegions, regionZoneCount, zoneMappingsByRegion, err := s.getAllAzureRegions(ctx, subID)
 			if err != nil {
 				log.Warn().Err(err).Msgf("Failed to get Azure regions for subscription %s, skipping", renderers.MaskSubscriptionID(subID, true))
 				return
@@ -188,12 +198,68 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			}
 			log.Debug().Msgf("Cost Management query completed for subscription %s (%d meters)", renderers.MaskSubscriptionID(subID, true), len(subMeterCosts))
 
+			// Step 4b: Fetch VM family quota and network quota for each unique target AND source region.
+			quotaByRegion := make(map[string][]quota.VMFamilyUsage)
+			networkQuotaByRegion := make(map[string][]quota.UsageEntry)
+			sqlQuotaByRegion := make(map[string][]quota.UsageEntry)
+			appServiceQuotaByRegion := make(map[string][]quota.UsageEntry)
+			storageQuotaByRegion := make(map[string][]quota.UsageEntry)
+
+			// Build the full set of unique physical regions to fetch quota for (targets + sources).
+			quotaRegions := make(map[string]bool)
+			for _, r := range regionResults {
+				quotaRegions[r.TargetRegion] = true
+				quotaRegions[r.SourceRegion] = true
+			}
+
+			// Helper to fetch and store generic quota entries, logging a warning on error.
+			fetchAndStore := func(region, label string, dest *map[string][]quota.UsageEntry,
+				fn func(context.Context, *az.HttpClient, string, string) ([]quota.UsageEntry, error)) {
+				usages, err := fn(ctx, s.httpClient, subID, region)
+				if err != nil {
+					log.Warn().Err(err).Msgf("%s quota unavailable for %s in %s — %s quota check skipped",
+						label, renderers.MaskSubscriptionID(subID, true), region, label)
+				} else {
+					(*dest)[region] = usages
+				}
+			}
+
+			for region := range quotaRegions {
+				if !types.IsPhysicalRegion(region) {
+					continue
+				}
+				vmUsages, qErr := quota.FetchVMQuota(ctx, s.cred, s.clientOpts, subID, region)
+				if qErr != nil {
+					log.Warn().Err(qErr).Msgf("VM quota unavailable for %s in %s — quota check skipped", renderers.MaskSubscriptionID(subID, true), region)
+				} else {
+					quotaByRegion[region] = vmUsages
+				}
+				fetchAndStore(region, "Network", &networkQuotaByRegion, quota.FetchNetworkQuota)
+				fetchAndStore(region, "SQL", &sqlQuotaByRegion, quota.FetchSQLQuota)
+				fetchAndStore(region, "App Service", &appServiceQuotaByRegion, quota.FetchAppServiceQuota)
+				fetchAndStore(region, "Storage", &storageQuotaByRegion, quota.FetchStorageQuota)
+			}
+
+			// Step 4c: Fetch Capacity Reservation Group inventory for this subscription.
+			crgEntries, crgErr := crg.FetchReservations(ctx, s.cred, s.clientOpts, subID, subName)
+			if crgErr != nil {
+				log.Warn().Err(crgErr).Msgf("CRG fetch failed for %s — capacity reservation sheet will be incomplete", renderers.MaskSubscriptionID(subID, true))
+				crgEntries = nil
+			}
+
 			phase1Mu.Lock()
 			phase1Results = append(phase1Results, subPhase1Result{
-				subID:         subID,
-				subName:       subName,
-				regionResults: regionResults,
-				meterCosts:    subMeterCosts,
+				subID:                   subID,
+				subName:                 subName,
+				regionResults:           regionResults,
+				meterCosts:              subMeterCosts,
+				quotaByRegion:           quotaByRegion,
+				networkQuotaByRegion:    networkQuotaByRegion,
+				sqlQuotaByRegion:        sqlQuotaByRegion,
+				appServiceQuotaByRegion: appServiceQuotaByRegion,
+				storageQuotaByRegion:    storageQuotaByRegion,
+				zoneMappingsByRegion:    zoneMappingsByRegion,
+				crgEntries:              crgEntries,
 			})
 			phase1Mu.Unlock()
 		}(subscriptionID, subscriptionName)
@@ -204,7 +270,7 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 
 	// Phase 2: build shared Retail API pricing once across all subscriptions.
 	// Deduplicate meter costs by MeterID while summing HistoricalCost across subscriptions
-	// so the Excel report reflects total cross-subscription spend per meter.
+	// so the outputs report reflects total cross-subscription spend per meter.
 	meterCostByID := make(map[string]float64)
 	allRegionsMap := make(map[string]bool)
 	for _, p1 := range phase1Results {
@@ -235,14 +301,19 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 	// Phase 3: apply shared pricing, calculate latency + scores (sequential — all in-memory).
 	allResults := []types.RegionComparison{}
 	for _, p1 := range phase1Results {
-		// Step 4b: Apply shared cross-region pricing weighted by this subscription's historical costs.
+		// Step 4c: Apply shared cross-region pricing weighted by this subscription's historical costs.
 		cost.ApplyCostDiffs(p1.regionResults, p1.meterCosts, sharedCostData)
 
-		// Step 5: Calculate network latency scores
+		// Step 5: Attach the subscription-scoped logical→physical AZ mapping for each target region.
+		for i := range p1.regionResults {
+			p1.regionResults[i].TargetZoneMappings = p1.zoneMappingsByRegion[p1.regionResults[i].TargetRegion]
+		}
+
+		// Step 6: Calculate network latency scores
 		log.Debug().Msgf("Calculating network latency for subscription %s...", renderers.MaskSubscriptionID(p1.subID, true))
 		latency.EnrichWithLatencyData(p1.regionResults)
 
-		// Step 6: Calculate recommendation scores
+		// Step 7: Calculate recommendation scores
 		log.Info().Msgf("Calculating recommendation scores for subscription %s", renderers.MaskSubscriptionID(p1.subID, true))
 		s.calculateScores(p1.regionResults)
 
@@ -305,22 +376,83 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 		}
 	}
 
-	// Build all output sheets: primary + SvcAvail_<region> per target + CostComparison
+	// Build all output sheets: primary + SvcAvail_<region> per target + CostComparison + CRG
 	outputs := []plugins.ExternalPluginOutput{{
 		Metadata:    s.GetMetadata(),
 		SheetName:   "Region Selection",
 		Description: "Analysis of optimal Azure region selection based on service availability, network latency, and cost factors",
 		Table:       table,
 	}}
-	outputs = append(outputs, excel.BuildSvcAvailSheets(allResults, globalInventory)...)
+	outputs = append(outputs, output.BuildSvcAvailSheets(allResults, globalInventory)...)
 	if sharedCostData != nil {
-		if costSheet := excel.BuildCostComparisonSheet(sharedCostData); costSheet != nil {
+		if costSheet := output.BuildCostComparisonSheet(sharedCostData); costSheet != nil {
 			outputs = append(outputs, *costSheet)
 		}
 	}
-	// Append Inventory sheet last. If an Inventory sheet was already written by
-	// the main scan (azqr scan), renderExternalPlugins will skip this sheet.
-	outputs = append(outputs, excel.BuildInventorySheet(allResources, params.Mask))
+
+	// Collect quota rows across all subscriptions and regions for the Quota sheet.
+	var allQuotaRows []output.QuotaSheetRow
+	for _, p1 := range phase1Results {
+		addQuotaRows := func(region, quotaType string, entries []quota.UsageEntry) {
+			for _, e := range entries {
+				allQuotaRows = append(allQuotaRows, output.QuotaSheetRow{
+					Subscription: p1.subName,
+					Region:       region,
+					QuotaType:    quotaType,
+					ResourceName: e.LocalizedName,
+					Current:      e.CurrentValue,
+					Limit:        e.Limit,
+					Available:    e.Available,
+					HeadroomPct:  e.HeadroomPct,
+					IsNearLimit:  e.IsNearLimit,
+					IsOverLimit:  e.IsAtOrOverLimit,
+				})
+			}
+		}
+		for region, entries := range p1.quotaByRegion {
+			addQuotaRows(region, "VM", entries)
+		}
+		for region, entries := range p1.networkQuotaByRegion {
+			addQuotaRows(region, "Network", entries)
+		}
+		for region, entries := range p1.sqlQuotaByRegion {
+			addQuotaRows(region, "SQL", entries)
+		}
+		for region, entries := range p1.appServiceQuotaByRegion {
+			addQuotaRows(region, "App Service", entries)
+		}
+		for region, entries := range p1.storageQuotaByRegion {
+			addQuotaRows(region, "Storage", entries)
+		}
+	}
+	if quotaSheet := output.BuildQuotaSheet(allQuotaRows); quotaSheet != nil {
+		outputs = append(outputs, *quotaSheet)
+	}
+
+	// Collect all CRG entries across subscriptions and build the sheet.
+	var allCRGRows [][]string
+	for _, p1 := range phase1Results {
+		for _, e := range p1.crgEntries {
+			allCRGRows = append(allCRGRows, []string{
+				e.SubscriptionName,
+				e.Location,
+				e.ResourceGroup,
+				e.CRGName,
+				e.ReservationName,
+				e.SKU,
+				fmt.Sprintf("%d", e.Reserved),
+				fmt.Sprintf("%d", e.Allocated),
+				fmt.Sprintf("%d", e.Available),
+				string(e.Status),
+			})
+		}
+	}
+	if crgSheet := output.BuildCRGSheetFromRows(allCRGRows); crgSheet != nil {
+		outputs = append(outputs, *crgSheet)
+	}
+
+	// Append Inventory sheet last.
+	outputs = append(outputs, output.BuildInventorySheet(allResources, params.Mask))
 
 	log.Info().Msgf("Region selection analysis completed for %d subscriptions",
 		len(subscriptions))
@@ -370,60 +502,55 @@ var azureZoneCapableRegions = map[string]int{
 	"westus3":            3,
 }
 
-// getAllAzureRegions gets a list of all available Azure regions and the Availability Zone count
-// for each. Queries the Azure Locations API to get the authoritative Physical region list.
-// Returns (regions, regionZoneCount, error).
+// getAllAzureRegions gets a list of all available Azure regions, the Availability Zone count
+// per region, and the per-subscription logical→physical AZ mapping per region.
+// Queries the Azure Locations API to get the authoritative Physical region list.
+// Returns (regions, regionZoneCount, zoneMappingsByRegion, error).
 // Zone counts first use availabilityZoneMappings from the API (subscription-scoped);
 // falls back to a curated static list when the API returns no mappings for any region.
-func (s *RegionSelectorScanner) getAllAzureRegions(ctx context.Context, subscriptionID string) ([]string, map[string]int, error) {
+func (s *RegionSelectorScanner) getAllAzureRegions(ctx context.Context, subscriptionID string) ([]string, map[string]int, map[string]map[string]string, error) {
 	log.Debug().Msgf("Getting regions for subscription %s", renderers.MaskSubscriptionID(subscriptionID, true))
 
-	// Query Azure Locations API (matches PowerShell implementation)
 	url := fmt.Sprintf("https://management.azure.com/subscriptions/%s/locations?api-version=2022-12-01", subscriptionID)
-
-	// Use scanner's HTTP client (throttling and retries handled internally)
-	body, err := s.httpClient.Do(ctx, url) // needsAuth=true, 3 retries
+	body, err := s.httpClient.Do(ctx, url)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to query locations API: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to query locations API: %w", err)
 	}
 
-	// Parse response — capture availabilityZoneMappings to determine zone support per region
-	var response struct {
-		Value []struct {
-			Name     string `json:"name"`
-			Metadata struct {
-				RegionType string `json:"regionType"`
-			} `json:"metadata"`
-			AvailabilityZoneMappings []struct {
-				LogicalZone  string `json:"logicalZone"`
-				PhysicalZone string `json:"physicalZone"`
-			} `json:"availabilityZoneMappings"`
-		} `json:"value"`
+	locations, err := az.ParseLocations(body)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to parse locations API response: %w", err)
 	}
 
-	if err := json.Unmarshal(body, &response); err != nil {
-		return nil, nil, fmt.Errorf("failed to parse response JSON: %w", err)
-	}
-
-	// Filter to Physical regions only; build zone count map in same pass
+	// Filter to Physical regions only; build zone count and mapping tables in one pass.
 	regions := make([]string, 0)
 	regionZoneCount := make(map[string]int)
+	zoneMappingsByRegion := make(map[string]map[string]string)
 	apiZonesDetected := 0
-	for _, location := range response.Value {
-		if location.Metadata.RegionType == "Physical" {
-			name := strings.ToLower(location.Name)
-			regions = append(regions, name)
-			zoneCount := len(location.AvailabilityZoneMappings)
-			regionZoneCount[name] = zoneCount
-			if zoneCount > 0 {
-				apiZonesDetected++
+
+	for _, location := range locations {
+		if location.Metadata.RegionType != "Physical" {
+			continue
+		}
+		name := strings.ToLower(location.Name)
+		regions = append(regions, name)
+
+		zoneCount := len(location.AvailabilityZoneMappings)
+		regionZoneCount[name] = zoneCount
+		if zoneCount > 0 {
+			apiZonesDetected++
+			// Build logical → physical map for this region (subscription-scoped).
+			m := make(map[string]string, zoneCount)
+			for _, zm := range location.AvailabilityZoneMappings {
+				m[zm.LogicalZone] = zm.PhysicalZone
 			}
+			zoneMappingsByRegion[name] = m
 		}
 	}
 
 	// The availabilityZoneMappings field is subscription-scoped: many subscription types
 	// (trial, MPN, some CSP) return empty mappings even for zone-capable regions.
-	// Fall back to the curated static list when the API returns no zone data at all.
+	// Fall back to the curated static list for zone counts when the API returns nothing.
 	if apiZonesDetected == 0 {
 		log.Debug().Msg("No availabilityZoneMappings in locations API response — using static zone-capable region list as fallback")
 		for name := range regionZoneCount {
@@ -436,7 +563,7 @@ func (s *RegionSelectorScanner) getAllAzureRegions(ctx context.Context, subscrip
 	sort.Strings(regions)
 	log.Debug().Msgf("Found %d physical Azure regions", len(regions))
 
-	return regions, regionZoneCount, nil
+	return regions, regionZoneCount, zoneMappingsByRegion, nil
 }
 
 // calculateScores calculates recommendation scores for each region using configurable weights
@@ -450,12 +577,15 @@ func (s *RegionSelectorScanner) calculateScores(results []types.RegionComparison
 
 		// SKU availability score (0-100).
 		// Denominator excludes unknowns (API errors) so they don't deflate the score.
-		// Restricted SKUs (subscription-level quota) count as 50% — they can be lifted.
+		// Zone-restricted SKUs (some zones blocked, liftable via support) count as 75%.
+		// Restricted SKUs (subscription-level regional block) count as 50%.
 		// When all SKU checks are unknown (confirmedChecked==0), score stays 100 (neutral).
 		skuAvailabilityScore := 100.0
 		confirmedChecked := results[i].TotalSKUsChecked - results[i].UnknownSKUs
 		if confirmedChecked > 0 {
-			effectiveAvailable := float64(results[i].AvailableSKUs) + float64(len(results[i].RestrictedSKUs))*0.5
+			effectiveAvailable := float64(results[i].AvailableSKUs) +
+				float64(len(results[i].ZoneRestrictedSKUs))*0.75 +
+				float64(len(results[i].RestrictedSKUs))*0.5
 			skuAvailabilityScore = (effectiveAvailable / float64(confirmedChecked)) * 100
 			if skuAvailabilityScore > 100 {
 				skuAvailabilityScore = 100
@@ -568,6 +698,25 @@ func (s *RegionSelectorScanner) generateOutputTable(results []types.RegionCompar
 		missingTypes := strings.Join(result.MissingResourceTypes, "; ")
 		unavailSKUs := strings.Join(result.MissingSKUs, "; ")
 		restrictedSKUs := strings.Join(result.RestrictedSKUs, "; ")
+		zoneRestrictedSKUs := strings.Join(result.ZoneRestrictedSKUs, "; ")
+
+		// Build logical→physical AZ mapping string for the target region.
+		// Format: "1→eastus-az1, 2→eastus-az2, 3→eastus-az3"
+		// This is subscription-scoped: logical zone numbers are NOT consistent across subscriptions.
+		var targetAZMapping string
+		if len(result.TargetZoneMappings) > 0 {
+			// Sort by logical zone for deterministic output.
+			logicalZones := make([]string, 0, len(result.TargetZoneMappings))
+			for lz := range result.TargetZoneMappings {
+				logicalZones = append(logicalZones, lz)
+			}
+			sort.Strings(logicalZones)
+			parts := make([]string, 0, len(logicalZones))
+			for _, lz := range logicalZones {
+				parts = append(parts, fmt.Sprintf("%s→%s", lz, result.TargetZoneMappings[lz]))
+			}
+			targetAZMapping = strings.Join(parts, ", ")
+		}
 
 		// Score quality: flag which data dimensions were unavailable during scoring
 		var qualityParts []string
@@ -607,9 +756,11 @@ func (s *RegionSelectorScanner) generateOutputTable(results []types.RegionCompar
 			fmt.Sprintf("%d", result.AvailableSKUs),
 			fmt.Sprintf("%d", result.UnavailableSKUs),
 			fmt.Sprintf("%d", len(result.RestrictedSKUs)),
+			fmt.Sprintf("%d", len(result.ZoneRestrictedSKUs)),
 			fmt.Sprintf("%d", result.UnknownSKUs),
 			skuAvailabilityStr,
 			azStr,
+			targetAZMapping,
 			latencyStr,
 			costDiffStr,
 			fmt.Sprintf("%.2f", result.Score),
@@ -618,6 +769,7 @@ func (s *RegionSelectorScanner) generateOutputTable(results []types.RegionCompar
 			missingTypes,
 			unavailSKUs,
 			restrictedSKUs,
+			zoneRestrictedSKUs,
 		})
 	}
 
