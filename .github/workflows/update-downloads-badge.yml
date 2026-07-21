@@ -1,0 +1,54 @@
+name: "update-downloads-badge"
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-badge:
+    name: Update Downloads Badge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout badges branch
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: badges
+          fetch-depth: 1
+
+      - name: Calculate total downloads
+        id: downloads
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TOTAL=$(gh api repos/${{ github.repository }}/releases \
+            --paginate \
+            --jq '[.[].assets[].download_count] | add // 0' \
+            | paste -sd+ | bc)
+          echo "total=${TOTAL}" >> $GITHUB_OUTPUT
+
+      - name: Generate downloads.json
+        run: |
+          TOTAL="${{ steps.downloads.outputs.total }}"
+          cat > downloads.json <<EOF
+          {
+            "schemaVersion": 1,
+            "label": "downloads",
+            "message": "${TOTAL}",
+            "color": "blue"
+          }
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update downloads badge to ${{ steps.downloads.outputs.total }}"
+          git push
