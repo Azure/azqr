@@ -9,10 +9,6 @@ on:
       - 'internal/scanners/**'
       - 'internal/aprl/**'
 
-  # Runs every Friday at midnight UTC
-  schedule:
-    - cron: "0 0 * * 5"
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -21,9 +17,6 @@ permissions:
   contents: read
   pages: write
   id-token: write
-
-env:
-  GH_TOKEN: ${{ github.token }}
 
 # Allow one concurrent deployment
 concurrency:
@@ -46,21 +39,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
-
-      - name: Calculate total downloads
-        run: |
-          TOTAL=$(gh api repos/${{ github.repository }}/releases \
-            --paginate \
-            --jq '[.[].assets[] | select(.name | (endswith("sha256") or startswith("Source code") or . == "azqr.zip") | not) | .download_count] | add // 0' \
-            | paste -sd+ | bc)
-          cat > ./docs/static/downloads.json <<EOF
-          {
-            "schemaVersion": 1,
-            "label": "downloads",
-            "message": "${TOTAL}",
-            "color": "blue"
-          }
-          EOF
 
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
