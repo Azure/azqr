@@ -41,9 +41,9 @@ func RegisterPrompts(s *server.MCPServer) {
 
 	s.AddPrompt(zoneMappingPrompt, handleZoneMappingPrompt())
 
-	// SQL ESU Plugin Prompt
+	// SQL EOL Plugin Prompt
 	sqlESUPrompt := mcp.NewPrompt(
-		"analyze_sql_esu",
+		"analyze_sql_eol",
 		mcp.WithPromptDescription("Analyze SQL Server End-of-Life and Extended Security Update status with cost analysis"),
 	)
 

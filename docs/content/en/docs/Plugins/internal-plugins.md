@@ -150,9 +150,9 @@ Availability zone loss/gain applies a multiplicative adjustment to the final sco
 
 ### 5. SQL Server ESU Status
 
-**Plugin Name**: `sql-esu`  
-**Command**: `azqr sql-esu`  
-**Flag**: `--plugin sql-esu`  
+**Plugin Name**: `sql-eol`  
+**Command**: `azqr sql-eol`  
+**Flag**: `--plugin sql-eol`  
 **Version**: 0.3.0-beta
 
 Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status across Arc-enabled SQL Server instances and SQL Virtual Machines on Azure.
@@ -215,8 +215,8 @@ azqr region-selection
 # Narrow region selection to specific target regions
 azqr region-selection --target-regions=swedencentral,germanywestcentral
 
-# Run SQL ESU plugin
-azqr sql-esu
+# Run SQL EOL plugin
+azqr sql-eol
 
 # Run with specific subscriptions
 azqr zone-mapping --subscription-id <sub-id>
@@ -239,7 +239,7 @@ Run plugins alongside standard compliance scanning using the `--plugin` flag:
 azqr scan --plugin openai-throttling
 
 # Enable multiple plugins during scan
-azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --plugin region-selection --plugin sql-esu
+azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --plugin region-selection --plugin sql-eol
 
 # Combine with other scan options
 azqr scan --subscription-id <sub-id> --plugin zone-mapping --output-name analysis
@@ -265,7 +265,7 @@ openai-throttling     1.0.0      internal   Checks OpenAI/Cognitive Services acc
 carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure resource type
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
 region-selection      0.1.0-beta internal   Scores and ranks Azure regions for workload migration...
-sql-esu               0.1.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
+sql-eol               0.1.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
 ```
 
 ### Plugin Details
@@ -289,7 +289,7 @@ Each internal plugin creates a dedicated worksheet in the Excel workbook:
 - **Region Selection** sheet (main scored table)
   - **Svc Avail `<region>`** sheets — one per target region with per-resource-type availability
   - **CostComparison** sheet — per-meter retail pricing across all analysed regions
-- **SQL ESU** sheet
+- **SQL EOL** sheet
 
 ```bash
 # Run plugins as standalone commands (fastest)
@@ -383,7 +383,7 @@ Internal plugins may require additional permissions beyond standard `Reader` acc
 | **zone-mapping** | Reader | Subscriptions API (locations endpoint) |
 | **openai-throttling** | Reader + Monitoring Reader | Cognitive Services, Monitor Metrics |
 | **carbon-emissions** | Reader | Carbon Optimization API |
-| **sql-esu** | Reader | Azure Resource Graph |
+| **sql-eol** | Reader | Azure Resource Graph |
 
 **Recommended**: Assign `Reader` and `Monitoring Reader` roles at subscription or management group scope.
 
@@ -394,7 +394,7 @@ Internal plugins add processing time to scans:
 - **openai-throttling**: 1-3 minutes (depends on number of OpenAI accounts)
 - **carbon-emissions**: 1-2 minutes (depends on subscription count)
 - **zone-mapping**: <10 seconds (very fast, one API call per subscription)
-- **sql-esu**: <30 seconds (single Azure Resource Graph query)
+- **sql-eol**: <30 seconds (single Azure Resource Graph query)
 
 **Optimization Tips**:
 - Enable only needed plugins

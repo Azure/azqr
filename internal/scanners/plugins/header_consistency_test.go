@@ -14,7 +14,7 @@ import (
 	"github.com/Azure/azqr/internal/scanners/plugins/carbon"
 	"github.com/Azure/azqr/internal/scanners/plugins/openai"
 	regionplugin "github.com/Azure/azqr/internal/scanners/plugins/region"
-	"github.com/Azure/azqr/internal/scanners/plugins/sqlesu"
+	"github.com/Azure/azqr/internal/scanners/plugins/sqleol"
 	"github.com/Azure/azqr/internal/scanners/plugins/zone"
 )
 
@@ -66,7 +66,7 @@ func TestCarbonPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
 }
 
 func TestSQLESUPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
-	assertHeaderRowMatchesColumnMetadata(t, sqlesu.NewScanner())
+	assertHeaderRowMatchesColumnMetadata(t, sqleol.NewScanner())
 }
 
 func TestRegionPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
@@ -81,7 +81,7 @@ func TestAllInternalPlugins_HaveColumnMetadata(t *testing.T) {
 		zone.NewScanner(),
 		openai.NewScanner(),
 		carbon.NewScanner(),
-		sqlesu.NewScanner(),
+		sqleol.NewScanner(),
 		regionplugin.NewScanner(),
 	}
 
