@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package sqlesu
+package sqleol
 
 import (
 	"encoding/json"
@@ -19,8 +19,8 @@ func TestNewScanner(t *testing.T) {
 func TestScanner_GetMetadata(t *testing.T) {
 	meta := NewScanner().GetMetadata()
 
-	if meta.Name != "sql-esu" {
-		t.Errorf("Name = %q, want sql-esu", meta.Name)
+	if meta.Name != "sql-eol" {
+		t.Errorf("Name = %q, want sql-eol", meta.Name)
 	}
 	if meta.Version == "" {
 		t.Error("Version must not be empty")
@@ -28,7 +28,7 @@ func TestScanner_GetMetadata(t *testing.T) {
 	if meta.Type != plugins.PluginTypeInternal {
 		t.Errorf("Type = %v, want PluginTypeInternal", meta.Type)
 	}
-	// sql-esu exposes a wide table; guard against an accidental large drop in columns.
+	// sql-eol exposes a wide table; guard against an accidental large drop in columns.
 	if len(meta.ColumnMetadata) < 20 {
 		t.Errorf("ColumnMetadata len = %d, want >= 20", len(meta.ColumnMetadata))
 	}
@@ -46,7 +46,7 @@ func TestScanner_GetMetadata(t *testing.T) {
 }
 
 // TestSQLESURow_Unmarshal verifies the JSON tag mapping from the ARG query
-// result into sqlESURow, including the lower-cased "vCores" tag.
+// result into sqlEOLRow, including the lower-cased "vCores" tag.
 func TestSQLESURow_Unmarshal(t *testing.T) {
 	raw := []byte(`{
 		"SubscriptionId": "sub-123",
@@ -59,7 +59,7 @@ func TestSQLESURow_Unmarshal(t *testing.T) {
 		"ConsolidationRatio": "2"
 	}`)
 
-	var r sqlESURow
+	var r sqlEOLRow
 	if err := json.Unmarshal(raw, &r); err != nil {
 		t.Fatalf("Unmarshal failed: %v", err)
 	}
@@ -84,7 +84,7 @@ func TestSQLESURow_Unmarshal(t *testing.T) {
 // TestSQLESURow_ToRecord verifies the flattened record preserves field order and
 // has one entry per declared column.
 func TestSQLESURow_ToRecord(t *testing.T) {
-	r := sqlESURow{
+	r := sqlEOLRow{
 		Name:                  "sql-vm-1",
 		ResourceGroup:         "rg-sql",
 		Subscription:          "Prod",

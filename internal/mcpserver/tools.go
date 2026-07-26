@@ -64,8 +64,8 @@ func RegisterTools(s *server.MCPServer) {
 	)
 	s.AddTool(zoneMappingTool, mcp.NewTypedToolHandler(scanPluginHandler("zone-mapping")))
 
-	// Plugin Tools: SQL ESU
-	sqlESUTool := mcp.NewTool("scan-sql-esu",
+	// Plugin Tools: SQL EOL
+	sqlEOLTool := mcp.NewTool("scan-sql-eol",
 		withBasicOptions(
 			mcp.WithDescription(
 				`Analyze SQL Server End-of-Life and Extended Security Update (ESU) status.
@@ -82,7 +82,7 @@ func RegisterTools(s *server.MCPServer) {
 				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
 		)...,
 	)
-	s.AddTool(sqlESUTool, mcp.NewTypedToolHandler(scanPluginHandler("sql-esu")))
+	s.AddTool(sqlEOLTool, mcp.NewTypedToolHandler(scanPluginHandler("sql-eol")))
 
 	// Plugin Tools: Region Selection
 	regionSelectionTool := mcp.NewTool("scan-region-selection",

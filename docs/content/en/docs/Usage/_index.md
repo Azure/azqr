@@ -265,8 +265,8 @@ azqr carbon-emissions
 # Run zone mapping analysis
 azqr zone-mapping
 
-# Run SQL ESU analysis
-azqr sql-esu
+# Run SQL EOL analysis
+azqr sql-eol
 
 # With specific subscription
 azqr zone-mapping --subscription-id <sub-id>
@@ -281,7 +281,7 @@ Run plugins alongside standard scanning:
 azqr scan --plugin openai-throttling
 
 # Multiple plugins with scan
-azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --plugin sql-esu
+azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --plugin sql-eol
 
 # With other options
 azqr scan --subscription-id <sub-id> --plugin zone-mapping

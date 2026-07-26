@@ -12,9 +12,14 @@
 //   ESU (blended 3-year estimate: Y1=75%, Y2=100%, Y3=125% of license cost):
 //     Standard/Web:   $139/core/month  |  Enterprise: $540.50/core/month
 //     Developer/Express/Evaluation/Free: $0
-//   SQL MI target cost:
+//   SQL MI target cost (compute + license):
 //     GP  PAYG: $123/vCore/month  |  GP  AHUB: $49/vCore/month
 //     BC  PAYG: $367/vCore/month  |  BC  AHUB: $147/vCore/month
+//   SQL MI storage (default: 0 GB — storage not included by default; set _estimatedStorageGB below):
+//     GP: $0.115/GB/month  (e.g. 512 GB → $58.88 | 1,024 GB → $117.76 | 2,048 GB → $235.52)
+//     BC rate is $0.230/GB/month but not used here (recommendGeneralPurposeOnly = true)
+//     Note: first 100% of provisioned DB size in backup is included free in SQL MI — backup not modelled
+//     Free editions (Developer/Express/Evaluation/Free): $0
 //
 // MIGRATION TARGET TIER LOGIC
 //   Arc Enterprise AHUB → General Purpose via Unlimited Virtualization Benefit (UVB)
@@ -29,18 +34,27 @@ resources
 // Consolidation model: conservative 2:1 ratio — 2 source SQL Server instances per SQL MI.
 // It is conservative and likely to be higher due to right-sizing (typical SQL Server utilization is 10–30%).
 | extend consolidationRatio = 2.0
+// Assumed total storage per SQL MI target instance (GB). Set to 0 by default (storage not factored in).
+// Change to your environment's expected DB size to include storage in the MI cost estimate.
+// GP rate: $0.115/GB/month (matches recommendGeneralPurposeOnly = true below).
+// Example: 512 GB → $58.88/month | 1,024 GB → $117.76/month | 2,048 GB → $235.52/month
+| extend _estimatedStorageGB = 0
 // Force all non-UVB cases to General Purpose pricing for a conservative assessment of SQL MI cost and savings.
 | extend recommendGeneralPurposeOnly = true
+| extend _rawSQLVersion = extract(@'(?i)sql(\d{4}(?:R2)?)', 1, tostring(properties.sqlImageOffer))
 | extend SQLVersion = iff(
                           type == "microsoft.azurearcdata/sqlserverinstances",
                           tostring(properties.version),
-                          strcat("SQL Server ", replace_string(extract(@'(?i)sql(\d{4}(?:R2)?)', 1, tostring(properties.sqlImageOffer)), "2008R2", "2008 R2"))
+                          iff(isempty(_rawSQLVersion), "Unknown",
+                              strcat("SQL Server ", replace_string(_rawSQLVersion, "2008R2", "2008 R2")))
     )
 | extend Edition = iff(type == "microsoft.azurearcdata/sqlserverinstances", tostring(properties.edition), tostring(properties.sqlImageSku))
-| extend CloudType = iff(type == "microsoft.azurearcdata/sqlserverinstances", "Arc-enabled (On-Prem)", "Azure VM (SQL IaaS)")
+// CloudType is derived after the hybridcompute join below (needs _arcCloudProvider)
 // For SQL VMs, core count lives on the underlying compute VM — join to retrieve it
 | extend _vmId = iff(type == "microsoft.sqlvirtualmachine/sqlvirtualmachines", tolower(tostring(properties.virtualMachineResourceId)), "")
 | extend _sqlImageOffer = iff(type == "microsoft.sqlvirtualmachine/sqlvirtualmachines", tolower(tostring(properties.sqlImageOffer)), "")
+// For Arc SQL, containerResourceId points to the underlying hybridcompute/machines resource
+| extend _arcMachineId = iff(type == "microsoft.azurearcdata/sqlserverinstances", tolower(tostring(properties.containerResourceId)), "")
 // SQL Server license type: PAYG = paying hourly license | AHUB = bring-your-own SA license
 | extend SQLLicenseType = case(
                               type == "microsoft.azurearcdata/sqlserverinstances",
@@ -57,12 +71,33 @@ resources
     | project _vmId = tolower(id), _vmSize = tostring(properties.hardwareProfile.vmSize)
     )
     on _vmId
+// Arc SQL: join to hybridcompute/machines to get cloudMetadata.provider (AWS/GCP/empty=on-prem)
+| join kind = leftouter (
+    resources
+    | where type == "microsoft.hybridcompute/machines"
+    | project _arcMachineId = tolower(id),
+              _arcCloudProvider = tostring(properties.cloudMetadata.provider)
+    )
+    on _arcMachineId
 | join kind = leftouter (
     resourcecontainers
     | where type == 'microsoft.resources/subscriptions'
     | project SubscriptionName = name, subscriptionId
     )
     on subscriptionId
+// Derive CloudType dynamically: SQL VMs are always Azure IaaS; Arc SQL cloud origin comes from
+// hybridcompute/machines.properties.cloudMetadata.provider (empty = on-prem, "AWS", "GCP", etc.)
+| extend CloudType = case(
+                         type != "microsoft.azurearcdata/sqlserverinstances",
+                         "Azure VM (SQL IaaS)",
+                         isempty(_arcCloudProvider),
+                         "Arc-enabled (On-Prem)",
+                         strcat("Arc-enabled (", _arcCloudProvider, ")")
+    )
+// UVB (Unlimited Virtualization Benefit) is an on-premises-only licensing benefit.
+// Restrict it to Arc SQL instances with no cloud provider (genuine on-prem / Azure Local).
+| extend _isOnPremArc = type == "microsoft.azurearcdata/sqlserverinstances"
+    and isempty(_arcCloudProvider)
 // Arc SQL: properties.vCore | SQL VM: exact lookup for legacy series (SKU ≠ vCPU), regex fallback for modern v3/v4/v5/v6
 | extend vCores = case(
                       type == "microsoft.azurearcdata/sqlserverinstances",
@@ -206,6 +241,8 @@ resources
                          "Expired",
                          SQLVersion == "SQL Server 2014" and _now >= datetime(2027-07-12),
                          "Expired",
+                         // SQL 2014: ESU started 2024-07-09 (already active) — no "Upcoming ESU" window.
+                         // Goes directly Supported → ESU Active → Expired (unlike 2016/2019/2022).
                          SQLVersion == "SQL Server 2014",
                          "ESU Active",
                          SQLVersion == "SQL Server 2016" and _now >= datetime(2029-07-14),
@@ -276,7 +313,7 @@ resources
 | extend _isWebEdition = tolower(Edition) contains "web"
 | extend _recommendedMITier = case(
                                   // UVB-eligible Arc Enterprise AHUB → GP is the right tier for highly virtualized on-prem workloads
-                                  _isEnterpriseEdition and SQLLicenseType == "AHUB" and CloudType == "Arc-enabled (On-Prem)",
+                                  _isEnterpriseEdition and SQLLicenseType == "AHUB" and _isOnPremArc,
                                   "General Purpose",
                                   _isEnterpriseEdition,
                                   "General Purpose (Database assessment required. Server had an Enterprise license)",
@@ -292,7 +329,7 @@ resources
                                        EOLStatus == "Expired",
                                        "CRITICAL - Migrate now to SQL MI",
                                        EOLStatus == "ESU Active",
-                                       "Recommended - Migrate to SQL MI ",
+                                       "Recommended - Migrate to SQL MI",
                                        EOLStatus == "Upcoming ESU",
                                        "Recommended - Migrate to SQL MI",
                                        EOLStatus == "Supported",
@@ -374,7 +411,7 @@ resources
                                    _isFreeEdition,
                                    0.0,
                                    // UVB: Arc-enabled Enterprise AHUB only (already GP — UVB sizing applies regardless of useOnlyGP)
-                                   _isEnterpriseEdition and SQLLicenseType == "AHUB" and CloudType == "Arc-enabled (On-Prem)",
+                                   _isEnterpriseEdition and SQLLicenseType == "AHUB" and _isOnPremArc,
                                    49.0 * iff(vCores / 4 < 4, 4, vCores / 4),   // GP + UVB + AHUB
                                    // useOnlyGP=true: force all remaining non-UVB cases to GP pricing
                                    recommendGeneralPurposeOnly and SQLLicenseType == "AHUB",
@@ -390,17 +427,12 @@ resources
                                    49.0 * BillableCores,   // GP + AHUB (~60% off $123)
                                    123.0 * BillableCores   // GP PAYG
     )
+// Add assumed storage cost to SQL MI target (GP rate: $0.115/GB/month; free editions excluded).
+// Consolidation and savings calculations below automatically include this cost.
+| extend EstSQLMIMonthlyCost = iff(_isFreeEdition, EstSQLMIMonthlyCost,
+    EstSQLMIMonthlyCost + (_estimatedStorageGB * 0.115))
 // Savings: current total − MI target cost ($0 for free editions)
 | extend EstSQLMIMonthlySaving = iff(_isFreeEdition, 0.0, _currentMonthlyCost - EstSQLMIMonthlyCost)
-| extend SQLMIMigrationVerdict = case(
-                                     _isFreeEdition,
-                                     "N/A",
-                                     EstSQLMIMonthlySaving > 0,
-                                     "Cost Savings",
-                                     EstSQLMIMonthlySaving < 0,
-                                     "Cost Increase (justified by PaaS/security benefits)",
-                                     "Break Even"
-    )
 | extend EstSQLMIMonthlyCostConsolidated = iff(_isFreeEdition, 0.0, EstSQLMIMonthlyCost / consolidationRatio)
 | extend EstSQLMIMonthlySavingConsolidated = iff(_isFreeEdition, 0.0, _currentMonthlyCost - EstSQLMIMonthlyCostConsolidated)
 | extend SQLMIMigrationVerdictConsolidated = case(
@@ -440,7 +472,7 @@ resources
     ConsolidationRatio = tostring(consolidationRatio),
     EstSQLMIMonthlyCost = tostring(round(EstSQLMIMonthlyCostConsolidated, 2)),
     EstSQLMIMonthlySaving = tostring(round(EstSQLMIMonthlySavingConsolidated, 2)),
-    SQLMIMigrationVerdict
+    SQLMIMigrationVerdict = SQLMIMigrationVerdictConsolidated
 | order by
     case(EOLStatus == "Expired", 0, EOLStatus == "ESU Active", 1, EOLStatus == "Upcoming ESU", 2, EOLStatus == "Supported", 3, 4) asc,
     EstSQLMIMonthlySaving desc,

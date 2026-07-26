@@ -438,10 +438,10 @@ Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status 
 
 ```bash
 # Run as standalone command (fast, plugin-only mode)
-azqr sql-esu
+azqr sql-eol
 
 # Or integrate with full scan
-azqr scan --plugin sql-esu
+azqr scan --plugin sql-eol
 ```
 
 [Internal Plugins Documentation](https://azure.github.io/azqr/docs/plugins/internal-plugins/)
@@ -454,7 +454,7 @@ azqr scan --subscription-id <sub-id> \
   --plugin carbon-emissions \
   --plugin zone-mapping \
   --plugin region-selection \
-  --plugin sql-esu \
+  --plugin sql-eol \
   --output-name comprehensive-analysis
 ```
 

@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package sqlesu
+package sqleol
 
 import (
 	"context"
 	_ "embed"
-	"encoding/json"
 	"fmt"
 
 	"github.com/Azure/azqr/internal/graph"
@@ -16,13 +15,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-//go:embed kql/sql-esu.kql
-var sqlESUQuery string
+//go:embed kql/sql-eol.kql
+var sqlEOLQuery string
 
 // Scanner is an internal plugin that scans SQL Server EOL/ESU status
 type Scanner struct{}
 
-// NewScanner creates a new SQL ESU scanner
+// NewScanner creates a new SQL EOL scanner
 func NewScanner() *Scanner {
 	return &Scanner{}
 }
@@ -30,9 +29,9 @@ func NewScanner() *Scanner {
 // GetMetadata returns plugin metadata
 func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "sql-esu",
-		Version:     "0.3.0-beta",
-		Description: "Analyzes SQL Server End-of-Life and Extended Security Update status with full cost breakdown (VM compute, SQL license, ESU), migration recommendations with target tier auto-selected by edition (Enterprise→BC, Standard/Web→GP), and unified SQL MI migration savings and verdict",
+		Name:        "sql-eol",
+		Version:     "0.5.0-beta",
+		Description: "Analyzes SQL Server End-of-Life and Extended Security Update status with full cost breakdown (VM compute, SQL license, ESU), migration recommendations with conservative GP-only SQL MI cost estimates (Enterprise editions include a note for assessment), and unified SQL MI migration savings and verdict",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
 		Type:        plugins.PluginTypeInternal,
@@ -74,44 +73,38 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 
 	graphClient := graph.NewGraphQuery(cred)
 
-	log.Debug().Msg("Executing SQL ESU ARG query")
+	log.Debug().Msg("Executing SQL EOL ARG query")
 
-	result, err := graphClient.Query(ctx, sqlESUQuery, subscriptions)
+	result, err := graphClient.Query(ctx, sqlEOLQuery, subscriptions)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query Azure Resource Graph for SQL ESU resources: %w", err)
+		return nil, fmt.Errorf("failed to query Azure Resource Graph for SQL EOL resources: %w", err)
 	}
 
 	// Build header row from ColumnMetadata (single source of truth).
-	table := [][]string{s.GetMetadata().HeaderRow()}
+	meta := s.GetMetadata()
+	table := [][]string{meta.HeaderRow()}
 
 	if result.Data != nil {
-		for _, raw := range result.Data {
-			var r sqlESURow
-			if err := json.Unmarshal(raw, &r); err != nil {
-				log.Warn().Err(err).Msg("Skipping malformed SQL ESU row")
-				continue
-			}
-
+		for _, r := range graph.UnmarshalRows[sqlEOLRow](result.Data, "SQL EOL") {
 			if params.Filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
 				continue
 			}
-
 			table = append(table, r.toRecord())
 		}
 	}
 
-	log.Info().Msgf("SQL ESU scan completed with %d resources", len(table)-1)
+	log.Info().Msgf("SQL EOL scan completed with %d resources", len(table)-1)
 
 	return []plugins.ExternalPluginOutput{{
-		Metadata:    s.GetMetadata(),
-		SheetName:   "SQL ESU",
+		Metadata:    meta,
+		SheetName:   "SQL EOL",
 		Description: "SQL Server End-of-Life and Extended Security Update status with cost analysis",
 		Table:       table,
 	}}, nil
 }
 
-// sqlESURow is the shape of a single row returned by the SQL ESU ARG query.
-type sqlESURow struct {
+// sqlEOLRow is the shape of a single row returned by the SQL EOL ARG query.
+type sqlEOLRow struct {
 	SubscriptionID               string `json:"SubscriptionId"`
 	Name                         string `json:"Name"`
 	ResourceGroup                string `json:"ResourceGroup"`
@@ -142,9 +135,9 @@ type sqlESURow struct {
 	SQLMIMigrationVerdict        string `json:"SQLMIMigrationVerdict"`
 }
 
-// toRecord flattens a sqlESURow into a table row in the same column order as
+// toRecord flattens a sqlEOLRow into a table row in the same column order as
 // the plugin's ColumnMetadata.
-func (r sqlESURow) toRecord() []string {
+func (r sqlEOLRow) toRecord() []string {
 	return []string{
 		r.Subscription,
 		r.ResourceGroup,
@@ -178,5 +171,5 @@ func (r sqlESURow) toRecord() []string {
 
 // init registers the plugin automatically
 func init() {
-	plugins.RegisterInternalPlugin("sql-esu", NewScanner())
+	plugins.RegisterInternalPlugin("sql-eol", NewScanner())
 }
