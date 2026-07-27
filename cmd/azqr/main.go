@@ -7,9 +7,10 @@ import (
 	"github.com/Azure/azqr/cmd/azqr/commands"
 
 	// Import internal plugins to register them
-	_ "github.com/Azure/azqr/internal/scanners/plugins/carbon"
 	_ "github.com/Azure/azqr/internal/scanners/plugins/aigov"
+	_ "github.com/Azure/azqr/internal/scanners/plugins/carbon"
 	_ "github.com/Azure/azqr/internal/scanners/plugins/region"
+	_ "github.com/Azure/azqr/internal/scanners/plugins/servicehealth"
 	_ "github.com/Azure/azqr/internal/scanners/plugins/sqleol"
 	_ "github.com/Azure/azqr/internal/scanners/plugins/zone"
 )
