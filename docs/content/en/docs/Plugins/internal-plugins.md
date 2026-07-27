@@ -12,11 +12,11 @@ Internal plugins are disabled by default and must be explicitly enabled using co
 
 ## Available Internal Plugins
 
-### 1. OpenAI Throttling
+### 1. AI Governance
 
-**Plugin Name**: `openai-throttling`  
-**Command**: `azqr openai-throttling`  
-**Flag**: `--plugin openai-throttling`  
+**Plugin Name**: `ai-gov`  
+**Command**: `azqr ai-gov`  
+**Flag**: `--plugin ai-gov`  
 **Version**: 1.0.0
 
 Monitors Azure OpenAI and Cognitive Services accounts for throttling (429 errors) to identify capacity constraints.
@@ -201,7 +201,7 @@ Run plugins as top-level commands for optimized execution. This mode skips resou
 
 ```bash
 # Run OpenAI throttling plugin
-azqr openai-throttling
+azqr ai-gov
 
 # Run carbon emissions plugin
 azqr carbon-emissions
@@ -222,7 +222,7 @@ azqr sql-eol
 azqr zone-mapping --subscription-id <sub-id>
 
 # Run with custom output name
-azqr openai-throttling --output-name throttling-report
+azqr ai-gov --output-name throttling-report
 ```
 
 **Benefits of Standalone Mode:**
@@ -236,10 +236,10 @@ Run plugins alongside standard compliance scanning using the `--plugin` flag:
 
 ```bash
 # Enable single plugin during scan
-azqr scan --plugin openai-throttling
+azqr scan --plugin ai-gov
 
 # Enable multiple plugins during scan
-azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --plugin region-selection --plugin sql-eol
+azqr scan --plugin ai-gov --plugin carbon-emissions --plugin zone-mapping --plugin region-selection --plugin sql-eol
 
 # Combine with other scan options
 azqr scan --subscription-id <sub-id> --plugin zone-mapping --output-name analysis
@@ -261,7 +261,7 @@ azqr plugins list
 **Sample Output**:
 ```
 NAME                  VERSION    TYPE       DESCRIPTION
-openai-throttling     1.0.0      internal   Checks OpenAI/Cognitive Services accounts for...
+ai-gov     1.0.0      internal   Checks OpenAI/Cognitive Services accounts for...
 carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure resource type
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
 region-selection      0.1.0-beta internal   Scores and ranks Azure regions for workload migration...
@@ -284,7 +284,7 @@ Internal plugin results are included in all output formats:
 
 Each internal plugin creates a dedicated worksheet in the Excel workbook:
 - **Zone Mapping** sheet
-- **OpenAI Throttling** sheet  
+- **AI Gov** sheet  
 - **Carbon Emissions** sheet
 - **Region Selection** sheet (main scored table)
   - **Svc Avail `<region>`** sheets — one per target region with per-resource-type availability
@@ -293,13 +293,13 @@ Each internal plugin creates a dedicated worksheet in the Excel workbook:
 
 ```bash
 # Run plugins as standalone commands (fastest)
-azqr openai-throttling
+azqr ai-gov
 azqr carbon-emissions
 azqr zone-mapping
 azqr region-selection
 
 # Or run with full scan
-azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --plugin region-selection
+azqr scan --plugin ai-gov --plugin carbon-emissions --plugin zone-mapping --plugin region-selection
 # Generates: azqr_action_plan_YYYY_MM_DD_THHMMSS.xlsx
 ```
 
@@ -351,29 +351,6 @@ azqr scan --plugin zone-mapping --csv
 #   ...
 ```
 
-## Interactive Dashboard
-
-View plugin results interactively using the `show` command:
-
-```bash
-# Generate report with plugins (standalone commands)
-azqr openai-throttling --output-name analysis
-azqr carbon-emissions --output-name analysis
-azqr zone-mapping --output-name analysis
-
-# Or generate with full scan
-azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --output-name analysis
-
-# Launch interactive viewer
-azqr show -f analysis.xlsx --open
-```
-
-The dashboard provides:
-- Filterable columns (dropdowns, search)
-- Sortable data tables
-- Export capabilities
-- Real-time filtering
-
 ## Permissions
 
 Internal plugins may require additional permissions beyond standard `Reader` access:
@@ -381,7 +358,7 @@ Internal plugins may require additional permissions beyond standard `Reader` acc
 | Plugin | Required Permissions | API Dependencies |
 |--------|---------------------|------------------|
 | **zone-mapping** | Reader | Subscriptions API (locations endpoint) |
-| **openai-throttling** | Reader + Monitoring Reader | Cognitive Services, Monitor Metrics |
+| **ai-gov** | Reader + Monitoring Reader | Cognitive Services, Monitor Metrics |
 | **carbon-emissions** | Reader | Carbon Optimization API |
 | **sql-eol** | Reader | Azure Resource Graph |
 
@@ -391,7 +368,7 @@ Internal plugins may require additional permissions beyond standard `Reader` acc
 
 Internal plugins add processing time to scans:
 
-- **openai-throttling**: 1-3 minutes (depends on number of OpenAI accounts)
+- **ai-gov**: 1-3 minutes (depends on number of OpenAI accounts)
 - **carbon-emissions**: 1-2 minutes (depends on subscription count)
 - **zone-mapping**: <10 seconds (very fast, one API call per subscription)
 - **sql-eol**: <30 seconds (single Azure Resource Graph query)

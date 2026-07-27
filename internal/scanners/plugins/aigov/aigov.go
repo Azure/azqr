@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package openai
+package aigov
 
 import (
 	"context"
@@ -25,40 +25,40 @@ import (
 // maxConcurrentDeploymentFetches limits parallel ARM calls when listing deployments.
 const maxConcurrentDeploymentFetches = 5
 
-// ThrottlingScanner is an internal plugin that monitors OpenAI throttling
-type ThrottlingScanner struct{}
+// AIGovScanner is an internal plugin that monitors AI governance throttling
+type AIGovScanner struct{}
 
-// NewScanner creates a new OpenAI throttling scanner
-func NewScanner() *ThrottlingScanner {
-	return &ThrottlingScanner{}
+// NewScanner creates a new AI governance throttling scanner
+func NewScanner() *AIGovScanner {
+	return &AIGovScanner{}
 }
 
 // GetMetadata returns plugin metadata
-func (s *ThrottlingScanner) GetMetadata() plugins.PluginMetadata {
+func (s *AIGovScanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "openai-throttling",
+		Name:        "ai-gov",
 		Version:     "1.0.0",
-		Description: "Checks OpenAI/Cognitive Services accounts for 429 throttling errors",
+		Description: "Checks AI Governance",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
 		Type:        plugins.PluginTypeInternal,
 		ColumnMetadata: []plugins.ColumnMetadata{
-			{Name: "Subscription", DataKey: "subscription", FilterType: plugins.FilterTypeSearch},
-			{Name: "Resource Group", DataKey: "resourceGroup", FilterType: plugins.FilterTypeSearch},
-			{Name: "Account Name", DataKey: "accountName", FilterType: plugins.FilterTypeSearch},
-			{Name: "Kind", DataKey: "kind", FilterType: plugins.FilterTypeDropdown},
-			{Name: "SKU", DataKey: "sku", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Deployment Name", DataKey: "deploymentName", FilterType: plugins.FilterTypeSearch},
-			{Name: "Model Name", DataKey: "modelName", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Model Version", DataKey: "modelVersion", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Model Format", DataKey: "modelFormat", FilterType: plugins.FilterTypeDropdown},
-			{Name: "SKU Capacity", DataKey: "skuCapacity", FilterType: plugins.FilterTypeNone},
-			{Name: "Version Upgrade Option", DataKey: "versionUpgradeOption", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Spillover Enabled", DataKey: "spilloverEnabled", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Spillover Deployment", DataKey: "spilloverDeployment", FilterType: plugins.FilterTypeSearch},
-			{Name: "Hour", DataKey: "hour", FilterType: plugins.FilterTypeSearch},
-			{Name: "Status Code", DataKey: "statusCode", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Request Count", DataKey: "requestCount", FilterType: plugins.FilterTypeNone},
+			{Name: "Subscription"},
+			{Name: "Resource Group"},
+			{Name: "Account Name"},
+			{Name: "Kind"},
+			{Name: "SKU"},
+			{Name: "Deployment Name"},
+			{Name: "Model Name"},
+			{Name: "Model Version"},
+			{Name: "Model Format"},
+			{Name: "SKU Capacity"},
+			{Name: "Version Upgrade Option"},
+			{Name: "Spillover Enabled"},
+			{Name: "Spillover Deployment"},
+			{Name: "Hour"},
+			{Name: "Status Code"},
+			{Name: "Request Count"},
 		},
 	}
 }
@@ -109,7 +109,7 @@ func extractDeploymentInfo(deployment *armcognitiveservices.Deployment) deployme
 }
 
 // Scan executes the plugin and returns table data
-func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
+func (s *AIGovScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
 	// Build header row from ColumnMetadata (single source of truth).
 	table := [][]string{s.GetMetadata().HeaderRow()}
 
@@ -125,8 +125,8 @@ func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredentia
 	if len(openAIResources) == 0 {
 		return []plugins.ExternalPluginOutput{{
 			Metadata:    s.GetMetadata(),
-			SheetName:   "OpenAI Throttling",
-			Description: "Analysis of throttling errors for OpenAI/Cognitive Services accounts by hour, model, and status code",
+			SheetName:   "AI Throttling",
+			Description: "Analysis of AI/Cognitive Services accounts by hour, model, and status code",
 			Table:       table,
 		}}, nil
 	}
@@ -189,15 +189,15 @@ func (s *ThrottlingScanner) Scan(ctx context.Context, cred azcore.TokenCredentia
 
 	return []plugins.ExternalPluginOutput{{
 		Metadata:    s.GetMetadata(),
-		SheetName:   "OpenAI Throttling",
-		Description: "Analysis of throttling errors for OpenAI/Cognitive Services accounts by hour, model, and status code",
+		SheetName:   "AI Gov",
+		Description: "Analysis of AI/Cognitive Services accounts by hour, model, and status code",
 		Table:       table,
 	}}, nil
 }
 
-// discoverOpenAIResources queries Azure Resource Graph for CognitiveServices accounts
+// discoverAIResources queries Azure Resource Graph for CognitiveServices accounts
 // with an OpenAI or AI Services kind, avoiding a full resource inventory download.
-func (s *ThrottlingScanner) discoverOpenAIResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) ([]*models.Resource, error) {
+func (s *AIGovScanner) discoverOpenAIResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) ([]*models.Resource, error) {
 	graphClient := graph.NewGraphQuery(cred)
 
 	query := `resources
@@ -257,7 +257,7 @@ type ResourceBatchGroup struct {
 }
 
 // groupResourcesForBatch groups resources that can be queried together in batch API
-func (s *ThrottlingScanner) groupResourcesForBatch(resources []*models.Resource) []ResourceBatchGroup {
+func (s *AIGovScanner) groupResourcesForBatch(resources []*models.Resource) []ResourceBatchGroup {
 	groups := make(map[string]*ResourceBatchGroup)
 
 	for _, resource := range resources {
@@ -292,7 +292,7 @@ type accountDeployments struct {
 }
 
 // processBatch processes a batch of resources using batch metrics API
-func (s *ThrottlingScanner) processBatch(ctx context.Context, cred azcore.TokenCredential, deploymentsClient *armcognitiveservices.DeploymentsClient, resources []*models.Resource, subscriptionName string) ([][]string, error) {
+func (s *AIGovScanner) processBatch(ctx context.Context, cred azcore.TokenCredential, deploymentsClient *armcognitiveservices.DeploymentsClient, resources []*models.Resource, subscriptionName string) ([][]string, error) {
 	if len(resources) == 0 {
 		return nil, nil
 	}
@@ -435,7 +435,7 @@ func (s *ThrottlingScanner) processBatch(ctx context.Context, cred azcore.TokenC
 }
 
 // getBatchMetricsWithStatusCodeSplit queries Azure Monitor batch API for request metrics
-func (s *ThrottlingScanner) getBatchMetricsWithStatusCodeSplit(ctx context.Context, cred azcore.TokenCredential, subscriptionID, region string, resourceIDs []string, hours int) (map[string]map[string]map[string]map[string]map[string]float64, error) {
+func (s *AIGovScanner) getBatchMetricsWithStatusCodeSplit(ctx context.Context, cred azcore.TokenCredential, subscriptionID, region string, resourceIDs []string, hours int) (map[string]map[string]map[string]map[string]map[string]float64, error) {
 	// Create regional metrics client
 	endpoint := fmt.Sprintf("https://%s.metrics.monitor.azure.com", region)
 	client, err := azmetrics.NewClient(endpoint, cred, nil)
@@ -542,7 +542,7 @@ func (s *ThrottlingScanner) getBatchMetricsWithStatusCodeSplit(ctx context.Conte
 }
 
 // getDeployments retrieves all deployments for a cognitive services account
-func (s *ThrottlingScanner) getDeployments(ctx context.Context, client *armcognitiveservices.DeploymentsClient, resourceGroup, accountName string) ([]*armcognitiveservices.Deployment, error) {
+func (s *AIGovScanner) getDeployments(ctx context.Context, client *armcognitiveservices.DeploymentsClient, resourceGroup, accountName string) ([]*armcognitiveservices.Deployment, error) {
 	pager := client.NewListPager(resourceGroup, accountName, nil)
 	var deployments []*armcognitiveservices.Deployment
 
@@ -561,5 +561,5 @@ func (s *ThrottlingScanner) getDeployments(ctx context.Context, client *armcogni
 // init registers this plugin with the internal plugin registry
 func init() {
 	scanner := NewScanner()
-	plugins.RegisterInternalPlugin("openai-throttling", scanner)
+	plugins.RegisterInternalPlugin("ai-gov", scanner)
 }

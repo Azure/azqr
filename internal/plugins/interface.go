@@ -135,9 +135,7 @@ func (m PluginMetadata) HeaderRow() []string {
 
 // ColumnMetadata defines filtering behavior for a column in the viewer
 type ColumnMetadata struct {
-	Name       string     `json:"name"`       // Display name (e.g., "Latest Month Emissions")
-	DataKey    string     `json:"dataKey"`    // JSON data key (e.g., "latestMonthEmissions")
-	FilterType FilterType `json:"filterType"` // "none", "dropdown", or "search"
+	Name       string     `json:"name"`        // Display name (e.g., "Latest Month Emissions")
 }
 
 // ExternalPluginOutput represents the output from a plugin execution

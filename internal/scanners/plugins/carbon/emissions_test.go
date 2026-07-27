@@ -32,23 +32,21 @@ func TestEmissionsScanner_GetMetadata(t *testing.T) {
 		t.Errorf("ColumnMetadata len = %d, want 8", len(meta.ColumnMetadata))
 	}
 
-	assertDataKeysValid(t, meta)
+	assertNamesValid(t, meta)
 }
 
-// assertDataKeysValid checks that every column has a non-empty, unique DataKey.
-// HeaderRow consistency is covered separately; this guards the DataKeys used by
-// the web viewer and filters.
-func assertDataKeysValid(t *testing.T, meta plugins.PluginMetadata) {
+// assertNamesValid checks that every column has a non-empty, unique Name.
+func assertNamesValid(t *testing.T, meta plugins.PluginMetadata) {
 	t.Helper()
 	seen := make(map[string]bool, len(meta.ColumnMetadata))
 	for i, col := range meta.ColumnMetadata {
-		if col.DataKey == "" {
-			t.Errorf("ColumnMetadata[%d] (%q) has empty DataKey", i, col.Name)
+		if col.Name == "" {
+			t.Errorf("ColumnMetadata[%d] has empty Name", i)
 		}
-		if seen[col.DataKey] {
-			t.Errorf("duplicate DataKey %q at index %d", col.DataKey, i)
+		if seen[col.Name] {
+			t.Errorf("duplicate Name %q at index %d", col.Name, i)
 		}
-		seen[col.DataKey] = true
+		seen[col.Name] = true
 	}
 }
 
