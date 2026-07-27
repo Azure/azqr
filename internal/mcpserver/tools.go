@@ -27,11 +27,11 @@ func RegisterTools(s *server.MCPServer) {
 	)
 	s.AddTool(carbonEmissionsTool, mcp.NewTypedToolHandler(scanPluginHandler("carbon-emissions")))
 
-	// Plugin Tools: OpenAI Throttling
-	openAIThrottlingTool := mcp.NewTool("scan-openai-throttling",
+	// Plugin Tools: AI Governance Throttling
+	aiGovTool := mcp.NewTool("scan-ai-gov",
 		withBasicOptions(
 			mcp.WithDescription(
-				`Check OpenAI/Cognitive Services accounts for 429 throttling errors.
+				`Check AI/Cognitive Services accounts for 429 throttling errors.
 
 				This tool monitors OpenAI and Azure Cognitive Services accounts for rate limiting issues:
 				- Detects HTTP 429 (Too Many Requests) responses
@@ -44,7 +44,7 @@ func RegisterTools(s *server.MCPServer) {
 				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
 		)...,
 	)
-	s.AddTool(openAIThrottlingTool, mcp.NewTypedToolHandler(scanPluginHandler("openai-throttling")))
+	s.AddTool(aiGovTool, mcp.NewTypedToolHandler(scanPluginHandler("ai-gov")))
 
 	// Plugin Tools: Zone Mapping
 	zoneMappingTool := mcp.NewTool("scan-zone-mapping",

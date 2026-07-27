@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-package openai
+package aigov
 
 import (
 	"testing"
@@ -12,14 +12,14 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices/v2"
 )
 
-func TestNewThrottlingScanner(t *testing.T) {
+func TestNewAIGovScanner(t *testing.T) {
 	scanner := NewScanner()
 	if scanner == nil {
-		t.Fatal("NewThrottlingScanner() returned nil")
+		t.Fatal("NewAIGovScanner() returned nil")
 	}
 }
 
-func TestThrottlingScanner_GetMetadata(t *testing.T) {
+func TestAIGovScanner_GetMetadata(t *testing.T) {
 	scanner := NewScanner()
 	metadata := scanner.GetMetadata()
 
@@ -28,9 +28,9 @@ func TestThrottlingScanner_GetMetadata(t *testing.T) {
 		got      interface{}
 		expected interface{}
 	}{
-		{"Name", metadata.Name, "openai-throttling"},
+		{"Name", metadata.Name, "ai-gov"},
 		{"Version", metadata.Version, "1.0.0"},
-		{"Description", metadata.Description, "Checks OpenAI/Cognitive Services accounts for 429 throttling errors"},
+		{"Description", metadata.Description, "Checks AI Governance"},
 		{"Author", metadata.Author, "Azure Quick Review Team"},
 		{"License", metadata.License, "MIT"},
 		{"Type", metadata.Type, plugins.PluginTypeInternal},
@@ -45,55 +45,45 @@ func TestThrottlingScanner_GetMetadata(t *testing.T) {
 	}
 }
 
-func TestThrottlingScanner_GetMetadata_ColumnMetadata(t *testing.T) {
+func TestAIGovScanner_GetMetadata_ColumnMetadata(t *testing.T) {
 	scanner := NewScanner()
 	metadata := scanner.GetMetadata()
 
-	expectedColumns := []struct {
-		name       string
-		dataKey    string
-		filterType plugins.FilterType
-	}{
-		{"Subscription", "subscription", plugins.FilterTypeSearch},
-		{"Resource Group", "resourceGroup", plugins.FilterTypeSearch},
-		{"Account Name", "accountName", plugins.FilterTypeSearch},
-		{"Kind", "kind", plugins.FilterTypeDropdown},
-		{"SKU", "sku", plugins.FilterTypeDropdown},
-		{"Deployment Name", "deploymentName", plugins.FilterTypeSearch},
-		{"Model Name", "modelName", plugins.FilterTypeDropdown},
-		{"Model Version", "modelVersion", plugins.FilterTypeDropdown},
-		{"Model Format", "modelFormat", plugins.FilterTypeDropdown},
-		{"SKU Capacity", "skuCapacity", plugins.FilterTypeNone},
-		{"Version Upgrade Option", "versionUpgradeOption", plugins.FilterTypeDropdown},
-		{"Spillover Enabled", "spilloverEnabled", plugins.FilterTypeDropdown},
-		{"Spillover Deployment", "spilloverDeployment", plugins.FilterTypeSearch},
-		{"Hour", "hour", plugins.FilterTypeSearch},
-		{"Status Code", "statusCode", plugins.FilterTypeDropdown},
-		{"Request Count", "requestCount", plugins.FilterTypeNone},
+	expectedNames := []string{
+		"Subscription",
+		"Resource Group",
+		"Account Name",
+		"Kind",
+		"SKU",
+		"Deployment Name",
+		"Model Name",
+		"Model Version",
+		"Model Format",
+		"SKU Capacity",
+		"Version Upgrade Option",
+		"Spillover Enabled",
+		"Spillover Deployment",
+		"Hour",
+		"Status Code",
+		"Request Count",
 	}
 
-	if len(metadata.ColumnMetadata) != len(expectedColumns) {
-		t.Errorf("Expected %d columns, got %d", len(expectedColumns), len(metadata.ColumnMetadata))
+	if len(metadata.ColumnMetadata) != len(expectedNames) {
+		t.Errorf("Expected %d columns, got %d", len(expectedNames), len(metadata.ColumnMetadata))
 	}
 
-	for i, expected := range expectedColumns {
+	for i, expected := range expectedNames {
 		if i >= len(metadata.ColumnMetadata) {
 			break
 		}
 		col := metadata.ColumnMetadata[i]
-		if col.Name != expected.name {
-			t.Errorf("Column[%d].Name = %s, want %s", i, col.Name, expected.name)
-		}
-		if col.DataKey != expected.dataKey {
-			t.Errorf("Column[%d].DataKey = %s, want %s", i, col.DataKey, expected.dataKey)
-		}
-		if col.FilterType != expected.filterType {
-			t.Errorf("Column[%d].FilterType = %v, want %v", i, col.FilterType, expected.filterType)
+		if col.Name != expected {
+			t.Errorf("Column[%d].Name = %s, want %s", i, col.Name, expected)
 		}
 	}
 }
 
-func TestThrottlingScanner_groupResourcesForBatch(t *testing.T) {
+func TestAIGovScanner_groupResourcesForBatch(t *testing.T) {
 	scanner := NewScanner()
 
 	tests := []struct {
@@ -236,7 +226,7 @@ func TestThrottlingScanner_groupResourcesForBatch(t *testing.T) {
 	}
 }
 
-func TestThrottlingScanner_groupResourcesForBatch_Grouping(t *testing.T) {
+func TestAIGovScanner_groupResourcesForBatch_Grouping(t *testing.T) {
 	scanner := NewScanner()
 
 	// Test that resources are correctly grouped
@@ -296,7 +286,7 @@ func TestPluginRegistration(t *testing.T) {
 	// This is a basic sanity check that the plugin can be created
 	scanner := NewScanner()
 	metadata := scanner.GetMetadata()
-	if metadata.Name != "openai-throttling" {
+	if metadata.Name != "ai-gov" {
 		t.Errorf("Plugin registration failed or wrong plugin registered")
 	}
 }

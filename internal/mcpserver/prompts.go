@@ -25,13 +25,13 @@ func RegisterPrompts(s *server.MCPServer) {
 
 	s.AddPrompt(carbonEmissionsPrompt, handleCarbonEmissionsPrompt())
 
-	// OpenAI Throttling Plugin Prompt
-	openAIThrottlingPrompt := mcp.NewPrompt(
-		"check_openai_throttling",
-		mcp.WithPromptDescription("Check OpenAI/Cognitive Services accounts for 429 throttling errors"),
+	// AI Governance Plugin Prompt
+	prompt := mcp.NewPrompt(
+		"check_ai_gov",
+		mcp.WithPromptDescription("Check AI/Cognitive Services accounts for 429 throttling errors"),
 	)
 
-	s.AddPrompt(openAIThrottlingPrompt, handleOpenAIThrottlingPrompt())
+	s.AddPrompt(prompt, handleAIGovPrompt())
 
 	// Zone Mapping Plugin Prompt
 	zoneMappingPrompt := mcp.NewPrompt(

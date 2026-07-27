@@ -35,14 +35,14 @@ func (s *EmissionsScanner) GetMetadata() plugins.PluginMetadata {
 		License:     "MIT",
 		Type:        plugins.PluginTypeInternal,
 		ColumnMetadata: []plugins.ColumnMetadata{
-			{Name: "Period From", DataKey: "periodFrom", FilterType: plugins.FilterTypeSearch},
-			{Name: "Period To", DataKey: "periodTo", FilterType: plugins.FilterTypeSearch},
-			{Name: "Resource Type", DataKey: "resourceType", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Latest Month Emissions", DataKey: "latestMonthEmissions", FilterType: plugins.FilterTypeNone},
-			{Name: "Previous Month Emissions", DataKey: "previousMonthEmissions", FilterType: plugins.FilterTypeNone},
-			{Name: "Month-over-Month Change Ratio", DataKey: "monthOverMonthChangeRatio", FilterType: plugins.FilterTypeNone},
-			{Name: "Monthly Change Value", DataKey: "monthlyChangeValue", FilterType: plugins.FilterTypeNone},
-			{Name: "Unit", DataKey: "unit", FilterType: plugins.FilterTypeNone},
+			{Name: "Period From"},
+			{Name: "Period To"},
+			{Name: "Resource Type"},
+			{Name: "Latest Month Emissions"},
+			{Name: "Previous Month Emissions"},
+			{Name: "Month-over-Month Change Ratio"},
+			{Name: "Monthly Change Value"},
+			{Name: "Unit"},
 		},
 	}
 }

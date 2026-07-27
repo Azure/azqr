@@ -9,12 +9,12 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
-func handleOpenAIThrottlingPrompt() func(context.Context, mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+func handleAIGovPrompt() func(context.Context, mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	return func(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-		prompt := `Check OpenAI/Cognitive Services throttling for Azure resources.
+		prompt := `Check AI/Cognitive Services throttling for Azure resources.
 
 Please:
-1. Use the scan-openai-throttling tool to detect 429 throttling errors
+1. Use the scan-ai-gov tool to detect 429 throttling errors
 2. Calculate throttling rate for each Deployment/Model/Environment combination:
    - Throttling Rate (%) = (429 status count / total requests) × 100
    - HIGHLIGHT combinations where throttling rate > 1% as CRITICAL
@@ -35,7 +35,7 @@ Please:
 		promptMessage := mcp.NewPromptMessage(mcp.RoleUser, mcp.NewTextContent(prompt))
 
 		return mcp.NewGetPromptResult(
-			"check OpenAI throttling",
+			"check AI governance",
 			[]mcp.PromptMessage{promptMessage},
 		), nil
 	}

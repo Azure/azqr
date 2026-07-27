@@ -211,8 +211,8 @@ func TestReportDataWithPluginResults(t *testing.T) {
 			},
 		},
 		{
-			PluginName:  "openai-throttling",
-			SheetName:   "OpenAI Throttling",
+			PluginName:  "ai-gov",
+			SheetName:   "AI Throttling",
 			Description: "Throttling data",
 			Table: [][]string{
 				{"Account", "Model", "Status"},
@@ -231,8 +231,8 @@ func TestReportDataWithPluginResults(t *testing.T) {
 	}
 
 	// Verify second plugin
-	if reportData.PluginResults[1].PluginName != "openai-throttling" {
-		t.Errorf("Expected second plugin 'openai-throttling', got %s", reportData.PluginResults[1].PluginName)
+	if reportData.PluginResults[1].PluginName != "ai-gov" {
+		t.Errorf("Expected second plugin 'ai-gov', got %s", reportData.PluginResults[1].PluginName)
 	}
 }
 

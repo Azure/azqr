@@ -10,9 +10,9 @@ import (
 func TestPluginMetadata_HeaderRow_ReturnsColumnNames(t *testing.T) {
 	m := PluginMetadata{
 		ColumnMetadata: []ColumnMetadata{
-			{Name: "Subscription", DataKey: "subscription", FilterType: FilterTypeSearch},
-			{Name: "Location", DataKey: "location", FilterType: FilterTypeDropdown},
-			{Name: "Display Name", DataKey: "displayName", FilterType: FilterTypeDropdown},
+			{Name: "Subscription"},
+			{Name: "Location"},
+			{Name: "Display Name"},
 		},
 	}
 

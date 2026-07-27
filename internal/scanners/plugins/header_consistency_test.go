@@ -12,7 +12,7 @@ import (
 
 	"github.com/Azure/azqr/internal/plugins"
 	"github.com/Azure/azqr/internal/scanners/plugins/carbon"
-	"github.com/Azure/azqr/internal/scanners/plugins/openai"
+	"github.com/Azure/azqr/internal/scanners/plugins/aigov"
 	regionplugin "github.com/Azure/azqr/internal/scanners/plugins/region"
 	"github.com/Azure/azqr/internal/scanners/plugins/sqleol"
 	"github.com/Azure/azqr/internal/scanners/plugins/zone"
@@ -57,8 +57,8 @@ func TestZonePlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
 	assertHeaderRowMatchesColumnMetadata(t, zone.NewScanner())
 }
 
-func TestOpenAIThrottlingPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
-	assertHeaderRowMatchesColumnMetadata(t, openai.NewScanner())
+func TestAIGovPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
+	assertHeaderRowMatchesColumnMetadata(t, aigov.NewScanner())
 }
 
 func TestCarbonPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
@@ -79,7 +79,7 @@ func TestRegionPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
 func TestAllInternalPlugins_HaveColumnMetadata(t *testing.T) {
 	scanners := []scannerWithMetadata{
 		zone.NewScanner(),
-		openai.NewScanner(),
+		aigov.NewScanner(),
 		carbon.NewScanner(),
 		sqleol.NewScanner(),
 		regionplugin.NewScanner(),

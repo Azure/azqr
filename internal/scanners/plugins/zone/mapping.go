@@ -35,11 +35,11 @@ func (s *ZoneMappingScanner) GetMetadata() plugins.PluginMetadata {
 		License:     "MIT",
 		Type:        plugins.PluginTypeInternal,
 		ColumnMetadata: []plugins.ColumnMetadata{
-			{Name: "Subscription", DataKey: "subscription", FilterType: plugins.FilterTypeSearch},
-			{Name: "Location", DataKey: "location", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Display Name", DataKey: "displayName", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Logical Zone", DataKey: "logicalZone", FilterType: plugins.FilterTypeDropdown},
-			{Name: "Physical Zone", DataKey: "physicalZone", FilterType: plugins.FilterTypeSearch},
+			{Name: "Subscription"},
+			{Name: "Location"},
+			{Name: "Display Name"},
+			{Name: "Logical Zone"},
+			{Name: "Physical Zone"},
 		},
 	}
 }

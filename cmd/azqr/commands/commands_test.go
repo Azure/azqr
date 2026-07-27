@@ -4,7 +4,6 @@
 package commands
 
 import (
-	"net"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -29,7 +28,7 @@ func TestRootCommandExists(t *testing.T) {
 }
 
 func TestRootCommandHasSubcommands(t *testing.T) {
-	expectedCommands := []string{"scan", "compare", "show", "rules", "types", "plugins"}
+	expectedCommands := []string{"scan", "compare", "rules", "types", "plugins"}
 
 	for _, expectedCmd := range expectedCommands {
 		found := false
@@ -201,34 +200,6 @@ func TestCompareCommandHasRequiredFlags(t *testing.T) {
 	}
 }
 
-func TestShowCommandExists(t *testing.T) {
-	showCmd := findCommand(rootCmd, "show")
-	if showCmd == nil {
-		t.Fatal("show command should exist")
-		return
-	}
-
-	if showCmd.Use != "show" {
-		t.Errorf("Expected show command Use to be 'show', got %q", showCmd.Use)
-	}
-
-	// Check required flags
-	fileFlag := showCmd.Flags().Lookup("file")
-	if fileFlag == nil {
-		t.Error("show command should have 'file' flag")
-	}
-
-	portFlag := showCmd.Flags().Lookup("port")
-	if portFlag == nil {
-		t.Error("show command should have 'port' flag")
-	}
-
-	openFlag := showCmd.Flags().Lookup("open")
-	if openFlag == nil {
-		t.Error("show command should have 'open' flag")
-	}
-}
-
 func TestRulesCommandExists(t *testing.T) {
 	rulesCmd := findCommand(rootCmd, "rules")
 	if rulesCmd == nil {
@@ -281,56 +252,6 @@ func TestPluginsCommandExists(t *testing.T) {
 	}
 }
 
-func TestPortAvailable(t *testing.T) {
-	tests := []struct {
-		name    string
-		port    int
-		wantErr bool
-	}{
-		{
-			name:    "high port number",
-			port:    59999,
-			wantErr: false,
-		},
-		{
-			name:    "another high port",
-			port:    58888,
-			wantErr: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := portAvailable(tt.port)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("portAvailable() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestPortAvailableWithUsedPort(t *testing.T) {
-	// Start a listener on a port
-	// Using ":0" lets the OS pick an available port - this is safe for tests
-	listener, err := net.Listen("tcp", "127.0.0.1:0") //nolint:gosec // Using localhost for test safety
-	if err != nil {
-		t.Fatalf("Failed to start test listener: %v", err)
-	}
-	defer func() {
-		_ = listener.Close()
-	}()
-
-	// Get the port that's in use
-	addr := listener.Addr().(*net.TCPAddr)
-	usedPort := addr.Port
-
-	// Test that portAvailable detects the used port
-	err = portAvailable(usedPort)
-	if err == nil {
-		t.Error("portAvailable() should return error for port in use")
-	}
-}
-
 func TestCommandArgsValidation(t *testing.T) {
 	tests := []struct {
 		commandName  string
@@ -338,7 +259,6 @@ func TestCommandArgsValidation(t *testing.T) {
 	}{
 		{"scan", true},
 		{"compare", true},
-		{"show", true},
 		{"rules", true},
 		{"types", true},
 	}
@@ -371,35 +291,6 @@ func findCommand(parent *cobra.Command, name string) *cobra.Command {
 		}
 	}
 	return nil
-}
-
-func TestOpenBrowserFunction(t *testing.T) {
-	// Test that openBrowser doesn't panic with valid URL
-	// We can't actually test browser opening in CI, but we can verify the function exists
-	// Note: openBrowser may fail in CI environment, so we don't fail the test
-	tests := []struct {
-		name string
-		url  string
-	}{
-		{
-			name: "http URL",
-			url:  "http://localhost:8080",
-		},
-		{
-			name: "https URL",
-			url:  "https://example.com",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Just verify the function doesn't panic
-			// The actual browser opening is OS-dependent and may fail in CI
-			err := openBrowser(tt.url)
-			// We don't assert on error because it's expected to fail in headless environments
-			t.Logf("openBrowser(%s) returned: %v", tt.url, err)
-		})
-	}
 }
 
 func TestCompareExcelFilesFunction(t *testing.T) {
@@ -504,32 +395,5 @@ func TestCompareCommandFormatDefault(t *testing.T) {
 
 	if formatFlag.DefValue != "excel" {
 		t.Errorf("format flag: expected default value 'excel', got %q", formatFlag.DefValue)
-	}
-}
-
-func TestShowCommandPortDefault(t *testing.T) {
-	showCmd := findCommand(rootCmd, "show")
-	if showCmd == nil {
-		t.Fatal("show command should exist")
-	}
-
-	portFlag := showCmd.Flags().Lookup("port")
-	if portFlag == nil {
-		t.Fatal("show command should have 'port' flag")
-		return
-	}
-
-	if portFlag.DefValue != "8080" {
-		t.Errorf("port flag: expected default value '8080', got %q", portFlag.DefValue)
-	}
-
-	openFlag := showCmd.Flags().Lookup("open")
-	if openFlag == nil {
-		t.Fatal("show command should have 'open' flag")
-		return
-	}
-
-	if openFlag.DefValue != "true" {
-		t.Errorf("open flag: expected default value 'true', got %q", openFlag.DefValue)
 	}
 }

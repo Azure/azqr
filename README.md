@@ -216,8 +216,6 @@ az login
 # 2. Run a scan (scans all accessible subscriptions)
 azqr scan
 
-# 3. View results in interactive dashboard
-azqr show -f azqr_action_plan_*.xlsx --open
 ```
 
 The scan generates an Excel report with recommendations, impacted resources, and an action plan.
@@ -288,30 +286,6 @@ azqr scan --csv
 
 Run `azqr -h` for all available commands and options.
 
-### Interactive Dashboard (show command)
-
-You can explore your scan results with a lightweight embedded web UI using the `show` command. The dashboard supports both Excel and JSON report formats:
-
-1. Generate a report (Excel or JSON):
-
-```bash
-# Excel format (default)
-azqr scan --subscription-id <subscription_id> --output-name report
-
-# JSON format
-azqr scan --subscription-id <subscription_id> --output-name report --json
-```
-
-2. Launch the dashboard:
-
-```bash
-# With Excel file
-azqr show -f report.xlsx --open
-
-# With JSON file
-azqr show -f report.json --open
-```
-
 ## Controlling Scan Stages
 
 Azure Quick Review allows you to control which scan stages are executed. By default, `diagnostics`, `advisor`, and `defender` stages are enabled.
@@ -346,7 +320,7 @@ azqr scan --stages -cost
 
 Azure Quick Review includes optional **internal plugins** that provide advanced analytics beyond standard recommendations. Plugins can be run as standalone commands for faster execution or integrated with full scans.
 
-### OpenAI Throttling Monitor
+### AI Governance
 
 Monitors Azure OpenAI and Cognitive Services accounts for throttling (HTTP 429 errors) to identify capacity constraints.
 
@@ -358,10 +332,10 @@ Monitors Azure OpenAI and Cognitive Services accounts for throttling (HTTP 429 e
 
 ```bash
 # Run as standalone command (fast, plugin-only mode)
-azqr openai-throttling
+azqr ai-gov
 
 # Or integrate with full scan
-azqr scan --plugin openai-throttling
+azqr scan --plugin ai-gov
 ```
 
 ### Carbon Emissions Tracking
@@ -450,7 +424,7 @@ azqr scan --plugin sql-eol
 
 ```bash
 azqr scan --subscription-id <sub-id> \
-  --plugin openai-throttling \
+  --plugin ai-gov \
   --plugin carbon-emissions \
   --plugin zone-mapping \
   --plugin region-selection \
@@ -460,7 +434,7 @@ azqr scan --subscription-id <sub-id> \
 
 Results from all enabled plugins are included in the Excel, JSON, or CSV output.
 
-> Plugin commands (e.g., `azqr openai-throttling`) run in optimized plugin-only mode for faster execution, skipping resource and APRL scanning. Use `azqr plugins list` to see all available plugins.
+> Plugin commands (e.g., `azqr ai-gov`) run in optimized plugin-only mode for faster execution, skipping resource and APRL scanning. Use `azqr plugins list` to see all available plugins.
 
 ### MCP Server (Model Context Protocol)
 

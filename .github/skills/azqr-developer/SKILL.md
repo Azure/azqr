@@ -48,7 +48,7 @@ azqr/
 │   ├── renderers/         # Output formatters (Excel, CSV, JSON)
 │   ├── scanners/          # Service-specific scanners (one per Azure service)
 │   ├── graph/             # Azure Resource Graph queries
-│   └── throttling/        # Rate limiting utilities
+│   └── aigov/             # AI Governance utilities
 ├── data/                  # Static data files
 │   └── recommendations.json # Generated recommendations data
 ├── examples/              # Example configurations and CI/CD pipelines

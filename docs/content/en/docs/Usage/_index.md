@@ -257,7 +257,7 @@ For fast, focused analysis, run plugins as top-level commands:
 
 ```bash
 # Run OpenAI throttling analysis
-azqr openai-throttling
+azqr ai-gov
 
 # Run carbon emissions analysis
 azqr carbon-emissions
@@ -278,10 +278,10 @@ Run plugins alongside standard scanning:
 
 ```bash
 # Single plugin with scan
-azqr scan --plugin openai-throttling
+azqr scan --plugin ai-gov
 
 # Multiple plugins with scan
-azqr scan --plugin openai-throttling --plugin carbon-emissions --plugin zone-mapping --plugin sql-eol
+azqr scan --plugin ai-gov --plugin carbon-emissions --plugin zone-mapping --plugin sql-eol
 
 # With other options
 azqr scan --subscription-id <sub-id> --plugin zone-mapping
@@ -383,35 +383,6 @@ azqr scan --mask=false
 # Enable masking explicitly (default)
 azqr scan --mask=true
 ```
-## Interactive Dashboard (show command)
-
-You can explore your scan results with a lightweight embedded web UI using the `show` command. The dashboard supports both Excel and JSON report formats.
-
-### Usage
-
-1. Generate a report (Excel or JSON):
-
-```bash
-# Excel format (default)
-azqr scan --subscription-id <subscription_id> --output-name report
-
-# JSON format
-azqr scan --subscription-id <subscription_id> --output-name report --json
-```
-
-2. Launch the dashboard:
-
-```bash
-# With Excel file
-azqr show --file report.xlsx --open
-
-# With JSON file
-azqr show --file report.json --open
-
-# On custom port
-azqr show --file report.xlsx --port 3000
-```
-
 ## MCP Server (Model Context Protocol)
 
 Azure Quick Review includes a Model Context Protocol (MCP) server that enables AI assistants and tools to interact with azqr functionality. The MCP server can run in two modes:
@@ -454,7 +425,7 @@ azqr scan --debug
 
 # Enable debug logging for plugins
 azqr zone-mapping --debug
-azqr openai-throttling --debug
+azqr ai-gov --debug
 
 # Combine with other flags
 azqr scan --subscription-id <sub-id> --debug --stages cost
