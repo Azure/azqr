@@ -102,5 +102,5 @@ terraform.rc
 # Ignore .terraform.lock.hcl files
 .terraform.lock.hcl
 
-# Ignore APM APM – Agent Package Manager modules 
-apm_modules
+# APM dependencies
+apm_modules/
