@@ -84,6 +84,24 @@ func RegisterTools(s *server.MCPServer) {
 	)
 	s.AddTool(sqlEOLTool, mcp.NewTypedToolHandler(scanPluginHandler("sql-eol")))
 
+	// Plugin Tools: Service Health
+	serviceHealthTool := mcp.NewTool("scan-service-health",
+		withBasicOptions(
+			mcp.WithDescription(
+				`Analyze Azure service health availability over the last 90 days.
+
+				This tool scans service health events across your Azure subscriptions and provides:
+				- Percentage of time each resource type was unaffected by service issues
+				- Service issue event counts per subscription, region, and resource type
+				- Number of affected resources per bucket
+				- Results sorted worst-first (lowest availability at the top)
+
+				Covers resolved Service Issues events from Azure Resource Health.
+				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
+		)...,
+	)
+	s.AddTool(serviceHealthTool, mcp.NewTypedToolHandler(scanPluginHandler("service-health")))
+
 	// Plugin Tools: Region Selection
 	regionSelectionTool := mcp.NewTool("scan-region-selection",
 		withBasicOptions(

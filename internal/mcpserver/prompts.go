@@ -49,6 +49,14 @@ func RegisterPrompts(s *server.MCPServer) {
 
 	s.AddPrompt(sqlESUPrompt, handleSQLESUPrompt())
 
+	// Service Health Plugin Prompt
+	serviceHealthPrompt := mcp.NewPrompt(
+		"analyze_service_health",
+		mcp.WithPromptDescription("Analyze Azure service health availability over the last 90 days by subscription, region, and resource type"),
+	)
+
+	s.AddPrompt(serviceHealthPrompt, handleServiceHealthPrompt())
+
 	// Region Selection Plugin Prompt
 	regionSelectionPrompt := mcp.NewPrompt(
 		"analyze_region_selection",
