@@ -45,7 +45,9 @@ resources
 | extend SQLVersion = iff(
                           type == "microsoft.azurearcdata/sqlserverinstances",
                           tostring(properties.version),
-                          iff(isempty(_rawSQLVersion), "Unknown",
+                          iff(
+                              isempty(_rawSQLVersion),
+                              "Unknown",
                               strcat("SQL Server ", replace_string(_rawSQLVersion, "2008R2", "2008 R2")))
     )
 | extend Edition = iff(type == "microsoft.azurearcdata/sqlserverinstances", tostring(properties.edition), tostring(properties.sqlImageSku))
@@ -75,8 +77,9 @@ resources
 | join kind = leftouter (
     resources
     | where type == "microsoft.hybridcompute/machines"
-    | project _arcMachineId = tolower(id),
-              _arcCloudProvider = tostring(properties.cloudMetadata.provider)
+    | project
+        _arcMachineId = tolower(id),
+        _arcCloudProvider = tostring(properties.cloudMetadata.provider)
     )
     on _arcMachineId
 | join kind = leftouter (
@@ -86,7 +89,8 @@ resources
     )
     on subscriptionId
 // Derive CloudType dynamically: SQL VMs are always Azure IaaS; Arc SQL cloud origin comes from
-// hybridcompute/machines.properties.cloudMetadata.provider (empty = on-prem, "AWS", "GCP", etc.)
+// hybridcompute/machines.properties.cloudMetadata.provider (empty or "N/A" = on-prem, "AWS", "GCP", etc.)
+| extend _arcCloudProvider = iff(tolower(_arcCloudProvider) == "n/a", "", _arcCloudProvider)
 | extend CloudType = case(
                          type != "microsoft.azurearcdata/sqlserverinstances",
                          "Azure VM (SQL IaaS)",
@@ -429,8 +433,10 @@ resources
     )
 // Add assumed storage cost to SQL MI target (GP rate: $0.115/GB/month; free editions excluded).
 // Consolidation and savings calculations below automatically include this cost.
-| extend EstSQLMIMonthlyCost = iff(_isFreeEdition, EstSQLMIMonthlyCost,
-    EstSQLMIMonthlyCost + (_estimatedStorageGB * 0.115))
+| extend EstSQLMIMonthlyCost = iff(
+                                   _isFreeEdition,
+                                   EstSQLMIMonthlyCost,
+                                   EstSQLMIMonthlyCost + (_estimatedStorageGB * 0.115))
 // Savings: current total − MI target cost ($0 for free editions)
 | extend EstSQLMIMonthlySaving = iff(_isFreeEdition, 0.0, _currentMonthlyCost - EstSQLMIMonthlyCost)
 | extend EstSQLMIMonthlyCostConsolidated = iff(_isFreeEdition, 0.0, EstSQLMIMonthlyCost / consolidationRatio)
