@@ -1,0 +1,7 @@
+# apm.yml — ships with your project
+name: my-office
+version: 1.0.0
+dependencies:
+  apm:
+    # Skills from Anthropic
+    - anthropics/skills/skills/skill-creator#b29e7cf6
