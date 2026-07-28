@@ -89,9 +89,14 @@ func TestSQLESURow_ToRecord(t *testing.T) {
 		ResourceGroup:         "rg-sql",
 		Subscription:          "Prod",
 		Location:              "eastus",
+		ArcServerName:         "arc-host-1",
+		CloudType:             "Arc-enabled (On-Prem)",
+		ServiceType:           "Engine",
 		Edition:               "Enterprise",
 		VCores:                "8",
 		EOLStatus:             "Out of Support",
+		ESUApplicable:         "Yes",
+		ESUEnabled:            "Enabled",
 		SQLMIMigrationVerdict: "Recommended",
 	}
 
@@ -102,20 +107,29 @@ func TestSQLESURow_ToRecord(t *testing.T) {
 		t.Fatalf("record len = %d, want %d (one per column)", len(record), wantLen)
 	}
 
-	// Spot-check ordering against the first columns and the final column.
-	if record[0] != "Prod" {
-		t.Errorf("record[0] = %q, want Prod (Subscription)", record[0])
+	// Spot-check ordering against the declared column positions.
+	checks := []struct {
+		idx  int
+		want string
+		desc string
+	}{
+		{0, "Prod", "Subscription"},
+		{1, "rg-sql", "Resource Group"},
+		{2, "sql-vm-1", "Name"},
+		{3, "eastus", "Location"},
+		{4, "arc-host-1", "Arc Server Name"},
+		{5, "Arc-enabled (On-Prem)", "Cloud Type"},
+		{6, "Engine", "Service Type"},
+		{8, "Enterprise", "Edition"},
+		{10, "Yes", "ESU Applicable"},
+		{11, "Enabled", "ESU Enabled"},
 	}
-	if record[1] != "rg-sql" {
-		t.Errorf("record[1] = %q, want rg-sql (Resource Group)", record[1])
+	for _, c := range checks {
+		if record[c.idx] != c.want {
+			t.Errorf("record[%d] (%s) = %q, want %q", c.idx, c.desc, record[c.idx], c.want)
+		}
 	}
-	if record[2] != "sql-vm-1" {
-		t.Errorf("record[2] = %q, want sql-vm-1 (Name)", record[2])
-	}
-	if record[6] != "Enterprise" {
-		t.Errorf("record[6] = %q, want Enterprise", record[6])
-	}
-	// SQLMIMigrationVerdict is the last column (index 26).
+	// SQLMIMigrationVerdict is the last column.
 	if record[len(record)-1] != "Recommended" {
 		t.Errorf("last record = %q, want Recommended", record[len(record)-1])
 	}

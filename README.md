@@ -404,9 +404,12 @@ azqr scan --plugin region-selection
 Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status across Arc-enabled SQL Server instances and SQL Virtual Machines.
 
 - Detects EOL status dynamically (Expired, ESU Active, Upcoming ESU, Supported)
-- Calculates ESU licensing costs per instance (by edition and core count)
+- Models ESU billing accurately: **once per host (OSE), per SQL Server version, at the highest edition** — multiple same-version components on one Arc machine share a single ESU charge
+- Enforces Standard edition **24-core ESU cap** per Microsoft pricing docs
+- Passive **HA/DR replicas excluded** from ESU cost ($0 — covered under SA failover rights)
+- Reports **ESU subscription status** from the Arc machine's SQL Server extension
 - Estimates SQL Managed Instance migration savings
-- Covers Arc-enabled SQL (on-prem) and Azure VM (SQL IaaS)
+- Covers Arc-enabled SQL (on-prem, AWS, GCP) and Azure VM (SQL IaaS)
 
 **Use Cases**: ESU cost forecasting, migration planning to SQL MI, compliance reporting, license optimization
 

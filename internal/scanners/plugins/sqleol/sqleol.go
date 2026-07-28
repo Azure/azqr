@@ -30,8 +30,8 @@ func NewScanner() *Scanner {
 func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "sql-eol",
-		Version:     "0.5.0-beta",
-		Description: "Analyzes SQL Server End-of-Life and Extended Security Update status with full cost breakdown (VM compute, SQL license, ESU), migration recommendations with conservative GP-only SQL MI cost estimates (Enterprise editions include a note for assessment), and unified SQL MI migration savings and verdict",
+		Version:     "0.6.0-beta",
+		Description: "Analyzes SQL Server End-of-Life and Extended Security Update status with host-level ESU billing (once per OSE, per version, at the highest edition), full cost breakdown (VM compute, SQL license, ESU), migration recommendations with conservative GP-only SQL MI cost estimates, and unified SQL MI migration savings and verdict",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
 		Type:        plugins.PluginTypeInternal,
@@ -40,10 +40,14 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Resource Group"},
 			{Name: "Name"},
 			{Name: "Location"},
+			{Name: "Arc Server Name"},
 			{Name: "Cloud Type"},
+			{Name: "Service Type"},
 			{Name: "SQL Version"},
 			{Name: "Edition"},
 			{Name: "EOL Status"},
+			{Name: "ESU Applicable"},
+			{Name: "ESU Enabled"},
 			{Name: "ESU Start Date"},
 			{Name: "ESU End Date"},
 			{Name: "Migration Target Tier"},
@@ -57,6 +61,7 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "VM Cost/Core/Month"},
 			{Name: "Est VM Compute Monthly Cost"},
 			{Name: "Est ESU Monthly Cost"},
+			{Name: "ESU Cost Basis"},
 			{Name: "Patch Ops Monthly Cost"},
 			{Name: "Current Monthly Cost"},
 			{Name: "Consolidation Ratio"},
@@ -110,12 +115,16 @@ type sqlEOLRow struct {
 	ResourceGroup                string `json:"ResourceGroup"`
 	Subscription                 string `json:"Subscription"`
 	Location                     string `json:"Location"`
+	ArcServerName                string `json:"ArcServerName"`
 	CloudType                    string `json:"CloudType"`
+	ServiceType                  string `json:"ServiceType"`
 	SQLVersion                   string `json:"SQLVersion"`
 	Edition                      string `json:"Edition"`
 	VCores                       string `json:"vCores"`
 	BillableCores                string `json:"BillableCores"`
 	EOLStatus                    string `json:"EOLStatus"`
+	ESUApplicable                string `json:"ESUApplicable"`
+	ESUEnabled                   string `json:"ESUEnabled"`
 	MigrationRecommendation      string `json:"MigrationRecommendation"`
 	MigrationTargetTier          string `json:"MigrationTargetTier"`
 	ESUStartDate                 string `json:"ESUStartDate"`
@@ -127,6 +136,7 @@ type sqlEOLRow struct {
 	VMCostPerCorePerMonth        string `json:"VMCostPerCorePerMonth"`
 	EstVMComputeMonthlyCost      string `json:"EstVMComputeMonthlyCost"`
 	EstESUMonthlyCost            string `json:"EstESUMonthlyCost"`
+	ESUCostBasis                 string `json:"ESUCostBasis"`
 	PatchOpsMonthlyCost          string `json:"PatchOpsMonthlyCost"`
 	CurrentMonthlyCost           string `json:"CurrentMonthlyCost"`
 	ConsolidationRatio           string `json:"ConsolidationRatio"`
@@ -143,10 +153,14 @@ func (r sqlEOLRow) toRecord() []string {
 		r.ResourceGroup,
 		r.Name,
 		r.Location,
+		r.ArcServerName,
 		r.CloudType,
+		r.ServiceType,
 		r.SQLVersion,
 		r.Edition,
 		r.EOLStatus,
+		r.ESUApplicable,
+		r.ESUEnabled,
 		r.ESUStartDate,
 		r.ESUEndDate,
 		r.MigrationTargetTier,
@@ -160,6 +174,7 @@ func (r sqlEOLRow) toRecord() []string {
 		r.VMCostPerCorePerMonth,
 		r.EstVMComputeMonthlyCost,
 		r.EstESUMonthlyCost,
+		r.ESUCostBasis,
 		r.PatchOpsMonthlyCost,
 		r.CurrentMonthlyCost,
 		r.ConsolidationRatio,
