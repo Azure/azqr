@@ -530,7 +530,8 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 		capacity := ""
 		if r.SkuCapacity > 0 {
 			if strings.EqualFold(r.Type, "microsoft.compute/virtualmachinescalesets") {
-				if cores := skus.Lookup(r.SkuName); cores > 0 {
+				if skuEntry, coresOK := skus.Lookup(r.SkuName); coresOK && skuEntry.VCPUs > 0 {
+					cores := skuEntry.VCPUs
 					capacity = fmt.Sprint(r.SkuCapacity * cores)
 				} else {
 					capacity = fmt.Sprint(r.SkuCapacity)
@@ -538,8 +539,8 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 			} else {
 				capacity = fmt.Sprint(r.SkuCapacity)
 			}
-		} else if v := skus.Lookup(r.SkuName); v > 0 {
-			capacity = fmt.Sprint(v)
+		} else if skuEntry, coresOK := skus.Lookup(r.SkuName); coresOK && skuEntry.VCPUs > 0 {
+			capacity = fmt.Sprint(skuEntry.VCPUs)
 		}
 
 		row := []string{
