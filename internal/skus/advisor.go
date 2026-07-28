@@ -4,8 +4,9 @@
 package skus
 
 import (
+	"math"
 	"regexp"
-	"sort"
+	"slices"
 	"strconv"
 )
 
@@ -58,8 +59,14 @@ func FindAlternatives(target SKU, n int) []Recommendation {
 		})
 	}
 
-	sort.Slice(recommendations, func(i, j int) bool {
-		return recommendations[i].CompatibilityScore > recommendations[j].CompatibilityScore
+	slices.SortFunc(recommendations, func(a, b Recommendation) int {
+		if a.CompatibilityScore > b.CompatibilityScore {
+			return -1
+		}
+		if a.CompatibilityScore < b.CompatibilityScore {
+			return 1
+		}
+		return 0
 	})
 
 	if n > 0 && len(recommendations) > n {
@@ -163,14 +170,14 @@ func scoreVersion(targetVer, candidateVer int) float64 {
 		return 0.05
 	}
 	// Use integer math to avoid float precision drift: score = max(0, 5 - diff*2) / 100
-	millis := 5 - diff*2
-	if millis < 0 {
-		millis = 0
+	centis := 5 - diff*2
+	if centis < 0 {
+		centis = 0
 	}
-	return float64(millis) / 100.0
+	return float64(centis) / 100.0
 }
 
 func round3(v float64) float64 {
-	return float64(int(v*1000+0.5)) / 1000
+	return math.Round(v*1000) / 1000
 }
 

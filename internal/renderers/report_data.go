@@ -527,21 +527,7 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 	for _, r := range resources {
 		sla := slaDirect[r.ID]
 
-		capacity := ""
-		if r.SkuCapacity > 0 {
-			if strings.EqualFold(r.Type, "microsoft.compute/virtualmachinescalesets") {
-				if skuEntry, coresOK := skus.Lookup(r.SkuName); coresOK && skuEntry.VCPUs > 0 {
-					cores := skuEntry.VCPUs
-					capacity = fmt.Sprint(r.SkuCapacity * cores)
-				} else {
-					capacity = fmt.Sprint(r.SkuCapacity)
-				}
-			} else {
-				capacity = fmt.Sprint(r.SkuCapacity)
-			}
-		} else if skuEntry, coresOK := skus.Lookup(r.SkuName); coresOK && skuEntry.VCPUs > 0 {
-			capacity = fmt.Sprint(skuEntry.VCPUs)
-		}
+		capacity := skus.ComputeCapacity(r.SkuName, r.SkuCapacity, strings.EqualFold(r.Type, "microsoft.compute/virtualmachinescalesets"))
 
 		row := []string{
 			MaskSubscriptionID(r.SubscriptionID, rd.Mask),
