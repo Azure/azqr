@@ -30,10 +30,14 @@ import (
 )
 
 type skuEntry struct {
-	Name         string `yaml:"name"`
-	Family       string `yaml:"family"`
-	VCPUs        int    `yaml:"vcpus"`
-	DiscoveredOn string `yaml:"discoveredOn"`
+	Name                  string  `yaml:"name"`
+	Family                string  `yaml:"family"`
+	VCPUs                 int     `yaml:"vcpus"`
+	MemoryGB              float64 `yaml:"memoryGb"`
+	GPUCount              int     `yaml:"gpuCount"`
+	MaxDataDisks          int     `yaml:"maxDataDisks"`
+	AcceleratedNetworking bool    `yaml:"acceleratedNetworking"`
+	DiscoveredOn          string  `yaml:"discoveredOn"`
 }
 
 func main() {
@@ -82,12 +86,11 @@ func main() {
 			if prev, ok := existing[name]; ok && prev.DiscoveredOn != "" {
 				discoveredOn = prev.DiscoveredOn
 			}
-			skuMap[name] = skuEntry{
-				Name:         name,
-				Family:       *sku.Family,
-				VCPUs:        extractVCPUs(sku),
-				DiscoveredOn: discoveredOn,
-			}
+			caps := extractCapabilities(sku)
+			caps.Name = name
+			caps.Family = *sku.Family
+			caps.DiscoveredOn = discoveredOn
+			skuMap[name] = caps
 		}
 	}
 
@@ -130,8 +133,9 @@ func resolveSubscription() string {
 	panic("no Azure subscription found: set AZURE_SUBSCRIPTION_ID or log in with 'az login'")
 }
 
-// extractVCPUs reads the vCPUsAvailable capability (preferred) or vCPUs from the SKU capabilities list.
-func extractVCPUs(sku *armcompute.ResourceSKU) int {
+// extractCapabilities reads relevant capabilities from a SKU into a skuEntry.
+func extractCapabilities(sku *armcompute.ResourceSKU) skuEntry {
+	var e skuEntry
 	var vCPUs, vCPUsAvailable int
 	for _, cap := range sku.Capabilities {
 		if cap.Name == nil || cap.Value == nil {
@@ -142,12 +146,22 @@ func extractVCPUs(sku *armcompute.ResourceSKU) int {
 			vCPUsAvailable, _ = strconv.Atoi(*cap.Value)
 		case "vCPUs":
 			vCPUs, _ = strconv.Atoi(*cap.Value)
+		case "MemoryGB":
+			e.MemoryGB, _ = strconv.ParseFloat(*cap.Value, 64)
+		case "GPUs":
+			e.GPUCount, _ = strconv.Atoi(*cap.Value)
+		case "MaxDataDiskCount":
+			e.MaxDataDisks, _ = strconv.Atoi(*cap.Value)
+		case "AcceleratedNetworkingEnabled":
+			e.AcceleratedNetworking = strings.EqualFold(*cap.Value, "true")
 		}
 	}
 	if vCPUsAvailable > 0 {
-		return vCPUsAvailable
+		e.VCPUs = vCPUsAvailable
+	} else {
+		e.VCPUs = vCPUs
 	}
-	return vCPUs
+	return e
 }
 
 // readExisting loads the existing SKU file so that discoveredOn dates are preserved on re-generation.

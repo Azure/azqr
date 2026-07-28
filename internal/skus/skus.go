@@ -15,14 +15,21 @@ import (
 //go:embed known_skus.yaml
 var rawYAML []byte
 
-type skuEntry struct {
-	Name  string `yaml:"name"`
-	VCPUs int    `yaml:"vcpus"`
+// SKU represents a single Azure VM SKU entry with its hardware characteristics.
+type SKU struct {
+	Name                  string  `yaml:"name"                  json:"name"`
+	Family                string  `yaml:"family"                json:"family"`
+	VCPUs                 int     `yaml:"vcpus"                 json:"vcpus"`
+	MemoryGB              float64 `yaml:"memoryGb"              json:"memoryGb"`
+	GPUCount              int     `yaml:"gpuCount"              json:"gpuCount"`
+	MaxDataDisks          int     `yaml:"maxDataDisks"          json:"maxDataDisks"`
+	AcceleratedNetworking bool    `yaml:"acceleratedNetworking" json:"acceleratedNetworking"`
 }
 
 var (
-	once      sync.Once
-	lookupMap map[string]int
+	once    sync.Once
+	skuMap  map[string]SKU
+	allSKUs []SKU
 )
 
 func init() {
@@ -30,20 +37,28 @@ func init() {
 }
 
 func load() {
-	var entries []skuEntry
+	var entries []SKU
 	if err := yaml.Unmarshal(rawYAML, &entries); err != nil {
-		lookupMap = map[string]int{}
+		skuMap = map[string]SKU{}
+		allSKUs = []SKU{}
 		return
 	}
-	m := make(map[string]int, len(entries))
+	skuMap = make(map[string]SKU, len(entries))
+	allSKUs = make([]SKU, 0, len(entries))
 	for _, e := range entries {
-		m[e.Name] = e.VCPUs
+		skuMap[e.Name] = e
+		allSKUs = append(allSKUs, e)
 	}
-	lookupMap = m
 }
 
-// Lookup returns the vCPU count for the given Azure VM SKU name.
-// Returns 0 if the SKU is not found in the embedded table.
-func Lookup(skuName string) int {
-	return lookupMap[skuName]
+// Lookup returns the full SKU entry for the given Azure VM SKU name.
+// The second return value is false if the SKU is not found.
+func Lookup(skuName string) (SKU, bool) {
+	s, ok := skuMap[skuName]
+	return s, ok
+}
+
+// ListAll returns all known SKU entries.
+func ListAll() []SKU {
+	return allSKUs
 }
