@@ -288,21 +288,7 @@ func BuildInventorySheet(resources []*models.Resource, mask bool) plugins.Extern
 	rows = append(rows, headers)
 
 	for _, r := range resources {
-		capacity := ""
-		if r.SkuCapacity > 0 {
-			if strings.EqualFold(r.Type, "microsoft.compute/virtualmachinescalesets") {
-				if skuEntry, coresOK := skus.Lookup(r.SkuName); coresOK && skuEntry.VCPUs > 0 {
-					cores := skuEntry.VCPUs
-					capacity = fmt.Sprint(r.SkuCapacity * cores)
-				} else {
-					capacity = fmt.Sprint(r.SkuCapacity)
-				}
-			} else {
-				capacity = fmt.Sprint(r.SkuCapacity)
-			}
-		} else if skuEntry, coresOK := skus.Lookup(r.SkuName); coresOK && skuEntry.VCPUs > 0 {
-			capacity = fmt.Sprint(skuEntry.VCPUs)
-		}
+		capacity := skus.ComputeCapacity(r.SkuName, r.SkuCapacity, strings.EqualFold(r.Type, "microsoft.compute/virtualmachinescalesets"))
 
 		rows = append(rows, []string{
 			renderers.MaskSubscriptionID(r.SubscriptionID, mask),

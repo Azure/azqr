@@ -7,7 +7,7 @@ package skus
 
 import (
 	_ "embed"
-	"sync"
+	"fmt"
 
 	"gopkg.in/yaml.v3"
 )
@@ -27,13 +27,12 @@ type SKU struct {
 }
 
 var (
-	once    sync.Once
 	skuMap  map[string]SKU
 	allSKUs []SKU
 )
 
 func init() {
-	once.Do(load)
+	load()
 }
 
 func load() {
@@ -61,4 +60,21 @@ func Lookup(skuName string) (SKU, bool) {
 // ListAll returns all known SKU entries.
 func ListAll() []SKU {
 	return allSKUs
+}
+
+// ComputeCapacity returns a capacity string for a resource given its SKU name,
+// instance count, and whether it is a VMSS (which multiplies count × vCPUs).
+func ComputeCapacity(skuName string, skuCapacity int, isVMSS bool) string {
+	if skuCapacity > 0 {
+		if isVMSS {
+			if sku, ok := Lookup(skuName); ok && sku.VCPUs > 0 {
+				return fmt.Sprint(skuCapacity * sku.VCPUs)
+			}
+		}
+		return fmt.Sprint(skuCapacity)
+	}
+	if sku, ok := Lookup(skuName); ok && sku.VCPUs > 0 {
+		return fmt.Sprint(sku.VCPUs)
+	}
+	return ""
 }
