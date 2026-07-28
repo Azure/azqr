@@ -4,9 +4,23 @@
 //
 // WHAT IT DOES
 //   1. Assigns EOL status per version: Supported → Upcoming ESU → ESU Active → Expired
-//   2. Estimates current monthly cost: VM compute + SQL license (PAYG only) + ESU + patch ops
-//   3. Estimates SQL MI target cost and monthly/annual/3-year savings
-//   4. Repeats savings under a conservative 2:1 consolidation (2 source instances → 1 SQL MI)
+//   2. Reports whether ESU is already subscribed on the host (ESUEnabled) and whether ESU applies
+//      to the instance (ESUApplicable). Per Microsoft docs, ESU is metered once per OSE, per version,
+//      at the highest edition present; all service types (Engine, SSIS, SSAS, SSRS, PBIRS) are
+//      ESU-eligible and roll into that single per-host+version meter. Free editions never pay ESU,
+//      and passive HA/DR replicas are covered at $0.
+//   3. Estimates current monthly cost: VM compute + SQL license (PAYG only) + ESU + patch ops
+//   4. Estimates SQL MI target cost and monthly savings
+//   5. Repeats savings under a conservative 2:1 consolidation (2 source instances → 1 SQL MI)
+//
+// ESU BILLING MODEL (per Microsoft docs): ESU is metered once per OSE (host), per SQL Server version,
+// at the HIGHEST edition present for that version, on the total OSE cores (minimum 4 cores; Standard
+// edition capped at 24 cores). Multiple same-version instances/components on one host are covered by
+// that single charge; different versions on the same host are billed separately. Free editions and
+// passive HA/DR replicas are not billed. Azure Resource Graph does not support `let` statements or
+// window functions, so the per-host+version aggregate is computed with a single inline self-join over
+// the Arc SQL instances (see the join near the bottom). OSE cores are taken from the instance vCores
+// (for Arc SQL this equals the machine's visible cores); SQL VMs self-host and bill per instance.
 //
 // KEY RATES (all USD, public list pricing — EA/CSP discounts not included)
 //   ESU (blended 3-year estimate: Y1=75%, Y2=100%, Y3=125% of license cost):
@@ -74,14 +88,27 @@ resources
     )
     on _vmId
 // Arc SQL: join to hybridcompute/machines to get cloudMetadata.provider (AWS/GCP/empty=on-prem)
+// Also captures the machine name for the ArcServerName column.
 | join kind = leftouter (
     resources
     | where type == "microsoft.hybridcompute/machines"
     | project
         _arcMachineId = tolower(id),
+        _arcMachineName = tostring(name),
         _arcCloudProvider = tostring(properties.cloudMetadata.provider)
     )
     on _arcMachineId
+// ESU subscription state lives on the Arc machine's WindowsAgent.SqlServer extension.
+// properties.settings.enableExtendedSecurityUpdates == true means ESU is already subscribed for the host.
+| join kind = leftouter (
+    resources
+    | where type == "microsoft.hybridcompute/machines/extensions"
+    | where tolower(tostring(properties.type)) == "windowsagent.sqlserver"
+    | project _extMachineId = tolower(substring(id, 0, indexof(id, "/extensions/"))),
+              _esuEnabledSetting = tostring(properties.settings.enableExtendedSecurityUpdates)
+    | where isnotempty(_extMachineId)
+    )
+    on $left._arcMachineId == $right._extMachineId
 | join kind = leftouter (
     resourcecontainers
     | where type == 'microsoft.resources/subscriptions'
@@ -315,6 +342,34 @@ resources
 | extend _isEnterpriseEdition = tolower(Edition) contains "enterprise"
 | extend _isStandardEdition = tolower(Edition) contains "standard"
 | extend _isWebEdition = tolower(Edition) contains "web"
+// Edition rank for "highest edition carries the ESU meter" selection (Enterprise > Standard > Web).
+| extend _editionRank = case(_isEnterpriseEdition, 3, _isStandardEdition, 2, _isWebEdition, 1, 0)
+// Passive HA/DR replicas are covered at $0 (SQL Server failover rights); detected via DR license type.
+// Note: "DR" license type is only available for SQL VMs; Arc SQL licenseType cannot produce "DR".
+| extend _isPassiveDR = SQLLicenseType == "DR"
+// Per Microsoft ESU docs, ESU is metered once per OSE (host), per version, at the highest edition.
+// All service types (Engine, SSIS, SSAS, SSRS, PBIRS) are ESU-eligible. Free editions and passive
+// HA/DR replicas are never billed.
+| extend _esuApplicable = not(_isFreeEdition) and not(_isPassiveDR)
+// ServiceType: Arc SQL exposes Engine | SSIS | SSAS | SSRS | PBIRS. SQL VMs are always the Engine.
+| extend ServiceType = iff(type == "microsoft.azurearcdata/sqlserverinstances", tostring(properties.serviceType), "Engine")
+// Arc-enabled server (hybridcompute machine) hosting this instance; N/A for Azure SQL VMs.
+| extend ArcServerName = iff(type == "microsoft.azurearcdata/sqlserverinstances", _arcMachineName, "N/A (SQL VM)")
+// ESUEnabled: is ESU already subscribed on the host? (Arc signal only; SQL VMs not covered here)
+| extend ESUEnabled = case(
+                          type != "microsoft.azurearcdata/sqlserverinstances",
+                          "Unknown (SQL VM)",
+                          tolower(_esuEnabledSetting) == "true",
+                          "Enabled",
+                          "Not Enabled"
+    )
+| extend ESUApplicable = case(
+                             _isFreeEdition,
+                             strcat("No - ", Edition, " edition not eligible for ESU"),
+                             _isPassiveDR,
+                             "No - passive HA/DR replica (covered at $0 per SQL Server failover rights)",
+                             "Yes"
+    )
 | extend _recommendedMITier = case(
                                   // UVB-eligible Arc Enterprise AHUB → GP is the right tier for highly virtualized on-prem workloads
                                   _isEnterpriseEdition and SQLLicenseType == "AHUB" and _isOnPremArc,
@@ -353,6 +408,54 @@ resources
                                      0.0
     )
 | extend BillableCores = iff(vCores < 4, 4, vCores)
+// ESU-specific billable cores: ESU is metered on the OSE cores. Minimum 4 cores per OSE; Standard
+// edition ESU is capped at 24 cores (Enterprise/Web uncapped). Kept separate from BillableCores
+// (which is used for SQL license cost and MI sizing and has no upper cap).
+| extend _esuBillableCores = iff(vCores < 4, 4, vCores)
+| extend _esuBillableCores = iff(_isStandardEdition and _esuBillableCores > 24, 24, _esuBillableCores)
+// Host key for ESU billing (ESU is metered per OSE, per version). Arc instances/components share the
+// Arc machine; SQL VMs and rows without a host are keyed on their own id (so no dedup is applied).
+| extend _instanceId = tolower(tostring(id))
+| extend _esuHostKey = case(
+                           type != "microsoft.azurearcdata/sqlserverinstances",
+                           _instanceId,
+                           isnotempty(_arcMachineId),
+                           _arcMachineId,
+                           _instanceId
+    )
+// Selection key so the single ESU charge lands on the HIGHEST-edition instance of each host+version
+// (Enterprise beats Standard beats Web); ties broken by instance id. Lower key = higher priority.
+| extend _esuPickKey = strcat(tostring(1000 - _editionRank), "|", _instanceId)
+// Attribute ESU cost once per (host, SQL version) at the HIGHEST edition present. Azure Resource Graph
+// does not support `let`/window functions, so the per-host+version aggregate is computed with a single
+// inline self-join over the Arc SQL instances (Arc components share a host; SQL VMs self-host and are
+// billed on their own row). The aggregate returns the OSE cores once (max billable cores), the
+// highest-edition rate (max rate), and the highest-edition representative row (min pick key). ESU is
+// then charged on that one row per host+version; 0 on the rest to avoid double counting.
+| join kind = leftouter (
+    resources
+    | where type == "microsoft.azurearcdata/sqlserverinstances"
+    | extend _agEdition = tostring(properties.edition)
+    | extend _agInstanceId = tolower(tostring(id))
+    | extend _agArcMachineId = tolower(tostring(properties.containerResourceId))
+    | extend _agIsFree = tolower(_agEdition) contains "developer" or tolower(_agEdition) contains "express" or tolower(_agEdition) contains "evaluation" or tolower(_agEdition) contains "free"
+    | where not(_agIsFree)
+    | extend _agIsEnt = tolower(_agEdition) contains "enterprise"
+    | extend _agIsStd = tolower(_agEdition) contains "standard"
+    | extend _agIsWeb = tolower(_agEdition) contains "web"
+    | extend _agRank = case(_agIsEnt, 3, _agIsStd, 2, _agIsWeb, 1, 0)
+    | extend _agVCores = coalesce(toint(properties.vCore), 0)
+    | extend _agBillable = iff(_agVCores < 4, 4, _agVCores)
+    | extend _agBillable = iff(_agIsStd and _agBillable > 24, 24, _agBillable)
+    | extend _agRate = iff(_agIsEnt, 540.5, 139.0)
+    | extend _esuHostKey = iff(isnotempty(_agArcMachineId), _agArcMachineId, _agInstanceId)
+    | extend _agPickKey = strcat(tostring(1000 - _agRank), "|", _agInstanceId)
+    | summarize _hostVersionBillableCores = max(_agBillable),
+                _hostVersionEsuRate = max(_agRate),
+                _esuPrimaryKey = min(_agPickKey)
+        by _esuHostKey, SQLVersion = tostring(properties.version)
+    )
+    on _esuHostKey, SQLVersion
 // Azure VM compute cost per vCore/month (Linux, PAYG, blended — for high-level assessment only)
 // Rates: M-series ~$0.192/hr, E-series ~$0.063/hr, L-series ~$0.078/hr, F-series ~$0.042/hr, General Purpose ~$0.05/hr (×730h)
 | extend VMCostPerCorePerMonth = case(
@@ -398,8 +501,25 @@ resources
 | extend SQLLicenseMonthlyCost = SQLLicenseMonthlyCostPerCore * BillableCores
 // For savings: PAYG customers pay the hourly rate; AHUB/DR is sunk cost (SA), not included in hourly saving
 | extend _sqlLicenseSavingsCost = iff(SQLLicenseType == "PAYG", SQLLicenseMonthlyCost, 0.0)
-// EstESUMonthlyCost is non-zero for ESU Active (currently paying) and Upcoming ESU (forecast)
-| extend EstESUMonthlyCost = iff(EOLStatus in("ESU Active", "Upcoming ESU"), ESUMonthlyCostPerCore * BillableCores, 0.0)
+// Bill ESU once per host+version. Arc: only the highest-edition primary row is charged. SQL VMs
+// self-host (no Arc aggregate match) and are billed per instance on the host's own cores/rate.
+| extend _isVM = type == "microsoft.sqlvirtualmachine/sqlvirtualmachines"
+| extend _isEsuPrimary = _esuApplicable and EOLStatus in("ESU Active", "Upcoming ESU") and (_isVM or _esuPickKey == _esuPrimaryKey)
+| extend _esuBillCores = iff(_isVM, _esuBillableCores, _hostVersionBillableCores)
+| extend _esuBillRate = iff(_isVM, ESUMonthlyCostPerCore, _hostVersionEsuRate)
+| extend EstESUMonthlyCost = iff(_isEsuPrimary, _esuBillRate * _esuBillCores, 0.0)
+// Explains how ESU cost is attributed for this row.
+| extend ESUCostBasis = case(
+                            _isFreeEdition,
+                            "N/A - free edition not ESU eligible",
+                            _isPassiveDR,
+                            "N/A - passive HA/DR replica (covered at $0)",
+                            not(_esuApplicable) or not(EOLStatus in("ESU Active", "Upcoming ESU")),
+                            "N/A - not ESU billable",
+                            _isEsuPrimary,
+                            strcat("Billed once per host+version at highest edition on ", tostring(_esuBillCores), " OSE cores"),
+                            "Included in host+version ESU (billed on highest-edition instance)"
+    )
 // Patch operations cost: 2h/month × $80/h = $160/month per instance
 | extend PatchOpsMonthlyCost = 160.0
 // Current total spend (used in both saving calculations)
@@ -456,10 +576,14 @@ resources
     ResourceGroup = resourceGroup,
     Name = name,
     Location = location,
+    ArcServerName,
     CloudType,
+    ServiceType,
     SQLVersion,
     Edition,
     EOLStatus,
+    ESUApplicable,
+    ESUEnabled,
     ESUStartDate,
     ESUEndDate,
     MigrationTargetTier = _recommendedMITier,
@@ -473,6 +597,7 @@ resources
     VMCostPerCorePerMonth = tostring(VMCostPerCorePerMonth),
     EstVMComputeMonthlyCost = tostring(round(EstVMComputeMonthlyCost, 2)),
     EstESUMonthlyCost = tostring(round(EstESUMonthlyCost, 2)),
+    ESUCostBasis,
     PatchOpsMonthlyCost = tostring(PatchOpsMonthlyCost),
     CurrentMonthlyCost = tostring(round(_currentMonthlyCost, 2)),
     ConsolidationRatio = tostring(consolidationRatio),

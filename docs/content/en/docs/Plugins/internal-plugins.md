@@ -153,35 +153,47 @@ Availability zone loss/gain applies a multiplicative adjustment to the final sco
 **Plugin Name**: `sql-eol`  
 **Command**: `azqr sql-eol`  
 **Flag**: `--plugin sql-eol`  
-**Version**: 0.3.0-beta
+**Version**: 0.6.0-beta
 
 Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status across Arc-enabled SQL Server instances and SQL Virtual Machines on Azure.
 
 **Key Features**:
 - Detects EOL status dynamically using current date (Expired, ESU Active, Upcoming ESU, Supported)
-- Calculates ESU licensing costs per instance based on edition and vCore count
+- Models ESU billing the way Microsoft meters it: **once per host (OSE), per SQL Server version, at the highest edition present** — multiple same-version components (Engine, SSIS, SSAS, SSRS, PBIRS) on one host share a single ESU charge
+- Enforces Standard edition **24-core cap** on ESU billing (per Microsoft ESU pricing docs; Enterprise and Web are uncapped)
+- Passive **HA/DR replicas excluded** from ESU cost ($0 — covered under primary's SA failover rights)
+- Reports **ESU subscription status** (`ESUEnabled`) from the Arc machine's `WindowsAgent.SqlServer` extension
 - Estimates SQL Managed Instance migration savings with 2:1 consolidation model
-- Covers both Arc-enabled SQL (on-prem) and Azure VM (SQL IaaS)
+- Covers both Arc-enabled SQL (on-prem, AWS, GCP) and Azure VM (SQL IaaS)
+
+**ESU Billing Model**: ESU is metered once per OSE (Operating System Environment — a physical or virtual machine), per SQL Server version, at the highest edition installed for that version. All SQL Server service types (Engine, SSIS, SSAS, SSRS, Power BI Report Server) are ESU-eligible and roll into that single per-host+version charge. Free editions (Developer, Express, Evaluation) are never billed; passive HA/DR replicas are covered at $0 under the primary server's Software Assurance.
 
 **Use Cases**:
-- ESU cost forecasting and budgeting
+- ESU cost forecasting and budgeting (accurate host-level model, not overcounted per-instance)
+- Identifying which Arc hosts already have ESU subscribed vs. unsubscribed
 - Migration planning to Azure SQL Managed Instance
 - Compliance reporting for end-of-support software
 - License optimization across SQL estates
 
 **Output Columns**:
 - Subscription, Resource Group, Name, Location
-- Cloud Type (Arc-enabled or Azure VM)
+- Arc Server Name (underlying Arc machine name; `N/A (SQL VM)` for Azure VMs)
+- Cloud Type (Arc-enabled (On-Prem) / Arc-enabled (AWS) / Arc-enabled (GCP) / Azure VM (SQL IaaS))
+- Service Type (Engine / SSIS / SSAS / SSRS / PBIRS for Arc; Engine for SQL VMs)
 - SQL Version, Edition
 - EOL Status (Expired / ESU Active / Upcoming ESU / Supported)
+- ESU Applicable (`Yes` / `No - free edition` / `No - passive HA/DR replica`)
+- ESU Enabled (`Enabled` / `Not Enabled` for Arc; `Unknown (SQL VM)` for Azure VMs)
 - ESU Start Date, ESU End Date
-- Migration Target Tier (General Purpose / Business Critical / N/A)
+- Migration Target Tier (General Purpose / N/A)
 - Migration Recommendation (actionable text)
 - vCores, Billable Cores
 - ESU Monthly Cost/Core
 - SQL License Type, SQL License Cost/Core/Month, SQL License Monthly Cost
 - VM Cost/Core/Month, Est VM Compute Monthly Cost
-- Est ESU Monthly Cost, Patch Ops Monthly Cost
+- Est ESU Monthly Cost (charged once per host+version; `$0` on secondary components)
+- ESU Cost Basis (explains attribution: primary row, included, or N/A)
+- Patch Ops Monthly Cost
 - Current Monthly Cost (total current spend)
 - Consolidation Ratio (2:1 default)
 - Est SQL MI Monthly Cost, Est SQL MI Monthly Saving
@@ -265,7 +277,7 @@ ai-gov     1.0.0      internal   Checks OpenAI/Cognitive Services accounts for..
 carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure resource type
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
 region-selection      0.1.0-beta internal   Scores and ranks Azure regions for workload migration...
-sql-eol               0.1.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
+sql-eol               0.6.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
 ```
 
 ### Plugin Details
