@@ -464,6 +464,16 @@ azqr scan --fail-on Medium
 
 Supported values are `High`, `Medium`, and `Low`. Requested reports are generated before the gate result is returned.
 
+## SARIF output
+
+Generate SARIF 2.1.0 for code-scanning integrations:
+
+```bash
+azqr scan --xlsx=false --sarif --output-name azqr-results
+```
+
+SARIF results are aggregated per impacted recommendation and use logical Azure locations. They support security dashboards, but not PR diff line annotations without a separate deployed-resource-to-IaC source mapping.
+
 ## Filtering Recommendations and more
 
 You can configure Azure Quick Review to include or exclude specific subscriptions or resource groups and also exclude services or recommendations. To do so, create a `yaml` file with the following format:

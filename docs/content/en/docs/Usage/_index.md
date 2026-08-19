@@ -322,7 +322,17 @@ Supported thresholds are `High`, `Medium`, and `Low`. The gate evaluates dedupli
 
 ## File Outputs
 
-Currently Azure Quick Review supports 3 types of file outputs: `xlsx` (default), `csv`, `json`
+Azure Quick Review supports `xlsx` (default), `csv`, `json`, and `sarif` file outputs.
+
+## SARIF output
+
+Generate a SARIF 2.1.0 report for GitHub code scanning or another SARIF consumer:
+
+```bash
+azqr scan --xlsx=false --sarif --output-name azqr-results
+```
+
+SARIF contains one result per impacted recommendation, with stable scope-aware fingerprints and `High`, `Medium`, and `Low` mapped to `error`, `warning`, and `note`. Results use logical Azure locations. They can appear in code-scanning security views but cannot create PR diff line annotations because deployed Azure resources are not mapped to repository source files.
 
 ### xlsx
 

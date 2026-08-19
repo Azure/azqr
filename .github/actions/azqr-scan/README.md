@@ -6,7 +6,7 @@ This GitHub Action allows you to integrate [Azure Quick Review (azqr)](https://g
 
 - ✅ **Cross-platform support**: Works on Linux, Windows, and macOS runners
 - ✅ **Flexible versioning**: Use latest version or specify a particular release
-- ✅ **Multiple output formats**: JSON, CSV, XLSX, HTML
+- ✅ **Multiple output formats**: JSON, XLSX, SARIF
 - ✅ **Artifact upload**: Automatically uploads scan reports as workflow artifacts
 - ✅ **Customizable**: Support for custom arguments and working directories
 
@@ -56,7 +56,7 @@ jobs:
 | `version` | Version of azqr to use (e.g., `v1.12.4`, `latest`) | No | `latest` |
 | `subscription-id` | Azure subscription ID to scan | No | |
 | `resource-group` | Specific resource group to scan | No | |
-| `output-format` | Output format (`json`, `csv`, `xlsx`) | No | `json` |
+| `output-format` | Output format (`json`, `xlsx`, `sarif`) | No | `json` |
 | `output-path` | Output file path (without extension) | No | `azqr-report` |
 | `extra-args` | Additional arguments to pass to azqr | No | |
 | `fail-on` | Fail when impacted recommendations meet or exceed `High`, `Medium`, or `Low` | No | |
