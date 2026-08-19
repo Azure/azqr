@@ -49,6 +49,7 @@ type (
 		SkuFamily      string
 		SkuCapacity    int
 		Kind           string
+		Tags           map[string]string
 		SLA            string
 	}
 

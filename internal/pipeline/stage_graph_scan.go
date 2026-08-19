@@ -49,13 +49,7 @@ func (s *GraphScanStage) Execute(ctx *ScanContext) error {
 		Msg("Graph Phase 1: Recommendations listed")
 
 	// Get resource type counts for filtering — fetched once and reused below.
-	resourceScanner := scanners.ResourceDiscovery{}
-	resourceTypeCount := resourceScanner.GetCountPerResourceTypeAndSubscription(
-		ctx.Ctx,
-		ctx.Cred,
-		ctx.Subscriptions,
-		ctx.Params.Filters,
-	)
+	resourceTypeCount := scanners.CountResourcesByTypeAndSubscription(ctx.ReportData.Resources, ctx.Subscriptions)
 	ctx.ReportData.ResourceTypeCount = resourceTypeCount
 
 	log.Debug().
