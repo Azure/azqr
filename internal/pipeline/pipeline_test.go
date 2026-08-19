@@ -218,9 +218,6 @@ func TestPipeline_Integration(t *testing.T) {
 	)
 
 	// Just verify pipeline structure is valid
-	if pipeline == nil {
-		t.Fatal("Expected non-nil pipeline")
-	}
 	if len(pipeline.stages) != 12 {
 		t.Errorf("Expected 12 stages, got %d", len(pipeline.stages))
 	}
