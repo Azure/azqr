@@ -32,7 +32,8 @@ Supports Excel (.xlsx).
 For Excel format, the comparison provides:
   - Row count comparison for each sheet
   - Detection of duplicate rows after row 4 (data rows)`,
-	Args: cobra.NoArgs,
+	Args:         cobra.NoArgs,
+	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		file1, _ := cmd.Flags().GetString("file1")

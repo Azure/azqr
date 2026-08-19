@@ -33,7 +33,8 @@ Examples:
   
   # Start in HTTP/SSE mode on custom port
   azqr mcp --mode http --addr :3000`,
-	Args: cobra.NoArgs,
+	Args:         cobra.NoArgs,
+	SilenceUsage: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		mode := mcpserver.ServerMode(mcpMode)
 		mcpserver.StartWithMode(mode, mcpAddr, version)

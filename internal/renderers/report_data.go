@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Azure/azqr/internal/findings"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/skus"
 )
@@ -28,6 +29,8 @@ type (
 		ResourceTypeCount       []*models.ResourceTypeCount                       `json:"resourceTypeCount,omitempty"`
 		PluginResults           []*PluginResult                                   `json:"pluginResults,omitempty"`
 		Stages                  *models.StageConfigs                              `json:"-"`
+		Summary                 *findings.Summary                                 `json:"-"`
+		ScopeID                 string                                            `json:"-"`
 
 		// Table caches - populated on first call, reused thereafter
 		cachedImpactedTable                [][]string `json:"-"`
@@ -299,15 +302,10 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 		return rd.cachedRecommendationsTable
 	}
 
-	counter := map[string]int{}
-	for _, rt := range rd.Recommendations {
-		for _, r := range rt {
-			counter[r.RecommendationID] = 0
-		}
-	}
-
-	for _, r := range rd.Graph {
-		counter[r.RecommendationID]++
+	if rd.Summary == nil {
+		// Fallback for callers that build ReportData outside the pipeline (e.g. tests).
+		// FindingsSummaryStage populates this during normal scans.
+		rd.Summary = findings.Build(rd.Recommendations, rd.Graph, len(rd.Resources))
 	}
 
 	headers := []string{"Implemented", "Number of Impacted Resources", "Azure Service / Well-Architected", "Recommendation Source",
@@ -315,7 +313,7 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 		"Impact", "Best Practices Guidance", "Read More", "Recommendation Id"}
 
 	// Estimate capacity based on recommendations count
-	estimatedCap := len(counter) + 1
+	estimatedCap := len(rd.Summary.Recommendations) + 1
 	rows := make([][]string, 1, estimatedCap)
 	rows[0] = headers
 
@@ -326,54 +324,39 @@ func (rd *ReportData) RecommendationsTable() [][]string {
 	// Always consider Microsoft.Resources as deployed
 	deployedTypes["microsoft.resources"] = true
 
-	// Outer key is already lowercase (set by ListRecommendations).
-	// Hoist the deployedTypes check to the outer loop — one lookup per resource
-	// type instead of one per recommendation, and zero ToLower allocations.
-	for lowerType, rt := range rd.Recommendations {
-		typeIsDeployed := deployedTypes[lowerType]
-		for _, r := range rt {
-			if skipCategory(r.Category) {
-				continue
-			}
-
-			var implemented string
-			switch {
-			case !typeIsDeployed:
-				implemented = "N/A"
-			case counter[r.RecommendationID] == 0:
-				implemented = "true"
-			default:
-				implemented = "false"
-			}
-
-			categoryPart := ""
-			servicePart := ""
-			typeParts := strings.Split(r.ResourceType, "/")
-			categoryPart = typeParts[0]
-			if len(typeParts) > 1 {
-				servicePart = typeParts[1]
-			}
-
-			// Cache string conversions
-			category := string(r.Category)
-			impact := string(r.Impact)
-
-			row := []string{
-				implemented,
-				fmt.Sprint(counter[r.RecommendationID]),
-				"Azure Service",
-				r.Source,
-				categoryPart,
-				servicePart,
-				category,
-				r.Recommendation,
-				impact,
-				r.LongDescription,
-				r.LearnMoreLink[0].Url,
-				r.RecommendationID,
-			}
-			rows = append(rows, row)
+	for _, r := range rd.Summary.Recommendations {
+		typeIsDeployed := deployedTypes[strings.ToLower(r.ResourceType)]
+		var implemented string
+		switch {
+		case !typeIsDeployed:
+			implemented = "N/A"
+		case r.ImpactedResources == 0:
+			implemented = "true"
+		default:
+			implemented = "false"
 		}
+
+		typeParts := strings.Split(r.ResourceType, "/")
+		categoryPart := typeParts[0]
+		servicePart := ""
+		if len(typeParts) > 1 {
+			servicePart = typeParts[1]
+		}
+
+		rows = append(rows, []string{
+			implemented,
+			fmt.Sprint(r.ImpactedResources),
+			"Azure Service",
+			r.Source,
+			categoryPart,
+			servicePart,
+			r.Category,
+			r.Recommendation,
+			r.Impact,
+			r.LongDescription,
+			r.LearnURL,
+			r.ID,
+		})
 	}
 
 	rd.cachedRecommendationsTable = rows
@@ -509,7 +492,7 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 
 	slaMap := make(map[string]string, len(rd.Graph))
 	for _, a := range rd.Graph {
-		if a.Category == models.CategorySLA {
+		if strings.EqualFold(string(a.Category), string(models.CategorySLA)) {
 			slaMap[strings.ToLower(a.ResourceID)] = a.Param1
 		}
 	}
@@ -549,5 +532,5 @@ func (rd *ReportData) resourcesTable(resources []*models.Resource) [][]string {
 }
 
 func skipCategory(category string) bool {
-	return category == string(models.CategorySLA)
+	return strings.EqualFold(category, string(models.CategorySLA))
 }
