@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Azure/azqr/internal/findings"
+	"github.com/Azure/azqr/internal/gate"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/profiling"
@@ -28,6 +30,7 @@ func init() {
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default) (default true)")
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
+	scanCmd.PersistentFlags().StringP("fail-on", "", "", "Fail when impacted recommendations meet or exceed this impact (High, Medium, Low)")
 
 	// Conditionally add profiling flags if profiling is available and enabled via environment
 	// Build with -tags debug to enable profiling features
@@ -65,7 +68,19 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 	mask, _ := cmd.Flags().GetBool("mask")
 	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
+	failOn, _ := cmd.Flags().GetString("fail-on")
 	pluginNames, _ := cmd.Flags().GetStringSlice("plugin")
+
+	var gateCriterion gate.Criterion
+	var gateEnabled bool
+	if failOn != "" {
+		var err error
+		gateCriterion, err = gate.Parse(failOn)
+		if err != nil {
+			return err
+		}
+		gateEnabled = true
+	}
 
 	// Get profiling flags if available
 	var cpuProfile, memProfile, traceProfile string
@@ -112,7 +127,23 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 	}
 
 	scanner := pipeline.Scanner{}
-	_, err := scanner.Scan(&params)
+	reportData, err := scanner.Scan(&params)
+	if err != nil {
+		return err
+	}
+	if gateEnabled {
+		return checkGate(cmd, reportData.Summary, gateCriterion)
+	}
+	return nil
+}
+
+func checkGate(cmd *cobra.Command, summary *findings.Summary, criterion gate.Criterion) error {
+	err := gate.Check(summary, criterion)
+	if err == nil {
+		return nil
+	}
+	cmd.Root().SilenceErrors = true
+	cmd.Root().SilenceUsage = true
 	return err
 }
 
