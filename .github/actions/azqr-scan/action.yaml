@@ -28,6 +28,10 @@ inputs:
     description: 'Additional arguments to pass to azqr'
     required: false
     default: ''
+  fail-on:
+    description: 'Fail when impacted recommendations meet or exceed this impact (High, Medium, Low)'
+    required: false
+    default: ''
 
 outputs:
   report-path:
@@ -177,6 +181,10 @@ runs:
         if [ -n "${{ inputs.extra-args }}" ]; then
           ARGS="$ARGS ${{ inputs.extra-args }}"
         fi
+
+        if [ -n "${{ inputs.fail-on }}" ]; then
+          ARGS="$ARGS --fail-on ${{ inputs.fail-on }}"
+        fi
         
         echo "Running command: $BINARY_PATH $ARGS"
         
@@ -195,7 +203,7 @@ runs:
           echo "azqr scan completed successfully"
         fi
         
-        # Don't fail the action even if scan finds issues
+        # Upload the report before re-raising this result in the final step.
         exit 0
 
     - name: Upload Report Artifact
@@ -205,3 +213,8 @@ runs:
         name: azqr-report-${{ github.run_number }}
         path: ${{ steps.scan.outputs.report-path }}
         retention-days: 30
+
+    - name: Propagate azqr Scan Result
+      if: always() && steps.scan.outputs.exit-code != '0'
+      shell: bash
+      run: exit "${{ steps.scan.outputs.exit-code }}"

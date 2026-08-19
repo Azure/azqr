@@ -59,6 +59,7 @@ jobs:
 | `output-format` | Output format (`json`, `csv`, `xlsx`) | No | `json` |
 | `output-path` | Output file path (without extension) | No | `azqr-report` |
 | `extra-args` | Additional arguments to pass to azqr | No | |
+| `fail-on` | Fail when impacted recommendations meet or exceed `High`, `Medium`, or `Low` | No | |
 | `working-directory` | Working directory to run azqr from | No | `.` |
 
 ## Outputs
@@ -117,6 +118,18 @@ jobs:
       with:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 ```
+
+### Fail a workflow on findings
+
+```yaml
+- name: Gate on medium and high impact findings
+  uses: Azure/azqr/.github/actions/azqr-scan
+  with:
+    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    fail-on: Medium
+```
+
+The report artifact is uploaded before the action propagates the non-zero scan result. Set `continue-on-error: true` on the action step only when the workflow should remain report-only.
 
 ## Troubleshooting
 
