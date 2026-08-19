@@ -307,6 +307,17 @@ azqr rules
 azqr rules --json
 ```
 
+## CI/CD severity gate
+
+Use `--fail-on` to return a non-zero exit code when the Recommendations table contains impacted resources at or above a severity threshold:
+
+```bash
+# Fails for Medium and High impact recommendations
+azqr scan --fail-on Medium
+```
+
+Supported thresholds are `High`, `Medium`, and `Low`. The gate evaluates deduplicated core azqr and diagnostics findings after requested reports are generated. Advisor, Defender, Policy, cost, status, and plugin datasets are not included.
+
 ## File Outputs
 
 Currently Azure Quick Review supports 3 types of file outputs: `xlsx` (default), `csv`, `json`

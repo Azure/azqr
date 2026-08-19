@@ -453,6 +453,17 @@ azqr mcp --mode http --addr :8080
 
 > For detailed MCP configuration, see the [Usage documentation](https://azure.github.io/azqr/docs/usage/).
 
+## CI/CD severity gate
+
+Use `--fail-on` to return a non-zero exit code when impacted core recommendations meet or exceed a threshold:
+
+```bash
+# Fails for Medium and High impact recommendations
+azqr scan --fail-on Medium
+```
+
+Supported values are `High`, `Medium`, and `Low`. Requested reports are generated before the gate result is returned.
+
 ## Filtering Recommendations and more
 
 You can configure Azure Quick Review to include or exclude specific subscriptions or resource groups and also exclude services or recommendations. To do so, create a `yaml` file with the following format:

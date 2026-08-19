@@ -6,6 +6,8 @@ package commands
 import (
 	"testing"
 
+	"github.com/Azure/azqr/internal/findings"
+	"github.com/Azure/azqr/internal/gate"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +26,42 @@ func TestRootCommandExists(t *testing.T) {
 
 	if rootCmd.Long == "" {
 		t.Error("rootCmd.Long should not be empty")
+	}
+	if rootCmd.SilenceErrors {
+		t.Error("rootCmd should preserve Cobra's default error behavior")
+	}
+	if rootCmd.SilenceUsage {
+		t.Error("rootCmd should preserve Cobra's default usage behavior")
+	}
+}
+
+func TestCheckGateSuppressesOutputOnlyOnFailure(t *testing.T) {
+	criterion, err := gate.Parse("Medium")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	root := &cobra.Command{Use: "test"}
+	command := &cobra.Command{Use: "scan"}
+	root.AddCommand(command)
+
+	if err := checkGate(command, &findings.Summary{}, criterion); err != nil {
+		t.Fatalf("unexpected passing gate error: %v", err)
+	}
+	if root.SilenceErrors || root.SilenceUsage {
+		t.Fatal("passing gate changed Cobra error behavior")
+	}
+
+	err = checkGate(command, &findings.Summary{Recommendations: []findings.Recommendation{{
+		ID:                "rec",
+		Impact:            "Medium",
+		ImpactedResources: 1,
+	}}}, criterion)
+	if err == nil {
+		t.Fatal("expected gate failure")
+	}
+	if !root.SilenceErrors || !root.SilenceUsage {
+		t.Fatal("failing gate should suppress Cobra's duplicate error and usage output")
 	}
 }
 
@@ -82,6 +120,7 @@ func TestScanCommandHasRequiredFlags(t *testing.T) {
 		{"output-name", "string"},
 		{"mask", "bool"},
 		{"filters", "string"},
+		{"fail-on", "string"},
 	}
 
 	for _, rf := range requiredFlags {
