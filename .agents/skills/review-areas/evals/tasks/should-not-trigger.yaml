@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/waza/v0.38.5/schemas/task.schema.json
+id: review-areas-should-not-trigger-001
+name: Should not trigger for planning or code explanation
+description: |
+  Negative routing test: a request to plan a new implementation is planning work,
+  and a request to explain how existing code works is a read-only question.
+  Neither should fan out the parallel review subagents.
+tags:
+  - negative
+
+inputs:
+  prompt: "Plan a new implementation for the cache layer, and explain how the existing code works while you are at it."
+  context:
+    project_type: web-app
+
+expected:
+  should_trigger: false
+  outcomes:
+    - type: task_completed
+  behavior:
+    max_tool_calls: 5
+
+graders:
+  - type: skill_invocation
+    name: avoids_review_areas
+    config:
+      forbidden_skills:
+        - review-areas
+      allow_extra: true

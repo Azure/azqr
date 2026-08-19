@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/waza/v0.38.5/schemas/task.schema.json
+id: review-areas-001
+name: In-depth parallel review across risk areas
+description: |
+  Verifies the CRITICAL in-depth code review after a non-trivial development
+  phase: the run fans out parallel subagents across review areas — correctness,
+  tests, security, performance and product — for a pull request bug hunt and
+  quality check, then synthesizes the findings per area.
+tags:
+  - basic
+  - happy-path
+
+inputs:
+  prompt: "Do an in-depth review of my pull request as a code quality check and bug hunt: fan out parallel subagents to review correctness, tests, security, performance and product areas."
+  context:
+    project_type: web-app
+
+expected:
+  should_trigger: true
+  output_contains:
+    - "review"
+  outcomes:
+    - type: task_completed
+  behavior:
+    max_tool_calls: 20
+
+graders:
+  - type: text
+    name: mentions_review_areas
+    config:
+      regex_match:
+        - "(?i)correctness|security|area"

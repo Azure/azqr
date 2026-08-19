@@ -1,0 +1,73 @@
+skill: review-areas
+
+# Note: review-areas and council-review have overlapping triggers.
+# review-areas = single-model fan-out across review areas (correctness, tests, security, performance, product)
+# council-review = multi-model consensus review
+# Generic "review my code" prompts may match either; tests here focus on
+# area-specific language or general review without multi-model keywords.
+
+should_trigger_prompts:
+  - prompt: "Review my code for correctness and security"
+    reason: "Mentions specific review areas (correctness, security)"
+    confidence: high
+
+  - prompt: "Do a security and correctness review"
+    reason: "Abstract area-specific request, no workspace state needed"
+    confidence: high
+
+  - prompt: "Find bugs, security issues, and test gaps in this code"
+    reason: "Maps to correctness + security + tests areas"
+    confidence: high
+
+  - prompt: "Give me feedback across different review areas"
+    reason: "Directly references review areas concept"
+    confidence: high
+
+  - prompt: "Do a code quality check on this PR"
+    reason: "Quality check maps to review areas"
+    confidence: high
+
+  - prompt: "Review my code"
+    reason: "Generic review without multi-model keywords — review-areas is the default single-model review"
+    confidence: medium
+
+  - prompt: "Check my changes for performance issues"
+    reason: "Performance is one of the review areas — references workspace changes that may not exist"
+    confidence: medium
+
+  - prompt: "Are there any bugs or missing tests in my recent changes?"
+    reason: "Bug hunt + test gaps maps to correctness and tests areas"
+    confidence: medium
+
+  - prompt: "Review this diff for security vulnerabilities"
+    reason: "Security is a specific review area — references a diff that may not exist in eval sandbox"
+    confidence: medium
+
+should_not_trigger_prompts:
+  - prompt: "Plan the architecture for a new feature"
+    reason: "Architecture planning, not review"
+    confidence: high
+
+  - prompt: "Write unit tests for this module"
+    reason: "Test writing is a different task"
+    confidence: high
+
+  - prompt: "Deploy my application to production"
+    reason: "Deployment, completely unrelated"
+    confidence: high
+
+  - prompt: "Explain what this function does"
+    reason: "Code explanation, not review"
+    confidence: high
+
+  - prompt: "Create a new React component"
+    reason: "Code creation, not review"
+    confidence: high
+
+  - prompt: "Council review my changes"
+    reason: "Explicit council keyword should go to council-review"
+    confidence: high
+
+  - prompt: "Have multiple models review this PR"
+    reason: "Multi-model is council-review territory"
+    confidence: high

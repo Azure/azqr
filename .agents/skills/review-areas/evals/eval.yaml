@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/waza/v0.38.5/schemas/eval.schema.json
+schemaVersion: "1.2"
+name: review-areas-eval
+description: |
+  Evaluation suite for the review-areas skill.
+  Tests that the skill correctly triggers for area-focused
+  code review with parallel subagent perspectives.
+skill: review-areas
+version: "1.0"
+
+config:
+  trials_per_task: 1
+  timeout_seconds: 300
+  parallel: false
+  executor: copilot-sdk
+  model: claude-sonnet-4.6
+  skill_directories:
+    - ".."
+    - "../../../../model-council/skills"
+  required_skills:
+    - review-areas
+
+metrics:
+  - name: trigger_accuracy
+    weight: 1.0
+    threshold: 0.9
+    description: Correctly trigger area-focused parallel review and avoid unrelated work.
+
+graders:
+  - type: text
+    name: no_errors
+    config:
+      regex_not_match:
+        - "(?i)fatal error|crashed|exception occurred"
+
+  - type: code
+    name: has_output
+    config:
+      assertions:
+        - "len(output) > 10"
+
+tasks:
+  - "tasks/*.yaml"

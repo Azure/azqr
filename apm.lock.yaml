@@ -1,5 +1,5 @@
 lockfile_version: '1'
-generated_at: '2026-07-27T16:08:41.640885+00:00'
+generated_at: '2026-08-19T14:40:30.465157+00:00'
 apm_version: 0.24.0
 dependencies:
 - repo_url: anthropics/skills
@@ -51,3 +51,26 @@ dependencies:
     .agents/skills/skill-creator/scripts/run_loop.py: sha256:7bd6f674203168520517eec94c55f493c0d154339b061b4d7c0f0dad187d0f21
     .agents/skills/skill-creator/scripts/utils.py: sha256:3af8ae62c40c73ab712207436a0d9a981e845f25c5a7040229eb189cc8e45bb1
   content_hash: sha256:b2bfe91d69ca99994c0566baede889e7d2b9bb8791c6b6106c5d387392f717f6
+- repo_url: microsoft/vscode-team-kit
+  name: review-areas
+  host: github.com
+  resolved_commit: 9ce1855c4be7369aa766be4efac3c1a40fe07f30
+  resolved_ref: 9ce1855
+  version: 0.0.0
+  virtual_path: review-areas
+  is_virtual: true
+  package_type: skill_bundle
+  deployed_files:
+  - .agents/skills/review-areas
+  - .agents/skills/review-areas/SKILL.md
+  - .agents/skills/review-areas/evals/eval.yaml
+  - .agents/skills/review-areas/evals/tasks/basic-review.yaml
+  - .agents/skills/review-areas/evals/tasks/should-not-trigger.yaml
+  - .agents/skills/review-areas/evals/trigger_tests.yaml
+  deployed_file_hashes:
+    .agents/skills/review-areas/SKILL.md: sha256:53e126bc6a2a9a47702e73c7ce0671a08a92bb72e6597a63b04f0b6b76d5fd91
+    .agents/skills/review-areas/evals/eval.yaml: sha256:d08462fdbac1058aabfa0b8414a201bd5c77376d3616bedc657c60abdefb85f8
+    .agents/skills/review-areas/evals/tasks/basic-review.yaml: sha256:4c24d32206e0be43a407a0fa4e3cb2b7641d8c83333f875f486dedd54d42cbad
+    .agents/skills/review-areas/evals/tasks/should-not-trigger.yaml: sha256:cce72b668a40fc81371e433798ede6f3f896914e3c1b990befcd7f6257c4a879
+    .agents/skills/review-areas/evals/trigger_tests.yaml: sha256:f2e78629e876859a3f98556a9edbad1483c37e0c835bb9c147c27b7dbf96ad41
+  content_hash: sha256:cb1a5180417404bdfb32f5673e3fd0aecc0890583cec4a908ccb6c6ff66e2421
