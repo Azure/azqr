@@ -4,13 +4,13 @@
 package commands
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/profiling"
 
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -41,17 +41,18 @@ func init() {
 }
 
 var scanCmd = &cobra.Command{
-	Use:   "scan",
-	Short: "Scan Azure Resources",
-	Long:  "Scan Azure Resources",
-	Args:  cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	Use:          "scan",
+	Short:        "Scan Azure Resources",
+	Long:         "Scan Azure Resources",
+	Args:         cobra.NoArgs,
+	SilenceUsage: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		scannerKeys, _ := models.GetScanners()
-		scan(cmd, scannerKeys)
+		return scan(cmd, scannerKeys)
 	},
 }
 
-func scan(cmd *cobra.Command, scannerKeys []string) {
+func scan(cmd *cobra.Command, scannerKeys []string) error {
 	managementGroups, _ := cmd.Flags().GetStringSlice("management-group-id")
 	subscriptions, _ := cmd.Flags().GetStringSlice("subscription-id")
 	resourceGroups, _ := cmd.Flags().GetStringSlice("resource-group")
@@ -88,7 +89,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	stageConfigs.ConfigureStages(stageNames)
 
 	if err := stageConfigs.ApplyStageParams(stageParams); err != nil {
-		log.Fatal().Err(err).Msg("failed applying stage parameters")
+		return fmt.Errorf("failed applying stage parameters: %w", err)
 	}
 
 	params := models.ScanParams{
@@ -111,12 +112,13 @@ func scan(cmd *cobra.Command, scannerKeys []string) {
 	}
 
 	scanner := pipeline.Scanner{}
-	scanner.Scan(&params)
+	_, err := scanner.Scan(&params)
+	return err
 }
 
 // scanWithPlugin is a specialized version of scan that enables a specific plugin
 // and forces plugin-only mode for faster execution by calling ScanPlugins directly
-func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string) {
+func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string) error {
 	managementGroups, _ := cmd.Flags().GetStringSlice("management-group-id")
 	subscriptions, _ := cmd.Flags().GetStringSlice("subscription-id")
 	resourceGroups, _ := cmd.Flags().GetStringSlice("resource-group")
@@ -177,5 +179,6 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 
 	scanner := pipeline.Scanner{}
 	// Call ScanPlugins directly for optimized plugin-only execution
-	scanner.ScanPlugins(&params)
+	_, err := scanner.ScanPlugins(&params)
+	return err
 }

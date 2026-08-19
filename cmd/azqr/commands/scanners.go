@@ -33,14 +33,15 @@ func init() {
 
 		// Create command for this scanner
 		cmd := &cobra.Command{
-			Use:   abbr,
-			Short: fmt.Sprintf("Scan %s", serviceName),
-			Long:  fmt.Sprintf("Scan %s", serviceName),
-			Args:  cobra.NoArgs,
-			Run: func(cmd *cobra.Command, args []string) {
+			Use:          abbr,
+			Short:        fmt.Sprintf("Scan %s", serviceName),
+			Long:         fmt.Sprintf("Scan %s", serviceName),
+			Args:         cobra.NoArgs,
+			SilenceUsage: true,
+			RunE: func(cmd *cobra.Command, args []string) error {
 				// Capture the abbreviation in the closure
 				scannerAbbr := abbr
-				scan(cmd, []string{scannerAbbr})
+				return scan(cmd, []string{scannerAbbr})
 			},
 		}
 

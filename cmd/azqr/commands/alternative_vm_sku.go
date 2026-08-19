@@ -37,6 +37,7 @@ The compatibility score (0.0–1.0) is computed from:
   - Accelerated networking     (weight 0.05)
 
 Returns the top N results (default 10) as JSON.`,
+	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		skuName, _ := cmd.Flags().GetString("sku")
 		top, _ := cmd.Flags().GetInt("top")

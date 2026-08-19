@@ -20,11 +20,12 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "azqr",
-	Short:   "Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group",
-	Long:    `Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group`,
-	Args:    cobra.NoArgs,
-	Version: version,
+	Use:          "azqr",
+	Short:        "Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group",
+	Long:         `Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group`,
+	Args:         cobra.NoArgs,
+	Version:      version,
+	SilenceUsage: true,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Initialize log level based on --debug flag
 		// This runs before any command executes, making debug logging available globally
@@ -75,16 +76,19 @@ func Execute() {
 			// Capture pluginName in closure properly
 			pName := pluginName
 			// Set the Run function to enable only this plugin
-			plugin.Command.Run = func(cmd *cobra.Command, args []string) {
+			plugin.Command.Run = nil
+			plugin.Command.RunE = func(cmd *cobra.Command, args []string) error {
 				// Enable only this specific plugin
 				// Note: We can't use Set() for StringArray flags, so we pass it directly to scan
 				scannerKeys, _ := models.GetScanners()
 				// Create a custom scan with this plugin enabled
-				scanWithPlugin(cmd, scannerKeys, pName)
+				return scanWithPlugin(cmd, scannerKeys, pName)
 			}
 			rootCmd.AddCommand(plugin.Command)
 		}
 	}
 
-	cobra.CheckErr(rootCmd.Execute())
+	if err := rootCmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }

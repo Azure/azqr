@@ -26,10 +26,11 @@ var pluginsCmd = &cobra.Command{
 }
 
 var pluginsListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all registered plugins",
-	Long:  "List all registered plugins including built-in and external command plugins",
-	Args:  cobra.NoArgs,
+	Use:          "list",
+	Short:        "List all registered plugins",
+	Long:         "List all registered plugins including built-in and external command plugins",
+	Args:         cobra.NoArgs,
+	SilenceUsage: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		registry := plugins.GetRegistry()
 		pluginList := registry.List()
@@ -64,10 +65,11 @@ var pluginsListCmd = &cobra.Command{
 }
 
 var pluginsInfoCmd = &cobra.Command{
-	Use:   "info <plugin-name>",
-	Short: "Show detailed information about a plugin",
-	Long:  "Show detailed information about a specific plugin including metadata and capabilities",
-	Args:  cobra.ExactArgs(1),
+	Use:          "info <plugin-name>",
+	Short:        "Show detailed information about a plugin",
+	Long:         "Show detailed information about a specific plugin including metadata and capabilities",
+	Args:         cobra.ExactArgs(1),
+	SilenceUsage: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		pluginName := args[0]
 		registry := plugins.GetRegistry()
