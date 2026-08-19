@@ -82,6 +82,9 @@ func TestScanCommandHasRequiredFlags(t *testing.T) {
 		{"output-name", "string"},
 		{"mask", "bool"},
 		{"filters", "string"},
+		{"notify-webhook", "string"},
+		{"notify-provider", "string"},
+		{"notify-top", "int"},
 		{"history", "bool"},
 		{"history-file", "string"},
 	}

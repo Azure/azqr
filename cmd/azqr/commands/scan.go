@@ -10,6 +10,7 @@ import (
 
 	"github.com/Azure/azqr/internal/history"
 	"github.com/Azure/azqr/internal/models"
+	"github.com/Azure/azqr/internal/notifications"
 	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/profiling"
 
@@ -32,6 +33,9 @@ func init() {
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
 	scanCmd.PersistentFlags().Bool("history", false, "Append an aggregate scan snapshot to local history")
 	scanCmd.PersistentFlags().String("history-file", "", "History JSONL path (defaults to the user config directory)")
+	scanCmd.PersistentFlags().String("notify-webhook", "", "HTTPS webhook URL for a scan summary")
+	scanCmd.PersistentFlags().String("notify-provider", "", "Webhook provider (teams, slack)")
+	scanCmd.PersistentFlags().Int("notify-top", 5, "Maximum recommendations and changes in a notification (1-20)")
 
 	// Conditionally add profiling flags if profiling is available and enabled via environment
 	// Build with -tags debug to enable profiling features
@@ -70,7 +74,24 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 	filtersFile, _ := cmd.Flags().GetString("filters")
 	historyEnabled, _ := cmd.Flags().GetBool("history")
 	historyFile, _ := cmd.Flags().GetString("history-file")
+	notifyWebhook, _ := cmd.Flags().GetString("notify-webhook")
+	notifyProviderValue, _ := cmd.Flags().GetString("notify-provider")
+	notifyTop, _ := cmd.Flags().GetInt("notify-top")
 	pluginNames, _ := cmd.Flags().GetStringSlice("plugin")
+
+	var notifyProvider notifications.Provider
+	if notifyWebhook != "" {
+		var err error
+		notifyProvider, err = notifications.ParseProvider(notifyProviderValue)
+		if err != nil {
+			return err
+		}
+		if notifyTop < 1 || notifyTop > 20 {
+			return fmt.Errorf("notify-top must be between 1 and 20")
+		}
+	} else if notifyProviderValue != "" {
+		return fmt.Errorf("notify-provider requires notify-webhook")
+	}
 
 	// Get profiling flags if available
 	var cpuProfile, memProfile, traceProfile string
@@ -131,6 +152,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 		return err
 	}
 	reportData.ScopeID = scopeID
+	var previousRecord *history.Record
 	if params.History {
 		path, err := history.ResolvePath(params.HistoryFile)
 		if err != nil {
@@ -140,9 +162,18 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 		if err != nil {
 			return err
 		}
-		_ = history.Latest(records, scopeID)
+		previousRecord = history.Latest(records, scopeID)
 		record := history.NewRecord(reportData.Summary, scopeID, version, time.Now())
 		if err := history.Append(path, record); err != nil {
+			return err
+		}
+	}
+	if notifyWebhook != "" {
+		model, err := notifications.Build(reportData.Summary, previousRecord, scopeID, "", notifyTop)
+		if err != nil {
+			return err
+		}
+		if err := notifications.Send(cmd.Context(), nil, notifyProvider, notifyWebhook, model); err != nil {
 			return err
 		}
 	}

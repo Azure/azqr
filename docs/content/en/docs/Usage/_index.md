@@ -327,6 +327,22 @@ azqr trend --last 20 --format json
 
 Each scan scope receives an opaque ID so subscriptions, resource groups, filters, and enabled recommendation stages are not mixed in one trend. History records do not contain subscription IDs, resource IDs, inventories, or webhook URLs.
 
+## Teams and Slack notifications
+
+Post a condensed summary after report and history processing:
+
+```bash
+azqr scan \
+  --history \
+  --notify-provider teams \
+  --notify-webhook "$AZQR_WEBHOOK_URL" \
+  --notify-top 5
+```
+
+Use `--notify-provider slack` for a Slack incoming webhook. Teams notifications target Teams Workflows Adaptive Card webhooks, not retired Office 365 connector MessageCards. When history is enabled, the message includes changes from the latest record with the same scan scope; otherwise it explicitly reports that no baseline is available.
+
+Webhook URLs must use HTTPS and are never logged or persisted. A delivery timeout or non-2xx response returns an operational error after scan artifacts and enabled history have been written.
+
 ## File Outputs
 
 Currently Azure Quick Review supports 3 types of file outputs: `xlsx` (default), `csv`, `json`

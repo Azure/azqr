@@ -464,6 +464,18 @@ azqr trend --last 12
 
 Use `--history-file <path>` on either command to override the default `history.jsonl` under the user config directory. Records are isolated by an opaque scan-scope ID and do not store resource or subscription IDs.
 
+## Teams and Slack notifications
+
+Send a summary to a Teams Workflows or Slack incoming webhook:
+
+```bash
+azqr scan --history \
+  --notify-provider teams \
+  --notify-webhook "$AZQR_WEBHOOK_URL"
+```
+
+Use `--notify-provider slack` for Slack. With history enabled, notifications include the largest same-scope changes. Webhook URLs must use HTTPS and are not logged or persisted.
+
 ## Filtering Recommendations and more
 
 You can configure Azure Quick Review to include or exclude specific subscriptions or resource groups and also exclude services or recommendations. To do so, create a `yaml` file with the following format:
