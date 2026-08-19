@@ -214,12 +214,13 @@ func TestPipeline_Integration(t *testing.T) {
 		NewAzurePolicyStage(),
 		NewArcSQLStage(),
 		NewCostStage(),
+		NewFindingsSummaryStage(),
 		NewReportRenderingStage(),
 	)
 
 	// Just verify pipeline structure is valid
-	if len(pipeline.stages) != 12 {
-		t.Errorf("Expected 12 stages, got %d", len(pipeline.stages))
+	if len(pipeline.stages) != 13 {
+		t.Errorf("Expected 13 stages, got %d", len(pipeline.stages))
 	}
 
 	t.Logf("Pipeline created with %d stages", len(pipeline.stages))

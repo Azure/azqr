@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -179,6 +180,21 @@ const (
 	CategoryServiceUpgradeAndRetirement RecommendationCategory = "ServiceUpgradeAndRetirement"
 	CategorySLA                         RecommendationCategory = "SLA"
 )
+
+// SeverityRank returns a numeric ordering rank for a recommendation impact level.
+// High=3, Medium=2, Low=1. Returns (0, false) for unknown values.
+func SeverityRank(impact string) (int, bool) {
+	switch {
+	case strings.EqualFold(impact, string(ImpactHigh)):
+		return 3, true
+	case strings.EqualFold(impact, string(ImpactMedium)):
+		return 2, true
+	case strings.EqualFold(impact, string(ImpactLow)):
+		return 1, true
+	default:
+		return 0, false
+	}
+}
 
 func LogSubscriptionScan(subscriptionID string, source string) {
 	log.Info().

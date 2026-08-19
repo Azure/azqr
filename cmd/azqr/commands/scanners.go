@@ -37,10 +37,10 @@ func init() {
 			Short: fmt.Sprintf("Scan %s", serviceName),
 			Long:  fmt.Sprintf("Scan %s", serviceName),
 			Args:  cobra.NoArgs,
-			Run: func(cmd *cobra.Command, args []string) {
+			RunE: func(cmd *cobra.Command, args []string) error {
 				// Capture the abbreviation in the closure
 				scannerAbbr := abbr
-				scan(cmd, []string{scannerAbbr})
+				return scan(cmd, []string{scannerAbbr})
 			},
 		}
 

@@ -34,7 +34,9 @@ func (s *InitializationStage) Execute(ctx *ScanContext) error {
 	ctx.Params.OutputName = outputFile
 
 	// Step 3: Validate and prepare filters
-	s.validateAndPrepareFilters(ctx.Params)
+	if err := s.validateAndPrepareFilters(ctx.Params); err != nil {
+		return err
+	}
 
 	// Step 4: Create Azure credentials
 	ctx.Cred = az.NewAzureCredential()
@@ -96,7 +98,7 @@ func (s *InitializationStage) generateOutputFileName(outputName string) string {
 }
 
 // validateAndPrepareFilters validates input parameters and prepares filters
-func (s *InitializationStage) validateAndPrepareFilters(params *models.ScanParams) {
+func (s *InitializationStage) validateAndPrepareFilters(params *models.ScanParams) error {
 	filters := params.Filters
 
 	log.Debug().
@@ -105,15 +107,15 @@ func (s *InitializationStage) validateAndPrepareFilters(params *models.ScanParam
 
 	// validate input
 	if len(params.ManagementGroups) > 0 && (len(params.Subscriptions) > 0 || len(params.ResourceGroups) > 0) {
-		log.Fatal().Msg("Management Group name cannot be used with a Subscription Id or Resource Group name")
+		return fmt.Errorf("management group name cannot be used with a subscription ID or resource group name")
 	}
 
 	if len(params.Subscriptions) < 1 && len(params.ResourceGroups) > 0 {
-		log.Fatal().Msg("Resource Group name can only be used with a Subscription Id")
+		return fmt.Errorf("resource group name can only be used with a subscription ID")
 	}
 
 	if len(params.Subscriptions) > 1 && len(params.ResourceGroups) > 0 {
-		log.Fatal().Msg("Resource Group name can only be used with 1 Subscription Id")
+		return fmt.Errorf("resource group name can only be used with one subscription ID")
 	}
 
 	if len(params.Subscriptions) > 0 {
@@ -131,4 +133,5 @@ func (s *InitializationStage) validateAndPrepareFilters(params *models.ScanParam
 	log.Debug().
 		Int("scanners_after", len(filters.Azqr.Scanners)).
 		Msg("Filters validation completed")
+	return nil
 }
