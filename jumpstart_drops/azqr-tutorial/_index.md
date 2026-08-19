@@ -155,6 +155,9 @@ azqr:
       - <resource_group_resource_id>
     resourceTypes:
       - <resource type abbreviation>
+    tags:
+      env: prod
+      team: platform
   exclude:
     subscriptions:
       - <subscription_id>
@@ -164,7 +167,11 @@ azqr:
       - <service_resource_id>
     recommendations:
       - <recommendation_id>
+    tags:
+      lifecycle: retired
 ```
+
+All include tags must match. Any matching exclude tag removes the resource, and exclusion takes precedence. Tag keys are case-insensitive; values are matched exactly.
 
 ### Running Scan with Filters
 

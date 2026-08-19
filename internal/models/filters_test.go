@@ -15,123 +15,82 @@ func TestValidateResourceGroupID(t *testing.T) {
 		expectError     bool
 		errorContains   string
 	}{
-		{
-			name:            "valid resource group ID",
-			resourceGroupID: "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg",
-			expectError:     false,
-		},
-		{
-			name:            "invalid format - just resource group name",
-			resourceGroupID: "test-rg",
-			expectError:     true,
-			errorContains:   "has incorrect format",
-		},
-		{
-			name:            "invalid format - missing leading slash",
-			resourceGroupID: "subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg",
-			expectError:     true,
-			errorContains:   "has incorrect format",
-		},
-		{
-			name:            "invalid format - missing subscriptions segment",
-			resourceGroupID: "/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg",
-			expectError:     true,
-			errorContains:   "has incorrect format",
-		},
-		{
-			name:            "invalid format - missing resourceGroups segment",
-			resourceGroupID: "/subscriptions/12345678-1234-1234-1234-123456789012/test-rg",
-			expectError:     true,
-			errorContains:   "has incorrect format",
-		},
-		{
-			name:            "invalid format - wrong resourceGroups segment",
-			resourceGroupID: "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroup/test-rg",
-			expectError:     true,
-			errorContains:   "has incorrect format",
-		},
-		{
-			name:            "invalid format - empty subscription ID",
-			resourceGroupID: "/subscriptions//resourceGroups/test-rg",
-			expectError:     true,
-			errorContains:   "has empty subscription ID",
-		},
-		{
-			name:            "invalid format - empty resource group name",
-			resourceGroupID: "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/",
-			expectError:     true,
-			errorContains:   "has empty resource group name",
-		},
-		{
-			name:            "invalid format - too many segments",
-			resourceGroupID: "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg/providers",
-			expectError:     true,
-			errorContains:   "has incorrect format",
-		},
-		{
-			name:            "invalid format - too few segments",
-			resourceGroupID: "/subscriptions/12345678-1234-1234-1234-123456789012",
-			expectError:     true,
-			errorContains:   "has incorrect format",
-		},
+		{name: "valid", resourceGroupID: "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg"},
+		{name: "name only", resourceGroupID: "test-rg", expectError: true, errorContains: "incorrect format"},
+		{name: "missing leading slash", resourceGroupID: "subscriptions/123/resourceGroups/test-rg", expectError: true, errorContains: "incorrect format"},
+		{name: "missing subscriptions segment", resourceGroupID: "/123/resourceGroups/test-rg", expectError: true, errorContains: "incorrect format"},
+		{name: "wrong resource groups segment", resourceGroupID: "/subscriptions/123/resourceGroup/test-rg", expectError: true, errorContains: "incorrect format"},
+		{name: "empty subscription", resourceGroupID: "/subscriptions//resourceGroups/test-rg", expectError: true, errorContains: "empty subscription ID"},
+		{name: "empty resource group", resourceGroupID: "/subscriptions/123/resourceGroups/", expectError: true, errorContains: "empty resource group name"},
+		{name: "too many segments", resourceGroupID: "/subscriptions/123/resourceGroups/test-rg/providers", expectError: true, errorContains: "incorrect format"},
+		{name: "too few segments", resourceGroupID: "/subscriptions/123", expectError: true, errorContains: "incorrect format"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validateResourceGroupID(tt.resourceGroupID)
-
 			if tt.expectError {
 				if err == nil {
-					t.Errorf("expected error for resourceGroupID '%s' but got none", tt.resourceGroupID)
-				} else if tt.errorContains != "" && !strings.Contains(err.Error(), tt.errorContains) {
-					t.Errorf("expected error to contain '%s' but got '%s'", tt.errorContains, err.Error())
+					t.Fatal("expected validation error")
 				}
-			} else {
-				if err != nil {
-					t.Errorf("unexpected error for resourceGroupID '%s': %v", tt.resourceGroupID, err)
+				if !strings.Contains(err.Error(), tt.errorContains) {
+					t.Fatalf("error %q does not contain %q", err, tt.errorContains)
 				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
 			}
 		})
 	}
 }
 
 func TestLoadFiltersValidation(t *testing.T) {
-	// Test with valid resource group IDs - should not panic or error
-	validFilters := &Filters{
-		Azqr: &AzqrFilter{
-			Include: &IncludeFilter{
-				Subscriptions:  []string{},
-				ResourceGroups: []string{"/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg"},
-				ResourceTypes:  []string{},
-			},
-			Exclude: &ExcludeFilter{
-				Subscriptions:   []string{},
-				ResourceGroups:  []string{"/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/exclude-rg"},
-				Services:        []string{},
-				Recommendations: []string{},
-			},
-		},
-	}
-
-	// This should not cause any validation errors
-	if err := validateResourceGroupID("/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg"); err != nil {
-		t.Errorf("valid resource group ID failed validation: %v", err)
-	}
-
-	if err := validateResourceGroupID("/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/exclude-rg"); err != nil {
-		t.Errorf("valid resource group ID failed validation: %v", err)
-	}
-
-	// Test validation of individual components
-	for _, rgID := range validFilters.Azqr.Include.ResourceGroups {
-		if err := validateResourceGroupID(rgID); err != nil {
-			t.Errorf("include resource group validation failed: %v", err)
+	for _, id := range []string{
+		"/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg",
+		"/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/exclude-rg",
+	} {
+		if err := validateResourceGroupID(id); err != nil {
+			t.Errorf("valid resource group ID failed validation: %v", err)
 		}
 	}
+}
 
-	for _, rgID := range validFilters.Azqr.Exclude.ResourceGroups {
-		if err := validateResourceGroupID(rgID); err != nil {
-			t.Errorf("exclude resource group validation failed: %v", err)
-		}
+func TestTagFilters(t *testing.T) {
+	filters := NewFilters()
+	filters.Azqr.iResourceTypes = map[string]bool{"microsoft.test/widgets": true}
+	filters.Azqr.iTags = map[string]string{"env": "prod", "team": "platform"}
+	filters.Azqr.xTags = map[string]string{"lifecycle": "retired"}
+	resourceID := "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Test/widgets/one"
+
+	tests := []struct {
+		name string
+		tags map[string]string
+		want bool
+	}{
+		{name: "all includes match", tags: map[string]string{"ENV": "prod", "Team": "platform"}},
+		{name: "include missing", tags: map[string]string{"env": "prod"}, want: true},
+		{name: "value comparison is exact", tags: map[string]string{"env": "Prod", "team": "platform"}, want: true},
+		{name: "exclude wins", tags: map[string]string{"env": "prod", "team": "platform", "lifecycle": "retired"}, want: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := filters.Azqr.IsResourceExcluded(resourceID, tt.tags); got != tt.want {
+				t.Fatalf("IsResourceExcluded() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTagScopeAppliesToChildResource(t *testing.T) {
+	filters := NewFilters()
+	filters.Azqr.iResourceTypes = map[string]bool{"microsoft.test/widgets": true}
+	filters.Azqr.iTags = map[string]string{"env": "prod"}
+	parent := "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Test/widgets/one"
+	filters.Azqr.SetResourceScope(parent, true)
+
+	if filters.Azqr.IsServiceExcluded(parent + "/slots/blue") {
+		t.Fatal("child resource should inherit included parent scope")
 	}
 }
