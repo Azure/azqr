@@ -66,7 +66,7 @@ func TestCheckGateSuppressesOutputOnlyOnFailure(t *testing.T) {
 }
 
 func TestRootCommandHasSubcommands(t *testing.T) {
-	expectedCommands := []string{"scan", "compare", "rules", "types", "plugins"}
+	expectedCommands := []string{"scan", "compare", "trend", "rules", "types", "plugins"}
 
 	for _, expectedCmd := range expectedCommands {
 		found := false
@@ -122,6 +122,8 @@ func TestScanCommandHasRequiredFlags(t *testing.T) {
 		{"filters", "string"},
 		{"fail-on", "string"},
 		{"sarif", "bool"},
+		{"history", "bool"},
+		{"history-file", "string"},
 	}
 
 	for _, rf := range requiredFlags {

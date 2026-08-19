@@ -6,9 +6,11 @@ package commands
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Azure/azqr/internal/findings"
 	"github.com/Azure/azqr/internal/gate"
+	"github.com/Azure/azqr/internal/history"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/profiling"
@@ -33,6 +35,8 @@ func init() {
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
 	scanCmd.PersistentFlags().StringP("fail-on", "", "", "Fail when impacted recommendations meet or exceed this impact (High, Medium, Low)")
 	scanCmd.PersistentFlags().Bool("sarif", false, "Create a SARIF 2.1.0 report")
+	scanCmd.PersistentFlags().Bool("history", false, "Append an aggregate scan snapshot to local history")
+	scanCmd.PersistentFlags().String("history-file", "", "History JSONL path (defaults to the user config directory)")
 
 	// Conditionally add profiling flags if profiling is available and enabled via environment
 	// Build with -tags debug to enable profiling features
@@ -72,6 +76,8 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 	filtersFile, _ := cmd.Flags().GetString("filters")
 	failOn, _ := cmd.Flags().GetString("fail-on")
 	sarifEnabled, _ := cmd.Flags().GetBool("sarif")
+	historyEnabled, _ := cmd.Flags().GetBool("history")
+	historyFile, _ := cmd.Flags().GetString("history-file")
 	pluginNames, _ := cmd.Flags().GetStringSlice("plugin")
 
 	var gateCriterion gate.Criterion
@@ -128,13 +134,32 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 		MemProfile:             memProfile,
 		TraceProfile:           traceProfile,
 		Sarif:                  sarifEnabled,
+		History:                historyEnabled || historyFile != "",
+		HistoryFile:            historyFile,
 		Version:                version,
 	}
+
+	scopeID, err := history.ScopeID(&params)
+	if err != nil {
+		return err
+	}
+	params.ScopeID = scopeID
 
 	scanner := pipeline.Scanner{}
 	reportData, err := scanner.Scan(&params)
 	if err != nil {
 		return err
+	}
+	reportData.ScopeID = scopeID
+	if params.History {
+		path, err := history.ResolvePath(params.HistoryFile)
+		if err != nil {
+			return err
+		}
+		record := history.NewRecord(reportData.Summary, scopeID, version, time.Now())
+		if err := history.Append(path, record); err != nil {
+			return err
+		}
 	}
 	if gateEnabled {
 		return checkGate(cmd, reportData.Summary, gateCriterion)
