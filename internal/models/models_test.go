@@ -202,3 +202,15 @@ func TestRecommendationConstants(t *testing.T) {
 		}
 	}
 }
+
+func TestSeverityRank(t *testing.T) {
+	for impact, want := range map[string]int{"high": 3, "Medium": 2, "LOW": 1} {
+		got, ok := SeverityRank(impact)
+		if !ok || got != want {
+			t.Errorf("SeverityRank(%q) = %d, %v; want %d, true", impact, got, ok, want)
+		}
+	}
+	if _, ok := SeverityRank("critical"); ok {
+		t.Error("unknown severity should be rejected")
+	}
+}

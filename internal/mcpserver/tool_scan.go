@@ -28,7 +28,10 @@ func scanHandler(ctx context.Context, request mcp.CallToolRequest, args models.S
 	params.OutputName = currentDir + "/azqr_scan_results"
 
 	scanner := pipeline.Scanner{}
-	r := scanner.Scan(params)
+	r, err := scanner.Scan(params)
+	if err != nil {
+		return nil, err
+	}
 
 	fileName := params.OutputName + ".xlsx"
 	uri := fmt.Sprintf("file://%s", fileName)

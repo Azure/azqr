@@ -4,6 +4,7 @@
 package pipeline
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Azure/azqr/internal/models"
@@ -14,18 +15,17 @@ import (
 type Scanner struct{}
 
 // Scan performs a full scan using the default pipeline
-func (sc *Scanner) Scan(params *models.ScanParams) *renderers.ReportData {
+func (sc *Scanner) Scan(params *models.ScanParams) (*renderers.ReportData, error) {
 	return sc.scan(params, true)
 }
 
 // ScanPlugins performs a scan using only the plugin execution stage
-func (sc *Scanner) ScanPlugins(params *models.ScanParams) *renderers.ReportData {
+func (sc *Scanner) ScanPlugins(params *models.ScanParams) (*renderers.ReportData, error) {
 	return sc.scan(params, false)
 }
 
 // scan executes the scan using the composable pipeline pattern
-func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) *renderers.ReportData {
-	// Import pipeline package
+func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) (*renderers.ReportData, error) {
 	builder := NewScanPipelineBuilder()
 
 	// Create scan context
@@ -35,7 +35,7 @@ func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) *render
 	if defaultPipeline {
 		// Ensure graph stage is enabled for regular scans
 		if err := params.Stages.ValidateGraphStageEnabled(); err != nil {
-			log.Fatal().Err(err).Msg("Configuration error")
+			return nil, fmt.Errorf("invalid scan configuration: %w", err)
 		}
 		pipe = builder.BuildDefault()
 	} else {
@@ -44,7 +44,7 @@ func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) *render
 
 	err := pipe.Execute(scanCtx)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Scan failed")
+		return nil, fmt.Errorf("scan failed: %w", err)
 	}
 
 	// Log metrics in debug mode
@@ -59,5 +59,5 @@ func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) *render
 	seconds := int(elapsedTime.Seconds()) % 60
 	log.Info().Msgf("Scan completed in %02d:%02d:%02d", hours, minutes, seconds)
 
-	return scanCtx.ReportData
+	return scanCtx.ReportData, nil
 }

@@ -75,12 +75,13 @@ func Execute() {
 			// Capture pluginName in closure properly
 			pName := pluginName
 			// Set the Run function to enable only this plugin
-			plugin.Command.Run = func(cmd *cobra.Command, args []string) {
+			plugin.Command.Run = nil
+			plugin.Command.RunE = func(cmd *cobra.Command, args []string) error {
 				// Enable only this specific plugin
 				// Note: We can't use Set() for StringArray flags, so we pass it directly to scan
 				scannerKeys, _ := models.GetScanners()
 				// Create a custom scan with this plugin enabled
-				scanWithPlugin(cmd, scannerKeys, pName)
+				return scanWithPlugin(cmd, scannerKeys, pName)
 			}
 			rootCmd.AddCommand(plugin.Command)
 		}

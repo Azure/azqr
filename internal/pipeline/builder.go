@@ -51,6 +51,7 @@ func (b *ScanPipelineBuilder) BuildDefault() *Pipeline {
 		With(NewArcSQLStage()).
 		With(NewCostStage()).
 		With(NewPluginExecutionStage()).
+		With(NewFindingsSummaryStage()).
 		With(NewReportRenderingStage()).
 		With(NewProfilingCleanupStage()).
 		Build()
@@ -63,6 +64,7 @@ func (b *ScanPipelineBuilder) BuildPluginOnly() *Pipeline {
 		With(NewInitializationStage()).
 		With(NewSubscriptionDiscoveryStage()).
 		With(NewPluginExecutionStage()).
+		With(NewFindingsSummaryStage()).
 		With(NewReportRenderingStage()).
 		With(NewProfilingCleanupStage()).
 		Build()
