@@ -32,6 +32,7 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default) (default true)")
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
 	scanCmd.PersistentFlags().StringP("fail-on", "", "", "Fail when impacted recommendations meet or exceed this impact (High, Medium, Low)")
+	scanCmd.PersistentFlags().Bool("sarif", false, "Create a SARIF 2.1.0 report")
 
 	// Conditionally add profiling flags if profiling is available and enabled via environment
 	// Build with -tags debug to enable profiling features
@@ -70,6 +71,7 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
 	failOn, _ := cmd.Flags().GetString("fail-on")
+	sarifEnabled, _ := cmd.Flags().GetBool("sarif")
 	pluginNames, _ := cmd.Flags().GetStringSlice("plugin")
 
 	var gateCriterion gate.Criterion
@@ -125,6 +127,8 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 		CPUProfile:             cpuProfile,
 		MemProfile:             memProfile,
 		TraceProfile:           traceProfile,
+		Sarif:                  sarifEnabled,
+		Version:                version,
 	}
 
 	scanner := pipeline.Scanner{}

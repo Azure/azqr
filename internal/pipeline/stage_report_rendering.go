@@ -9,6 +9,7 @@ import (
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
+	"github.com/Azure/azqr/internal/renderers/sarif"
 	"github.com/rs/zerolog/log"
 )
 
@@ -53,6 +54,13 @@ func (s *ReportRenderingStage) Execute(ctx *ScanContext) error {
 		csv.CreateCsvReport(ctx.ReportData)
 	}
 
+	if ctx.Params.Sarif {
+		log.Info().Msg("Generating SARIF report")
+		if err := sarif.CreateReport(ctx.ReportData, ctx.Params.Version); err != nil {
+			return err
+		}
+	}
+
 	// Generate JSON output for stdout
 	if ctx.Params.Stdout {
 		outputJson := json.CreateJsonOutput(ctx.ReportData)
@@ -64,6 +72,7 @@ func (s *ReportRenderingStage) Execute(ctx *ScanContext) error {
 		Bool("json", ctx.Params.Json).
 		Bool("csv", ctx.Params.Csv).
 		Bool("stdout", ctx.Params.Stdout).
+		Bool("sarif", ctx.Params.Sarif).
 		Msg("Report rendering completed")
 
 	return nil
