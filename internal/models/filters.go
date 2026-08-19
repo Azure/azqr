@@ -23,26 +23,31 @@ type (
 		iSubscriptions   map[string]bool
 		iResourceGroups  map[string]bool
 		iResourceTypes   map[string]bool
+		iTags            map[string]string
 		xSubscriptions   map[string]bool
 		xResourceGroups  map[string]bool
 		xServices        map[string]bool
 		xRecommendations map[string]bool
+		xTags            map[string]string
+		resourceScope    map[string]bool
 		Scanners         []IAzureScanner
 	}
 
 	// ExcludeFilter - Struct for ExcludeFilter
 	ExcludeFilter struct {
-		Subscriptions   []string `yaml:"subscriptions,flow" json:"subscriptions"`
-		ResourceGroups  []string `yaml:"resourceGroups,flow" json:"resourceGroups"`
-		Services        []string `yaml:"services,flow" json:"services"`
-		Recommendations []string `yaml:"recommendations,flow" json:"recommendations"`
+		Subscriptions   []string          `yaml:"subscriptions,flow" json:"subscriptions"`
+		ResourceGroups  []string          `yaml:"resourceGroups,flow" json:"resourceGroups"`
+		Services        []string          `yaml:"services,flow" json:"services"`
+		Recommendations []string          `yaml:"recommendations,flow" json:"recommendations"`
+		Tags            map[string]string `yaml:"tags" json:"tags"`
 	}
 
 	// IncludeFilter - Struct for IncludeFilter
 	IncludeFilter struct {
-		Subscriptions  []string `yaml:"subscriptions,flow" json:"subscriptions"`
-		ResourceGroups []string `yaml:"resourceGroups,flow" json:"resourceGroups"`
-		ResourceTypes  []string `yaml:"resourceTypes,flow"`
+		Subscriptions  []string          `yaml:"subscriptions,flow" json:"subscriptions"`
+		ResourceGroups []string          `yaml:"resourceGroups,flow" json:"resourceGroups"`
+		ResourceTypes  []string          `yaml:"resourceTypes,flow"`
+		Tags           map[string]string `yaml:"tags" json:"tags"`
 	}
 )
 
@@ -78,6 +83,54 @@ func (e *AzqrFilter) IsSubscriptionExcluded(subscriptionID string) bool {
 }
 
 func (e *AzqrFilter) IsServiceExcluded(resourceID string) bool {
+	if e.isServiceStructurallyExcluded(resourceID) {
+		return true
+	}
+
+	if !e.hasTagFilters() {
+		return false
+	}
+
+	if included, ok := e.resourceScopeDecision(resourceID); ok {
+		return !included
+	}
+	if len(e.iTags) > 0 {
+		log.Debug().Msgf("Service is excluded because tag-filter scope is unknown: %s", resourceID)
+		return true
+	}
+	log.Debug().Msgf("Service tag-filter scope is unknown; retaining resource for exclude-only filters: %s", resourceID)
+	return false
+}
+
+// IsResourceExcluded evaluates structural and tag filters during resource discovery.
+func (e *AzqrFilter) IsResourceExcluded(resourceID string, tags map[string]string) bool {
+	if e.isServiceStructurallyExcluded(resourceID) {
+		return true
+	}
+
+	normalizedTags := normalizeTags(tags)
+	for key, value := range e.xTags {
+		if resourceValue, ok := normalizedTags[key]; ok && resourceValue == value {
+			return true
+		}
+	}
+	for key, value := range e.iTags {
+		if resourceValue, ok := normalizedTags[key]; !ok || resourceValue != value {
+			return true
+		}
+	}
+	return false
+}
+
+// SetResourceScope records the tag-filter decision for downstream scan results.
+func (e *AzqrFilter) SetResourceScope(resourceID string, included bool) {
+	if e.resourceScope == nil {
+		e.resourceScope = make(map[string]bool)
+	}
+	e.resourceScope[strings.ToLower(resourceID)] = included
+}
+
+func (e *AzqrFilter) isServiceStructurallyExcluded(resourceID string) bool {
 	t := GetResourceTypeFromResourceID(resourceID)
 	if _, included := e.iResourceTypes[strings.ToLower(t)]; included {
 		sID := GetSubscriptionFromResourceID(resourceID)
@@ -147,12 +200,14 @@ func NewFilters() *Filters {
 				Subscriptions:  []string{},
 				ResourceGroups: []string{},
 				ResourceTypes:  []string{},
+				Tags:           map[string]string{},
 			},
 			Exclude: &ExcludeFilter{
 				Subscriptions:   []string{},
 				ResourceGroups:  []string{},
 				Services:        []string{},
 				Recommendations: []string{},
+				Tags:            map[string]string{},
 			},
 			Scanners: []IAzureScanner{},
 		},
@@ -174,6 +229,20 @@ func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 		if err != nil {
 			log.Fatal().Err(err).Msgf("failed parsing yaml from file: %s", filterFile)
 		}
+
+		if filters.Azqr == nil {
+			filters.Azqr = NewFilters().Azqr
+		}
+		if filters.Azqr.Include == nil {
+			filters.Azqr.Include = NewFilters().Azqr.Include
+		}
+		if filters.Azqr.Exclude == nil {
+			filters.Azqr.Exclude = NewFilters().Azqr.Exclude
+		}
+
+		filters.Azqr.iTags = normalizeTags(filters.Azqr.Include.Tags)
+		filters.Azqr.xTags = normalizeTags(filters.Azqr.Exclude.Tags)
+		filters.Azqr.resourceScope = make(map[string]bool)
 	}
 
 	filters.Azqr.iSubscriptions = make(map[string]bool)
@@ -266,6 +335,32 @@ func LoadFilters(filterFile string, scannerKeys []string) *Filters {
 	}
 
 	return filters
+}
+
+func (e *AzqrFilter) hasTagFilters() bool {
+	return len(e.iTags) > 0 || len(e.xTags) > 0
+}
+
+func (e *AzqrFilter) resourceScopeDecision(resourceID string) (bool, bool) {
+	id := strings.ToLower(resourceID)
+	for {
+		if included, ok := e.resourceScope[id]; ok {
+			return included, true
+		}
+		lastSlash := strings.LastIndexByte(id, '/')
+		if lastSlash <= 0 {
+			return false, false
+		}
+		id = id[:lastSlash]
+	}
+}
+
+func normalizeTags(tags map[string]string) map[string]string {
+	normalized := make(map[string]string, len(tags))
+	for key, value := range tags {
+		normalized[strings.ToLower(strings.TrimSpace(key))] = value
+	}
+	return normalized
 }
 
 func (e *AzqrFilter) isResourceGroupExcluded(resourceGroupID string) bool {

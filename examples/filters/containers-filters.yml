@@ -7,3 +7,10 @@ azqr:
       - cae
       - ci
       - cr
+    # All include tags must match. Tag keys are case-insensitive; values are exact.
+    tags:
+      env: prod
+  exclude:
+    # Any matching exclude tag removes the resource, even when include tags match.
+    tags:
+      lifecycle: retired
