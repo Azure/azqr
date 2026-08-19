@@ -6,7 +6,9 @@ package commands
 import (
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/Azure/azqr/internal/history"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/profiling"
@@ -28,6 +30,8 @@ func init() {
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default) (default true)")
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
+	scanCmd.PersistentFlags().Bool("history", false, "Append an aggregate scan snapshot to local history")
+	scanCmd.PersistentFlags().String("history-file", "", "History JSONL path (defaults to the user config directory)")
 
 	// Conditionally add profiling flags if profiling is available and enabled via environment
 	// Build with -tags debug to enable profiling features
@@ -64,6 +68,8 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 	mask, _ := cmd.Flags().GetBool("mask")
 	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
+	historyEnabled, _ := cmd.Flags().GetBool("history")
+	historyFile, _ := cmd.Flags().GetString("history-file")
 	pluginNames, _ := cmd.Flags().GetStringSlice("plugin")
 
 	// Get profiling flags if available
@@ -108,11 +114,39 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 		CPUProfile:             cpuProfile,
 		MemProfile:             memProfile,
 		TraceProfile:           traceProfile,
+		History:                historyEnabled || historyFile != "",
+		HistoryFile:            historyFile,
+		Version:                version,
 	}
 
+	scopeID, err := history.ScopeID(&params)
+	if err != nil {
+		return err
+	}
+	params.ScopeID = scopeID
+
 	scanner := pipeline.Scanner{}
-	_, err := scanner.Scan(&params)
-	return err
+	reportData, err := scanner.Scan(&params)
+	if err != nil {
+		return err
+	}
+	reportData.ScopeID = scopeID
+	if params.History {
+		path, err := history.ResolvePath(params.HistoryFile)
+		if err != nil {
+			return err
+		}
+		records, err := history.Read(path)
+		if err != nil {
+			return err
+		}
+		_ = history.Latest(records, scopeID)
+		record := history.NewRecord(reportData.Summary, scopeID, version, time.Now())
+		if err := history.Append(path, record); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // scanWithPlugin is a specialized version of scan that enables a specific plugin

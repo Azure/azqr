@@ -28,7 +28,7 @@ func TestRootCommandExists(t *testing.T) {
 }
 
 func TestRootCommandHasSubcommands(t *testing.T) {
-	expectedCommands := []string{"scan", "compare", "rules", "types", "plugins"}
+	expectedCommands := []string{"scan", "compare", "trend", "rules", "types", "plugins"}
 
 	for _, expectedCmd := range expectedCommands {
 		found := false
@@ -82,6 +82,8 @@ func TestScanCommandHasRequiredFlags(t *testing.T) {
 		{"output-name", "string"},
 		{"mask", "bool"},
 		{"filters", "string"},
+		{"history", "bool"},
+		{"history-file", "string"},
 	}
 
 	for _, rf := range requiredFlags {

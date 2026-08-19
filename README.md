@@ -453,6 +453,17 @@ azqr mcp --mode http --addr :8080
 
 > For detailed MCP configuration, see the [Usage documentation](https://azure.github.io/azqr/docs/usage/).
 
+## Scan history and trends
+
+Record aggregate-only history and inspect recent scans:
+
+```bash
+azqr scan --history
+azqr trend --last 12
+```
+
+Use `--history-file <path>` on either command to override the default `history.jsonl` under the user config directory. Records are isolated by an opaque scan-scope ID and do not store resource or subscription IDs.
+
 ## Filtering Recommendations and more
 
 You can configure Azure Quick Review to include or exclude specific subscriptions or resource groups and also exclude services or recommendations. To do so, create a `yaml` file with the following format:

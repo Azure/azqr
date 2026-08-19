@@ -22,6 +22,10 @@ type (
 		CPUProfile   string
 		MemProfile   string
 		TraceProfile string
+		History      bool
+		HistoryFile  string
+		ScopeID      string
+		Version      string
 	}
 
 	ScanArgs struct {

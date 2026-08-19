@@ -307,6 +307,26 @@ azqr rules
 azqr rules --json
 ```
 
+## Scan history and trends
+
+History is opt-in and stores aggregate counts only:
+
+```bash
+# Uses the default history.jsonl under the user config directory
+azqr scan --history
+
+# Uses a specific history file
+azqr scan --history --history-file ./azqr-history.jsonl
+
+# Shows the latest 12 scans for the most recently recorded scope
+azqr trend
+
+# Machine-readable trend output
+azqr trend --last 20 --format json
+```
+
+Each scan scope receives an opaque ID so subscriptions, resource groups, filters, and enabled recommendation stages are not mixed in one trend. History records do not contain subscription IDs, resource IDs, inventories, or webhook URLs.
+
 ## File Outputs
 
 Currently Azure Quick Review supports 3 types of file outputs: `xlsx` (default), `csv`, `json`
