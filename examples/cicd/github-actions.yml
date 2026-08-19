@@ -2,6 +2,10 @@
 
 name: azqr-pipeline
 
+permissions:
+  contents: read
+  security-events: write
+
 on:
   workflow_dispatch: # Trigger manually
   schedule: # Trigger every Friday at midnight
@@ -24,6 +28,7 @@ jobs:
 
       # Run azqr scan
       - name: Run Azure Quick Review
+        id: scan
         uses: Azure/azqr/.github/actions/azqr-scan
         env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -31,4 +36,11 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         with:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          output-format: 'json'
+          output-format: 'sarif'
+          fail-on: 'Medium'
+
+      - name: Upload SARIF to GitHub code scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ${{ steps.scan.outputs.report-path }}

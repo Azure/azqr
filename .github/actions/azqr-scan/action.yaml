@@ -172,6 +172,10 @@ runs:
             ARGS="$ARGS -o $OUTPUT_FILE"
             OUTPUT_FILE="${OUTPUT_FILE}.xlsx"
             ;;
+          sarif)
+            ARGS="$ARGS --xlsx=false --sarif -o $OUTPUT_FILE"
+            OUTPUT_FILE="${OUTPUT_FILE}.sarif"
+            ;;
           *)
             echo "Unsupported output format: ${{ inputs.output-format }}"
             exit 1

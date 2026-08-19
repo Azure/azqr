@@ -22,6 +22,8 @@ type (
 		CPUProfile   string
 		MemProfile   string
 		TraceProfile string
+		Sarif        bool
+		Version      string
 	}
 
 	ScanArgs struct {
