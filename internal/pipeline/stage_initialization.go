@@ -50,6 +50,7 @@ func (s *InitializationStage) Execute(ctx *ScanContext) error {
 		ctx.Params.Mask,
 		ctx.Params.Stages,
 	)
+	reportData.ScopeID = ctx.Params.ScopeID
 	ctx.ReportData = &reportData
 
 	log.Debug().Msg("Initialization stage completed")
