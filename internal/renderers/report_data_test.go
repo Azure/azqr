@@ -4,11 +4,139 @@
 package renderers
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/Azure/azqr/internal/models"
 )
+
+func TestRecommendationsTablePreservesReportContract(t *testing.T) {
+	impacted := graphRecommendation(
+		"rec-impacted",
+		"Microsoft.Test/widgets",
+		"Fix impacted widget",
+		string(models.CategorySecurity),
+		string(models.ImpactHigh),
+	)
+	clean := graphRecommendation(
+		"rec-clean",
+		"Microsoft.Test/widgets",
+		"Keep widget clean",
+		string(models.CategoryGovernance),
+		string(models.ImpactMedium),
+	)
+	notDeployed := graphRecommendation(
+		"rec-not-deployed",
+		"Microsoft.Other/things",
+		"Configure other thing",
+		string(models.CategoryHighAvailability),
+		string(models.ImpactLow),
+	)
+	sla := graphRecommendation(
+		"rec-sla",
+		"Microsoft.Test/widgets",
+		"Check SLA",
+		string(models.CategorySLA),
+		string(models.ImpactLow),
+	)
+
+	data := &ReportData{
+		Recommendations: map[string]map[string]*models.GraphRecommendation{
+			"microsoft.test/widgets": {
+				impacted.RecommendationID: impacted,
+				clean.RecommendationID:    clean,
+				sla.RecommendationID:      sla,
+			},
+			"microsoft.other/things": {
+				notDeployed.RecommendationID: notDeployed,
+			},
+		},
+		Graph: []*models.GraphResult{
+			{
+				RecommendationID: impacted.RecommendationID,
+				ResourceID:       "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Test/widgets/one",
+				Category:         models.CategorySecurity,
+				Impact:           models.ImpactHigh,
+			},
+			// Duplicate rows for the same recommendation/resource are one impacted resource.
+			{
+				RecommendationID: impacted.RecommendationID,
+				ResourceID:       "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Test/widgets/ONE",
+				Category:         models.CategorySecurity,
+				Impact:           models.ImpactHigh,
+			},
+			// Undefined findings did not create Recommendations rows before the summary refactor.
+			{
+				RecommendationID: "undefined",
+				ResourceID:       "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Test/widgets/two",
+				Category:         models.CategorySecurity,
+				Impact:           models.ImpactHigh,
+			},
+		},
+		ResourceTypeCount: []*models.ResourceTypeCount{{
+			ResourceType: "Microsoft.Test/widgets",
+			Count:        1,
+		}},
+	}
+
+	got := data.RecommendationsTable()
+	want := [][]string{
+		{
+			"Implemented",
+			"Number of Impacted Resources",
+			"Azure Service / Well-Architected",
+			"Recommendation Source",
+			"Azure Service Category / Well-Architected Area",
+			"Azure Service / Well-Architected Topic",
+			"Category",
+			"Recommendation",
+			"Impact",
+			"Best Practices Guidance",
+			"Read More",
+			"Recommendation Id",
+		},
+		{
+			"N/A", "0", "Azure Service", "APRL", "Microsoft.Other", "things",
+			string(models.CategoryHighAvailability), "Configure other thing", string(models.ImpactLow),
+			"Long description", "https://example.test/learn", "rec-not-deployed",
+		},
+		{
+			"true", "0", "Azure Service", "APRL", "Microsoft.Test", "widgets",
+			string(models.CategoryGovernance), "Keep widget clean", string(models.ImpactMedium),
+			"Long description", "https://example.test/learn", "rec-clean",
+		},
+		{
+			"false", "1", "Azure Service", "APRL", "Microsoft.Test", "widgets",
+			string(models.CategorySecurity), "Fix impacted widget", string(models.ImpactHigh),
+			"Long description", "https://example.test/learn", "rec-impacted",
+		},
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("RecommendationsTable contract changed:\ngot:  %#v\nwant: %#v", got, want)
+	}
+}
+
+func graphRecommendation(id, resourceType, recommendation, category, impact string) *models.GraphRecommendation {
+	result := &models.GraphRecommendation{
+		RecommendationID: id,
+		ResourceType:     resourceType,
+		Recommendation:   recommendation,
+		Category:         category,
+		Impact:           impact,
+		Source:           "APRL",
+		LongDescription:  "Long description",
+	}
+	result.LearnMoreLink = append(result.LearnMoreLink, struct {
+		Name string `yaml:"name"`
+		Url  string `yaml:"url"`
+	}{
+		Name: "Learn",
+		Url:  "https://example.test/learn",
+	})
+	return result
+}
 
 func TestNewReportData(t *testing.T) {
 	tests := []struct {

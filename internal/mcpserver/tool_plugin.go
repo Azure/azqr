@@ -42,7 +42,10 @@ func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequ
 		}
 
 		scanner := pipeline.Scanner{}
-		r := scanner.ScanPlugins(params)
+		r, err := scanner.ScanPlugins(params)
+		if err != nil {
+			return nil, err
+		}
 
 		fileName := params.OutputName + ".xlsx"
 		uri := fmt.Sprintf("file://%s", fileName)

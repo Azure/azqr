@@ -270,6 +270,7 @@ func TestBuildDefault_StageCountAndOrder(t *testing.T) {
 		"Arc-enabled SQL Server Scan",
 		"Cost Analysis Scan",
 		"Plugin Execution",
+		"Findings Summary",
 		"Report Rendering",
 		"Profiling Cleanup",
 	}
@@ -293,6 +294,7 @@ func TestBuildPluginOnly_StageCountAndOrder(t *testing.T) {
 		"Initialization",
 		"Subscription Discovery",
 		"Plugin Execution",
+		"Findings Summary",
 		"Report Rendering",
 		"Profiling Cleanup",
 	}
