@@ -121,6 +121,7 @@ func TestScanCommandHasRequiredFlags(t *testing.T) {
 		{"mask", "bool"},
 		{"filters", "string"},
 		{"fail-on", "string"},
+		{"sarif", "bool"},
 	}
 
 	for _, rf := range requiredFlags {
