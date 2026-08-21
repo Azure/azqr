@@ -196,6 +196,9 @@ azqr:
       - <resource_group_resource_id> # format: /subscriptions/<subscription_id>/resourceGroups/<resource_group_name>
     resourceTypes:
       - <resource type abbreviation> # format: Abbreviation of the resource type. For example: "vm" for "Microsoft.Compute/virtualMachines"
+    tags:
+      env: prod
+      team: platform
   exclude:
     subscriptions:
       - <subscription_id> # format: <subscription_id>
@@ -205,12 +208,11 @@ azqr:
       - <service_resource_id> # format: /subscriptions/<subscription_id>/resourceGroups/<resource_group_name>/providers/<service_provider>/<service_name>
     recommendations:
       - <recommendation_id> # format: <recommendation_id>
+    tags:
+      lifecycle: retired
 ```
 
-Then run the scan with the `--filters` flag:
-
-```bash
-./azqr scan --filters <path_to_yaml_file>
+All tags under `include.tags` must match. Any matching tag under `exclude.tags` removes the resource, and exclusion takes precedence. Tag keys are case-insensitive; tag values are matched exactly.
 ```
 
 > Check the [rules](https://azure.github.io/azqr/docs/recommendations/) to get the recommendation ids.
