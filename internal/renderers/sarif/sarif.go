@@ -26,8 +26,8 @@ type logFile struct {
 }
 
 type run struct {
-	Tool       tool     `json:"tool"`
-	Results    []result `json:"results"`
+	Tool       tool       `json:"tool"`
+	Results    []result   `json:"results"`
 	Automation automation `json:"automationDetails,omitempty"`
 }
 
@@ -40,18 +40,18 @@ type tool struct {
 }
 
 type driver struct {
-	Name            string `json:"name"`
-	Version         string `json:"version,omitempty"`
-	InformationURI  string `json:"informationUri"`
-	Rules           []rule `json:"rules"`
+	Name           string `json:"name"`
+	Version        string `json:"version,omitempty"`
+	InformationURI string `json:"informationUri"`
+	Rules          []rule `json:"rules"`
 }
 
 type rule struct {
 	ID               string            `json:"id"`
 	ShortDescription message           `json:"shortDescription"`
 	FullDescription  message           `json:"fullDescription,omitempty"`
-	HelpURI           string            `json:"helpUri,omitempty"`
-	Properties        map[string]string `json:"properties"`
+	HelpURI          string            `json:"helpUri,omitempty"`
+	Properties       map[string]string `json:"properties"`
 }
 
 type result struct {
@@ -76,20 +76,41 @@ type logicalLocation struct {
 	Kind               string `json:"kind"`
 }
 
-// CreateReport writes a SARIF report for impacted recommendations.
+// CreateReport writes a SARIF report with one result per impacted resource.
 func CreateReport(data *renderers.ReportData, version string) error {
 	if data == nil || data.Summary == nil {
 		return fmt.Errorf("SARIF rendering requires a findings summary")
 	}
 
+	// Build rules and an index of which recommendation IDs have impacted resources.
+	impacted := make(map[string]findings.Recommendation, data.Summary.RecommendationsFound)
 	rules := make([]rule, 0, data.Summary.RecommendationsFound)
-	results := make([]result, 0, data.Summary.RecommendationsFound)
-	for _, recommendation := range data.Summary.Recommendations {
-		if recommendation.ImpactedResources == 0 {
+	for _, rec := range data.Summary.Recommendations {
+		if rec.ImpactedResources == 0 {
 			continue
 		}
-		rules = append(rules, buildRule(recommendation))
-		results = append(results, buildResult(recommendation, data.ScopeID))
+		impacted[strings.ToLower(rec.ID)] = rec
+		rules = append(rules, buildRule(rec))
+	}
+
+	// One result per (recommendation, resource) pair, deduplicated.
+	type seenKey struct{ ruleID, resourceID string }
+	seen := make(map[seenKey]struct{}, data.Summary.ImpactedResources)
+	results := make([]result, 0, data.Summary.ImpactedResources)
+	for _, g := range data.Graph {
+		if g == nil || g.Category == models.CategorySLA {
+			continue
+		}
+		ruleID := strings.ToLower(g.RecommendationID)
+		if _, ok := impacted[ruleID]; !ok {
+			continue
+		}
+		key := seenKey{ruleID, strings.ToLower(g.ResourceID)}
+		if _, dup := seen[key]; dup {
+			continue
+		}
+		seen[key] = struct{}{}
+		results = append(results, buildResult(g))
 	}
 
 	output := logFile{
@@ -118,37 +139,37 @@ func CreateReport(data *renderers.ReportData, version string) error {
 	return nil
 }
 
-func buildRule(recommendation findings.Recommendation) rule {
+func buildRule(rec findings.Recommendation) rule {
 	return rule{
-		ID:               recommendation.ID,
-		ShortDescription: message{Text: recommendation.Recommendation},
-		FullDescription:  message{Text: recommendation.LongDescription},
-		HelpURI:           recommendation.LearnURL,
+		ID:               rec.ID,
+		ShortDescription: message{Text: rec.Recommendation},
+		FullDescription:  message{Text: rec.LongDescription},
+		HelpURI:          rec.LearnURL,
 		Properties: map[string]string{
-			"category":     recommendation.Category,
-			"impact":       recommendation.Impact,
-			"resourceType": recommendation.ResourceType,
-			"source":       recommendation.Source,
+			"category":     rec.Category,
+			"impact":       rec.Impact,
+			"resourceType": rec.ResourceType,
+			"source":       rec.Source,
 		},
 	}
 }
 
-func buildResult(recommendation findings.Recommendation, scopeID string) result {
+func buildResult(g *models.GraphResult) result {
 	return result{
-		RuleID: recommendation.ID,
-		Level:  level(recommendation.Impact),
+		RuleID: g.RecommendationID,
+		Level:  level(string(g.Impact)),
 		Message: message{Text: fmt.Sprintf(
-			"%s impacts %d Azure resource(s).",
-			recommendation.Recommendation,
-			recommendation.ImpactedResources,
+			"%s: %s",
+			g.Recommendation,
+			g.ResourceID,
 		)},
 		PartialFingerprints: map[string]string{
-			"azqrRecommendationScope/v1": fingerprint(scopeID, recommendation.ID),
+			"azqrFinding/v1": fingerprint(g.RecommendationID, g.ResourceID),
 		},
 		Locations: []location{{
 			LogicalLocations: []logicalLocation{{
-				Name:               recommendation.ID,
-				FullyQualifiedName: recommendation.ResourceType + "/" + recommendation.ID,
+				Name:               g.Name,
+				FullyQualifiedName: g.ResourceID,
 				Kind:               "resource",
 			}},
 		}},
@@ -167,7 +188,7 @@ func level(impact string) string {
 	}
 }
 
-func fingerprint(scopeID, recommendationID string) string {
-	sum := sha256.Sum256([]byte(scopeID + "\x00" + strings.ToLower(recommendationID)))
+func fingerprint(recommendationID, resourceID string) string {
+	sum := sha256.Sum256([]byte(strings.ToLower(recommendationID) + "\x00" + strings.ToLower(resourceID)))
 	return hex.EncodeToString(sum[:16])
 }

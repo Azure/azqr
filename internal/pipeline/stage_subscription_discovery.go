@@ -4,6 +4,11 @@
 package pipeline
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"sort"
+	"strings"
+
 	"github.com/Azure/azqr/internal/scanners"
 	"github.com/rs/zerolog/log"
 )
@@ -45,6 +50,14 @@ func (s *SubscriptionDiscoveryStage) Execute(ctx *ScanContext) error {
 	log.Info().
 		Int("subscriptions", len(ctx.Subscriptions)).
 		Msg("Discovered subscriptions")
+
+	ids := make([]string, 0, len(ctx.Subscriptions))
+	for id := range ctx.Subscriptions {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	sum := sha256.Sum256([]byte(strings.Join(ids, ",")))
+	ctx.ReportData.ScopeID = hex.EncodeToString(sum[:])
 
 	return nil
 }
