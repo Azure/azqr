@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"sort"
-	"strings"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
@@ -119,74 +118,4 @@ func CountResourcesByTypeAndSubscription(resources []*models.Resource, subscript
 	return results
 }
 
-// buildResourceTypeCounts maps raw count-by-subscription-and-type rows to
-// ResourceTypeCount records, applying the resource-type exclusion filter.
-func buildResourceTypeCounts(data []json.RawMessage, subscriptions map[string]string, filters *models.Filters) []*models.ResourceTypeCount {
-	resources := []*models.ResourceTypeCount{}
-	if data != nil {
-		type countBySubRow struct {
-			SubscriptionID string  `json:"subscriptionId"`
-			Type           string  `json:"type"`
-			Count          float64 `json:"count_"`
-		}
-		for _, raw := range data {
-			var r countBySubRow
-			if err := json.Unmarshal(raw, &r); err != nil {
-				log.Warn().Err(err).Msg("Skipping malformed resource count row")
-				continue
-			}
 
-			if filters.Azqr.IsResourceTypeExcluded(strings.ToLower(r.Type)) {
-				continue
-			}
-
-			resources = append(resources, &models.ResourceTypeCount{
-				Subscription: subscriptions[r.SubscriptionID],
-				ResourceType: r.Type,
-				Count:        r.Count,
-			})
-		}
-	}
-	return resources
-}
-
-func (sc ResourceDiscovery) GetCountPerResourceType(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) map[string]float64 {
-	models.LogResourceTypeScan("Resource Count per Type")
-
-	graphClient := graph.NewGraphQuery(cred)
-	query := "resources | summarize count() by type | order by type"
-	log.Debug().Msg(query)
-
-	result, err := graphClient.Query(ctx, query, subscriptions)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to query Azure Resource Graph for resource counts by type")
-		return map[string]float64{}
-	}
-	return buildResourceTypeCountMap(result.Data, filters)
-}
-
-// buildResourceTypeCountMap maps raw count-by-type rows to a type→count map,
-// applying the resource-type exclusion filter.
-func buildResourceTypeCountMap(data []json.RawMessage, filters *models.Filters) map[string]float64 {
-	resources := map[string]float64{}
-	if data != nil {
-		type countByTypeRow struct {
-			Type  string  `json:"type"`
-			Count float64 `json:"count_"`
-		}
-		for _, raw := range data {
-			var r countByTypeRow
-			if err := json.Unmarshal(raw, &r); err != nil {
-				log.Warn().Err(err).Msg("Skipping malformed resource type count row")
-				continue
-			}
-
-			if filters.Azqr.IsResourceTypeExcluded(strings.ToLower(r.Type)) {
-				continue
-			}
-
-			resources[r.Type] = r.Count
-		}
-	}
-	return resources
-}

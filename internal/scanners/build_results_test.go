@@ -244,34 +244,3 @@ func TestBuildResources(t *testing.T) {
 	})
 }
 
-func TestBuildResourceTypeCounts(t *testing.T) {
-	filters := includeAllFilters()
-	subscriptions := map[string]string{"sub1": "Sub One"}
-	data := rawRows(
-		`{"subscriptionId":"sub1","type":"Microsoft.Storage/storageAccounts","count_":5}`,
-		`{bad}`,
-	)
-	got := buildResourceTypeCounts(data, subscriptions, filters)
-	if len(got) != 1 {
-		t.Fatalf("expected 1 result, got %d", len(got))
-	}
-	r := got[0]
-	if r.Subscription != "Sub One" || r.ResourceType != "Microsoft.Storage/storageAccounts" || r.Count != 5 {
-		t.Errorf("count mapping wrong: %+v", r)
-	}
-}
-
-func TestBuildResourceTypeCountMap(t *testing.T) {
-	filters := includeAllFilters()
-	data := rawRows(
-		`{"type":"Microsoft.Storage/storageAccounts","count_":7}`,
-		`{bad}`,
-	)
-	got := buildResourceTypeCountMap(data, filters)
-	if len(got) != 1 {
-		t.Fatalf("expected 1 entry, got %d", len(got))
-	}
-	if got["Microsoft.Storage/storageAccounts"] != 7 {
-		t.Errorf("count map wrong: %+v", got)
-	}
-}
