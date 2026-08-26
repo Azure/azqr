@@ -12,6 +12,7 @@ import (
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/profiling"
+	"github.com/rs/zerolog/log"
 
 	"github.com/spf13/cobra"
 )
@@ -142,6 +143,7 @@ func checkGate(cmd *cobra.Command, summary *findings.Summary, criterion gate.Cri
 	if err == nil {
 		return nil
 	}
+	log.Error().Msg(err.Error())
 	cmd.Root().SilenceErrors = true
 	cmd.Root().SilenceUsage = true
 	return err

@@ -20,12 +20,11 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:          "azqr",
-	Short:        "Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group",
-	Long:         `Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group`,
-	Args:         cobra.NoArgs,
-	Version:      version,
-	SilenceUsage: true,
+	Use:     "azqr",
+	Short:   "Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group",
+	Long:    `Azure Quick Review (azqr) goal is to produce a high level assessment of an Azure Subscription or Resource Group`,
+	Args:    cobra.NoArgs,
+	Version: version,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Initialize log level based on --debug flag
 		// This runs before any command executes, making debug logging available globally

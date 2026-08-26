@@ -34,7 +34,7 @@ type Failure struct {
 // Error implements error.
 func (e *Failure) Error() string {
 	return fmt.Sprintf(
-		"scan gate failed: %d recommendation(s) at or above %s impact %d resource finding(s)",
+		"quality gate failed: %d recommendation(s) at or above %s impact with %d impacted resource(s)",
 		e.Recommendations,
 		e.Threshold,
 		e.Impacted,
