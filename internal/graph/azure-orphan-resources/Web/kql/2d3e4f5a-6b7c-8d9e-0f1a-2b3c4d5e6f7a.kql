@@ -7,10 +7,10 @@ resources
     resources
     | where type == 'microsoft.logic/workflows'
     | extend resourceGroup, location, subscriptionId, properties
-    | extend varJson = properties["parameters"]["$connections"]["value"]
-    | mvexpand varConnection = varJson
-    | where notnull(varConnection)
-    | extend connectionId = extract("connectionId\":\"(.*?)\"", 1, tostring(varConnection))
+    | extend var_json = properties["parameters"]["$connections"]["value"]
+    | mvexpand var_connection = var_json
+    | where notnull(var_connection)
+    | extend connectionId = extract("connectionId\":\"(.*?)\"", 1, tostring(var_connection))
     | project connectionId, name
     )
     on $left.Resource == $right.connectionId
