@@ -93,6 +93,10 @@ sku:
 
 latency:
 	go run ./hack/code/latency_gen/main.go
+
+validate-orphan-resources:
+	@echo "Validating orphan resources YAML files against schema..."
+	@go run ./hack/code/validate_orphan_resources/main.go ./internal/graph/azure-orphan-resources
 	
 validate-yaml:
 	@echo "Validating recommendation YAML files against schema..."
