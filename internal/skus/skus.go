@@ -21,7 +21,7 @@ type SKU struct {
 	Family                string  `yaml:"family"                json:"family"`
 	VCPUs                 int     `yaml:"vcpus"                 json:"vcpus"`
 	MemoryGB              float64 `yaml:"memoryGb"              json:"memoryGb"`
-	GPUCount              int     `yaml:"gpuCount"              json:"gpuCount"`
+	GPUCount              float64 `yaml:"gpuCount"              json:"gpuCount"`
 	MaxDataDisks          int     `yaml:"maxDataDisks"          json:"maxDataDisks"`
 	AcceleratedNetworking bool    `yaml:"acceleratedNetworking" json:"acceleratedNetworking"`
 }

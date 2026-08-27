@@ -1551,6 +1551,38 @@
   maxDataDisks: 8
   acceleratedNetworking: false
   discoveredOn: "2026-07-03"
+- name: Standard_D248ds_v7
+  family: StandardDdsv7Family
+  vcpus: 248
+  memoryGb: 992
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
+- name: Standard_D248lds_v7
+  family: StandardDldsv7Family
+  vcpus: 248
+  memoryGb: 496
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
+- name: Standard_D248ls_v7
+  family: StandardDlsv7Family
+  vcpus: 248
+  memoryGb: 496
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
+- name: Standard_D248s_v7
+  family: StandardDsv7Family
+  vcpus: 248
+  memoryGb: 992
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
 - name: Standard_D2_v2
   family: standardDv2Family
   vcpus: 2
@@ -2279,6 +2311,22 @@
   maxDataDisks: 64
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"
+- name: Standard_D372ds_v7
+  family: StandardDdsv7Family
+  vcpus: 372
+  memoryGb: 1488
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
+- name: Standard_D372s_v7
+  family: StandardDsv7Family
+  vcpus: 372
+  memoryGb: 1488
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
 - name: Standard_D3_v2
   family: standardDv2Family
   vcpus: 4
@@ -4135,6 +4183,14 @@
   maxDataDisks: 4
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"
+- name: Standard_DC1s_v2
+  family: standardDCSv2Family
+  vcpus: 1
+  memoryGb: 4
+  gpuCount: 0
+  maxDataDisks: 1
+  acceleratedNetworking: false
+  discoveredOn: "2026-08-27"
 - name: Standard_DC1s_v3
   family: standardDCSv3Family
   vcpus: 1
@@ -4231,6 +4287,14 @@
   maxDataDisks: 8
   acceleratedNetworking: false
   discoveredOn: "2026-07-03"
+- name: Standard_DC2s_v2
+  family: standardDCSv2Family
+  vcpus: 2
+  memoryGb: 8
+  gpuCount: 0
+  maxDataDisks: 2
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
 - name: Standard_DC2s_v3
   family: standardDCSv3Family
   vcpus: 2
@@ -4519,6 +4583,14 @@
   maxDataDisks: 12
   acceleratedNetworking: false
   discoveredOn: "2026-07-03"
+- name: Standard_DC4s_v2
+  family: standardDCSv2Family
+  vcpus: 4
+  memoryGb: 16
+  gpuCount: 0
+  maxDataDisks: 4
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
 - name: Standard_DC4s_v3
   family: standardDCSv3Family
   vcpus: 4
@@ -4607,6 +4679,14 @@
   maxDataDisks: 64
   acceleratedNetworking: false
   discoveredOn: "2026-07-03"
+- name: Standard_DC8_v2
+  family: standardDCSv2Family
+  vcpus: 8
+  memoryGb: 32
+  gpuCount: 0
+  maxDataDisks: 8
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
 - name: Standard_DC8ads_cc_v5
   family: standardDCADCCV5Family
   vcpus: 8
@@ -5895,6 +5975,22 @@
   maxDataDisks: 48
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"
+- name: Standard_E248ds_v7
+  family: StandardEdsv7Family
+  vcpus: 248
+  memoryGb: 1888
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
+- name: Standard_E248s_v7
+  family: StandardEsv7Family
+  vcpus: 248
+  memoryGb: 1888
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
 - name: Standard_E2_v3
   family: standardEv3Family
   vcpus: 2
@@ -6567,6 +6663,22 @@
   maxDataDisks: 64
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"
+- name: Standard_E372ids_v7
+  family: StandardEdsv7Family
+  vcpus: 372
+  memoryGb: 2832
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
+- name: Standard_E372is_v7
+  family: StandardEsv7Family
+  vcpus: 372
+  memoryGb: 2832
+  gpuCount: 0
+  maxDataDisks: 64
+  acceleratedNetworking: true
+  discoveredOn: "2026-08-27"
 - name: Standard_E4-2ads_v5
   family: standardEADSv5Family
   vcpus: 2
@@ -12163,7 +12275,7 @@
   family: standardNDISRGB300V6Family
   vcpus: 128
   memoryGb: 864
-  gpuCount: 0
+  gpuCount: 4
   maxDataDisks: 16
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"
@@ -12171,7 +12283,7 @@
   family: standardNDISRGB200V6NDRFamily
   vcpus: 128
   memoryGb: 864
-  gpuCount: 0
+  gpuCount: 4
   maxDataDisks: 16
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"
@@ -12299,7 +12411,7 @@
   family: StandardNVadsV710v5Family
   vcpus: 12
   memoryGb: 64
-  gpuCount: 0
+  gpuCount: 0.5
   maxDataDisks: 6
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"
@@ -12339,7 +12451,7 @@
   family: StandardNVadsV710v5Family
   vcpus: 24
   memoryGb: 128
-  gpuCount: 0
+  gpuCount: 1
   maxDataDisks: 12
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"
@@ -12395,7 +12507,7 @@
   family: StandardNVadsV710v5Family
   vcpus: 4
   memoryGb: 16
-  gpuCount: 0
+  gpuCount: 0.16666666666666666
   maxDataDisks: 2
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"
@@ -12435,7 +12547,7 @@
   family: StandardNVadsV710v5Family
   vcpus: 8
   memoryGb: 32
-  gpuCount: 0
+  gpuCount: 0.3333333333333333
   maxDataDisks: 4
   acceleratedNetworking: true
   discoveredOn: "2026-07-03"

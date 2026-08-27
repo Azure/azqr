@@ -119,8 +119,84 @@ func TestExtractBaseName(t *testing.T) {
 	}
 }
 
-// TestFindAlternatives_SameModelVersionsRankFirst ensures that same-series SKUs
-// (e.g. Standard_D16s_v4, Standard_D16s_v6) appear before unrelated SKUs.
+// TestExtractGPUCategory verifies workload class extraction from N-series SKU names.
+func TestExtractGPUCategory(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{"Standard_NV36ads_A10_v5", "V"},
+		{"Standard_NV4ads_V710_v5", "V"},
+		{"Standard_NC64as_T4_v3", "C"},
+		{"Standard_NC48ads_A100_v4", "C"},
+		{"Standard_ND96asr_v4", "D"},
+		{"Standard_D4s_v5", ""},  // not N-series
+		{"Standard_B4ms", ""},
+	}
+	for _, tt := range tests {
+		got := extractGPUCategory(tt.name)
+		if got != tt.want {
+			t.Errorf("extractGPUCategory(%q) = %q, want %q", tt.name, got, tt.want)
+		}
+	}
+}
+
+// TestFindAlternatives_V710AppearsForA10 verifies that NVads V710 v5 SKUs surface
+// when searching for alternatives to an NVads A10 v5 SKU of comparable size.
+func TestFindAlternatives_V710AppearsForA10(t *testing.T) {
+	// Use NV12ads_A10_v5: the V710 equivalent (NV12ads_V710_v5) has a comparable
+	// memory footprint (64 GB vs 110 GB), so it should rank in the top alternatives.
+	target, ok := Lookup("Standard_NV12ads_A10_v5")
+	if !ok {
+		t.Skip("Standard_NV12ads_A10_v5 not found in known_skus.yaml")
+	}
+
+	results := FindAlternatives(target, 10)
+
+	found := false
+	for _, r := range results {
+		if r.SKU.Family == "StandardNVadsV710v5Family" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("expected at least one NVads V710 v5 SKU in top-10 alternatives for Standard_NV12ads_A10_v5")
+	}
+}
+
+// TestFindAlternatives_NVAlternativesRankAboveNC verifies that NV (visualization)
+// alternatives rank above NC (compute) alternatives for an NV source SKU.
+func TestFindAlternatives_NVAlternativesRankAboveNC(t *testing.T) {
+	target, ok := Lookup("Standard_NV36ads_A10_v5")
+	if !ok {
+		t.Skip("Standard_NV36ads_A10_v5 not found in known_skus.yaml")
+	}
+
+	results := FindAlternatives(target, 0) // all results
+
+	nvPos, ncPos := -1, -1
+	for i, r := range results {
+		cat := extractGPUCategory(r.SKU.Name)
+		if cat == "V" && nvPos == -1 {
+			nvPos = i
+		}
+		if cat == "C" && ncPos == -1 {
+			ncPos = i
+		}
+		if nvPos != -1 && ncPos != -1 {
+			break
+		}
+	}
+
+	if nvPos == -1 || ncPos == -1 {
+		t.Skip("need both NV and NC alternatives to compare ranking")
+	}
+	if nvPos > ncPos {
+		t.Errorf("first NV alternative (pos %d) should rank above first NC alternative (pos %d)", nvPos, ncPos)
+	}
+}
+
 func TestFindAlternatives_SameModelVersionsRankFirst(t *testing.T) {
 	target, ok := Lookup("Standard_D16s_v5")
 	if !ok {
