@@ -41,6 +41,11 @@ jobs:
       - name: Run tests
         run: make test
 
+      - name: Check third-party licenses
+        run: |
+          go install github.com/google/go-licenses/v2@latest
+          make notice
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
@@ -252,6 +257,12 @@ jobs:
     if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          submodules: "recursive"
+
       - name: Download all artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -305,6 +316,20 @@ jobs:
         with:
           args: zip -qq azqr-linux-arm64.zip bin/linux_arm64/azqr
 
+      - name: Generate SBOM (CycloneDX)
+        uses: anchore/sbom-action@f5e124a5457d5adfb0f2f04c96ef0e60ae6f3e2f # v0.20.9
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: azqr.cdx.json
+
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@f5e124a5457d5adfb0f2f04c96ef0e60ae6f3e2f # v0.20.9
+        with:
+          path: .
+          format: spdx-json
+          output-file: azqr.spdx.json
+
       - name: Create sha256 Checksums
         run: |
           sha256sum azqr.zip > azqr.zip.sha256
@@ -314,13 +339,15 @@ jobs:
           sha256sum azqr-darwin-arm64.zip > azqr-darwin-arm64.zip.sha256
           sha256sum azqr-linux-amd64.zip > azqr-linux-amd64.zip.sha256
           sha256sum azqr-linux-arm64.zip > azqr-linux-arm64.zip.sha256
+          sha256sum azqr.cdx.json > azqr.cdx.json.sha256
+          sha256sum azqr.spdx.json > azqr.spdx.json.sha256
 
       - name: Publish
         uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: azqr.zip azqr-win-amd64.zip azqr-win-arm64.zip azqr-darwin-amd64.zip azqr-darwin-arm64.zip azqr-linux-amd64.zip azqr-linux-arm64.zip azqr.zip.sha256 azqr-win-amd64.zip.sha256 azqr-win-arm64.zip.sha256 azqr-darwin-amd64.zip.sha256 azqr-darwin-arm64.zip.sha256 azqr-linux-amd64.zip.sha256 azqr-linux-arm64.zip.sha256
+          args: azqr.zip azqr-win-amd64.zip azqr-win-arm64.zip azqr-darwin-amd64.zip azqr-darwin-arm64.zip azqr-linux-amd64.zip azqr-linux-arm64.zip azqr.zip.sha256 azqr-win-amd64.zip.sha256 azqr-win-arm64.zip.sha256 azqr-darwin-amd64.zip.sha256 azqr-darwin-arm64.zip.sha256 azqr-linux-amd64.zip.sha256 azqr-linux-arm64.zip.sha256 azqr.cdx.json azqr.spdx.json azqr.cdx.json.sha256 azqr.spdx.json.sha256
           releaseId: ${{ needs.release.outputs.release_id }}
 
   bump-winget:

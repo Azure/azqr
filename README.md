@@ -233,6 +233,8 @@ The scan generates an Excel report with recommendations, impacted resources, and
 * Azure Managed Identity
 * Azure CLI (Using this type of authentication will make scans run slower)
 
+> **Security recommendation:** `AZURE_CLIENT_SECRET` is a credential and must not be stored in plaintext (e.g. committed to source control, hardcoded in scripts, or set directly in shared configuration files). Store it in a secure secret store, such as [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions), Azure DevOps secret variables/variable groups, or Azure Key Vault, and inject it into the environment at runtime. Where possible, prefer Managed Identity or Workload Identity Federation (OIDC) over a service principal secret to avoid storing long-lived credentials altogether.
+
 ### Credential Chain Configuration
 
 **Azure Quick Review (azqr)** uses the Azure SDK's `DefaultAzureCredential` which automatically selects the most appropriate credential based on your environment. By default, it tries credentials in order: environment variables, workload identity, managed identity, Azure CLI, and Azure Developer CLI.
@@ -464,6 +466,10 @@ azqr scan --fail-on Medium
 
 Supported values are `High`, `Medium`, and `Low`. Requested reports are generated before the gate result is returned.
 
+## Execution isolation and resource limits in shared CI/CD environments
+
+**Azure Quick Review (azqr)** does not enforce an overall scan timeout or a cap on memory/CPU/disk usage; these must be provided by the host environment. When running on shared or multi-tenant CI/CD infrastructure, apply isolation and resource limits at the platform level: use ephemeral/isolated runners (or per-job containers), set explicit CPU/memory limits and job/step timeouts, scope scans with `--subscription-id`, `--resource-group`, `--stages`, and `--filters` instead of scanning an entire tenant in one run, write reports to a job-scoped workspace, and avoid running untrusted code in the same job as the scan. See [Execution Isolation and Resource Limits in Shared CI/CD Environments](https://azure.github.io/azqr/docs/usage/#execution-isolation-and-resource-limits-in-shared-cicd-environments) for detailed guidance.
+
 ## SARIF output
 
 Generate SARIF 2.1.0 for code-scanning integrations:
@@ -545,9 +551,18 @@ Make sure you have `Go 1.23.x` or higher installed in your environment. You can 
    git submodule update --recursive
    make
  ```
+
 ## Binary Verification
 
 To verify the authenticity of downloaded binaries, see our [Binary Verification Guide](SECURITY_VERIFICATION.md).
+
+## Software Bill of Materials (SBOM)
+
+Azure Quick Review (azqr) publishes SBOMs for both release binaries and the Docker image. See our [Software Bill of Materials Guide](SBOM.md) for details and instructions on generating your own.
+
+## Third-Party Licenses
+
+**Azure Quick Review (azqr)** is licensed under the [MIT License](LICENSE) and depends on third-party open source Go modules distributed under permissive licenses (MIT, Apache-2.0, BSD-3-Clause, BSD-2-Clause). Copyright notices and license texts for all third-party dependencies are collected in [NOTICE.md](NOTICE.md)
 
 ## Support
 
