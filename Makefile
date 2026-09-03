@@ -11,6 +11,7 @@ ifeq ($(OS),windows)
   DEBUG_BIN = bin/$(OS)_$(ARCH)$(if $(GOARM),v$(GOARM),)/$(TARGET)-debug.exe
 endif
 GOLANGCI_LINT := ./bin/golangci-lint
+GO_LICENSES := $(shell go env GOPATH)/bin/go-licenses
 # Integration test timeout. Override on the command line for long-running fixtures
 # (e.g. Azure Managed Redis takes 10-20 min to provision):
 #   make test-integration INTEGRATION_TIMEOUT=90m
@@ -38,6 +39,8 @@ help:
 	@echo "  lint-all     - Run comprehensive linting checks (includes errcheck, gosec, etc.)"
 	@echo "  vet          - Run go vet checks"
 	@echo "  tidy         - Tidy up go modules and check for changes"
+	@echo "  licenses     - Check third-party dependency licenses against the allowlist"
+	@echo "  notice       - Regenerate NOTICE.md from third-party dependency licenses and check for changes"
 	@echo "  json         - Generate JSON recommendations and check for changes"
 	@echo "  validate-yaml - Validate all recommendation YAML files against schema"
 	@echo "  validate-scanners - Validate APRL recommendations coverage"
@@ -83,6 +86,18 @@ tidy:
 	go mod tidy
 	git diff --exit-code ./go.mod
 	git diff --exit-code ./go.sum
+
+licenses: go-licenses-install
+	$(GO_LICENSES) check ./cmd/... --allowed_licenses=MIT,Apache-2.0,BSD-3-Clause,BSD-2-Clause,ISC
+
+notice: go-licenses-install
+	PATH="$(dir $(GO_LICENSES)):$$PATH" ./hack/code/notice_gen/generate-notice.sh
+	git diff --exit-code ./NOTICE.md
+
+go-licenses-install:
+	@if [ ! -f $(GO_LICENSES) ]; then \
+		go install github.com/google/go-licenses/v2@latest; \
+	fi
 
 json:
 	go run ./cmd/azqr/main.go rules --json > ./data/recommendations.json 

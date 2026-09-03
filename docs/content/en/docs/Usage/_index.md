@@ -45,6 +45,8 @@ export AZURE_CLIENT_SECRET='<service-principal-client-secret>'
 export AZURE_TENANT_ID='<tenant-id>'
 ```
 
+> **Security recommendation:** `AZURE_CLIENT_SECRET` is a credential and should never be stored in plaintext (e.g. committed to source control, hardcoded in scripts, or set directly in shared configuration files). Store it in a secure secret store — such as [GitHub Actions secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions), Azure DevOps secret variables/variable groups, or Azure Key Vault — and inject it into the environment at runtime. Where possible, prefer Managed Identity or Workload Identity Federation (OIDC) instead of a service principal secret to avoid storing long-lived credentials altogether.
+
 ### Authenticate with a Managed Identity
 
 Set the following environment variables:
@@ -319,6 +321,19 @@ azqr scan --fail-on Medium
 ```
 
 Supported thresholds are `High`, `Medium`, and `Low`. The gate evaluates deduplicated core azqr and diagnostics findings after requested reports are generated. Advisor, Defender, Policy, cost, status, and plugin datasets are not included.
+
+## Execution Isolation and Resource Limits in Shared CI/CD Environments
+
+**Azure Quick Review (azqr)** does not itself impose an overall scan timeout, a maximum resource/finding count, or a cap on memory/CPU/disk usage; it relies on the host environment for these guarantees. When running `azqr scan` on shared or multi-tenant CI/CD infrastructure (self-hosted runners, shared build agents, shared Kubernetes nodes, etc.), apply the following controls at the platform level:
+
+* **Use isolated, ephemeral runners.** Prefer GitHub-hosted or Microsoft-hosted Azure DevOps runners (one-time, disposable VMs) over long-lived self-hosted/shared runners for scans. If self-hosted runners are required, run each job in its own container or VM instance rather than a shared, persistent host, so one scan cannot affect concurrent or subsequent jobs.
+* **Set container/VM resource limits.** When running azqr in a container (Docker/Kubernetes), set explicit CPU and memory `limits` (and `requests`) on the container/pod so a large or slow-running scan cannot exhaust the host's shared resources or starve neighboring jobs. Configure a pod/job-level `activeDeadlineSeconds` (Kubernetes) or job/step `timeout-minutes` (GitHub Actions) / `timeoutInMinutes` (Azure DevOps) as a hard ceiling on run time.
+* **Scope the scan to reduce load.** Narrow the scan surface with `--subscription-id`, `--resource-group`, `--stages`, and `--filters` (see [Advanced Filtering](#advanced-filtering) and [Controlling Scan Stages](#controlling-scan-stages)) instead of scanning an entire tenant/management group in a single run, especially on constrained runners. Splitting a large tenant into multiple parallel, scoped scans (e.g. one job per subscription) with smaller runners is generally safer than one large job on a shared host.
+* **Isolate output/artifact storage.** Write report files to a job-scoped, ephemeral workspace (the default CI/CD checkout/workspace directory) rather than a shared persistent volume, and publish reports as CI/CD build artifacts rather than writing to shared network storage accessible by other jobs. This limits disk exhaustion and cross-job data exposure to the artifact's own lifecycle/retention policy.
+* **Avoid running untrusted code in the same job.** Do not combine `azqr scan` with build/test steps that execute untrusted, third-party, or pull-request-supplied code in the same job/runner, since azqr's credentials (see [Authentication](#authentication)) would be exposed to that process's environment.
+* **Monitor and alert on runner exhaustion.** Use your CI/CD platform's built-in job/agent metrics (or self-hosted runner host monitoring) to detect and alert on jobs approaching resource or time limits, and terminate/kill jobs that exceed expected thresholds for your environment size.
+
+> These are deployment/operational controls to be applied by the platform team running azqr, not a substitute for reducing scan scope; combining runner-level isolation with a narrower `--subscription-id`/`--resource-group`/`--filters` scope gives the strongest protection against resource exhaustion on shared infrastructure.
 
 ## File Outputs
 

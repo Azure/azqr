@@ -82,6 +82,8 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.extract_version.outputs.version }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           file: Dockerfile
+          sbom: true
+          provenance: true
 
       - name: Generate Docker image summary
         run: |
@@ -89,3 +91,4 @@ jobs:
           echo "- **Registry**: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Version**: ${{ steps.extract_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Platforms**: linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
+          echo "- **SBOM**: attached as build attestation (\`docker buildx imagetools inspect\`)" >> $GITHUB_STEP_SUMMARY
