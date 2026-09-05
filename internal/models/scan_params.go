@@ -23,6 +23,9 @@ type (
 		MemProfile   string
 		TraceProfile string
 		Sarif        bool
+		History      bool
+		HistoryFile  string
+		ScopeID      string
 		Version      string
 	}
 
