@@ -4,7 +4,7 @@
 ARG BUILDPLATFORM=linux/amd64
 
 # Extract CA certificates from a known-good base image
-FROM --platform=$BUILDPLATFORM alpine:3.21 AS certs
+FROM --platform=$BUILDPLATFORM alpine:3.21@sha256:48b0309ca019d89d40f670aa1bc06e426dc0931948452e8491e3d65087abc07d AS certs
 RUN apk --no-cache add ca-certificates
 
 FROM --platform=$BUILDPLATFORM scratch
