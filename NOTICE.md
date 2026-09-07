@@ -117,7 +117,7 @@ SOFTWARE.
 
 Applies to:
 
-- `github.com/AzureAD/microsoft-authentication-library-for-go/apps` v1.8.0
+- `github.com/AzureAD/microsoft-authentication-library-for-go/apps` v1.9.0
 
 ```
 MIT License
@@ -262,7 +262,7 @@ SOFTWARE.
 Applies to:
 
 - `github.com/kylelemons/godebug` v1.1.0
-- `github.com/richardlehane/mscfb` v1.0.7
+- `github.com/richardlehane/mscfb` v1.0.8
 - `github.com/richardlehane/msoleps/types` v1.0.6
 
 ```
@@ -473,7 +473,7 @@ Apache License
 
 Applies to:
 
-- `github.com/mark3labs/mcp-go` v0.58.0
+- `github.com/mark3labs/mcp-go` v1.0.0
 
 ```
 MIT License
@@ -533,7 +533,7 @@ SOFTWARE.
 
 Applies to:
 
-- `github.com/mattn/go-isatty` v0.0.22
+- `github.com/mattn/go-isatty` v0.0.24
 
 ```
 Copyright (c) Yasuhiro MATSUMOTO <mattn.jp@gmail.com>
@@ -613,7 +613,7 @@ SOFTWARE.
 
 Applies to:
 
-- `github.com/santhosh-tekuri/jsonschema/v6` v6.0.2
+- `github.com/santhosh-tekuri/jsonschema/v6` v6.0.3
 - `github.com/spf13/cobra` v1.10.2
 
 ```
@@ -1041,7 +1041,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Applies to:
 
-- `golang.org/x/crypto` v0.55.0
+- `golang.org/x/crypto` v0.56.0
 - `golang.org/x/net` v0.58.0
 - `golang.org/x/sync/singleflight` v0.22.0
 - `golang.org/x/sys/unix` v0.47.0
