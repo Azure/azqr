@@ -1,0 +1,12 @@
+// Check if MySQL Flexible Server is running a version subject to Extended Security Updates (ESU) billing
+resources
+| where type =~ 'Microsoft.DBforMySQL/flexibleServers'
+| extend mysqlVersion = tostring(properties.version)
+| where mysqlVersion startswith '5.7' or mysqlVersion startswith '8.0'
+| extend esuStartDate = case(
+    mysqlVersion startswith '8.0', '2027-01-01',
+    '2026-08-01')
+| extend recommendationId = 'mysqlf-005'
+| extend param1 = strcat('MySQL version: ', mysqlVersion)
+| extend param2 = strcat('ESU start date: ', esuStartDate)
+| project recommendationId, name, id, tags, param1, param2

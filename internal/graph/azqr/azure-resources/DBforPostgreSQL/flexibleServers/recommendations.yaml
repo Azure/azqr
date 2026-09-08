@@ -29,3 +29,19 @@
   learnMoreLink:
   - name: Private access (VNet Integration)
     url: https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking#private-access-vnet-integration
+
+- description: PostgreSQL Flexible Server is running a version subject to Extended Security Updates (ESU) billing
+  aprlGuid: psqlf-005
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforPostgreSQL/flexibleServers
+  recommendationMetadataState: Active
+  longDescription: 'PostgreSQL Flexible Servers running major versions 11, 12, 13 or 14 have reached, or are approaching, the end of Azure Standard Support and are billed for Extended Security Updates (ESU). Perform a Major Version Upgrade to PostgreSQL 15 or later to avoid ESU charges.'
+  potentialBenefits: Avoid Extended Security Updates (ESU) billing by upgrading to a supported major version
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Azure Database for PostgreSQL Flexible Server versioning policy
+    url: https://learn.microsoft.com/en-us/azure/postgresql/configure-maintain/concepts-version-policy

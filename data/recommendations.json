@@ -2440,6 +2440,14 @@
 		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
 	},
 	{
+		"category": "Governance",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/mysql/concepts-version-policy",
+		"recommendation": "Azure Database for MySQL - Flexible Server is running a version subject to Extended Security Updates (ESU) billing",
+		"recommendationId": "mysqlf-005",
+		"resourceType": "Microsoft.DBforMySQL/flexibleServers"
+	},
+	{
 		"category": "SLA",
 		"impact": "High",
 		"learnMoreUrl": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
@@ -2557,6 +2565,14 @@
 		"learnMoreUrl": "https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-networking-private-link",
 		"recommendation": "PostgreSQL should have private access enabled",
 		"recommendationId": "psqlf-004",
+		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
+	},
+	{
+		"category": "Governance",
+		"impact": "High",
+		"learnMoreUrl": "https://learn.microsoft.com/en-us/azure/postgresql/configure-maintain/concepts-version-policy",
+		"recommendation": "PostgreSQL Flexible Server is running a version subject to Extended Security Updates (ESU) billing",
+		"recommendationId": "psqlf-005",
 		"resourceType": "Microsoft.DBforPostgreSQL/flexibleServers"
 	},
 	{

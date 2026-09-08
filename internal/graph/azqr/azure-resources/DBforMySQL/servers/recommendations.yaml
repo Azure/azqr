@@ -78,3 +78,19 @@
   - name: Learn more
     url: 'https://learn.microsoft.com/azure/mysql/flexible-server/concepts-networking-vnet'
 
+- description: Azure Database for MySQL - Flexible Server is running a version subject to Extended Security Updates (ESU) billing
+  aprlGuid: mysqlf-005
+  recommendationTypeId: null
+  recommendationControl: Governance
+  recommendationImpact: High
+  recommendationResourceType: Microsoft.DBforMySQL/flexibleServers
+  recommendationMetadataState: Active
+  longDescription: 'Azure Database for MySQL - Flexible Servers running major version 5.7 or 8.0 have reached, or are approaching, the end of Azure Standard Support and are billed for Extended Security Updates (ESU). Perform a Major Version Upgrade to a supported version to avoid ESU charges.'
+  potentialBenefits: Avoid Extended Security Updates (ESU) billing by upgrading to a supported major version
+  pgVerified: true
+  automationAvailable: true
+  tags: []
+  learnMoreLink:
+  - name: Learn more
+    url: 'https://learn.microsoft.com/en-us/azure/mysql/concepts-version-policy'
+
