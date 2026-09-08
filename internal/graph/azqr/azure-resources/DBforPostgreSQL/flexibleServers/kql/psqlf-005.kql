@@ -1,0 +1,12 @@
+// Check if PostgreSQL Flexible Server is running a version subject to Extended Security Updates (ESU) billing
+resources
+| where type =~ 'Microsoft.DBforPostgreSQL/flexibleServers'
+| extend pgVersion = tostring(properties.version)
+| where pgVersion in ('11', '12', '13', '14')
+| extend esuStartDate = case(
+    pgVersion == '14', '2026-12-12',
+    '2026-08-01')
+| extend recommendationId = 'psqlf-005'
+| extend param1 = strcat('PostgreSQL version: ', pgVersion)
+| extend param2 = strcat('ESU start date: ', esuStartDate)
+| project recommendationId, name, id, tags, param1, param2
