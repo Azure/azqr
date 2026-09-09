@@ -1046,7 +1046,7 @@ Applies to:
 - `golang.org/x/sync/singleflight` v0.22.0
 - `golang.org/x/sys/unix` v0.47.0
 - `golang.org/x/text` v0.41.0
-- `golang.org/x/time/rate` v0.15.0
+- `golang.org/x/time/rate` v0.16.0
 
 ```
 Copyright 2009 The Go Authors.
