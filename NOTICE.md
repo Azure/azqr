@@ -1043,7 +1043,7 @@ Applies to:
 
 - `golang.org/x/crypto` v0.56.0
 - `golang.org/x/net` v0.58.0
-- `golang.org/x/sync/singleflight` v0.22.0
+- `golang.org/x/sync/singleflight` v0.23.0
 - `golang.org/x/sys/unix` v0.47.0
 - `golang.org/x/text` v0.41.0
 - `golang.org/x/time/rate` v0.16.0
