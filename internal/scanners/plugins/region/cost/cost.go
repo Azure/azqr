@@ -4,7 +4,6 @@
 package cost
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -17,7 +16,6 @@ import (
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
 	"github.com/Azure/azqr/internal/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/costmanagement/armcostmanagement"
 	"github.com/rs/zerolog/log"
 )
@@ -28,11 +26,12 @@ func odataEscape(s string) string {
 	return strings.ReplaceAll(s, "'", "''")
 }
 
-// FetchMeterCosts queries the Cost Management API for historical meter costs for one subscription.
+// FetchMeterCosts returns historical costs per meter for one subscription,
+// aggregating all Cost Management result pages.
 // historyMonths controls how many full calendar months of history to include (1–12; default 1).
 // This is the per-subscription phase of cost enrichment; safe to call in parallel across subscriptions.
-func FetchMeterCosts(ctx context.Context, cred azcore.TokenCredential, httpClient *az.HttpClient, subscriptionID string, historyMonths int) ([]types.MeterCostData, error) {
-	return getMeterCostsFromCostManagement(ctx, cred, httpClient, subscriptionID, historyMonths)
+func FetchMeterCosts(ctx context.Context, httpClient *az.HttpClient, subscriptionID string, historyMonths int) ([]types.MeterCostData, error) {
+	return queryMeterCosts(ctx, httpClient, subscriptionID, historyMonths)
 }
 
 // BuildRetailPricing resolves Retail Prices API metadata for all provided meters and fetches
@@ -144,8 +143,8 @@ func ApplyCostDiffs(results []types.RegionComparison, subMeterCosts []types.Mete
 // EnrichWithCostData is a single-subscription convenience wrapper that calls FetchMeterCosts,
 // BuildRetailPricing, and ApplyCostDiffs in sequence. Use the three-phase approach in Scan for
 // multi-subscription scenarios to avoid redundant Retail API calls.
-func EnrichWithCostData(ctx context.Context, cred azcore.TokenCredential, httpClient *az.HttpClient, subscriptionID string, results []types.RegionComparison) *types.CostComparisonData {
-	meterCosts, err := FetchMeterCosts(ctx, cred, httpClient, subscriptionID, 1)
+func EnrichWithCostData(ctx context.Context, httpClient *az.HttpClient, subscriptionID string, results []types.RegionComparison) *types.CostComparisonData {
+	meterCosts, err := FetchMeterCosts(ctx, httpClient, subscriptionID, 1)
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to get cost data from Cost Management API - cost comparison will be skipped")
 		return nil
@@ -173,9 +172,7 @@ func EnrichWithCostData(ctx context.Context, cred azcore.TokenCredential, httpCl
 	return shared
 }
 
-// getMeterCostsFromCostManagement queries Cost Management API to get historical costs grouped by meter
-// This implements Get-CostInformation.ps1 functionality
-func getMeterCostsFromCostManagement(ctx context.Context, cred azcore.TokenCredential, httpClient *az.HttpClient, subscriptionID string, historyMonths int) ([]types.MeterCostData, error) {
+func queryMeterCosts(ctx context.Context, httpClient *az.HttpClient, subscriptionID string, historyMonths int) ([]types.MeterCostData, error) {
 	if historyMonths < 1 {
 		historyMonths = 1
 	}
@@ -188,17 +185,8 @@ func getMeterCostsFromCostManagement(ctx context.Context, cred azcore.TokenCrede
 
 	log.Debug().Msgf("Querying Cost Management for period: %s to %s (%d month(s))", startDate.Format("2006-01-02"), endDate.Format("2006-01-02"), historyMonths)
 
-	allMeterCosts := []types.MeterCostData{}
-
 	// Query the subscription for cost data
 	log.Debug().Msgf("Querying Cost Management API for subscription: %s", renderers.MaskSubscriptionID(subscriptionID, true))
-
-	clientOptions := az.NewDefaultClientOptions()
-
-	client, err := armcostmanagement.NewQueryClient(cred, clientOptions)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Cost Management client for subscription %s: %w", renderers.MaskSubscriptionID(subscriptionID, true), err)
-	}
 
 	scope := fmt.Sprintf("/subscriptions/%s", subscriptionID)
 
@@ -244,82 +232,45 @@ func getMeterCostsFromCostManagement(ctx context.Context, cred azcore.TokenCrede
 		},
 	}
 
-	result, err := client.Usage(ctx, scope, definition, nil)
+	// Cost Management's query operation has no generated pager (unlike e.g. armcompute's
+	// usage pager) - its spec doesn't model it as paged. Azure's own Az.CostManagement
+	// PowerShell module hits the same gap and works around it with raw REST calls for every
+	// page, including the first; az.QueryCostManagementPages follows the same approach so
+	// this shared helper is used unchanged by both the region plugin and the ordinary
+	// CostScanner.
+	meterTotals := make(map[string]float64)
+	meterCount := 0
+	err := az.QueryCostManagementPages(ctx, httpClient, scope, definition, func(properties *armcostmanagement.QueryProperties) error {
+		log.Debug().Msgf("Subscription %s: Got %d columns, %d rows from Cost Management API",
+			renderers.MaskSubscriptionID(subscriptionID, true),
+			len(properties.Columns),
+			len(properties.Rows))
+
+		if len(properties.Columns) > 0 {
+			columnNames := make([]string, len(properties.Columns))
+			for i, col := range properties.Columns {
+				if col.Name != nil {
+					columnNames[i] = *col.Name
+				}
+			}
+			log.Debug().Msgf("Columns: %v", columnNames)
+		}
+
+		pageMeterCosts, err := parseCostManagementRows(properties, subscriptionID)
+		if err != nil {
+			return err
+		}
+		meterCount += len(pageMeterCosts)
+		for _, mc := range pageMeterCosts {
+			meterTotals[mc.MeterID] += mc.HistoricalCost
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to query Cost Management API for subscription %s: %w", renderers.MaskSubscriptionID(subscriptionID, true), err)
 	}
 
-	// Debug: log the response structure
-	if result.Properties == nil {
-		log.Warn().Msgf("Subscription %s: Cost Management response has no Properties", renderers.MaskSubscriptionID(subscriptionID, true))
-		return []types.MeterCostData{}, nil
-	}
-
-	log.Debug().Msgf("Subscription %s: Got %d columns, %d rows from Cost Management API",
-		renderers.MaskSubscriptionID(subscriptionID, true),
-		len(result.Properties.Columns),
-		len(result.Properties.Rows))
-
-	// Log column names to understand structure
-	if len(result.Properties.Columns) > 0 {
-		columnNames := make([]string, len(result.Properties.Columns))
-		for i, col := range result.Properties.Columns {
-			if col.Name != nil {
-				columnNames[i] = *col.Name
-			}
-		}
-		log.Debug().Msgf("Columns: %v", columnNames)
-	}
-
-	pageMeterCosts, err := parseCostManagementRows(result.Properties, subscriptionID)
-	if err != nil {
-		return nil, err
-	}
-	allMeterCosts = append(allMeterCosts, pageMeterCosts...)
-
-	bodyBytes, err := json.Marshal(definition)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal Cost Management query definition for subscription %s: %w", renderers.MaskSubscriptionID(subscriptionID, true), err)
-	}
-
-	nextLink := ""
-	if result.Properties.NextLink != nil {
-		nextLink = *result.Properties.NextLink
-	}
-
-	for nextLink != "" {
-		responseBody, _, err := httpClient.DoPost(ctx, nextLink, az.NopReadSeekCloser{Reader: bytes.NewReader(bodyBytes)})
-		if err != nil {
-			return nil, fmt.Errorf("failed to query paginated Cost Management results for subscription %s: %w", renderers.MaskSubscriptionID(subscriptionID, true), err)
-		}
-
-		var nextResult armcostmanagement.QueryResult
-		if err := json.Unmarshal(responseBody, &nextResult); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal paginated Cost Management results for subscription %s: %w", renderers.MaskSubscriptionID(subscriptionID, true), err)
-		}
-		if nextResult.Properties == nil {
-			break
-		}
-
-		pageMeterCosts, err = parseCostManagementRows(nextResult.Properties, subscriptionID)
-		if err != nil {
-			return nil, err
-		}
-		allMeterCosts = append(allMeterCosts, pageMeterCosts...)
-
-		nextLink = ""
-		if nextResult.Properties.NextLink != nil {
-			nextLink = *nextResult.Properties.NextLink
-		}
-	}
-
-	log.Debug().Msgf("Subscription %s: found %d meter cost entries", renderers.MaskSubscriptionID(subscriptionID, true), len(allMeterCosts))
-
-	// Aggregate costs by meter ID (sum across resources)
-	meterTotals := make(map[string]float64)
-	for _, mc := range allMeterCosts {
-		meterTotals[mc.MeterID] += mc.HistoricalCost
-	}
+	log.Debug().Msgf("Subscription %s: found %d meter cost entries", renderers.MaskSubscriptionID(subscriptionID, true), meterCount)
 
 	// Build final list
 	uniqueMeters := make([]types.MeterCostData, 0, len(meterTotals))

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/rs/zerolog/log"
@@ -21,22 +23,31 @@ var armLimiter = rate.NewLimiter(rate.Limit(20), 100)
 // https://learn.microsoft.com/en-us/azure/governance/resource-graph/concepts/guidance-for-throttled-requests#staggering-queries
 var graphLimiter = rate.NewLimiter(rate.Limit(3), 10)
 
-// CostLimiter rate limits Azure Cost Management API calls
-// Cost Management uses QPU (Query Processing Units): 1 QPU = 1 month of data queried
-// Limits: 12 QPU per 10 seconds, 60 QPU per 1 minute, 600 QPU per 1 hour
-// https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/manage-automation#data-latency-and-rate-limits
-var costLimiter = rate.NewLimiter(rate.Limit(0.2), 1)
+// Cost Management queries share an aggregate limit in addition to per-scope limits.
+var costLimiter = rate.NewLimiter(rate.Every(5*time.Second), 1)
 
-// ThrottlingPolicy implements policy.Policy to apply rate limiting
-type ThrottlingPolicy struct{}
+// ThrottlingPolicy applies rate limiting across Azure API clients.
+type ThrottlingPolicy struct {
+	// CostLimiter optionally overrides the shared Cost Management limiter.
+	CostLimiter *rate.Limiter
 
-// NewThrottlingPolicy creates a new throttling policy
+	costMu          sync.Mutex
+	costScopes      map[string]*costScopeLimiter
+	lastCostCleanup time.Time
+}
+
+var sharedThrottlingPolicy = &ThrottlingPolicy{}
+
+// NewThrottlingPolicy returns the shared throttling policy.
 func NewThrottlingPolicy() policy.Policy {
-	return &ThrottlingPolicy{}
+	return sharedThrottlingPolicy
 }
 
 // Do implements the policy.Policy interface
 func (p *ThrottlingPolicy) Do(req *policy.Request) (*http.Response, error) {
+	if IsCostManagementQuery(req.Raw()) {
+		return p.throttleCostRequest(req)
+	}
 	// Apply rate limiting based on URL before sending request
 	url := req.Raw().URL.String()
 	var err error
@@ -45,10 +56,6 @@ func (p *ThrottlingPolicy) Do(req *policy.Request) (*http.Response, error) {
 		log.Debug().
 			Msg("Applying Graph API throttling limiter")
 		err = graphLimiter.Wait(req.Raw().Context())
-	case strings.Contains(url, "Microsoft.CostManagement/query"):
-		log.Debug().
-			Msg("Applying Cost Management API throttling limiter")
-		err = costLimiter.Wait(req.Raw().Context())
 	case strings.Contains(url, "prices.azure.com"):
 		// migration-advisor parity: the Retail Prices API gets NO proactive
 		// rate cap. Instead we rely solely on reactive exponential backoff on
