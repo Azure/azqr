@@ -221,8 +221,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    outputs:
-      release_id: ${{ steps.create_release.outputs.id }}
     steps:
       - name: Detect preview version
         id: detect_preview
@@ -234,26 +232,6 @@ jobs:
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create azqr Release
-        id: create_release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          name: ${{ needs.calculate-version.outputs.version }}
-          body: ""
-          draft: false
-          prerelease: ${{ steps.detect_preview.outputs.is_prerelease }}
-
-  publish:
-    name: Publish binaries
-    needs: [release]
-    permissions:
-      contents: write
-    if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
       - name: Check out code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -339,17 +317,39 @@ jobs:
           sha256sum azqr.cdx.json > azqr.cdx.json.sha256
           sha256sum azqr.spdx.json > azqr.spdx.json.sha256
 
-      - name: Publish
-        uses: skx/github-action-publish-binaries@44887b225ceca96efd8a912d39c09ad70312af31 # master
+      - name: Create azqr Release
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: azqr.zip azqr-win-amd64.zip azqr-win-arm64.zip azqr-darwin-amd64.zip azqr-darwin-arm64.zip azqr-linux-amd64.zip azqr-linux-arm64.zip azqr.zip.sha256 azqr-win-amd64.zip.sha256 azqr-win-arm64.zip.sha256 azqr-darwin-amd64.zip.sha256 azqr-darwin-arm64.zip.sha256 azqr-linux-amd64.zip.sha256 azqr-linux-arm64.zip.sha256 azqr.cdx.json azqr.spdx.json azqr.cdx.json.sha256 azqr.spdx.json.sha256
-          releaseId: ${{ needs.release.outputs.release_id }}
+          tag_name: ${{ github.ref }}
+          name: ${{ needs.calculate-version.outputs.version }}
+          body: ""
+          draft: false
+          prerelease: ${{ steps.detect_preview.outputs.is_prerelease }}
+          files: |
+            azqr.zip
+            azqr-win-amd64.zip
+            azqr-win-arm64.zip
+            azqr-darwin-amd64.zip
+            azqr-darwin-arm64.zip
+            azqr-linux-amd64.zip
+            azqr-linux-arm64.zip
+            azqr.zip.sha256
+            azqr-win-amd64.zip.sha256
+            azqr-win-arm64.zip.sha256
+            azqr-darwin-amd64.zip.sha256
+            azqr-darwin-arm64.zip.sha256
+            azqr-linux-amd64.zip.sha256
+            azqr-linux-arm64.zip.sha256
+            azqr.cdx.json
+            azqr.spdx.json
+            azqr.cdx.json.sha256
+            azqr.spdx.json.sha256
 
   bump-winget:
     name: bump-winget
-    needs: [calculate-version, publish]
+    needs: [calculate-version, release]
     permissions:
       contents: write
     if: github.event_name != 'pull_request' && startswith(github.ref, 'refs/tags/v')
