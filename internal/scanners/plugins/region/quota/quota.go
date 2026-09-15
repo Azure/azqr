@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azqr/internal/az"
+	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v6"
@@ -88,8 +89,13 @@ func (n *usageName) UnmarshalJSON(data []byte) error {
 // fetchUsages is the shared pagination loop for quota usages APIs.
 // keepFn returns true for items that should be included in the result.
 // Returns nil, nil when the subscription or endpoint is not supported by the RP
-// (HTTP 400, 404, 405) — callers should treat nil as "no data available".
-func fetchUsages(ctx context.Context, httpClient *az.HttpClient, startURL string, keepFn func(usageItem) bool) ([]UsageEntry, error) {
+// (HTTP 400, 404, 405), or returns HTTP 409 SubscriptionHasNoUsages.
+// Callers should treat nil as "no data available".
+func fetchUsages(ctx context.Context, httpClient *az.HttpClient, subscriptionID, region, provider, apiVersion string, keepFn func(usageItem) bool) ([]UsageEntry, error) {
+	startURL := fmt.Sprintf(
+		"https://management.azure.com/subscriptions/%s/providers/%s/locations/%s/usages?api-version=%s",
+		subscriptionID, provider, region, apiVersion,
+	)
 	entries := make([]UsageEntry, 0)
 	url := startURL
 	pageNum := 0
@@ -97,6 +103,10 @@ func fetchUsages(ctx context.Context, httpClient *az.HttpClient, startURL string
 	for url != "" {
 		body, err := httpClient.Do(ctx, url)
 		if err != nil {
+			if isSubscriptionWithoutUsages(err) {
+				warnQuotaUnavailable(subscriptionID, region, provider)
+				return nil, nil
+			}
 			var respErr *azcore.ResponseError
 			if errors.As(err, &respErr) {
 				switch respErr.StatusCode {
@@ -142,6 +152,20 @@ func fetchUsages(ctx context.Context, httpClient *az.HttpClient, startURL string
 	return entries, nil
 }
 
+func isSubscriptionWithoutUsages(err error) bool {
+	var responseErr *azcore.ResponseError
+	return errors.As(err, &responseErr) && responseErr.StatusCode == http.StatusConflict &&
+		responseErr.ErrorCode == "SubscriptionHasNoUsages"
+}
+
+func warnQuotaUnavailable(subscriptionID, region, provider string) {
+	log.Warn().
+		Str("subscription", renderers.MaskSubscriptionID(subscriptionID, true)).
+		Str("region", region).
+		Str("provider", provider).
+		Msg("Azure has no usage records for this subscription/region; quota remains unknown and the check is skipped")
+}
+
 // FetchVMQuota queries Microsoft.Compute/locations/{region}/usages for VM family quotas.
 // It returns only VM family-level counters (names containing "Family") so that the
 // aggregate "cores" (Total Regional vCPUs) entry is excluded — that counter reflects ALL
@@ -162,6 +186,10 @@ func FetchVMQuota(ctx context.Context, cred azcore.TokenCredential, clientOpts *
 	for pager.More() {
 		page, err := pager.NextPage(ctx)
 		if err != nil {
+			if isSubscriptionWithoutUsages(err) {
+				warnQuotaUnavailable(subscriptionID, region, "Microsoft.Compute")
+				return nil, nil
+			}
 			return nil, fmt.Errorf("VM quota API error for %s in %s: %w", subscriptionID, region, err)
 		}
 		for _, item := range page.Value {

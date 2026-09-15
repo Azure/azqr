@@ -25,13 +25,9 @@ var sqlSkipList = map[string]bool{
 // actionable regional counters such as Servers, ElasticPools, DTUs, and vCores.
 // The caller should treat a nil return as "no data available".
 func FetchSQLQuota(ctx context.Context, httpClient *az.HttpClient, subscriptionID, region string) ([]UsageEntry, error) {
-	url := fmt.Sprintf(
-		"https://management.azure.com/subscriptions/%s/providers/Microsoft.Sql/locations/%s/usages?api-version=2021-11-01",
-		subscriptionID, region,
-	)
 	log.Debug().Msgf("Querying SQL quota for subscription %s in %s", subscriptionID, region)
 
-	entries, err := fetchUsages(ctx, httpClient, url, func(item usageItem) bool {
+	entries, err := fetchUsages(ctx, httpClient, subscriptionID, region, "Microsoft.Sql", "2021-11-01", func(item usageItem) bool {
 		for suffix := range sqlSkipList {
 			if strings.HasSuffix(item.Name.Value, suffix) {
 				return false
