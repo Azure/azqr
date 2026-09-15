@@ -32,13 +32,9 @@ var storageSkipList = map[string]bool{
 // the provider, while skipping nested sub-resource totals. The caller should
 // treat a nil return as "no data available".
 func FetchStorageQuota(ctx context.Context, httpClient *az.HttpClient, subscriptionID, region string) ([]UsageEntry, error) {
-	url := fmt.Sprintf(
-		"https://management.azure.com/subscriptions/%s/providers/Microsoft.Storage/locations/%s/usages?api-version=2023-01-01",
-		subscriptionID, region,
-	)
 	log.Debug().Msgf("Querying storage quota for subscription %s in %s", subscriptionID, region)
 
-	entries, err := fetchUsages(ctx, httpClient, url, func(item usageItem) bool {
+	entries, err := fetchUsages(ctx, httpClient, subscriptionID, region, "Microsoft.Storage", "2023-01-01", func(item usageItem) bool {
 		if storageSkipList[item.Name.Value] {
 			return false
 		}

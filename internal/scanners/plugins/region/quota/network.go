@@ -28,15 +28,12 @@ var networkSkipList = map[string]bool{
 // FetchNetworkQuota queries Microsoft.Network/locations/{region}/usages for network
 // resource quotas in the target region. It returns all non-trivial usage entries so
 // callers can determine whether the target region has room to absorb migrated network
-// resources. The caller should treat a nil return as "no data available".
+// resources. The caller should treat a nil return as "no data available",
+// including when Azure returns SubscriptionHasNoUsages.
 func FetchNetworkQuota(ctx context.Context, httpClient *az.HttpClient, subscriptionID, region string) ([]UsageEntry, error) {
-	url := fmt.Sprintf(
-		"https://management.azure.com/subscriptions/%s/providers/Microsoft.Network/locations/%s/usages?api-version=2022-07-01",
-		subscriptionID, region,
-	)
 	log.Debug().Msgf("Querying network quota for subscription %s in %s", subscriptionID, region)
 
-	entries, err := fetchUsages(ctx, httpClient, url, func(item usageItem) bool {
+	entries, err := fetchUsages(ctx, httpClient, subscriptionID, region, "Microsoft.Network", "2022-07-01", func(item usageItem) bool {
 		if networkSkipList[item.Name.Value] {
 			return false
 		}

@@ -42,6 +42,18 @@ func (r *rewriteTransport) Do(req *http.Request) (*http.Response, error) {
 func newTestStorageClient(t *testing.T, handler http.HandlerFunc) *az.HttpClient {
 	t.Helper()
 
+	return az.NewHttpClient(testCredential{}, &az.HttpClientOptions{
+		Timeout:          5 * time.Second,
+		MaxRetries:       1,
+		OperationTimeout: 10 * time.Second,
+		Scope:            "https://management.azure.com/.default",
+		Transport:        newTestQuotaTransport(t, handler),
+	})
+}
+
+func newTestQuotaTransport(t *testing.T, handler http.HandlerFunc) policy.Transporter {
+	t.Helper()
+
 	server := httptest.NewTLSServer(handler)
 	t.Cleanup(server.Close)
 
@@ -50,16 +62,10 @@ func newTestStorageClient(t *testing.T, handler http.HandlerFunc) *az.HttpClient
 		t.Fatalf("url.Parse(server.URL) error = %v", err)
 	}
 
-	return az.NewHttpClient(testCredential{}, &az.HttpClientOptions{
-		Timeout:          5 * time.Second,
-		MaxRetries:       1,
-		OperationTimeout: 10 * time.Second,
-		Scope:            "https://management.azure.com/.default",
-		Transport: &rewriteTransport{
-			client: server.Client(),
-			target: target,
-		},
-	})
+	return &rewriteTransport{
+		client: server.Client(),
+		target: target,
+	}
 }
 
 func usageNames(usages []UsageEntry) []string {

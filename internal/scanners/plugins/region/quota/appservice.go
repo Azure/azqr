@@ -32,14 +32,11 @@ func keepAppServiceUsage(item usageItem) bool {
 
 // FetchAppServiceQuota queries Microsoft.Web/locations/{region}/usages for App
 // Service regional quotas. Returns nil, nil when the endpoint is not supported (405).
+// The caller should treat a nil return as "no data available".
 func FetchAppServiceQuota(ctx context.Context, httpClient *az.HttpClient, subscriptionID, region string) ([]UsageEntry, error) {
-	url := fmt.Sprintf(
-		"https://management.azure.com/subscriptions/%s/providers/Microsoft.Web/locations/%s/usages?api-version=2023-01-01",
-		subscriptionID, region,
-	)
 	log.Debug().Msgf("Querying App Service quota for subscription %s in %s", subscriptionID, region)
 
-	entries, err := fetchUsages(ctx, httpClient, url, func(item usageItem) bool {
+	entries, err := fetchUsages(ctx, httpClient, subscriptionID, region, "Microsoft.Web", "2023-01-01", func(item usageItem) bool {
 		if !keepAppServiceUsage(item) {
 			return false
 		}
