@@ -39,7 +39,8 @@ var sharedTransport = &http.Transport{
 
 // HttpClient wraps Azure SDK pipeline for authenticated HTTP requests with built-in retry logic
 type HttpClient struct {
-	pipeline runtime.Pipeline
+	pipeline     runtime.Pipeline
+	costPipeline runtime.Pipeline
 }
 
 // HttpClientOptions configures the HTTP client behavior
@@ -49,6 +50,7 @@ type HttpClientOptions struct {
 	OperationTimeout time.Duration      // Total operation timeout including all retries
 	Scope            string             // OAuth scope for authentication
 	Transport        policy.Transporter // Optional custom transport (for testing)
+	ThrottlingPolicy policy.Policy      // Optional limiter override; nil shares process-wide pacing
 }
 
 // DefaultHttpClientOptions returns the default options for production use
@@ -108,18 +110,32 @@ func NewHttpClient(cred azcore.TokenCredential, opts *HttpClientOptions) *HttpCl
 	// Create pipeline with proper policy ordering
 	// PerCall policies execute once per logical operation (before retry logic)
 	// PerRetry policies execute on each attempt (auth token must refresh on retry)
+	throttlingPolicy := opts.ThrottlingPolicy
+	if throttlingPolicy == nil {
+		throttlingPolicy = throttling.NewThrottlingPolicy()
+	}
+	pipelineOptions := runtime.PipelineOptions{
+		PerRetry: []policy.Policy{authPolicy, throttlingPolicy},
+	}
 	pipeline := runtime.NewPipeline(
 		"azqr-http-client",
 		"v1.0.0",
-		runtime.PipelineOptions{
-			PerRetry: []policy.Policy{authPolicy, throttling.NewThrottlingPolicy()},
-		},
+		pipelineOptions,
 		clientOpts,
 	)
 
+	costOptions := costClientOptions(*clientOpts)
 	return &HttpClient{
-		pipeline: pipeline,
+		pipeline:     pipeline,
+		costPipeline: runtime.NewPipeline("azqr-http-client", "v1.0.0", pipelineOptions, &costOptions),
 	}
+}
+
+func (c *HttpClient) requestPipeline(req *policy.Request) runtime.Pipeline {
+	if throttling.IsCostManagementQuery(req.Raw()) {
+		return c.costPipeline
+	}
+	return c.pipeline
 }
 
 // Do performs an HTTP GET request with automatic authentication, throttling, and retries
@@ -146,7 +162,7 @@ func (c *HttpClient) DoPostStream(ctx context.Context, url string, body io.ReadS
 		}
 	}
 
-	resp, err := c.pipeline.Do(req)
+	resp, err := c.requestPipeline(req).Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
@@ -185,7 +201,7 @@ func (c *HttpClient) doRequest(ctx context.Context, method, url string, body io.
 	}
 
 	// Send request through pipeline (handles authentication, throttling, and retries automatically)
-	resp, err := c.pipeline.Do(req)
+	resp, err := c.requestPipeline(req).Do(req)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to execute request: %w", err)
 	}

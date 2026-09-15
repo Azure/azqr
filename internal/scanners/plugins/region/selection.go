@@ -192,9 +192,9 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			// Step 4a: Fetch per-subscription Cost Management data (historical meter costs).
 			// The Retail API call is deferred until after all subscriptions complete (Phase 2).
 			log.Debug().Msgf("Querying Cost Management API for subscription %s...", renderers.MaskSubscriptionID(subID, true))
-			subMeterCosts, err := cost.FetchMeterCosts(ctx, cred, s.httpClient, subID, s.costHistoryMonths)
+			subMeterCosts, err := cost.FetchMeterCosts(ctx, s.httpClient, subID, s.costHistoryMonths)
 			if err != nil {
-				log.Warn().Err(err).Msgf("Failed to get cost data from Cost Management API for subscription %s - cost comparison will use equal weights", renderers.MaskSubscriptionID(subID, true))
+				log.Warn().Err(err).Msgf("Failed to get cost data from Cost Management API for subscription %s - cost comparison data is unavailable for this subscription", renderers.MaskSubscriptionID(subID, true))
 			}
 			log.Debug().Msgf("Cost Management query completed for subscription %s (%d meters)", renderers.MaskSubscriptionID(subID, true), len(subMeterCosts))
 

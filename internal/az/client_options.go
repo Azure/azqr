@@ -4,6 +4,7 @@
 package az
 
 import (
+	"slices"
 	"time"
 
 	"github.com/Azure/azqr/internal/throttling"
@@ -25,4 +26,20 @@ func NewDefaultClientOptions() *arm.ClientOptions {
 			PerRetryPolicies: []policy.Policy{throttling.NewThrottlingPolicy()},
 		},
 	}
+}
+
+func costClientOptions(base policy.ClientOptions) policy.ClientOptions {
+	options := base
+	options.Retry.MaxRetryDelay = throttling.CostRequestTimeout
+	// Pacing belongs to the operation budget, not the network-attempt timeout.
+	options.Retry.TryTimeout = 0
+	options.PerCallPolicies = append([]policy.Policy{
+		throttling.NewCostTimeoutPolicy(throttling.CostRequestTimeout),
+	}, base.PerCallPolicies...)
+	options.PerRetryPolicies = slices.Clone(base.PerRetryPolicies)
+	if base.Retry.TryTimeout > 0 {
+		options.PerRetryPolicies = append(options.PerRetryPolicies,
+			throttling.NewCostTimeoutPolicy(base.Retry.TryTimeout))
+	}
+	return options
 }
