@@ -386,6 +386,7 @@ Scores and ranks Azure regions for workload migration or expansion across four d
 - Compares every source region (where your resources live) against each candidate target region
 - Produces a weighted 0–100 score with qualitative **Recommended / Neutral / Not Recommended** bands
 - Flags Score Quality when cost or latency data is unavailable
+- Network latency uses Microsoft's published [Azure inter-region round-trip (RTT) latency statistics](https://learn.microsoft.com/en-us/azure/networking/azure-network-latency); when a direct measurement isn't available, a geographic cluster-based estimate is used and flagged as "(est.)"
 - Generates per-target-region **Svc Avail** sheets and a **CostComparison** sheet in Excel output
 
 **Use Cases**: Migration planning, regional expansion, DR site selection
