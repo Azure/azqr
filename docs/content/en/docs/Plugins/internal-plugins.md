@@ -128,6 +128,12 @@ Scores and ranks Azure regions for workload migration or expansion. For each sou
 
 Availability zone loss/gain applies a multiplicative adjustment to the final score.
 
+**Network Latency Details**:
+- Values are **round-trip time (RTT)** sourced from Microsoft's published [Azure Network Round-trip Latency Statistics](https://learn.microsoft.com/en-us/azure/networking/azure-network-latency) (P50/median RTT in ms)
+- Lookup order: exact measured region pair → reverse pair (RTT is treated as symmetric) → geographic cluster-pair average as a fallback estimate
+- Estimated values (cluster-based, no direct measurement available) are shown as "X.X (est.)" in the Avg Latency (ms) column
+- Pairs with no data or estimate available show "N/A" and are scored neutrally
+
 **Key Features**:
 - Qualitative **Recommended** (≥ 80), **Neutral** (60–79), **Not Recommended** (< 60) bands
 - **Score Quality** flag notes when cost or latency data was unavailable
