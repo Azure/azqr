@@ -17,30 +17,38 @@ Internal plugins are disabled by default and must be explicitly enabled using co
 **Plugin Name**: `ai-gov`  
 **Command**: `azqr ai-gov`  
 **Flag**: `--plugin ai-gov`  
-**Version**: 1.0.0
+**Version**: 1.2.0
 
-Monitors Azure OpenAI and Cognitive Services accounts for throttling (429 errors) to identify capacity constraints.
+Monitors Azure OpenAI and Cognitive Services accounts for throttling (429 errors), token usage, estimated cost, and PTU (Provisioned Throughput Unit) suitability. This plugin ports the analytical capability of the [TokenLens-for-Azure](https://github.com/zakarel/tokenlens-for-azure) project, created by [@zakarel](https://github.com/zakarel), into azqr's own Excel/CSV/JSON output.
 
 **Key Features**:
-- Tracks 429 throttling errors by hour, model, and deployment
-- Analyzes spillover configuration effectiveness
+- Collects up to 90 days of Azure Monitor metrics at 5-minute resolution (falling back to 15-minute or 1-hour grain per chunk when a query is rejected); the grain, observed span and collection gaps are reported on the PTU and Insights sheets
+- Tracks 429 throttling errors by hour, model, and deployment, and reports a window-level throttle rate that is withheld when request outcomes are incomplete
+- Captures deployment SKU and mode (Global, Data Zone, Regional, Batch, Provisioned) and provider family
+- Reports spillover configuration (enabled flag and target deployment); spillover effectiveness is not measured
 - Reports request counts by status code
-- Identifies peak throttling periods
+- Reports hourly 429 counts so peak throttling periods can be spotted; peaks are not detected automatically
+- Collects hourly input/output token usage per deployment and model
+- Estimates list-price (USD retail) cost for token-billed Global/Data Zone/Regional standard deployments using **verified pricing only** (Azure Retail Prices API for Azure OpenAI meters, or an embedded Claude-on-Foundry CCU-equivalent snapshot) — a rate is never guessed from a similar model, and when several model versions are priced differently the deployment's Model Version selects the meter; if it cannot, the row stays unpriced and the remediation lists the price range. Provisioned (PTU) and Batch deployments are not token-priced; discounts, reservations and agreements are not applied
+- Scores PTU suitability on four dimensions (workload shape, capacity pressure, latency sensitivity, load predictability) with a TokenLens-style recommendation; skips provisioned, batch and non-Microsoft models; PTUs are sized on the P95 of 5-minute-or-coarser averages, so minute-level peaks may need more; `N/A` means a value was not computed (capacity table generated from the [Microsoft Learn PTU sizing page](https://learn.microsoft.com/azure/foundry/openai/how-to/provisioned-throughput-sizing) with `make ptu-capacity`; scoring formulas adapted from [msftse-org/ptu-advisor](https://github.com/msftse-org/ptu-advisor), MIT-licensed, via TokenLens-for-Azure)
+- Rolls estimated cost up per technical workload (default: one workload per deployment; same-named accounts are qualified with subscription and resource group)
 
 **Use Cases**:
 - Capacity planning for OpenAI deployments
 - Troubleshooting throttling issues
 - Optimizing deployment spillover configuration
 - Monitoring API usage patterns
+- Cost estimation and chargeback for AI workloads
+- Deciding whether a deployment should move from pay-as-you-go to Provisioned Throughput
 
-**Output Columns**:
-- Subscription, Resource Group, Account Name
-- Kind (OpenAI, Cognitive Services)
-- SKU and deployment details
-- Model name and spillover settings
-- Hourly throttling statistics (status code, request count)
+**Sheets and Output Columns**:
+- **AI Gov Usage** — identity columns, Hour (UTC), Input/Output Tokens, Request Count, Rate-Limited and Failed Requests (non-429; other statuses are not counted), Avg Latency (ms, unweighted mean of bucket averages), Active Buckets, observed Service Tiers and Context Bands (Service Tiers come from the `ServiceTierRequest` dimension, available on `ProcessedPromptTokens`/`GeneratedTokens`, which are preferred over `InputTokens`/`OutputTokens`; Context Bands need the `ContextLength` dimension, which Azure Monitor currently exposes only on Anthropic cache metrics, so they show `N/A` otherwise)
+- **AI Gov Cost** — identity columns plus Deployment Mode, Service Tier, Context Band, Input/Output Tokens, Pricing Source (`exact_retail` / `claude_ccu_equivalent` / `unavailable`), Estimated Cost (USD; `N/A` when unpriced), Assumptions, Remediation. Rates follow the observed mode and context band; a Global rate is never applied to a Data Zone deployment, and unpriced tiers are withheld
+- **AI Gov PTU** — identity columns plus Kind, SKU, Model Version/Format, SKU Capacity, Version Upgrade Option, Spillover Enabled/Deployment, Deployment SKU, Deployment Mode, Provider Family, Recommendation (`PTU recommended`, `Borderline`, `PAYG recommended`, `Insufficient evidence`, `PTU not applicable`, `Capacity data required`), the four dimension verdicts, Observed Avg/P95 TPM and Break-even TPM (all PTU-weighted: input + output × model ratio; the average spans the first to last active bucket), Active/Elapsed Buckets, Grain, Window Throttle Rate, Recommended PTUs, Estimated PAYG/PTU Monthly (USD; PTU hourly rate from Retail meters, labelled fallback otherwise, and extrapolated from the observed span to 30 days), Remediation, Observed Span (days), Notes. SKU Capacity carries its unit (`K TPM` for standard, `PTUs` for provisioned). Verdicts: positive favours PTU, negative favours pay-as-you-go, neutral is inconclusive, insufficient means the metric is unavailable. Capacity Pressure compares raw P95 tokens/min with the deployment limit when known, else the model default quota
+- **AI Gov Workloads** — Workload, Estimated Cost (USD; `N/A` when nothing is priced), Active Hour Buckets, Priced Token Share (%), Cost Status (`Complete` / `Partial` / `Not available`; unpriced usage contributes no cost)
+- **AI Gov Insights** — evidence-grounded findings per account (collection gaps, activity coverage, rate limiting, non-throttling failures, tokens per request, missing token/outcome/latency/cached-token evidence) with confidence and applicability
 
-**Data Source**: Azure Monitor Metrics API (last 24-48 hours)
+**Data Source**: Azure Monitor Metrics API (last 90 days), Azure Retail Prices API, embedded Claude pricing snapshot (refreshed via `make claude-pricing`, see `hack/code/claude_pricing_gen`)
 
 ---
 
@@ -369,7 +377,7 @@ azqr plugins list
 **Sample Output**:
 ```
 NAME                  VERSION    TYPE       DESCRIPTION
-ai-gov     1.0.0      internal   Checks OpenAI/Cognitive Services accounts for...
+ai-gov     1.2.0      internal   Checks OpenAI/Cognitive Services accounts for...
 carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure resource type
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
 region-selection      0.2.0-beta internal   Analyzes optimal Azure region selection based on service availability...
@@ -394,7 +402,7 @@ Internal plugin results are included in all output formats:
 
 Each internal plugin creates a dedicated worksheet in the Excel workbook:
 - **Zone Mapping** sheet
-- **AI Gov** sheet  
+- **AI Gov Usage**, **AI Gov Cost**, **AI Gov PTU**, **AI Gov Workloads**, **AI Gov Insights** sheets
 - **Carbon Emissions** sheet
 - **Region Selection** sheet (main scored table)
   - **Svc Avail `<region>`** sheets — one per target region with per-resource-type availability

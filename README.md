@@ -329,6 +329,7 @@ Monitors Azure OpenAI and Cognitive Services accounts for throttling (HTTP 429 e
 - Tracks throttling by hour, model, and deployment
 - Analyzes spillover configuration effectiveness  
 - Reports request counts by status code
+- Token usage, cost and PTU suitability analysis ported from [TokenLens-for-Azure](https://github.com/zakarel/tokenlens-for-azure) by [@zakarel](https://github.com/zakarel)
 
 **Use Cases**: Capacity planning, troubleshooting throttling, optimizing deployment configuration
 

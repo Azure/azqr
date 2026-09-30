@@ -260,7 +260,8 @@ Azure Quick Review includes specialized internal plugins for advanced analytics.
 For fast, focused analysis, run plugins as top-level commands:
 
 ```bash
-# Run OpenAI throttling analysis
+# Run OpenAI throttling, token usage, cost and PTU analysis
+# (based on TokenLens-for-Azure by @zakarel: https://github.com/zakarel/tokenlens-for-azure)
 azqr ai-gov
 
 # Run carbon emissions analysis

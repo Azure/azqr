@@ -7,17 +7,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
-	"sync"
-	"time"
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/plugins"
-	"github.com/Azure/azqr/internal/to"
+	"github.com/Azure/azqr/internal/scanners/plugins/aigov/modelinfo"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/monitor/query/azmetrics"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -25,10 +21,13 @@ import (
 // maxConcurrentDeploymentFetches limits parallel ARM calls when listing deployments.
 const maxConcurrentDeploymentFetches = 5
 
-// AIGovScanner is an internal plugin that monitors AI governance throttling
+// maxResourcesPerBatch is the Azure Monitor batch API limit on resources per call.
+const maxResourcesPerBatch = 50
+
+// AIGovScanner is an internal plugin that monitors AI governance
 type AIGovScanner struct{}
 
-// NewScanner creates a new AI governance throttling scanner
+// NewScanner creates a new AI governance scanner
 func NewScanner() *AIGovScanner {
 	return &AIGovScanner{}
 }
@@ -36,30 +35,13 @@ func NewScanner() *AIGovScanner {
 // GetMetadata returns plugin metadata
 func (s *AIGovScanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
-		Name:        "ai-gov",
-		Version:     "1.0.0",
-		Description: "Checks AI Governance",
-		Author:      "Azure Quick Review Team",
-		License:     "MIT",
-		Type:        plugins.PluginTypeInternal,
-		ColumnMetadata: []plugins.ColumnMetadata{
-			{Name: "Subscription"},
-			{Name: "Resource Group"},
-			{Name: "Account Name"},
-			{Name: "Kind"},
-			{Name: "SKU"},
-			{Name: "Deployment Name"},
-			{Name: "Model Name"},
-			{Name: "Model Version"},
-			{Name: "Model Format"},
-			{Name: "SKU Capacity"},
-			{Name: "Version Upgrade Option"},
-			{Name: "Spillover Enabled"},
-			{Name: "Spillover Deployment"},
-			{Name: "Hour"},
-			{Name: "Status Code"},
-			{Name: "Request Count"},
-		},
+		Name:           "ai-gov",
+		Version:        "1.2.0",
+		Description:    "Checks AI Governance",
+		Author:         "Azure Quick Review Team",
+		License:        "MIT",
+		Type:           plugins.PluginTypeInternal,
+		ColumnMetadata: ptuSheetMetadata().ColumnMetadata,
 	}
 }
 
@@ -71,18 +53,27 @@ type deploymentInfo struct {
 	VersionUpgradeOption string
 	SpilloverEnabled     string
 	SpilloverDeployment  string
+	SKUName              string
+	Mode                 string
 }
 
-// extractDeploymentInfo pre-computes display values from a Deployment once.
-func extractDeploymentInfo(deployment *armcognitiveservices.Deployment) deploymentInfo {
-	info := deploymentInfo{
+// newDefaultDeploymentInfo returns display defaults for unknown deployments.
+func newDefaultDeploymentInfo() deploymentInfo {
+	return deploymentInfo{
 		ModelVersion:         "N/A",
 		ModelFormat:          "N/A",
 		SKUCapacity:          "N/A",
 		VersionUpgradeOption: "N/A",
 		SpilloverEnabled:     "No",
 		SpilloverDeployment:  "N/A",
+		SKUName:              "N/A",
+		Mode:                 modelinfo.ModeUnknown,
 	}
+}
+
+// extractDeploymentInfo pre-computes display values from a Deployment once.
+func extractDeploymentInfo(deployment *armcognitiveservices.Deployment) deploymentInfo {
+	info := newDefaultDeploymentInfo()
 
 	if deployment.Properties != nil {
 		if deployment.Properties.SpilloverDeploymentName != nil {
@@ -101,8 +92,14 @@ func extractDeploymentInfo(deployment *armcognitiveservices.Deployment) deployme
 			info.VersionUpgradeOption = string(*deployment.Properties.VersionUpgradeOption)
 		}
 	}
-	if deployment.SKU != nil && deployment.SKU.Capacity != nil {
-		info.SKUCapacity = fmt.Sprintf("%d", *deployment.SKU.Capacity)
+	if deployment.SKU != nil {
+		if deployment.SKU.Capacity != nil {
+			info.SKUCapacity = fmt.Sprintf("%d", *deployment.SKU.Capacity)
+		}
+		if deployment.SKU.Name != nil && *deployment.SKU.Name != "" {
+			info.SKUName = *deployment.SKU.Name
+			info.Mode = modelinfo.DeploymentModeForSKU(*deployment.SKU.Name)
+		}
 	}
 
 	return info
@@ -110,9 +107,6 @@ func extractDeploymentInfo(deployment *armcognitiveservices.Deployment) deployme
 
 // Scan executes the plugin and returns table data
 func (s *AIGovScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
-	// Build header row from ColumnMetadata (single source of truth).
-	table := [][]string{s.GetMetadata().HeaderRow()}
-
 	// Use a targeted Resource Graph query instead of fetching all resources.
 	// This avoids downloading the entire resource inventory when only
 	// CognitiveServices/accounts with OpenAI or AI Services kind are needed.
@@ -122,14 +116,7 @@ func (s *AIGovScanner) Scan(ctx context.Context, cred azcore.TokenCredential, su
 	}
 	log.Debug().Msgf("Discovered %d OpenAI/AI Services accounts", len(openAIResources))
 
-	if len(openAIResources) == 0 {
-		return []plugins.ExternalPluginOutput{{
-			Metadata:    s.GetMetadata(),
-			SheetName:   "AI Throttling",
-			Description: "Analysis of AI/Cognitive Services accounts by hour, model, and status code",
-			Table:       table,
-		}}, nil
-	}
+	httpClient := az.NewHttpClient(cred, nil)
 
 	// Group resources by subscription and region for batch processing
 	resourceGroups := s.groupResourcesForBatch(openAIResources)
@@ -138,17 +125,15 @@ func (s *AIGovScanner) Scan(ctx context.Context, cred azcore.TokenCredential, su
 	// Create client options once and cache DeploymentsClient per subscription.
 	clientOptions := az.NewDefaultClientOptions()
 	deploymentsClients := make(map[string]*armcognitiveservices.DeploymentsClient)
+	var collected []*collectedAccount
 
-	// Process each batch group
 	for groupIdx, group := range resourceGroups {
-		// Check for context cancellation between groups
 		if err := ctx.Err(); err != nil {
 			return nil, fmt.Errorf("scan cancelled: %w", err)
 		}
 
 		log.Debug().Int("group", groupIdx+1).Int("total", len(resourceGroups)).Str("subscription", group.SubscriptionID).Str("region", group.Region).Int("resources", len(group.Resources)).Msg("Processing group")
 
-		// Reuse DeploymentsClient for the same subscription across batches/regions
 		deploymentsClient, exists := deploymentsClients[group.SubscriptionID]
 		if !exists {
 			var clientErr error
@@ -165,37 +150,26 @@ func (s *AIGovScanner) Scan(ctx context.Context, cred azcore.TokenCredential, su
 			subscriptionName = group.SubscriptionID
 		}
 
-		// Process resources in batches of up to 50
-		for i := 0; i < len(group.Resources); i += 50 {
+		for i := 0; i < len(group.Resources); i += maxResourcesPerBatch {
 			if err := ctx.Err(); err != nil {
 				return nil, fmt.Errorf("scan cancelled: %w", err)
 			}
 
-			end := min(i+50, len(group.Resources))
+			end := min(i+maxResourcesPerBatch, len(group.Resources))
 			batch := group.Resources[i:end]
 			log.Debug().Int("start", i).Int("end", end).Int("total", len(group.Resources)).Msg("Processing batch")
 
-			// Collect throttling data for batch
-			results, err := s.processBatch(ctx, cred, deploymentsClient, batch, subscriptionName)
-			if err != nil {
-				log.Debug().Err(err).Msg("Error processing batch")
-				continue
-			}
-
-			log.Debug().Msgf("Collected %d results from batch", len(results))
-			table = append(table, results...)
+			accounts := s.collectAccounts(ctx, cred, deploymentsClient, subscriptionName, group.SubscriptionID, group.Region, batch)
+			collected = append(collected, accounts...)
 		}
 	}
 
-	return []plugins.ExternalPluginOutput{{
-		Metadata:    s.GetMetadata(),
-		SheetName:   "AI Gov",
-		Description: "Analysis of AI/Cognitive Services accounts by hour, model, and status code",
-		Table:       table,
-	}}, nil
+	// Usage, Cost, PTU, Insights and Workloads sheets share the same
+	// collected buckets so every sheet describes the same observation window.
+	return s.collectExtendedSheets(ctx, httpClient, collected), nil
 }
 
-// discoverAIResources queries Azure Resource Graph for CognitiveServices accounts
+// discoverOpenAIResources queries Azure Resource Graph for CognitiveServices accounts
 // with an OpenAI or AI Services kind, avoiding a full resource inventory download.
 func (s *AIGovScanner) discoverOpenAIResources(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, filters *models.Filters) ([]*models.Resource, error) {
 	graphClient := graph.NewGraphQuery(cred)
@@ -264,15 +238,12 @@ func (s *AIGovScanner) groupResourcesForBatch(resources []*models.Resource) []Re
 		// Batch API requires: same subscription and region
 		key := fmt.Sprintf("%s|%s", resource.SubscriptionID, resource.Location)
 
-		if group, exists := groups[key]; exists {
-			group.Resources = append(group.Resources, resource)
-		} else {
-			groups[key] = &ResourceBatchGroup{
-				SubscriptionID: resource.SubscriptionID,
-				Region:         resource.Location,
-				Resources:      []*models.Resource{resource},
-			}
+		group, exists := groups[key]
+		if !exists {
+			group = &ResourceBatchGroup{SubscriptionID: resource.SubscriptionID, Region: resource.Location}
+			groups[key] = group
 		}
+		group.Resources = append(group.Resources, resource)
 	}
 
 	// Convert map to slice
@@ -282,263 +253,6 @@ func (s *AIGovScanner) groupResourcesForBatch(resources []*models.Resource) []Re
 	}
 
 	return result
-}
-
-// accountDeployments holds the result of a concurrent deployment fetch.
-type accountDeployments struct {
-	ResourceID    string
-	DeploymentMap map[string]deploymentInfo
-	Err           error
-}
-
-// processBatch processes a batch of resources using batch metrics API
-func (s *AIGovScanner) processBatch(ctx context.Context, cred azcore.TokenCredential, deploymentsClient *armcognitiveservices.DeploymentsClient, resources []*models.Resource, subscriptionName string) ([][]string, error) {
-	if len(resources) == 0 {
-		return nil, nil
-	}
-
-	subscriptionID := resources[0].SubscriptionID
-	region := resources[0].Location
-
-	// Build resource ID list for batch query
-	resourceIDs := make([]string, 0, len(resources))
-	resourceMap := make(map[string]*models.Resource)
-	for _, resource := range resources {
-		resourceIDs = append(resourceIDs, resource.ID)
-		resourceMap[resource.ID] = resource
-	}
-
-	// Query metrics using batch API
-	batchMetrics, err := s.getBatchMetricsWithStatusCodeSplit(ctx, cred, subscriptionID, region, resourceIDs, 167)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get batch metrics: %w", err)
-	}
-
-	// Fetch deployments concurrently for all resources that have metrics.
-	// Use a semaphore to bound the number of parallel ARM calls.
-	sem := make(chan struct{}, maxConcurrentDeploymentFetches)
-	deploymentsCh := make(chan accountDeployments, len(batchMetrics))
-	var wg sync.WaitGroup
-
-	for resourceID := range batchMetrics {
-		resource, exists := resourceMap[resourceID]
-		if !exists {
-			continue
-		}
-
-		wg.Add(1)
-		go func(res *models.Resource) {
-			defer wg.Done()
-
-			// Acquire semaphore slot
-			sem <- struct{}{}
-			defer func() { <-sem }()
-
-			deployments, fetchErr := s.getDeployments(ctx, deploymentsClient, res.ResourceGroup, res.Name)
-			result := accountDeployments{ResourceID: res.ID, Err: fetchErr}
-			if fetchErr == nil {
-				result.DeploymentMap = make(map[string]deploymentInfo, len(deployments))
-				for _, d := range deployments {
-					if d.Name != nil {
-						result.DeploymentMap[*d.Name] = extractDeploymentInfo(d)
-					}
-				}
-			}
-			deploymentsCh <- result
-		}(resource)
-	}
-
-	wg.Wait()
-	close(deploymentsCh)
-
-	// Collect deployment maps keyed by resource ID.
-	allDeployments := make(map[string]map[string]deploymentInfo, len(batchMetrics))
-	for ad := range deploymentsCh {
-		if ad.Err != nil {
-			log.Debug().Err(ad.Err).Str("resourceID", ad.ResourceID).Msg("Failed to get deployments")
-			continue
-		}
-		allDeployments[ad.ResourceID] = ad.DeploymentMap
-	}
-
-	// Default deployment info for unmatched deployments.
-	defaultInfo := deploymentInfo{
-		ModelVersion:         "N/A",
-		ModelFormat:          "N/A",
-		SKUCapacity:          "N/A",
-		VersionUpgradeOption: "N/A",
-		SpilloverEnabled:     "No",
-		SpilloverDeployment:  "N/A",
-	}
-
-	var results [][]string
-
-	// Process metrics for each resource
-	for resourceID, hourlyMetrics := range batchMetrics {
-		resource, exists := resourceMap[resourceID]
-		if !exists {
-			continue
-		}
-
-		resourceGroup := resource.ResourceGroup
-		accountName := resource.Name
-		kind := resource.Kind
-		if kind == "" {
-			kind = "Unknown"
-		}
-
-		skuName := resource.SkuName
-		if skuName == "" {
-			skuName = "Unknown"
-		}
-
-		depMap := allDeployments[resourceID] // may be nil if fetch failed
-
-		// Create rows for each hour/deployment/model/status code combination
-		for hourKey, deploymentMetrics := range hourlyMetrics {
-			for metricDeploymentName, mdls := range deploymentMetrics {
-				// Look up deployment metadata once per deployment name, not per metric row.
-				info := defaultInfo
-				if depMap != nil {
-					if di, ok := depMap[metricDeploymentName]; ok {
-						info = di
-					}
-				}
-
-				for modelName, statusCodes := range mdls {
-					for statusCode, count := range statusCodes {
-						results = append(results, []string{
-							subscriptionName,
-							resourceGroup,
-							accountName,
-							kind,
-							skuName,
-							metricDeploymentName,
-							modelName,
-							info.ModelVersion,
-							info.ModelFormat,
-							info.SKUCapacity,
-							info.VersionUpgradeOption,
-							info.SpilloverEnabled,
-							info.SpilloverDeployment,
-							hourKey,
-							statusCode,
-							fmt.Sprintf("%.0f", count),
-						})
-					}
-				}
-			}
-		}
-	}
-
-	return results, nil
-}
-
-// getBatchMetricsWithStatusCodeSplit queries Azure Monitor batch API for request metrics
-func (s *AIGovScanner) getBatchMetricsWithStatusCodeSplit(ctx context.Context, cred azcore.TokenCredential, subscriptionID, region string, resourceIDs []string, hours int) (map[string]map[string]map[string]map[string]map[string]float64, error) {
-	// Create regional metrics client
-	endpoint := fmt.Sprintf("https://%s.metrics.monitor.azure.com", region)
-	client, err := azmetrics.NewClient(endpoint, cred, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create metrics client for region %s: %w", region, err)
-	}
-
-	endTime := time.Now().UTC()
-	startTime := endTime.Add(-time.Duration(hours) * time.Hour)
-
-	log.Debug().Str("subscription", subscriptionID).Int("resources", len(resourceIDs)).Msg("Querying batch metrics for throttling")
-
-	metricNames := []string{"AzureOpenAIRequests"}
-	namespace := "Microsoft.CognitiveServices/accounts"
-
-	// Build options with filters for status code, deployment name, and model name
-	options := &azmetrics.QueryResourcesOptions{
-		StartTime:   to.Ptr(startTime.Format(time.RFC3339)),
-		EndTime:     to.Ptr(endTime.Format(time.RFC3339)),
-		Interval:    to.Ptr("PT1H"),
-		Aggregation: to.Ptr("Count"),
-		Filter:      to.Ptr("StatusCode eq '*' and ModelDeploymentName eq '*' and ModelName eq '*'"),
-	}
-
-	// Create ResourceIDList
-	resourceIDList := azmetrics.ResourceIDList{
-		ResourceIDs: resourceIDs,
-	}
-
-	// Query batch metrics
-	response, err := client.QueryResources(ctx, subscriptionID, namespace, metricNames, resourceIDList, options)
-	if err != nil {
-		log.Debug().Err(err).Msg("Batch query error for throttling metrics")
-		return nil, fmt.Errorf("failed to query batch metrics: %w", err)
-	}
-
-	log.Debug().Msgf("Batch query successful, returned %d metric data entries", len(response.Values))
-
-	// Parse response: map[resourceID]map[hour]map[deploymentName]map[modelName]map[statusCode]count
-	result := make(map[string]map[string]map[string]map[string]map[string]float64)
-
-	for _, metricData := range response.Values {
-		if metricData.ResourceID == nil {
-			continue
-		}
-		resourceID := *metricData.ResourceID
-
-		for _, metric := range metricData.Values {
-			if metric.TimeSeries == nil {
-				continue
-			}
-
-			for _, timeseries := range metric.TimeSeries {
-				// Extract metadata
-				statusCode := "Unknown"
-				deploymentName := "Unknown"
-				modelName := "Unknown"
-
-				if timeseries.MetadataValues != nil {
-					for _, meta := range timeseries.MetadataValues {
-						if meta.Name != nil && meta.Name.Value != nil && meta.Value != nil {
-							switch strings.ToLower(*meta.Name.Value) {
-							case "statuscode":
-								statusCode = *meta.Value
-							case "modelname":
-								modelName = *meta.Value
-							case "modeldeploymentname":
-								deploymentName = *meta.Value
-							}
-						}
-					}
-				}
-
-				// Process each data point (hourly)
-				if timeseries.Data != nil {
-					for _, data := range timeseries.Data {
-						if data.TimeStamp == nil || data.Count == nil {
-							continue
-						}
-
-						hourKey := data.TimeStamp.Format("2006-01-02 15:00")
-
-						if result[resourceID] == nil {
-							result[resourceID] = make(map[string]map[string]map[string]map[string]float64)
-						}
-						if result[resourceID][hourKey] == nil {
-							result[resourceID][hourKey] = make(map[string]map[string]map[string]float64)
-						}
-						if result[resourceID][hourKey][deploymentName] == nil {
-							result[resourceID][hourKey][deploymentName] = make(map[string]map[string]float64)
-						}
-						if result[resourceID][hourKey][deploymentName][modelName] == nil {
-							result[resourceID][hourKey][deploymentName][modelName] = make(map[string]float64)
-						}
-
-						result[resourceID][hourKey][deploymentName][modelName][statusCode] += *data.Count
-					}
-				}
-			}
-		}
-	}
-
-	return result, nil
 }
 
 // getDeployments retrieves all deployments for a cognitive services account

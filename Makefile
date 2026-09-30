@@ -46,6 +46,7 @@ help:
 	@echo "  validate-scanners - Validate APRL recommendations coverage"
 	@echo "  sku          - Generate internal/skus/known_skus.yaml from Azure VM SKUs (requires Azure login)"
 	@echo "  latency      - Regenerate zz_generated.latency.go (latency matrix + region clusters) from Microsoft Learn"
+	@echo "  ptu-capacity - Regenerate ptu/zz_generated.ptu_capacity.go (PTU sizing table) from Microsoft Learn"
 	@echo "  test         - Run tests (includes linting and validation)"
 	@echo "  test-integration - Run integration tests (requires Azure credentials, default timeout 60m)"
 	@echo "  test-integration-setup - Validate prerequisites for running integration tests"
@@ -108,6 +109,12 @@ sku:
 
 latency:
 	go run ./hack/code/latency_gen/main.go
+
+ptu-capacity:
+	go run ./hack/code/ptu_capacity_gen/main.go
+
+claude-pricing:
+	go run ./hack/code/claude_pricing_gen/main.go
 
 validate-orphan-resources:
 	@echo "Validating orphan resources YAML files against schema..."
