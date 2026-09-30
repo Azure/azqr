@@ -19,28 +19,34 @@ Internal plugins are disabled by default and must be explicitly enabled using co
 **Flag**: `--plugin ai-gov`  
 **Version**: 1.0.0
 
-Monitors Azure OpenAI and Cognitive Services accounts for throttling (429 errors) to identify capacity constraints.
+Monitors Azure OpenAI and Cognitive Services accounts for throttling (429 errors), token usage, estimated cost, and PTU (Provisioned Throughput Unit) suitability. This plugin ports the analytical capability of the [TokenLens-for-Azure](https://github.com/zakarel/tokenlens-for-azure) project into azqr's own Excel/CSV/JSON output.
 
 **Key Features**:
 - Tracks 429 throttling errors by hour, model, and deployment
 - Analyzes spillover configuration effectiveness
 - Reports request counts by status code
 - Identifies peak throttling periods
+- Collects hourly input/output token usage per deployment and model
+- Estimates cost using **verified pricing only** (Azure Retail Prices API for Azure OpenAI meters, or an embedded Claude-on-Foundry CCU-equivalent snapshot) — a rate is never guessed from a similar model
+- Assesses PTU suitability and evidence quality per deployment (capacity table and formulas adapted from [msftse-org/ptu-advisor](https://github.com/msftse-org/ptu-advisor), MIT-licensed, via TokenLens-for-Azure)
+- Rolls estimated cost up per technical workload (default: one workload per deployment)
 
 **Use Cases**:
 - Capacity planning for OpenAI deployments
 - Troubleshooting throttling issues
 - Optimizing deployment spillover configuration
 - Monitoring API usage patterns
+- Cost estimation and chargeback for AI workloads
+- Deciding whether a deployment should move from pay-as-you-go to Provisioned Throughput
 
-**Output Columns**:
-- Subscription, Resource Group, Account Name
-- Kind (OpenAI, Cognitive Services)
-- SKU and deployment details
-- Model name and spillover settings
-- Hourly throttling statistics (status code, request count)
+**Sheets and Output Columns**:
+- **AI Gov** — Subscription, Resource Group, Account Name, Kind, SKU, deployment details, model name, spillover settings, hourly throttling statistics (status code, request count)
+- **AI Gov Usage** — Subscription, Resource Group, Account Name, Deployment Name, Model Name, Hour, Input Tokens, Output Tokens
+- **AI Gov Cost** — same identity columns plus Input/Output Tokens, Pricing Source (`exact_retail` / `claude_ccu_equivalent` / `unavailable`), Estimated Cost (USD), Remediation
+- **AI Gov PTU** — same identity columns plus Observed Avg/P95 TPM, Eligibility, Recommended PTUs, Estimated PAYG/PTU Monthly (USD), Break-even TPM, Remediation
+- **AI Gov Workloads** — Workload, Estimated Cost (USD), Active Hour Buckets
 
-**Data Source**: Azure Monitor Metrics API (last 24-48 hours)
+**Data Source**: Azure Monitor Metrics API (last ~7 days), Azure Retail Prices API, embedded Claude pricing snapshot (refreshed via `make claude-pricing`, see `hack/code/claude_pricing_gen`)
 
 ---
 
@@ -302,7 +308,8 @@ Internal plugin results are included in all output formats:
 
 Each internal plugin creates a dedicated worksheet in the Excel workbook:
 - **Zone Mapping** sheet
-- **AI Gov** sheet  
+- **AI Gov** sheet
+  - **AI Gov Usage**, **AI Gov Cost**, **AI Gov PTU**, **AI Gov Workloads** sheets
 - **Carbon Emissions** sheet
 - **Region Selection** sheet (main scored table)
   - **Svc Avail `<region>`** sheets — one per target region with per-resource-type availability
