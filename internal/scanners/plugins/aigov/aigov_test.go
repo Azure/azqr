@@ -29,7 +29,7 @@ func TestAIGovScanner_GetMetadata(t *testing.T) {
 		expected interface{}
 	}{
 		{"Name", metadata.Name, "ai-gov"},
-		{"Version", metadata.Version, "1.0.0"},
+		{"Version", metadata.Version, "1.1.0"},
 		{"Description", metadata.Description, "Checks AI Governance"},
 		{"Author", metadata.Author, "Azure Quick Review Team"},
 		{"License", metadata.License, "MIT"},

@@ -37,7 +37,7 @@ func NewScanner() *AIGovScanner {
 func (s *AIGovScanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "ai-gov",
-		Version:     "1.0.0",
+		Version:     "1.1.0",
 		Description: "Checks AI Governance",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
@@ -123,12 +123,15 @@ func (s *AIGovScanner) Scan(ctx context.Context, cred azcore.TokenCredential, su
 	log.Debug().Msgf("Discovered %d OpenAI/AI Services accounts", len(openAIResources))
 
 	if len(openAIResources) == 0 {
-		return []plugins.ExternalPluginOutput{{
+		httpClient := az.NewHttpClient(cred, nil)
+		output := []plugins.ExternalPluginOutput{{
 			Metadata:    s.GetMetadata(),
 			SheetName:   "AI Throttling",
 			Description: "Analysis of AI/Cognitive Services accounts by hour, model, and status code",
 			Table:       table,
-		}}, nil
+		}}
+		output = append(output, s.collectExtendedSheets(ctx, cred, httpClient, subscriptions, openAIResources)...)
+		return output, nil
 	}
 
 	// Group resources by subscription and region for batch processing
@@ -187,12 +190,19 @@ func (s *AIGovScanner) Scan(ctx context.Context, cred azcore.TokenCredential, su
 		}
 	}
 
-	return []plugins.ExternalPluginOutput{{
+	output := []plugins.ExternalPluginOutput{{
 		Metadata:    s.GetMetadata(),
 		SheetName:   "AI Gov",
 		Description: "Analysis of AI/Cognitive Services accounts by hour, model, and status code",
 		Table:       table,
-	}}, nil
+	}}
+
+	// Usage, Cost, PTU, and Workloads sheets are the ported subset of
+	// TokenLens-for-Azure's analytical capability (see internal/scanners/plugins/aigov/extended.go).
+	httpClient := az.NewHttpClient(cred, nil)
+	output = append(output, s.collectExtendedSheets(ctx, cred, httpClient, subscriptions, openAIResources)...)
+
+	return output, nil
 }
 
 // discoverAIResources queries Azure Resource Graph for CognitiveServices accounts
