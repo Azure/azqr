@@ -28,7 +28,7 @@ func (s *ServiceHealthScanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "service-health",
 		Version:     "0.1.0-beta",
-		Description: "Analyzes Azure service health events to determine the percentage of time resources were unaffected by service issues over the last 90 days.",
+		Description: "Estimates the percentage of time resources were unaffected by Azure service health issues over the last 90 days. Overlapping events are counted independently.",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
 		Type:        plugins.PluginTypeInternal,
@@ -36,7 +36,7 @@ func (s *ServiceHealthScanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Subscription ID"},
 			{Name: "Target Region"},
 			{Name: "Target Resource Type"},
-			{Name: "Percentage Without Events"},
+			{Name: "Estimated Event-Free %"},
 			{Name: "Events Count"},
 			{Name: "Affected Resources"},
 		},
@@ -44,12 +44,15 @@ func (s *ServiceHealthScanner) GetMetadata() plugins.PluginMetadata {
 }
 
 // serviceHealthQuery is the Azure Resource Graph query for service health analysis.
-// It correctly computes event-free % by:
+// It estimates event-free % by:
 //  1. Joining events to impacted resources (no mv-expand — those columns are unused).
-//  2. Summing event durations per resource (capped at window to approximate overlaps).
+//  2. Summing event durations per resource and capping the total at the reporting window.
 //  3. Computing event-free % per resource before averaging within each bucket.
 //  4. Unioning unaffected resources (each contributing exactly one 100% row).
 //  5. Averaging per-resource values within each (subscription, region, resourceType) bucket.
+//
+// Overlapping events are counted independently, so concurrent events can understate
+// the estimated event-free percentage.
 //
 // Note: ARG does not support 'let' bindings, so subqueries are inlined.
 // The events table is scanned twice: once for per-resource % and once for event counts.
@@ -102,7 +105,7 @@ const serviceHealthQuery = `servicehealthresources
 | join kind=leftouter (
     servicehealthresources
     | where type =~ 'Microsoft.ResourceHealth/events' and properties.Status == 'Resolved'
-      and (properties.EventType == 'ServiceIssue' or properties.EventType == 'PlannedMaintenance')
+      and properties.EventType == 'ServiceIssue'
     | extend eventId = tostring(id), subscriptionId = tostring(subscriptionId)
     | join kind=inner (
         servicehealthresources
@@ -125,7 +128,7 @@ const serviceHealthQuery = `servicehealthresources
 
 // Scan executes the plugin and returns table data
 func (s *ServiceHealthScanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscriptions map[string]string, params *models.ScanParams) ([]plugins.ExternalPluginOutput, error) {
-	log.Info().Msg("Scanning service health availability across subscriptions")
+	log.Info().Msg("Scanning service health event-free time across subscriptions")
 
 	// Create graph client and execute query
 	graphClient := graph.NewGraphQuery(cred)
@@ -136,21 +139,21 @@ func (s *ServiceHealthScanner) Scan(ctx context.Context, cred azcore.TokenCreden
 
 	// Initialize table with headers
 	table := [][]string{
-		{"Subscription ID", "Target Region", "Target Resource Type", "Percentage Without Events", "Events Count", "Affected Resources"},
+		{"Subscription ID", "Target Region", "Target Resource Type", "Estimated Event-Free %", "Events Count", "Affected Resources"},
 	}
 
 	if result == nil || result.Data == nil {
 		log.Warn().Msg("No service health data returned from query")
 		return []plugins.ExternalPluginOutput{{
 			Metadata:    s.GetMetadata(),
-			SheetName:   "Service Health Availability",
-			Description: "Azure service health availability analysis by subscription, region, and resource type",
+			SheetName:   "Service Issues",
+			Description: "Estimated Azure service health event-free time by subscription, region, and resource type. Overlapping events are counted independently.",
 			Table:       table,
 		}}, nil
 	}
 
 	// Process query results
-	type availabilityRow struct {
+	type eventFreeTimeRow struct {
 		SubscriptionID                string  `json:"subscriptionId"`
 		TargetRegion                  string  `json:"targetRegion"`
 		TargetResourceType            string  `json:"targetResourceType"`
@@ -164,8 +167,8 @@ func (s *ServiceHealthScanner) Scan(ctx context.Context, cred azcore.TokenCreden
 		filters = params.Filters
 	}
 
-	rows := make([]availabilityRow, 0, len(result.Data))
-	for _, row := range graph.UnmarshalRows[availabilityRow](result.Data, "service health availability") {
+	rows := make([]eventFreeTimeRow, 0, len(result.Data))
+	for _, row := range graph.UnmarshalRows[eventFreeTimeRow](result.Data, "service health event-free time") {
 		if filters != nil && filters.Azqr.IsResourceTypeExcluded(row.TargetResourceType) {
 			continue
 		}
@@ -198,12 +201,12 @@ func (s *ServiceHealthScanner) Scan(ctx context.Context, cred azcore.TokenCreden
 		})
 	}
 
-	log.Info().Msgf("Service health availability scan completed with %d results", len(rows))
+	log.Info().Msgf("Service health event-free time scan completed with %d results", len(rows))
 
 	return []plugins.ExternalPluginOutput{{
 		Metadata:    s.GetMetadata(),
 		SheetName:   "Service Issues",
-		Description: "Azure service health availability analysis showing percentage of time without service health events by subscription, region, and resource type (last 90 days)",
+		Description: "Estimated Azure service health event-free time by subscription, region, and resource type over the last 90 days. Overlapping events are counted independently.",
 		Table:       table,
 	}}, nil
 }
