@@ -24,8 +24,8 @@ func TestGetMetadata(t *testing.T) {
 		t.Errorf("Expected name 'service-health', got '%s'", metadata.Name)
 	}
 
-	if metadata.Version != "0.1.0-beta" {
-		t.Errorf("Expected version '0.1.0-beta', got '%s'", metadata.Version)
+	if metadata.Version != "0.1.0" {
+		t.Errorf("Expected version '0.1.0', got '%s'", metadata.Version)
 	}
 
 	if metadata.Type != plugins.PluginTypeInternal {
