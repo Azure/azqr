@@ -424,6 +424,25 @@ azqr sql-eol
 azqr scan --plugin sql-eol
 ```
 
+### VM v6/v7 Modernization Readiness
+
+Reports Azure VM v6/v7 series modernization readiness, following the Discover → Assess → Plan phases from the [VM v6/v7 modernization guidance](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/sizes-v6-v7-modernization-discover).
+
+- Classifies each VM's Discover-phase workload pattern (compute pool, AVD pooled host pool, service-managed, certified ISV appliance, or customer-managed)
+- Reports Assess-phase readiness signals: Hyper-V generation, disk controller type (SCSI vs. NVMe), series generation, and Azure Disk Encryption status
+- Recommends a Plan-phase execution method (redeploy / no action / manual review) and a suggested target v6/v7 SKU ranked by compatibility score
+- Surfaces matching lifecycle/pricing notices (retirements, price changes) and the full raw inventory signal set from the Assess article's starter query
+
+**Use Cases**: Modernization discovery and triage, SCSI-to-NVMe migration planning, v6/v7 SKU selection, lifecycle/pricing awareness
+
+```bash
+# Run as standalone command (fast, plugin-only mode)
+azqr vm-modernization
+
+# Or integrate with full scan
+azqr scan --plugin vm-modernization
+```
+
 [Internal Plugins Documentation](https://azure.github.io/azqr/docs/plugins/internal-plugins/)
 
 ### Combining Features
@@ -435,6 +454,7 @@ azqr scan --subscription-id <sub-id> \
   --plugin zone-mapping \
   --plugin region-selection \
   --plugin sql-eol \
+  --plugin vm-modernization \
   --output-name comprehensive-analysis
 ```
 

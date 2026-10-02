@@ -1,0 +1,201 @@
+# This file is a manually curated, dated reference dataset — not auto-generated.
+# It encodes the user-supplied VM lifecycle/pricing change table as its own
+# auditable record, separate from live Azure Resource Graph data (plan decision D2).
+#
+# An empty `families` list means the row applies broadly (not to a specific VM
+# family) and is always surfaced as a general notice. `excludeFamilies` removes
+# otherwise-matching families from a row's match set (including from an empty
+# `families` row), so a broad row can state "every family except these"
+# without an exhaustive explicit allow-list.
+#
+# An empty `regions` list means the row applies to all Azure regions. A
+# non-empty `regions` list restricts the row to only those regions (lowercase,
+# no spaces, matching the ARG `location` value, for example "westeurope").
+#
+# The region-scoped price-increase rows exclude both the v7 families (exempt
+# from any uplift) and the v1/v2 families (which take the separate 25 percent
+# increase instead, per the field alert's "do not double-count" rule) via
+# `excludeFamilies`, so a v1/v2 SKU in an affected region reports only the 25
+# percent note, not also a regional percentage note.
+- families:
+    - "Bv1"
+    - "D"
+    - "Ds"
+    - "F"
+    - "Fs"
+    - "G"
+    - "Gs"
+    - "Ls"
+    - "NP"
+    - "HC"
+    - "Av2"
+    - "Amv2"
+    - "Dv2"
+    - "Dsv2"
+    - "Fsv2"
+    - "Lsv2"
+  regions: []
+  impact: "25 percent price increase on v1-v2 VM series. Applies to pay-as-you-go, Enterprise Agreement, and Microsoft Customer Agreement rates"
+  impactPercent: 25.0
+  effectiveDate: "2027-02-01"
+- families:
+    - "Dv3"
+    - "Dsv3"
+    - "Ev3"
+    - "Esv3"
+  regions: []
+  impact: "No create, resize-into, or run after the retirement date"
+  effectiveDate: "2029-11-15"
+- families:
+    - "Dv4"
+    - "Dsv4"
+    - "Ddv4"
+    - "Ddsv4"
+    - "Dav4"
+    - "Dasv4"
+    - "Ev4"
+    - "Esv4"
+    - "Edv4"
+    - "Edsv4"
+    - "Eav4"
+    - "Easv4"
+  regions: []
+  impact: "Capacity growth restrictions for previously affected v4 Azure VM series have been lifted"
+  effectiveDate: "2026-09-28"
+- families: []
+  regions:
+    - "northeurope"
+  excludeFamilies:
+    - "Dsv7"
+    - "Ddsv7"
+    - "Dlsv7"
+    - "Dldsv7"
+    - "Esv7"
+    - "Edsv7"
+    - "Av2"
+    - "Amv2"
+    - "Bv1"
+    - "D"
+    - "Ds"
+    - "Dv2"
+    - "Dsv2"
+    - "F"
+    - "Fs"
+    - "Fsv2"
+    - "G"
+    - "Gs"
+    - "Ls"
+    - "Lsv2"
+  impact: "Regional price increase of 17 percent (North Europe)"
+  impactPercent: 17.0
+  effectiveDate: "2027-02-01"
+- families: []
+  regions:
+    - "francecentral"
+    - "francesouth"
+  excludeFamilies:
+    - "Dsv7"
+    - "Ddsv7"
+    - "Dlsv7"
+    - "Dldsv7"
+    - "Esv7"
+    - "Edsv7"
+    - "Av2"
+    - "Amv2"
+    - "Bv1"
+    - "D"
+    - "Ds"
+    - "Dv2"
+    - "Dsv2"
+    - "F"
+    - "Fs"
+    - "Fsv2"
+    - "G"
+    - "Gs"
+    - "Ls"
+    - "Lsv2"
+  impact: "Regional price increase of 11 percent (France Central and France South)"
+  impactPercent: 11.0
+  effectiveDate: "2027-02-01"
+- families: []
+  regions:
+    - "westeurope"
+    - "norwayeast"
+    - "norwaywest"
+  excludeFamilies:
+    - "Dsv7"
+    - "Ddsv7"
+    - "Dlsv7"
+    - "Dldsv7"
+    - "Esv7"
+    - "Edsv7"
+    - "Av2"
+    - "Amv2"
+    - "Bv1"
+    - "D"
+    - "Ds"
+    - "Dv2"
+    - "Dsv2"
+    - "F"
+    - "Fs"
+    - "Fsv2"
+    - "G"
+    - "Gs"
+    - "Ls"
+    - "Lsv2"
+  impact: "Regional price increase of 9 percent (West Europe, Norway East, Norway West)"
+  impactPercent: 9.0
+  effectiveDate: "2027-02-01"
+- families: []
+  regions:
+    - "southeastasia"
+  excludeFamilies:
+    - "Dsv7"
+    - "Ddsv7"
+    - "Dlsv7"
+    - "Dldsv7"
+    - "Esv7"
+    - "Edsv7"
+    - "Av2"
+    - "Amv2"
+    - "Bv1"
+    - "D"
+    - "Ds"
+    - "Dv2"
+    - "Dsv2"
+    - "F"
+    - "Fs"
+    - "Fsv2"
+    - "G"
+    - "Gs"
+    - "Ls"
+    - "Lsv2"
+  impact: "Regional price increase of 8 percent (Southeast Asia)"
+  impactPercent: 8.0
+  effectiveDate: "2027-02-01"
+- families:
+    - "Av2"
+    - "Amv2"
+    - "Bv1"
+    - "D"
+    - "Ds"
+    - "Dv2"
+    - "Dsv2"
+    - "F"
+    - "Fs"
+    - "Fsv2"
+    - "G"
+    - "Gs"
+    - "Ls"
+    - "Lsv2"
+  regions: []
+  impact: "No new 1-year Azure Reserved VM Instance purchases or renewals for this series"
+  effectiveDate: "2026-07-01"
+- families:
+    - "Dv3"
+    - "Dsv3"
+    - "Ev3"
+    - "Esv3"
+  regions: []
+  impact: "No new 1-year or 3-year Azure Reserved VM Instance purchases or renewals for this series"
+  effectiveDate: "2026-07-01"

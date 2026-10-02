@@ -205,6 +205,62 @@ Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status 
 - Est SQL MI Monthly Cost, Est SQL MI Monthly Saving
 - SQL MI Migration Verdict (Cost Savings / Break Even / Cost Increase)
 
+### 6. VM v6/v7 Modernization Readiness
+
+**Plugin Name**: `vm-modernization`  
+**Command**: `azqr vm-modernization`  
+**Flag**: `--plugin vm-modernization`  
+**Version**: 0.1.0
+
+Reports Azure VM v6/v7 series modernization readiness, following the Discover → Assess → Plan phases from the [VM v6/v7 modernization guidance](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/sizes-v6-v7-modernization-discover): Discover-phase workload pattern, Assess-phase readiness signals, and a Plan-phase execution-method recommendation with a suggested target v6/v7 SKU.
+
+**Key Features**:
+- Classifies each VM's workload pattern (compute pool, AVD pooled host pool, service-managed, certified ISV appliance, or customer-managed) from Azure Resource Graph signals
+- Reports Assess-phase readiness signals: Hyper-V generation, disk controller type (SCSI vs. NVMe), series generation, and Azure Disk Encryption status
+- Recommends a Plan-phase execution method (redeploy / no action / manual review) and flags the Temp Disk Dependency and SAP/ISV Certification Gate hard gates where applicable
+- Suggests the best-matching v6/v7 target SKU using the `internal/skus` compatibility advisor
+- Surfaces relevant upcoming retirements and price changes from an embedded lifecycle/pricing dataset
+- Computes per-VM current, projected, and monthly cost impact directly from the Azure Retail Prices API — including pool-managed VMs, using each VM's own current SKU
+- Covers standalone VMs, Availability Set members, and VMSS Flex/Uniform members (including AKS node pools), plus Databricks-managed and AVD pooled hosts
+- Reports pool-level signals (`Orchestration Mode`, `Pool Model VM Size`, `Pool Model Series Generation`) for every VMSS-backed row
+- Surfaces the full raw inventory signal set from the Assess article's starter query (placement, OS/image, storage, licensing, networking, security), alongside the derived columns above
+
+**Scope**:
+- The Validate phase from the [VM v6/v7 modernization guidance](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/sizes-v6-v7-modernization-discover) (post-migration scoring/verification) is out of scope for this plugin; it covers only the Discover, Assess, and Plan phases
+
+**Use Cases**:
+- Discover-phase inventory: which VMs are customer-managed vs. pool-managed, and ready for per-VM modernization planning
+- Assess-phase readiness triage: identifying Gen1-only VMs, SCSI-controller VMs needing the [SCSI-to-NVMe migration](https://learn.microsoft.com/en-us/azure/virtual-machines/migration/scsi-to-nvme-migration) path, and VMs already on v6/v7
+- Plan-phase SKU selection: a starting v6/v7 target recommendation per VM, ranked by compatibility score
+- Lifecycle/pricing awareness: surfacing upcoming retirements and price changes relevant to each VM's current series
+- Full-inventory export: a single query result covering every signal the Assess article's manual checklist references (image, disk, network, security, licensing), for readers who want the complete picture rather than only the plugin's own verdicts
+
+**Output Columns**:
+
+*Derived readiness/plan columns:*
+- Subscription, Resource Group, Name, Location
+- Current VM Size
+- Workload Pattern (`A: Compute pool` / `B: AVD pooled host pool` / `C: Service-managed compute (excluded)` / `E: Customer-managed VM (default)` / `G: Certified ISV appliance`), Pool Membership (`AKS Node Pool` / `VMSS` / `AVD Pooled Host Pool` / `Azure Databricks` / `Standalone` / appliance vendor name)
+- Hyper-V Generation, Disk Controller Type, Series Generation
+- Azure Disk Encryption (`Enabled` / `Disabled`, aggregated across every attached disk)
+- Temp Disk Dependency (`Manual Review Required` for patterns B, E, G; `N/A (pool/platform-managed)` for A, C), SAP/ISV Certification Gate (`Manual Review Required` for pattern G only; `N/A (not an SAP or ISV-certified workload)` for A, B, C, E)
+- Recommended Execution Method
+- Suggested Target SKU, Target SKU Compatibility Score
+- Lifecycle/Pricing Notes
+- Current Monthly Cost (USD), Projected Monthly Cost After Increase (USD), Monthly Cost Impact (USD)
+
+*Full raw inventory columns (mirrors the Assess article's starter query):*
+- Membership Model (`Standalone` / `Availability Set` / `VMSS Flex`), Zone Placement (`Zonal` / `Regional`), Availability Zone
+- VMSS Name, Availability Set Name, Platform Fault Domain
+- VM Power State, Instance View Captured
+- OS Type, OS Version, Computer Name
+- Is Marketplace VM, Image Publisher, Image Offer, Image SKU, Image Version
+- OS Disk Type, OS Disk Size (GB), Ephemeral OS Disk, Data Disk Count
+- ADE OS Disk (VM Property)
+- Hibernation Enabled, Ultra SSD Enabled, License Type
+- NIC Count, Accelerated Networking, IP Forwarding
+- Security Type, Secure Boot Enabled, vTPM Enabled
+
 ---
 
 ## Usage
@@ -236,6 +292,9 @@ azqr region-selection --target-regions=swedencentral,germanywestcentral
 # Run SQL EOL plugin
 azqr sql-eol
 
+# Run VM v6/v7 modernization readiness plugin
+azqr vm-modernization
+
 # Run with specific subscriptions
 azqr zone-mapping --subscription-id <sub-id>
 
@@ -257,7 +316,7 @@ Run plugins alongside standard compliance scanning using the `--plugin` flag:
 azqr scan --plugin ai-gov
 
 # Enable multiple plugins during scan
-azqr scan --plugin ai-gov --plugin carbon-emissions --plugin zone-mapping --plugin region-selection --plugin sql-eol
+azqr scan --plugin ai-gov --plugin carbon-emissions --plugin zone-mapping --plugin region-selection --plugin sql-eol --plugin vm-modernization
 
 # Combine with other scan options
 azqr scan --subscription-id <sub-id> --plugin zone-mapping --output-name analysis
@@ -284,6 +343,7 @@ carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure r
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
 region-selection      0.1.0-beta internal   Scores and ranks Azure regions for workload migration...
 sql-eol               0.6.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
+vm-modernization      0.1.0      internal   Reports Azure VM v6/v7 series modernization readiness
 ```
 
 ### Plugin Details
@@ -308,6 +368,8 @@ Each internal plugin creates a dedicated worksheet in the Excel workbook:
   - **Svc Avail `<region>`** sheets — one per target region with per-resource-type availability
   - **CostComparison** sheet — per-meter retail pricing across all analysed regions
 - **SQL EOL** sheet
+- **VM Modernization** sheet
+  - **VM Modernization - Notices** sheet — account-wide lifecycle/pricing notices that apply regardless of VM family or region, omitted on Azure Government/Azure China
 
 ```bash
 # Run plugins as standalone commands (fastest)
@@ -379,6 +441,7 @@ Internal plugins may require additional permissions beyond standard `Reader` acc
 | **ai-gov** | Reader + Monitoring Reader | Cognitive Services, Monitor Metrics |
 | **carbon-emissions** | Reader | Carbon Optimization API |
 | **sql-eol** | Reader | Azure Resource Graph |
+| **vm-modernization** | Reader | Azure Resource Graph, Azure Retail Prices API |
 
 **Recommended**: Assign `Reader` and `Monitoring Reader` roles at subscription or management group scope.
 
@@ -390,6 +453,7 @@ Internal plugins add processing time to scans:
 - **carbon-emissions**: 1-2 minutes (depends on subscription count)
 - **zone-mapping**: <10 seconds (very fast, one API call per subscription)
 - **sql-eol**: <30 seconds (single Azure Resource Graph query)
+- **vm-modernization**: <30 seconds (single Azure Resource Graph query, plus a batched/concurrent Azure Retail Prices API lookup across the estate's unique VM SKU/region pairs); large estates with many distinct SKU/region pairs may see this increase, since each batch request covers only 8 pairs
 
 **Optimization Tips**:
 - Enable only needed plugins

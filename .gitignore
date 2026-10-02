@@ -103,5 +103,8 @@ terraform.rc
 # Ignore .terraform.lock.hcl files
 .terraform.lock.hcl
 
+# HVE Core RPI tracking files
+.copilot-tracking/
+
 # APM dependencies
 apm_modules/

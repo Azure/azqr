@@ -11,10 +11,11 @@ import (
 	"testing"
 
 	"github.com/Azure/azqr/internal/plugins"
-	"github.com/Azure/azqr/internal/scanners/plugins/carbon"
 	"github.com/Azure/azqr/internal/scanners/plugins/aigov"
+	"github.com/Azure/azqr/internal/scanners/plugins/carbon"
 	regionplugin "github.com/Azure/azqr/internal/scanners/plugins/region"
 	"github.com/Azure/azqr/internal/scanners/plugins/sqleol"
+	"github.com/Azure/azqr/internal/scanners/plugins/vmmodernization"
 	"github.com/Azure/azqr/internal/scanners/plugins/zone"
 )
 
@@ -73,6 +74,10 @@ func TestRegionPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
 	assertHeaderRowMatchesColumnMetadata(t, regionplugin.NewScanner())
 }
 
+func TestVMModernizationPlugin_HeaderRow_MatchesColumnMetadata(t *testing.T) {
+	assertHeaderRowMatchesColumnMetadata(t, vmmodernization.NewScanner())
+}
+
 // TestAllInternalPlugins_HaveColumnMetadata is a catch-all: every registered
 // internal plugin must declare at least one column (prevents accidentally
 // shipping a plugin with an empty metadata definition).
@@ -83,6 +88,7 @@ func TestAllInternalPlugins_HaveColumnMetadata(t *testing.T) {
 		carbon.NewScanner(),
 		sqleol.NewScanner(),
 		regionplugin.NewScanner(),
+		vmmodernization.NewScanner(),
 	}
 
 	for _, s := range scanners {
