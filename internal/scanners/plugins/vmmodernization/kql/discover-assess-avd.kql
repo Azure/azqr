@@ -1,0 +1,46 @@
+// Azure Resource Graph Query
+// VM v6/v7 Modernization Readiness — AVD host-pool-type lookup
+//
+// WHAT IT DOES
+//   Returns one row per Azure Virtual Desktop session host, giving the
+//   session host's VM resource ID (vmId) and its parent host pool's type
+//   (Pooled/Personal — avdHostPoolType). The main discover-assess.kql query
+//   merges this onto its own rows (by vmId) in Go to classify AVD-managed
+//   workload pattern.
+//
+// WHY A SEPARATE QUERY
+//   Microsoft.DesktopVirtualization/hostPools and .../hostPools/sessionHosts
+//   live in the desktopvirtualizationresources table, not resources
+//   (confirmed live against the ARG API). discover-assess.kql already
+//   references a different non-resources extension table (computeresources,
+//   for Uniform-mode VMSS members), and Azure Resource Graph disallows
+//   referencing more than one such extension table in the same query —
+//   confirmed live: combining computeresources and
+//   desktopvirtualizationresources in one request fails with
+//   "UnsupportedRemoteTableScenario ... are unsupported, or disallowed in
+//   the same cross table queries" (see
+//   https://aka.ms/resourcegraph-tables). This query is therefore run as its
+//   own separate Resource Graph call and merged in Go rather than joined
+//   in-query.
+//
+// NOTES
+//   - Azure Resource Graph disallows referencing the same remote table more
+//     than once as a join right-side and does not support `let`, so both
+//     resource types (hostPools and sessionHosts) are pulled via a single
+//     table reference and correlated with summarize (not a join).
+//   - A session host's own id embeds its parent host pool's id as a path
+//     prefix (.../hostPools/<pool>/sessionHosts/<host>), so the host pool
+//     ARM ID is derived by string-trimming rather than reading a separate
+//     property.
+desktopvirtualizationresources
+| where type in ("microsoft.desktopvirtualization/hostpools/sessionhosts", "microsoft.desktopvirtualization/hostpools")
+| extend idLower = tolower(tostring(id))
+| extend hostPoolArmId = iff(type == "microsoft.desktopvirtualization/hostpools/sessionhosts",
+    substring(idLower, 0, indexof(idLower, "/sessionhosts/")), idLower)
+| extend vmIdRaw = iff(type == "microsoft.desktopvirtualization/hostpools/sessionhosts",
+    tolower(tostring(properties.resourceId)), "")
+| extend hostPoolTypeRaw = iff(type == "microsoft.desktopvirtualization/hostpools",
+    tostring(properties.hostPoolType), "")
+| summarize vmId = max(vmIdRaw), avdHostPoolType = max(hostPoolTypeRaw) by hostPoolArmId
+| where isnotempty(vmId)
+| project vmId, avdHostPoolType

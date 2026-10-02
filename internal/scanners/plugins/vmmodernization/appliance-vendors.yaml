@@ -1,0 +1,48 @@
+# This file is a manually curated, auditable reference dataset — not auto-
+# generated. It encodes the Discover article's pattern-G ("certified ISV
+# appliance") example vendor list as its own reviewable record, separate from
+# the Go classification code, following the same convention as
+# lifecycle-pricing.yaml.
+#
+# `publisher` matches the VM's `ImagePublisher` marketplace value exactly
+# (case-insensitive) — not a loose substring, to avoid a customer's unrelated
+# image coincidentally matching a vendor name.
+#
+# `offerContains` is optional. When present, the VM's `ImageOffer` must also
+# contain at least one of these substrings (case-insensitive) to match —
+# useful for a publisher whose marketplace catalog mixes appliance and
+# non-appliance offers. An empty or omitted list matches any offer from that
+# publisher.
+#
+# Exact publisher ID strings should be verified against current Azure
+# Marketplace listings when revising this dataset; the values below are a
+# starting set from the Discover article's named examples, not an exhaustive
+# or independently re-verified catalog.
+- publisher: "paloaltonetworks"
+  offerContains: []
+  vendor: "Palo Alto Networks"
+- publisher: "checkpoint"
+  offerContains: []
+  vendor: "Check Point"
+- publisher: "fortinet"
+  offerContains: []
+  vendor: "Fortinet"
+- publisher: "f5-networks"
+  offerContains: []
+  vendor: "F5"
+- publisher: "citrix"
+  offerContains:
+    - "netscaler"
+    - "adc"
+  vendor: "Citrix ADC"
+- publisher: "cisco"
+  offerContains:
+    - "catalyst"
+    - "8000v"
+  vendor: "Cisco Catalyst 8000V"
+- publisher: "veeam"
+  offerContains: []
+  vendor: "Veeam"
+- publisher: "commvault"
+  offerContains: []
+  vendor: "Commvault"

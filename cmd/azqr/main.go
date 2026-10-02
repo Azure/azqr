@@ -12,6 +12,7 @@ import (
 	_ "github.com/Azure/azqr/internal/scanners/plugins/region"
 	_ "github.com/Azure/azqr/internal/scanners/plugins/servicehealth"
 	_ "github.com/Azure/azqr/internal/scanners/plugins/sqleol"
+	_ "github.com/Azure/azqr/internal/scanners/plugins/vmmodernization"
 	_ "github.com/Azure/azqr/internal/scanners/plugins/zone"
 )
 

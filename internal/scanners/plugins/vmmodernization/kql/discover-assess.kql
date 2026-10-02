@@ -1,0 +1,299 @@
+// Azure Resource Graph Query
+// VM v6/v7 Modernization Readiness — Discover, Assess, and full inventory signals
+//
+// WHAT IT DOES
+//   Returns one row per Microsoft.Compute/virtualMachines resource (standalone
+//   VMs, Availability Set members, and VMSS Flex members) and one row per
+//   Microsoft.Compute/virtualMachineScaleSets/virtualMachines resource (VMSS
+//   Uniform-mode members), each with:
+//     1. The signals the plugin uses to compute its derived readiness columns
+//        (workload pattern, Hyper-V generation, disk controller type, series
+//        generation, Azure Disk Encryption, execution-method recommendation,
+//        target SKU, lifecycle/pricing notes)
+//     2. The full raw inventory signal set from the Assess article's own
+//        "Inventory query (Azure Resource Graph)" starter query (placement,
+//        OS/image, storage, capabilities/licensing, networking, security),
+//        surfaced as-is so a reader has everything that article's checklist
+//        references, not only the subset the plugin's own verdicts consume.
+//     3. For every VMSS-backed row (Flex or Uniform), the parent scale set's
+//        orchestration mode and model/default VM profile size, joined in via
+//        the row's own derived scale-set ID (see the VMSS-parent join below).
+//
+// NOTES
+//   - Hyper-V generation and disk controller type are confirmed directly
+//     queryable via properties.extended.instanceView.hyperVGeneration and
+//     properties.storageProfile.diskControllerType (live-tenant spike, see
+//     research evidence C11) — no supplementary Compute API call is needed.
+//     This was confirmed against Microsoft.Compute/virtualMachines rows;
+//     whether Uniform-mode instance rows populate the same instanceView
+//     fields identically has not been separately live-tenant-verified (open
+//     risk, tracked in the plan's Risks and Open Questions).
+//   - Two independent Azure Disk Encryption (ADE) signals are surfaced:
+//       * AzureDiskEncryption: aggregated across every attached disk (OS +
+//         data), read from the managed disk resource's
+//         properties.encryptionSettingsCollection.enabled, joined to the VM
+//         by managedBy (same join pattern as the existing APRL query
+//         f0a97179-133a-6e4f-8a49-8a44da73ffce.kql) and summarized with max()
+//         before the join to avoid duplicating VM rows. This is NOT the same
+//         as the VM-resident encryptionAtHost property.
+//       * ADEOSDiskEnabled: the OS-disk-only signal the Assess article's own
+//         starter query reads directly off the VM via
+//         properties.storageProfile.osDisk.encryptionSettings.enabled — no
+//         join needed, but it misses data-disk-only encryption.
+//     Both are kept so a reader can cross-check the simpler (OS-disk-only)
+//   - OSDiskType/OSDiskSizeGB are joined from the managed disk resource
+//     (filtered to OS disks via properties.osType, which only OS disks
+//     carry), not read off the VM's embedded storageProfile as the Assess
+//     article's starter query does. A live-tenant spike showed the VM's own
+//     storageProfile.osDisk.managedDisk.storageAccountType/diskSizeGB are
+//     frequently absent from the ARM response even though the disk resource
+//     itself reports both reliably — this join is a deliberate accuracy
+//     improvement over the article's verbatim query. The VM-embedded values
+//     remain as a fallback (iff/coalesce) for the rare case the disk
+//     resource can't be joined.
+//     signal against the more complete (any-disk) one.
+//   - Uniform-orchestration VMSS member instances
+//     (microsoft.compute/virtualmachinescalesets/virtualmachines) are NOT
+//     queryable from the `resources` table — Azure Resource Graph's own
+//     table reference places this exact type in the separate
+//     `computeresources` table (confirmed against Microsoft's published ARG
+//     table/type reference), the same kind of table split
+//     `kql/discover-assess-avd.kql`'s AVD host-pool lookup already handles
+//     (`desktopvirtualizationresources` instead of `resources`). The two
+//     sources are combined with a top-level
+//     `union` so every row still reaches the one shared derived-column and
+//     classification path with `HasScaleSet` forced to true for Uniform rows.
+//     A Uniform instance has no properties.virtualMachineScaleSet.id of its
+//     own (that property is Flex-only); its parent scale-set ID is instead
+//     derived by trimming the instance's own resource ID at
+//     "/virtualmachines/" (the ID embeds
+//     .../virtualMachineScaleSets/<name>/virtualMachines/<instanceId>), the
+//     same string-derivation technique `kql/discover-assess-avd.kql`'s AVD
+//     host-pool lookup already uses for a child-to-parent ID relationship.
+(
+resources
+| where type =~ "microsoft.compute/virtualmachines"
+)
+| union (
+computeresources
+| where type =~ "microsoft.compute/virtualmachinescalesets/virtualmachines"
+)
+| extend vmId = tolower(id)
+| extend p = properties
+| extend isUniformMember = type =~ "microsoft.compute/virtualmachinescalesets/virtualmachines"
+// ---- v1 derived-column signals (pattern classification, series, ADE-any-disk) ----
+| extend isAKSManaged = isnotnull(tags["aks-managed-poolName"]) or isnotnull(tags["aks-managed-cluster-name"])
+| extend isDatabricksManaged = tags["Vendor"] =~ "Databricks"
+| extend hasScaleSet = isnotnull(p.virtualMachineScaleSet.id) or isUniformMember
+// ---- identity & placement (Assess starter query) ----
+| extend
+    availabilityZone    = tostring(zones[0]),
+    availabilitySetId   = tostring(p.availabilitySet.id),
+    // Lowercased (matching the NIC join's tolower(properties.virtualMachine.id)
+    // convention below) because this is an ARM-embedded property value, not
+    // the resources table's own normalized `id` column the VMSS-parent join's
+    // right side keys on via tolower(id) — case-sensitive Kusto join keys
+    // would otherwise silently fail to match for VMSS Flex rows.
+    vmssIdFlex          = tolower(tostring(p.virtualMachineScaleSet.id)),
+    platformFaultDomain = tostring(p.platformFaultDomain)
+// Uniform rows carry no vmssIdFlex property; derive the parent scale set's ID
+// by trimming this instance's own ID at "/virtualmachines/" instead.
+| extend
+    vmssId = case(
+        isnotempty(vmssIdFlex), vmssIdFlex,
+        isUniformMember,        substring(vmId, 0, indexof(vmId, "/virtualmachines/")),
+                                 '')
+| extend
+    availabilitySetName = iff(isnotempty(availabilitySetId), tostring(split(availabilitySetId, '/')[-1]), ''),
+    vmssName            = iff(isnotempty(vmssId),            tostring(split(vmssId, '/')[-1]), '')
+| extend
+    membershipModel = case(
+        isUniformMember,                'VMSS (Uniform)',
+        isnotempty(vmssId),             'VMSS Flex',
+        isnotempty(availabilitySetId),  'Availability Set',
+                                         'Standalone'),
+    zonePlacement   = iff(isnotempty(availabilityZone), 'Zonal', 'Regional')
+// ---- compute & generation ----
+| extend
+    vmSize           = tostring(p.hardwareProfile.vmSize),
+    hyperVGeneration = tostring(p.extended.instanceView.hyperVGeneration)
+// ---- power state + data quality ----
+| extend vmState = tostring(p.extended.instanceView.powerState.displayStatus)
+| extend instanceViewCaptured = iff(isempty(hyperVGeneration) and isempty(vmState), 'No', 'Yes')
+// ---- OS & image ----
+| extend
+    osType          = tostring(p.storageProfile.osDisk.osType),
+    osVersion       = tostring(p.extended.instanceView.osVersion),
+    computerName    = tostring(p.extended.instanceView.computerName),
+    isMarketplaceVm = isnotempty(plan),
+    imagePublisher  = tostring(p.storageProfile.imageReference.publisher),
+    imageOffer      = tostring(p.storageProfile.imageReference.offer),
+    imageSku        = tostring(p.storageProfile.imageReference.sku),
+    imageVersion    = tostring(p.storageProfile.imageReference.exactVersion)
+// ---- storage / disks ----
+// NOTE: osDiskType/osDiskSizeGB below are read from the VM's own embedded
+// storageProfile, matching the Assess article's starter query verbatim. A
+// live-tenant spike confirmed these VM-embedded fields are frequently absent
+// from the ARM response even when the OS disk itself has a SKU/size — the
+// Microsoft.Compute/disks resource is the authoritative source. The OS-disk
+// join below (filtered on properties.osType, which only OS disks carry)
+// supplies the authoritative value, and these VM-embedded fields remain only
+// as a fallback for the rare case the disk resource itself can't be joined.
+| extend
+    diskControllerType = tostring(p.storageProfile.diskControllerType),
+    osDiskTypeVMProperty   = tostring(p.storageProfile.osDisk.managedDisk.storageAccountType),
+    osDiskSizeGBVMProperty = toint(p.storageProfile.osDisk.diskSizeGB),
+    ephemeralOsDisk     = iff(tostring(p.storageProfile.osDisk.diffDiskSettings.option) =~ 'Local', 'Yes', 'No'),
+    dataDiskCount       = array_length(p.storageProfile.dataDisks),
+    adeOsDiskEnabled    = tostring(p.storageProfile.osDisk.encryptionSettings.enabled)
+// ---- capabilities / licensing ----
+| extend
+    hibernationEnabled = tostring(p.additionalCapabilities.hibernationEnabled),
+    ultraSsdEnabled    = tostring(p.additionalCapabilities.ultraSSDEnabled),
+    licenseType        = tostring(p.licenseType)
+// ---- network (VM level) ----
+| extend nicCount = array_length(p.networkProfile.networkInterfaces)
+// ---- security & encryption ----
+| extend
+    securityType      = tostring(p.securityProfile.securityType),
+    secureBootEnabled = tostring(p.securityProfile.uefiSettings.secureBootEnabled),
+    vTpmEnabled       = tostring(p.securityProfile.uefiSettings.vTpmEnabled)
+| project
+    vmId,
+    vmssId,
+    Name = name,
+    Id = id,
+    ResourceGroup = resourceGroup,
+    SubscriptionId = subscriptionId,
+    Location = location,
+    VMSize = vmSize,
+    HyperVGeneration = hyperVGeneration,
+    DiskControllerType = diskControllerType,
+    HasScaleSet = hasScaleSet,
+    IsAKSManaged = isAKSManaged,
+    IsDatabricksManaged = isDatabricksManaged,
+    MembershipModel = membershipModel,
+    ZonePlacement = zonePlacement,
+    AvailabilityZone = availabilityZone,
+    VMSSName = vmssName,
+    AvailabilitySetName = availabilitySetName,
+    PlatformFaultDomain = platformFaultDomain,
+    VMPowerState = vmState,
+    InstanceViewCaptured = instanceViewCaptured,
+    OSType = osType,
+    OSVersion = osVersion,
+    ComputerName = computerName,
+    IsMarketplaceVM = isMarketplaceVm,
+    ImagePublisher = imagePublisher,
+    ImageOffer = imageOffer,
+    ImageSKU = imageSku,
+    ImageVersion = imageVersion,
+    OSDiskType = osDiskTypeVMProperty,
+    OSDiskSizeGB = osDiskSizeGBVMProperty,
+    EphemeralOSDisk = ephemeralOsDisk,
+    DataDiskCount = dataDiskCount,
+    ADEOSDiskEnabled = adeOsDiskEnabled,
+    HibernationEnabled = hibernationEnabled,
+    UltraSSDEnabled = ultraSsdEnabled,
+    LicenseType = licenseType,
+    NICCount = nicCount,
+    SecurityType = securityType,
+    SecureBootEnabled = secureBootEnabled,
+    VTpmEnabled = vTpmEnabled
+// ---- disk join: ADE aggregated across every attached disk (OS + data) ----
+| join kind=leftouter (
+    resources
+    | where type =~ "microsoft.compute/disks"
+    | project vmId = tolower(managedBy), diskEncrypted = iff(properties.encryptionSettingsCollection.enabled == true, true, false)
+    | summarize AzureDiskEncryption = max(diskEncrypted) by vmId
+  ) on vmId
+// ---- OS disk join: authoritative SKU/size from the managed disk resource
+// itself (properties.osType is present only on OS disks, never data disks,
+// so this reliably isolates the one OS disk per VM) ----
+| join kind=leftouter (
+    resources
+    | where type =~ "microsoft.compute/disks"
+    | where isnotempty(properties.osType)
+    | project vmId = tolower(managedBy), osDiskTypeDisk = tostring(sku.name), osDiskSizeGBDisk = toint(properties.diskSizeGB)
+  ) on vmId
+// ---- NIC join: any attached NIC with accelerated networking / IP forwarding ----
+| join kind=leftouter (
+    resources
+    | where type =~ "microsoft.network/networkinterfaces"
+    | extend nicVmId = tolower(tostring(properties.virtualMachine.id))
+    | where isnotempty(nicVmId)
+    | summarize
+        anyAccelNet = countif(tobool(properties.enableAcceleratedNetworking) == true),
+        anyIpFwd    = countif(tobool(properties.enableIPForwarding) == true)
+      by vmId = nicVmId
+  ) on vmId
+// NOTE: the AVD host-pool-type signal (Microsoft.DesktopVirtualization/hostPools
+// and .../hostPools/sessionHosts) is intentionally NOT joined here. Those types
+// live in the desktopvirtualizationresources table, and Azure Resource Graph
+// disallows referencing more than one non-"resources" extension table in the
+// same query (confirmed live: querying computeresources together with
+// desktopvirtualizationresources in one request fails with
+// "UnsupportedRemoteTableScenario ... are unsupported, or disallowed in the
+// same cross table queries") — this query already uses computeresources
+// above for Uniform-mode VMSS members, so AVD host-pool data is fetched by a
+// separate query (discover-assess-avd.kql) and merged onto these rows in Go
+// by vmId after both queries return.
+// ---- VMSS-parent join: scale-set-level ("pool-level") data joined onto every
+// VMSS-backed row (Flex or Uniform) via the row's own derived vmssId, rather
+// than a second top-level query/sheet. Rows with no vmssId (standalone VMs,
+// Availability Set members) naturally get null join results here, projected
+// as "N/A (not pool-managed)" downstream in Go.
+// LIMITATION (accepted, not solved by a second query/sheet): a scale set
+// with zero current member instances produces no row in this query at all,
+// so this join cannot surface that scale set's orchestration mode/model size
+// independent of at least one visible member instance.
+| join kind=leftouter (
+    resources
+    | where type =~ "microsoft.compute/virtualmachinescalesets"
+    | project vmssId = tolower(id), poolOrchestrationMode = tostring(properties.orchestrationMode), poolModelVMSize = tostring(sku.name)
+  ) on vmssId
+| project
+    Name,
+    Id,
+    ResourceGroup,
+    SubscriptionId,
+    Location,
+    VMSize,
+    HyperVGeneration,
+    DiskControllerType,
+    HasScaleSet,
+    IsAKSManaged,
+    IsDatabricksManaged,
+    AzureDiskEncryption = iff(isnull(AzureDiskEncryption), false, AzureDiskEncryption),
+    MembershipModel,
+    ZonePlacement,
+    AvailabilityZone,
+    VMSSName,
+    AvailabilitySetName,
+    PlatformFaultDomain,
+    VMPowerState,
+    InstanceViewCaptured,
+    OSType,
+    OSVersion,
+    ComputerName,
+    IsMarketplaceVM,
+    ImagePublisher,
+    ImageOffer,
+    ImageSKU,
+    ImageVersion,
+    OSDiskType = iff(isnotempty(osDiskTypeDisk), osDiskTypeDisk, OSDiskType),
+    OSDiskSizeGB = coalesce(osDiskSizeGBDisk, OSDiskSizeGB),
+    EphemeralOSDisk,
+    DataDiskCount,
+    ADEOSDiskEnabled,
+    HibernationEnabled,
+    UltraSSDEnabled,
+    LicenseType,
+    NICCount,
+    AcceleratedNetworking = iff(coalesce(anyAccelNet, 0) > 0, 'Yes', 'No'),
+    IPForwarding = iff(coalesce(anyIpFwd, 0) > 0, 'Yes', 'No'),
+    SecurityType,
+    SecureBootEnabled,
+    VTpmEnabled,
+    OrchestrationMode = poolOrchestrationMode,
+    PoolModelVMSize = poolModelVMSize
