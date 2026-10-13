@@ -13,7 +13,6 @@ type (
 		Mask                   bool
 		Csv                    bool
 		Json                   bool
-		Stdout                 bool
 		Debug                  bool
 		ScannerKeys            []string
 		Filters                *Filters
@@ -33,6 +32,11 @@ type (
 		Stages         []string `json:"stages,omitempty"`
 		StageParams    []string `json:"stageParams,omitempty"`
 		Mask           *bool    `json:"mask,omitempty"`
+		// Xlsx and Json are opt-in and default to false when nil, the inverse of Mask (which
+		// defaults to true for safety). File export is disabled by default so a typical MCP scan
+		// does not write an Excel/JSON file to disk unless the caller explicitly requests one.
+		Xlsx *bool `json:"xlsx,omitempty"`
+		Json *bool `json:"json,omitempty"`
 	}
 
 	PluginScanArgs struct {
@@ -40,6 +44,9 @@ type (
 		ResourceGroups []string       `json:"resourceGroups,omitempty"`
 		Mask           *bool          `json:"mask,omitempty"`
 		Options        map[string]any `json:"options,omitempty"`
+		// Xlsx and Json are opt-in and default to false when nil; see ScanArgs for the rationale.
+		Xlsx *bool `json:"xlsx,omitempty"`
+		Json *bool `json:"json,omitempty"`
 	}
 )
 
@@ -61,6 +68,16 @@ func NewScanParamsWithDefaults(args ScanArgs) *ScanParams {
 		mask = *args.Mask
 	}
 
+	xlsx := false
+	if args.Xlsx != nil {
+		xlsx = *args.Xlsx
+	}
+
+	json := false
+	if args.Json != nil {
+		json = *args.Json
+	}
+
 	return &ScanParams{
 		ManagementGroups: []string{},
 		Subscriptions:    args.Subscriptions,
@@ -68,8 +85,9 @@ func NewScanParamsWithDefaults(args ScanArgs) *ScanParams {
 		OutputName:       "",
 		Stages:           stages,
 		Mask:             mask,
+		Xlsx:             xlsx,
 		Csv:              false,
-		Json:             false,
+		Json:             json,
 		Debug:            false,
 		ScannerKeys:      args.Services,
 		Filters:          filters,
@@ -84,6 +102,16 @@ func NewScanParamsForPlugins(args PluginScanArgs) *ScanParams {
 		mask = *args.Mask
 	}
 
+	xlsx := false
+	if args.Xlsx != nil {
+		xlsx = *args.Xlsx
+	}
+
+	json := false
+	if args.Json != nil {
+		json = *args.Json
+	}
+
 	return &ScanParams{
 		ManagementGroups: []string{},
 		Subscriptions:    args.Subscriptions,
@@ -91,8 +119,9 @@ func NewScanParamsForPlugins(args PluginScanArgs) *ScanParams {
 		OutputName:       "",
 		Stages:           stages,
 		Mask:             mask,
+		Xlsx:             xlsx,
 		Csv:              false,
-		Json:             false,
+		Json:             json,
 		Debug:            false,
 		ScannerKeys:      []string{},
 		Filters:          filters,

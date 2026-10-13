@@ -221,7 +221,7 @@ func TestCompareCommandHasRequiredFlags(t *testing.T) {
 		return
 	}
 
-	requiredFlags := []string{"file1", "file2"}
+	requiredFlags := []string{"source", "target"}
 	for _, flagName := range requiredFlags {
 		flag := compareCmd.Flags().Lookup(flagName)
 		if flag == nil {
@@ -231,7 +231,7 @@ func TestCompareCommandHasRequiredFlags(t *testing.T) {
 	}
 
 	// Check optional flags
-	optionalFlags := []string{"format", "output"}
+	optionalFlags := []string{"output"}
 	for _, flagName := range optionalFlags {
 		flag := compareCmd.Flags().Lookup(flagName)
 		if flag == nil {
@@ -333,40 +333,6 @@ func findCommand(parent *cobra.Command, name string) *cobra.Command {
 	return nil
 }
 
-func TestCompareExcelFilesFunction(t *testing.T) {
-	// This function requires actual Excel files to test properly
-	// We'll test error cases only
-
-	tests := []struct {
-		name    string
-		file1   string
-		file2   string
-		wantErr bool
-	}{
-		{
-			name:    "non-existent files",
-			file1:   "/tmp/nonexistent1.xlsx",
-			file2:   "/tmp/nonexistent2.xlsx",
-			wantErr: true,
-		},
-		{
-			name:    "empty file paths",
-			file1:   "",
-			file2:   "",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, err := compareExcelFiles(tt.file1, tt.file2)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("compareExcelFiles() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func TestAllServiceCommandsHaveMetadata(t *testing.T) {
 	scanCmd := findCommand(rootCmd, "scan")
 	if scanCmd == nil {
@@ -421,19 +387,3 @@ func TestScanCommandShortcutFlags(t *testing.T) {
 	}
 }
 
-func TestCompareCommandFormatDefault(t *testing.T) {
-	compareCmd := findCommand(rootCmd, "compare")
-	if compareCmd == nil {
-		t.Fatal("compare command should exist")
-	}
-
-	formatFlag := compareCmd.Flags().Lookup("format")
-	if formatFlag == nil {
-		t.Fatal("compare command should have 'format' flag")
-		return
-	}
-
-	if formatFlag.DefValue != "excel" {
-		t.Errorf("format flag: expected default value 'excel', got %q", formatFlag.DefValue)
-	}
-}

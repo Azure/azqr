@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/renderers"
@@ -224,4 +225,82 @@ func TestPipeline_Integration(t *testing.T) {
 	}
 
 	t.Logf("Pipeline created with %d stages", len(pipeline.stages))
+}
+
+// recordingObserver is a test StageObserver that records every StageCompleted call it receives.
+type recordingObserver struct {
+	calls []struct {
+		stageName string
+		position  int
+		status    StageStatus
+		err       error
+	}
+}
+
+func (o *recordingObserver) StageCompleted(ctx *ScanContext, stageName string, position int, status StageStatus, duration time.Duration, err error) {
+	o.calls = append(o.calls, struct {
+		stageName string
+		position  int
+		status    StageStatus
+		err       error
+	}{stageName, position, status, err})
+}
+
+func TestPipeline_Execute_NotifiesObserversOnSuccessSkipAndFailure(t *testing.T) {
+	stage1 := NewMockStage("stage1", true, false)
+	stage2 := NewMockStage("stage2", false, false) // optional, will be skipped
+	stage3 := NewMockStage("stage3", true, true)   // fails
+
+	p := NewPipeline(stage1, stage2, stage3)
+	obs := &recordingObserver{}
+	if returned := p.AddObserver(obs); returned != p {
+		t.Error("AddObserver() should return the same *Pipeline for chaining")
+	}
+
+	ctx := &ScanContext{
+		Ctx:        context.Background(),
+		Params:     &models.ScanParams{},
+		ReportData: &renderers.ReportData{},
+	}
+
+	err := p.Execute(ctx)
+	if err == nil {
+		t.Fatal("Expected error from failing stage3")
+	}
+
+	if len(obs.calls) != 3 {
+		t.Fatalf("Expected 3 observer calls, got %d", len(obs.calls))
+	}
+	if obs.calls[0].stageName != "stage1" || obs.calls[0].status != StageStatusExecuted || obs.calls[0].err != nil {
+		t.Errorf("call[0] = %+v, want executed stage1 with no error", obs.calls[0])
+	}
+	if obs.calls[1].stageName != "stage2" || obs.calls[1].status != StageStatusSkipped {
+		t.Errorf("call[1] = %+v, want skipped stage2", obs.calls[1])
+	}
+	if obs.calls[2].stageName != "stage3" || obs.calls[2].status != StageStatusFailed || obs.calls[2].err == nil {
+		t.Errorf("call[2] = %+v, want failed stage3 with an error", obs.calls[2])
+	}
+}
+
+func TestPipeline_Execute_NoObserversIsNoOp(t *testing.T) {
+	stage1 := NewMockStage("stage1", true, false)
+	p := NewPipeline(stage1)
+
+	ctx := &ScanContext{
+		Ctx:        context.Background(),
+		Params:     &models.ScanParams{},
+		ReportData: &renderers.ReportData{},
+	}
+
+	if err := p.Execute(ctx); err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+}
+
+func TestPipeline_AddObserver_IgnoresNil(t *testing.T) {
+	p := NewPipeline()
+	p.AddObserver(nil)
+	if len(p.observers) != 0 {
+		t.Errorf("Expected 0 observers after adding nil, got %d", len(p.observers))
+	}
 }

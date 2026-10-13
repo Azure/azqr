@@ -55,8 +55,33 @@ type Stage interface {
 
 // Pipeline orchestrates the execution of multiple stages in sequence.
 type Pipeline struct {
-	stages  []Stage
-	metrics *PipelineMetrics
+	stages    []Stage
+	metrics   *PipelineMetrics
+	observers []StageObserver
+}
+
+// StageStatus describes the outcome of a single stage as reported to StageObserver.
+type StageStatus string
+
+const (
+	// StageStatusExecuted means the stage ran and returned a nil error.
+	StageStatusExecuted StageStatus = "executed"
+	// StageStatusSkipped means the stage's Skip(ctx) returned true, so Execute never ran.
+	StageStatusSkipped StageStatus = "skipped"
+	// StageStatusFailed means the stage ran and returned a non-nil error.
+	StageStatusFailed StageStatus = "failed"
+)
+
+// StageObserver reacts to the completion (executed, skipped, or failed) of each pipeline
+// stage. Pipeline.Execute notifies every registered observer immediately after a stage
+// resolves, and before deciding whether to continue to the next stage, so an observer can
+// persist partial progress even when a later stage goes on to fail.
+//
+// A Pipeline with no registered observers behaves exactly as it did before this type was
+// added: the observer-notification calls are unconditional but become no-ops over an empty
+// slice.
+type StageObserver interface {
+	StageCompleted(ctx *ScanContext, stageName string, position int, status StageStatus, duration time.Duration, err error)
 }
 
 // PipelineMetrics tracks performance of each pipeline stage.
@@ -79,6 +104,23 @@ func NewPipeline(stages ...Stage) *Pipeline {
 	}
 }
 
+// AddObserver registers o to be notified after every stage completes (executed, skipped, or
+// failed). Returns the Pipeline for fluent chaining. Safe to call with a nil observer, which
+// is ignored.
+func (p *Pipeline) AddObserver(o StageObserver) *Pipeline {
+	if o != nil {
+		p.observers = append(p.observers, o)
+	}
+	return p
+}
+
+// notify calls StageCompleted on every registered observer. No-op when there are none.
+func (p *Pipeline) notify(ctx *ScanContext, stageName string, position int, status StageStatus, duration time.Duration, err error) {
+	for _, o := range p.observers {
+		o.StageCompleted(ctx, stageName, position, status, duration, err)
+	}
+}
+
 // Execute runs all pipeline stages in sequence.
 func (p *Pipeline) Execute(ctx *ScanContext) error {
 	startTime := time.Now()
@@ -96,6 +138,7 @@ func (p *Pipeline) Execute(ctx *ScanContext) error {
 				Int("position", i+1).
 				Msg("Skipping stage")
 			p.metrics.StagesSkipped++
+			p.notify(ctx, stageName, i+1, StageStatusSkipped, 0, nil)
 			continue
 		}
 
@@ -120,6 +163,7 @@ func (p *Pipeline) Execute(ctx *ScanContext) error {
 				Dur("duration", stageDuration).
 				Msg("Stage failed")
 			p.metrics.StageErrors[stageName] = err
+			p.notify(ctx, stageName, i+1, StageStatusFailed, stageDuration, err)
 			return err
 		}
 
@@ -127,6 +171,7 @@ func (p *Pipeline) Execute(ctx *ScanContext) error {
 			Str("stage", stageName).
 			Dur("duration", stageDuration).
 			Msg("Stage completed")
+		p.notify(ctx, stageName, i+1, StageStatusExecuted, stageDuration, nil)
 	}
 
 	p.metrics.TotalDuration = time.Since(startTime)
@@ -138,6 +183,12 @@ func (p *Pipeline) Execute(ctx *ScanContext) error {
 		Msg("Scan completed")
 
 	return nil
+}
+
+// Metrics returns a copy of the pipeline's current execution metrics. Safe to call after
+// Execute returns, whether it returned an error or not.
+func (p *Pipeline) Metrics() PipelineMetrics {
+	return *p.metrics
 }
 
 // LogMetrics logs detailed pipeline metrics (for debug mode).

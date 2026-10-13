@@ -11,6 +11,8 @@ import (
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/renderers"
 	"github.com/Azure/azqr/internal/scanners/registry"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rs/zerolog/log"
 )
 
@@ -52,8 +54,42 @@ func (s *InitializationStage) Execute(ctx *ScanContext) error {
 	)
 	ctx.ReportData = &reportData
 
+	// Step 7: Best-effort tenant ID capture from the credential's token. A failure here must
+	// not fail the scan: the token/tenant is informational for session comparison, not required
+	// for scanning to proceed.
+	reportData.TenantID = s.captureTenantID(ctx)
+
 	log.Debug().Msg("Initialization stage completed")
 	return nil
+}
+
+// captureTenantID acquires a token for the resource-manager scope azqr already uses for every
+// ARM call, then decodes the `tid` (tenant ID) claim from it without verifying the token's
+// signature: azqr does not have Azure AD's signing keys, and the token was already accepted by
+// Azure AD itself when the credential obtained it, so reading a claim from a token already
+// trusted is not an independent authentication step. The captured value reflects the
+// credential's token tenant, which may not equal the tenant owning every individual
+// subscription in scope (for example, Lighthouse/delegated-access scenarios).
+func (s *InitializationStage) captureTenantID(ctx *ScanContext) string {
+	scope := fmt.Sprintf("%s/.default", az.GetResourceManagerEndpoint())
+	token, err := ctx.Cred.GetToken(ctx.Ctx, policy.TokenRequestOptions{Scopes: []string{scope}})
+	if err != nil {
+		log.Debug().Err(err).Msg("Initialization stage: tenant ID capture skipped (token acquisition failed)")
+		return ""
+	}
+
+	claims := jwt.MapClaims{}
+	if _, _, err := jwt.NewParser().ParseUnverified(token.Token, claims); err != nil {
+		log.Debug().Err(err).Msg("Initialization stage: tenant ID capture skipped (token parse failed)")
+		return ""
+	}
+
+	tenantID, ok := claims["tid"].(string)
+	if !ok || tenantID == "" {
+		log.Debug().Msg("Initialization stage: tenant ID capture skipped (no tid claim)")
+		return ""
+	}
+	return tenantID
 }
 
 // logScannerRegistryInfo logs information about registered scanners (debug mode)

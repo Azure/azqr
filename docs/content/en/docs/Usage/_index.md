@@ -410,15 +410,6 @@ azqr scan --output-name "azqr_action_plan_$timestamp"
 
 > By default, the output file name is `azqr_action_plan_YYYY_MM_DD_THHMMSS`.
 
-### Output to STDOUT
-
-You can output JSON results directly to stdout:
-
-```bash
-# Output JSON to stdout
-azqr scan --json --stdout
-```
-
 ### Masking Subscription IDs
 
 By default, Azure Quick Review masks subscription IDs in reports for security. You can control this behavior:

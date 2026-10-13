@@ -30,7 +30,13 @@ type (
 		PluginResults           []*PluginResult                                   `json:"pluginResults,omitempty"`
 		Stages                  *models.StageConfigs                              `json:"-"`
 		Summary                 *findings.Summary                                 `json:"-"`
-		ScopeID                 string                                            `json:"-"`
+		// ScopeID is a hash of the discovered subscription IDs, used only to build the SARIF
+		// automation ID; it is overwritten with the session ID on export reload and is unrelated
+		// to store.Session.ScopeID (the session's declared-scan-scope identity).
+		ScopeID string `json:"-"`
+		// TenantID is the Azure AD tenant captured from the scan credential's token (the `tid`
+		// claim) during pipeline.InitializationStage, persisted to store.Session.TenantID.
+		TenantID string `json:"-"`
 
 		// Table caches - populated on first call, reused thereafter
 		cachedImpactedTable                [][]string `json:"-"`

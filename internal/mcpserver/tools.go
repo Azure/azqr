@@ -22,7 +22,7 @@ func RegisterTools(s *server.MCPServer) {
 				- Month-over-month change ratio and absolute value
 				- Emission units
 
-				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
+				Excel/JSON file export is opt-in and off by default: pass xlsx/json=true to also write a file and get its resource URI; otherwise use the returned summary and the azqr-query-results tool.`),
 		)...,
 	)
 	s.AddTool(carbonEmissionsTool, mcp.NewTypedToolHandler(scanPluginHandler("carbon-emissions")))
@@ -41,7 +41,7 @@ func RegisterTools(s *server.MCPServer) {
 				- Shows SKU and kind information
 
 				Useful for identifying capacity planning issues and optimizing API usage patterns.
-				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
+				Excel/JSON file export is opt-in and off by default: pass xlsx/json=true to also write a file and get its resource URI; otherwise use the returned summary and the azqr-query-results tool.`),
 		)...,
 	)
 	s.AddTool(aiGovTool, mcp.NewTypedToolHandler(scanPluginHandler("ai-gov")))
@@ -59,7 +59,7 @@ func RegisterTools(s *server.MCPServer) {
 				- Assists with multi-region architecture design
 
 				Important: Physical zone mappings are subscription-specific and may differ between subscriptions.
-				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
+				Excel/JSON file export is opt-in and off by default: pass xlsx/json=true to also write a file and get its resource URI; otherwise use the returned summary and the azqr-query-results tool.`),
 		)...,
 	)
 	s.AddTool(zoneMappingTool, mcp.NewTypedToolHandler(scanPluginHandler("zone-mapping")))
@@ -79,7 +79,7 @@ func RegisterTools(s *server.MCPServer) {
 				- SQL Managed Instance migration cost estimates and potential savings
 
 				Useful for planning SQL Server modernization and understanding ESU financial impact.
-				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
+				Excel/JSON file export is opt-in and off by default: pass xlsx/json=true to also write a file and get its resource URI; otherwise use the returned summary and the azqr-query-results tool.`),
 		)...,
 	)
 	s.AddTool(sqlEOLTool, mcp.NewTypedToolHandler(scanPluginHandler("sql-eol")))
@@ -97,7 +97,7 @@ func RegisterTools(s *server.MCPServer) {
 				- Results sorted worst-first (lowest availability at the top)
 
 				Covers resolved Service Issues events from Azure Resource Health.
-				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
+				Excel/JSON file export is opt-in and off by default: pass xlsx/json=true to also write a file and get its resource URI; otherwise use the returned summary and the azqr-query-results tool.`),
 		)...,
 	)
 	s.AddTool(serviceHealthTool, mcp.NewTypedToolHandler(scanPluginHandler("service-health")))
@@ -117,7 +117,7 @@ func RegisterTools(s *server.MCPServer) {
 				- Detailed lists of missing resource types and unavailable SKUs
 
 				Useful for multi-region planning, disaster recovery site selection, and workload migration.
-				Results are saved to Excel/JSON files and returned with resource URIs for download.`),
+				Excel/JSON file export is opt-in and off by default: pass xlsx/json=true to also write a file and get its resource URI; otherwise use the returned summary and the azqr-query-results tool.`),
 			mcp.WithObject("options",
 				mcp.Required(),
 				mcp.Description("Plugin options. Use 'target-regions' (comma-separated string) to specify which Azure regions to analyze (e.g., {\"target-regions\": \"eastus,westeurope\"})."),
@@ -149,7 +149,9 @@ func RegisterTools(s *server.MCPServer) {
 				- {"services": ["aks", "vm", "sql"], "stages": ["-diagnostics"]} -> Scan AKS/VM/SQL without diagnostic settings analysis
 				- {"stages": ["-defender", "-advisor"]} -> Scan all resources but skip Defender and Advisor
 
-				Use get-supported-services tool to see all available service abbreviations.`),
+				Use get-supported-services tool to see all available service abbreviations.
+
+				Excel/JSON file export is opt-in and off by default: pass xlsx/json=true to also write a file and get its resource URI; otherwise use the returned summary and the azqr-query-results tool.`),
 			mcp.WithArray("stages",
 				mcp.Items(map[string]any{"type": "string"}),
 				mcp.Description("Optional array of scan stages to execute. Available stages: diagnostics, advisor, defender (enabled by default), cost, arc, policy, defender-recommendations (disabled by default). To disable a stage, prefix it with '-' (e.g., ['-diagnostics', '-defender']). Leave empty or omit to run default stages."),
@@ -181,6 +183,43 @@ func RegisterTools(s *server.MCPServer) {
 	)
 
 	s.AddTool(servicesTool, handleServiceTypeTool)
+
+	// Tool: Query paginated scan results from a past session
+	queryResultsTool := mcp.NewTool("query-results",
+		mcp.WithDescription(
+			`Query a bounded, paginated page of a past scan session's data directly from the session store.
+
+			This is the only MCP-level way to retrieve scan data beyond the small summary envelope
+			returned by the scan tools: full report files are no longer transferred over MCP, so use
+			this tool to read resources, recommendation/graph results, or a session's persisted
+			summary in small pages.
+
+			Result types:
+			- "resources" (default): one page of the session's scanned resources.
+			- "recommendations": one page of the session's recommendation/graph results.
+			- "summary": the session's persisted findings.Summary (not paginated).
+
+			If sessionId is omitted, the most recently *completed* session is used (an in-progress or
+			failed session is never silently chosen). Use the sessionId returned by a scan tool to
+			query that specific scan's results later.`),
+		mcp.WithString("sessionId",
+			mcp.Description("Optional session ID to query. Defaults to the most recently completed session when omitted."),
+		),
+		mcp.WithString("resultType",
+			mcp.Enum(queryResultTypeResources, queryResultTypeRecommendations, queryResultTypeSummary),
+			mcp.Description("Which result category to return. Defaults to 'resources'."),
+		),
+		mcp.WithNumber("limit",
+			mcp.Description("Max items per page for paginated result types (default 100, max 1000). Ignored for 'summary'."),
+		),
+		mcp.WithNumber("offset",
+			mcp.Description("Zero-based offset into the result set for paginated result types. Ignored for 'summary'."),
+		),
+		mcp.WithReadOnlyHintAnnotation(true),
+		mcp.WithDestructiveHintAnnotation(false),
+	)
+
+	s.AddTool(queryResultsTool, mcp.NewTypedToolHandler(queryResultsHandler))
 }
 
 func withBasicOptions(opts ...mcp.ToolOption) []mcp.ToolOption {
@@ -196,6 +235,14 @@ func withBasicOptions(opts ...mcp.ToolOption) []mcp.ToolOption {
 		mcp.WithBoolean("mask",
 			mcp.DefaultBool(true),
 			mcp.Description("Mask sensitive data in output (default: true)."),
+		),
+		mcp.WithBoolean("xlsx",
+			mcp.DefaultBool(false),
+			mcp.Description("Opt in to writing an Excel (.xlsx) report file for this scan. Off by default; when true, the file is written to <output>.xlsx and its file:// URI is included in the tool result."),
+		),
+		mcp.WithBoolean("json",
+			mcp.DefaultBool(false),
+			mcp.Description("Opt in to writing a JSON (.json) report file for this scan. Off by default; when true, the file is written to <output>.json and its file:// URI is included in the tool result."),
 		),
 		mcp.WithReadOnlyHintAnnotation(false),
 		mcp.WithDestructiveHintAnnotation(false),

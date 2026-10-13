@@ -12,6 +12,7 @@ import (
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
 	"github.com/Azure/azqr/internal/profiling"
+	"github.com/Azure/azqr/internal/store"
 	"github.com/rs/zerolog/log"
 
 	"github.com/spf13/cobra"
@@ -27,7 +28,6 @@ func init() {
 	scanCmd.PersistentFlags().BoolP("xlsx", "", true, "Create Excel report (default) (default true)")
 	scanCmd.PersistentFlags().BoolP("json", "", false, "Create JSON report files")
 	scanCmd.PersistentFlags().BoolP("csv", "", false, "Create CSV report files")
-	scanCmd.PersistentFlags().BoolP("stdout", "", false, "Write the JSON output to stdout")
 	scanCmd.PersistentFlags().StringP("output-name", "o", "", "Output file name without extension")
 	scanCmd.PersistentFlags().BoolP("mask", "m", true, "Mask the subscription id in the report (default) (default true)")
 	scanCmd.PersistentFlags().StringP("filters", "e", "", "Filters file (YAML format)")
@@ -68,7 +68,6 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 	csv, _ := cmd.Flags().GetBool("csv")
 	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
-	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
 	failOn, _ := cmd.Flags().GetString("fail-on")
 	sarifEnabled, _ := cmd.Flags().GetBool("sarif")
@@ -120,7 +119,6 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 		Csv:                    csv,
 		Json:                   json,
 		Mask:                   mask,
-		Stdout:                 stdout,
 		ScannerKeys:            scannerKeys,
 		Filters:                filters,
 		EnabledInternalPlugins: enabledInternalPlugins,
@@ -131,13 +129,14 @@ func scan(cmd *cobra.Command, scannerKeys []string) error {
 		Version:                version,
 	}
 
-	scanner := pipeline.Scanner{}
-	reportData, err := scanner.Scan(&params)
+	summary, err := runPersistedOrPlain(cmd, store.SessionKindFull, store.SessionTriggerCLI, &params, func(sc *pipeline.Scanner) (*findings.Summary, error) {
+		return sc.Scan(&params)
+	})
 	if err != nil {
 		return err
 	}
 	if gateEnabled {
-		return checkGate(cmd, reportData.Summary, gateCriterion)
+		return checkGate(cmd, summary, gateCriterion)
 	}
 	return nil
 }
@@ -165,7 +164,6 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 	json, _ := cmd.Flags().GetBool("json")
 	mask, _ := cmd.Flags().GetBool("mask")
 	debug, _ := cmd.Flags().GetBool("debug")
-	stdout, _ := cmd.Flags().GetBool("stdout")
 	filtersFile, _ := cmd.Flags().GetString("filters")
 
 	// Get profiling flags if available
@@ -204,7 +202,6 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 		Csv:                    csv,
 		Json:                   json,
 		Mask:                   mask,
-		Stdout:                 stdout,
 		Debug:                  debug,
 		ScannerKeys:            scannerKeys,
 		Filters:                filters,
@@ -214,8 +211,38 @@ func scanWithPlugin(cmd *cobra.Command, scannerKeys []string, pluginName string)
 		TraceProfile:           traceProfile,
 	}
 
-	scanner := pipeline.Scanner{}
 	// Call ScanPlugins directly for optimized plugin-only execution
-	_, err := scanner.ScanPlugins(&params)
+	_, err := runPersistedOrPlain(cmd, store.SessionKindPluginOnly, store.SessionTriggerCLI, &params, func(sc *pipeline.Scanner) (*findings.Summary, error) {
+		return sc.ScanPlugins(&params)
+	})
 	return err
+}
+
+// runPersistedOrPlain opens the session store configured via --store-path (falling back to
+// store.DefaultPath() when unset) and runs scanFn through store.RunPersistedScan so the scan
+// becomes a persisted session. If the store cannot be opened, it logs a warning and runs scanFn
+// against a plain *pipeline.Scanner instead, so store unavailability never blocks an otherwise
+// successful scan and its existing export behavior.
+func runPersistedOrPlain(
+	cmd *cobra.Command,
+	kind store.SessionKind,
+	trigger store.SessionTrigger,
+	params *models.ScanParams,
+	scanFn func(*pipeline.Scanner) (*findings.Summary, error),
+) (*findings.Summary, error) {
+	storePath, _ := cmd.Flags().GetString("store-path")
+
+	st := store.OpenForScan(storePath)
+	if st == nil {
+		return scanFn(&pipeline.Scanner{})
+	}
+	defer func() { _ = st.Close() }()
+
+	var sess *store.Session
+	summary, err := st.RunPersistedScan(kind, trigger, params, version, scanFn, func(s *store.Session) { sess = s })
+	if sess != nil {
+		log.Info().Str("sessionId", sess.ID).Str("scopeId", sess.ScopeID).Msg("Scan session recorded")
+	}
+
+	return summary, err
 }

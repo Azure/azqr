@@ -7,25 +7,37 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Azure/azqr/internal/findings"
 	"github.com/Azure/azqr/internal/models"
-	"github.com/Azure/azqr/internal/renderers"
 	"github.com/rs/zerolog/log"
 )
 
-type Scanner struct{}
+type Scanner struct {
+	// Observers, if set, are registered on the pipeline before it executes, so each can react
+	// to stage completion (for example, internal/store.Recorder persisting partial results).
+	Observers []StageObserver
+
+	lastMetrics PipelineMetrics
+}
+
+// LastMetrics returns the PipelineMetrics captured by the most recently completed Scan/ScanPlugins
+// call on this Scanner. Zero-valued until the first scan completes.
+func (sc *Scanner) LastMetrics() PipelineMetrics {
+	return sc.lastMetrics
+}
 
 // Scan performs a full scan using the default pipeline
-func (sc *Scanner) Scan(params *models.ScanParams) (*renderers.ReportData, error) {
+func (sc *Scanner) Scan(params *models.ScanParams) (*findings.Summary, error) {
 	return sc.scan(params, true)
 }
 
 // ScanPlugins performs a scan using only the plugin execution stage
-func (sc *Scanner) ScanPlugins(params *models.ScanParams) (*renderers.ReportData, error) {
+func (sc *Scanner) ScanPlugins(params *models.ScanParams) (*findings.Summary, error) {
 	return sc.scan(params, false)
 }
 
 // scan executes the scan using the composable pipeline pattern
-func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) (*renderers.ReportData, error) {
+func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) (*findings.Summary, error) {
 	builder := NewScanPipelineBuilder()
 
 	// Create scan context
@@ -42,7 +54,12 @@ func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) (*rende
 		pipe = builder.BuildPluginOnly()
 	}
 
+	for _, o := range sc.Observers {
+		pipe.AddObserver(o)
+	}
+
 	err := pipe.Execute(scanCtx)
+	sc.lastMetrics = pipe.Metrics()
 	if err != nil {
 		return nil, fmt.Errorf("scan failed: %w", err)
 	}
@@ -59,5 +76,5 @@ func (sc *Scanner) scan(params *models.ScanParams, defaultPipeline bool) (*rende
 	seconds := int(elapsedTime.Seconds()) % 60
 	log.Info().Msgf("Scan completed in %02d:%02d:%02d", hours, minutes, seconds)
 
-	return scanCtx.ReportData, nil
+	return scanCtx.ReportData.Summary, nil
 }

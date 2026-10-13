@@ -13,6 +13,10 @@ import (
 
 var s *server.MCPServer
 
+// azqrVersion is captured from StartWithMode so scan handlers can tag persisted sessions with
+// the running azqr version without threading it through every tool call.
+var azqrVersion = "dev"
+
 // ServerMode defines the transport mode for the MCP server
 type ServerMode string
 
@@ -29,6 +33,7 @@ func StartWithMode(mode ServerMode, addr, version string) {
 	if version == "" {
 		version = "dev"
 	}
+	azqrVersion = version
 
 	s = server.NewMCPServer(
 		"Azure Quick Review 🚀",

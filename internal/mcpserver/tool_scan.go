@@ -5,13 +5,11 @@ package mcpserver
 
 import (
 	"context"
-	"encoding/base64"
-	"fmt"
-	"os"
-	"path/filepath"
 
+	"github.com/Azure/azqr/internal/findings"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
+	"github.com/Azure/azqr/internal/store"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/rs/zerolog/log"
 )
@@ -23,73 +21,37 @@ func scanHandler(ctx context.Context, request mcp.CallToolRequest, args models.S
 	}
 
 	params := models.NewScanParamsWithDefaults(args)
-	params.Xlsx = true
-	params.Json = true
 	params.OutputName = currentDir + "/azqr_scan_results"
 
-	scanner := pipeline.Scanner{}
-	r, err := scanner.Scan(params)
+	var sess *store.Session
+	r, err := runPersistedScanMCP(store.SessionKindFull, params, func(sc *pipeline.Scanner) (*findings.Summary, error) {
+		return sc.Scan(params)
+	}, func(s *store.Session) { sess = s })
 	if err != nil {
 		return nil, err
 	}
 
-	fileName := params.OutputName + ".xlsx"
-	uri := fmt.Sprintf("file://%s", fileName)
-	uriJSON := fmt.Sprintf("file://%s.json", params.OutputName)
-
-	// Register the scan results as a resource
-	jsonResults := mcp.NewResource(
-		uriJSON,
-		"Azure Quick Review Scan Results Metadata",
-		mcp.WithResourceDescription(`The metadata of the Azure Quick Review (azqr) scan for the specified resource type.`),
-		mcp.WithMIMEType("application/json"),
-	)
-
-	jsonBlob, err := os.ReadFile(params.OutputName + ".json")
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to read scan results metadata file")
-	}
-
-	encodedJSONBlob := make([]byte, base64.StdEncoding.EncodedLen(len(jsonBlob)))
-	base64.StdEncoding.Encode(encodedJSONBlob, jsonBlob)
-
-	s.AddResource(jsonResults, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		return []mcp.ResourceContents{
-			mcp.BlobResourceContents{
-				URI:      uriJSON,
-				MIMEType: "application/json",
-				Blob:     string(encodedJSONBlob),
-			},
-		}, nil
-	})
-
-	results := mcp.NewResource(
-		uri,
-		"Azure Quick Review Scan Results",
-		mcp.WithResourceDescription(`The results of the Azure Quick Review (azqr) scan for the specified resource type.`),
-		mcp.WithMIMEType("binary/octet-stream"),
-	)
-
-	fileBlob, err := os.ReadFile(filepath.Clean(fileName)) //nolint:gosec // fileName is generated internally by scan
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to read scan results file")
-	}
-
-	encodedBlob := make([]byte, base64.StdEncoding.EncodedLen(len(fileBlob)))
-	base64.StdEncoding.Encode(encodedBlob, fileBlob)
-
-	s.AddResource(results, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-		return []mcp.ResourceContents{
-			mcp.BlobResourceContents{
-				URI:      uri,
-				MIMEType: "binary/octet-stream",
-				Blob:     string(encodedBlob),
-			},
-		}, nil
-	})
-
-	// Return both the scan results and the resource URIs
-	resultText := fmt.Sprintf("Scan results saved to:\n- Excel: %s\n- JSON: %s", uri, uriJSON)
-	result := mcp.NewToolResultStructured(r, resultText)
+	resultText := scanResultText(sess, params.OutputName, params.Xlsx, params.Json)
+	result := mcp.NewToolResultStructured(scanSummaryEnvelope(sess, r), resultText)
 	return result, nil
+}
+
+// runPersistedScanMCP opens the session store (store.DefaultPath()) and runs scanFn through
+// store.RunPersistedScan so the MCP-triggered scan becomes a persisted session. If the store
+// cannot be opened, it logs a warning and runs scanFn against a plain *pipeline.Scanner instead,
+// so store unavailability never blocks an otherwise successful scan and its file exports. In
+// that fallback case onSessionCreated is never called, since no session was persisted.
+func runPersistedScanMCP(
+	kind store.SessionKind,
+	params *models.ScanParams,
+	scanFn func(*pipeline.Scanner) (*findings.Summary, error),
+	onSessionCreated func(*store.Session),
+) (*findings.Summary, error) {
+	st := store.OpenForScan("")
+	if st == nil {
+		return scanFn(&pipeline.Scanner{})
+	}
+	defer func() { _ = st.Close() }()
+
+	return st.RunPersistedScan(kind, store.SessionTriggerMCP, params, azqrVersion, scanFn, onSessionCreated)
 }

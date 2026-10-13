@@ -4,8 +4,6 @@
 package pipeline
 
 import (
-	"fmt"
-
 	"github.com/Azure/azqr/internal/renderers/csv"
 	"github.com/Azure/azqr/internal/renderers/excel"
 	"github.com/Azure/azqr/internal/renderers/json"
@@ -61,17 +59,10 @@ func (s *ReportRenderingStage) Execute(ctx *ScanContext) error {
 		}
 	}
 
-	// Generate JSON output for stdout
-	if ctx.Params.Stdout {
-		outputJson := json.CreateJsonOutput(ctx.ReportData)
-		fmt.Println(outputJson)
-	}
-
 	log.Info().
 		Bool("xlsx", ctx.Params.Xlsx).
 		Bool("json", ctx.Params.Json).
 		Bool("csv", ctx.Params.Csv).
-		Bool("stdout", ctx.Params.Stdout).
 		Bool("sarif", ctx.Params.Sarif).
 		Msg("Report rendering completed")
 

@@ -39,6 +39,10 @@ var rootCmd = &cobra.Command{
 func init() {
 	// Add global --debug flag to root command (available to all subcommands)
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "Enable debug logging")
+	// Add global --store-path flag so every scan (including plugin-only commands, which are
+	// registered as top-level commands rather than children of scanCmd) can configure where the
+	// SQLite session store lives. Empty resolves to store.DefaultPath() (~/.azqr/azqr.db).
+	rootCmd.PersistentFlags().StringP("store-path", "", "", "Path to the azqr SQLite session store (default: ~/.azqr/azqr.db)")
 }
 
 // InitializeLogLevel sets the global log level based on debug flag

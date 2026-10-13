@@ -105,7 +105,6 @@ func TestCreatePluginCommand(t *testing.T) {
 		"xlsx",
 		"json",
 		"csv",
-		"stdout",
 		"output-name",
 		"mask",
 		"filters",

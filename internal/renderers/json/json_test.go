@@ -289,6 +289,62 @@ func TestCreateJsonReportWithPlugins(t *testing.T) {
 	}
 }
 
+func TestCreateJsonReportMatchesCreateJsonOutput(t *testing.T) {
+	// The streaming file-writing path (CreateJsonReport/streamConsolidatedReport) must produce
+	// exactly the same JSON document, with the same key order and "\t"-indented formatting, as
+	// the non-streaming buildConsolidatedReport + json.MarshalIndent path still used by
+	// CreateJsonOutput. This guards the byte-for-byte parity the streaming rewrite must preserve.
+	tmpDir := t.TempDir()
+
+	stages := models.NewStageConfigs()
+	_ = stages.EnableStage(models.StageNameGraph)
+	_ = stages.EnableStage(models.StageNameDefender)
+	_ = stages.EnableStage(models.StageNameDefenderRecommendations)
+	_ = stages.EnableStage(models.StageNamePolicy)
+	_ = stages.EnableStage(models.StageNameArc)
+	_ = stages.EnableStage(models.StageNameAdvisor)
+	_ = stages.EnableStage(models.StageNameCost)
+
+	data := &renderers.ReportData{
+		OutputFileName:          filepath.Join(tmpDir, "parity_report"),
+		Graph:                   []*models.GraphResult{},
+		Defender:                []*models.DefenderResult{},
+		DefenderRecommendations: []*models.DefenderRecommendation{},
+		Advisor:                 []*models.AdvisorResult{},
+		AzurePolicy:             []*models.AzurePolicyResult{},
+		ArcSQL:                  []*models.ArcSQLResult{},
+		Cost:                    []*models.CostResult{},
+		Resources:               []*models.Resource{},
+		ExludedResources:        []*models.Resource{},
+		ResourceTypeCount:       []*models.ResourceTypeCount{},
+		Stages:                  stages,
+		PluginResults: []*renderers.PluginResult{
+			{
+				PluginName:  "test-plugin",
+				Description: "Test Plugin",
+				SheetName:   "TestSheet",
+				Table: [][]string{
+					{"Header1", "Header2"},
+					{"Value1", "Value2"},
+				},
+			},
+		},
+	}
+
+	wantJSON := CreateJsonOutput(data)
+
+	CreateJsonReport(data)
+	filename := filepath.Join(tmpDir, "parity_report.json")
+	gotBytes, err := os.ReadFile(filename) //nolint:gosec // filename is a test-generated path
+	if err != nil {
+		t.Fatalf("Failed to read created file: %v", err)
+	}
+
+	if string(gotBytes) != wantJSON {
+		t.Errorf("CreateJsonReport() output does not match CreateJsonOutput() output.\nGot:\n%s\nWant:\n%s", gotBytes, wantJSON)
+	}
+}
+
 func mapKeys(m map[string]interface{}) []string {
 	keys := make([]string, 0, len(m))
 	for k := range m {

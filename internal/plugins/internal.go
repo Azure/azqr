@@ -73,7 +73,6 @@ func createPluginCommand(name, description string) *cobra.Command {
 	cmd.Flags().BoolP("xlsx", "", true, "Create Excel report (default) (default true)")
 	cmd.Flags().BoolP("json", "", false, "Create JSON report files")
 	cmd.Flags().BoolP("csv", "", false, "Create CSV report files")
-	cmd.Flags().BoolP("stdout", "", false, "Write the JSON output to stdout")
 	cmd.Flags().StringP("output-name", "o", "", "Output file name without extension")
 	cmd.Flags().BoolP("mask", "m", true, "Mask the subscription id in the report (default) (default true)")
 	cmd.Flags().StringP("filters", "e", "", "Filters file (YAML format)")

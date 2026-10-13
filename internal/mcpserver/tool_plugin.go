@@ -5,13 +5,12 @@ package mcpserver
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
-	"os"
-	"path/filepath"
 
+	"github.com/Azure/azqr/internal/findings"
 	"github.com/Azure/azqr/internal/models"
 	"github.com/Azure/azqr/internal/pipeline"
+	"github.com/Azure/azqr/internal/store"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/rs/zerolog/log"
 )
@@ -25,8 +24,6 @@ func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequ
 		}
 
 		params := models.NewScanParamsForPlugins(args)
-		params.Xlsx = true
-		params.Json = true
 		params.OutputName = fmt.Sprintf("%s/azqr_%s_results", currentDir, pluginName)
 
 		// Apply plugin stage options if provided (e.g. target-regions for region-selection)
@@ -41,70 +38,16 @@ func scanPluginHandler(pluginName string) func(context.Context, mcp.CallToolRequ
 			pluginName: true,
 		}
 
-		scanner := pipeline.Scanner{}
-		r, err := scanner.ScanPlugins(params)
+		var sess *store.Session
+		r, err := runPersistedScanMCP(store.SessionKindPluginOnly, params, func(sc *pipeline.Scanner) (*findings.Summary, error) {
+			return sc.ScanPlugins(params)
+		}, func(s *store.Session) { sess = s })
 		if err != nil {
 			return nil, err
 		}
 
-		fileName := params.OutputName + ".xlsx"
-		uri := fmt.Sprintf("file://%s", fileName)
-		uriJSON := fmt.Sprintf("file://%s.json", params.OutputName)
-
-		// Register the scan results as a resource
-		jsonResults := mcp.NewResource(
-			uriJSON,
-			fmt.Sprintf("Azure Quick Review %s Scan Results (JSON)", pluginName),
-			mcp.WithResourceDescription(fmt.Sprintf(`The results of the Azure Quick Review (azqr) %s scan (JSON).`, pluginName)),
-			mcp.WithMIMEType("application/json"),
-		)
-
-		jsonBlob, err := os.ReadFile(params.OutputName + ".json")
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to read scan results JSON file")
-		}
-
-		encodedJSONBlob := make([]byte, base64.StdEncoding.EncodedLen(len(jsonBlob)))
-		base64.StdEncoding.Encode(encodedJSONBlob, jsonBlob)
-
-		s.AddResource(jsonResults, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			return []mcp.ResourceContents{
-				mcp.BlobResourceContents{
-					URI:      uriJSON,
-					MIMEType: "application/json",
-					Blob:     string(encodedJSONBlob),
-				},
-			}, nil
-		})
-
-		results := mcp.NewResource(
-			uri,
-			fmt.Sprintf("Azure Quick Review %s Scan Results", pluginName),
-			mcp.WithResourceDescription(fmt.Sprintf(`The results of the Azure Quick Review (azqr) %s scan.`, pluginName)),
-			mcp.WithMIMEType("binary/octet-stream"),
-		)
-
-		fileBlob, err := os.ReadFile(filepath.Clean(fileName)) //nolint:gosec // fileName is generated internally by scan
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to read scan results file")
-		}
-
-		encodedBlob := make([]byte, base64.StdEncoding.EncodedLen(len(fileBlob)))
-		base64.StdEncoding.Encode(encodedBlob, fileBlob)
-
-		s.AddResource(results, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-			return []mcp.ResourceContents{
-				mcp.BlobResourceContents{
-					URI:      uri,
-					MIMEType: "binary/octet-stream",
-					Blob:     string(encodedBlob),
-				},
-			}, nil
-		})
-
-		// Return both the scan results and the resource URIs
-		resultText := fmt.Sprintf("Scan results saved to:\n- Excel: %s\n- JSON: %s", uri, uriJSON)
-		result := mcp.NewToolResultStructured(r, resultText)
+		resultText := scanResultText(sess, params.OutputName, params.Xlsx, params.Json)
+		result := mcp.NewToolResultStructured(scanSummaryEnvelope(sess, r), resultText)
 		return result, nil
 	}
 }
