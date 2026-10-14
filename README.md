@@ -402,7 +402,7 @@ azqr region-selection --target-regions=swedencentral,germanywestcentral,italynor
 azqr scan --plugin region-selection
 ```
 
-### SQL Server ESU Status
+### SQL Server EOL
 
 Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status across Arc-enabled SQL Server instances and SQL Virtual Machines.
 
@@ -443,6 +443,24 @@ azqr vm-modernization
 azqr scan --plugin vm-modernization
 ```
 
+### Service Health Availability
+
+Analyzes Azure service health events to determine the percentage of time resources were unaffected by service issues over the last 90 days.
+
+- Correlates resolved service issue events with impacted resources via Azure Resource Graph
+- Computes an event-free percentage per subscription, region, and resource type
+- Reports event counts and the number of affected resources per bucket, sorted worst-first
+
+**Use Cases**: Reliability reporting, identifying regions/resource types prone to service issues, SLA/availability analysis
+
+```bash
+# Run as standalone command (fast, plugin-only mode)
+azqr service-health
+
+# Or integrate with full scan
+azqr scan --plugin service-health
+```
+
 [Internal Plugins Documentation](https://azure.github.io/azqr/docs/plugins/internal-plugins/)
 
 ### Combining Features
@@ -455,6 +473,7 @@ azqr scan --subscription-id <sub-id> \
   --plugin region-selection \
   --plugin sql-eol \
   --plugin vm-modernization \
+  --plugin service-health \
   --output-name comprehensive-analysis
 ```
 
