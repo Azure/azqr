@@ -17,9 +17,9 @@ are grouped together.
 
 Applies to:
 
-- `github.com/Azure/azure-sdk-for-go/sdk/azcore` v1.23.2
+- `github.com/Azure/azure-sdk-for-go/sdk/azcore` v1.23.3
 - `github.com/Azure/azure-sdk-for-go/sdk/azidentity` v1.14.1
-- `github.com/Azure/azure-sdk-for-go/sdk/internal` v1.12.0
+- `github.com/Azure/azure-sdk-for-go/sdk/internal` v1.13.0
 
 ```
 MIT License
