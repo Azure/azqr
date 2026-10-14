@@ -473,7 +473,7 @@ Apache License
 
 Applies to:
 
-- `github.com/mark3labs/mcp-go` v1.2.0
+- `github.com/mark3labs/mcp-go` v1.2.1
 
 ```
 MIT License
