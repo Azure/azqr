@@ -115,7 +115,7 @@ Retrieves logical-to-physical availability zone mappings for all Azure regions i
 **Plugin Name**: `region-selection`  
 **Command**: `azqr region-selection`  
 **Flag**: `--plugin region-selection`  
-**Version**: 0.1.0-beta
+**Version**: 0.2.0-beta
 
 Scores and ranks Azure regions for workload migration or expansion. For each source region (where your resources currently live) × target region (candidate), the plugin computes a weighted 0–100 recommendation score across four dimensions.
 
@@ -154,7 +154,7 @@ Availability zone loss/gain applies a multiplicative adjustment to the final sco
 - Recommendation Score, Score Quality, Recommendation
 - Missing Resource Types, Unavailable SKUs (detail), Restricted SKUs (detail)
 
-### 5. SQL Server ESU Status
+### 5. SQL Server EOL
 
 **Plugin Name**: `sql-eol`  
 **Command**: `azqr sql-eol`  
@@ -263,6 +263,35 @@ Reports Azure VM v6/v7 series modernization readiness, following the Discover �
 
 ---
 
+### 7. Service Health Availability
+
+**Plugin Name**: `service-health`  
+**Command**: `azqr service-health`  
+**Flag**: `--plugin service-health`  
+**Version**: 0.1.0-beta
+
+Analyzes Azure service health events to determine the percentage of time resources were unaffected by service issues over the last 90 days.
+
+**Key Features**:
+- Correlates resolved `ServiceIssue` events (and their impacted-resource associations) with the full resource inventory via Azure Resource Graph
+- Computes an event-free percentage per resource, capped to the 90-day (2,160-hour) window to account for overlapping events, then averages within each (subscription, region, resource type) bucket
+- Reports total distinct event counts and the number of affected resources per bucket
+- Results are sorted worst-first (lowest event-free percentage first)
+- Honors resource-type exclusion filters (`--filters`)
+
+**Use Cases**:
+- Reliability and SLA/availability reporting
+- Identifying regions or resource types prone to service health issues
+- Prioritizing resiliency investments based on historical impact
+
+**Output Columns**:
+- Subscription ID, Target Region, Target Resource Type
+- Percentage Without Events, Events Count, Affected Resources
+
+**Data Source**: Azure Resource Graph (`servicehealthresources` table, last 90 days)
+
+---
+
 ## Usage
 
 ### Running Internal Plugins
@@ -295,6 +324,9 @@ azqr sql-eol
 # Run VM v6/v7 modernization readiness plugin
 azqr vm-modernization
 
+# Run service health availability plugin
+azqr service-health
+
 # Run with specific subscriptions
 azqr zone-mapping --subscription-id <sub-id>
 
@@ -316,7 +348,7 @@ Run plugins alongside standard compliance scanning using the `--plugin` flag:
 azqr scan --plugin ai-gov
 
 # Enable multiple plugins during scan
-azqr scan --plugin ai-gov --plugin carbon-emissions --plugin zone-mapping --plugin region-selection --plugin sql-eol --plugin vm-modernization
+azqr scan --plugin ai-gov --plugin carbon-emissions --plugin zone-mapping --plugin region-selection --plugin sql-eol --plugin vm-modernization --plugin service-health
 
 # Combine with other scan options
 azqr scan --subscription-id <sub-id> --plugin zone-mapping --output-name analysis
@@ -341,9 +373,10 @@ NAME                  VERSION    TYPE       DESCRIPTION
 ai-gov     1.0.0      internal   Checks OpenAI/Cognitive Services accounts for...
 carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure resource type
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
-region-selection      0.1.0-beta internal   Scores and ranks Azure regions for workload migration...
+region-selection      0.2.0-beta internal   Analyzes optimal Azure region selection based on service availability...
 sql-eol               0.6.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
 vm-modernization      0.1.0      internal   Reports Azure VM v6/v7 series modernization readiness
+service-health        0.1.0-beta internal   Analyzes Azure service health events to determine...
 ```
 
 ### Plugin Details
@@ -370,6 +403,7 @@ Each internal plugin creates a dedicated worksheet in the Excel workbook:
 - **SQL EOL** sheet
 - **VM Modernization** sheet
   - **VM Modernization - Notices** sheet — account-wide lifecycle/pricing notices that apply regardless of VM family or region, omitted on Azure Government/Azure China
+- **Service Issues** sheet
 
 ```bash
 # Run plugins as standalone commands (fastest)
@@ -442,6 +476,7 @@ Internal plugins may require additional permissions beyond standard `Reader` acc
 | **carbon-emissions** | Reader | Carbon Optimization API |
 | **sql-eol** | Reader | Azure Resource Graph |
 | **vm-modernization** | Reader | Azure Resource Graph, Azure Retail Prices API |
+| **service-health** | Reader | Azure Resource Graph (service health events) |
 
 **Recommended**: Assign `Reader` and `Monitoring Reader` roles at subscription or management group scope.
 
@@ -454,6 +489,7 @@ Internal plugins add processing time to scans:
 - **zone-mapping**: <10 seconds (very fast, one API call per subscription)
 - **sql-eol**: <30 seconds (single Azure Resource Graph query)
 - **vm-modernization**: <30 seconds (single Azure Resource Graph query, plus a batched/concurrent Azure Retail Prices API lookup across the estate's unique VM SKU/region pairs); large estates with many distinct SKU/region pairs may see this increase, since each batch request covers only 8 pairs
+- **service-health**: <30 seconds (single Azure Resource Graph query against 90 days of service health events)
 
 **Optimization Tips**:
 - Enable only needed plugins

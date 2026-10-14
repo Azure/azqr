@@ -272,6 +272,15 @@ azqr zone-mapping
 # Run SQL EOL analysis
 azqr sql-eol
 
+# Run region selection analysis
+azqr region-selection
+
+# Run VM v6/v7 modernization readiness analysis
+azqr vm-modernization
+
+# Run service health availability analysis
+azqr service-health
+
 # With specific subscription
 azqr zone-mapping --subscription-id <sub-id>
 ```
@@ -285,7 +294,7 @@ Run plugins alongside standard scanning:
 azqr scan --plugin ai-gov
 
 # Multiple plugins with scan
-azqr scan --plugin ai-gov --plugin carbon-emissions --plugin zone-mapping --plugin sql-eol
+azqr scan --plugin ai-gov --plugin carbon-emissions --plugin zone-mapping --plugin sql-eol --plugin region-selection --plugin vm-modernization --plugin service-health
 
 # With other options
 azqr scan --subscription-id <sub-id> --plugin zone-mapping
