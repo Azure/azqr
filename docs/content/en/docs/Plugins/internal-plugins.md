@@ -221,26 +221,29 @@ Reports Azure VM v6/v7 series modernization readiness, following the Discover â†
 - Suggests the best-matching v6/v7 target SKU using the `internal/skus` compatibility advisor
 - Surfaces relevant upcoming retirements and price changes from an embedded lifecycle/pricing dataset
 - Computes per-VM current, projected, and monthly cost impact directly from the Azure Retail Prices API â€” including pool-managed VMs, using each VM's own current SKU
-- Covers standalone VMs, Availability Set members, and VMSS Flex/Uniform members (including AKS node pools), plus Databricks-managed and AVD pooled hosts
+- Covers standalone VMs, Availability Set members, and VMSS Flex/Uniform members (including AKS node pools), plus Databricks-managed, AVD pooled, and standard Azure Red Hat OpenShift (ARO) cluster nodes
 - Reports pool-level signals (`Orchestration Mode`, `Pool Model VM Size`, `Pool Model Series Generation`) for every VMSS-backed row
 - Surfaces the full raw inventory signal set from the Assess article's starter query (placement, OS/image, storage, licensing, networking, security), alongside the derived columns above
 
 **Scope**:
 - The Validate phase from the [VM v6/v7 modernization guidance](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/sizes-v6-v7-modernization-discover) (post-migration scoring/verification) is out of scope for this plugin; it covers only the Discover, Assess, and Plan phases
+- Standard ARO ownership is identified by matching each inventoried VM's full resource-group ID to the cluster's `clusterProfile.resourceGroupId`. Recognized nodes report `A: Compute pool` and `ARO Cluster`, without standalone redeploy or target-SKU recommendations; inventory, placement signals, and per-VM cost calculations remain available.
+- ARO matching identifies cluster ownership, not individual MachineSets or control-plane/worker roles. Hosted-control-plane ARO and self-managed OpenShift are not covered by this lookup. Follow [ARO support policy](https://learn.microsoft.com/en-us/azure/openshift/support-policies-v4) for node changes; worker-pool replacement guidance does not authorize changes to control-plane nodes.
+- The scan identity needs read access to both the ARO cluster resource and its node resources within the scan's subscription scope. ARO and AVD ownership use supplementary ARG lookups. Lookup failures are logged as warnings and do not stop inventory reporting. Missing permissions, incomplete ARG data, or failed enrichment can leave nodes without ARO classification, including the default customer-managed classification; generic migration advice is not authorization to modify an ARO node.
 
 **Use Cases**:
 - Discover-phase inventory: which VMs are customer-managed vs. pool-managed, and ready for per-VM modernization planning
 - Assess-phase readiness triage: identifying Gen1-only VMs, SCSI-controller VMs needing the [SCSI-to-NVMe migration](https://learn.microsoft.com/en-us/azure/virtual-machines/migration/scsi-to-nvme-migration) path, and VMs already on v6/v7
 - Plan-phase SKU selection: a starting v6/v7 target recommendation per VM, ranked by compatibility score
 - Lifecycle/pricing awareness: surfacing upcoming retirements and price changes relevant to each VM's current series
-- Full-inventory export: a single query result covering every signal the Assess article's manual checklist references (image, disk, network, security, licensing), for readers who want the complete picture rather than only the plugin's own verdicts
+- Full-inventory export: an inventory result enriched by supplementary ownership lookups, covering every signal the Assess article's manual checklist references (image, disk, network, security, licensing), for readers who want the complete picture rather than only the plugin's own verdicts
 
 **Output Columns**:
 
 *Derived readiness/plan columns:*
 - Subscription, Resource Group, Name, Location
 - Current VM Size
-- Workload Pattern (`A: Compute pool` / `B: AVD pooled host pool` / `C: Service-managed compute (excluded)` / `E: Customer-managed VM (default)` / `G: Certified ISV appliance`), Pool Membership (`AKS Node Pool` / `VMSS` / `AVD Pooled Host Pool` / `Azure Databricks` / `Standalone` / appliance vendor name)
+- Workload Pattern (`A: Compute pool` / `B: AVD pooled host pool` / `C: Service-managed compute (excluded)` / `E: Customer-managed VM (default)` / `G: Certified ISV appliance`), Pool Membership (`AKS Node Pool` / `ARO Cluster` / `VMSS` / `AVD Pooled Host Pool` / `Azure Databricks` / `Standalone` / appliance vendor name)
 - Hyper-V Generation, Disk Controller Type, Series Generation
 - Azure Disk Encryption (`Enabled` / `Disabled`, aggregated across every attached disk)
 - Temp Disk Dependency (`Manual Review Required` for patterns B, E, G; `N/A (pool/platform-managed)` for A, C), SAP/ISV Certification Gate (`Manual Review Required` for pattern G only; `N/A (not an SAP or ISV-certified workload)` for A, B, C, E)
@@ -488,7 +491,7 @@ Internal plugins add processing time to scans:
 - **carbon-emissions**: 1-2 minutes (depends on subscription count)
 - **zone-mapping**: <10 seconds (very fast, one API call per subscription)
 - **sql-eol**: <30 seconds (single Azure Resource Graph query)
-- **vm-modernization**: <30 seconds (single Azure Resource Graph query, plus a batched/concurrent Azure Retail Prices API lookup across the estate's unique VM SKU/region pairs); large estates with many distinct SKU/region pairs may see this increase, since each batch request covers only 8 pairs
+- **vm-modernization**: one main Azure Resource Graph query plus separate AVD and ARO ownership lookups, followed by batched/concurrent Azure Retail Prices API lookups across the estate's unique VM SKU/region pairs. Latency depends on inventory size, ARG batching/pagination, and the number of distinct SKU/region pairs; each price batch request covers only 8 pairs.
 - **service-health**: <30 seconds (single Azure Resource Graph query against 90 days of service health events)
 
 **Optimization Tips**:

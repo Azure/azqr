@@ -58,6 +58,9 @@ var discoverAssessQuery string
 //go:embed kql/discover-assess-avd.kql
 var discoverAssessAVDQuery string
 
+//go:embed kql/discover-assess-aro.kql
+var discoverAssessAROQuery string
+
 // manualReviewRequired is the explicit flag value used whenever azqr cannot
 // establish a hard-gate verdict (temp-disk dependency, SAP/ISV certification)
 // from available data, instead of guessing Ready/Blocked (FR-004).
@@ -182,6 +185,8 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 		}
 	}
 
+	aroClustersByResourceGroup := loadAROClusters(ctx, graphClient.Query, subscriptions)
+
 	// Build header row from ColumnMetadata (single source of truth).
 	meta := s.GetMetadata()
 	table := [][]string{meta.HeaderRow()}
@@ -189,6 +194,7 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 	if result.Data != nil {
 		rows := graph.UnmarshalRows[vmModernizationRow](result.Data, "VM Modernization")
 		mergeAVDHostPoolType(rows, avdHostPoolByVMId)
+		mergeAROClusters(rows, aroClustersByResourceGroup)
 
 		// Pre-collect every unique (armSkuName, armRegionName) pair across the
 		// whole scan and fetch them via one batched, concurrent pass (P02-T03/
@@ -303,6 +309,44 @@ func mergeAVDHostPoolType(rows []vmModernizationRow, avdHostPoolByVMId map[strin
 	}
 }
 
+type aroClusterRow struct {
+	AROClusterID       string `json:"AROClusterId"`
+	AROClusterName     string `json:"AROClusterName"`
+	AROResourceGroupID string `json:"AROResourceGroupId"`
+}
+
+func loadAROClusters(ctx context.Context, query func(context.Context, string, map[string]string, ...graph.QueryOptions) (*graph.GraphResult, error), subscriptions map[string]string) map[string]aroClusterRow {
+	clusters := make(map[string]aroClusterRow)
+	log.Debug().Msg("Executing VM modernization ARO cluster ARG query")
+	result, err := query(ctx, discoverAssessAROQuery, subscriptions)
+	if err != nil {
+		log.Warn().Err(err).Msg("Failed to query Azure Resource Graph for ARO cluster data; ARO workload-pattern classification will be unavailable for this scan")
+		return clusters
+	}
+	if result == nil {
+		log.Warn().Msg("Empty Azure Resource Graph response for ARO cluster data; ARO workload-pattern classification will be unavailable for this scan")
+		return clusters
+	}
+
+	for _, cluster := range graph.UnmarshalRows[aroClusterRow](result.Data, "ARO Cluster") {
+		cluster.AROClusterID = strings.ToLower(cluster.AROClusterID)
+		cluster.AROResourceGroupID = strings.ToLower(cluster.AROResourceGroupID)
+		clusters[cluster.AROResourceGroupID] = cluster
+	}
+	return clusters
+}
+
+func mergeAROClusters(rows []vmModernizationRow, clustersByResourceGroup map[string]aroClusterRow) {
+	for i := range rows {
+		rows[i].IsAROManaged = false
+		if rows[i].SubscriptionID == "" || rows[i].ResourceGroup == "" {
+			continue
+		}
+		key := strings.ToLower(fmt.Sprintf("/subscriptions/%s/resourceGroups/%s", rows[i].SubscriptionID, rows[i].ResourceGroup))
+		_, rows[i].IsAROManaged = clustersByResourceGroup[key]
+	}
+}
+
 // vmModernizationRow is the shape of a single row returned by the Discover/Assess
 // ARG query. Field names match the KQL `project` output exactly (see
 // kql/discover-assess.kql).
@@ -319,6 +363,7 @@ type vmModernizationRow struct {
 	IsAKSManaged        argBool `json:"IsAKSManaged"`
 	IsDatabricksManaged argBool `json:"IsDatabricksManaged"`
 	AVDHostPoolType     string  `json:"AVDHostPoolType"`
+	IsAROManaged        bool    `json:"-"`
 	AzureDiskEncryption argBool `json:"AzureDiskEncryption"`
 
 	// Full raw inventory signals (Assess article's starter query), surfaced
@@ -363,7 +408,7 @@ type vmModernizationRow struct {
 // execution-method recommendation, the suggested target v6/v7 SKU, and matching
 // lifecycle/pricing notes.
 func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPriceCache) []string {
-	patternCode, poolMembership := classifyWorkloadPattern(bool(r.HasScaleSet), bool(r.IsAKSManaged), bool(r.IsDatabricksManaged), r.AVDHostPoolType, r.ImagePublisher, r.ImageOffer)
+	patternCode, poolMembership := classifyWorkloadPattern(bool(r.HasScaleSet), bool(r.IsAKSManaged), bool(r.IsDatabricksManaged), r.AVDHostPoolType, r.ImagePublisher, r.ImageOffer, r.IsAROManaged)
 	seriesGeneration, isTargetGeneration := classifySeriesGeneration(r.VMSize)
 	executionMethod := recommendExecutionMethod(patternCode, r.HyperVGeneration, isTargetGeneration)
 	tempDiskDependency, sapISVCertificationGate := recommendHardGates(patternCode)
@@ -552,7 +597,7 @@ const (
 
 // classifyWorkloadPattern derives the Discover-phase workload pattern using
 // exactly one canonical precedence order: C (Databricks-managed) -> A
-// (pool/AKS membership) -> B (AVD pooled host pool) -> G (certified
+// (ARO/AKS/VMSS membership) -> B (AVD pooled host pool) -> G (certified
 // appliance) -> E (default). Each step's rationale:
 //   - C first: the Vendor=Databricks tag is authoritative regardless of
 //     whether the underlying compute happens to be VMSS-backed, so a
@@ -567,10 +612,12 @@ const (
 //   - G next: the certified-appliance vendor match is the most specific
 //     remaining signal once C/A/B have not matched.
 //   - E is the default for every VM none of the above signals identify.
-func classifyWorkloadPattern(hasScaleSet, isAKSManaged, isDatabricksManaged bool, avdHostPoolType, imagePublisher, imageOffer string) (patternCode, poolMembership string) {
+func classifyWorkloadPattern(hasScaleSet, isAKSManaged, isDatabricksManaged bool, avdHostPoolType, imagePublisher, imageOffer string, isAROManaged bool) (patternCode, poolMembership string) {
 	switch {
 	case isDatabricksManaged:
 		return patternPlatformManaged, "Azure Databricks"
+	case isAROManaged:
+		return patternComputePool, "ARO Cluster"
 	case isAKSManaged:
 		return patternComputePool, "AKS Node Pool"
 	case hasScaleSet:
