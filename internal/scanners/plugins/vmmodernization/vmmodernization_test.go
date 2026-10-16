@@ -4,9 +4,17 @@
 package vmmodernization
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
+	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/Azure/azqr/internal/graph"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 // TestArgBool_UnmarshalJSON locks in the fix for a real production error:
@@ -134,10 +142,33 @@ func TestClassifyWorkloadPattern(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotCode, gotPool := classifyWorkloadPattern(tt.hasScaleSet, tt.isAKSManaged, tt.isDatabricksManaged, tt.avdHostPoolType, tt.imagePublisher, tt.imageOffer)
+			gotCode, gotPool := classifyWorkloadPattern(tt.hasScaleSet, tt.isAKSManaged, tt.isDatabricksManaged, tt.avdHostPoolType, tt.imagePublisher, tt.imageOffer, false)
 			if gotCode != tt.wantPatternCode || gotPool != tt.wantPoolMembership {
 				t.Errorf("classifyWorkloadPattern(%v, %v, %v, %q, %q, %q) = (%q, %q), want (%q, %q)",
 					tt.hasScaleSet, tt.isAKSManaged, tt.isDatabricksManaged, tt.avdHostPoolType, tt.imagePublisher, tt.imageOffer, gotCode, gotPool, tt.wantPatternCode, tt.wantPoolMembership)
+			}
+		})
+	}
+
+	aroTests := []struct {
+		name        string
+		row         vmModernizationRow
+		wantPattern string
+		wantPool    string
+	}{
+		{"ARO node", vmModernizationRow{}, patternComputePool, "ARO Cluster"},
+		{"ARO before VMSS", vmModernizationRow{HasScaleSet: true}, patternComputePool, "ARO Cluster"},
+		{"ARO before AKS", vmModernizationRow{IsAKSManaged: true}, patternComputePool, "ARO Cluster"},
+		{"ARO before AVD", vmModernizationRow{AVDHostPoolType: "Pooled"}, patternComputePool, "ARO Cluster"},
+		{"ARO before appliance", vmModernizationRow{ImagePublisher: "fortinet"}, patternComputePool, "ARO Cluster"},
+		{"Databricks before ARO", vmModernizationRow{IsDatabricksManaged: true}, patternPlatformManaged, "Azure Databricks"},
+	}
+	for _, tt := range aroTests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := tt.row
+			pattern, pool := classifyWorkloadPattern(bool(r.HasScaleSet), bool(r.IsAKSManaged), bool(r.IsDatabricksManaged), r.AVDHostPoolType, r.ImagePublisher, r.ImageOffer, true)
+			if pattern != tt.wantPattern || pool != tt.wantPool {
+				t.Errorf("ARO classification = (%q, %q), want (%q, %q)", pattern, pool, tt.wantPattern, tt.wantPool)
 			}
 		})
 	}
@@ -535,6 +566,133 @@ func TestMergeAVDHostPoolType(t *testing.T) {
 	}
 }
 
+func TestLoadAROClusters(t *testing.T) {
+	cluster := aroClusterRow{
+		AROClusterID:       "/subscriptions/sub1/resourceGroups/parent/providers/Microsoft.RedHatOpenShift/openShiftClusters/cluster1",
+		AROClusterName:     "cluster1",
+		AROResourceGroupID: "/subscriptions/sub1/resourceGroups/aro-nodes",
+	}
+	mixedCaseCluster := cluster
+	mixedCaseCluster.AROClusterID = strings.ToUpper(cluster.AROClusterID)
+	mixedCaseCluster.AROResourceGroupID = strings.ToUpper(cluster.AROResourceGroupID)
+	tests := []struct {
+		name      string
+		rows      []aroClusterRow
+		raw       []json.RawMessage
+		queryErr  error
+		nilResult bool
+		wantMatch bool
+		wantLog   string
+	}{
+		{name: "successful lookup", rows: []aroClusterRow{cluster}, wantMatch: true},
+		{name: "mixed-case ownership", rows: []aroClusterRow{mixedCaseCluster}, wantMatch: true},
+		{name: "no clusters", rows: []aroClusterRow{}},
+		{name: "nil data"},
+		{name: "query failure", queryErr: errors.New("query unavailable"), wantLog: "ARO workload-pattern classification will be unavailable"},
+		{name: "nil response", nilResult: true, wantLog: "ARO workload-pattern classification will be unavailable"},
+		{name: "malformed row does not discard valid row", rows: []aroClusterRow{cluster},
+			raw: []json.RawMessage{json.RawMessage(`{"AROClusterId":7}`)}, wantMatch: true, wantLog: "Skipping malformed ARO Cluster row"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var output bytes.Buffer
+			original := log.Logger
+			log.Logger = zerolog.New(&output)
+			t.Cleanup(func() { log.Logger = original })
+
+			data := append([]json.RawMessage(nil), tt.raw...)
+			for _, row := range tt.rows {
+				raw, err := json.Marshal(row)
+				if err != nil {
+					t.Fatal(err)
+				}
+				data = append(data, raw)
+			}
+			ctx := context.Background()
+			subscriptions := map[string]string{"sub1": "Subscription 1"}
+			calls := 0
+			query := func(gotCtx context.Context, kql string, gotSubs map[string]string, opts ...graph.QueryOptions) (*graph.GraphResult, error) {
+				calls++
+				if gotCtx != ctx || kql != discoverAssessAROQuery || !reflect.DeepEqual(gotSubs, subscriptions) || len(opts) != 0 {
+					t.Fatal("ARO query did not preserve context, embedded query, subscriptions, and default options")
+				}
+				if tt.nilResult || tt.queryErr != nil {
+					return nil, tt.queryErr
+				}
+				return &graph.GraphResult{Data: data}, nil
+			}
+			got := loadAROClusters(ctx, query, subscriptions)
+			if calls != 1 {
+				t.Fatalf("query called %d times, want one batched lookup", calls)
+			}
+			if tt.wantMatch {
+				if len(got) != 1 {
+					t.Fatalf("got %d ownership groups, want 1; logs: %s", len(got), output.String())
+				}
+				row, ok := got[strings.ToLower(cluster.AROResourceGroupID)]
+				if !ok || row.AROClusterID != strings.ToLower(cluster.AROClusterID) || row.AROClusterName != cluster.AROClusterName {
+					t.Errorf("unexpected normalized ownership: %+v", got)
+				}
+			} else if len(got) != 0 {
+				t.Errorf("got ownership for absent data: %+v", got)
+			}
+			if tt.wantLog != "" && !strings.Contains(output.String(), tt.wantLog) {
+				t.Errorf("logs %q do not contain %q", output.String(), tt.wantLog)
+			}
+			if tt.wantLog == "" && strings.Contains(output.String(), `"level":"warn"`) {
+				t.Errorf("unexpected warning: %s", output.String())
+			}
+		})
+	}
+}
+
+func TestMergeAROClusters(t *testing.T) {
+	cluster := aroClusterRow{
+		AROClusterID:       "/subscriptions/sub1/resourcegroups/parent/providers/microsoft.redhatopenshift/openshiftclusters/cluster1",
+		AROClusterName:     "cluster1",
+		AROResourceGroupID: "/subscriptions/sub1/resourcegroups/aro-nodes",
+	}
+	tests := []struct {
+		name     string
+		clusters map[string]aroClusterRow
+		wantARO  bool
+	}{
+		{"matching cluster", map[string]aroClusterRow{cluster.AROResourceGroupID: cluster}, true},
+		{"nil lookup", nil, false},
+		{"empty lookup", map[string]aroClusterRow{}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rows := []vmModernizationRow{
+				{Name: "master", SubscriptionID: "SUB1", ResourceGroup: "ARO-Nodes"},
+				{Name: "worker", SubscriptionID: "sub1", ResourceGroup: "aro-nodes"},
+				{Name: "other-subscription", SubscriptionID: "sub2", ResourceGroup: "aro-nodes"},
+				{Name: "other-group", SubscriptionID: "sub1", ResourceGroup: "other"},
+				{Name: "missing-subscription", ResourceGroup: "aro-nodes"},
+				{Name: "missing-group", SubscriptionID: "sub1"},
+			}
+			before := append([]vmModernizationRow(nil), rows...)
+			mergeAROClusters(rows, tt.clusters)
+			for i, row := range rows {
+				want := tt.wantARO && i < 2
+				if row.IsAROManaged != want {
+					t.Errorf("row %q IsAROManaged = %v, want %v", row.Name, row.IsAROManaged, want)
+				}
+				row.IsAROManaged = false
+				if !reflect.DeepEqual(row, before[i]) {
+					t.Errorf("merge changed inventory or order at row %d", i)
+				}
+			}
+			mergeAROClusters(rows, nil)
+			for _, row := range rows {
+				if row.IsAROManaged {
+					t.Errorf("empty lookup retained stale ownership for %q", row.Name)
+				}
+			}
+		})
+	}
+}
+
 func TestToRecord_ColumnCountMatchesMetadata(t *testing.T) {
 	// Pin AZURE_CLOUD to a non-exempt value (RV-002): toRecord ultimately
 	// calls matchLifecycleNotes, which suppresses its output on Azure
@@ -560,6 +718,93 @@ func TestToRecord_ColumnCountMatchesMetadata(t *testing.T) {
 	if len(record) != len(meta.ColumnMetadata) {
 		t.Fatalf("toRecord() produced %d columns, ColumnMetadata declares %d — they must match",
 			len(record), len(meta.ColumnMetadata))
+	}
+}
+
+func TestToRecord_AROOwnership(t *testing.T) {
+	t.Setenv("AZURE_CLOUD", "")
+	const sku = "Standard_D4_v2"
+	cache := &vmPriceCache{rows: map[skuRegionPair][]vmRetailPriceItem{
+		{ArmSkuName: sku, ArmRegionName: "eastus"}: {{
+			ArmSkuName: sku, ArmRegionName: "eastus", RetailPrice: 0.20,
+			Type: "Consumption", MeterName: sku, ProductName: "Virtual Machines", SkuName: sku,
+			EffectiveStartDate: "2020-01-01T00:00:00Z",
+		}},
+	}}
+	header := (&Scanner{}).GetMetadata().HeaderRow()
+	wantHeader := []string{
+		"Subscription", "Resource Group", "Name", "Location", "Current VM Size",
+		"Workload Pattern", "Pool Membership", "Hyper-V Generation", "Disk Controller Type",
+		"Series Generation", "Azure Disk Encryption", "Temp Disk Dependency", "SAP/ISV Certification Gate",
+		"Recommended Execution Method", "Suggested Target SKU", "Target SKU Compatibility Score",
+		"Lifecycle/Pricing Notes", "Current Monthly Cost (USD)", "Projected Monthly Cost After Increase (USD)",
+		"Monthly Cost Impact (USD)", "Membership Model", "Zone Placement", "Availability Zone",
+		"VMSS Name", "Availability Set Name", "Platform Fault Domain", "VM Power State",
+		"Instance View Captured", "OS Type", "OS Version", "Computer Name", "Is Marketplace VM",
+		"Image Publisher", "Image Offer", "Image SKU", "Image Version", "OS Disk Type",
+		"OS Disk Size (GB)", "Ephemeral OS Disk", "Data Disk Count", "ADE OS Disk (VM Property)",
+		"Hibernation Enabled", "Ultra SSD Enabled", "License Type", "NIC Count", "Accelerated Networking",
+		"IP Forwarding", "Security Type", "Secure Boot Enabled", "vTPM Enabled", "Orchestration Mode",
+		"Pool Model VM Size", "Pool Model Series Generation",
+	}
+	if !reflect.DeepEqual(header, wantHeader) {
+		t.Fatalf("report schema changed: got %v, want %v", header, wantHeader)
+	}
+	tests := []struct {
+		name string
+		row  vmModernizationRow
+	}{
+		{"standalone placement", vmModernizationRow{MembershipModel: "Standalone"}},
+		{"availability set placement", vmModernizationRow{MembershipModel: "Availability Set", AvailabilitySetName: "as1"}},
+		{"VMSS placement", vmModernizationRow{
+			HasScaleSet: true, MembershipModel: "VMSS (Uniform)", VMSSName: "vmss1",
+			OrchestrationMode: "Uniform", PoolModelVMSize: "Standard_D4s_v5",
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			row := tt.row
+			row.Name, row.ResourceGroup, row.SubscriptionID = "node1", "aro-nodes", "sub1"
+			row.VMSize, row.Location, row.OSType = sku, "eastus", "Linux"
+			row.HyperVGeneration, row.DiskControllerType = "V2", "SCSI"
+			baseline := row.toRecord("Subscription 1", cache)
+			rows := []vmModernizationRow{row}
+			cluster := aroClusterRow{AROClusterID: "/subscriptions/sub1/resourcegroups/parent/providers/microsoft.redhatopenshift/openshiftclusters/cluster1", AROClusterName: "cluster1"}
+			mergeAROClusters(rows, map[string]aroClusterRow{"/subscriptions/sub1/resourcegroups/aro-nodes": cluster})
+			got := rows[0].toRecord("Subscription 1", cache)
+			if len(got) != len(wantHeader) {
+				t.Fatalf("got %d columns, want %d", len(got), len(wantHeader))
+			}
+			wantChanges := map[string]string{
+				"Workload Pattern":               patternComputePool,
+				"Pool Membership":                "ARO Cluster",
+				"Temp Disk Dependency":           "N/A (pool/platform-managed)",
+				"SAP/ISV Certification Gate":     "N/A (not an SAP or ISV-certified workload)",
+				"Recommended Execution Method":   "Managed by pool/cluster — evaluate at the pool level",
+				"Suggested Target SKU":           "N/A (pool-managed)",
+				"Target SKU Compatibility Score": "N/A",
+			}
+			for i, column := range wantHeader {
+				want, changed := wantChanges[column]
+				if !changed {
+					want = baseline[i]
+				}
+				if got[i] != want {
+					t.Errorf("%s = %q, want %q", column, got[i], want)
+				}
+			}
+			for column, want := range map[string]string{
+				"Current Monthly Cost (USD)":                  formatUSD(0.20 * 730),
+				"Projected Monthly Cost After Increase (USD)": formatUSD(0.20 * 730 * 1.25),
+				"Monthly Cost Impact (USD)":                   formatUSD(0.20 * 730 * 0.25),
+			} {
+				for i, name := range wantHeader {
+					if name == column && got[i] != want {
+						t.Errorf("%s = %q, want %q", column, got[i], want)
+					}
+				}
+			}
+		})
 	}
 }
 

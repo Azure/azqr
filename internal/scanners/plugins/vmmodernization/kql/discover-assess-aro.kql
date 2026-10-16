@@ -1,0 +1,10 @@
+// Standard ARO cluster ownership lookup, merged onto VM inventory in Go.
+// A separate query avoids adding joins to the main inventory query.
+// The cluster resource group contains the nodes, not the customer networking group.
+resources
+| where type =~ "microsoft.redhatopenshift/openshiftclusters"
+| project
+    AROClusterId = tolower(id),
+    AROClusterName = name,
+    AROResourceGroupId = tolower(tostring(properties.clusterProfile.resourceGroupId))
+| where isnotempty(AROResourceGroupId)
