@@ -61,6 +61,9 @@ var discoverAssessAVDQuery string
 //go:embed kql/discover-assess-aro.kql
 var discoverAssessAROQuery string
 
+//go:embed kql/discover-assess-vmss.kql
+var discoverAssessVMSSQuery string
+
 // manualReviewRequired is the explicit flag value used whenever azqr cannot
 // establish a hard-gate verdict (temp-disk dependency, SAP/ISV certification)
 // from available data, instead of guessing Ready/Blocked (FR-004).
@@ -94,14 +97,23 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Name"},
 			{Name: "Location"},
 			{Name: "Current VM Size"},
+			{Name: "Series Generation"},
 			{Name: "Workload Pattern"},
 			{Name: "Pool Membership"},
+			{Name: "Membership Model"},
+			{Name: "Orchestration Mode"},
+			{Name: "VMSS Name"},
+			{Name: "Pool Model VM Size"},
+			{Name: "Pool Model Series Generation"},
+			{Name: "Availability Set Name"},
 			{Name: "Hyper-V Generation"},
 			{Name: "Disk Controller Type"},
-			{Name: "Series Generation"},
 			{Name: "Azure Disk Encryption"},
 			{Name: "Temp Disk Dependency"},
 			{Name: "SAP/ISV Certification Gate"},
+			{Name: "VM Power State"},
+			{Name: "Instance View Captured"},
+			{Name: "Hibernation Enabled"},
 			{Name: "Recommended Execution Method"},
 			{Name: "Suggested Target SKU"},
 			{Name: "Target SKU Compatibility Score"},
@@ -109,18 +121,9 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Current Monthly Cost (USD)"},
 			{Name: "Projected Monthly Cost After Increase (USD)"},
 			{Name: "Monthly Cost Impact (USD)"},
-			// Full raw inventory signals, mirroring the Assess article's own
-			// "Inventory query (Azure Resource Graph)" starter query, so a
-			// reader has every signal that article's checklist references —
-			// not only the subset the derived columns above consume.
-			{Name: "Membership Model"},
 			{Name: "Zone Placement"},
 			{Name: "Availability Zone"},
-			{Name: "VMSS Name"},
-			{Name: "Availability Set Name"},
 			{Name: "Platform Fault Domain"},
-			{Name: "VM Power State"},
-			{Name: "Instance View Captured"},
 			{Name: "OS Type"},
 			{Name: "OS Version"},
 			{Name: "Computer Name"},
@@ -134,7 +137,6 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Ephemeral OS Disk"},
 			{Name: "Data Disk Count"},
 			{Name: "ADE OS Disk (VM Property)"},
-			{Name: "Hibernation Enabled"},
 			{Name: "Ultra SSD Enabled"},
 			{Name: "License Type"},
 			{Name: "NIC Count"},
@@ -143,13 +145,6 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Security Type"},
 			{Name: "Secure Boot Enabled"},
 			{Name: "vTPM Enabled"},
-			// Pool-level signals (P02): joined from the VMSS-backed row's
-			// parent scale set via a shared vmssId, appended after the raw
-			// inventory columns above so no existing column shifts position
-			// (NFR-001). "N/A (not pool-managed)" for non-pool rows.
-			{Name: "Orchestration Mode"},
-			{Name: "Pool Model VM Size"},
-			{Name: "Pool Model Series Generation"},
 		},
 	}
 }
@@ -180,12 +175,11 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 	if avdResult, avdErr := graphClient.Query(ctx, discoverAssessAVDQuery, subscriptions); avdErr != nil {
 		log.Warn().Err(avdErr).Msg("Failed to query Azure Resource Graph for AVD host-pool data; AVD workload-pattern classification will be unavailable for this scan")
 	} else if avdResult.Data != nil {
-		for _, a := range graph.UnmarshalRows[avdHostPoolRow](avdResult.Data, "AVD Host Pool") {
-			avdHostPoolByVMId[a.VMId] = a.AVDHostPoolType
-		}
+		avdHostPoolByVMId = buildAVDHostPoolByVMId(graph.UnmarshalRows[avdHostPoolRow](avdResult.Data, "AVD Host Pool"))
 	}
 
 	aroClustersByResourceGroup := loadAROClusters(ctx, graphClient.Query, subscriptions)
+	vmssByID := loadVMSSPools(ctx, graphClient.Query, subscriptions)
 
 	// Build header row from ColumnMetadata (single source of truth).
 	meta := s.GetMetadata()
@@ -195,6 +189,7 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 		rows := graph.UnmarshalRows[vmModernizationRow](result.Data, "VM Modernization")
 		mergeAVDHostPoolType(rows, avdHostPoolByVMId)
 		mergeAROClusters(rows, aroClustersByResourceGroup)
+		mergeVMSSPools(rows, vmssByID)
 
 		// Pre-collect every unique (armSkuName, armRegionName) pair across the
 		// whole scan and fetch them via one batched, concurrent pass (P02-T03/
@@ -295,8 +290,31 @@ func buildGeneralNoticesSheet() *plugins.ExternalPluginOutput {
 // Resource Graph disallows combining the desktopvirtualizationresources and
 // computeresources tables in one query.
 type avdHostPoolRow struct {
+	HostPoolArmID   string `json:"hostPoolArmId"`
 	VMId            string `json:"vmId"`
 	AVDHostPoolType string `json:"avdHostPoolType"`
+}
+
+// buildAVDHostPoolByVMId joins the query's session-host rows (vmId set) to its
+// host-pool rows (avdHostPoolType set) by host pool ARM ID, returning a
+// lowercase vmId -> host pool type map covering every session host.
+func buildAVDHostPoolByVMId(rows []avdHostPoolRow) map[string]string {
+	typeByPool := map[string]string{}
+	for _, r := range rows {
+		if r.AVDHostPoolType != "" {
+			typeByPool[strings.ToLower(r.HostPoolArmID)] = r.AVDHostPoolType
+		}
+	}
+	byVM := map[string]string{}
+	for _, r := range rows {
+		if r.VMId == "" {
+			continue
+		}
+		if t, ok := typeByPool[strings.ToLower(r.HostPoolArmID)]; ok {
+			byVM[strings.ToLower(r.VMId)] = t
+		}
+	}
+	return byVM
 }
 
 // mergeAVDHostPoolType sets rows[i].AVDHostPoolType from avdHostPoolByVMId by
@@ -347,6 +365,42 @@ func mergeAROClusters(rows []vmModernizationRow, clustersByResourceGroup map[str
 	}
 }
 
+type vmssPoolRow struct {
+	VMSSID            string `json:"VMSSId"`
+	OrchestrationMode string `json:"OrchestrationMode"`
+	PoolModelVMSize   string `json:"PoolModelVMSize"`
+}
+
+func loadVMSSPools(ctx context.Context, query func(context.Context, string, map[string]string, ...graph.QueryOptions) (*graph.GraphResult, error), subscriptions map[string]string) map[string]vmssPoolRow {
+	pools := make(map[string]vmssPoolRow)
+	log.Debug().Msg("Executing VM modernization VMSS pool ARG query")
+	result, err := query(ctx, discoverAssessVMSSQuery, subscriptions)
+	if err != nil {
+		log.Warn().Err(err).Msg("Failed to query Azure Resource Graph for scale set data; pool-level columns will be unavailable for this scan")
+		return pools
+	}
+	if result == nil || result.Data == nil {
+		return pools
+	}
+	for _, pool := range graph.UnmarshalRows[vmssPoolRow](result.Data, "VMSS Pool") {
+		pools[strings.ToLower(pool.VMSSID)] = pool
+	}
+	return pools
+}
+
+// mergeVMSSPools sets the pool-level fields from the scale set matching each
+// row's VMSSId; rows without a match keep empty values.
+func mergeVMSSPools(rows []vmModernizationRow, poolsByID map[string]vmssPoolRow) {
+	for i := range rows {
+		pool, ok := poolsByID[strings.ToLower(rows[i].VMSSID)]
+		if rows[i].VMSSID == "" || !ok {
+			continue
+		}
+		rows[i].OrchestrationMode = pool.OrchestrationMode
+		rows[i].PoolModelVMSize = pool.PoolModelVMSize
+	}
+}
+
 // vmModernizationRow is the shape of a single row returned by the Discover/Assess
 // ARG query. Field names match the KQL `project` output exactly (see
 // kql/discover-assess.kql).
@@ -372,6 +426,7 @@ type vmModernizationRow struct {
 	ZonePlacement         string  `json:"ZonePlacement"`
 	AvailabilityZone      string  `json:"AvailabilityZone"`
 	VMSSName              string  `json:"VMSSName"`
+	VMSSID                string  `json:"VMSSId"`
 	AvailabilitySetName   string  `json:"AvailabilitySetName"`
 	PlatformFaultDomain   string  `json:"PlatformFaultDomain"`
 	VMPowerState          string  `json:"VMPowerState"`
@@ -428,6 +483,12 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 		suggestedSKU = "N/A (pool-managed)"
 	}
 
+	if patternCode == patternComputePool && poolMembership == "VMSS" {
+		executionMethod = manualReviewRequired + " (scale-set member; validate it is a stateless pool before evaluating at the pool level)"
+		tempDiskDependency = manualReviewRequired
+		sapISVCertificationGate = manualReviewRequired
+	}
+
 	currentMonthlyCost, projectedMonthlyCost, monthlyCostImpact := r.computeMonetaryImpact(priceCache)
 
 	orchestrationMode, poolModelVMSize, poolModelSeriesGeneration := r.poolLevelColumns()
@@ -438,14 +499,23 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 		r.Name,
 		r.Location,
 		r.VMSize,
+		seriesGeneration,
 		patternCode,
 		poolMembership,
+		orNA(r.MembershipModel),
+		orchestrationMode,
+		orNA(r.VMSSName),
+		poolModelVMSize,
+		poolModelSeriesGeneration,
+		orNA(r.AvailabilitySetName),
 		r.HyperVGeneration,
 		r.DiskControllerType,
-		seriesGeneration,
 		formatBool(bool(r.AzureDiskEncryption)),
 		tempDiskDependency,
 		sapISVCertificationGate,
+		orNA(r.VMPowerState),
+		orNA(r.InstanceViewCaptured),
+		orNA(r.HibernationEnabled),
 		executionMethod,
 		suggestedSKU,
 		targetScore,
@@ -453,14 +523,9 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 		currentMonthlyCost,
 		projectedMonthlyCost,
 		monthlyCostImpact,
-		orNA(r.MembershipModel),
 		orNA(r.ZonePlacement),
 		orNA(r.AvailabilityZone),
-		orNA(r.VMSSName),
-		orNA(r.AvailabilitySetName),
 		orNA(r.PlatformFaultDomain),
-		orNA(r.VMPowerState),
-		orNA(r.InstanceViewCaptured),
 		orNA(r.OSType),
 		orNA(r.OSVersion),
 		orNA(r.ComputerName),
@@ -474,7 +539,6 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 		orNA(r.EphemeralOSDisk),
 		fmt.Sprintf("%d", r.DataDiskCount),
 		orNA(r.ADEOSDiskEnabled),
-		orNA(r.HibernationEnabled),
 		orNA(r.UltraSSDEnabled),
 		orNA(r.LicenseType),
 		fmt.Sprintf("%d", r.NICCount),
@@ -483,9 +547,6 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 		orNA(r.SecurityType),
 		orNA(r.SecureBootEnabled),
 		orNA(r.VTpmEnabled),
-		orchestrationMode,
-		poolModelVMSize,
-		poolModelSeriesGeneration,
 	}
 }
 
@@ -521,7 +582,7 @@ func formatBool(b bool) string {
 // computeMonetaryImpact derives the three monetary-impact columns (current
 // monthly cost, projected monthly cost after the increase, and the monthly
 // impact) following the plan's confirmed fallback precedence: exempt cloud ->
-// deallocated/stopped VM -> retail price lookup failure -> no applicable
+// deallocated VM -> retail price lookup failure -> no applicable
 // impactPercent -> full calculation. This always computes a per-instance
 // figure from the row's own current SKU, independent of whether the row's
 // workload pattern is actionable at the per-VM level (that gate only applies
@@ -532,8 +593,8 @@ func (r vmModernizationRow) computeMonetaryImpact(priceCache *vmPriceCache) (cur
 	if isExemptCloud() {
 		return "", "", ""
 	}
-	if isDeallocatedOrStopped(r.VMPowerState) {
-		const na = "N/A (VM deallocated/stopped)"
+	if isDeallocated(r.VMPowerState) {
+		const na = "N/A (VM deallocated)"
 		return na, na, na
 	}
 
@@ -556,13 +617,12 @@ func (r vmModernizationRow) computeMonetaryImpact(priceCache *vmPriceCache) (cur
 	return current, formatUSD(projectedMonthly), formatUSD(monthlyDiff)
 }
 
-// isDeallocatedOrStopped reports whether a VM's power state indicates it is
-// not accruing compute charges, matching on either substring the Azure
-// Resource Graph instance-view powerState.displayStatus value may carry
-// ("deallocated" or "stopped"), case-insensitively.
-func isDeallocatedOrStopped(powerState string) bool {
-	s := strings.ToLower(powerState)
-	return strings.Contains(s, "deallocated") || strings.Contains(s, "stopped")
+// isDeallocated reports whether a VM's power state indicates compute is
+// released and no longer billed ("deallocating" or "deallocated"),
+// case-insensitively. A stopped but still allocated VM keeps accruing compute
+// charges, so it is deliberately not matched.
+func isDeallocated(powerState string) bool {
+	return strings.Contains(strings.ToLower(powerState), "deallocat")
 }
 
 // formatUSD renders a monetary value using the plan's confirmed "$%.2f"
@@ -587,18 +647,20 @@ func orNA(s string) string {
 // no SAP-detection signal exists yet — but is declared so recommendHardGates'
 // pattern-F handling stays correct and testable ahead of a future detector.
 const (
-	patternPlatformManaged    = "C: Service-managed compute (excluded)"
+	patternPlatformManaged    = "C: Service-managed compute"
 	patternComputePool        = "A: Compute pool"
 	patternAVDPooled          = "B: AVD pooled host pool"
 	patternCertifiedAppliance = "G: Certified ISV appliance"
 	patternCustomerManaged    = "E: Customer-managed VM (default)"
-	patternSAPWorkload        = "F: SAP workload (not yet detected)"
+	patternSAPWorkload        = "F: SAP workload"
 )
 
 // classifyWorkloadPattern derives the Discover-phase workload pattern using
 // exactly one canonical precedence order: C (Databricks-managed) -> A
-// (ARO/AKS/VMSS membership) -> B (AVD pooled host pool) -> G (certified
-// appliance) -> E (default). Each step's rationale:
+// (ARO/AKS membership) -> B (AVD pooled host pool) -> G (certified
+// appliance) -> A for a generic VMSS member -> E (default). VMSS membership
+// alone does not prove a stateless pool, so toRecord recommends manual
+// validation for those rows. Each step's rationale:
 //   - C first: the Vendor=Databricks tag is authoritative regardless of
 //     whether the underlying compute happens to be VMSS-backed, so a
 //     Databricks-tagged VM is never misreported as a generic compute pool.
@@ -620,16 +682,16 @@ func classifyWorkloadPattern(hasScaleSet, isAKSManaged, isDatabricksManaged bool
 		return patternComputePool, "ARO Cluster"
 	case isAKSManaged:
 		return patternComputePool, "AKS Node Pool"
-	case hasScaleSet:
-		return patternComputePool, "VMSS"
 	case strings.EqualFold(avdHostPoolType, "Pooled"):
 		return patternAVDPooled, "AVD Pooled Host Pool"
-	default:
-		if vendor, ok := matchApplianceVendor(imagePublisher, imageOffer); ok {
-			return patternCertifiedAppliance, vendor
-		}
-		return patternCustomerManaged, "Standalone"
 	}
+	if vendor, ok := matchApplianceVendor(imagePublisher, imageOffer); ok {
+		return patternCertifiedAppliance, vendor
+	}
+	if hasScaleSet {
+		return patternComputePool, "VMSS"
+	}
+	return patternCustomerManaged, "Standalone"
 }
 
 // isActionableWorkloadPattern reports whether a workload pattern represents a
@@ -677,6 +739,9 @@ func classifySeriesGeneration(vmSize string) (label string, isTargetGeneration b
 // should consult those two columns before acting on a Redeploy/In-place
 // recommendation.
 func recommendExecutionMethod(patternCode, hyperVGeneration string, isTargetGeneration bool) string {
+	if patternCode == patternAVDPooled {
+		return "Managed by pool/cluster — evaluate at the pool level; the golden image still needs Assess/Plan checks"
+	}
 	if !isActionableWorkloadPattern(patternCode) {
 		return "Managed by pool/cluster — evaluate at the pool level"
 	}
@@ -687,7 +752,10 @@ func recommendExecutionMethod(patternCode, hyperVGeneration string, isTargetGene
 		return manualReviewRequired + " (Gen1 image; evaluate Trusted Launch/Gen2 upgrade path first)"
 	}
 	if strings.EqualFold(hyperVGeneration, "V2") {
-		return "Redeploy (see SCSI-to-NVMe migration guidance)"
+		if patternCode == patternCertifiedAppliance {
+			return "Redeploy (see SCSI-to-NVMe migration guidance) - only after vendor certification is confirmed (see SAP/ISV Certification Gate)"
+		}
+		return "Redeploy (see SCSI-to-NVMe migration guidance) - conditional on the Temp Disk Dependency and SAP/ISV Certification Gate review"
 	}
 	return manualReviewRequired + " (Hyper-V generation not reported)"
 }
@@ -710,11 +778,9 @@ func recommendExecutionMethod(patternCode, hyperVGeneration string, isTargetGene
 //     golden-image rebuild concern and are evaluated at the pool level per
 //     Learn's own exit criteria, so Temp Disk Dependency reads
 //     "N/A (pool/platform-managed)" for them.
-//   - SAP/ISV Certification Gate applies only to pattern G (ISV-certified
-//     appliance) and pattern F (SAP, never emitted today, included only for
-//     forward-compatibility). Patterns A, B, C, and E are not SAP or
-//     ISV-certified workloads, so this column reads
-//     "N/A (not an SAP or ISV-certified workload)" for them.
+//   - SAP/ISV Certification Gate reads Manual Review Required for every
+//     pattern except the service-managed A and C, because azqr cannot rule out
+//     an SAP or ISV-certified workload on a VM it only infers about.
 func recommendHardGates(patternCode string) (tempDiskDependency, sapISVCertificationGate string) {
 	switch patternCode {
 	case patternAVDPooled, patternCustomerManaged, patternCertifiedAppliance, patternSAPWorkload:
@@ -724,10 +790,10 @@ func recommendHardGates(patternCode string) (tempDiskDependency, sapISVCertifica
 	}
 
 	switch patternCode {
-	case patternCertifiedAppliance, patternSAPWorkload:
-		sapISVCertificationGate = manualReviewRequired
+	case patternComputePool, patternPlatformManaged:
+		sapISVCertificationGate = "N/A (pool/platform-managed)"
 	default:
-		sapISVCertificationGate = "N/A (not an SAP or ISV-certified workload)"
+		sapISVCertificationGate = manualReviewRequired
 	}
 
 	return tempDiskDependency, sapISVCertificationGate

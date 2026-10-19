@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/Azure/azqr/internal/graph"
 	"github.com/rs/zerolog"
@@ -124,7 +125,7 @@ func TestClassifyWorkloadPattern(t *testing.T) {
 		// appliance vendor still resolves to pattern A, since pool membership
 		// is checked before the appliance-vendor match (NFR-003 precedence order).
 		{"A-over-G: AKS-managed VM with an appliance image stays pattern A", false, true, false, "", "paloaltonetworks", "vmseries-flex", patternComputePool, "AKS Node Pool"},
-		{"A-over-G: VMSS member with an appliance image stays pattern A", true, false, false, "", "fortinet", "fortigate-vm", patternComputePool, "VMSS"},
+		{"G-over-VMSS: VMSS member with an appliance image is pattern G", true, false, false, "", "fortinet", "fortigate-vm", patternCertifiedAppliance, "Fortinet"},
 		// C-over-A overlap: a Databricks-tagged VM that also reports
 		// HasScaleSet=true or IsAKSManaged=true still resolves to pattern C,
 		// since the Databricks tag check runs before the pool-membership
@@ -135,7 +136,7 @@ func TestClassifyWorkloadPattern(t *testing.T) {
 		// VMSS/AKS pool member resolves to pattern A, not B, consistent with
 		// the canonical order placing A before B (NFR-003 precedence order).
 		{"B-excluded-by-A: AVD-pooled VM also reporting IsAKSManaged stays pattern A", false, true, false, "Pooled", "", "", patternComputePool, "AKS Node Pool"},
-		{"B-excluded-by-A: AVD-pooled VM also reporting HasScaleSet stays pattern A", true, false, false, "Pooled", "", "", patternComputePool, "VMSS"},
+		{"B-over-VMSS: AVD-pooled VM also reporting HasScaleSet is pattern B", true, false, false, "Pooled", "", "", patternAVDPooled, "AVD Pooled Host Pool"},
 		// G-over-E baseline: an appliance-image VM with no pool, Databricks,
 		// or AVD signal resolves to G, not the E default.
 		{"G-over-E: appliance-image VM with no other signal resolves to G", false, false, false, "", "checkpoint", "vmseries", patternCertifiedAppliance, "Check Point"},
@@ -209,7 +210,9 @@ func TestRecommendExecutionMethod(t *testing.T) {
 		{"Gen1 customer-managed", patternCustomerManaged, "V1", false, manualReviewRequired},
 		{"Gen2 customer-managed", patternCustomerManaged, "V2", false, "Redeploy"},
 		{"unknown Hyper-V generation", patternCustomerManaged, "", false, manualReviewRequired},
-		{"certified ISV appliance is actionable like a customer-managed VM", patternCertifiedAppliance, "V2", false, "Redeploy"},
+		{"certified ISV appliance is actionable like a customer-managed VM", patternCertifiedAppliance, "V2", false, "only after vendor certification is confirmed"},
+		{"customer-managed redeploy is conditional on the gates", patternCustomerManaged, "V2", false, "conditional on the Temp Disk Dependency and SAP/ISV Certification Gate review"},
+		{"AVD pooled host pool still needs golden-image checks", patternAVDPooled, "V2", false, "golden image still needs Assess/Plan checks"},
 		{"Databricks-managed node is non-actionable like a pool-managed VM", patternPlatformManaged, "V2", false, "pool/cluster"},
 		{"AVD pooled host pool is non-actionable like a pool-managed VM", patternAVDPooled, "V2", false, "pool/cluster"},
 	}
@@ -231,10 +234,10 @@ func TestRecommendHardGates(t *testing.T) {
 		wantTempDiskDependency  string
 		wantSAPISVCertification string
 	}{
-		{"compute pool (A) is not subject to either gate", patternComputePool, "N/A (pool/platform-managed)", "N/A (not an SAP or ISV-certified workload)"},
-		{"AVD pooled host pool (B) still needs Temp Disk Dependency review for its golden image", patternAVDPooled, manualReviewRequired, "N/A (not an SAP or ISV-certified workload)"},
-		{"platform-managed e.g. Databricks (C) is not subject to either gate", patternPlatformManaged, "N/A (pool/platform-managed)", "N/A (not an SAP or ISV-certified workload)"},
-		{"customer-managed VM (E) needs Temp Disk Dependency review but not SAP/ISV certification", patternCustomerManaged, manualReviewRequired, "N/A (not an SAP or ISV-certified workload)"},
+		{"compute pool (A) is not subject to either gate", patternComputePool, "N/A (pool/platform-managed)", "N/A (pool/platform-managed)"},
+		{"AVD pooled host pool (B) needs both gates reviewed", patternAVDPooled, manualReviewRequired, manualReviewRequired},
+		{"platform-managed e.g. Databricks (C) is not subject to either gate", patternPlatformManaged, "N/A (pool/platform-managed)", "N/A (pool/platform-managed)"},
+		{"customer-managed VM (E) needs both gates reviewed", patternCustomerManaged, manualReviewRequired, manualReviewRequired},
 		{"certified ISV appliance (G) needs both gates reviewed", patternCertifiedAppliance, manualReviewRequired, manualReviewRequired},
 		{"SAP workload (F, not yet emitted) needs both gates reviewed for forward-compatibility", patternSAPWorkload, manualReviewRequired, manualReviewRequired},
 	}
@@ -292,14 +295,30 @@ func TestMatchLifecycleNotes(t *testing.T) {
 		t.Errorf("matchLifecycleNotes(Standard_D4_v3, eastus) = %q, should not match the v1-v2 price-increase row (Dv3 is not in its family list)", got)
 	}
 
-	// Dv2 is listed in the v1-v2 price-increase row's family list, so it must
-	// match that row and not the Dv3/Dsv3/Ev3/Esv3 retirement row.
+	// Dv2 matches the v1-v2 price-increase row and its own 2028-05-01
+	// retirement row, but not the 2029-11-15 Dv3/Dsv3/Ev3/Esv3 row.
 	got = matchLifecycleNotes("Standard_D4_v2", "eastus")
 	if !strings.Contains(got, "price increase on v1-v2 VM series") {
 		t.Errorf("matchLifecycleNotes(Standard_D4_v2, eastus) = %q, want the v1-v2 price-increase note", got)
 	}
-	if strings.Contains(got, "retirement date") {
-		t.Errorf("matchLifecycleNotes(Standard_D4_v2, eastus) = %q, should not match the Dv3/Dsv3/Ev3/Esv3 retirement row", got)
+	if !strings.Contains(got, "effective 2028-05-01") || strings.Contains(got, "effective 2029-11-15") {
+		t.Errorf("matchLifecycleNotes(Standard_D4_v2, eastus) = %q, want only the 2028-05-01 retirement", got)
+	}
+
+	for _, tc := range []struct{ sku, date string }{
+		{"Standard_NP10s", "2027-05-31"},
+		{"Standard_HC44rs", "2027-05-31"},
+		{"Standard_DS2_v2", "2028-05-01"},
+		{"Standard_L8s", "2028-05-01"},
+		{"Standard_A2_v2", "2028-11-15"},
+		{"Standard_B2s", "2028-11-15"},
+		{"Standard_F4s_v2", "2028-11-15"},
+		{"Standard_GS2", "2028-11-15"},
+		{"Standard_L8s_v2", "2028-11-15"},
+	} {
+		if got := matchLifecycleNotes(tc.sku, "eastus"); !strings.Contains(got, "effective "+tc.date) {
+			t.Errorf("matchLifecycleNotes(%s, eastus) = %q, want retirement effective %s", tc.sku, got, tc.date)
+		}
 	}
 
 	// A v6 SKU matches no family-scoped row, and outside the region-scoped
@@ -733,19 +752,59 @@ func TestToRecord_AROOwnership(t *testing.T) {
 	}}
 	header := (&Scanner{}).GetMetadata().HeaderRow()
 	wantHeader := []string{
-		"Subscription", "Resource Group", "Name", "Location", "Current VM Size",
-		"Workload Pattern", "Pool Membership", "Hyper-V Generation", "Disk Controller Type",
-		"Series Generation", "Azure Disk Encryption", "Temp Disk Dependency", "SAP/ISV Certification Gate",
-		"Recommended Execution Method", "Suggested Target SKU", "Target SKU Compatibility Score",
-		"Lifecycle/Pricing Notes", "Current Monthly Cost (USD)", "Projected Monthly Cost After Increase (USD)",
-		"Monthly Cost Impact (USD)", "Membership Model", "Zone Placement", "Availability Zone",
-		"VMSS Name", "Availability Set Name", "Platform Fault Domain", "VM Power State",
-		"Instance View Captured", "OS Type", "OS Version", "Computer Name", "Is Marketplace VM",
-		"Image Publisher", "Image Offer", "Image SKU", "Image Version", "OS Disk Type",
-		"OS Disk Size (GB)", "Ephemeral OS Disk", "Data Disk Count", "ADE OS Disk (VM Property)",
-		"Hibernation Enabled", "Ultra SSD Enabled", "License Type", "NIC Count", "Accelerated Networking",
-		"IP Forwarding", "Security Type", "Secure Boot Enabled", "vTPM Enabled", "Orchestration Mode",
-		"Pool Model VM Size", "Pool Model Series Generation",
+		"Subscription",
+		"Resource Group",
+		"Name",
+		"Location",
+		"Current VM Size",
+		"Series Generation",
+		"Workload Pattern",
+		"Pool Membership",
+		"Membership Model",
+		"Orchestration Mode",
+		"VMSS Name",
+		"Pool Model VM Size",
+		"Pool Model Series Generation",
+		"Availability Set Name",
+		"Hyper-V Generation",
+		"Disk Controller Type",
+		"Azure Disk Encryption",
+		"Temp Disk Dependency",
+		"SAP/ISV Certification Gate",
+		"VM Power State",
+		"Instance View Captured",
+		"Hibernation Enabled",
+		"Recommended Execution Method",
+		"Suggested Target SKU",
+		"Target SKU Compatibility Score",
+		"Lifecycle/Pricing Notes",
+		"Current Monthly Cost (USD)",
+		"Projected Monthly Cost After Increase (USD)",
+		"Monthly Cost Impact (USD)",
+		"Zone Placement",
+		"Availability Zone",
+		"Platform Fault Domain",
+		"OS Type",
+		"OS Version",
+		"Computer Name",
+		"Is Marketplace VM",
+		"Image Publisher",
+		"Image Offer",
+		"Image SKU",
+		"Image Version",
+		"OS Disk Type",
+		"OS Disk Size (GB)",
+		"Ephemeral OS Disk",
+		"Data Disk Count",
+		"ADE OS Disk (VM Property)",
+		"Ultra SSD Enabled",
+		"License Type",
+		"NIC Count",
+		"Accelerated Networking",
+		"IP Forwarding",
+		"Security Type",
+		"Secure Boot Enabled",
+		"vTPM Enabled",
 	}
 	if !reflect.DeepEqual(header, wantHeader) {
 		t.Fatalf("report schema changed: got %v, want %v", header, wantHeader)
@@ -779,7 +838,7 @@ func TestToRecord_AROOwnership(t *testing.T) {
 				"Workload Pattern":               patternComputePool,
 				"Pool Membership":                "ARO Cluster",
 				"Temp Disk Dependency":           "N/A (pool/platform-managed)",
-				"SAP/ISV Certification Gate":     "N/A (not an SAP or ISV-certified workload)",
+				"SAP/ISV Certification Gate":     "N/A (pool/platform-managed)",
 				"Recommended Execution Method":   "Managed by pool/cluster — evaluate at the pool level",
 				"Suggested Target SKU":           "N/A (pool-managed)",
 				"Target SKU Compatibility Score": "N/A",
@@ -810,8 +869,8 @@ func TestToRecord_AROOwnership(t *testing.T) {
 
 // TestToRecord_MonetaryImpactColumns locks in the confirmed fallback
 // precedence for the three monetary-impact columns (current monthly cost,
-// projected monthly cost, monthly impact): exempt cloud -> deallocated/
-// stopped VM -> retail price lookup failure -> no applicable impactPercent ->
+// projected monthly cost, monthly impact): exempt cloud -> deallocated
+// VM -> retail price lookup failure -> no applicable impactPercent ->
 // full calculation. Pool-managed rows are no longer a separate fallback step:
 // they compute the same per-instance cost as any other row (see P01-T01 of
 // the pool-monetary-impact fix).
@@ -879,12 +938,12 @@ func TestToRecord_MonetaryImpactColumns(t *testing.T) {
 				return r
 			}(),
 			cache:         buildCache("Standard_D4_v2"),
-			wantCurrent:   "N/A (VM deallocated/stopped)",
-			wantProjected: "N/A (VM deallocated/stopped)",
-			wantMonthly:   "N/A (VM deallocated/stopped)",
+			wantCurrent:   "N/A (VM deallocated)",
+			wantProjected: "N/A (VM deallocated)",
+			wantMonthly:   "N/A (VM deallocated)",
 		},
 		{
-			name:       "stopped VM (case-insensitive)",
+			name:       "stopped but allocated VM is still billed (case-insensitive)",
 			azureCloud: "",
 			row: func() vmModernizationRow {
 				r := baseRow("Standard_D4_v2")
@@ -892,9 +951,9 @@ func TestToRecord_MonetaryImpactColumns(t *testing.T) {
 				return r
 			}(),
 			cache:         buildCache("Standard_D4_v2"),
-			wantCurrent:   "N/A (VM deallocated/stopped)",
-			wantProjected: "N/A (VM deallocated/stopped)",
-			wantMonthly:   "N/A (VM deallocated/stopped)",
+			wantCurrent:   formatUSD(priceUSD * 730),
+			wantProjected: formatUSD(priceUSD * 730 * 1.25),
+			wantMonthly:   formatUSD(priceUSD * 730 * 0.25),
 		},
 		{
 			// Pool-managed rows (here, an AVD pooled host pool, pattern B)
@@ -989,5 +1048,112 @@ func TestBuildGeneralNoticesSheet_SuppressedOnExemptCloud(t *testing.T) {
 	t.Setenv("AZURE_CLOUD", "AzureChina")
 	if sheet := buildGeneralNoticesSheet(); sheet != nil {
 		t.Errorf("buildGeneralNoticesSheet() on Azure China = %+v, want nil (suppressed)", sheet)
+	}
+}
+
+func TestMatchLifecycleNotes_BSeriesV1(t *testing.T) {
+	t.Setenv("AZURE_CLOUD", "")
+
+	for _, region := range []string{"eastus", "westeurope"} {
+		got := matchLifecycleNotes("Standard_B2s", region)
+		if !strings.Contains(got, "25 percent price increase on v1-v2 VM series") {
+			t.Errorf("matchLifecycleNotes(Standard_B2s, %s) = %q, want the v1-v2 price-increase note", region, got)
+		}
+	}
+	if pct, ok := matchImpactPercent("Standard_B2s", "westeurope"); !ok || pct != 25 {
+		t.Errorf("matchImpactPercent(Standard_B2s, westeurope) = %v, %v, want 25, true", pct, ok)
+	}
+}
+
+func TestMatchImpactPercent_NPHCNotDoubleCounted(t *testing.T) {
+	t.Setenv("AZURE_CLOUD", "")
+
+	for _, sku := range []string{"Standard_NP10s", "Standard_HC44rs"} {
+		for _, region := range []string{"eastus", "westeurope", "northeurope", "francecentral"} {
+			pct, ok := matchImpactPercent(sku, region)
+			if !ok || pct != 25 {
+				t.Errorf("matchImpactPercent(%s, %s) = %v, %v, want 25, true", sku, region, pct, ok)
+			}
+			if got := matchLifecycleNotes(sku, region); strings.Contains(got, "Regional price increase") {
+				t.Errorf("matchLifecycleNotes(%s, %s) = %q, should not include a regional increase", sku, region, got)
+			}
+		}
+	}
+}
+
+func TestBuildAVDHostPoolByVMId_KeepsEveryHostInPool(t *testing.T) {
+	rows := []avdHostPoolRow{
+		{HostPoolArmID: "/subscriptions/s/resourcegroups/rg/providers/microsoft.desktopvirtualization/hostpools/hp1", AVDHostPoolType: "Pooled"},
+		{HostPoolArmID: "/subscriptions/s/resourcegroups/rg/providers/microsoft.desktopvirtualization/hostpools/hp1", VMId: "/subscriptions/s/resourcegroups/rg/providers/microsoft.compute/virtualmachines/vm1"},
+		{HostPoolArmID: "/subscriptions/s/resourcegroups/rg/providers/microsoft.desktopvirtualization/hostpools/hp1", VMId: "/subscriptions/s/resourcegroups/rg/providers/microsoft.compute/virtualmachines/vm2"},
+		{HostPoolArmID: "/subscriptions/s/resourcegroups/rg/providers/microsoft.desktopvirtualization/hostpools/hp2", AVDHostPoolType: "Personal"},
+		{HostPoolArmID: "/subscriptions/s/resourcegroups/rg/providers/microsoft.desktopvirtualization/hostpools/hp2", VMId: "/subscriptions/s/resourcegroups/rg/providers/microsoft.compute/virtualmachines/vm3"},
+		{HostPoolArmID: "/subscriptions/s/resourcegroups/rg/providers/microsoft.desktopvirtualization/hostpools/missing", VMId: "/subscriptions/s/resourcegroups/rg/providers/microsoft.compute/virtualmachines/vm4"},
+	}
+	got := buildAVDHostPoolByVMId(rows)
+	want := map[string]string{
+		"/subscriptions/s/resourcegroups/rg/providers/microsoft.compute/virtualmachines/vm1": "Pooled",
+		"/subscriptions/s/resourcegroups/rg/providers/microsoft.compute/virtualmachines/vm2": "Pooled",
+		"/subscriptions/s/resourcegroups/rg/providers/microsoft.compute/virtualmachines/vm3": "Personal",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("buildAVDHostPoolByVMId = %v, want %v", got, want)
+	}
+}
+
+func TestMatchImpactPercentAt_EffectiveDate(t *testing.T) {
+	t.Setenv("AZURE_CLOUD", "")
+
+	before := time.Date(2027, 1, 31, 23, 59, 59, 0, time.UTC)
+	onDate := time.Date(2027, 2, 1, 0, 0, 0, 0, time.UTC)
+
+	if pct, ok := matchImpactPercentAt("Standard_D4_v2", "eastus", before); !ok || pct != 25 {
+		t.Errorf("before effective date = %v, %v, want 25, true", pct, ok)
+	}
+	if pct, ok := matchImpactPercentAt("Standard_D4_v2", "eastus", onDate); ok {
+		t.Errorf("on effective date = %v, %v, want no pending percent (already in current rates)", pct, ok)
+	}
+}
+
+func TestGenericVMSSRecommendsManualValidation(t *testing.T) {
+	meta := (&Scanner{}).GetMetadata().ColumnMetadata
+	col := func(rec []string, name string) string {
+		for i, c := range meta {
+			if c.Name == name {
+				return rec[i]
+			}
+		}
+		return ""
+	}
+
+	vmss := vmModernizationRow{HasScaleSet: true, VMSize: "Standard_D4_v3", HyperVGeneration: "V2"}.toRecord("sub", &vmPriceCache{})
+	if got := col(vmss, "Recommended Execution Method"); !strings.HasPrefix(got, manualReviewRequired) {
+		t.Errorf("generic VMSS execution method = %q, want Manual Review Required", got)
+	}
+	for _, name := range []string{"Temp Disk Dependency", "SAP/ISV Certification Gate"} {
+		if got := col(vmss, name); got != manualReviewRequired {
+			t.Errorf("generic VMSS %s = %q, want %q", name, got, manualReviewRequired)
+		}
+	}
+
+	aks := vmModernizationRow{HasScaleSet: true, IsAKSManaged: true, VMSize: "Standard_D4_v3", HyperVGeneration: "V2"}.toRecord("sub", &vmPriceCache{})
+	if got := col(aks, "Recommended Execution Method"); strings.HasPrefix(got, manualReviewRequired) {
+		t.Errorf("AKS node execution method = %q, want pool-level text", got)
+	}
+	if got := col(aks, "SAP/ISV Certification Gate"); got != "N/A (pool/platform-managed)" {
+		t.Errorf("AKS node SAP/ISV Certification Gate = %q, want N/A (pool/platform-managed)", got)
+	}
+}
+
+func TestMergeVMSSPools(t *testing.T) {
+	rows := []vmModernizationRow{{VMSSID: "/subscriptions/s/resourcegroups/rg/providers/microsoft.compute/virtualmachinescalesets/a"}, {}}
+	mergeVMSSPools(rows, map[string]vmssPoolRow{
+		"/subscriptions/s/resourcegroups/rg/providers/microsoft.compute/virtualmachinescalesets/a": {OrchestrationMode: "Flexible", PoolModelVMSize: "Standard_D4s_v5"},
+	})
+	if rows[0].OrchestrationMode != "Flexible" || rows[0].PoolModelVMSize != "Standard_D4s_v5" {
+		t.Errorf("pool fields not merged: %+v", rows[0])
+	}
+	if rows[1].OrchestrationMode != "" || rows[1].PoolModelVMSize != "" {
+		t.Errorf("row without VMSSId must stay empty: %+v", rows[1])
 	}
 }

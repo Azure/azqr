@@ -1,0 +1,11 @@
+// Scale-set ("pool-level") lookup, merged onto VM inventory in Go by the
+// row's VMSSId. A separate query keeps the main inventory query within the
+// default Azure Resource Graph join/union limits.
+// A scale set with zero member instances has no VM row to merge onto, so its
+// orchestration mode/model size are not surfaced.
+resources
+| where type =~ "microsoft.compute/virtualmachinescalesets"
+| project
+    VMSSId = tolower(id),
+    OrchestrationMode = tostring(properties.orchestrationMode),
+    PoolModelVMSize = tostring(sku.name)

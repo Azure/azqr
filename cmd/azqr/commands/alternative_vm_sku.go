@@ -36,6 +36,11 @@ The compatibility score (0.0–1.0) is computed from:
   - Data disk match            (weight 0.05)
   - Accelerated networking     (weight 0.05)
 
+The score measures hardware similarity only. It does not check CPU architecture,
+local temp-disk needs, attached disk/NIC counts, vendor certification, image
+readiness, region or zone availability, subscription restrictions, quota, or
+capacity, so validate any alternative before using it.
+
 Returns the top N results (default 10) as JSON.`,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
