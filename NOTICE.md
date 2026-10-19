@@ -18,7 +18,7 @@ are grouped together.
 Applies to:
 
 - `github.com/Azure/azure-sdk-for-go/sdk/azcore` v1.23.3
-- `github.com/Azure/azure-sdk-for-go/sdk/azidentity` v1.14.1
+- `github.com/Azure/azure-sdk-for-go/sdk/azidentity` v1.15.0
 - `github.com/Azure/azure-sdk-for-go/sdk/internal` v1.13.0
 
 ```
@@ -117,7 +117,7 @@ SOFTWARE.
 
 Applies to:
 
-- `github.com/AzureAD/microsoft-authentication-library-for-go/apps` v1.9.0
+- `github.com/AzureAD/microsoft-authentication-library-for-go/apps` v1.10.1
 
 ```
 MIT License
