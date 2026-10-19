@@ -66,15 +66,16 @@ type skuRegionPair struct {
 // canonical-row selection need — it does not need every field the region
 // plugin's types.RetailPriceItem declares.
 type vmRetailPriceItem struct {
-	ArmSkuName         string  `json:"armSkuName"`
-	ArmRegionName      string  `json:"armRegionName"`
-	RetailPrice        float64 `json:"retailPrice"`
-	UnitOfMeasure      string  `json:"unitOfMeasure"`
-	Type               string  `json:"type"`
-	MeterName          string  `json:"meterName"`
-	ProductName        string  `json:"productName"`
-	SkuName            string  `json:"skuName"`
-	EffectiveStartDate string  `json:"effectiveStartDate"`
+	ArmSkuName           string  `json:"armSkuName"`
+	ArmRegionName        string  `json:"armRegionName"`
+	RetailPrice          float64 `json:"retailPrice"`
+	UnitOfMeasure        string  `json:"unitOfMeasure"`
+	IsPrimaryMeterRegion *bool   `json:"isPrimaryMeterRegion"`
+	Type                 string  `json:"type"`
+	MeterName            string  `json:"meterName"`
+	ProductName          string  `json:"productName"`
+	SkuName              string  `json:"skuName"`
+	EffectiveStartDate   string  `json:"effectiveStartDate"`
 }
 
 // vmRetailPriceResponse is the paginated Azure Retail Prices API response
@@ -243,6 +244,15 @@ func selectCanonicalPrice(items []vmRetailPriceItem, osType string) (float64, bo
 			continue
 		}
 		if !strings.EqualFold(item.Type, "Consumption") {
+			continue
+		}
+		if containsFold(item.MeterName, "low priority") || containsFold(item.SkuName, "low priority") || containsFold(item.ProductName, "low priority") {
+			continue
+		}
+		if item.RetailPrice <= 0 || (item.UnitOfMeasure != "" && !strings.EqualFold(strings.TrimSpace(item.UnitOfMeasure), "1 Hour")) {
+			continue
+		}
+		if item.IsPrimaryMeterRegion != nil && !*item.IsPrimaryMeterRegion {
 			continue
 		}
 		isWindowsRow := containsFold(item.ProductName, "windows") || containsFold(item.SkuName, "windows")

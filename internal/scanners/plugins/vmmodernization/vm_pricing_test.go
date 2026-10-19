@@ -284,3 +284,24 @@ func TestCollectVMPrices_NoPairsNoHTTPCall(t *testing.T) {
 		t.Fatal("collectVMPrices with no pairs should still return a non-nil, empty cache")
 	}
 }
+
+func TestSelectCanonicalPrice_RejectsNonPAYGHourlyRows(t *testing.T) {
+	notPrimary := false
+	base := vmRetailPriceItem{RetailPrice: 1, Type: "Consumption", UnitOfMeasure: "1 Hour", EffectiveStartDate: "2020-01-01T00:00:00Z"}
+
+	for name, mutate := range map[string]func(*vmRetailPriceItem){
+		"low priority":    func(i *vmRetailPriceItem) { i.MeterName = "D4 v2 Low Priority" },
+		"non-hour unit":   func(i *vmRetailPriceItem) { i.UnitOfMeasure = "1/Month" },
+		"zero price":      func(i *vmRetailPriceItem) { i.RetailPrice = 0 },
+		"non-primary reg": func(i *vmRetailPriceItem) { i.IsPrimaryMeterRegion = &notPrimary },
+	} {
+		item := base
+		mutate(&item)
+		if price, ok := selectCanonicalPrice([]vmRetailPriceItem{item}, "Linux"); ok {
+			t.Errorf("%s: selected %v, want no price", name, price)
+		}
+	}
+	if price, ok := selectCanonicalPrice([]vmRetailPriceItem{base}, "Linux"); !ok || price != 1 {
+		t.Errorf("valid row = %v, %v, want 1, true", price, ok)
+	}
+}

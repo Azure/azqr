@@ -2,11 +2,12 @@
 // VM v6/v7 Modernization Readiness — AVD host-pool-type lookup
 //
 // WHAT IT DOES
-//   Returns one row per Azure Virtual Desktop session host, giving the
-//   session host's VM resource ID (vmId) and its parent host pool's type
-//   (Pooled/Personal — avdHostPoolType). The main discover-assess.kql query
-//   merges this onto its own rows (by vmId) in Go to classify AVD-managed
-//   workload pattern.
+//   Returns one row per Azure Virtual Desktop session host (hostPoolArmId +
+//   vmId) and one row per host pool (hostPoolArmId + avdHostPoolType,
+//   Pooled/Personal). Go joins the two by hostPoolArmId and merges the result
+//   onto the main discover-assess.kql rows (by vmId) to classify AVD-managed
+//   workload pattern. Rows are deliberately not aggregated, so every session
+//   host in a pool is preserved.
 //
 // WHY A SEPARATE QUERY
 //   Microsoft.DesktopVirtualization/hostPools and .../hostPools/sessionHosts
@@ -27,7 +28,7 @@
 //   - Azure Resource Graph disallows referencing the same remote table more
 //     than once as a join right-side and does not support `let`, so both
 //     resource types (hostPools and sessionHosts) are pulled via a single
-//     table reference and correlated with summarize (not a join).
+//     table reference and correlated in Go (not a join or summarize).
 //   - A session host's own id embeds its parent host pool's id as a path
 //     prefix (.../hostPools/<pool>/sessionHosts/<host>), so the host pool
 //     ARM ID is derived by string-trimming rather than reading a separate
@@ -41,6 +42,4 @@ desktopvirtualizationresources
     tolower(tostring(properties.resourceId)), "")
 | extend hostPoolTypeRaw = iff(type == "microsoft.desktopvirtualization/hostpools",
     tostring(properties.hostPoolType), "")
-| summarize vmId = max(vmIdRaw), avdHostPoolType = max(hostPoolTypeRaw) by hostPoolArmId
-| where isnotempty(vmId)
-| project vmId, avdHostPoolType
+| project hostPoolArmId, vmId = vmIdRaw, avdHostPoolType = hostPoolTypeRaw

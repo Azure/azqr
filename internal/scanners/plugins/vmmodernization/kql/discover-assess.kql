@@ -15,9 +15,9 @@
 //        OS/image, storage, capabilities/licensing, networking, security),
 //        surfaced as-is so a reader has everything that article's checklist
 //        references, not only the subset the plugin's own verdicts consume.
-//     3. For every VMSS-backed row (Flex or Uniform), the parent scale set's
-//        orchestration mode and model/default VM profile size, joined in via
-//        the row's own derived scale-set ID (see the VMSS-parent join below).
+//     3. For every VMSS-backed row (Flex or Uniform), the derived scale-set ID
+//        (VMSSId). The parent scale set's orchestration mode and model size
+//        come from discover-assess-vmss.kql and are merged in Go by VMSSId.
 //
 // NOTES
 //   - Hyper-V generation and disk controller type are confirmed directly
@@ -91,9 +91,8 @@ computeresources
     availabilitySetId   = tostring(p.availabilitySet.id),
     // Lowercased (matching the NIC join's tolower(properties.virtualMachine.id)
     // convention below) because this is an ARM-embedded property value, not
-    // the resources table's own normalized `id` column the VMSS-parent join's
-    // right side keys on via tolower(id) — case-sensitive Kusto join keys
-    // would otherwise silently fail to match for VMSS Flex rows.
+    // the resources table's own normalized `id` column; the VMSS lookup query
+    // lowercases its ids too so the Go merge matches for VMSS Flex rows.
     vmssIdFlex          = tolower(tostring(p.virtualMachineScaleSet.id)),
     platformFaultDomain = tostring(p.platformFaultDomain)
 // Uniform rows carry no vmssIdFlex property; derive the parent scale set's ID
@@ -238,20 +237,6 @@ computeresources
 // above for Uniform-mode VMSS members, so AVD host-pool data is fetched by a
 // separate query (discover-assess-avd.kql) and merged onto these rows in Go
 // by vmId after both queries return.
-// ---- VMSS-parent join: scale-set-level ("pool-level") data joined onto every
-// VMSS-backed row (Flex or Uniform) via the row's own derived vmssId, rather
-// than a second top-level query/sheet. Rows with no vmssId (standalone VMs,
-// Availability Set members) naturally get null join results here, projected
-// as "N/A (not pool-managed)" downstream in Go.
-// LIMITATION (accepted, not solved by a second query/sheet): a scale set
-// with zero current member instances produces no row in this query at all,
-// so this join cannot surface that scale set's orchestration mode/model size
-// independent of at least one visible member instance.
-| join kind=leftouter (
-    resources
-    | where type =~ "microsoft.compute/virtualmachinescalesets"
-    | project vmssId = tolower(id), poolOrchestrationMode = tostring(properties.orchestrationMode), poolModelVMSize = tostring(sku.name)
-  ) on vmssId
 | project
     Name,
     Id,
@@ -269,6 +254,7 @@ computeresources
     ZonePlacement,
     AvailabilityZone,
     VMSSName,
+    VMSSId = vmssId,
     AvailabilitySetName,
     PlatformFaultDomain,
     VMPowerState,
@@ -294,6 +280,4 @@ computeresources
     IPForwarding = iff(coalesce(anyIpFwd, 0) > 0, 'Yes', 'No'),
     SecurityType,
     SecureBootEnabled,
-    VTpmEnabled,
-    OrchestrationMode = poolOrchestrationMode,
-    PoolModelVMSize = poolModelVMSize
+    VTpmEnabled

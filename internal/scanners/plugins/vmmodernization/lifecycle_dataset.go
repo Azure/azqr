@@ -7,6 +7,7 @@ import (
 	_ "embed"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/skus"
@@ -87,7 +88,11 @@ func matchLifecycleNotes(vmSize, location string) string {
 			!matchesAnyFamily(familyNorm, entry.ExcludeFamilies)
 		regionMatches := len(entry.Regions) == 0 || matchesAnyRegion(regionNorm, entry.Regions)
 		if familyMatches && regionMatches {
-			notes = append(notes, fmt.Sprintf("%s (effective %s)", entry.Impact, entry.EffectiveDate))
+			note := fmt.Sprintf("%s (effective %s)", entry.Impact, entry.EffectiveDate)
+			if entry.ImpactPercent != nil && isPriceChangeInEffect(entry.EffectiveDate, time.Now()) {
+				note += " - already in effect, included in current rates"
+			}
+			notes = append(notes, note)
 		}
 	}
 
@@ -107,6 +112,21 @@ func matchLifecycleNotes(vmSize, location string) string {
 // summed. Returns ok=false (no applicable percent) on an exempt cloud,
 // mirroring matchLifecycleNotes' suppression.
 func matchImpactPercent(vmSize, location string) (percent float64, ok bool) {
+	return matchImpactPercentAt(vmSize, location, time.Now().UTC())
+}
+
+// isPriceChangeInEffect reports whether a dataset entry's price change has
+// already taken effect at now (midnight UTC of its effective date). An
+// unparseable date is treated as not yet in effect.
+func isPriceChangeInEffect(effectiveDate string, now time.Time) bool {
+	d, err := time.Parse("2006-01-02", effectiveDate)
+	return err == nil && !d.After(now.UTC())
+}
+
+// matchImpactPercentAt is matchImpactPercent evaluated at an explicit time.
+// A price change already in effect is excluded: the current retail rate
+// already includes it, so applying it again would double-count.
+func matchImpactPercentAt(vmSize, location string, now time.Time) (percent float64, ok bool) {
 	if isExemptCloud() {
 		return 0, false
 	}
@@ -116,7 +136,7 @@ func matchImpactPercent(vmSize, location string) (percent float64, ok bool) {
 
 	var matches []float64
 	for _, entry := range lifecycleEntries {
-		if entry.ImpactPercent == nil {
+		if entry.ImpactPercent == nil || isPriceChangeInEffect(entry.EffectiveDate, now) {
 			continue
 		}
 		familyMatches := (len(entry.Families) == 0 || matchesAnyFamily(familyNorm, entry.Families)) &&
@@ -146,6 +166,10 @@ func normalizeFamily(vmSize string) string {
 	f := strings.ToLower(sku.Family)
 	f = strings.TrimPrefix(f, "standard")
 	f = strings.TrimSuffix(f, "family")
+	// The catalog names the original B-series "BS"; the dataset calls it "Bv1".
+	if f == "bs" {
+		return "bv1"
+	}
 	return f
 }
 
