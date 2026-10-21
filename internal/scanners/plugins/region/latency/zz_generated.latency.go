@@ -3037,6 +3037,7 @@ var regionCluster = map[string]string{
 	"newzealandnorth": "apac",
 	"southeastasia": "apac",
 	"southindia": "apac",
+	"taiwannorth": "apac",
 	"westindia": "apac",
 	// Middle East & Africa
 	"israelcentral": "mea",
