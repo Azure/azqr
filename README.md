@@ -177,11 +177,14 @@ wps | Microsoft.SignalRService/webPubSub
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/azure/azqr/main/scripts/install.sh)"
 ```
 
-To install the latest preview (pre-release) version:
+<details>
+<summary>Install the latest preview (pre-release) version</summary>
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/azure/azqr/main/scripts/install.sh)" -- --preview
 ```
+
+</details>
 
 ### Windows
 
@@ -194,10 +197,14 @@ Or via PowerShell:
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/azure/azqr/main/scripts/install.ps1'))
 ```
 
-To install the latest preview (pre-release) version via PowerShell:
+<details>
+<summary>Install the latest preview (pre-release) version via PowerShell</summary>
+
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex "& { $(iwr -useb 'https://raw.githubusercontent.com/azure/azqr/main/scripts/install.ps1') } -Preview"
 ```
+
+</details>
 
 ### macOS
 
