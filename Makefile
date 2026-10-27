@@ -106,6 +106,9 @@ json:
 sku:
 	go run ./hack/code/sku_gen/main.go
 
+replacement-series:
+	go run ./hack/code/replacement_series_gen/main.go
+
 latency:
 	go run ./hack/code/latency_gen/main.go
 

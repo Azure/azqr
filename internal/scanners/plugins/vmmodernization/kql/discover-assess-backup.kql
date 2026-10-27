@@ -1,0 +1,19 @@
+// Azure Backup policy subtype per protected VM, merged onto VM inventory in Go.
+// A separate query is required: Azure Resource Graph disallows combining
+// extension tables such as recoveryservicesresources with the main inventory query.
+// Enhanced (policy type V2) outranks Standard (V1) when a VM has several items.
+recoveryservicesresources
+| where type =~ "microsoft.recoveryservices/vaults/backupfabrics/protectioncontainers/protecteditems"
+| where properties.backupManagementType =~ "AzureIaasVM"
+| extend ProtectionState = tostring(properties.currentProtectionState)
+| where ProtectionState in~ ("ProtectionConfigured", "ConfiguringProtection", "ConfiguringProtectionFailed", "ProtectionError")
+| extend VMId = tolower(tostring(properties.sourceResourceId)),
+    PolicyRank = case(
+        tostring(properties.policyType) =~ "V2", 2,
+        tostring(properties.policyType) =~ "V1", 1,
+        0)
+| where isnotempty(VMId)
+| summarize PolicyRank = max(PolicyRank) by VMId
+| project
+    VMId,
+    BackupPolicySubtype = case(PolicyRank == 2, "Enhanced", PolicyRank == 1, "Standard", "Unknown")

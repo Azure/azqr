@@ -205,22 +205,20 @@ func TestRecommendExecutionMethod(t *testing.T) {
 		isTargetGen      bool
 		wantContains     string
 	}{
-		{"pool-managed VM", patternComputePool, "V2", false, "pool/cluster"},
-		{"already on target", patternCustomerManaged, "V2", true, "No action needed"},
+		{"pool-managed VM", patternComputePool, "V2", false, methodManagedByPool},
+		{"already on target", patternCustomerManaged, "V2", true, methodNoAction},
 		{"Gen1 customer-managed", patternCustomerManaged, "V1", false, manualReviewRequired},
-		{"Gen2 customer-managed", patternCustomerManaged, "V2", false, "Redeploy"},
+		{"Gen2 customer-managed", patternCustomerManaged, "V2", false, methodRedeploy},
 		{"unknown Hyper-V generation", patternCustomerManaged, "", false, manualReviewRequired},
-		{"certified ISV appliance is actionable like a customer-managed VM", patternCertifiedAppliance, "V2", false, "only after vendor certification is confirmed"},
-		{"customer-managed redeploy is conditional on the gates", patternCustomerManaged, "V2", false, "conditional on the Temp Disk Dependency and SAP/ISV Certification Gate review"},
-		{"AVD pooled host pool still needs golden-image checks", patternAVDPooled, "V2", false, "golden image still needs Assess/Plan checks"},
-		{"Databricks-managed node is non-actionable like a pool-managed VM", patternPlatformManaged, "V2", false, "pool/cluster"},
-		{"AVD pooled host pool is non-actionable like a pool-managed VM", patternAVDPooled, "V2", false, "pool/cluster"},
+		{"certified ISV appliance is actionable like a customer-managed VM", patternCertifiedAppliance, "V2", false, methodRedeploy},
+		{"Databricks-managed node is non-actionable like a pool-managed VM", patternPlatformManaged, "V2", false, methodManagedByPool},
+		{"AVD pooled host pool is non-actionable like a pool-managed VM", patternAVDPooled, "V2", false, methodManagedByPool},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := recommendExecutionMethod(tt.patternCode, tt.hyperVGeneration, tt.isTargetGen)
-			if !strings.Contains(got, tt.wantContains) {
-				t.Errorf("recommendExecutionMethod(%q, %q, %v) = %q, want substring %q",
+			if got != tt.wantContains {
+				t.Errorf("recommendExecutionMethod(%q, %q, %v) = %q, want %q",
 					tt.patternCode, tt.hyperVGeneration, tt.isTargetGen, got, tt.wantContains)
 			}
 		})
@@ -665,6 +663,68 @@ func TestLoadAROClusters(t *testing.T) {
 	}
 }
 
+func TestLoadAndMergeBackupPolicySubtypes(t *testing.T) {
+	raw := func(vmID, subtype string) json.RawMessage {
+		b, err := json.Marshal(backupPolicyRow{VMID: vmID, BackupPolicySubtype: subtype})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return b
+	}
+	tests := []struct {
+		name       string
+		data       []json.RawMessage
+		queryErr   error
+		wantLoaded bool
+		want       map[string]string // VM ID -> expected subtype
+	}{
+		{
+			name:       "enhanced, standard and unprotected",
+			data:       []json.RawMessage{raw("/SUBSCRIPTIONS/S/vm-a", "Enhanced"), raw("/subscriptions/s/vm-b", "Standard")},
+			wantLoaded: true,
+			want:       map[string]string{"/subscriptions/s/vm-a": "Enhanced", "/subscriptions/s/vm-b": "Standard", "/subscriptions/s/vm-c": "Not configured"},
+		},
+		{
+			name:       "no protected items",
+			wantLoaded: true,
+			want:       map[string]string{"/subscriptions/s/vm-a": "Not configured"},
+		},
+		{
+			name:     "query failure marks every VM unknown",
+			queryErr: errors.New("query unavailable"),
+			want:     map[string]string{"/subscriptions/s/vm-a": "Unknown"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			query := func(_ context.Context, kql string, _ map[string]string, _ ...graph.QueryOptions) (*graph.GraphResult, error) {
+				if kql != discoverAssessBackupQuery {
+					t.Fatal("unexpected query")
+				}
+				if tt.queryErr != nil {
+					return nil, tt.queryErr
+				}
+				return &graph.GraphResult{Data: tt.data}, nil
+			}
+			subtypes, loaded := loadBackupPolicySubtypes(context.Background(), query, map[string]string{"s": "S"})
+			if loaded != tt.wantLoaded {
+				t.Fatalf("loaded = %v, want %v", loaded, tt.wantLoaded)
+			}
+
+			var rows []vmModernizationRow
+			for id := range tt.want {
+				rows = append(rows, vmModernizationRow{ID: id})
+			}
+			mergeBackupPolicySubtypes(rows, subtypes, loaded)
+			for _, r := range rows {
+				if r.BackupPolicySubtype != tt.want[r.ID] {
+					t.Errorf("%s: subtype = %q, want %q", r.ID, r.BackupPolicySubtype, tt.want[r.ID])
+				}
+			}
+		})
+	}
+}
+
 func TestMergeAROClusters(t *testing.T) {
 	cluster := aroClusterRow{
 		AROClusterID:       "/subscriptions/sub1/resourcegroups/parent/providers/microsoft.redhatopenshift/openshiftclusters/cluster1",
@@ -759,6 +819,30 @@ func TestToRecord_AROOwnership(t *testing.T) {
 		"Current VM Size",
 		"Series Generation",
 		"Workload Pattern",
+		"Platform Readiness Outcome",
+		"Recommended Execution Method",
+		"Modernization Complexity",
+		"Complexity Reason",
+		"Suggested Target SKU",
+		"Target SKU Compatibility Score",
+		"Documented Replacement Series",
+		"Series Specification Differences",
+		"Lifecycle/Pricing Notes",
+		"Generation 2 Ready",
+		"Remote NVMe OS Supported",
+		"MANA OS Supported",
+		"Hyper-V Generation",
+		"Disk Controller Type",
+		"Temp Disk Dependency",
+		"SAP/ISV Certification Gate",
+		"Azure Disk Encryption",
+		"Hibernation Enabled",
+		"Backup Policy Subtype",
+		"VM Power State",
+		"Instance View Captured",
+		"Current Monthly Cost (USD)",
+		"Projected Monthly Cost After Increase (USD)",
+		"Monthly Cost Impact (USD)",
 		"Pool Membership",
 		"Membership Model",
 		"Orchestration Mode",
@@ -766,21 +850,6 @@ func TestToRecord_AROOwnership(t *testing.T) {
 		"Pool Model VM Size",
 		"Pool Model Series Generation",
 		"Availability Set Name",
-		"Hyper-V Generation",
-		"Disk Controller Type",
-		"Azure Disk Encryption",
-		"Temp Disk Dependency",
-		"SAP/ISV Certification Gate",
-		"VM Power State",
-		"Instance View Captured",
-		"Hibernation Enabled",
-		"Recommended Execution Method",
-		"Suggested Target SKU",
-		"Target SKU Compatibility Score",
-		"Lifecycle/Pricing Notes",
-		"Current Monthly Cost (USD)",
-		"Projected Monthly Cost After Increase (USD)",
-		"Monthly Cost Impact (USD)",
 		"Zone Placement",
 		"Availability Zone",
 		"Platform Fault Domain",
@@ -796,7 +865,6 @@ func TestToRecord_AROOwnership(t *testing.T) {
 		"OS Disk Size (GB)",
 		"Ephemeral OS Disk",
 		"Data Disk Count",
-		"ADE OS Disk (VM Property)",
 		"Ultra SSD Enabled",
 		"License Type",
 		"NIC Count",
@@ -839,7 +907,7 @@ func TestToRecord_AROOwnership(t *testing.T) {
 				"Pool Membership":                "ARO Cluster",
 				"Temp Disk Dependency":           "N/A (pool/platform-managed)",
 				"SAP/ISV Certification Gate":     "N/A (pool/platform-managed)",
-				"Recommended Execution Method":   "Managed by pool/cluster — evaluate at the pool level",
+				"Recommended Execution Method":   methodManagedByPool,
 				"Suggested Target SKU":           "N/A (pool-managed)",
 				"Target SKU Compatibility Score": "N/A",
 			}
@@ -1155,5 +1223,197 @@ func TestMergeVMSSPools(t *testing.T) {
 	}
 	if rows[1].OrchestrationMode != "" || rows[1].PoolModelVMSize != "" {
 		t.Errorf("row without VMSSId must stay empty: %+v", rows[1])
+	}
+}
+
+func TestClassifyGeneration2Ready(t *testing.T) {
+	tests := []struct {
+		name, gen, imageSKU, want string
+	}{
+		{"V2", "V2", "", "TRUE"},
+		{"Generation 2 label", "Generation 2", "", "TRUE"},
+		{"V1", "V1", "2022-datacenter-g2", "FALSE"},
+		{"missing gen, gen2 image", "", "22_04-lts-gen2", "TRUE"},
+		{"missing gen, g2 image", "", "2022-datacenter-azure-edition-g2", "TRUE"},
+		{"missing gen, plain image", "", "22_04-lts", "UNKNOWN"},
+		{"nothing", "", "", "UNKNOWN"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := classifyGeneration2Ready(tt.gen, tt.imageSKU); got != tt.want {
+				t.Errorf("classifyGeneration2Ready(%q, %q) = %q, want %q", tt.gen, tt.imageSKU, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestClassifyModernizationComplexity(t *testing.T) {
+	tests := []struct {
+		name, size, gen, ctrl, sec string
+		target                     bool
+		want                       string
+	}{
+		{"gen1", "Standard_D4s_v3", "V1", "SCSI", "", false, "HIGH"},
+		{"gen2 scsi", "Standard_D4s_v4", "V2", "SCSI", "", false, "MEDIUM"},
+		{"gen2 nvme v5 standard", "Standard_D4s_v5", "V2", "NVMe", "", false, "LOW"},
+		{"gen2 nvme v5 trusted launch", "Standard_D4s_v5", "V2", "NVMe", "TrustedLaunch", false, "REVIEW"},
+		{"gen2 nvme v3", "Standard_D4s_v3", "Generation 2", "NVMe", "Standard", false, "REVIEW"},
+		{"unknown generation", "Standard_D4s_v5", "", "NVMe", "", false, "REVIEW"},
+		{"already target", "Standard_D4s_v6", "V1", "SCSI", "", true, "N/A (already on target generation)"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, reason := classifyModernizationComplexity(tt.size, tt.gen, tt.ctrl, tt.sec, tt.target)
+			if got != tt.want || reason == "" {
+				t.Errorf("got (%q, %q), want rating %q with a reason", got, reason, tt.want)
+			}
+		})
+	}
+}
+
+func TestClassifyRemoteNVMeOSSupport(t *testing.T) {
+	tests := []struct {
+		name                                  string
+		publisher, offer, sku, osName, osVers string
+		want                                  string
+	}{
+		{"no metadata", "", "", "", "", "", "UNKNOWN"},
+		{"azure linux 3", "MicrosoftCBLMariner", "azure-linux-3", "azure-linux-3-gen2", "", "", "TRUE"},
+		{"mariner 2", "MicrosoftCBLMariner", "cbl-mariner", "cbl-mariner-2-gen2", "", "", "FALSE"},
+		{"alma 9", "almalinux", "almalinux-x86_64", "9-gen2", "", "", "TRUE"},
+		{"alma 10", "almalinux", "almalinux-x86_64", "10-gen2", "", "", "FALSE"},
+		{"debian 12", "Debian", "debian-12", "12-gen2", "", "", "TRUE"},
+		{"debian 10", "Debian", "debian-10", "10-gen2", "", "", "FALSE"},
+		{"oracle 7.9", "Oracle", "Oracle-Linux", "ol79-gen2", "", "", "TRUE"},
+		{"oracle 8.4", "Oracle", "Oracle-Linux", "ol84-lvm-gen2", "", "", "FALSE"},
+		{"oracle 9.4", "Oracle", "Oracle-Linux", "ol94-lvm-gen2", "", "", "TRUE"},
+		{"rhel 8.6", "RedHat", "RHEL", "86-gen2", "", "", "TRUE"},
+		{"rhel 8.5", "RedHat", "RHEL", "8_5", "", "", "FALSE"},
+		{"rhel 8 latest", "RedHat", "RHEL", "8-lvm-gen2", "", "", "TRUE"},
+		{"rhel 9", "RedHat", "RHEL", "9-lvm-gen2", "", "", "TRUE"},
+		{"rhel 7.9", "RedHat", "RHEL", "7_9", "", "", "TRUE"},
+		{"rhel 7.8", "RedHat", "RHEL", "7.8", "", "", "FALSE"},
+		{"sles 15 sp5", "SUSE", "sles-15-sp5", "gen2", "", "", "TRUE"},
+		{"sles 15 sp3", "SUSE", "sles-15-sp3", "gen2", "", "", "FALSE"},
+		{"sles sap 15 sp3", "SUSE", "sles-sap-15-sp3", "gen2", "", "", "TRUE"},
+		{"ubuntu 22.04 jammy", "Canonical", "0001-com-ubuntu-server-jammy", "22_04-lts-gen2", "", "", "TRUE"},
+		{"ubuntu 24.04", "Canonical", "ubuntu-24_04-lts", "server", "", "", "TRUE"},
+		{"ubuntu 16.04", "Canonical", "UbuntuServer", "16.04-LTS", "", "", "FALSE"},
+		{"rocky 9.6", "resf", "rockylinux-x86_64", "9-6", "", "", "TRUE"},
+		{"rocky 9 base", "resf", "rockylinux-x86_64", "9-base", "", "", "FALSE"},
+		{"windows server 2022", "MicrosoftWindowsServer", "WindowsServer", "2022-datacenter-g2", "", "", "TRUE"},
+		{"windows server 2016", "MicrosoftWindowsServer", "WindowsServer", "2016-datacenter-gensecond", "", "", "FALSE"},
+		{"windows 11", "MicrosoftWindowsDesktop", "windows-11", "win11-23h2-ent", "", "", "TRUE"},
+		{"windows 10", "MicrosoftWindowsDesktop", "windows-10", "win10-22h2-pro-g2", "", "", "TRUE"},
+		{"guest os only", "", "", "", "Ubuntu", "22.04", "TRUE"},
+		{"guest windows 2012", "", "", "", "Windows Server 2012 R2 Datacenter", "6.3.9600", "FALSE"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := classifyRemoteNVMeOSSupport(tt.publisher, tt.offer, tt.sku, tt.osName, tt.osVers); got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestClassifyMANAOSSupport(t *testing.T) {
+	tests := []struct {
+		name                                  string
+		publisher, offer, sku, osName, osVers string
+		want                                  string
+	}{
+		{"no metadata", "", "", "", "", "", "UNKNOWN"},
+		{"windows server 2016", "MicrosoftWindowsServer", "WindowsServer", "2016-datacenter-gensecond", "", "", "TRUE"},
+		{"windows server 2012", "MicrosoftWindowsServer", "WindowsServer", "2012-r2-datacenter-gensecond", "", "", "FALSE"},
+		{"windows 11", "MicrosoftWindowsDesktop", "windows-11", "win11-23h2-ent", "", "", "TRUE"},
+		{"windows 10", "MicrosoftWindowsDesktop", "windows-10", "win10-22h2-pro-g2", "", "", "FALSE"},
+		{"azure linux 3", "MicrosoftCBLMariner", "azure-linux-3", "azure-linux-3-gen2", "", "", "TRUE"},
+		{"mariner 2", "MicrosoftCBLMariner", "cbl-mariner", "cbl-mariner-2-gen2", "", "", "FALSE"},
+		{"alma 9.6", "almalinux", "almalinux-x86_64", "9_6-gen2", "", "", "TRUE"},
+		{"alma 9.4", "almalinux", "almalinux-x86_64", "9_4-gen2", "", "", "FALSE"},
+		{"rocky 10.0", "resf", "rockylinux-x86_64", "10-0", "", "", "TRUE"},
+		{"rhel 9.6", "RedHat", "RHEL", "96-gen2", "", "", "TRUE"},
+		{"rhel 8.10", "RedHat", "RHEL", "8_10", "", "", "FALSE"},
+		{"debian 13", "Debian", "debian-13", "13-gen2", "", "", "TRUE"},
+		{"debian 11", "Debian", "debian-11", "11-gen2", "", "", "FALSE"},
+		{"oracle 9.4", "Oracle", "Oracle-Linux", "ol94-lvm-gen2", "", "", "TRUE"},
+		{"oracle 8.10", "Oracle", "Oracle-Linux", "ol810-lvm-gen2", "", "", "FALSE"},
+		{"oracle uek 8", "", "", "", "Oracle Linux Server UEK8", "", "TRUE"},
+		{"sles 15 sp6", "SUSE", "sles-15-sp6", "gen2", "", "", "TRUE"},
+		{"sles 15 sp4", "SUSE", "sles-15-sp4", "gen2", "", "", "FALSE"},
+		{"sles 16", "SUSE", "sles-16", "gen2", "", "", "TRUE"},
+		{"ubuntu 24.04", "Canonical", "ubuntu-24_04-lts", "server", "", "", "TRUE"},
+		{"ubuntu 20.04", "Canonical", "0001-com-ubuntu-server-focal", "20_04-lts-gen2", "", "", "FALSE"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := classifyMANAOSSupport(tt.publisher, tt.offer, tt.sku, tt.osName, tt.osVers); got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLookupDocumentedReplacement(t *testing.T) {
+	tests := []struct {
+		name       string
+		vmSize     string
+		target     bool
+		wantTarget string // substring of the replacement column
+	}{
+		{"Dsv2 maps to D row", "Standard_DS2_v2", false, "Dsv5/Ddsv5"},
+		{"Dv2 maps to D row", "Standard_D2_v2", false, "Dsv5/Ddsv5"},
+		{"legacy Ds without version", "Standard_DS3", false, "Dsv5/Ddsv5"},
+		{"Dsv3 maps to its row", "Standard_D4s_v3", false, "Dv5/Dsv5"},
+		{"Ls", "Standard_L8s", false, "Lsv3/Lasv3"},
+		{"Lsv2", "Standard_L8s_v2", false, "Lsv3/Lasv3"},
+		{"Amv2", "Standard_A2m_v2", false, "Bsv2/Basv2"},
+		{"Bv1 without version suffix", "Standard_B2s", false, "Bsv2/Basv2"},
+		{"Fsv2", "Standard_F4s_v2", false, "Dlsv6"},
+		{"Gs", "Standard_GS2", false, "Lsv3/Lasv3"},
+		{"HBv2 with feature letters", "Standard_HB120rs_v2", false, "HBv5"},
+		{"NP", "Standard_NP10s", false, "NDv2"},
+		{"documented target Bsv2", "Standard_B2s_v2", false, "No action"},
+		{"documented target Lsv3", "Standard_L8s_v3", false, "No action"},
+		{"documented target HBv3", "Standard_HB120rs_v3", false, "No action"},
+		{"documented target NCasT4_v3", "Standard_NC4as_T4_v3", false, "No action"},
+		{"v6 target generation", "Standard_D4ds_v6", true, "No action"},
+		{"no documented replacement", "Standard_M64s", false, "Review newer candidates"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			replacement, differences := lookupDocumentedReplacement(tt.vmSize, tt.target)
+			if !strings.Contains(replacement, tt.wantTarget) {
+				t.Errorf("replacement = %q, want substring %q", replacement, tt.wantTarget)
+			}
+			documented := !strings.HasPrefix(replacement, "No action") && !strings.HasPrefix(replacement, "Review")
+			if documented == (differences == "N/A") {
+				t.Errorf("differences = %q inconsistent with replacement %q", differences, replacement)
+			}
+		})
+	}
+}
+
+func TestClassifyPlatformReadinessOutcome(t *testing.T) {
+	tests := []struct {
+		name             string
+		gen2, nvme, mana string
+		target           bool
+		want             string
+	}{
+		{"gen1 wins over os gaps", "FALSE", "FALSE", "FALSE", false, "Gen2 migration needed"},
+		{"nvme unsupported", "TRUE", "FALSE", "TRUE", false, "OS image refresh needed"},
+		{"mana unsupported beats unknown", "TRUE", "UNKNOWN", "FALSE", false, "OS image refresh needed"},
+		{"unknown gen2", "UNKNOWN", "TRUE", "TRUE", false, "OS support unconfirmed"},
+		{"all pass", "TRUE", "TRUE", "TRUE", false, "Platform checks passed"},
+		{"already target", "FALSE", "FALSE", "FALSE", true, "N/A (already on target generation)"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := classifyPlatformReadinessOutcome(tt.gen2, tt.nvme, tt.mana, tt.target); got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+		})
 	}
 }
