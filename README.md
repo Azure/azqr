@@ -439,6 +439,7 @@ Reports Azure VM v6/v7 series modernization readiness, following the Discover â†
 - Reports Assess-phase readiness signals: Hyper-V generation, disk controller type (SCSI vs. NVMe), series generation, and Azure Disk Encryption status
 - Recommends a Plan-phase execution method (redeploy / no action / manual review) and a suggested target v6/v7 SKU ranked by a hardware-similarity score (a candidate to validate, not a readiness verdict)
 - Surfaces matching lifecycle/pricing notices (retirements, price changes) and the full raw inventory signal set from the Assess article's starter query
+- Adds heuristic Gen2/NVMe/MANA readiness verdicts and a second sheet with regional SKU availability and VM family quota; `--target-regions` (shared with `region-selection`) chooses the regions checked
 
 **Use Cases**: Modernization discovery and triage, SCSI-to-NVMe migration planning, v6/v7 SKU selection, lifecycle/pricing awareness
 

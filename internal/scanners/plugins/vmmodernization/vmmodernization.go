@@ -24,6 +24,7 @@ import (
 	"github.com/Azure/azqr/internal/skus"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
 )
 
 // argBool decodes a computed boolean column from an Azure Resource Graph KQL
@@ -64,10 +65,17 @@ var discoverAssessAROQuery string
 //go:embed kql/discover-assess-vmss.kql
 var discoverAssessVMSSQuery string
 
+//go:embed kql/discover-assess-backup.kql
+var discoverAssessBackupQuery string
+
 // manualReviewRequired is the explicit flag value used whenever azqr cannot
 // establish a hard-gate verdict (temp-disk dependency, SAP/ISV certification)
 // from available data, instead of guessing Ready/Blocked (FR-004).
 const manualReviewRequired = "Manual Review Required"
+
+// alreadyOnTargetGeneration is the Suggested Target SKU value for a VM whose
+// current size is already on a v6/v7 series.
+const alreadyOnTargetGeneration = "Already on target generation"
 
 // notPoolManaged is the fallback value for the three pool-level columns
 // (P02) on a row with no vmssId (standalone VM, Availability Set member) —
@@ -82,16 +90,30 @@ func NewScanner() *Scanner {
 	return &Scanner{}
 }
 
+// RegisterFlags registers plugin-specific flags (implements FlagProvider).
+// target-regions is shared with the region-selection plugin so one set of
+// regions drives both; when unset each VM is checked in its own region.
+func (s *Scanner) RegisterFlags(cmd *cobra.Command) {
+	cmd.Flags().StringSlice("target-regions", []string{}, "Target regions to check SKU availability and quota in (comma-separated, e.g., eastus,westeurope). Defaults to each VM's own region")
+}
+
 // GetMetadata returns plugin metadata.
 func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "vm-modernization",
-		Version:     "0.1.0",
-		Description: "Reports Azure VM v6/v7 series modernization readiness: Discover workload pattern, Assess readiness signals (Hyper-V generation, disk controller type, series generation, Azure Disk Encryption), and a Plan-phase execution-method recommendation with a suggested target v6/v7 SKU",
+		Version:     "0.2.0",
+		Description: "Reports Azure VM v6/v7 series modernization readiness: Discover workload pattern, Assess readiness signals (Hyper-V generation, disk controller type, series generation, Azure Disk Encryption, heuristic Gen2/NVMe/MANA OS verdicts), a Plan-phase execution-method recommendation with a suggested target v6/v7 SKU, and a SKU availability and VM family quota sheet",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
 		Type:        plugins.PluginTypeInternal,
+		// Column order is triage-oriented: an engineer reads left to right from
+		// "what is this VM" to "what should I do" to "what blocks it" to raw data.
+		// toRecord must emit values in exactly this order, and the pinned header
+		// list in the tests must be updated with every change. Add each new column
+		// to the group it belongs to, not at the end; the raw inventory group is
+		// the only one meant to grow with unprocessed ARG fields.
 		ColumnMetadata: []plugins.ColumnMetadata{
+			// Identify: which VM and which workload pattern it was classified as.
 			{Name: "Subscription"},
 			{Name: "Resource Group"},
 			{Name: "Name"},
@@ -99,6 +121,35 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Current VM Size"},
 			{Name: "Series Generation"},
 			{Name: "Workload Pattern"},
+			// Decide: the verdict, the route, and how hard the move is.
+			{Name: "Platform Readiness Outcome"},
+			{Name: "Recommended Execution Method"},
+			{Name: "Modernization Complexity"},
+			{Name: "Complexity Reason"},
+			// Target: where to move to and what changes there.
+			{Name: "Suggested Target SKU"},
+			{Name: "Target SKU Compatibility Score"},
+			{Name: "Documented Replacement Series"},
+			{Name: "Series Specification Differences"},
+			{Name: "Lifecycle/Pricing Notes"},
+			// Blockers: signals that gate or complicate the move.
+			{Name: "Generation 2 Ready"},
+			{Name: "Remote NVMe OS Supported"},
+			{Name: "MANA OS Supported"},
+			{Name: "Hyper-V Generation"},
+			{Name: "Disk Controller Type"},
+			{Name: "Temp Disk Dependency"},
+			{Name: "SAP/ISV Certification Gate"},
+			{Name: "Azure Disk Encryption"},
+			{Name: "Hibernation Enabled"},
+			{Name: "Backup Policy Subtype"},
+			{Name: "VM Power State"},
+			{Name: "Instance View Captured"},
+			// Cost: existing-SKU retail exposure.
+			{Name: "Current Monthly Cost (USD)"},
+			{Name: "Projected Monthly Cost After Increase (USD)"},
+			{Name: "Monthly Cost Impact (USD)"},
+			// Pool context: scale set, availability set and pool-model details.
 			{Name: "Pool Membership"},
 			{Name: "Membership Model"},
 			{Name: "Orchestration Mode"},
@@ -106,21 +157,7 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Pool Model VM Size"},
 			{Name: "Pool Model Series Generation"},
 			{Name: "Availability Set Name"},
-			{Name: "Hyper-V Generation"},
-			{Name: "Disk Controller Type"},
-			{Name: "Azure Disk Encryption"},
-			{Name: "Temp Disk Dependency"},
-			{Name: "SAP/ISV Certification Gate"},
-			{Name: "VM Power State"},
-			{Name: "Instance View Captured"},
-			{Name: "Hibernation Enabled"},
-			{Name: "Recommended Execution Method"},
-			{Name: "Suggested Target SKU"},
-			{Name: "Target SKU Compatibility Score"},
-			{Name: "Lifecycle/Pricing Notes"},
-			{Name: "Current Monthly Cost (USD)"},
-			{Name: "Projected Monthly Cost After Increase (USD)"},
-			{Name: "Monthly Cost Impact (USD)"},
+			// Raw inventory: unprocessed ARG fields, kept last.
 			{Name: "Zone Placement"},
 			{Name: "Availability Zone"},
 			{Name: "Platform Fault Domain"},
@@ -136,7 +173,6 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "OS Disk Size (GB)"},
 			{Name: "Ephemeral OS Disk"},
 			{Name: "Data Disk Count"},
-			{Name: "ADE OS Disk (VM Property)"},
 			{Name: "Ultra SSD Enabled"},
 			{Name: "License Type"},
 			{Name: "NIC Count"},
@@ -180,16 +216,19 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 
 	aroClustersByResourceGroup := loadAROClusters(ctx, graphClient.Query, subscriptions)
 	vmssByID := loadVMSSPools(ctx, graphClient.Query, subscriptions)
+	backupSubtypeByVMId, backupLoaded := loadBackupPolicySubtypes(ctx, graphClient.Query, subscriptions)
 
 	// Build header row from ColumnMetadata (single source of truth).
 	meta := s.GetMetadata()
 	table := [][]string{meta.HeaderRow()}
+	var availabilitySheet *plugins.ExternalPluginOutput
 
 	if result.Data != nil {
 		rows := graph.UnmarshalRows[vmModernizationRow](result.Data, "VM Modernization")
 		mergeAVDHostPoolType(rows, avdHostPoolByVMId)
 		mergeAROClusters(rows, aroClustersByResourceGroup)
 		mergeVMSSPools(rows, vmssByID)
+		mergeBackupPolicySubtypes(rows, backupSubtypeByVMId, backupLoaded)
 
 		// Pre-collect every unique (armSkuName, armRegionName) pair across the
 		// whole scan and fetch them via one batched, concurrent pass (P02-T03/
@@ -199,6 +238,7 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 		httpClient := az.NewHttpClient(cred, az.DefaultHttpClientOptions(30*time.Second))
 		priceCache := collectVMPrices(ctx, httpClient, uniqueSKURegionPairs(rows))
 
+		var activeRows []vmModernizationRow
 		for _, r := range rows {
 			if params.Filters.Azqr.IsSubscriptionExcluded(r.SubscriptionID) {
 				continue
@@ -208,7 +248,12 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 				subscriptionName = r.SubscriptionID
 			}
 			table = append(table, r.toRecord(subscriptionName, priceCache))
+			activeRows = append(activeRows, r)
 		}
+
+		groups := groupAvailabilityTargets(activeRows, parseTargetRegions(params))
+		regionData := collectRegionSKUData(ctx, cred, httpClient, regionPairs(groups))
+		availabilitySheet = buildSKUAvailabilitySheet(groups, regionData, subscriptions)
 	}
 
 	log.Info().Msgf("VM modernization scan completed with %d resources", len(table)-1)
@@ -219,6 +264,9 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 		Description: "Azure VM v6/v7 series modernization readiness: workload pattern, Assess-phase signals, and Plan-phase recommendation",
 		Table:       table,
 	}}
+	if availabilitySheet != nil {
+		outputs = append(outputs, *availabilitySheet)
+	}
 	if sheet := buildGeneralNoticesSheet(); sheet != nil {
 		outputs = append(outputs, *sheet)
 	}
@@ -365,6 +413,56 @@ func mergeAROClusters(rows []vmModernizationRow, clustersByResourceGroup map[str
 	}
 }
 
+type backupPolicyRow struct {
+	VMID                string `json:"VMId"`
+	BackupPolicySubtype string `json:"BackupPolicySubtype"`
+}
+
+const (
+	backupNotConfigured = "Not configured"
+	backupUnknown       = "Unknown"
+)
+
+// loadBackupPolicySubtypes returns a lowercase VM ID to policy subtype map. The
+// bool reports whether the query succeeded, so a failed query can be told
+// apart from a VM that simply has no backup.
+func loadBackupPolicySubtypes(ctx context.Context, query func(context.Context, string, map[string]string, ...graph.QueryOptions) (*graph.GraphResult, error), subscriptions map[string]string) (map[string]string, bool) {
+	subtypes := make(map[string]string)
+	log.Debug().Msg("Executing VM modernization backup policy ARG query")
+	result, err := query(ctx, discoverAssessBackupQuery, subscriptions)
+	if err != nil {
+		log.Warn().Err(err).Msg("Failed to query Azure Resource Graph for backup policy data; backup policy subtype will be Unknown for this scan")
+		return subtypes, false
+	}
+	if result == nil {
+		log.Warn().Msg("Empty Azure Resource Graph response for backup policy data; backup policy subtype will be Unknown for this scan")
+		return subtypes, false
+	}
+	if result.Data == nil {
+		return subtypes, true
+	}
+	for _, row := range graph.UnmarshalRows[backupPolicyRow](result.Data, "Backup Policy") {
+		subtypes[strings.ToLower(row.VMID)] = row.BackupPolicySubtype
+	}
+	return subtypes, true
+}
+
+// mergeBackupPolicySubtypes sets each row's backup policy subtype. When the
+// lookup failed every row is Unknown; otherwise a VM without a protected item
+// is Not configured.
+func mergeBackupPolicySubtypes(rows []vmModernizationRow, subtypeByVMId map[string]string, loaded bool) {
+	for i := range rows {
+		switch subtype, ok := subtypeByVMId[strings.ToLower(rows[i].ID)]; {
+		case !loaded:
+			rows[i].BackupPolicySubtype = backupUnknown
+		case ok:
+			rows[i].BackupPolicySubtype = subtype
+		default:
+			rows[i].BackupPolicySubtype = backupNotConfigured
+		}
+	}
+}
+
 type vmssPoolRow struct {
 	VMSSID            string `json:"VMSSId"`
 	OrchestrationMode string `json:"OrchestrationMode"`
@@ -418,6 +516,7 @@ type vmModernizationRow struct {
 	IsDatabricksManaged argBool `json:"IsDatabricksManaged"`
 	AVDHostPoolType     string  `json:"AVDHostPoolType"`
 	IsAROManaged        bool    `json:"-"`
+	BackupPolicySubtype string  `json:"-"`
 	AzureDiskEncryption argBool `json:"AzureDiskEncryption"`
 
 	// Full raw inventory signals (Assess article's starter query), surfaced
@@ -433,6 +532,7 @@ type vmModernizationRow struct {
 	InstanceViewCaptured  string  `json:"InstanceViewCaptured"`
 	OSType                string  `json:"OSType"`
 	OSVersion             string  `json:"OSVersion"`
+	OSName                string  `json:"OSName"`
 	ComputerName          string  `json:"ComputerName"`
 	IsMarketplaceVM       argBool `json:"IsMarketplaceVM"`
 	ImagePublisher        string  `json:"ImagePublisher"`
@@ -443,7 +543,6 @@ type vmModernizationRow struct {
 	OSDiskSizeGB          int64   `json:"OSDiskSizeGB"`
 	EphemeralOSDisk       string  `json:"EphemeralOSDisk"`
 	DataDiskCount         int64   `json:"DataDiskCount"`
-	ADEOSDiskEnabled      string  `json:"ADEOSDiskEnabled"`
 	HibernationEnabled    string  `json:"HibernationEnabled"`
 	UltraSSDEnabled       string  `json:"UltraSSDEnabled"`
 	LicenseType           string  `json:"LicenseType"`
@@ -472,7 +571,7 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 	targetScore := "N/A"
 	if isActionableWorkloadPattern(patternCode) {
 		if isTargetGeneration {
-			suggestedSKU = "Already on target generation"
+			suggestedSKU = alreadyOnTargetGeneration
 		} else if name, score, ok := suggestTargetSKU(r.VMSize); ok {
 			suggestedSKU = name
 			targetScore = fmt.Sprintf("%.3f", score)
@@ -484,16 +583,25 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 	}
 
 	if patternCode == patternComputePool && poolMembership == "VMSS" {
-		executionMethod = manualReviewRequired + " (scale-set member; validate it is a stateless pool before evaluating at the pool level)"
+		executionMethod = manualReviewRequired
 		tempDiskDependency = manualReviewRequired
 		sapISVCertificationGate = manualReviewRequired
 	}
 
 	currentMonthlyCost, projectedMonthlyCost, monthlyCostImpact := r.computeMonetaryImpact(priceCache)
+	complexityRating, complexityReason := classifyModernizationComplexity(r.VMSize, r.HyperVGeneration, r.DiskControllerType, r.SecurityType, isTargetGeneration)
+	generation2Ready := classifyGeneration2Ready(r.HyperVGeneration, r.ImageSKU)
+	nvmeOSSupported := classifyRemoteNVMeOSSupport(r.ImagePublisher, r.ImageOffer, r.ImageSKU, r.OSName, r.OSVersion)
+	manaOSSupported := classifyMANAOSSupport(r.ImagePublisher, r.ImageOffer, r.ImageSKU, r.OSName, r.OSVersion)
+	readinessOutcome := classifyPlatformReadinessOutcome(generation2Ready, nvmeOSSupported, manaOSSupported, isTargetGeneration)
+	documentedTargetSeries, documentedDifferences := lookupDocumentedReplacement(r.VMSize, isTargetGeneration)
 
 	orchestrationMode, poolModelVMSize, poolModelSeriesGeneration := r.poolLevelColumns()
 
+	// Keep the groups below in lockstep with GetMetadata: Identify, Decide,
+	// Target, Blockers, Cost, Pool context, Raw inventory.
 	return []string{
+		// Identify
 		subscriptionName,
 		r.ResourceGroup,
 		r.Name,
@@ -501,6 +609,35 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 		r.VMSize,
 		seriesGeneration,
 		patternCode,
+		// Decide
+		readinessOutcome,
+		executionMethod,
+		complexityRating,
+		complexityReason,
+		// Target
+		suggestedSKU,
+		targetScore,
+		documentedTargetSeries,
+		documentedDifferences,
+		matchLifecycleNotes(r.VMSize, r.Location),
+		// Blockers
+		generation2Ready,
+		nvmeOSSupported,
+		manaOSSupported,
+		r.HyperVGeneration,
+		r.DiskControllerType,
+		tempDiskDependency,
+		sapISVCertificationGate,
+		formatBool(bool(r.AzureDiskEncryption)),
+		orNA(r.HibernationEnabled),
+		orNA(r.BackupPolicySubtype),
+		orNA(r.VMPowerState),
+		orNA(r.InstanceViewCaptured),
+		// Cost
+		currentMonthlyCost,
+		projectedMonthlyCost,
+		monthlyCostImpact,
+		// Pool context
 		poolMembership,
 		orNA(r.MembershipModel),
 		orchestrationMode,
@@ -508,21 +645,7 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 		poolModelVMSize,
 		poolModelSeriesGeneration,
 		orNA(r.AvailabilitySetName),
-		r.HyperVGeneration,
-		r.DiskControllerType,
-		formatBool(bool(r.AzureDiskEncryption)),
-		tempDiskDependency,
-		sapISVCertificationGate,
-		orNA(r.VMPowerState),
-		orNA(r.InstanceViewCaptured),
-		orNA(r.HibernationEnabled),
-		executionMethod,
-		suggestedSKU,
-		targetScore,
-		matchLifecycleNotes(r.VMSize, r.Location),
-		currentMonthlyCost,
-		projectedMonthlyCost,
-		monthlyCostImpact,
+		// Raw inventory
 		orNA(r.ZonePlacement),
 		orNA(r.AvailabilityZone),
 		orNA(r.PlatformFaultDomain),
@@ -538,7 +661,6 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 		fmt.Sprintf("%d", r.OSDiskSizeGB),
 		orNA(r.EphemeralOSDisk),
 		fmt.Sprintf("%d", r.DataDiskCount),
-		orNA(r.ADEOSDiskEnabled),
 		orNA(r.UltraSSDEnabled),
 		orNA(r.LicenseType),
 		fmt.Sprintf("%d", r.NICCount),
@@ -725,39 +847,37 @@ func classifySeriesGeneration(vmSize string) (label string, isTargetGeneration b
 	}
 }
 
+// Recommended Execution Method values. The column holds only these four;
+// the reasons behind a value live in the signal columns (Hyper-V Generation,
+// Generation 2 Ready, Temp Disk Dependency, SAP/ISV Certification Gate,
+// Workload Pattern and Pool Membership).
+const (
+	methodManagedByPool = "Managed by pool/cluster"
+	methodNoAction      = "No action needed"
+	methodRedeploy      = "Redeploy"
+)
+
 // recommendExecutionMethod applies the Plan-phase redeploy-vs-in-place decision
-// rule. Only pattern-E (customer-managed) VMs not already on the target
-// generation receive a method; pool-managed VMs (pattern A) are evaluated at the
-// pool level per the Discover article, not per VM.
+// rule. Only pattern-E (customer-managed) and pattern-G (certified appliance)
+// VMs not already on the target generation get a Redeploy or Manual Review
+// Required value; pool-managed VMs are evaluated at the pool level per the
+// Discover article, not per VM.
 //
-// Today only the Hyper-V generation (Gen1) signal downgrades this recommendation
-// to Manual Review Required automatically: azqr has no data to assert a hard
-// block from the temp-disk-dependency or SAP/ISV-certification gates (see
-// recommendHardGates; neither gate column resolves a determinate "blocked"
-// verdict for a pattern it applies to, only Manual Review Required or N/A), so
-// they do not force this column to Manual Review Required in v1 — a reader
-// should consult those two columns before acting on a Redeploy/In-place
-// recommendation.
+// Today only the Hyper-V generation signal downgrades Redeploy to Manual Review
+// Required automatically: azqr has no data to assert a hard block from the
+// temp-disk-dependency or SAP/ISV-certification gates (see recommendHardGates),
+// so a reader should consult those two columns before acting on Redeploy.
 func recommendExecutionMethod(patternCode, hyperVGeneration string, isTargetGeneration bool) string {
-	if patternCode == patternAVDPooled {
-		return "Managed by pool/cluster — evaluate at the pool level; the golden image still needs Assess/Plan checks"
-	}
-	if !isActionableWorkloadPattern(patternCode) {
-		return "Managed by pool/cluster — evaluate at the pool level"
+	if !isActionableWorkloadPattern(patternCode) || patternCode == patternAVDPooled {
+		return methodManagedByPool
 	}
 	if isTargetGeneration {
-		return "No action needed (already on target generation)"
-	}
-	if strings.EqualFold(hyperVGeneration, "V1") {
-		return manualReviewRequired + " (Gen1 image; evaluate Trusted Launch/Gen2 upgrade path first)"
+		return methodNoAction
 	}
 	if strings.EqualFold(hyperVGeneration, "V2") {
-		if patternCode == patternCertifiedAppliance {
-			return "Redeploy (see SCSI-to-NVMe migration guidance) - only after vendor certification is confirmed (see SAP/ISV Certification Gate)"
-		}
-		return "Redeploy (see SCSI-to-NVMe migration guidance) - conditional on the Temp Disk Dependency and SAP/ISV Certification Gate review"
+		return methodRedeploy
 	}
-	return manualReviewRequired + " (Hyper-V generation not reported)"
+	return manualReviewRequired
 }
 
 // recommendHardGates reports the Temp Disk Dependency and SAP/ISV Certification

@@ -28,19 +28,13 @@
 //     whether Uniform-mode instance rows populate the same instanceView
 //     fields identically has not been separately live-tenant-verified (open
 //     risk, tracked in the plan's Risks and Open Questions).
-//   - Two independent Azure Disk Encryption (ADE) signals are surfaced:
-//       * AzureDiskEncryption: aggregated across every attached disk (OS +
-//         data), read from the managed disk resource's
-//         properties.encryptionSettingsCollection.enabled, joined to the VM
-//         by managedBy (same join pattern as the existing APRL query
-//         f0a97179-133a-6e4f-8a49-8a44da73ffce.kql) and summarized with max()
-//         before the join to avoid duplicating VM rows. This is NOT the same
-//         as the VM-resident encryptionAtHost property.
-//       * ADEOSDiskEnabled: the OS-disk-only signal the Assess article's own
-//         starter query reads directly off the VM via
-//         properties.storageProfile.osDisk.encryptionSettings.enabled — no
-//         join needed, but it misses data-disk-only encryption.
-//     Both are kept so a reader can cross-check the simpler (OS-disk-only)
+//   - AzureDiskEncryption: Azure Disk Encryption (ADE) aggregated across every
+//     attached disk (OS + data), read from the managed disk resource's
+//     properties.encryptionSettingsCollection.enabled, joined to the VM
+//     by managedBy (same join pattern as the existing APRL query
+//     f0a97179-133a-6e4f-8a49-8a44da73ffce.kql) and summarized with max()
+//     before the join to avoid duplicating VM rows. This is NOT the same
+//     as the VM-resident encryptionAtHost property.
 //   - OSDiskType/OSDiskSizeGB are joined from the managed disk resource
 //     (filtered to OS disks via properties.osType, which only OS disks
 //     carry), not read off the VM's embedded storageProfile as the Assess
@@ -123,6 +117,7 @@ computeresources
 | extend
     osType          = tostring(p.storageProfile.osDisk.osType),
     osVersion       = tostring(p.extended.instanceView.osVersion),
+    osName          = tostring(p.extended.instanceView.osName),
     computerName    = tostring(p.extended.instanceView.computerName),
     isMarketplaceVm = isnotempty(plan),
     imagePublisher  = tostring(p.storageProfile.imageReference.publisher),
@@ -143,8 +138,7 @@ computeresources
     osDiskTypeVMProperty   = tostring(p.storageProfile.osDisk.managedDisk.storageAccountType),
     osDiskSizeGBVMProperty = toint(p.storageProfile.osDisk.diskSizeGB),
     ephemeralOsDisk     = iff(tostring(p.storageProfile.osDisk.diffDiskSettings.option) =~ 'Local', 'Yes', 'No'),
-    dataDiskCount       = array_length(p.storageProfile.dataDisks),
-    adeOsDiskEnabled    = tostring(p.storageProfile.osDisk.encryptionSettings.enabled)
+    dataDiskCount       = array_length(p.storageProfile.dataDisks)
 // ---- capabilities / licensing ----
 | extend
     hibernationEnabled = tostring(p.additionalCapabilities.hibernationEnabled),
@@ -181,6 +175,7 @@ computeresources
     InstanceViewCaptured = instanceViewCaptured,
     OSType = osType,
     OSVersion = osVersion,
+    OSName = osName,
     ComputerName = computerName,
     IsMarketplaceVM = isMarketplaceVm,
     ImagePublisher = imagePublisher,
@@ -191,7 +186,6 @@ computeresources
     OSDiskSizeGB = osDiskSizeGBVMProperty,
     EphemeralOSDisk = ephemeralOsDisk,
     DataDiskCount = dataDiskCount,
-    ADEOSDiskEnabled = adeOsDiskEnabled,
     HibernationEnabled = hibernationEnabled,
     UltraSSDEnabled = ultraSsdEnabled,
     LicenseType = licenseType,
@@ -261,6 +255,7 @@ computeresources
     InstanceViewCaptured,
     OSType,
     OSVersion,
+    OSName,
     ComputerName,
     IsMarketplaceVM,
     ImagePublisher,
@@ -271,7 +266,6 @@ computeresources
     OSDiskSizeGB = coalesce(osDiskSizeGBDisk, OSDiskSizeGB),
     EphemeralOSDisk,
     DataDiskCount,
-    ADEOSDiskEnabled,
     HibernationEnabled,
     UltraSSDEnabled,
     LicenseType,

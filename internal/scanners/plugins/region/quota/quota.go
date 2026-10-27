@@ -174,6 +174,17 @@ func warnQuotaUnavailable(subscriptionID, region, provider string) {
 // actionable: they tell you whether the specific VM families you need have available quota.
 // The caller should treat a nil return as "no data available".
 func FetchVMQuota(ctx context.Context, cred azcore.TokenCredential, clientOpts *arm.ClientOptions, subscriptionID, region string) ([]UsageEntry, error) {
+	return fetchVMQuota(ctx, cred, clientOpts, subscriptionID, region, false)
+}
+
+// FetchVMQuotaIncludingZeroLimits is FetchVMQuota but also returns families whose
+// limit is 0. A zero limit means the subscription has no quota for that family,
+// which callers that map a specific SKU to its family need to see.
+func FetchVMQuotaIncludingZeroLimits(ctx context.Context, cred azcore.TokenCredential, clientOpts *arm.ClientOptions, subscriptionID, region string) ([]UsageEntry, error) {
+	return fetchVMQuota(ctx, cred, clientOpts, subscriptionID, region, true)
+}
+
+func fetchVMQuota(ctx context.Context, cred azcore.TokenCredential, clientOpts *arm.ClientOptions, subscriptionID, region string, includeZeroLimit bool) ([]UsageEntry, error) {
 	client, err := armcompute.NewUsageClient(subscriptionID, cred, clientOpts)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create compute usage client for %s: %w", subscriptionID, err)
@@ -196,10 +207,10 @@ func FetchVMQuota(ctx context.Context, cred azcore.TokenCredential, clientOpts *
 			if item.Name == nil || item.Name.Value == nil || !strings.Contains(*item.Name.Value, "Family") {
 				continue
 			}
-			if item.Limit == nil {
+			if item.Limit == nil || item.CurrentValue == nil {
 				continue
 			}
-			if *item.Limit <= 0 {
+			if *item.Limit <= 0 && !includeZeroLimit {
 				log.Debug().Msgf("fetchVMQuota: skipping %s (limit=%d, treated as unlimited/unavailable)", *item.Name.Value, *item.Limit)
 				continue
 			}
@@ -207,7 +218,10 @@ func FetchVMQuota(ctx context.Context, cred azcore.TokenCredential, clientOpts *
 			cv := int(*item.CurrentValue)
 			lim := int(*item.Limit)
 			available := lim - cv
-			headroomPct := float64(available) / float64(lim) * 100
+			headroomPct := 0.0
+			if lim > 0 {
+				headroomPct = float64(available) / float64(lim) * 100
+			}
 
 			localizedName := ""
 			if item.Name.LocalizedValue != nil {

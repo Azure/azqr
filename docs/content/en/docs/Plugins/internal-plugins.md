@@ -210,15 +210,18 @@ Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status 
 **Plugin Name**: `vm-modernization`  
 **Command**: `azqr vm-modernization`  
 **Flag**: `--plugin vm-modernization`  
-**Version**: 0.1.0
+**Version**: 0.2.0
 
 Reports Azure VM v6/v7 series modernization readiness, following the Discover → Assess → Plan phases from the [VM v6/v7 modernization guidance](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/sizes-v6-v7-modernization-discover): Discover-phase workload pattern, Assess-phase readiness signals, and a Plan-phase execution-method recommendation with a suggested target v6/v7 SKU.
 
 **Key Features**:
 - Classifies each VM's workload pattern (compute pool, AVD pooled host pool, service-managed, certified ISV appliance, or customer-managed) from Azure Resource Graph signals
 - Reports Assess-phase readiness signals: Hyper-V generation, disk controller type (SCSI vs. NVMe), series generation, and Azure Disk Encryption status
+- Adds heuristic platform-readiness verdicts: Generation 2 readiness, remote NVMe and MANA operating system support, a combined readiness outcome and a complexity rating. The operating system verdicts are derived from the image and OS version, so treat them as triage hints and confirm them against the image vendor's documentation
+- Maps each source series to the replacement series documented on Microsoft Learn, with the specification differences, and reports the Gen1 backup policy subtype
+- Adds a second sheet, `VM Modernization - SKU Avail`, that checks whether each suggested target SKU is offered in a region (including restrictions and zone limits) and whether the VM family quota covers the VMs that would move
 - Recommends a Plan-phase execution method (redeploy / no action / manual review) and flags the Temp Disk Dependency and SAP/ISV Certification Gate hard gates where applicable
-- Suggests a hardware-similar v6/v7 target SKU using the `internal/skus` compatibility advisor. The score reflects vCPU, memory and feature similarity only. It does not check CPU architecture, temp-disk needs, attached disk/NIC counts, vendor certification, image readiness, region/zone availability, quota, or capacity, so validate every suggestion
+- Suggests a hardware-similar v6/v7 target SKU using the `internal/skus` compatibility advisor. The score reflects vCPU, memory and feature similarity only. It does not check CPU architecture, temp-disk needs, attached disk/NIC counts, vendor certification, or capacity. Regional availability and VM family quota are reported separately on the `VM Modernization - SKU Avail` sheet, which is not a capacity guarantee, so validate every suggestion
 - Surfaces upcoming retirements and price changes from an embedded lifecycle/pricing dataset covering the D/Ds/Dv2/Dsv2/Ls, Av2/Amv2/B/F/Fs/Fsv2/G/Gs/Lsv2, NP/HC/HBv2 and Dv3/Dsv3/Ev3/Esv3 groups. Other series are not encoded, so `N/A` means no published lifecycle risk
 - Computes per-VM current, projected, and monthly cost impact from the Azure Retail Prices API, using each VM's own current SKU (including pool-managed VMs)
 - Covers standalone VMs, Availability Set members, VMSS Flex/Uniform members (including AKS node pools), and Databricks, AVD pooled and standard ARO nodes, with pool-level signals (`Orchestration Mode`, `Pool Model VM Size`, `Pool Model Series Generation`) on VMSS-backed rows
@@ -236,29 +239,68 @@ Reports Azure VM v6/v7 series modernization readiness, following the Discover �
 
 **Output Columns**:
 
-*Derived readiness/plan columns:*
+Columns are grouped so an engineer reads left to right: identify, decide, target, blockers, cost, pool context, then raw inventory.
+
+*Identify:*
 - Subscription, Resource Group, Name, Location
-- Current VM Size
+- Current VM Size, Series Generation
 - Workload Pattern (`A: Compute pool` / `B: AVD pooled host pool` / `C: Service-managed compute` / `E: Customer-managed VM (default)` / `G: Certified ISV appliance`; a generic VMSS member reads `A` with a Manual Review Required execution method until it is confirmed to be a stateless pool, and AVD-pooled and appliance signals take priority over scale-set membership), Pool Membership (`AKS Node Pool` / `ARO Cluster` / `VMSS` / `AVD Pooled Host Pool` / `Azure Databricks` / `Standalone` / appliance vendor name)
-- Hyper-V Generation, Disk Controller Type, Series Generation
-- Azure Disk Encryption (`Enabled` / `Disabled`, aggregated across every attached disk)
-- Temp Disk Dependency and SAP/ISV Certification Gate: `Manual Review Required` when a customer should check the gate, otherwise `N/A (pool/platform-managed)`. Temp Disk Dependency requires review for B, E, G; SAP/ISV for every pattern except A and C. A generic VMSS member requires review for both
-- Recommended Execution Method: a route suggestion, not a gate-cleared verdict. `Redeploy` is conditional on the two gate reviews, appliances need vendor certification first, AVD pooled hosts need golden-image checks, and a generic VMSS member must be validated as a stateless pool
+
+*Decide:*
+- Platform Readiness Outcome (`Platform checks passed` / `OS image refresh needed` / `OS support unconfirmed` / `Gen2 migration needed` / `N/A (already on target generation)`): a combined, heuristic verdict on the blocker columns that says what is wrong, not what to do. Recommended Execution Method is the only column that says how to proceed, so pool-managed VMs still show their own platform verdict next to a "evaluate at the pool level" route
+- Recommended Execution Method (one of `Redeploy`, `Manual Review Required`, `No action needed`, `Managed by pool/cluster`): a route suggestion, not a gate-cleared verdict. `Redeploy` applies to Gen2 customer-managed VMs and appliances, and is conditional on the Temp Disk Dependency and SAP/ISV Certification Gate reviews (appliances need vendor certification first). `Manual Review Required` covers Gen1 or unreported Hyper-V generation and generic VMSS members, which must be validated as stateless pools. `Managed by pool/cluster` means evaluate at the pool level; AVD pooled hosts also need golden-image checks. The reason is visible in the Hyper-V Generation, Generation 2 Ready, gate, Workload Pattern and Pool Membership columns
+- Modernization Complexity (`LOW` / `MEDIUM` / `HIGH` / `REVIEW`, or `N/A` when already on a target generation) and Complexity Reason
+
+*Target:*
 - Suggested Target SKU, Target SKU Compatibility Score (0.0–1.0 hardware similarity, not migration readiness)
+- Documented Replacement Series and Series Specification Differences: the replacement documented on Microsoft Learn for the VM's source series
 - Lifecycle/Pricing Notes
+
+*Blockers:*
+- Generation 2 Ready, Remote NVMe OS Supported, MANA OS Supported (`TRUE` / `FALSE` / `UNKNOWN`, heuristic verdicts from the image and OS version)
+- Hyper-V Generation, Disk Controller Type
+- Temp Disk Dependency and SAP/ISV Certification Gate: `Manual Review Required` when a customer should check the gate, otherwise `N/A (pool/platform-managed)`. Temp Disk Dependency requires review for B, E, G; SAP/ISV for every pattern except A and C. A generic VMSS member requires review for both
+- Azure Disk Encryption (`Enabled` / `Disabled`, aggregated across every attached disk)
+- Hibernation Enabled, Backup Policy Subtype (the Azure Backup policy subtype protecting the VM, `Unknown` when the lookup fails), VM Power State, Instance View Captured
+
+*Cost:*
 - Current Monthly Cost (USD), Projected Monthly Cost After Increase (USD), Monthly Cost Impact (USD): existing-SKU retail exposure (hourly retail price x 730), not target pricing or savings. Only price changes not yet effective (UTC) are applied, because the current retail rate already includes earlier ones. Stopped (allocated) VMs are still billed; deallocated VMs read `N/A (VM deallocated)`
 
+*Pool context:*
+- Pool Membership, Membership Model (`Standalone` / `Availability Set` / `VMSS Flex`), Orchestration Mode
+- VMSS Name, Pool Model VM Size, Pool Model Series Generation, Availability Set Name
+
 *Full raw inventory columns (mirrors the Assess article's starter query):*
-- Membership Model (`Standalone` / `Availability Set` / `VMSS Flex`), Zone Placement (`Zonal` / `Regional`), Availability Zone
-- VMSS Name, Availability Set Name, Platform Fault Domain
-- VM Power State, Instance View Captured
+- Zone Placement (`Zonal` / `Regional`), Availability Zone, Platform Fault Domain
 - OS Type, OS Version, Computer Name
 - Is Marketplace VM, Image Publisher, Image Offer, Image SKU, Image Version
 - OS Disk Type, OS Disk Size (GB), Ephemeral OS Disk, Data Disk Count
-- ADE OS Disk (VM Property)
-- Hibernation Enabled, Ultra SSD Enabled, License Type
+- Ultra SSD Enabled, License Type
 - NIC Count, Accelerated Networking, IP Forwarding
 - Security Type, Secure Boot Enabled, vTPM Enabled
+
+**SKU Availability Sheet** (`VM Modernization - SKU Avail`):
+
+One row per (subscription, region, suggested target SKU), with these columns:
+- Subscription, Region, Suggested Target SKU, Source VM Sizes, VM Count
+- Availability: `Available`, `Restricted` (with Restriction Reasons), `Zone restricted` (with Restricted Zones), `Not offered`, or `Unknown` when the Compute SKUs call failed. This is not a capacity guarantee
+- Quota (right after Availability): `Sufficient`, `Near limit` (less than 15% of the limit would remain), `Insufficient`, `N/A` when the SKU is not offered in the region, or `Unknown` when the quota entry could not be found or a call failed. Supporting columns: Quota Family, vCPUs Needed, Family Quota Available. A redeploy needs the full vCPU count; an in-place resize needs only the change in the new family. The regional total vCPU limit is not checked
+
+Only VMs with a concrete suggested target SKU are evaluated; pool-managed, already-on-target and manual-review VMs are skipped.
+
+**Target Regions**:
+
+The plugin accepts the same `target-regions` option as the [Region Selection](#4-region-selection) plugin, so one set of regions drives both:
+
+```bash
+# Standalone command
+azqr vm-modernization --target-regions eastus,westeurope
+
+# Combined scan
+azqr scan --plugin region-selection --plugin vm-modernization --stage-param plugin.target-regions=eastus,westeurope
+```
+
+When set, every VM with a suggested target SKU is checked in each listed region, and the `Region` column shows the region checked. When unset, each VM is checked in its own region (Region Selection defaults to Sweden Central instead). Target regions affect only availability and quota; cost columns stay on each VM's current region.
 
 ---
 
@@ -374,7 +416,7 @@ carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure r
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
 region-selection      0.2.0-beta internal   Analyzes optimal Azure region selection based on service availability...
 sql-eol               0.6.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
-vm-modernization      0.1.0      internal   Reports Azure VM v6/v7 series modernization readiness
+vm-modernization      0.2.0      internal   Reports Azure VM v6/v7 series modernization readiness
 service-health        0.1.0-beta internal   Analyzes Azure service health events to determine...
 ```
 
@@ -474,7 +516,7 @@ Internal plugins may require additional permissions beyond standard `Reader` acc
 | **ai-gov** | Reader + Monitoring Reader | Cognitive Services, Monitor Metrics |
 | **carbon-emissions** | Reader | Carbon Optimization API |
 | **sql-eol** | Reader | Azure Resource Graph |
-| **vm-modernization** | Reader | Azure Resource Graph, Azure Retail Prices API |
+| **vm-modernization** | Reader (includes `Microsoft.Compute/skus/read` and `Microsoft.Compute/locations/usages/read`) | Azure Resource Graph (including Recovery Services backup data), Azure Retail Prices API, Compute Resource SKUs API, Compute usages API |
 | **service-health** | Reader | Azure Resource Graph (service health events) |
 
 **Recommended**: Assign `Reader` and `Monitoring Reader` roles at subscription or management group scope.
@@ -487,7 +529,7 @@ Internal plugins add processing time to scans:
 - **carbon-emissions**: 1-2 minutes (depends on subscription count)
 - **zone-mapping**: <10 seconds (very fast, one API call per subscription)
 - **sql-eol**: <30 seconds (single Azure Resource Graph query)
-- **vm-modernization**: one main Azure Resource Graph query plus separate AVD, ARO ownership and scale set lookups, followed by batched/concurrent Azure Retail Prices API lookups across the estate's unique VM SKU/region pairs. Latency depends on inventory size, ARG batching/pagination, and the number of distinct SKU/region pairs; each price batch request covers only 8 pairs.
+- **vm-modernization**: one main Azure Resource Graph query plus separate AVD, ARO ownership and scale set lookups, followed by batched/concurrent Azure Retail Prices API lookups across the estate's unique VM SKU/region pairs, plus one Compute SKUs and one usages call per unique subscription/region pair for the availability sheet. Latency depends on inventory size, ARG batching/pagination, and the number of distinct SKU/region pairs; each price batch request covers only 8 pairs.
 - **service-health**: <30 seconds (single Azure Resource Graph query against 90 days of service health events)
 
 **Optimization Tips**:

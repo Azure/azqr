@@ -204,6 +204,32 @@ func TestQuotaPaginationSuccess(t *testing.T) {
 	}
 }
 
+func TestFetchVMQuotaZeroLimit(t *testing.T) {
+	opts := &arm.ClientOptions{
+		ClientOptions: policy.ClientOptions{
+			Transport: newTestQuotaTransport(t, func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				if _, err := fmt.Fprint(w, `{"value":[{"currentValue":0,"limit":0,"name":{"value":"standardDCasv6Family"}},{"currentValue":2,"limit":100,"name":{"value":"standardDSv5Family"}}]}`); err != nil {
+					t.Error(err)
+				}
+			}),
+			Retry: policy.RetryOptions{MaxRetries: 1},
+		},
+	}
+	ctx := context.Background()
+	filtered, err := FetchVMQuota(ctx, testCredential{}, opts, quotaTestSubscription, "eastus")
+	if err != nil || len(filtered) != 1 || filtered[0].ResourceName != "standardDSv5Family" {
+		t.Fatalf("FetchVMQuota must keep skipping zero limits, got %v, %v", filtered, err)
+	}
+	all, err := FetchVMQuotaIncludingZeroLimits(ctx, testCredential{}, opts, quotaTestSubscription, "eastus")
+	if err != nil || len(all) != 2 {
+		t.Fatalf("expected both families, got %v, %v", all, err)
+	}
+	if zero := all[0]; zero.ResourceName != "standardDCasv6Family" || zero.Limit != 0 || zero.Available != 0 || zero.HeadroomPct != 0 {
+		t.Errorf("unexpected zero-limit entry: %+v", zero)
+	}
+}
+
 func TestQuotaUnsupportedEndpoint(t *testing.T) {
 	for _, provider := range quotaTestProviders {
 		for _, status := range []int{http.StatusBadRequest, http.StatusNotFound, http.StatusMethodNotAllowed} {
