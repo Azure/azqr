@@ -275,6 +275,16 @@ func TestSuggestTargetSKU_UnknownSKU(t *testing.T) {
 	}
 }
 
+func TestSuggestTargetSKU_NoConfidentialForNonConfidential(t *testing.T) {
+	name, _, ok := suggestTargetSKU("Standard_B2ms")
+	if !ok {
+		t.Fatal("expected a suggestion for Standard_B2ms")
+	}
+	if strings.HasPrefix(name, "Standard_DC") || strings.HasPrefix(name, "Standard_EC") {
+		t.Errorf("Standard_B2ms must not get a confidential-computing target, got %s", name)
+	}
+}
+
 func TestMatchLifecycleNotes(t *testing.T) {
 	// Pin AZURE_CLOUD to a non-exempt value so this test's assertions do not
 	// depend on ambient environment state: matchLifecycleNotes suppresses all

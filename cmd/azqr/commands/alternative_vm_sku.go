@@ -36,6 +36,9 @@ The compatibility score (0.0–1.0) is computed from:
   - Data disk match            (weight 0.05)
   - Accelerated networking     (weight 0.05)
 
+Confidential-computing sizes (DC/EC series) are only suggested when the source
+SKU is itself a DC/EC size. Equal scores are ordered by SKU name.
+
 The score measures hardware similarity only. It does not check CPU architecture,
 local temp-disk needs, attached disk/NIC counts, vendor certification, image
 readiness, region or zone availability, subscription restrictions, quota, or

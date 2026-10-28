@@ -224,3 +224,40 @@ func TestFindAlternatives_SameModelVersionsRankFirst(t *testing.T) {
 		t.Errorf("Standard_D16s_v4 (pos %d) should rank above Standard_D16ads_v5 (pos %d)", v4Pos, otherPos)
 	}
 }
+
+func TestFindAlternatives_ConfidentialOnlyForConfidentialSource(t *testing.T) {
+	b2ms, ok := Lookup("Standard_B2ms")
+	if !ok {
+		t.Fatal("Standard_B2ms not found in known_skus.yaml")
+	}
+	for _, r := range FindAlternatives(b2ms, 0) {
+		if isConfidential(r.SKU.Name) {
+			t.Errorf("non-confidential source received confidential alternative %s", r.SKU.Name)
+		}
+	}
+
+	dc, ok := Lookup("Standard_DC2as_v5")
+	if !ok {
+		t.Fatal("Standard_DC2as_v5 not found in known_skus.yaml")
+	}
+	found := false
+	for _, r := range FindAlternatives(dc, 0) {
+		if r.SKU.Name == "Standard_DC2as_v6" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("confidential source should still receive confidential alternatives")
+	}
+}
+
+func TestFindAlternatives_TiesOrderedByName(t *testing.T) {
+	target, _ := Lookup("Standard_B2ms")
+	results := FindAlternatives(target, 0)
+	for i := 1; i < len(results); i++ {
+		a, b := results[i-1], results[i]
+		if a.CompatibilityScore == b.CompatibilityScore && a.SKU.Name > b.SKU.Name {
+			t.Fatalf("tie not ordered by name: %s before %s", a.SKU.Name, b.SKU.Name)
+		}
+	}
+}

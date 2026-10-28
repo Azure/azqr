@@ -27,6 +27,14 @@ var baseNameRe = regexp.MustCompile(`(?i)_v\d+.*$`)
 // Groups: 1=category letter (V=visualization, C=compute, D=distributed).
 var gpuCategoryRe = regexp.MustCompile(`(?i)^Standard_N([VCD])\d`)
 
+// confidentialRe matches confidential-computing sizes (DC and EC series, for
+// example Standard_DC2as_v6 or Standard_EC4eds_v5).
+var confidentialRe = regexp.MustCompile(`(?i)^Standard_[DE]C\d`)
+
+func isConfidential(name string) bool {
+	return confidentialRe.MatchString(name)
+}
+
 // extractVersion returns the generation version found in the SKU name, or 0 if absent.
 func extractVersion(name string) int {
 	m := versionRe.FindStringSubmatch(name)
@@ -56,11 +64,16 @@ func extractGPUCategory(name string) string {
 
 // FindAlternatives returns the top n alternative SKUs for the given target SKU,
 // ranked by compatibility score using the same algorithm as azure-assessor's SkuAdvisor.
+// Confidential-computing (DC/EC) candidates are only returned when the target is
+// itself confidential, and equal scores are ordered by SKU name.
 func FindAlternatives(target SKU, n int) []Recommendation {
 	var recommendations []Recommendation
 
 	for _, candidate := range ListAll() {
 		if candidate.Name == target.Name {
+			continue
+		}
+		if isConfidential(candidate.Name) && !isConfidential(target.Name) {
 			continue
 		}
 
@@ -82,7 +95,7 @@ func FindAlternatives(target SKU, n int) []Recommendation {
 		if a.CompatibilityScore < b.CompatibilityScore {
 			return 1
 		}
-		return 0
+		return strings.Compare(a.SKU.Name, b.SKU.Name)
 	})
 
 	if n > 0 && len(recommendations) > n {
