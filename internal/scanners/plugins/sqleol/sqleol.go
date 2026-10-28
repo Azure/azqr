@@ -30,8 +30,8 @@ func NewScanner() *Scanner {
 func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "sql-eol",
-		Version:     "0.6.0-beta",
-		Description: "Analyzes SQL Server End-of-Life and Extended Security Update status with host-level ESU billing (once per OSE, per version, at the highest edition), full cost breakdown (VM compute, SQL license, ESU), migration recommendations with conservative GP-only SQL MI cost estimates, and unified SQL MI migration savings and verdict",
+		Version:     "0.7.0-beta",
+		Description: "Analyzes SQL Server End-of-Life and Extended Security Update status with host-level ESU billing (once per OSE, per version, at the highest edition), full cost breakdown (VM compute, SQL license, ESU), migration recommendations with SQL MI cost estimates sized from the Azure Arc migration assessment when available (conservative GP-only heuristic otherwise), a 2:1 consolidation ratio, and SQL MI migration savings and verdict",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
 		Type:        plugins.PluginTypeInternal,
@@ -68,6 +68,15 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Est SQL MI Monthly Cost"},
 			{Name: "Est SQL MI Monthly Saving"},
 			{Name: "SQL MI Migration Verdict"},
+			{Name: "Estimate Basis"},
+			{Name: "Assessment Readiness"},
+			{Name: "Assessment Blocker Count"},
+			{Name: "Assessment Upload Time"},
+			{Name: "Assessed MI Tier"},
+			{Name: "Assessed MI vCores"},
+			{Name: "Predicted Data+Log GB"},
+			{Name: "Assessment Price (reference)"},
+			{Name: "Assessment Price Basis"},
 		},
 	}
 }
@@ -143,6 +152,15 @@ type sqlEOLRow struct {
 	EstSQLMIMonthlyCost          string `json:"EstSQLMIMonthlyCost"`
 	EstSQLMIMonthlySaving        string `json:"EstSQLMIMonthlySaving"`
 	SQLMIMigrationVerdict        string `json:"SQLMIMigrationVerdict"`
+	EstimateBasis                string `json:"EstimateBasis"`
+	AssessmentReadiness          string `json:"AssessmentReadiness"`
+	AssessmentBlockerCount       string `json:"AssessmentBlockerCount"`
+	AssessmentUploadTime         string `json:"AssessmentUploadTime"`
+	AssessedMITier               string `json:"AssessedMITier"`
+	AssessedMIvCores             string `json:"AssessedMIvCores"`
+	PredictedDataLogGB           string `json:"PredictedDataLogGB"`
+	AssessmentPriceReference     string `json:"AssessmentPriceReference"`
+	AssessmentPriceBasis         string `json:"AssessmentPriceBasis"`
 }
 
 // toRecord flattens a sqlEOLRow into a table row in the same column order as
@@ -181,6 +199,15 @@ func (r sqlEOLRow) toRecord() []string {
 		r.EstSQLMIMonthlyCost,
 		r.EstSQLMIMonthlySaving,
 		r.SQLMIMigrationVerdict,
+		r.EstimateBasis,
+		r.AssessmentReadiness,
+		r.AssessmentBlockerCount,
+		r.AssessmentUploadTime,
+		r.AssessedMITier,
+		r.AssessedMIvCores,
+		r.PredictedDataLogGB,
+		r.AssessmentPriceReference,
+		r.AssessmentPriceBasis,
 	}
 }
 

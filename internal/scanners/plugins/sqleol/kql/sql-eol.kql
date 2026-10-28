@@ -11,7 +11,10 @@
 //      and passive HA/DR replicas are covered at $0.
 //   3. Estimates current monthly cost: VM compute + SQL license (PAYG only) + ESU + patch ops
 //   4. Estimates SQL MI target cost and monthly savings
-//   5. Repeats savings under a conservative 2:1 consolidation (2 source instances → 1 SQL MI)
+//   5. For Arc-enabled instances with a fresh, usable Azure Arc migration assessment, sizes the MI from the
+//      assessment (vCores, tier, predicted data+log storage) and uses it for the MI cost;
+//      all other rows keep the heuristic (see EstimateBasis).
+//   6. Always applies the conservative 2:1 consolidation (2 source instances → 1 SQL MI) to cost, saving and verdict
 //
 // ESU BILLING MODEL (per Microsoft docs): ESU is metered once per OSE (host), per SQL Server version,
 // at the HIGHEST edition present for that version, on the total OSE cores (minimum 4 cores; Standard
@@ -29,7 +32,7 @@
 //   SQL MI target cost (compute + license):
 //     GP  PAYG: $123/vCore/month  |  GP  AHUB: $49/vCore/month
 //     BC  PAYG: $367/vCore/month  |  BC  AHUB: $147/vCore/month
-//   SQL MI storage (default: 0 GB — storage not included by default; set _estimatedStorageGB below):
+//   SQL MI storage (heuristic rows: default 0 GB — set _estimatedStorageGB below; assessed rows use predicted data+log size):
 //     GP: $0.115/GB/month  (e.g. 512 GB → $58.88 | 1,024 GB → $117.76 | 2,048 GB → $235.52)
 //     BC rate is $0.230/GB/month but not used here (recommendGeneralPurposeOnly = true)
 //     Note: first 100% of provisioned DB size in backup is included free in SQL MI — backup not modelled
@@ -48,6 +51,8 @@ resources
 // Consolidation model: conservative 2:1 ratio — 2 source SQL Server instances per SQL MI.
 // It is conservative and likely to be higher due to right-sizing (typical SQL Server utilization is 10–30%).
 | extend consolidationRatio = 2.0
+// Arc migration assessments older than this many days are ignored (Microsoft's own ARG sample uses 14).
+| extend _assessmentFreshnessDays = 14
 // Assumed total storage per SQL MI target instance (GB). Set to 0 by default (storage not factored in).
 // Change to your environment's expected DB size to include storage in the MI cost estimate.
 // GP rate: $0.115/GB/month (matches recommendGeneralPurposeOnly = true below).
@@ -557,18 +562,88 @@ resources
                                    _isFreeEdition,
                                    EstSQLMIMonthlyCost,
                                    EstSQLMIMonthlyCost + (_estimatedStorageGB * 0.115))
-// Savings: current total − MI target cost ($0 for free editions)
-| extend EstSQLMIMonthlySaving = iff(_isFreeEdition, 0.0, _currentMonthlyCost - EstSQLMIMonthlyCost)
-| extend EstSQLMIMonthlyCostConsolidated = iff(_isFreeEdition, 0.0, EstSQLMIMonthlyCost / consolidationRatio)
-| extend EstSQLMIMonthlySavingConsolidated = iff(_isFreeEdition, 0.0, _currentMonthlyCost - EstSQLMIMonthlyCostConsolidated)
-| extend SQLMIMigrationVerdictConsolidated = case(
-                                                 _isFreeEdition,
-                                                 "N/A",
-                                                 EstSQLMIMonthlySavingConsolidated > 0,
-                                                 "Cost Savings",
-                                                 EstSQLMIMonthlySavingConsolidated < 0,
-                                                 "Cost Increase (justified by PaaS/security benefits)",
-                                                 "Break Even"
+// ARC MIGRATION ASSESSMENT (Arc-enabled SQL only; read from the same row, no join/mv-expand needed)
+//   properties.migration.assessment.skuRecommendationResults.azureSqlManagedInstance holds the measured
+//   (P95 over the lookback window) SQL MI size, tier and predicted data+log storage. Only the sizing and
+//   readiness are used; pricing stays on the plugin rates above so all rows share one price basis.
+//   A row uses the assessment only when it is enabled, fresh, has an MI result with status
+//   Ready/ReadyWithConditions, a compute size and a recognised tier. Everything else keeps the heuristic.
+| extend _asm = properties.migration.assessment
+| extend _asmMI = _asm.skuRecommendationResults.azureSqlManagedInstance
+| extend _asmStatus = tostring(_asmMI.recommendationStatus)
+| extend _asmUploadTime = todatetime(_asm.assessmentUploadTime)
+| extend _asmVCores = toint(_asmMI.targetSku.computeSize)
+| extend _asmTierRaw = tolower(tostring(_asmMI.targetSku.category.sqlServiceTier))
+| extend _asmIsBC = _asmTierRaw contains "business"
+| extend _asmTierKnown = _asmTierRaw contains "business" or _asmTierRaw contains "general"
+| extend _asmStorageGB = (todouble(_asmMI.targetSku.predictedDataSizeInMb) + todouble(_asmMI.targetSku.predictedLogSizeInMb)) / 1024.0
+| extend _asmEnabled = iff(tobool(_asm.enabled) == true, true, false)
+| extend _asmIsFresh = iff(isnotnull(_asmUploadTime) and _asmUploadTime >= _now - 1d * _assessmentFreshnessDays, true, false)
+| extend _asmHasMI = iff(isnotnull(_asmMI) and isnotempty(_asmStatus), true, false)
+| extend _asmNotReady = iff(type == "microsoft.azurearcdata/sqlserverinstances" and _asmEnabled and _asmIsFresh and _asmStatus == "NotReady", true, false)
+| extend _asmUsable = iff(
+                          type == "microsoft.azurearcdata/sqlserverinstances"
+                              and not(_isFreeEdition)
+                              and _asmEnabled
+                              and _asmIsFresh
+                              and _asmStatus in ("Ready", "ReadyWithConditions")
+                              and coalesce(_asmVCores, 0) > 0
+                              and _asmTierKnown,
+                          true,
+                          false)
+| extend _heuristicReason = case(
+                                type != "microsoft.azurearcdata/sqlserverinstances",
+                                "SQL VM, no Arc assessment",
+                                _isFreeEdition,
+                                "free edition",
+                                isnull(_asm),
+                                "no assessment",
+                                not(_asmEnabled),
+                                "assessment disabled",
+                                not(_asmIsFresh),
+                                "assessment stale",
+                                not(_asmHasMI),
+                                "no MI result in assessment",
+                                _asmNotReady,
+                                "not ready for sizing",
+                                "assessment not usable"
+    )
+| extend EstimateBasis = iff(
+                             _asmUsable,
+                             strcat(
+                                 "Arc assessment (",
+                                 tostring(toint(_asm.settings.percentile)),
+                                 "th percentile, ",
+                                 tostring(toint(_asm.settings.lookbackPeriodInDays)),
+                                 "d, uploaded ",
+                                 format_datetime(_asmUploadTime, "yyyy-MM-dd"),
+                                 ")"),
+                             strcat("Heuristic (", _heuristicReason, ")"))
+// Assessed MI cost = assessed vCores × plugin rate for the assessed tier + predicted data+log storage.
+//   GP: $123 PAYG / $49 AHUB per vCore | BC: $367 PAYG / $147 AHUB per vCore | storage GP $0.115, BC $0.230 per GB
+//   No Unlimited Virtualization Benefit vCores÷4 reduction is applied: the assessed size is already the MI target.
+| extend _miAssessedRate = case(
+                               _asmIsBC and SQLLicenseType == "AHUB",
+                               147.0,
+                               _asmIsBC,
+                               367.0,
+                               SQLLicenseType == "AHUB",
+                               49.0,
+                               123.0)
+| extend _miAssessedCost = _miAssessedRate * coalesce(_asmVCores, 0) + coalesce(_asmStorageGB, 0.0) * iff(_asmIsBC, 0.230, 0.115)
+// Cost, saving and verdict always use the conservative 2:1 consolidation ratio (assessed MI cost or heuristic cost ÷ ratio).
+| extend _miCost = case(_isFreeEdition, 0.0, _asmUsable, _miAssessedCost, EstSQLMIMonthlyCost) / consolidationRatio
+| extend _miSaving = iff(_isFreeEdition, 0.0, _currentMonthlyCost - _miCost)
+| extend _miVerdict = case(
+                          _isFreeEdition,
+                          "N/A",
+                          _asmNotReady,
+                          "Blocked (assessment: NotReady)",
+                          _miSaving > 0,
+                          "Cost Savings",
+                          _miSaving < 0,
+                          "Cost Increase (justified by PaaS/security benefits)",
+                          "Break Even"
     )
 | project
     Subscription = SubscriptionName,
@@ -586,7 +661,10 @@ resources
     ESUEnabled,
     ESUStartDate,
     ESUEndDate,
-    MigrationTargetTier = _recommendedMITier,
+    MigrationTargetTier = iff(
+                              _asmUsable,
+                              strcat(iff(_asmIsBC, "Business Critical", "General Purpose"), " (Arc assessment)"),
+                              _recommendedMITier),
     MigrationRecommendation,
     vCores = tostring(vCores),
     BillableCores = tostring(BillableCores),
@@ -601,9 +679,27 @@ resources
     PatchOpsMonthlyCost = tostring(PatchOpsMonthlyCost),
     CurrentMonthlyCost = tostring(round(_currentMonthlyCost, 2)),
     ConsolidationRatio = tostring(consolidationRatio),
-    EstSQLMIMonthlyCost = tostring(round(EstSQLMIMonthlyCostConsolidated, 2)),
-    EstSQLMIMonthlySaving = tostring(round(EstSQLMIMonthlySavingConsolidated, 2)),
-    SQLMIMigrationVerdict = SQLMIMigrationVerdictConsolidated
+    EstSQLMIMonthlyCost = tostring(round(_miCost, 2)),
+    EstSQLMIMonthlySaving = tostring(round(_miSaving, 2)),
+    SQLMIMigrationVerdict = _miVerdict,
+    EstimateBasis,
+    AssessmentReadiness = _asmStatus,
+    AssessmentBlockerCount = tostring(toint(_asmMI.numberOfServerBlockerIssues)),
+    AssessmentUploadTime = tostring(_asmUploadTime),
+    AssessedMITier = iff(_asmUsable, iff(_asmIsBC, "Business Critical", "General Purpose"), ""),
+    AssessedMIvCores = iff(_asmUsable, tostring(_asmVCores), ""),
+    PredictedDataLogGB = iff(_asmUsable, tostring(round(_asmStorageGB, 2)), ""),
+    AssessmentPriceReference = tostring(round(todouble(_asmMI.monthlyCost.totalCost), 2)),
+    AssessmentPriceBasis = iff(
+                               _asmHasMI,
+                               strcat(
+                                   tostring(_asm.settings.targetLocation),
+                                   ", ",
+                                   tostring(_asm.settings.currency),
+                                   iff(tostring(_asm.settings.currency) != "USD", " (non-USD)", ""),
+                                   ", ",
+                                   tostring(_asm.settings.strategy)),
+                               "")
 | order by
     case(EOLStatus == "Expired", 0, EOLStatus == "ESU Active", 1, EOLStatus == "Upcoming ESU", 2, EOLStatus == "Supported", 3, 4) asc,
     EstSQLMIMonthlySaving desc,

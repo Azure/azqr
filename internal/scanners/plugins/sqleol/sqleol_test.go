@@ -56,7 +56,9 @@ func TestSQLESURow_Unmarshal(t *testing.T) {
 		"vCores": "8",
 		"EOLStatus": "Out of Support",
 		"SQLMIMigrationVerdict": "Recommended",
-		"ConsolidationRatio": "2"
+		"ConsolidationRatio": "2",
+		"EstimateBasis": "Arc assessment (95th percentile, 30d, uploaded 2026-10-01)",
+		"AssessedMIvCores": "8"
 	}`)
 
 	var r sqlEOLRow
@@ -79,6 +81,9 @@ func TestSQLESURow_Unmarshal(t *testing.T) {
 	if r.ConsolidationRatio != "2" {
 		t.Errorf("ConsolidationRatio = %q, want 2", r.ConsolidationRatio)
 	}
+	if r.EstimateBasis != "Arc assessment (95th percentile, 30d, uploaded 2026-10-01)" || r.AssessedMIvCores != "8" {
+		t.Errorf("assessment columns not mapped: %+v", r)
+	}
 }
 
 // TestSQLESURow_ToRecord verifies the flattened record preserves field order and
@@ -98,6 +103,7 @@ func TestSQLESURow_ToRecord(t *testing.T) {
 		ESUApplicable:         "Yes",
 		ESUEnabled:            "Enabled",
 		SQLMIMigrationVerdict: "Recommended",
+		EstimateBasis:         "Heuristic (no assessment)",
 	}
 
 	record := r.toRecord()
@@ -129,8 +135,14 @@ func TestSQLESURow_ToRecord(t *testing.T) {
 			t.Errorf("record[%d] (%s) = %q, want %q", c.idx, c.desc, record[c.idx], c.want)
 		}
 	}
-	// SQLMIMigrationVerdict is the last column.
-	if record[len(record)-1] != "Recommended" {
-		t.Errorf("last record = %q, want Recommended", record[len(record)-1])
+	// New assessment columns are appended after the existing SQLMIMigrationVerdict column.
+	if record[31] != "Recommended" {
+		t.Errorf("SQL MI Migration Verdict record[31] = %q, want Recommended", record[31])
+	}
+	if record[32] != "Heuristic (no assessment)" {
+		t.Errorf("Estimate Basis record[32] = %q, want Heuristic (no assessment)", record[32])
+	}
+	if record[len(record)-1] != "" {
+		t.Errorf("last record = %q, want empty Assessment Price Basis", record[len(record)-1])
 	}
 }

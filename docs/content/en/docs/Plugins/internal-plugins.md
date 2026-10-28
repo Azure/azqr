@@ -159,7 +159,7 @@ Availability zone loss/gain applies a multiplicative adjustment to the final sco
 **Plugin Name**: `sql-eol`  
 **Command**: `azqr sql-eol`  
 **Flag**: `--plugin sql-eol`  
-**Version**: 0.6.0-beta
+**Version**: 0.7.0-beta
 
 Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status across Arc-enabled SQL Server instances and SQL Virtual Machines on Azure.
 
@@ -169,7 +169,7 @@ Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status 
 - Enforces Standard edition **24-core cap** on ESU billing (per Microsoft ESU pricing docs; Enterprise and Web are uncapped)
 - Passive **HA/DR replicas excluded** from ESU cost ($0 — covered under primary's SA failover rights)
 - Reports **ESU subscription status** (`ESUEnabled`) from the Arc machine's `WindowsAgent.SqlServer` extension
-- Estimates SQL Managed Instance migration savings with 2:1 consolidation model
+- Estimates SQL Managed Instance migration savings; Arc-enabled instances with a fresh Azure Arc migration assessment are sized from it (vCores, tier, predicted storage, readiness) at the plugin's list rates, and always applying a 2:1 consolidation ratio
 - Covers both Arc-enabled SQL (on-prem, AWS, GCP) and Azure VM (SQL IaaS)
 
 **ESU Billing Model**: ESU is metered once per OSE (Operating System Environment — a physical or virtual machine), per SQL Server version, at the highest edition installed for that version. All SQL Server service types (Engine, SSIS, SSAS, SSRS, Power BI Report Server) are ESU-eligible and roll into that single per-host+version charge. Free editions (Developer, Express, Evaluation) are never billed; passive HA/DR replicas are covered at $0 under the primary server's Software Assurance.
@@ -202,8 +202,9 @@ Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status 
 - Patch Ops Monthly Cost
 - Current Monthly Cost (total current spend)
 - Consolidation Ratio (2:1 default)
-- Est SQL MI Monthly Cost, Est SQL MI Monthly Saving
-- SQL MI Migration Verdict (Cost Savings / Break Even / Cost Increase)
+- Est SQL MI Monthly Cost, Est SQL MI Monthly Saving (2:1 consolidation for all rows)
+- SQL MI Migration Verdict (Cost Savings / Break Even / Cost Increase / Blocked)
+- Estimate Basis, Assessment Readiness, Assessment Blocker Count, Assessment Upload Time, Assessed MI Tier, Assessed MI vCores, Predicted Data+Log GB, Assessment Price (reference), Assessment Price Basis
 
 ### 6. VM v6/v7 Modernization Readiness
 
@@ -415,8 +416,8 @@ ai-gov     1.0.0      internal   Checks OpenAI/Cognitive Services accounts for..
 carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure resource type
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
 region-selection      0.2.0-beta internal   Analyzes optimal Azure region selection based on service availability...
-sql-eol               0.6.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
-vm-modernization      0.2.0      internal   Reports Azure VM v6/v7 series modernization readiness
+sql-eol               0.7.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
+vm-modernization      0.3.0      internal   Reports Azure VM v6/v7 series modernization readiness
 service-health        0.1.0-beta internal   Analyzes Azure service health events to determine...
 ```
 

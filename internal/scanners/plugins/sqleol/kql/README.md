@@ -1,6 +1,6 @@
 # SQL Server ESU Scanner
 
-> **Version: 0.5.0-beta**
+> **Version: 0.7.0-beta**
 
 Scans SQL Server instances (Azure VMs and Arc-enabled) for EOL/ESU lifecycle status, estimates the full current monthly cost of staying on SQL Server IaaS, and calculates monthly savings from migrating to Azure SQL Managed Instance. The query is implemented in [sql-eol.kql](sql-eol.kql).
 
@@ -13,6 +13,18 @@ Scans SQL Server instances (Azure VMs and Arc-enabled) for EOL/ESU lifecycle sta
 3. Assigns an `EOLStatus`: `Supported` → `Upcoming ESU` → `ESU Active` → `Expired`.
 4. Generates a `MigrationRecommendation` and estimates the SQL MI target cost using a **conservative GP-only model** (all non-UVB cases use General Purpose pricing). Arc-enabled Enterprise AHUB instances apply the **Unlimited Virtualization Benefit (UVB)** → General Purpose at `max(4, vCores÷4)` vCores. Enterprise editions without UVB receive a note that a database assessment is required before committing to a tier.
 5. Calculates current total monthly cost and estimated SQL MI cost, producing monthly savings and a migration verdict.
+6. For Arc-enabled instances with a usable **Azure Arc migration assessment** (`properties.migration.assessment`), sizes the SQL MI from the assessment instead of the heuristic: assessed vCores, assessed tier (General Purpose or Business Critical) and predicted data+log storage. Pricing still uses the plugin's own list rates so every row shares one price basis; the assessment's own prices are shown only as a reference. All other rows keep the heuristic. The `EstimateBasis` column states which was used.
+
+### Arc assessment rules
+
+- A row uses the assessment only when it is enabled, uploaded within the last 14 days (`_assessmentFreshnessDays`), has a managed-instance result with status `Ready` or `ReadyWithConditions`, a compute size and a recognised tier.
+- `NotReady` assessments produce the verdict `Blocked (assessment: NotReady)`; cost columns still use the heuristic.
+- The headline cost, saving and verdict always use the conservative **2:1** consolidation, for assessed and heuristic rows alike.
+- Assessed rows do not apply the UVB `vCores÷4` reduction; the assessed size is used at the plugin AHUB or PAYG rate.
+- The assessment is Windows-only, SQL Server 2014+, excludes failover cluster instances, and uses a 30-day lookback at the 95th percentile by default. Under-sizing is possible if the lookback missed peak periods.
+- Assessment currency, region and discount may differ from the plugin rates (`AssessmentPriceBasis` flags non-USD).
+
+> **Breaking change (0.7.0-beta):** assessed rows now size the MI from the assessment (tier, vCores, storage), so headline cost and verdicts can change. New columns are appended after `SQLMIMigrationVerdict`; the verdict is no longer the last column.
 
 ## Assumptions
 
@@ -68,13 +80,17 @@ Scans SQL Server instances (Azure VMs and Arc-enabled) for EOL/ESU lifecycle sta
 | PatchOpsMonthlyCost | Operational overhead |
 | CurrentMonthlyCost | Total current monthly spend (all components) |
 | ConsolidationRatio | Conservative 2:1 source-to-target ratio used in MI cost allocation |
-| EstSQLMIMonthlyCost | Estimated SQL MI cost at recommended tier (2:1 consolidated), compute + license only by default. Set `_estimatedStorageGB` in the KQL to include storage (GP rate: $0.115/GB/month). |
+| EstSQLMIMonthlyCost | Estimated SQL MI cost at recommended tier: 2:1 consolidated for all rows; assessed rows use assessed size and predicted storage, heuristic rows compute + license only by default. Set `_estimatedStorageGB` in the KQL to include storage (GP rate: $0.115/GB/month). |
 | EstSQLMIMonthlySaving | Saving vs current monthly spend (negative = cost increase) |
-| SQLMIMigrationVerdict | `Cost Savings` · `Break Even` · `Cost Increase (justified by PaaS/security benefits)` |
+| SQLMIMigrationVerdict | `Cost Savings` · `Break Even` · `Cost Increase (justified by PaaS/security benefits)` · `Blocked (assessment: NotReady)` |
+| EstimateBasis | `Arc assessment (<percentile>th percentile, <lookback>d, uploaded <date>)` or `Heuristic (<reason>)` |
+| AssessmentReadiness / AssessmentBlockerCount / AssessmentUploadTime | Arc assessment MI readiness status, blocker count and upload time (empty without an assessment) |
+| AssessedMITier / AssessedMIvCores / PredictedDataLogGB | Assessed target tier, vCores and predicted data+log size (only when the assessment is used) |
+| AssessmentPriceReference / AssessmentPriceBasis | The assessment's own monthly total and its region, currency and strategy; reference only |
 
 ## Limitations
 
-- SQL MI storage is **not included by default** (`_estimatedStorageGB = 0`). Set `_estimatedStorageGB` in `sql-eol.kql` to include storage in the MI cost estimate (GP rate: $0.115/GB/month). Actual storage costs depend on database size and backup retention settings.
+- For heuristic rows SQL MI storage is **not included by default** (`_estimatedStorageGB = 0`); assessed rows include predicted data+log storage. Set `_estimatedStorageGB` in `sql-eol.kql` to include storage in the MI cost estimate (GP rate: $0.115/GB/month). Actual storage costs depend on database size and backup retention settings.
 - Costs reflect public list pricing — EA/CSP discounts are not factored in.
 - VM compute rates are blended family-level estimates (Linux PAYG baseline), not exact billing.
 - SQL MI estimates do not account for reserved capacity pricing or workload-specific sizing.
