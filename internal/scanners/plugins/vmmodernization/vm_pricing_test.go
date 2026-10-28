@@ -286,14 +286,12 @@ func TestCollectVMPrices_NoPairsNoHTTPCall(t *testing.T) {
 }
 
 func TestSelectCanonicalPrice_RejectsNonPAYGHourlyRows(t *testing.T) {
-	notPrimary := false
 	base := vmRetailPriceItem{RetailPrice: 1, Type: "Consumption", UnitOfMeasure: "1 Hour", EffectiveStartDate: "2020-01-01T00:00:00Z"}
 
 	for name, mutate := range map[string]func(*vmRetailPriceItem){
-		"low priority":    func(i *vmRetailPriceItem) { i.MeterName = "D4 v2 Low Priority" },
-		"non-hour unit":   func(i *vmRetailPriceItem) { i.UnitOfMeasure = "1/Month" },
-		"zero price":      func(i *vmRetailPriceItem) { i.RetailPrice = 0 },
-		"non-primary reg": func(i *vmRetailPriceItem) { i.IsPrimaryMeterRegion = &notPrimary },
+		"low priority":  func(i *vmRetailPriceItem) { i.MeterName = "D4 v2 Low Priority" },
+		"non-hour unit": func(i *vmRetailPriceItem) { i.UnitOfMeasure = "1/Month" },
+		"zero price":    func(i *vmRetailPriceItem) { i.RetailPrice = 0 },
 	} {
 		item := base
 		mutate(&item)
@@ -303,5 +301,43 @@ func TestSelectCanonicalPrice_RejectsNonPAYGHourlyRows(t *testing.T) {
 	}
 	if price, ok := selectCanonicalPrice([]vmRetailPriceItem{base}, "Linux"); !ok || price != 1 {
 		t.Errorf("valid row = %v, %v, want 1, true", price, ok)
+	}
+}
+
+// Legacy series (v2/v3/v4) Pay-As-You-Go rows carry isPrimaryMeterRegion=false
+// in the live API, so that flag must not influence price selection.
+func TestSelectCanonicalPrice_LegacySeriesRows(t *testing.T) {
+	items := []vmRetailPriceItem{
+		{RetailPrice: 0.12, Type: "Consumption", UnitOfMeasure: "1 Hour", ProductName: "Virtual Machines DSv3 Series", SkuName: "D2s v3", EffectiveStartDate: "2017-06-17T00:00:00Z"},
+		{RetailPrice: 0.212, Type: "Consumption", UnitOfMeasure: "1 Hour", ProductName: "Virtual Machines DSv3 Series Windows", SkuName: "D2s v3", EffectiveStartDate: "2017-06-17T00:00:00Z"},
+	}
+	if price, ok := selectCanonicalPrice(items, "Linux"); !ok || price != 0.12 {
+		t.Errorf("Linux = %v, %v, want 0.12, true", price, ok)
+	}
+	if price, ok := selectCanonicalPrice(items, "Windows"); !ok || price != 0.212 {
+		t.Errorf("Windows = %v, %v, want 0.212, true", price, ok)
+	}
+}
+
+// ARG can return a lowercase size (standard_e4as_v5) while the API returns
+// Standard_E4as_v5.
+func TestCollectVMPrices_CaseInsensitiveSKUMatch(t *testing.T) {
+	t.Setenv("AZURE_CLOUD", "")
+
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		item := vmRetailPriceItem{
+			ArmSkuName: "Standard_E4as_v5", ArmRegionName: "westeurope", RetailPrice: 0.3,
+			Type: "Consumption", SkuName: "E4as v5", ProductName: "Virtual Machines Easv5 Series",
+			EffectiveStartDate: "2024-01-01T00:00:00Z",
+		}
+		_, _ = w.Write(retailResponseJSON(t, []vmRetailPriceItem{item}))
+	}))
+	defer server.Close()
+
+	withVMRetailPricesURL(t, server)
+	cache := collectVMPrices(context.Background(), testVMHttpClient(server),
+		[]skuRegionPair{{ArmSkuName: "standard_e4as_v5", ArmRegionName: "westeurope"}})
+	if price, ok := cache.hourlyPrice("standard_e4as_v5", "westeurope", "Linux"); !ok || price != 0.3 {
+		t.Errorf("hourlyPrice = (%v, %v), want (0.3, true)", price, ok)
 	}
 }
