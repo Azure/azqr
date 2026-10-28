@@ -210,7 +210,7 @@ Analyzes SQL Server End-of-Life (EOL) and Extended Security Update (ESU) status 
 **Plugin Name**: `vm-modernization`  
 **Command**: `azqr vm-modernization`  
 **Flag**: `--plugin vm-modernization`  
-**Version**: 0.2.0
+**Version**: 0.3.0
 
 Reports Azure VM v6/v7 series modernization readiness, following the Discover → Assess → Plan phases from the [VM v6/v7 modernization guidance](https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/lifecycle/sizes-v6-v7-modernization-discover): Discover-phase workload pattern, Assess-phase readiness signals, and a Plan-phase execution-method recommendation with a suggested target v6/v7 SKU.
 
@@ -264,7 +264,8 @@ Columns are grouped so an engineer reads left to right: identify, decide, target
 - Hibernation Enabled, Backup Policy Subtype (the Azure Backup policy subtype protecting the VM, `Unknown` when the lookup fails), VM Power State, Instance View Captured
 
 *Cost:*
-- Current Monthly Cost (USD), Projected Monthly Cost After Increase (USD), Monthly Cost Impact (USD): existing-SKU retail exposure (hourly retail price x 730), not target pricing or savings. Only price changes not yet effective (UTC) are applied, because the current retail rate already includes earlier ones. Stopped (allocated) VMs are still billed; deallocated VMs read `N/A (VM deallocated)`
+- Current Monthly Cost (USD), Projected Monthly Cost After Increase (USD), Monthly Cost Impact (USD): existing-SKU retail exposure (hourly retail price x 730). Only price changes not yet effective (UTC) are applied, because the current retail rate already includes earlier ones. Stopped (allocated) VMs are still billed; deallocated VMs read `N/A (VM deallocated)`
+- Target Monthly Cost (USD), Target Projected Monthly Cost After Increase (USD), Target Monthly Cost Impact (USD): the same calculation for the Suggested Target SKU in the VM's region and OS. The projected cost equals the target cost when no price increase applies to the target SKU. Rows without a concrete target SKU read `N/A`; a missing retail price reads `Manual Review Required`
 
 *Pool context:*
 - Pool Membership, Membership Model (`Standalone` / `Availability Set` / `VMSS Flex`), Orchestration Mode
@@ -416,7 +417,7 @@ carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure r
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
 region-selection      0.2.0-beta internal   Analyzes optimal Azure region selection based on service availability...
 sql-eol               0.6.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
-vm-modernization      0.2.0      internal   Reports Azure VM v6/v7 series modernization readiness
+vm-modernization      0.3.0      internal   Reports Azure VM v6/v7 series modernization readiness
 service-health        0.1.0-beta internal   Analyzes Azure service health events to determine...
 ```
 

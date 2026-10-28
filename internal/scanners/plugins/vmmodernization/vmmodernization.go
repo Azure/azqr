@@ -101,7 +101,7 @@ func (s *Scanner) RegisterFlags(cmd *cobra.Command) {
 func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "vm-modernization",
-		Version:     "0.2.0",
+		Version:     "0.3.0",
 		Description: "Reports Azure VM v6/v7 series modernization readiness: Discover workload pattern, Assess readiness signals (Hyper-V generation, disk controller type, series generation, Azure Disk Encryption, heuristic Gen2/NVMe/MANA OS verdicts), a Plan-phase execution-method recommendation with a suggested target v6/v7 SKU, and a SKU availability and VM family quota sheet",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",
@@ -145,10 +145,13 @@ func (s *Scanner) GetMetadata() plugins.PluginMetadata {
 			{Name: "Backup Policy Subtype"},
 			{Name: "VM Power State"},
 			{Name: "Instance View Captured"},
-			// Cost: existing-SKU retail exposure.
+			// Cost: retail exposure for the current SKU and for the suggested target SKU.
 			{Name: "Current Monthly Cost (USD)"},
 			{Name: "Projected Monthly Cost After Increase (USD)"},
 			{Name: "Monthly Cost Impact (USD)"},
+			{Name: "Target Monthly Cost (USD)"},
+			{Name: "Target Projected Monthly Cost After Increase (USD)"},
+			{Name: "Target Monthly Cost Impact (USD)"},
 			// Pool context: scale set, availability set and pool-model details.
 			{Name: "Pool Membership"},
 			{Name: "Membership Model"},
@@ -275,7 +278,7 @@ func (s *Scanner) Scan(ctx context.Context, cred azcore.TokenCredential, subscri
 }
 
 // uniqueSKURegionPairs collects every unique (armSkuName, armRegionName) pair
-// across all VM rows returned by the scan's ARG query (P02-T03/NFR-002), so
+// across all VM rows (current and suggested target SKUs) returned by the scan's ARG query (P02-T03/NFR-002), so
 // the Retail Prices API lookup can be pre-collected and batched once rather
 // than discovered lazily one VM at a time. Region values are normalized the
 // same way normalizeRegion already does in lifecycle_dataset.go, since ARG's
@@ -285,10 +288,16 @@ func uniqueSKURegionPairs(rows []vmModernizationRow) []skuRegionPair {
 	seen := make(map[skuRegionPair]bool)
 	var pairs []skuRegionPair
 	for _, r := range rows {
-		pair := skuRegionPair{ArmSkuName: r.VMSize, ArmRegionName: normalizeRegion(r.Location)}
-		if !seen[pair] {
-			seen[pair] = true
-			pairs = append(pairs, pair)
+		skuNames := []string{r.VMSize}
+		if target, ok := r.concreteTargetSKU(); ok {
+			skuNames = append(skuNames, target)
+		}
+		for _, name := range skuNames {
+			pair := skuRegionPair{ArmSkuName: name, ArmRegionName: normalizeRegion(r.Location)}
+			if !seen[pair] {
+				seen[pair] = true
+				pairs = append(pairs, pair)
+			}
 		}
 	}
 	return pairs
@@ -567,13 +576,14 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 	executionMethod := recommendExecutionMethod(patternCode, r.HyperVGeneration, isTargetGeneration)
 	tempDiskDependency, sapISVCertificationGate := recommendHardGates(patternCode)
 
-	var suggestedSKU string
+	var suggestedSKU, concreteTarget string
 	targetScore := "N/A"
 	if isActionableWorkloadPattern(patternCode) {
 		if isTargetGeneration {
 			suggestedSKU = alreadyOnTargetGeneration
 		} else if name, score, ok := suggestTargetSKU(r.VMSize); ok {
 			suggestedSKU = name
+			concreteTarget = name
 			targetScore = fmt.Sprintf("%.3f", score)
 		} else {
 			suggestedSKU = manualReviewRequired
@@ -589,6 +599,7 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 	}
 
 	currentMonthlyCost, projectedMonthlyCost, monthlyCostImpact := r.computeMonetaryImpact(priceCache)
+	targetMonthlyCost, targetProjectedMonthlyCost, targetMonthlyCostImpact := r.computeTargetMonetaryImpact(concreteTarget, priceCache)
 	complexityRating, complexityReason := classifyModernizationComplexity(r.VMSize, r.HyperVGeneration, r.DiskControllerType, r.SecurityType, isTargetGeneration)
 	generation2Ready := classifyGeneration2Ready(r.HyperVGeneration, r.ImageSKU)
 	nvmeOSSupported := classifyRemoteNVMeOSSupport(r.ImagePublisher, r.ImageOffer, r.ImageSKU, r.OSName, r.OSVersion)
@@ -637,6 +648,9 @@ func (r vmModernizationRow) toRecord(subscriptionName string, priceCache *vmPric
 		currentMonthlyCost,
 		projectedMonthlyCost,
 		monthlyCostImpact,
+		targetMonthlyCost,
+		targetProjectedMonthlyCost,
+		targetMonthlyCostImpact,
 		// Pool context
 		poolMembership,
 		orNA(r.MembershipModel),
@@ -712,6 +726,20 @@ func formatBool(b bool) string {
 // pool-managed VM (AKS node, VMSS member) still accrues real billing on its
 // current SKU today.
 func (r vmModernizationRow) computeMonetaryImpact(priceCache *vmPriceCache) (current, projected, monthlyImpact string) {
+	return r.computeSKUMonetaryImpact(r.VMSize, priceCache)
+}
+
+// computeTargetMonetaryImpact applies the same calculation to the suggested
+// target SKU in the VM's own region and OS. Rows without a concrete target
+// (already on target, pool-managed, manual review) read "N/A".
+func (r vmModernizationRow) computeTargetMonetaryImpact(targetSKU string, priceCache *vmPriceCache) (current, projected, monthlyImpact string) {
+	if targetSKU == "" {
+		return "N/A", "N/A", "N/A"
+	}
+	return r.computeSKUMonetaryImpact(targetSKU, priceCache)
+}
+
+func (r vmModernizationRow) computeSKUMonetaryImpact(vmSize string, priceCache *vmPriceCache) (current, projected, monthlyImpact string) {
 	if isExemptCloud() {
 		return "", "", ""
 	}
@@ -720,7 +748,7 @@ func (r vmModernizationRow) computeMonetaryImpact(priceCache *vmPriceCache) (cur
 		return na, na, na
 	}
 
-	hourlyPrice, ok := priceCache.hourlyPrice(r.VMSize, normalizeRegion(r.Location), r.OSType)
+	hourlyPrice, ok := priceCache.hourlyPrice(vmSize, normalizeRegion(r.Location), r.OSType)
 	if !ok {
 		return manualReviewRequired, manualReviewRequired, manualReviewRequired
 	}
@@ -728,7 +756,7 @@ func (r vmModernizationRow) computeMonetaryImpact(priceCache *vmPriceCache) (cur
 	currentMonthly := hourlyPrice * 730
 	current = formatUSD(currentMonthly)
 
-	percent, ok := matchImpactPercent(r.VMSize, r.Location)
+	percent, ok := matchImpactPercent(vmSize, r.Location)
 	if !ok {
 		return current, current, formatUSD(0)
 	}

@@ -853,6 +853,9 @@ func TestToRecord_AROOwnership(t *testing.T) {
 		"Current Monthly Cost (USD)",
 		"Projected Monthly Cost After Increase (USD)",
 		"Monthly Cost Impact (USD)",
+		"Target Monthly Cost (USD)",
+		"Target Projected Monthly Cost After Increase (USD)",
+		"Target Monthly Cost Impact (USD)",
 		"Pool Membership",
 		"Membership Model",
 		"Orchestration Mode",
@@ -913,13 +916,16 @@ func TestToRecord_AROOwnership(t *testing.T) {
 				t.Fatalf("got %d columns, want %d", len(got), len(wantHeader))
 			}
 			wantChanges := map[string]string{
-				"Workload Pattern":               patternComputePool,
-				"Pool Membership":                "ARO Cluster",
-				"Temp Disk Dependency":           "N/A (pool/platform-managed)",
-				"SAP/ISV Certification Gate":     "N/A (pool/platform-managed)",
-				"Recommended Execution Method":   methodManagedByPool,
-				"Suggested Target SKU":           "N/A (pool-managed)",
-				"Target SKU Compatibility Score": "N/A",
+				"Workload Pattern":                                   patternComputePool,
+				"Pool Membership":                                    "ARO Cluster",
+				"Temp Disk Dependency":                               "N/A (pool/platform-managed)",
+				"SAP/ISV Certification Gate":                         "N/A (pool/platform-managed)",
+				"Recommended Execution Method":                       methodManagedByPool,
+				"Suggested Target SKU":                               "N/A (pool-managed)",
+				"Target SKU Compatibility Score":                     "N/A",
+				"Target Monthly Cost (USD)":                          "N/A",
+				"Target Projected Monthly Cost After Increase (USD)": "N/A",
+				"Target Monthly Cost Impact (USD)":                   "N/A",
 			}
 			for i, column := range wantHeader {
 				want, changed := wantChanges[column]
@@ -1402,6 +1408,116 @@ func TestLookupDocumentedReplacement(t *testing.T) {
 				t.Errorf("differences = %q inconsistent with replacement %q", differences, replacement)
 			}
 		})
+	}
+}
+
+// TestToRecord_TargetMonetaryImpactColumns verifies the suggested target SKU is
+// priced in the VM's own region: no applicable increase leaves projected equal
+// to the target cost, an applicable regional increase is applied, and rows
+// without a concrete target read N/A.
+func TestToRecord_TargetMonetaryImpactColumns(t *testing.T) {
+	t.Setenv("AZURE_CLOUD", "")
+
+	const (
+		currentSKU = "Standard_D4s_v3"
+		targetSKU  = "Standard_D4s_v6"
+		priceUSD   = 0.30
+	)
+	if got, _, ok := suggestTargetSKU(currentSKU); !ok || got != targetSKU {
+		t.Fatalf("suggestTargetSKU(%q) = %q, %v; want %q", currentSKU, got, ok, targetSKU)
+	}
+
+	cacheFor := func(region string) *vmPriceCache {
+		return &vmPriceCache{rows: map[skuRegionPair][]vmRetailPriceItem{
+			{ArmSkuName: targetSKU, ArmRegionName: region}: {{
+				ArmSkuName: targetSKU, ArmRegionName: region, RetailPrice: priceUSD,
+				Type: "Consumption", ProductName: "Virtual Machines", SkuName: targetSKU,
+				EffectiveStartDate: "2020-01-01T00:00:00Z",
+			}},
+		}}
+	}
+	columns := func(row vmModernizationRow, cache *vmPriceCache) map[string]string {
+		header := (&Scanner{}).GetMetadata().HeaderRow()
+		record := row.toRecord("sub1", cache)
+		out := map[string]string{}
+		for i, name := range header {
+			out[name] = record[i]
+		}
+		return out
+	}
+
+	tests := []struct {
+		name          string
+		row           vmModernizationRow
+		cache         *vmPriceCache
+		wantTarget    string
+		wantProjected string
+		wantImpact    string
+	}{
+		{
+			name:          "no applicable increase keeps projected equal to target cost",
+			row:           vmModernizationRow{Name: "vm1", Location: "eastus", VMSize: currentSKU, OSType: "Linux"},
+			cache:         cacheFor("eastus"),
+			wantTarget:    formatUSD(priceUSD * 730),
+			wantProjected: formatUSD(priceUSD * 730),
+			wantImpact:    formatUSD(0),
+		},
+		{
+			name:          "regional increase applies to the target SKU",
+			row:           vmModernizationRow{Name: "vm1", Location: "northeurope", VMSize: currentSKU, OSType: "Linux"},
+			cache:         cacheFor("northeurope"),
+			wantTarget:    formatUSD(priceUSD * 730),
+			wantProjected: formatUSD(priceUSD * 730 * 1.17),
+			wantImpact:    formatUSD(priceUSD * 730 * 0.17),
+		},
+		{
+			name:          "target price lookup failure needs manual review",
+			row:           vmModernizationRow{Name: "vm1", Location: "eastus", VMSize: currentSKU, OSType: "Linux"},
+			cache:         &vmPriceCache{},
+			wantTarget:    manualReviewRequired,
+			wantProjected: manualReviewRequired,
+			wantImpact:    manualReviewRequired,
+		},
+		{
+			name:          "already on target generation has no target cost",
+			row:           vmModernizationRow{Name: "vm1", Location: "eastus", VMSize: targetSKU, OSType: "Linux"},
+			cache:         cacheFor("eastus"),
+			wantTarget:    "N/A",
+			wantProjected: "N/A",
+			wantImpact:    "N/A",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := columns(tt.row, tt.cache)
+			if got["Target Monthly Cost (USD)"] != tt.wantTarget ||
+				got["Target Projected Monthly Cost After Increase (USD)"] != tt.wantProjected ||
+				got["Target Monthly Cost Impact (USD)"] != tt.wantImpact {
+				t.Errorf("target cost columns = (%q, %q, %q), want (%q, %q, %q)",
+					got["Target Monthly Cost (USD)"], got["Target Projected Monthly Cost After Increase (USD)"], got["Target Monthly Cost Impact (USD)"],
+					tt.wantTarget, tt.wantProjected, tt.wantImpact)
+			}
+		})
+	}
+}
+
+func TestUniqueSKURegionPairs_IncludesTargetSKU(t *testing.T) {
+	rows := []vmModernizationRow{
+		{VMSize: "Standard_D4s_v3", Location: "eastus"},
+		{VMSize: "Standard_D4s_v3", Location: "eastus"},
+	}
+	want := map[skuRegionPair]bool{
+		{ArmSkuName: "Standard_D4s_v3", ArmRegionName: "eastus"}: true,
+		{ArmSkuName: "Standard_D4s_v6", ArmRegionName: "eastus"}: true,
+	}
+	got := uniqueSKURegionPairs(rows)
+	if len(got) != len(want) {
+		t.Fatalf("got %d pairs (%v), want %d", len(got), got, len(want))
+	}
+	for _, p := range got {
+		if !want[p] {
+			t.Errorf("unexpected pair %v", p)
+		}
 	}
 }
 
