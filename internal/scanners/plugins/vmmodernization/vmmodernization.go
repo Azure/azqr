@@ -312,6 +312,7 @@ var generalNotices = []string{
 	"Reserved Instance (RI) protection: customers on Reserved Instances are protected from the price changes until the RI itself expires, not until the 1 February 2027 effective date.",
 	"PaaS compute is not affected by the price changes (Storage services are affected; see the Lifecycle/Pricing Notes column for Storage-specific entries).",
 	"The price changes apply to all agreement types (pay-as-you-go, Enterprise Agreement, and Microsoft Customer Agreement).",
+	"The percentage increase applies only to the compute portion of the VM price. Windows Server license charges are not increased, and VMs with Azure Hybrid Benefit (License Type Windows_Server or Windows_Client) are costed at the compute rate.",
 }
 
 // buildGeneralNoticesSheet returns a second, broadcast-only Excel sheet
@@ -748,12 +749,23 @@ func (r vmModernizationRow) computeSKUMonetaryImpact(vmSize string, priceCache *
 		return na, na, na
 	}
 
-	hourlyPrice, ok := priceCache.hourlyPrice(vmSize, normalizeRegion(r.Location), r.OSType)
+	region := normalizeRegion(r.Location)
+	computePrice, ok := priceCache.computeHourlyPrice(vmSize, region)
 	if !ok {
 		return manualReviewRequired, manualReviewRequired, manualReviewRequired
 	}
 
-	currentMonthly := hourlyPrice * 730
+	// The OS-matched price is the real billed rate. Hybrid Benefit Windows
+	// VMs are billed at the compute rate because the license is already paid.
+	billedPrice := computePrice
+	if strings.EqualFold(r.OSType, "Windows") && !hasWindowsHybridBenefit(r.LicenseType) {
+		billedPrice, ok = priceCache.hourlyPrice(vmSize, region, r.OSType)
+		if !ok {
+			return manualReviewRequired, manualReviewRequired, manualReviewRequired
+		}
+	}
+
+	currentMonthly := billedPrice * 730
 	current = formatUSD(currentMonthly)
 
 	percent, ok := matchImpactPercent(vmSize, r.Location)
@@ -761,10 +773,16 @@ func (r vmModernizationRow) computeSKUMonetaryImpact(vmSize string, priceCache *
 		return current, current, formatUSD(0)
 	}
 
-	projectedMonthly := currentMonthly * (1 + percent/100)
-	monthlyDiff := projectedMonthly - currentMonthly
+	// The percentage applies to the compute portion only, not the license.
+	monthlyDiff := computePrice * 730 * percent / 100
 
-	return current, formatUSD(projectedMonthly), formatUSD(monthlyDiff)
+	return current, formatUSD(currentMonthly + monthlyDiff), formatUSD(monthlyDiff)
+}
+
+// hasWindowsHybridBenefit reports whether the VM's licenseType indicates Azure
+// Hybrid Benefit for Windows, so the Windows license is not billed per hour.
+func hasWindowsHybridBenefit(licenseType string) bool {
+	return strings.EqualFold(licenseType, "Windows_Server") || strings.EqualFold(licenseType, "Windows_Client")
 }
 
 // isDeallocated reports whether a VM's power state indicates compute is

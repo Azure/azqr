@@ -1106,6 +1106,61 @@ func TestToRecord_MonetaryImpactColumns(t *testing.T) {
 	}
 }
 
+// TestComputeMonetaryImpact_WindowsComputeOnly locks in that the price-increase
+// percentage applies only to the Linux (compute) rate, never to the Windows
+// license portion (Windows price = compute + license).
+func TestComputeMonetaryImpact_WindowsComputeOnly(t *testing.T) {
+	t.Setenv("AZURE_CLOUD", "")
+	const (
+		sku    = "Standard_D4_v2"
+		region = "eastus"
+		linux  = 0.20
+		win    = 0.30
+	)
+	item := func(product string, price float64) vmRetailPriceItem {
+		return vmRetailPriceItem{
+			ArmSkuName: sku, ArmRegionName: region, RetailPrice: price, Type: "Consumption",
+			UnitOfMeasure: "1 Hour", ProductName: product, SkuName: sku,
+			EffectiveStartDate: "2020-01-01T00:00:00Z",
+		}
+	}
+	pair := skuRegionPair{ArmSkuName: sku, ArmRegionName: region}
+	both := &vmPriceCache{rows: map[skuRegionPair][]vmRetailPriceItem{
+		pair: {item("Virtual Machines Dv2 Series", linux), item("Virtual Machines Dv2 Series Windows", win)},
+	}}
+	windowsOnly := &vmPriceCache{rows: map[skuRegionPair][]vmRetailPriceItem{
+		pair: {item("Virtual Machines Dv2 Series Windows", win)},
+	}}
+
+	tests := []struct {
+		name          string
+		licenseType   string
+		cache         *vmPriceCache
+		wantCurrent   string
+		wantProjected string
+		wantMonthly   string
+	}{
+		{"Windows pays the license, impact on compute only", "", both,
+			formatUSD(win * 730), formatUSD(win*730 + linux*730*0.25), formatUSD(linux * 730 * 0.25)},
+		{"Windows with Hybrid Benefit is billed at the compute rate", "Windows_Server", both,
+			formatUSD(linux * 730), formatUSD(linux * 730 * 1.25), formatUSD(linux * 730 * 0.25)},
+		{"Windows without a Linux row needs manual review", "", windowsOnly,
+			manualReviewRequired, manualReviewRequired, manualReviewRequired},
+		{"Windows with Hybrid Benefit and no Linux row needs manual review", "Windows_Server", windowsOnly,
+			manualReviewRequired, manualReviewRequired, manualReviewRequired},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			row := vmModernizationRow{Name: "vm1", Location: region, VMSize: sku, OSType: "Windows", LicenseType: tt.licenseType}
+			current, projected, monthly := row.computeMonetaryImpact(tt.cache)
+			if current != tt.wantCurrent || projected != tt.wantProjected || monthly != tt.wantMonthly {
+				t.Errorf("computeMonetaryImpact() = (%q, %q, %q), want (%q, %q, %q)",
+					current, projected, monthly, tt.wantCurrent, tt.wantProjected, tt.wantMonthly)
+			}
+		})
+	}
+}
+
 // TestBuildGeneralNoticesSheet locks in Decision D4/Finding 6: account-wide
 // notices are reported once per run on their own sheet (not Metadata-bearing,
 // following the region-selection plugin's additional-sheet precedent), and
