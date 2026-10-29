@@ -119,6 +119,15 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 	}
 	var globalInventoryMu sync.Mutex
 
+	// Fetch provider data once for all subscriptions and merge it: a type is available when any
+	// subscription reports it.
+	subIDs := make([]string, 0, len(subscriptions))
+	for id := range subscriptions {
+		subIDs = append(subIDs, id)
+	}
+	log.Debug().Msg("Fetching all Azure resource providers...")
+	providerData := availability.FetchMergedProviders(ctx, cred, subIDs)
+
 	var wg sync.WaitGroup
 
 	for subscriptionID, subscriptionName := range subscriptions {
@@ -186,7 +195,7 @@ func (s *RegionSelectorScanner) Scan(ctx context.Context, cred azcore.TokenCrede
 			// Step 3: Check availability for each source->target region pair
 			// Source regions come from where resources actually exist
 			log.Debug().Msgf("Checking resource availability from source regions to %d target regions for subscription %s...", len(targetRegions), renderers.MaskSubscriptionID(subID, true))
-			regionResults := availability.CheckRegionsInParallel(ctx, cred, targetRegions, inventory, subID, subName, regionZoneCount, s.skuCache, s.httpClient)
+			regionResults := availability.CheckRegionsInParallel(ctx, providerData, targetRegions, inventory, subID, subName, regionZoneCount, s.skuCache, s.httpClient)
 			log.Debug().Msgf("Completed availability check for subscription %s", renderers.MaskSubscriptionID(subID, true))
 
 			// Step 4a: Fetch per-subscription Cost Management data (historical meter costs).

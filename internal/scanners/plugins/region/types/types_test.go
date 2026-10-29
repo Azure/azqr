@@ -100,3 +100,23 @@ func TestResourceTypeLocationData_IsAvailable(t *testing.T) {
 		})
 	}
 }
+
+func TestResourceTypeLocationData_MergeAndUnknown(t *testing.T) {
+	a := &ResourceTypeLocationData{Data: map[string]map[string]map[string]struct{}{
+		"microsoft.compute": {"disks": {}, "virtualmachines": {"westeurope": {}}},
+	}}
+	b := &ResourceTypeLocationData{Data: map[string]map[string]map[string]struct{}{
+		"microsoft.compute": {"disks": {"swedencentral": {}}},
+	}}
+
+	if !a.IsUnknown("microsoft.compute/disks") {
+		t.Fatal("empty-location type should be unknown")
+	}
+	a.Merge(b)
+	if a.IsUnknown("microsoft.compute/disks") || !a.IsAvailable("microsoft.compute/disks", "swedencentral") {
+		t.Error("merged locations should make disks available")
+	}
+	if a.IsAvailable("microsoft.compute/virtualmachines", "swedencentral") {
+		t.Error("virtualmachines should stay unavailable in swedencentral")
+	}
+}

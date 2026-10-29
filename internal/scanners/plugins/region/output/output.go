@@ -63,6 +63,8 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 		// Aggregate missing, restricted, and zone-restricted resource types/SKUs across all comparisons to this target
 		missingTypeSet := map[string]bool{}
 		missingSKUSet := map[string]bool{}
+		unknownTypeSet := map[string]bool{}
+		unknownSKUSet := map[string]bool{}
 		zoneRestrictedSKUSet := map[string]bool{}
 		for _, comp := range allResults {
 			if comp.TargetRegion != targetRegion {
@@ -71,7 +73,15 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 			for _, t := range comp.MissingResourceTypes {
 				missingTypeSet[strings.ToLower(t)] = true
 			}
+			for _, t := range comp.UnknownResourceTypes {
+				unknownTypeSet[strings.ToLower(t)] = true
+			}
 			for _, s := range comp.MissingSKUs {
+				// Failed lookups are recorded as "type:sku (unknown)".
+				if key, isUnknown := strings.CutSuffix(s, " (unknown)"); isUnknown {
+					unknownSKUSet[strings.ToLower(key)] = true
+					continue
+				}
 				missingSKUSet[strings.ToLower(s)] = true
 			}
 			for _, s := range comp.ZoneRestrictedSKUs {
@@ -108,6 +118,8 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 			serviceAvail := "Available"
 			if missingTypeSet[strings.ToLower(rt)] {
 				serviceAvail = "Not available"
+			} else if unknownTypeSet[strings.ToLower(rt)] {
+				serviceAvail = "Unknown"
 			}
 
 			implRegions := implRegionsByType[strings.ToLower(rt)]
@@ -144,6 +156,13 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 				}
 			}
 
+			unknownSKUNames := make([]string, 0)
+			for _, skuName := range skuNames {
+				if unknownSKUSet[strings.ToLower(rt+":"+skuName)] && !missingSKUSet[strings.ToLower(rt+":"+skuName)] {
+					unknownSKUNames = append(unknownSKUNames, skuName)
+				}
+			}
+
 			zoneRestrictedSKUNames := make([]string, 0)
 			for _, skuName := range skuNames {
 				if zoneRestrictedSKUSet[strings.ToLower(rt+":"+skuName)] {
@@ -162,6 +181,9 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 				if len(missingSKUNames) > 0 {
 					allSKUsAvail = "Not available"
 					skuDisplay = strings.Join(missingSKUNames, ", ")
+				} else if len(unknownSKUNames) > 0 {
+					allSKUsAvail = "Unknown"
+					skuDisplay = strings.Join(unknownSKUNames, ", ")
 				}
 				if len(zoneRestrictedSKUNames) > 0 {
 					zoneRestrictedDisplay = strings.Join(zoneRestrictedSKUNames, ", ")

@@ -63,8 +63,8 @@ type sqlMIFamily struct {
 // sqlMITierCode maps the SQL MI edition name (from capabilities response) to the
 // abbreviated tier prefix used in sku.name by ARG and ARM templates.
 var sqlMITierCode = map[string]string{
-	"generalpurpose":     "GP",
-	"businesscritical":   "BC",
+	"generalpurpose":        "GP",
+	"businesscritical":      "BC",
 	"nextgengeneralpurpose": "NGPGEN5", // future-proofing
 }
 
@@ -111,7 +111,7 @@ func (SQLDatabaseProvider) FetchSKUs(ctx context.Context, subID, region string, 
 				if strings.EqualFold(slo.Status, "Disabled") {
 					avail.State = types.SKUUnavailable
 				}
-				result[strings.ToLower(slo.SKU.Name)] = avail
+				mergeBestSKU(result, strings.ToLower(slo.SKU.Name), avail)
 			}
 		}
 	}

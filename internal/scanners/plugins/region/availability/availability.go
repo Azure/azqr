@@ -24,17 +24,45 @@ type regionPair struct {
 	target string
 }
 
-// CheckRegionsInParallel checks availability for multiple source->target region combinations concurrently using a worker pool
-func CheckRegionsInParallel(ctx context.Context, cred azcore.TokenCredential, targetRegions []string, inventory *types.ResourceInventory, subscriptionID, subscriptionName string, regionZoneCount map[string]int, skuCache *sku.Cache, httpClient *az.HttpClient) []types.RegionComparison {
-	// First, fetch all provider data once
-	log.Debug().Msg("Fetching all Azure resource providers...")
-	resourceTypeLocations, err := fetchAllProviders(ctx, cred, subscriptionID)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to fetch providers, falling back to empty data")
-		resourceTypeLocations = &types.ResourceTypeLocationData{Data: make(map[string]map[string]map[string]struct{})}
-	}
-	log.Debug().Msgf("Detected %d resource providers", len(resourceTypeLocations.Data))
+// providerFetcher is a variable so tests can substitute provider data.
+var providerFetcher = fetchAllProviders
 
+// FetchMergedProviders fetches the providers list for every subscription and unions the locations,
+// so a type is available in a region when any subscription reports it. Failed subscriptions are
+// logged and skipped; nil is returned when no subscription succeeded.
+func FetchMergedProviders(ctx context.Context, cred azcore.TokenCredential, subscriptionIDs []string) *types.ResourceTypeLocationData {
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 8)
+	var merged *types.ResourceTypeLocationData
+	for _, subID := range subscriptionIDs {
+		wg.Add(1)
+		go func(subID string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			data, err := providerFetcher(ctx, cred, subID)
+			if err != nil {
+				log.Error().Err(err).Msgf("Failed to fetch providers for subscription %s, skipping", renderers.MaskSubscriptionID(subID, true))
+				return
+			}
+			mu.Lock()
+			defer mu.Unlock()
+			if merged == nil {
+				merged = &types.ResourceTypeLocationData{Data: make(map[string]map[string]map[string]struct{})}
+			}
+			merged.Merge(data)
+		}(subID)
+	}
+	wg.Wait()
+	if merged != nil {
+		log.Debug().Msgf("Merged provider data from subscriptions: %d providers", len(merged.Data))
+	}
+	return merged
+}
+
+// CheckRegionsInParallel checks availability for multiple source->target region combinations concurrently using a worker pool
+func CheckRegionsInParallel(ctx context.Context, resourceTypeLocations *types.ResourceTypeLocationData, targetRegions []string, inventory *types.ResourceInventory, subscriptionID, subscriptionName string, regionZoneCount map[string]int, skuCache *sku.Cache, httpClient *az.HttpClient) []types.RegionComparison {
 	// Get all source regions from inventory
 	sourceRegions := make([]string, 0, len(inventory.ResourceTypesByRegion))
 	for sourceRegion := range inventory.ResourceTypesByRegion {
@@ -214,18 +242,25 @@ func checkRegionAvailability(
 
 	// Check each resource type from source region against target region availability
 	for resourceType := range resourceTypesInSource {
-		if resourceTypeLocations.IsAvailable(resourceType, targetRegion) {
+		switch {
+		case resourceTypeLocations == nil || resourceTypeLocations.IsUnknown(resourceType):
+			// No evidence either way: neither available nor missing.
+			result.UnknownResourceTypes = append(result.UnknownResourceTypes, resourceType)
+		case resourceTypeLocations.IsAvailable(resourceType, targetRegion):
 			result.AvailableTypes++
-		} else {
+		default:
 			result.UnavailableTypes++
 			result.MissingResourceTypes = append(result.MissingResourceTypes, resourceType)
 		}
 	}
 
-	// Calculate resource type availability percentage
+	// Calculate resource type availability percentage; with no provider data there is
+	// no evidence of unavailability, so do not penalize the score.
 	totalTypes := result.AvailableTypes + result.UnavailableTypes
 	if totalTypes > 0 {
 		result.AvailabilityPercent = (float64(result.AvailableTypes) / float64(totalTypes)) * 100
+	} else if len(result.UnknownResourceTypes) > 0 {
+		result.AvailabilityPercent = 100.0
 	}
 
 	// Check SKU-level availability for resources in source region
