@@ -310,6 +310,9 @@ func checkRegionAvailability(
 				}
 
 				skuIdentifier := resourceType + ":" + skuName
+				if avail.State != types.SKUUnavailable {
+					result.OfferedSKUs = append(result.OfferedSKUs, skuIdentifier)
+				}
 				switch avail.State {
 				case types.SKUAvailable:
 					result.AvailableSKUs++
