@@ -49,6 +49,29 @@ func Get(resourceType string) SKUProvider {
 	return registry[strings.ToLower(resourceType)]
 }
 
+// skuRank orders states from best (lowest) to worst for best-wins merging.
+func skuRank(s types.SKUAvailabilityState) int {
+	switch s {
+	case types.SKUAvailable:
+		return 0
+	case types.SKUZoneRestricted:
+		return 1
+	case types.SKURestricted:
+		return 2
+	default:
+		return 3
+	}
+}
+
+// mergeBestSKU records avail under key; when the API returns several entries for the same
+// SKU name (for example one per size), the best state wins.
+func mergeBestSKU(m map[string]types.SKUAvailability, key string, avail types.SKUAvailability) {
+	if existing, ok := m[key]; ok && skuRank(existing.State) <= skuRank(avail.State) {
+		return
+	}
+	m[key] = avail
+}
+
 // armPage is the standard ARM list-response envelope used by most SKU endpoints.
 type armPage[T any] struct {
 	Value    []T    `json:"value"`
@@ -67,7 +90,22 @@ func FetchPagedSKUs[T any](
 	client *az.HttpClient,
 	extract func(item T) (skuName string, avail types.SKUAvailability, ok bool),
 ) (map[string]types.SKUAvailability, error) {
+	items, err := FetchAllItems[T](ctx, startURL, client)
+	if err != nil {
+		return nil, err
+	}
 	result := make(map[string]types.SKUAvailability)
+	for _, item := range items {
+		if name, avail, ok := extract(item); ok {
+			mergeBestSKU(result, strings.ToLower(name), avail)
+		}
+	}
+	return result, nil
+}
+
+// FetchAllItems follows nextLink pagination and returns every item from a standard ARM list endpoint.
+func FetchAllItems[T any](ctx context.Context, startURL string, client *az.HttpClient) ([]T, error) {
+	var items []T
 	url := startURL
 	for url != "" {
 		body, err := client.Do(ctx, url)
@@ -78,12 +116,8 @@ func FetchPagedSKUs[T any](
 		if err := json.Unmarshal(body, &page); err != nil {
 			return nil, fmt.Errorf("sku: parse response from %s: %w", url, err)
 		}
-		for _, item := range page.Value {
-			if name, avail, ok := extract(item); ok {
-				result[strings.ToLower(name)] = avail
-			}
-		}
+		items = append(items, page.Value...)
 		url = page.NextLink
 	}
-	return result, nil
+	return items, nil
 }

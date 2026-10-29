@@ -65,6 +65,7 @@ type RegionComparison struct {
 	AvgLatencyMs            float64 // Average network latency in milliseconds
 	LatencyEstimated        bool    // True when AvgLatencyMs is a cluster-based estimate, not a direct measurement
 	MissingResourceTypes    []string
+	UnknownResourceTypes    []string          // Types whose provider location data is empty or unavailable (neither available nor missing)
 	MissingSKUs             []string          // Specific SKUs not available in target region (hard block)
 	RestrictedSKUs          []string          // SKUs regionally restricted for this subscription (NotAvailableForSubscription — quota-liftable)
 	ZoneRestrictedSKUs      []string          // SKUs available in region but restricted in one or more zones (zone-liftable)
@@ -84,6 +85,38 @@ type RegionComparison struct {
 type ResourceTypeLocationData struct {
 	// namespace -> resourceType -> set of locations
 	Data map[string]map[string]map[string]struct{}
+}
+
+// Merge unions the locations of other into rtl so that a type is available in a region
+// when any merged source reports it.
+func (rtl *ResourceTypeLocationData) Merge(other *ResourceTypeLocationData) {
+	if other == nil {
+		return
+	}
+	for ns, rts := range other.Data {
+		if rtl.Data[ns] == nil {
+			rtl.Data[ns] = make(map[string]map[string]struct{})
+		}
+		for rt, locs := range rts {
+			if rtl.Data[ns][rt] == nil {
+				rtl.Data[ns][rt] = make(map[string]struct{}, len(locs))
+			}
+			for loc := range locs {
+				rtl.Data[ns][rt][loc] = struct{}{}
+			}
+		}
+	}
+}
+
+// IsUnknown reports whether the provider data lists the resource type but with no
+// locations, which gives no evidence either way about regional availability.
+func (rtl *ResourceTypeLocationData) IsUnknown(resourceType string) bool {
+	namespace, typeName, ok := strings.Cut(resourceType, "/")
+	if !ok {
+		return false
+	}
+	locs, exists := rtl.Data[namespace][typeName]
+	return exists && len(locs) == 0
 }
 
 // IsAvailable checks if a resource type is available in a region in O(1).

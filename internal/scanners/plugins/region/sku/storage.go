@@ -6,9 +6,11 @@ package sku
 import (
 	"context"
 	"strings"
+	"sync"
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
+	"golang.org/x/sync/singleflight"
 )
 
 // storageSKUItem is one item from the Storage SKUs global-list endpoint.
@@ -32,8 +34,14 @@ func (StorageProvider) FetchSKUs(ctx context.Context, subID, region string, clie
 	endpoint := "https://management.azure.com/subscriptions/" + subID + "/providers/Microsoft.Storage/skus?api-version=2023-01-01"
 	target := types.NormalizeRegionName(region)
 
-	return FetchPagedSKUs(ctx, endpoint, client,
-		func(item storageSKUItem) (string, types.SKUAvailability, bool) {
+	items, err := storageSKUsOnce(ctx, subID, endpoint, client)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]types.SKUAvailability)
+	for _, item := range items {
+		if name, avail, ok := func(item storageSKUItem) (string, types.SKUAvailability, bool) {
 			// Filter: only accept items that list the target region.
 			appliesTo := len(item.Locations) == 0 // no locations = globally available
 			for _, loc := range item.Locations {
@@ -55,8 +63,42 @@ func (StorageProvider) FetchSKUs(ctx context.Context, subID, region string, clie
 			}
 
 			return name, CheckStandardRestrictions(item.Restrictions, item.Capabilities), true
-		},
-	)
+		}(item); ok {
+			mergeBestSKU(result, strings.ToLower(name), avail)
+		}
+	}
+	return result, nil
+}
+
+var (
+	storageSKUGroup singleflight.Group
+	storageSKUMu    sync.Mutex
+	storageSKUItems = map[string][]storageSKUItem{}
+)
+
+// storageSKUsOnce fetches the region-independent Storage SKU list once per subscription.
+// Failures are not cached.
+func storageSKUsOnce(ctx context.Context, subID, endpoint string, client *az.HttpClient) ([]storageSKUItem, error) {
+	storageSKUMu.Lock()
+	items, ok := storageSKUItems[subID]
+	storageSKUMu.Unlock()
+	if ok {
+		return items, nil
+	}
+	v, err, _ := storageSKUGroup.Do(subID, func() (any, error) {
+		items, err := FetchAllItems[storageSKUItem](ctx, endpoint, client)
+		if err != nil {
+			return nil, err
+		}
+		storageSKUMu.Lock()
+		storageSKUItems[subID] = items
+		storageSKUMu.Unlock()
+		return items, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return v.([]storageSKUItem), nil
 }
 
 func init() { Register(StorageProvider{}) }

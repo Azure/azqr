@@ -6,6 +6,7 @@ package sku
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Azure/azqr/internal/az"
 	"github.com/Azure/azqr/internal/scanners/plugins/region/types"
@@ -63,6 +64,7 @@ func fetchVMSizes(ctx context.Context, subID, region string, client *az.HttpClie
 // diskSKUItem is one item from the Compute SKUs endpoint (filtered to a region).
 // Unlike vmSizes, this endpoint includes restrictions and capabilities.
 type diskSKUItem struct {
+	ResourceType string           `json:"resourceType"`
 	Name         string           `json:"name"`
 	Tier         string           `json:"tier"`
 	Restrictions []SKURestriction `json:"restrictions"`
@@ -82,16 +84,22 @@ func (DiskProvider) FetchSKUs(ctx context.Context, subID, region string, client 
 		"https://management.azure.com/subscriptions/%s/providers/Microsoft.Compute/skus?api-version=2023-03-01&$filter=location%%20eq%%20%%27%s%%27",
 		subID, region,
 	)
-	return FetchPagedSKUs(ctx, url, client, func(item diskSKUItem) (string, types.SKUAvailability, bool) {
-		name := item.Name
-		if name == "" {
-			name = item.Tier
-		}
-		if name == "" {
-			return "", types.SKUAvailability{}, false
-		}
-		return name, CheckStandardRestrictions(item.Restrictions, item.Capabilities), true
-	})
+	return FetchPagedSKUs(ctx, url, client, extractDiskSKU)
+}
+
+func extractDiskSKU(item diskSKUItem) (string, types.SKUAvailability, bool) {
+	// The endpoint also returns snapshots and other types that reuse SKU names.
+	if !strings.EqualFold(item.ResourceType, "disks") {
+		return "", types.SKUAvailability{}, false
+	}
+	name := item.Name
+	if name == "" {
+		name = item.Tier
+	}
+	if name == "" {
+		return "", types.SKUAvailability{}, false
+	}
+	return name, CheckStandardRestrictions(item.Restrictions, item.Capabilities), true
 }
 
 func init() {
