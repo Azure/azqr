@@ -38,3 +38,20 @@ func TestBuildSvcAvailSheets_RanksUnknownBetweenAvailableAndMissing(t *testing.T
 		}
 	}
 }
+
+func TestBuildSvcAvailSheets_SKUListedByAnySubscriptionIsAvailable(t *testing.T) {
+	rt := "microsoft.cognitiveservices/accounts"
+	inv := &types.ResourceInventory{
+		ResourceTypes:         map[string]int{rt: 1},
+		SKUsByType:            map[string]map[string]int{rt: {"S1": 1}},
+		ResourceTypesByRegion: map[string]map[string]int{"westeurope": {rt: 1}},
+	}
+	results := []types.RegionComparison{
+		{TargetRegion: "swedencentral", MissingSKUs: []string{rt + ":S1"}},
+		{TargetRegion: "swedencentral", OfferedSKUs: []string{rt + ":S1"}},
+	}
+	rows := BuildSvcAvailSheets(results, inv)[0].Table
+	if got := rows[1][5]; got != "Available" {
+		t.Errorf("SKU available = %q, want Available", got)
+	}
+}

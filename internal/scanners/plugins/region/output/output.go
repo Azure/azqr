@@ -64,6 +64,7 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 		missingTypeSet := map[string]bool{}
 		missingSKUSet := map[string]bool{}
 		unknownTypeSet := map[string]bool{}
+		offeredSKUSet := map[string]bool{}
 		unknownSKUSet := map[string]bool{}
 		zoneRestrictedSKUSet := map[string]bool{}
 		for _, comp := range allResults {
@@ -72,6 +73,9 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 			}
 			for _, t := range comp.MissingResourceTypes {
 				missingTypeSet[strings.ToLower(t)] = true
+			}
+			for _, s := range comp.OfferedSKUs {
+				offeredSKUSet[strings.ToLower(s)] = true
 			}
 			for _, t := range comp.UnknownResourceTypes {
 				unknownTypeSet[strings.ToLower(t)] = true
@@ -91,6 +95,13 @@ func BuildSvcAvailSheets(allResults []types.RegionComparison, inventory *types.R
 				key := strings.ToLower(strings.SplitN(s, " (zones", 2)[0])
 				zoneRestrictedSKUSet[key] = true
 			}
+		}
+
+		// A SKU that any subscription lists is offered in the region; absence or failed lookups
+		// in other subscriptions must not outvote it.
+		for k := range offeredSKUSet {
+			delete(missingSKUSet, k)
+			delete(unknownSKUSet, k)
 		}
 
 		header := []string{

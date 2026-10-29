@@ -115,7 +115,7 @@ Retrieves logical-to-physical availability zone mappings for all Azure regions i
 **Plugin Name**: `region-selection`  
 **Command**: `azqr region-selection`  
 **Flag**: `--plugin region-selection`  
-**Version**: 0.2.0-beta
+**Version**: 0.2.1
 
 Scores and ranks Azure regions for workload migration or expansion. For each source region (where your resources currently live) × target region (candidate), the plugin computes a weighted 0–100 recommendation score across four dimensions.
 
@@ -414,7 +414,7 @@ NAME                  VERSION    TYPE       DESCRIPTION
 ai-gov     1.0.0      internal   Checks OpenAI/Cognitive Services accounts for...
 carbon-emissions      1.0.0      internal   Analyzes carbon emissions by Azure resource type
 zone-mapping          1.0.0      internal   Retrieves logical-to-physical availability zone mappings...
-region-selection      0.2.0-beta internal   Analyzes optimal Azure region selection based on service availability...
+region-selection      0.2.1 internal   Analyzes optimal Azure region selection based on service availability...
 sql-eol               0.6.0-beta internal   Analyzes SQL Server End-of-Life and Extended Security Update status
 vm-modernization      0.2.0      internal   Reports Azure VM v6/v7 series modernization readiness
 service-health        0.1.0-beta internal   Analyzes Azure service health events to determine...

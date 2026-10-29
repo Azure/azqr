@@ -66,6 +66,7 @@ type RegionComparison struct {
 	LatencyEstimated        bool    // True when AvgLatencyMs is a cluster-based estimate, not a direct measurement
 	MissingResourceTypes    []string
 	UnknownResourceTypes    []string          // Types whose provider location data is empty or unavailable (neither available nor missing)
+	OfferedSKUs             []string          // type:sku entries listed by this subscription (any state except absent); lets output ignore absence reported by other subscriptions
 	MissingSKUs             []string          // Specific SKUs not available in target region (hard block)
 	RestrictedSKUs          []string          // SKUs regionally restricted for this subscription (NotAvailableForSubscription — quota-liftable)
 	ZoneRestrictedSKUs      []string          // SKUs available in region but restricted in one or more zones (zone-liftable)
