@@ -264,7 +264,7 @@ Columns are grouped so an engineer reads left to right: identify, decide, target
 - Hibernation Enabled, Backup Policy Subtype (the Azure Backup policy subtype protecting the VM, `Unknown` when the lookup fails), VM Power State, Instance View Captured
 
 *Cost:*
-- Current Monthly Cost (USD), Projected Monthly Cost After Increase (USD), Monthly Cost Impact (USD): existing-SKU retail exposure (hourly retail price x 730). Only price changes not yet effective (UTC) are applied, because the current retail rate already includes earlier ones. Stopped (allocated) VMs are still billed; deallocated VMs read `N/A (VM deallocated)`
+- Current Monthly Cost (USD), Projected Monthly Cost After Increase (USD), Monthly Cost Impact (USD): existing-SKU retail exposure (hourly retail price x 730). Current cost uses the OS-matched rate (the Linux compute rate for Windows VMs with Azure Hybrid Benefit). The price increase percentage is applied only to the compute (Linux) rate, never to the Windows license portion. Only price changes not yet effective (UTC) are applied, because the current retail rate already includes earlier ones. Stopped (allocated) VMs are still billed; deallocated VMs read `N/A (VM deallocated)`
 - Target Monthly Cost (USD), Target Projected Monthly Cost After Increase (USD), Target Monthly Cost Impact (USD): the same calculation for the Suggested Target SKU in the VM's region and OS. The projected cost equals the target cost when no price increase applies to the target SKU. Rows without a concrete target SKU read `N/A`; a missing retail price reads `Manual Review Required`
 
 *Pool context:*

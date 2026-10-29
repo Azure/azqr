@@ -107,6 +107,13 @@ func (c *vmPriceCache) hourlyPrice(armSkuName, armRegionName, osType string) (fl
 	return selectCanonicalPrice(rows, osType)
 }
 
+// computeHourlyPrice returns the Linux (compute-only) hourly price for the
+// pair. Microsoft applies the price-increase percentage to the compute portion
+// only, so the Windows license component must be excluded from the impact base.
+func (c *vmPriceCache) computeHourlyPrice(armSkuName, armRegionName string) (float64, bool) {
+	return c.hourlyPrice(armSkuName, armRegionName, "Linux")
+}
+
 // odataEscape escapes a string value for use in an OData $filter expression
 // by replacing single quotes with two single quotes, mirroring the region
 // plugin's own helper (internal/scanners/plugins/region/cost/cost.go).
