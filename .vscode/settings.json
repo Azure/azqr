@@ -19,5 +19,16 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": "explicit"
         }
+    },
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#344F6B",
+        "titleBar.activeForeground": "#FFFFFF",
+        "activityBar.background": "#344F6B",
+        "activityBar.foreground": "#FFFFFF",
+        "statusBar.background": "#344F6B",
+        "statusBar.foreground": "#FFFFFF",
+        "window.activeBorder": "#344F6B",
+        "window.inactiveBorder": "#344F6B",
+        "editorGroup.border": "#344F6B"
     }
 }
