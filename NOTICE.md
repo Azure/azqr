@@ -262,7 +262,7 @@ SOFTWARE.
 Applies to:
 
 - `github.com/kylelemons/godebug` v1.1.0
-- `github.com/richardlehane/mscfb` v1.0.8
+- `github.com/richardlehane/mscfb` v1.0.9
 - `github.com/richardlehane/msoleps/types` v1.0.6
 
 ```
@@ -894,12 +894,12 @@ SOFTWARE.
 
 Applies to:
 
-- `github.com/xuri/efp` v0.0.1
+- `github.com/xuri/efp` v0.0.3-0.20260924042702-217b81952dec
 
 ```
 BSD 3-Clause License
 
-Copyright (c) 2017 - 2025 Ri Xu All rights reserved.
+Copyright (c) 2017 - 2026 Ri Xu All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -931,7 +931,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Applies to:
 
-- `github.com/xuri/excelize/v2` v2.11.0
+- `github.com/xuri/excelize/v2` v2.11.1
 
 ```
 BSD 3-Clause License
@@ -1041,11 +1041,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Applies to:
 
-- `golang.org/x/crypto` v0.57.0
-- `golang.org/x/net` v0.59.0
+- `golang.org/x/crypto` v0.58.0
+- `golang.org/x/net` v0.62.0
 - `golang.org/x/sync/singleflight` v0.24.0
-- `golang.org/x/sys/unix` v0.48.0
-- `golang.org/x/text` v0.42.0
+- `golang.org/x/sys/unix` v0.49.0
+- `golang.org/x/text` v0.43.0
 - `golang.org/x/time/rate` v0.16.0
 
 ```
