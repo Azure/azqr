@@ -1,0 +1,43 @@
+name: Dependabot NOTICE update
+
+on:
+  pull_request_target:
+    paths:
+      - go.mod
+      - go.sum
+
+permissions:
+  contents: write
+
+jobs:
+  notice:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          # A PAT lets the pushed commit re-trigger CI (GITHUB_TOKEN pushes do not)
+          token: ${{ secrets.NOTICE_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Regenerate NOTICE.md
+        run: |
+          go install github.com/google/go-licenses/v2@latest
+          PATH="$(go env GOPATH)/bin:$PATH" ./hack/code/notice_gen/generate-notice.sh
+
+      - name: Commit changes
+        run: |
+          if git diff --quiet NOTICE.md; then
+            echo "NOTICE.md is up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add NOTICE.md
+          git commit -m "chore: update NOTICE.md"
+          git push
