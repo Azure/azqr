@@ -35,7 +35,7 @@ func NewScanner() *RegionSelectorScanner {
 func (s *RegionSelectorScanner) GetMetadata() plugins.PluginMetadata {
 	return plugins.PluginMetadata{
 		Name:        "region-selection",
-		Version:     "0.2.1",
+		Version:     "0.2.2",
 		Description: "Analyzes optimal Azure region selection based on service availability, network latency, and cost comparison",
 		Author:      "Azure Quick Review Team",
 		License:     "MIT",

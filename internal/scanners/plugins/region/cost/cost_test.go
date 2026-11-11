@@ -307,3 +307,30 @@ func TestMergeCostData_UomErrorsDeduped(t *testing.T) {
 		t.Errorf("expected deduped UomErrors (len 1), got %d", len(result.UomErrors))
 	}
 }
+
+func TestSelectTargetPrice(t *testing.T) {
+	item := func(id, date string, price float64) types.RetailPriceItem {
+		return types.RetailPriceItem{MeterID: id, EffectiveStartDate: date, RetailPrice: price}
+	}
+	tests := []struct {
+		name      string
+		in        []types.RetailPriceItem
+		wantOK    bool
+		wantPrice float64
+	}{
+		{"empty", nil, false, 0},
+		{"single", []types.RetailPriceItem{item("a", "2024-01-01T00:00:00Z", 1)}, true, 1},
+		{"same meter latest date wins", []types.RetailPriceItem{
+			item("a", "2020-01-01T00:00:00Z", 1), item("a", "2024-01-01T00:00:00Z", 2)}, true, 2},
+		{"distinct meters ambiguous", []types.RetailPriceItem{
+			item("a", "2020-01-01T00:00:00Z", 1), item("b", "2024-01-01T00:00:00Z", 2)}, false, 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, ok := selectTargetPrice(tt.in)
+			if ok != tt.wantOK || (ok && got.RetailPrice != tt.wantPrice) {
+				t.Fatalf("got (%v, %v), want price %v ok %v", got.RetailPrice, ok, tt.wantPrice, tt.wantOK)
+			}
+		})
+	}
+}

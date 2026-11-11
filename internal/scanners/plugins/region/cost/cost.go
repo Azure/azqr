@@ -190,10 +190,11 @@ func queryMeterCosts(ctx context.Context, httpClient *az.HttpClient, subscriptio
 
 	scope := fmt.Sprintf("/subscriptions/%s", subscriptionID)
 
-	// Build query parameters - group by ResourceGuid (meter ID), ResourceId
-	// This matches the PowerShell script grouping
+	// Build query parameters - group by ResourceGuid (meter ID), ResourceId.
+	// AmortizedCost spreads reservation/savings-plan purchases over the usage they cover,
+	// so weights reflect consumption (as in Azure/AzRegionSelection).
 	definition := armcostmanagement.QueryDefinition{
-		Type:      to.Ptr(armcostmanagement.ExportTypeActualCost),
+		Type:      to.Ptr(armcostmanagement.ExportTypeAmortizedCost),
 		Timeframe: to.Ptr(armcostmanagement.TimeframeTypeCustom),
 		TimePeriod: &armcostmanagement.QueryTimePeriod{
 			From: to.Ptr(startDate),
@@ -436,6 +437,27 @@ func getMeterMetadataFromRetailAPI(ctx context.Context, meterCosts []types.Meter
 	return updatedMeters
 }
 
+// selectTargetPrice picks the target-region price for one source meter from candidates that
+// already match on name, product, SKU, tier and unit of measure. When the candidates are
+// distinct meters (different meterId) the match is ambiguous and ok is false, since picking
+// one (e.g. the newest) could compare unrelated meters. Rows sharing a meterId are
+// versions of the same meter, so the latest effectiveStartDate wins.
+func selectTargetPrice(candidates []types.RetailPriceItem) (best types.RetailPriceItem, ok bool) {
+	if len(candidates) == 0 {
+		return best, false
+	}
+	best = candidates[0]
+	for _, c := range candidates[1:] {
+		if c.MeterID != best.MeterID {
+			return types.RetailPriceItem{}, false
+		}
+		if c.EffectiveStartDate > best.EffectiveStartDate {
+			best = c
+		}
+	}
+	return best, true
+}
+
 // getMeterPricingAcrossRegions queries the Retail Prices API for cross-region pricing
 // using the exact (meterName, productId, skuName) triple filter for every meter.
 // Region clause is omitted from the URL (causes 400s above ~750 chars); region
@@ -508,7 +530,8 @@ func getMeterPricingAcrossRegions(ctx context.Context, meters []types.MeterCostD
 					continue
 				}
 				// No region clause in the URL — region filtering happens in-memory below.
-				filter := fmt.Sprintf("currencyCode eq 'USD' and type eq 'Consumption' and (%s)",
+				// Primary meters only, consistent with the source-meter lookup.
+				filter := fmt.Sprintf("currencyCode eq 'USD' and type eq 'Consumption' and isPrimaryMeterRegion eq true and (%s)",
 					strings.Join(meterFilters, " or "))
 				pageURL := baseURL + "?$filter=" + url.QueryEscape(filter)
 
@@ -516,6 +539,8 @@ func getMeterPricingAcrossRegions(ctx context.Context, meters []types.MeterCostD
 					pricing:        make(map[string]map[string]float64),
 					effectiveDates: make(map[string]map[string]string),
 				}
+				// candidates: source meterID -> region -> matching target items
+				candidates := make(map[string]map[string][]types.RetailPriceItem)
 				for pageURL != "" {
 					body, err := httpClient.Do(ctx, pageURL)
 					if err != nil {
@@ -556,20 +581,29 @@ func getMeterPricingAcrossRegions(ctx context.Context, meters []types.MeterCostD
 							if item.EffectiveStartDate > nowStr {
 								continue
 							}
-							if res.pricing[meterMeta.MeterID] == nil {
-								res.pricing[meterMeta.MeterID] = make(map[string]float64)
+							if candidates[meterMeta.MeterID] == nil {
+								candidates[meterMeta.MeterID] = make(map[string][]types.RetailPriceItem)
 							}
-							if res.effectiveDates[meterMeta.MeterID] == nil {
-								res.effectiveDates[meterMeta.MeterID] = make(map[string]string)
-							}
-							if existingDate, ok := res.effectiveDates[meterMeta.MeterID][region]; !ok || item.EffectiveStartDate > existingDate {
-								res.pricing[meterMeta.MeterID][region] = item.RetailPrice
-								res.effectiveDates[meterMeta.MeterID][region] = item.EffectiveStartDate
-								res.items = append(res.items, item)
-							}
+							candidates[meterMeta.MeterID][region] = append(candidates[meterMeta.MeterID][region], item)
 						}
 					}
 					pageURL = priceResp.NextPageLink
+				}
+				for meterID, byRegion := range candidates {
+					for region, items := range byRegion {
+						item, ok := selectTargetPrice(items)
+						if !ok {
+							log.Warn().Msgf("Ambiguous target meters for meter %s in region %s — excluded from comparison", meterID, region)
+							continue
+						}
+						if res.pricing[meterID] == nil {
+							res.pricing[meterID] = make(map[string]float64)
+							res.effectiveDates[meterID] = make(map[string]string)
+						}
+						res.pricing[meterID][region] = item.RetailPrice
+						res.effectiveDates[meterID][region] = item.EffectiveStartDate
+						res.items = append(res.items, item)
+					}
 				}
 				batchResults[work.idx] = res
 			}
@@ -645,7 +679,7 @@ func BuildCostDetailsForOutput(meterMetadata []types.MeterCostData, meterPricing
 		// Find the original meter this price item matches
 		var origMeterID string
 		for _, meter := range meterMetadata {
-			if meter.MeterName == item.MeterName && meter.ProductID == item.ProductID && meter.SkuName == item.SkuName {
+			if meter.MeterName == item.MeterName && meter.ProductID == item.ProductID && meter.SkuName == item.SkuName && meter.TierMinimumUnits == item.TierMinimumUnits {
 				origMeterID = meter.MeterID
 				break
 			}
@@ -749,7 +783,7 @@ func BuildCostDetailsForOutput(meterMetadata []types.MeterCostData, meterPricing
 			productName := ""
 			for _, item := range priceItems {
 				if item.MeterID == meter.MeterID ||
-					(item.MeterName == meter.MeterName && item.ProductID == meter.ProductID && item.SkuName == meter.SkuName) {
+					(item.MeterName == meter.MeterName && item.ProductID == meter.ProductID && item.SkuName == meter.SkuName && item.TierMinimumUnits == meter.TierMinimumUnits) {
 					productName = item.ProductName
 					break
 				}
@@ -847,14 +881,17 @@ func MergeCostData(dst, src *types.CostComparisonData) *types.CostComparisonData
 		}
 	}
 
-	// Merge PriceItems: deduplicate by (meterName + productId + skuName + armRegionName)
-	type priceKey struct{ meterName, productID, skuName, region string }
+	// Merge PriceItems: deduplicate by (meterName + productId + skuName + armRegionName + tier)
+	type priceKey struct {
+		meterName, productID, skuName, region string
+		tier                                  float64
+	}
 	seen := make(map[priceKey]bool, len(dst.PriceItems))
 	for _, item := range dst.PriceItems {
-		seen[priceKey{item.MeterName, item.ProductID, item.SkuName, item.ArmRegionName}] = true
+		seen[priceKey{item.MeterName, item.ProductID, item.SkuName, item.ArmRegionName, item.TierMinimumUnits}] = true
 	}
 	for _, item := range src.PriceItems {
-		k := priceKey{item.MeterName, item.ProductID, item.SkuName, item.ArmRegionName}
+		k := priceKey{item.MeterName, item.ProductID, item.SkuName, item.ArmRegionName, item.TierMinimumUnits}
 		if !seen[k] {
 			seen[k] = true
 			dst.PriceItems = append(dst.PriceItems, item)
